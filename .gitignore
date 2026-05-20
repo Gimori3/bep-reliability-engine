@@ -216,3 +216,13 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Project Specific Customizations
+data/raw/
+results/
+*.h5
+.ipynb_checkpoints/
+__pycache__/
+.pytest_cache/
+.venv/
+.env
