@@ -1,0 +1,506 @@
+# Phase 1 Computational Architecture: Time-Dependent BEP Reliability Engine
+
+## Authoritative Specification for Implementation
+
+---
+
+## 0. Framing and Architectural Principles
+
+This document is the complete specification for the Phase 1 computational engine. It supersedes prior drafts and incorporates all decisions reached through prior discussion: the seven-dimensional stochastic parameter vector with C_e as a random variable, LHS as the sampling strategy throughout, the shared-sample contract between static and transient limit states, and the explicit handoff design for Phase 2 Bayesian filtering.
+
+Four structural properties shape every downstream choice and warrant being stated upfront.
+
+**Property 1 — Asymmetric limit state cost.** The static limit state is scalar-in, scalar-out per realization: sample θ, compute H_c via Sellmeijer, compare against r_e-translated peak. The transient limit state is scalar-in, trajectory-out: sample θ, integrate the Pol ODE across the full multi-peak h(t), compare final l_e to L. The transient branch is roughly T × more expensive than the static, where T is the number of timesteps per hydrograph (≈500–5000). All optimization effort must focus on the transient timestepper; the static branch is essentially free.
+
+**Property 2 — Shared-sample contract.** Both limit states must consume the same θ_j and the same r_e within each realization. Independent draws would conflate physical bias with sampling noise and destroy the scientific deliverable of Phase 1 (static-vs-transient bias quantification). This is non-negotiable and constrains the engine architecture more than any other single requirement.
+
+**Property 3 — r_e is stochastic.** Because the Mazure leakage length λ_in depends on k_aq, D_aq, D_bl, and k_bl — four of the seven random variables — r_e cannot be precomputed once and reused. It lives inside the per-realization loop. This is a frequent source of confusion in Pol-style implementations.
+
+**Property 4 — Irreducibly serial inner loop.** The compound event memory model creates a hard sequential dependency along the time axis: l(t+Δt) depends on l(t) via the positive-part operator and the running uplift latch. You can vectorize across realizations and across conditioning water levels, but inside a single realization the timestepper is serial. This determines exactly where numpy broadcasting works and where it fails.
+
+---
+
+## 1. Module Decomposition and Single Responsibilities
+
+The architecture decomposes into nine logical modules. Each has one clear responsibility. Whether each becomes a .py file or class is addressed in §9.
+
+**M1 — `config`** holds all deterministic inputs for a single run: cross-section geometry (L, foreshore width, HWL, z_toe), the conditioning grid {h_1, …, h_Nh}, Monte Carlo settings (N = 10^5, RNG seed, LHS scheme), timestepper settings (Δt, integration scheme), and the prior distribution specifications for the seven random variables (family, mean, COV). This is a pure data object with no logic. Its purpose is reproducibility: one config object fully determines one fragility curve pair. Validate at load time using pydantic or equivalent to catch unit errors (e.g., COV = 50 vs 0.50) before a 4-hour run begins.
+
+**M2 — `prior_sampler`** generates the N × 7 matrix of θ samples via Latin Hypercube Sampling. Single responsibility: converting marginal distribution specifications into a stratified sample matrix in physical units. Returns a structured array or DataFrame keyed by parameter name so that downstream modules never index into raw column numbers. Does not know anything about limit states.
+
+**M3 — `hydrograph_loader`** ingests the d4PDF hydrograph ensemble and exposes it as a clean object: for each event, a (t, h(t)) array plus metadata (event ID, duration, peak, scenario tag — historical or +4K). Also exposes the conditioning grid extraction logic — for the static comparison you need a representative scalar h_peak per event, but for the transient you need the full h(t). This module isolates all I/O and units handling.
+
+**M4 — `hydraulic_translator`** computes, given a θ sample and cross-section geometry, the response factor r_e and returns the function or array h_aquifer(t) = z_toe + r_e · (h_river(t) − z_toe). This is where λ_in = √(k_aq · D_aq · D_bl / k_bl) and the full Mazure r_e formula live. Single responsibility: river stage → landside aquifer piezometric head. Bake the instantaneous-translation assumption into the module's docstring so future-you doesn't accidentally try to add transient seepage.
+
+**M5 — `initiation_evaluator`** evaluates Z_uplift(t) and Z_heave(t) at each timestep given Δh_blanket(t) from M4 and the sampled (D_bl, γ'_s). Exposes (a) the boolean indicator I_er(t) per Pol's formulation — true once the running minimum of Z_uplift has gone negative AND heave is currently active, OR if l_ini > 0 AND heave is currently active — and (b) the time t_uh of first co-occurrence. Single responsibility: STPH gating logic.
+
+**M6 — `sellmeijer_static`** implements the full revised Sellmeijer 2011 critical head: H_c = L · F_r · F_s · F_g, with the three factors computed per equation (12) of the 2011 paper. Inputs: θ vector + geometry. Output: scalar H_c. Used in two places — once for the static limit state evaluation, and once *inside* the transient progression model because H_c parameterizes the equilibrium curve H_eq(l). Centralizing it in one place prevents drift between the two uses. Also computes l_c via the Pol SIE 2024 formula l_c/L = 0.5 · tanh(2 · D_aq/L).
+
+**M7 — `pol_ode_progression`** is the time-dependent ODE integrator. Given θ (including C_e), the aquifer head time series h_aquifer(t), the initiation indicator series I_er(t), and the H_c and l_c from M6, it integrates dl/dt = 89 · C_e · (k_aq · (H(t) − H_eq(l))/L)^0.81 forward in time using forward Euler. The equilibrium curve H_eq(l) is constructed by piecewise linear interpolation between (0, 0), (l_c, H_c), and (L, 0.9·H_c). The positive-part operator ⟨·⟩ is enforced inside the timestepper. Output: full l(t) trajectory and final l_e.
+
+**M8 — `limit_state_evaluator`** orchestrates both limit states for a single realization. Receives one θ sample, the hydrograph, the geometry, and an optional l_ini, and returns the pair (Z_static, Z_transient). This is the module that enforces the shared-sample contract: the same θ is fed into both branches. Also returns auxiliary diagnostics — H_c, l_c, λ_in, peak r_e, time-to-breach if failure occurred — because Phase 2 Bayesian filtering needs trajectory information, not just binary pass/fail. This module must be importable cleanly by Phase 2.
+
+**M9 — `fragility_assembler`** takes the raw N × N_h indicator matrices (one for static, one for transient) and fits lognormal fragility curves separately for each. Computes confidence bands via bootstrap on the realizations. Output: a FragilityResult object containing both fitted curves, raw point estimates, and — critically — the full θ matrix and failure matrix retained for Phase 2.
+
+---
+
+## 2. Data-Flow and Interface Contracts
+
+`config` (M1) flows into every other module as a read-only object. No module mutates it.
+
+`prior_sampler` (M2) consumes `config.prior_specs` and emits:
+
+```
+theta_matrix: ndarray shape (N, 7)
+param_names:  ['k_aq', 'd_70', 'D_aq', 'D_bl', 'k_bl', 'gamma_s_sub', 'C_e']
+```
+
+Contract: rows are independent LHS draws, columns are physical-units parameter values, and the RNG seed in config fully determines the matrix. All downstream modules access columns by name via `theta_matrix[:, param_names.index('k_aq')]` or, preferably, via a thin wrapper that exposes named access.
+
+`hydrograph_loader` (M3) emits:
+
+```
+hydrographs: dict[event_id → HydrographRecord]
+HydrographRecord:
+  t:               ndarray (T,)         # seconds or hours, units in metadata
+  h:               ndarray (T,)         # river stage [m above datum]
+  peak:            float
+  duration_hours:  float
+  scenario:        str                  # 'historical' or '+4K'
+  event_id:        str
+```
+
+The core inner contract — and the one needing the most care — is the signature of `limit_state_evaluator` (M8):
+
+```
+Input:
+  theta_row:    ndarray (7,)            # one realization's parameter vector
+  hydrograph:   HydrographRecord
+  geometry:     dict                    # L, z_toe, foreshore_width, lambda_out_params
+  l_ini:        float                   # initial pipe length (default 0)
+  store_trajectory: bool                # default False to save memory
+
+Output: EvaluationResult dataclass
+  Z_static:        float
+  Z_transient:     float
+  l_e_final:       float
+  l_trajectory:    ndarray (T,) or None
+  H_c:             float
+  l_c:             float
+  lambda_in:       float
+  r_e:             float
+  t_uh:            float or NaN          # time of first uplift+heave co-occurrence
+  failure_static:  bool
+  failure_trans:   bool
+  uplift_occurred: bool                  # latched within event
+  heave_occurred:  bool                  # latched within event
+```
+
+The optional `l_trajectory` storage matters for memory: 10^5 realizations × ≈1000 timesteps × 8 bytes ≈ 800 MB per cross-section. For Phase 2 you only need the final l_e under the 2016 hydrograph specifically, so default to off and toggle on for diagnostic runs and for the 2016 calibration sweep.
+
+`fragility_assembler` (M9) consumes the full N × N_h matrices of `failure_static` and `failure_trans` booleans and emits the FragilityResult — the handoff artifact to Phase 2:
+
+```
+FragilityResult:
+  conditioning_grid:    ndarray (N_h,)
+  P_f_static_raw:       ndarray (N_h,)        # MC point estimates
+  P_f_trans_raw:        ndarray (N_h,)
+  P_f_static_fit:       LognormFragility       # fitted (mu, sigma)
+  P_f_trans_fit:        LognormFragility
+  bootstrap_bands:      dict[curve → (lo, hi)]
+  theta_matrix:         ndarray (N, 7)         # RETAINED for Phase 2
+  param_names:          list[str]
+  failure_matrix_stat:  ndarray (N, N_h) bool  # RETAINED for diagnostics
+  failure_matrix_tran:  ndarray (N, N_h) bool  # RETAINED for Phase 2
+  metadata:             dict                    # config snapshot, runtime, version, c_e_stochastic flag
+```
+
+Retaining `theta_matrix` and `failure_matrix_tran` is non-negotiable. Phase 2's Accept-Reject filtering re-runs M8 on the surviving θ rows against h_2016(t); it needs the raw prior matrix, not just the fitted curve. Persist via HDF5 (h5py) for the large arrays and JSON sidecar for metadata. One HDF5 file per cross-section per scenario.
+
+---
+
+## 3. Logical Execution Sequence
+
+Three nested levels, with order chosen for both correctness and performance:
+
+**Outermost loop: conditioning water levels h_i.** Fully parallelizable across cores. Each h_i is independent; for each, the static evaluation uses h_i as h_peak, while the transient evaluation uses either an actual d4PDF hydrograph anchored at peak h_i (for ensemble-driven fragility) or a synthetic scaled hydrograph (for fragility curve construction).
+
+**Middle loop: realizations j ∈ {1, …, N}.** All N realizations at a given h_i share the same hydrograph but use independent θ_j rows. This is the loop where numpy broadcasting yields the largest gains.
+
+**Innermost loop: timesteps t_k.** Irreducibly serial within a realization. Vectorized across realizations within a single timestep (see §6).
+
+The per-realization, per-conditioning-level pseudocode:
+
+```
+SHARED PREAMBLE (computed once per θ_j):
+  1. Read θ_j from theta_matrix
+  2. Compute H_c(θ_j) and l_c(θ_j) via M6
+  3. Compute λ_in(θ_j) and r_e(θ_j) via M4
+
+STATIC BRANCH:
+  4. H_load_peak = r_e · (h_i − z_toe)
+  5. Z_static = H_c − H_load_peak
+  6. failure_static = (Z_static ≤ 0)
+
+TRANSIENT BRANCH (full timestep loop):
+  7. Initialize l_current = l_ini, uplift_ever = False
+  8. For each timestep t_k:
+       a. h_aq(t_k)        = z_toe + r_e · (h(t_k) − z_toe)
+       b. Δh_blanket(t_k)  = h_aq(t_k) − z_toe        [= r_e · (h(t_k) − z_toe)]
+       c. Z_uplift(t_k)    = (γ'_s · D_bl)/γ_w − Δh_blanket(t_k)
+       d. uplift_ever     |= (Z_uplift(t_k) < 0)
+       e. i_exit(t_k)      = Δh_blanket(t_k) / D_bl
+       f. Z_heave(t_k)     = γ'_s/γ_w − i_exit(t_k)
+       g. heave_now        = (Z_heave(t_k) < 0)
+       h. I_er(t_k)        = (uplift_ever OR l_current > 0) AND heave_now
+       i. If I_er(t_k):
+            H_eq = piecewise_linear(l_current, anchors=[(0,0), (l_c, H_c), (L, 0.9·H_c)])
+            overload = max(0, Δh_blanket(t_k) − H_eq)
+            dldt = 89 · C_e · (k_aq · overload / L)^0.81
+            l_current = l_current + dldt · Δt          # positive-part enforced by max(0, overload)
+          Else:
+            l_current unchanged                          # positive-part operator
+  9. Z_transient = L − l_current
+  10. failure_trans = (Z_transient ≤ 0)
+```
+
+Two subtle points worth highlighting. First, in step 4 the static comparator uses r_e · (h_peak − z_toe), the *translated* aquifer head, not the raw river peak. Both limit states share the hydraulic translation; this is a direct consequence of the shared-sample contract. Second, in step 8h the clause `(uplift_ever OR l_current > 0)` is what enables compound-event progression to resume on subsequent peaks without re-triggering uplift — the gateway condition for the memory model.
+
+---
+
+## 4. Organization of the Two Parallel Limit States
+
+The two limit states share three computations and diverge on a fourth. The architectural pattern is "shared preamble, then branch":
+
+```
+SHARED PREAMBLE  (per θ_j, O(1) cost):
+  - sample θ_j               (M2)
+  - compute H_c(θ_j), l_c    (M6)
+  - compute λ_in, r_e(θ_j)   (M4)
+
+DIVERGENT EVALUATION:
+  Static branch:    scalar comparison       O(1)
+  Transient branch: T-step ODE integration  O(T)
+```
+
+This pattern makes the cost asymmetry explicit. Implementation must not be tempted to write `run_static()` and `run_transient()` as fully independent functions — they must consume the same θ_j and the same r_e. Implement them as a single function (M8) that returns both Z values, with internal flags controlling which diagnostics get retained.
+
+A consequence worth flagging: the static branch has no exposure to C_e at all. C_e is a transient-branch parameter only. The static limit state depends only on the six geotechnical variables (k_aq, d_70, D_aq, D_bl, k_bl, γ'_s) plus the deterministic θ_repose and D_r. Phase 2 filtering will therefore tighten C_e only through the transient branch, which is exactly the desired behavior — Phase 2 is calibrating laminar-flow conservatism, which lives only in the ODE.
+
+---
+
+## 5. Compound Event Memory Model: State Variable Management
+
+This is the most error-prone part of the implementation. The memory model demands that pipe length l carry across peaks within a single d4PDF event record, with the positive-part operator preventing healing.
+
+The state variable is **`l_current: float`**, initialized to `l_ini` at the start of each event. For prior fragility curve construction in Phase 1, l_ini = 0. For Phase 2 (where the 2016 hydrograph is replayed for filtering) l_ini also starts at 0 because the 2016 event is the calibration event itself. The hook for non-zero l_ini exists to support sensitivity studies and the architectural flexibility to feed event sequences.
+
+Inside the timestepper, l_current is updated as:
+
+```
+if I_er(t):
+    overload = max(0, Δh_blanket(t) − H_eq(l_current))
+    dldt = 89 · C_e · (k_aq · overload / L)^0.81
+    l_current += dldt · Δt
+else:
+    l_current unchanged
+```
+
+The `max(0, overload)` enforces ⟨·⟩ at the level of the driving force; combined with `dldt ≥ 0` and the absence of any negative-progression term, this guarantees l_current is monotonically non-decreasing. There is no separate "reset between peaks" step — that's the whole point of the memory model. The hydrograph is fed in as one continuous time series spanning the entire compound event, and l_current evolves monotonically across the whole record.
+
+**Traps to watch for:**
+
+When h(t) drops below the uplift threshold during inter-peak troughs, I_er goes false, dl/dt = 0, and l_current stays flat. Trajectory plots will show staircase-shaped growth — flat segments during troughs, growth segments during peaks. This is correct. Do not "fix" it.
+
+The "min{Z_u(τ): τ ≤ t} < 0" clause in I_er is a running minimum. Implement it as a single scalar `uplift_ever_occurred: bool` that latches to True the first time Z_u goes negative and stays True for the rest of the event. This avoids confusion with the instantaneous Z_h check and is correct because uplift represents a one-way structural failure of the blanket.
+
+The `l_ini > 0` clause in I_er means a pre-existing pipe makes the uplift gate effectively bypassed for that event. This is correct physics — an existing pipe means the blanket is already breached — but be aware it changes the gating logic between events with and without prior pipes.
+
+For r_l (long-term strength recovery between events): in Phase 1 set r_l = 0 always, per thesis scope. The hook should exist in the API (`l_ini_next_event = (1 − r_l) · l_e_prev`) but it lives outside the timestepper, between event evaluations.
+
+---
+
+## 6. Vectorization and Parallelization Strategy
+
+Vectorization opportunities decompose along the three loop levels.
+
+**Across realizations (middle loop): partially vectorizable.** The shared preamble — sampling θ, computing H_c, λ_in, r_e — is fully numpy-vectorizable. Compute these as N-length arrays in one shot:
+
+```python
+H_c_vec     = sellmeijer_vectorized(theta_matrix)        # shape (N,)
+l_c_vec     = 0.5 * L * np.tanh(2 * theta_matrix[:, idx_D_aq] / L)
+lambda_in   = np.sqrt(k_aq_vec * D_aq_vec * D_bl_vec / k_bl_vec)
+r_e_vec     = lambda_in / (lambda_out + L + lambda_in)
+```
+
+The static limit state is fully vectorizable: a single boolean comparison across N realizations. The static branch is essentially O(N) with a tiny constant and runs in seconds for N = 10^5.
+
+**Across timesteps (inner loop): not vectorizable in time.** Path dependency. But within a single timestep you can vectorize across all N realizations simultaneously:
+
+```python
+# At time t_k, advance all N realizations one step
+h_t                = h_river[k]                                            # scalar
+delta_h_vec        = r_e_vec * (h_t - z_toe)                              # shape (N,)
+Z_u_vec            = (gamma_s_sub_vec * D_bl_vec) / gamma_w - delta_h_vec
+uplift_ever_vec   |= (Z_u_vec < 0)
+i_exit_vec         = delta_h_vec / D_bl_vec
+Z_h_vec            = gamma_s_sub_vec / gamma_w - i_exit_vec
+heave_now_vec      = (Z_h_vec < 0)
+I_er_vec           = (uplift_ever_vec | (l_current_vec > 0)) & heave_now_vec
+
+# Piecewise linear H_eq with per-realization breakpoints
+H_eq_vec = np.where(
+    l_current_vec < l_c_vec,
+    H_c_vec * l_current_vec / l_c_vec,
+    H_c_vec + (0.9 * H_c_vec - H_c_vec) * (l_current_vec - l_c_vec) / (L - l_c_vec)
+)
+overload_vec       = np.maximum(0.0, delta_h_vec - H_eq_vec)
+dldt_vec           = 89.0 * C_e_vec * (k_aq_vec * overload_vec / L)**0.81
+dldt_vec           = np.where(I_er_vec, dldt_vec, 0.0)
+l_current_vec     += dldt_vec * dt
+```
+
+Total operation count: N × T elementwise ops, all in numpy. For N = 10^5 and T ≈ 1000, that's 10^8 fused operations — well within numpy's reach in minutes.
+
+**Across conditioning water levels (outer loop): embarrassingly parallel.** Each h_i is independent; parallelize with joblib.Parallel across CPU cores. For N_h ≈ 30 and 8–16 cores, near-linear speedup.
+
+**Where broadcasting breaks down:**
+
+Variable-length hydrographs across d4PDF events. Different events have different durations; you cannot stack into a uniform (N_events, T) array without padding. Process events one at a time — they are independent across the conditioning loop.
+
+The piecewise linear H_eq interpolation: breakpoints (l_c, H_c) differ per realization, so scipy.interpolate.interp1d won't broadcast cleanly. Implement manually with np.where as shown above. This is fine — the two-segment piecewise linear is trivial to express.
+
+The first-uplift-time bookkeeping requires sequential updates *along time* but vectorizes across realizations (`uplift_ever_vec |= Z_u_vec < 0`).
+
+**Numba note:** if profiling shows the per-timestep elementwise loop is a bottleneck (it shouldn't be with pure numpy, but might be if you add complexity), `@numba.njit(parallel=True)` on the timestepper gives another 3–5× without code changes. Don't pre-optimize — write numpy first, profile, only reach for Numba if wall-clock demands it.
+
+**Budget estimate:** ~5 min per h_i × 30 h_i = ~2.5 hr single-threaded; ~15–30 min with 8-core parallelism. Comfortable for iterative thesis development.
+
+---
+
+## 7. The Seven-Dimensional Stochastic Parameter Vector
+
+Random variables sampled via LHS:
+
+| Symbol | Description | Distribution | Mean | COV | Source |
+|---|---|---|---|---|---|
+| k_aq | Aquifer hydraulic conductivity [m/s] | Lognormal | (site-specific) | 0.50 | OYO 1999 field tests |
+| d_70 | Representative grain size [m] | Lognormal | (site-specific) | 0.10 | OYO 1999 grain-size curves |
+| D_aq | Aquifer thickness [m] | Lognormal | (site-specific) | 0.20 | OYO 1999 borehole logs |
+| D_bl | Blanket thickness [m] | Lognormal | (site-specific) | 0.20 | OYO 1999 borehole logs |
+| k_bl | Blanket vertical conductivity [m/s] | Lognormal | (site-specific) | 0.50 | OYO 1999 (or proxy) |
+| γ'_s | Submerged unit weight [kN/m³] | Normal | (site-specific) | 0.05 | OYO 1999 lab tests |
+| C_e | Erosion coefficient [−] | Lognormal | 0.014 | 0.50 | Pol 2024 calibration |
+
+Fixed within every realization:
+
+- θ_repose = 37° (angle of repose, enters Sellmeijer F_r)
+- D_r = 0.725 (Pol base case)
+- C_u, KAS evaluated at experimental mean values per Sellmeijer 2011 convention
+
+The C_e promotion is the substantive update from a six-dimensional formulation. The justification, in brief: Pol's ODE is calibrated against laminar-regime experiments (Re < 2100); prototype-scale pipe flow frequently transitions to turbulent regime (Okamura 2022, 2025) introducing friction that reduces progression rates. Rather than modify the ODE with empirically unvalidated turbulence corrections, the laminar-flow conservative bias is encoded as prior uncertainty on C_e, and Phase 2 Bayesian filtering against 2016 survival empirically constrains it. The COV of 0.50 spans the small-scale calibration range of 0.007–0.030 reported by Pol 2024.
+
+Sampling is independent across all seven variables unless an empirical correlation is identified in the OYO 1999 dataset. If correlations are found, use the Nataf transformation to preserve marginals while imposing the empirical correlation structure.
+
+**A note on the C_e–k_aq product:** both enter multiplicatively in dl/dt and both are Lognormal with COV ≈ 0.50, so their product has COV ≈ 0.71. The high-C_e/high-k_aq corner of the prior produces progression rates several times the deterministic baseline. This is physically defensible — these are realizations that *should* fail — but means the prior transient fragility curve will sit above what deterministic-C_e analysis would predict. The Phase 2 posterior will pull this tail back in, producing a larger prior-to-posterior shift than a deterministic-C_e analysis would show. Be prepared to explain this in the discussion: the apparent strength of Bayesian calibration partly reflects giving the filter more parameter freedom to act on, not solely the informativeness of the 2016 survival observation.
+
+---
+
+## 8. Output Data Structures for Phase 2 Handoff
+
+The FragilityResult object described in §2 is the primary handoff. Think carefully about what Phase 2 actually needs.
+
+Phase 2 Accept-Reject filtering operates on the **prior θ matrix**, not the fragility curve. The procedure: take the N × 7 prior matrix from Phase 1, run each row through the transient evaluator with the 2016 hydrograph h_2016(t), reject rows whose Z_transient < 0, keep survivors as the posterior sample.
+
+Phase 2 needs:
+
+1. The raw `theta_matrix` (N × 7) — to filter.
+2. The `param_names` list — so column identities are unambiguous.
+3. The deterministic 2016 hydrograph (separate input, not part of FragilityResult).
+4. The cross-section geometry and config used in Phase 1 — so filtering replays under identical assumptions. Embed a config snapshot in `metadata`.
+5. The Phase 1 evaluator function M8 itself — so Phase 2 isn't reimplementing physics.
+
+The cleanest interface: expose M8 as a public function with a stable signature, and have Phase 2 import it directly. The filtering becomes:
+
+```python
+from bep_phase1.evaluator import evaluate_realization
+
+surviving_mask = np.array([
+    evaluate_realization(
+        theta_matrix[j], h_2016, geometry, l_ini=0.0
+    ).Z_transient > 0
+    for j in range(N)
+])
+theta_posterior = theta_matrix[surviving_mask]
+```
+
+For this to work, M8 must be importable without notebook context — directly motivating the architecture recommendation in §9.
+
+**Persistence format:** HDF5 via h5py for the large arrays; JSON sidecar for config metadata. Avoid pickle for long-term storage (Python version brittleness); avoid CSV for matrices (slow, lossy for floats). One HDF5 file per cross-section per scenario is a reasonable granularity. Recommended schema:
+
+```
+/theta_matrix             (N, 7)  float64
+/param_names              (7,)    string
+/conditioning_grid        (N_h,)  float64
+/failure_matrix_static    (N, N_h) bool
+/failure_matrix_trans     (N, N_h) bool
+/P_f_static_raw           (N_h,)  float64
+/P_f_trans_raw            (N_h,)  float64
+/attrs:
+    config_hash, runtime_seconds, c_e_stochastic=True,
+    prior_means, prior_covs, lhs_seed, cross_section_id,
+    scenario, code_version, hydrograph_source
+```
+
+---
+
+## 9. Recommended Package Architecture
+
+**Recommendation: modular .py package with thin notebook drivers.** I will be specific because the distinction matters more for this project than it might seem.
+
+Reasons against pure-notebook architecture:
+
+1. **Phase 2 must import M8.** Notebooks can be imported via nbformat/jupytext, but it's fragile and ugly. Functions called from other code belong in .py files.
+2. **Unit testing the physics.** You will want pytest coverage on `sellmeijer_static`, `pol_ode_progression`, and `hydraulic_translator` — testing against the Pol 2024 published examples and Sellmeijer 2011 fine-tuning experiments. Pytest on notebooks is painful; on .py files it's trivial.
+3. **Refactoring during a 25-week thesis.** You will discover physics bugs in month 3 and need to rerun everything. If physics is in cells, you'll be copy-pasting fixes between notebooks. If it's in a module, you fix once and re-import.
+4. **Version control diffs.** Git diffs on notebook JSON are unreadable; diffs on .py files are reviewable.
+5. **Reproducibility for defense.** A .py package with pinned requirements and a notebook entry point is what you hand to anyone and have it just work.
+
+**Recommended layout:**
+
+```
+bep_phase1/
+├── bep_phase1/                       # importable package
+│   ├── __init__.py
+│   ├── config.py                     # M1: pydantic dataclasses
+│   ├── sampling.py                   # M2: LHS sampler
+│   ├── hydrographs.py                # M3: d4PDF loader
+│   ├── hydraulics.py                 # M4: r_e, λ_in
+│   ├── initiation.py                 # M5: uplift, heave, I_er logic
+│   ├── sellmeijer.py                 # M6: H_c, l_c
+│   ├── progression.py                # M7: Pol ODE timestepper
+│   ├── evaluator.py                  # M8: combined limit state evaluator
+│   ├── fragility.py                  # M9: curve fitting, FragilityResult
+│   └── io.py                         # HDF5 persistence
+├── tests/
+│   ├── test_sellmeijer.py            # vs Pol/Sellmeijer published cases
+│   ├── test_progression.py           # vs Pol 2024 small-scale calibration
+│   ├── test_hydraulics.py            # vs Mazure analytical solutions
+│   └── test_evaluator.py             # integration test, deterministic case
+├── notebooks/
+│   ├── 01_prior_distributions.ipynb  # visualize 7D priors
+│   ├── 02_single_realization.ipynb   # trace one θ end-to-end
+│   ├── 03_fragility_run.ipynb        # driver: full N=10^5
+│   ├── 04_static_vs_transient.ipynb  # analysis: bias quantification
+│   └── 05_compound_event_study.ipynb # 2016 typhoon trace, sanity
+├── data/                             # geotech inputs, hydrographs
+├── results/                          # FragilityResult HDF5 files
+├── configs/                          # YAML config files per cross-section
+├── requirements.txt
+└── README.md
+```
+
+Notebooks become *thin drivers* — they import from `bep_phase1`, configure a run, execute, visualize. They do not contain physics. The notebook for a fragility run is essentially:
+
+```python
+from bep_phase1 import Config, run_fragility_analysis, plot_fragility
+cfg = Config.from_yaml("configs/tokachi_kp58.yaml")
+result = run_fragility_analysis(cfg)
+result.save("results/tokachi_kp58_historical.h5")
+plot_fragility(result)
+```
+
+Everything else — the 10^5-iteration machinery — is in the package.
+
+**Pragmatic transition path:** start in a single notebook for the first two weeks while debugging the physics on small N (say 1000). Once physics is stable, refactor into the package layout. Commit to completing this refactor by end of week 13 (Phase 1 start week per your Gantt), not deferring indefinitely.
+
+---
+
+## 10. Python Package Ecosystem
+
+**Minimal stack:**
+
+- **numpy** — backbone for all numerics.
+- **scipy.stats** — distribution sampling, lognormal fitting for fragility curves (`scipy.stats.lognorm.fit`).
+- **scipy.stats.qmc.LatinHypercube** — built-in LHS sampler since SciPy 1.7. Don't reach for pyDOE.
+- **pandas** — DataFrame for theta_matrix at module boundaries; convert to ndarray inside hot loops.
+- **joblib** — parallelism across conditioning water levels; clean persistence via `joblib.dump`.
+- **h5py** — long-term storage of large arrays.
+- **matplotlib** — fragility curves, diagnostic trajectories. Add seaborn for nicer defaults.
+- **pydantic** — config validation; catches unit errors at load time.
+- **pytest** — non-negotiable for physics unit tests.
+- **tqdm** — progress bars on outer loop; sanity-saving on long runs.
+
+**Optional but valuable:**
+
+- **xarray** — labeled multi-dimensional arrays (cross-section × scenario × climate × h_i × static/transient). If you anticipate analysis growing along these dimensions, adopt from the start.
+- **numba** — held in reserve. Only if profiling demands it.
+
+**Avoid:** TensorFlow, PyTorch, JAX (overkill, no autodiff benefit here). Also avoid scipy.integrate.solve_ivp for the timestepper — forward Euler is what Pol uses, and adaptive integrators fight the I_er discontinuities.
+
+---
+
+## 11. Convergence and Validation Strategy
+
+**Convergence diagnostic.** Monitor the coefficient of variation of P̂_f at the lowest failure probability of interest as N increases. Standard practice (Schweckendiek 2014) targets CoV < 5% across the relevant failure range. For levels where P̂_f < 10^-4, monitor CoV explicitly; increase N if needed. Bootstrap resampling of the realization set provides confidence bands on fitted fragility curves.
+
+**Timestep convergence test.** Run a single representative hydrograph and a worst-case θ (high k_aq, low D_bl) with Δt and Δt/2; confirm l_e differs by <1%. Pol uses Δt = 10 s for small-scale, 100 s for large-scale. For field-scale typhoons, 600 s (10 min) is likely safe but verify. Native d4PDF resolution is the starting default.
+
+**Physics validation tests** (pytest):
+
+1. **Sellmeijer reproduction:** Compute H_c for the IJkdijk test cases reported in Sellmeijer 2011 Table 1; require agreement within reported regression scatter.
+2. **Pol small-scale reproduction:** Run progression.py against Pol 2024 B25-245 and FPH calibration cases; require l_e(t) agreement within experimental scatter using Pol's calibrated C_e.
+3. **Mazure analytical check:** For an idealized cross-section (no foreshore, λ_in computable in closed form), require r_e agreement with hand calculation to machine precision.
+4. **Conservation/monotonicity:** Assert l_current is monotonically non-decreasing across every timestep in every realization. Assert l_e ≤ L at termination. Assert I_er never goes from true to false except via heave inactivation.
+5. **Degenerate-case smoke tests:** A toe-drained segment with h_surface forced to z_toe at exit must yield Z_u, Z_h ≥ 0 for all stages and P_f → 0. A cross-section with C_e → 0 must yield Z_trans → L − l_ini regardless of hydrograph.
+
+---
+
+## 12. Failure Modes and Architectural Tradeoffs
+
+**Failure mode 1: Silent unit inconsistency in r_e.** Mazure mixes hydraulic conductivity [m/s], geometric lengths [m], and dimensionless factors. A factor-of-86400 error from m/s vs m/day produces λ_in values that look plausible but are off by orders of magnitude. *Mitigation:* single-realization integration test against a published Mazure analytical case before trusting any fragility output. Use pydantic with units annotations in config.
+
+**Failure mode 2: H_c non-physical for extreme θ tails.** Lognormal sampling with COV = 0.5 on k_aq produces a heavy right tail. Combined with small d_70 samples, F_s can produce H_c values near zero or unstable values via F_g. *Mitigation:* clip θ samples to physically defensible bounds (e.g., d_70 ∈ [50 μm, 1 mm]) at the sampler stage. Add an assertion in `sellmeijer_static` that H_c > 0; log and skip realizations that fail, tracking skip rate. Skip rate > 1% indicates priors need re-bounding.
+
+**Failure mode 3: Forward Euler timestep too large for steep rising limbs.** For typhoon peak rising limbs in flashy rivers, the effective time constant of dl/dt response can be short. If Δt > critical, l_e can overshoot. *Mitigation:* the timestep convergence test in §11.
+
+**Failure mode 4: Static-vs-transient bias conflates two physical effects.** The static Sellmeijer assumes 2D plane-strain and inherits the 2D scale exponent α = −1/3. The Pol ODE was calibrated against 3D experiments and implicitly encodes different geometry assumptions. The intended finding "static overestimates because it ignores time" is partly conflated with 2D-vs-3D geometric assumptions. *Mitigation:* acknowledge in the discussion chapter; don't claim the entire static-transient gap is purely temporal.
+
+**Failure mode 5: LHS variance reduction in the tails (revised).** LHS retains meaningful variance reduction over crude MC for tail probability estimation at P_f ~ 10^-3 to 10^-4 because stratification systematically explores parameter-space tails rather than relying on random coverage. More importantly, sensitivity studies and cross-section sweeps will run at reduced N (typically 10^4), where the LHS advantage on tail estimation grows substantially — empirically 2–5× variance reduction depending on input-output sensitivity alignment, which is favorable here given the dominance of k_aq and D_bl. *Mitigation:* design the engine around LHS from the start, treat crude MC only as a debug fallback for reproducibility checks against textbook formulas.
+
+**Failure mode 6: Memory explosion from storing all l(t) trajectories.** 10^5 × 1000 × 8 bytes ≈ 800 MB per cross-section per scenario. Across 5 cross-sections × 2 scenarios × static/transient you can blow past 16 GB. *Mitigation:* default `store_trajectories=False`; retain only Z values and scalar diagnostics. Enable trajectory storage only for the 2016 calibration run and for a 100-realization visualization subset.
+
+**Failure mode 7: C_e–k_aq multiplicative tail amplification.** Both Lognormal COV ≈ 0.50; product has COV ≈ 0.71. The high-C_e/high-k_aq corner produces progression rates several times deterministic baseline, dominating the transient failure tail. This is physically correct but means the prior transient fragility sits above deterministic-C_e predictions and the Phase 2 posterior shift looks more dramatic than under deterministic C_e. *Mitigation:* explain in discussion that the apparent strength of Bayesian calibration partly reflects giving the filter more parameter freedom, not solely the informativeness of 2016 survival. Plot prior and posterior marginals for all seven parameters, with C_e called out specifically.
+
+**Tradeoff 1: Sequential timestepper, numpy vs JIT.** Pure numpy vectorized-across-realizations is clean and gets to ~30 min runs. Numba-JIT'd gets to ~5 min but introduces debugging headaches (poor error messages, type-inference regressions). *Recommendation:* numpy first, ship the thesis with numpy, leave Numba as optimization for any follow-up paper.
+
+**Tradeoff 2: Storing failure_matrix for Phase 2 vs recomputing.** Storing costs ~3 MB (N × N_h bools); recomputing costs ~30 min. Store it. The recompute path should still exist as a code path for reproducibility but should not be the default.
+
+**Tradeoff 3: Coupling to Uemura's discretization.** Thesis is committed to the 200 m segment grid and KP boundaries. Fragility output dimensions are fixed by external data, not computational convenience. Architect the FragilityResult to carry segment_id as a first-class index from day one — don't try to retrofit when integrating with Uemura's curves in Phase 3.
+
+---
+
+## 13. Summary of Single Decisions
+
+For quick reference during implementation, the architectural decisions that should not be re-litigated mid-build:
+
+| Decision | Setting |
+|---|---|
+| Stochastic parameter vector dimensionality | 7 (includes C_e) |
+| C_e prior | Lognormal, mean 0.014, COV 0.50 |
+| Sampling scheme | Latin Hypercube, 7-dimensional |
+| Sample size per cross-section | N = 10^5 |
+| Conditioning grid size | N_h ≈ 30 (refine as needed) |
+| Shared sampling for static/transient | Mandatory — single θ_j feeds both |
+| Hydraulic translation | Instantaneous Mazure r_e, no transient lag |
+| Static comparator hydraulic input | r_e · (h_peak − z_toe), not raw h_peak |
+| ODE integrator | Forward Euler |
+| Timestep | Native d4PDF resolution, validated by Δt/2 convergence test |
+| Recovery rate r_l (Phase 1) | 0 (zero recovery within events) |
+| Trajectory storage | Off by default; on for 2016 calibration and viz subsets |
+| Persistence format | HDF5 with JSON metadata sidecar |
+| Code organization | .py package with thin notebook drivers |
+| Phase 2 handoff payload | theta_matrix + failure_matrix_trans + metadata, all in FragilityResult |
+| Filter dimensionality in Phase 2 | 7 (C_e included; this is the whole point) |
+
+This is the complete, authoritative specification. Implement against this document; deviate from it only with a documented justification.

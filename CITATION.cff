@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Rietman"
+  given-names: "Gijs Morten"
+  orcid: ""
+title: "bep-reliability-engine"
+version: 1.0.0
+doi: 
+date-released: 2026-05-20
+url: "https://github.com/Gimori3/bep-reliability-engine"
