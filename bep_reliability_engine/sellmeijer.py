@@ -1,0 +1,357 @@
+"""Sellmeijer (2011) critical head and critical pipe length (module M6).
+
+Implements the revised Sellmeijer backward-erosion-piping resistance model
+
+    H_c = L * F_r * F_s * F_g
+
+published as the adapted piping rule of Sellmeijer, Lopez de la Cruz,
+van Beek & Knoeff (2011), "Fine-tuning of the backward erosion piping
+model through small-scale, medium-scale and IJkdijk experiments", EJECE
+15(8):1139-1154 (formula [6] in that paper), and restated as Eq. (12) of
+Pol, Kanning, Jonkman & Kok (2024), "Time-dependent reliability analysis
+of flood defenses under cumulative internal erosion", Structure and
+Infrastructure Engineering -- the Eq. (12) numbering is the one used by
+the project spec.
+
+The critical pipe length follows Pol et al. (2024, SIE) Eq. (13),
+
+    l_c / L = 0.5 * tanh(2 * D_aq / L)
+
+valid for homogeneous aquifers, where it agrees with 2D numerical piping
+simulations (Sellmeijer 2006; Rosenbrand et al. 2022).
+
+This module is the single source of H_c and l_c for both limit states
+(spec section 1, M6): the static Sellmeijer comparison and the equilibrium
+curve H_eq(l) of the Pol progression ODE (M7) must both obtain H_c here so
+the two uses cannot drift apart. The optional ``alpha_exponent`` argument
+is the sensitivity hook of spec section 12 (failure mode 4) for
+substituting the 3D hole-type-exit scale exponent alpha = -1/2 for the 2D
+plane-strain value alpha = -1/3.
+
+All computations are in strict SI base units (m, s, m/s, radians); unit
+weights are in kN/m^3, consistent with ``constants.GAMMA_W``.
+"""
+
+import math
+
+import numpy as np
+import numpy.typing as npt
+
+from .constants import GAMMA_W
+
+__all__ = [
+    "GAMMA_W",
+    "ETA_WHITE",
+    "THETA_REPOSE_DEFAULT",
+    "D_R_DEFAULT",
+    "D_R_MEAN",
+    "C_U_MEAN",
+    "KAS_MEAN",
+    "D_70_MEAN_M",
+    "NU_WATER_M2_PER_S",
+    "compute_critical_head",
+    "compute_critical_head_vectorized",
+    "compute_critical_pipe_length",
+]
+
+# --- Physical constants ----------------------------------------------------
+
+# White's drag coefficient eta [-] (Sellmeijer 2011, formula [6]; Pol 2024
+# SIE, Eq. (12)). An alternate calibrated value of 0.30 exists in Dutch
+# assessment practice; 0.25 is the value of both source papers.
+ETA_WHITE: float = 0.25
+
+# Bedding (repose) angle of the sand, deterministic at 37 degrees per spec
+# section 7. Stored in radians per docs/conventions.md section 2.
+THETA_REPOSE_DEFAULT: float = math.radians(37.0)
+
+# Default relative density D_r [-]: Pol et al. (2024) base case, equal to
+# the Sellmeijer experimental mean so the (D_r / D_r,m) ratio term is 1
+# (spec section 7: "C_u, KAS evaluated at experimental mean values").
+D_R_DEFAULT: float = 0.725
+
+# --- Sellmeijer (2011) experimental mean values -----------------------------
+# Means of the small-scale test programme used to normalize the regression
+# ratio terms in F_r and F_s (Sellmeijer 2011, Table 2; restated below
+# Eq. (12) of Pol et al. 2024 SIE).
+
+D_R_MEAN: float = 0.725  # mean relative density D_r,m [-]
+C_U_MEAN: float = 1.81  # mean uniformity coefficient C_u,m [-]
+KAS_MEAN: float = 0.498  # mean angularity KAS_m [-]
+D_70_MEAN_M: float = 2.08e-4  # mean grain size d_70,m [m]
+
+# Kinematic viscosity of water at 10 degC [m^2/s], entering the intrinsic
+# permeability kappa = k_aq * nu / g (Pol et al. 2024 SIE, Eq. (12)).
+NU_WATER_M2_PER_S: float = 1.3e-6
+
+# Canonical theta-vector column order (spec section 2, M2 contract).
+_PARAM_NAMES: list[str] = [
+    "k_aq",
+    "d_70",
+    "D_aq",
+    "D_bl",
+    "k_bl",
+    "gamma_s_sub",
+    "C_e",
+]
+
+
+def _factor_Fr(
+    gamma_s_sub_kn_m3: float | npt.NDArray[np.float64],
+    theta_repose_rad: float = THETA_REPOSE_DEFAULT,
+    relative_density: float = D_R_DEFAULT,
+    uniformity_cu: float = C_U_MEAN,
+    angularity_kas: float = KAS_MEAN,
+    eta: float = ETA_WHITE,
+) -> float | npt.NDArray[np.float64]:
+    """Resistance factor F_r of the revised Sellmeijer model.
+
+    F_r = eta * (gamma'_p / gamma_w) * tan(theta)
+          * (D_r / D_r,m)^0.35 * (C_u / C_u,m)^0.13 * (KAS / KAS_m)^-0.02
+
+    per Sellmeijer (2011) formula [6] / Pol (2024 SIE) Eq. (12).
+
+    Parameters
+    ----------
+    gamma_s_sub_kn_m3 : float or ndarray
+        Submerged particle unit weight gamma'_p = (rho_s - rho_w) * g
+        [kN/m^3]. This is the ``gamma_s_sub`` entry of the theta vector;
+        it enters as the dimensionless ratio gamma'_p / gamma_w.
+    theta_repose_rad : float, optional
+        Bedding (repose) angle of the sand [rad]. Deterministic, default
+        37 degrees (spec section 7).
+    relative_density : float, optional
+        Relative density D_r [-]. Default ``D_R_DEFAULT`` makes the
+        regression ratio term equal to 1.
+    uniformity_cu : float, optional
+        Uniformity coefficient C_u = d_60/d_10 [-]. Default ``C_U_MEAN``
+        makes the regression ratio term equal to 1.
+    angularity_kas : float, optional
+        Particle roundness KAS [-]. Default ``KAS_MEAN`` makes the
+        regression ratio term equal to 1.
+    eta : float, optional
+        White's drag coefficient [-], default ``ETA_WHITE`` = 0.25.
+
+    Returns
+    -------
+    float or ndarray
+        Dimensionless resistance factor F_r [-], broadcasting over
+        ``gamma_s_sub_kn_m3``.
+
+    Notes
+    -----
+    The empirical exponents 0.35, 0.13 and -0.02 are the multivariate
+    regression weights of Sellmeijer (2011), Table 1; they are valid only
+    inside the tested parameter limits (Table 2). With all three optional
+    arguments left at the experimental means this reduces to the classical
+    F_r = eta * (gamma'_p / gamma_w) * tan(theta).
+    """
+    raise NotImplementedError
+
+
+def _factor_Fs(
+    d_70_m: float | npt.NDArray[np.float64],
+    k_aq_mps: float | npt.NDArray[np.float64],
+    seepage_length_m: float,
+    alpha_exponent: float = -1.0 / 3.0,
+) -> float | npt.NDArray[np.float64]:
+    """Scale factor F_s of the revised Sellmeijer model.
+
+    F_s = (d_70^3 / (kappa * L))^(-alpha) * (d_70,m / d_70)^0.6,
+    with the intrinsic permeability kappa = k_aq * nu / g [m^2].
+
+    At the default 2D Sellmeijer exponent alpha = -1/3 this reduces
+    exactly to formula [6] of Sellmeijer (2011) / Eq. (12) of Pol (2024
+    SIE):  F_s = d_70 / (kappa * L)^(1/3) * (d_70,m / d_70)^0.6.
+
+    Parameters
+    ----------
+    d_70_m : float or ndarray
+        Representative grain size d_70 [m]. The empirical grain-size
+        correction (d_70,m / d_70)^0.6 restricts validity to the tested
+        range 150e-6 to 430e-6 m (Sellmeijer 2011, Table 2).
+    k_aq_mps : float or ndarray
+        Aquifer hydraulic conductivity [m/s].
+    seepage_length_m : float
+        Seepage length L across the structure [m].
+    alpha_exponent : float, optional
+        Scale exponent alpha [-]. Default -1/3 (2D plane strain);
+        substitute -1/2 for the 3D hole-type-exit scaling.
+
+    Returns
+    -------
+    float or ndarray
+        Dimensionless scale factor F_s [-], broadcasting over the array
+        arguments.
+
+    Notes
+    -----
+    The alpha substitution is applied through the dimensionless group
+    d_70^3 / (kappa * L) so that any alpha yields a dimensionless F_s and
+    alpha = -1/3 reproduces the published rule identically. At field
+    seepage lengths d_70^3 / (kappa * L) << 1, so the 3D value alpha =
+    -1/2 lowers F_s and hence H_c, consistent with van Beek (2015). This
+    is a sensitivity hook for the bias decomposition of spec section 12
+    (failure mode 4), not a validated 3D model.
+    """
+    raise NotImplementedError
+
+
+def _factor_Fg(
+    D_aq_m: float | npt.NDArray[np.float64],
+    seepage_length_m: float,
+) -> float | npt.NDArray[np.float64]:
+    """Geometrical shape factor F_g of the revised Sellmeijer model.
+
+    F_g = 0.91 * (D_aq / L)^( 0.28 / ((D_aq / L)^2.8 - 1) + 0.04 )
+
+    per Sellmeijer (2011) formula [6] / Pol (2024 SIE) Eq. (12).
+
+    Parameters
+    ----------
+    D_aq_m : float or ndarray
+        Aquifer (sand layer) thickness D [m].
+    seepage_length_m : float
+        Seepage length L across the structure [m].
+
+    Returns
+    -------
+    float or ndarray
+        Dimensionless geometrical shape factor F_g [-], broadcasting over
+        ``D_aq_m``.
+
+    Notes
+    -----
+    Valid for a sand layer of constant thickness (Sellmeijer 2011). The
+    exponent has a removable singularity at D_aq / L = 1, where the
+    factor tends to the finite limit 0.91 * exp(0.1) * (D_aq/L)^0.04; the
+    implementation must handle that point explicitly rather than rely on
+    floating-point evaluation of 0.28 / 0.
+    """
+    raise NotImplementedError
+
+
+def compute_critical_head(
+    theta_row: npt.NDArray[np.float64],
+    geometry: dict,
+    alpha_exponent: float = -1.0 / 3.0,
+) -> float:
+    """Critical head H_c of the revised Sellmeijer (2011) model, one
+    realization.
+
+    H_c = L * F_r * F_s * F_g  (Sellmeijer 2011 formula [6]; Pol 2024 SIE
+    Eq. (12)), the critical hydraulic head difference across the structure
+    at which backward erosion progresses to failure.
+
+    Parameters
+    ----------
+    theta_row : ndarray, shape (7,)
+        One realization's parameter vector in the canonical column order
+        ``['k_aq', 'd_70', 'D_aq', 'D_bl', 'k_bl', 'gamma_s_sub', 'C_e']``
+        (spec section 2). Consumed here: ``k_aq`` [m/s], ``d_70`` [m],
+        ``D_aq`` [m] and ``gamma_s_sub`` [kN/m^3, submerged particle unit
+        weight]. ``D_bl``, ``k_bl`` and ``C_e`` do not enter H_c -- the
+        static branch has no C_e exposure by design (ADR-0001).
+    geometry : dict
+        Cross-section geometry; only ``geometry['L']`` (seepage length
+        [m]) is read here. Other keys (``z_toe``, ``foreshore_width``,
+        ``lambda_out_params``) are accepted and ignored.
+    alpha_exponent : float, optional
+        Scale exponent alpha [-] passed to the scale factor F_s. Default
+        -1/3 (2D Sellmeijer); -1/2 substitutes the 3D hole-type-exit
+        value for the sensitivity decomposition of spec section 12,
+        failure mode 4.
+
+    Returns
+    -------
+    float
+        Critical head H_c [m]. Guaranteed positive; the implementation
+        must assert H_c > 0 and treat violations as sampling-bound errors
+        (spec section 12, failure mode 2).
+
+    Notes
+    -----
+    Mathematical assumptions: 2D plane-strain groundwater flow under a
+    dike of constant sand-layer thickness; relative density, uniformity
+    and angularity fixed at the Sellmeijer experimental means so their
+    regression ratio terms equal 1 (spec section 7); deterministic repose
+    angle of 37 degrees; kinematic viscosity at 10 degC in kappa = k_aq *
+    nu / g. The empirical grain-size adaptation restricts validity to
+    d_70 in [150e-6, 430e-6] m (Sellmeijer 2011, Table 2). H_c is a head
+    *difference* across the structure and carries no datum of its own;
+    the caller (M8) is responsible for comparing it against the
+    r_e-translated load head.
+    """
+    raise NotImplementedError
+
+
+def compute_critical_head_vectorized(
+    theta_matrix: npt.NDArray[np.float64],
+    geometry: dict,
+    alpha_exponent: float = -1.0 / 3.0,
+) -> npt.NDArray[np.float64]:
+    """Critical head H_c for all N realizations at once.
+
+    Vectorized evaluation of :func:`compute_critical_head` across the rows
+    of the theta matrix (spec section 6, shared preamble). Must agree with
+    the scalar function row by row to machine precision.
+
+    Parameters
+    ----------
+    theta_matrix : ndarray, shape (N, 7)
+        LHS sample matrix in the canonical column order
+        ``['k_aq', 'd_70', 'D_aq', 'D_bl', 'k_bl', 'gamma_s_sub', 'C_e']``
+        (spec section 2), physical units as in
+        :func:`compute_critical_head`.
+    geometry : dict
+        Cross-section geometry; only ``geometry['L']`` (seepage length
+        [m]) is read here.
+    alpha_exponent : float, optional
+        Scale exponent alpha [-] (see :func:`compute_critical_head`).
+
+    Returns
+    -------
+    ndarray, shape (N,)
+        Critical head H_c per realization [m].
+
+    Notes
+    -----
+    Same mathematical assumptions as :func:`compute_critical_head`. This
+    is the production path for N = 1e5 fragility runs; the scalar variant
+    exists for single-realization tracing and for the Phase 2 evaluator
+    import path (M8).
+    """
+    raise NotImplementedError
+
+
+def compute_critical_pipe_length(D_aq: float, L: float) -> float:
+    """Critical pipe length l_c per Pol et al. (2024, SIE) Eq. (13).
+
+    l_c = 0.5 * L * tanh(2 * D_aq / L)
+
+    The pipe length at which the equilibrium curve H_eq(l) attains its
+    maximum H_c; beyond l_c, progression is unstable under constant head.
+    Anchors the (l_c, H_c) breakpoint of the piecewise-linear H_eq used by
+    the progression ODE (M7, spec section 1).
+
+    Parameters
+    ----------
+    D_aq : float
+        Aquifer (sand layer) thickness [m].
+    L : float
+        Seepage length across the structure [m].
+
+    Returns
+    -------
+    float
+        Critical pipe length l_c [m], bounded by 0 < l_c < 0.5 * L.
+
+    Notes
+    -----
+    Valid for homogeneous aquifers, for which Pol et al. (2024, SIE)
+    report good agreement with 2D numerical piping simulations
+    (Sellmeijer 2006; Rosenbrand et al. 2022). Scalar only: the formula
+    is cheap and smooth, and numpy broadcasting through ``np.tanh`` works
+    unchanged if arrays are passed, so no vectorized variant is provided.
+    """
+    raise NotImplementedError
