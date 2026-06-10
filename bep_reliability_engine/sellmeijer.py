@@ -26,18 +26,20 @@ curve H_eq(l) of the Pol progression ODE (M7) must both obtain H_c here so
 the two uses cannot drift apart. The optional ``alpha_exponent`` argument
 is the sensitivity hook of spec section 12 (failure mode 4) for
 substituting the 3D hole-type-exit scale exponent alpha = -1/2 for the 2D
-plane-strain value alpha = -1/3.
+plane-strain value alpha = -1/3; it enters through the scale factor F_s,
+which is where the -1/3 exponent of the published rule lives.
 
 All computations are in strict SI base units (m, s, m/s, radians); unit
 weights are in kN/m^3, consistent with ``constants.GAMMA_W``.
 """
 
 import math
+from typing import NamedTuple
 
 import numpy as np
 import numpy.typing as npt
 
-from .constants import GAMMA_W
+from .constants import GAMMA_W, GRAVITY
 
 __all__ = [
     "GAMMA_W",
@@ -49,6 +51,7 @@ __all__ = [
     "KAS_MEAN",
     "D_70_MEAN_M",
     "NU_WATER_M2_PER_S",
+    "SellmeijerResult",
     "compute_critical_head",
     "compute_critical_head_vectorized",
     "compute_critical_pipe_length",
@@ -94,6 +97,18 @@ _PARAM_NAMES: list[str] = [
     "gamma_s_sub",
     "C_e",
 ]
+
+
+class SellmeijerResult(NamedTuple):
+    """Critical head and critical pipe length from one M6 evaluation.
+
+    Fields hold floats when produced by :func:`compute_critical_head` and
+    (N,)-shaped float64 arrays when produced by
+    :func:`compute_critical_head_vectorized`.
+    """
+
+    H_c: float | npt.NDArray[np.float64]
+    l_c: float | npt.NDArray[np.float64]
 
 
 def _factor_Fr(
@@ -146,7 +161,14 @@ def _factor_Fr(
     arguments left at the experimental means this reduces to the classical
     F_r = eta * (gamma'_p / gamma_w) * tan(theta).
     """
-    raise NotImplementedError
+    return (
+        eta
+        * (gamma_s_sub_kn_m3 / GAMMA_W)
+        * math.tan(theta_repose_rad)
+        * (relative_density / D_R_MEAN) ** 0.35
+        * (uniformity_cu / C_U_MEAN) ** 0.13
+        * (angularity_kas / KAS_MEAN) ** -0.02
+    )
 
 
 def _factor_Fs(
@@ -194,7 +216,9 @@ def _factor_Fs(
     is a sensitivity hook for the bias decomposition of spec section 12
     (failure mode 4), not a validated 3D model.
     """
-    raise NotImplementedError
+    kappa_m2 = k_aq_mps * NU_WATER_M2_PER_S / GRAVITY
+    scale_group = d_70_m**3 / (kappa_m2 * seepage_length_m)
+    return scale_group**-alpha_exponent * (D_70_MEAN_M / d_70_m) ** 0.6
 
 
 def _factor_Fg(
@@ -223,25 +247,36 @@ def _factor_Fg(
     Notes
     -----
     Valid for a sand layer of constant thickness (Sellmeijer 2011). The
-    exponent has a removable singularity at D_aq / L = 1, where the
-    factor tends to the finite limit 0.91 * exp(0.1) * (D_aq/L)^0.04; the
-    implementation must handle that point explicitly rather than rely on
-    floating-point evaluation of 0.28 / 0.
+    exponent has a removable singularity at D_aq / L = 1; that point is
+    handled explicitly by substituting the finite limit value
+    0.91 * exp(0.1) * (D_aq/L)^0.04 rather than relying on floating-point
+    evaluation of 0.28 / 0.
     """
-    raise NotImplementedError
+    thickness_ratio = np.asarray(D_aq_m, dtype=np.float64) / seepage_length_m
+    denom = thickness_ratio**2.8 - 1.0
+    with np.errstate(divide="ignore"):
+        exponent = 0.28 / denom + 0.04
+    f_g = 0.91 * np.where(
+        denom == 0.0,
+        math.exp(0.1) * thickness_ratio**0.04,
+        thickness_ratio**exponent,
+    )
+    if f_g.ndim == 0:
+        return float(f_g)
+    return f_g
 
 
 def compute_critical_head(
     theta_row: npt.NDArray[np.float64],
     geometry: dict,
     alpha_exponent: float = -1.0 / 3.0,
-) -> float:
-    """Critical head H_c of the revised Sellmeijer (2011) model, one
-    realization.
+) -> SellmeijerResult:
+    """Critical head H_c and critical pipe length l_c, one realization.
 
     H_c = L * F_r * F_s * F_g  (Sellmeijer 2011 formula [6]; Pol 2024 SIE
     Eq. (12)), the critical hydraulic head difference across the structure
-    at which backward erosion progresses to failure.
+    at which backward erosion progresses to failure, together with the
+    critical pipe length l_c of Pol (2024 SIE) Eq. (13).
 
     Parameters
     ----------
@@ -264,10 +299,17 @@ def compute_critical_head(
 
     Returns
     -------
-    float
-        Critical head H_c [m]. Guaranteed positive; the implementation
-        must assert H_c > 0 and treat violations as sampling-bound errors
-        (spec section 12, failure mode 2).
+    SellmeijerResult
+        Named tuple ``(H_c, l_c)`` with the critical head H_c [m] and the
+        critical pipe length l_c [m], both floats.
+
+    Raises
+    ------
+    ValueError
+        If H_c is not strictly positive (including NaN), with the
+        offending parameter values in the message. Per spec section 12
+        (failure mode 2) such realizations indicate priors that need
+        re-bounding; the caller logs and skips them.
 
     Notes
     -----
@@ -282,19 +324,45 @@ def compute_critical_head(
     the caller (M8) is responsible for comparing it against the
     r_e-translated load head.
     """
-    raise NotImplementedError
+    seepage_length_m = geometry["L"]
+    k_aq_mps = float(theta_row[_PARAM_NAMES.index("k_aq")])
+    d_70_m = float(theta_row[_PARAM_NAMES.index("d_70")])
+    D_aq_m = float(theta_row[_PARAM_NAMES.index("D_aq")])
+    gamma_s_sub_kn_m3 = float(theta_row[_PARAM_NAMES.index("gamma_s_sub")])
+
+    h_c = (
+        seepage_length_m
+        * _factor_Fr(gamma_s_sub_kn_m3)
+        * _factor_Fs(d_70_m, k_aq_mps, seepage_length_m, alpha_exponent)
+        * _factor_Fg(D_aq_m, seepage_length_m)
+    )
+    # "not (h_c > 0)" instead of "h_c <= 0" so that NaN from pathological
+    # theta values is rejected as well.
+    if not (h_c > 0.0):
+        raise ValueError(
+            f"Non-positive critical head H_c={h_c} for k_aq={k_aq_mps} m/s, "
+            f"d_70={d_70_m} m, D_aq={D_aq_m} m, "
+            f"gamma_s_sub={gamma_s_sub_kn_m3} kN/m^3, L={seepage_length_m} m, "
+            f"alpha_exponent={alpha_exponent}; re-bound the priors "
+            "(spec section 12, failure mode 2)."
+        )
+    l_c = compute_critical_pipe_length(D_aq_m, seepage_length_m)
+    return SellmeijerResult(H_c=float(h_c), l_c=float(l_c))
 
 
 def compute_critical_head_vectorized(
     theta_matrix: npt.NDArray[np.float64],
     geometry: dict,
     alpha_exponent: float = -1.0 / 3.0,
-) -> npt.NDArray[np.float64]:
-    """Critical head H_c for all N realizations at once.
+) -> SellmeijerResult:
+    """Critical head H_c and critical pipe length l_c for all N
+    realizations at once.
 
     Vectorized evaluation of :func:`compute_critical_head` across the rows
-    of the theta matrix (spec section 6, shared preamble). Must agree with
-    the scalar function row by row to machine precision.
+    of the theta matrix (spec section 6, shared preamble). Columns are
+    extracted by name from the canonical parameter order, never by
+    hard-coded position. Produces results identical to calling the scalar
+    function row by row (for realizations with valid, positive H_c).
 
     Parameters
     ----------
@@ -311,20 +379,39 @@ def compute_critical_head_vectorized(
 
     Returns
     -------
-    ndarray, shape (N,)
-        Critical head H_c per realization [m].
+    SellmeijerResult
+        Named tuple ``(H_c, l_c)`` of (N,)-shaped float64 arrays.
 
     Notes
     -----
     Same mathematical assumptions as :func:`compute_critical_head`. This
     is the production path for N = 1e5 fragility runs; the scalar variant
     exists for single-realization tracing and for the Phase 2 evaluator
-    import path (M8).
+    import path (M8). Unlike the scalar function, no positivity guard is
+    raised here: the spec (section 12, failure mode 2) prescribes
+    log-and-skip handling of non-positive H_c realizations at the caller
+    level, which a raise across the whole batch would prevent.
     """
-    raise NotImplementedError
+    seepage_length_m = geometry["L"]
+    k_aq_mps = theta_matrix[:, _PARAM_NAMES.index("k_aq")]
+    d_70_m = theta_matrix[:, _PARAM_NAMES.index("d_70")]
+    D_aq_m = theta_matrix[:, _PARAM_NAMES.index("D_aq")]
+    gamma_s_sub_kn_m3 = theta_matrix[:, _PARAM_NAMES.index("gamma_s_sub")]
+
+    h_c = (
+        seepage_length_m
+        * _factor_Fr(gamma_s_sub_kn_m3)
+        * _factor_Fs(d_70_m, k_aq_mps, seepage_length_m, alpha_exponent)
+        * _factor_Fg(D_aq_m, seepage_length_m)
+    )
+    l_c = compute_critical_pipe_length(D_aq_m, seepage_length_m)
+    return SellmeijerResult(H_c=h_c, l_c=l_c)
 
 
-def compute_critical_pipe_length(D_aq: float, L: float) -> float:
+def compute_critical_pipe_length(
+    D_aq: float | npt.NDArray[np.float64],
+    L: float,
+) -> float | npt.NDArray[np.float64]:
     """Critical pipe length l_c per Pol et al. (2024, SIE) Eq. (13).
 
     l_c = 0.5 * L * tanh(2 * D_aq / L)
@@ -336,22 +423,23 @@ def compute_critical_pipe_length(D_aq: float, L: float) -> float:
 
     Parameters
     ----------
-    D_aq : float
+    D_aq : float or ndarray
         Aquifer (sand layer) thickness [m].
     L : float
         Seepage length across the structure [m].
 
     Returns
     -------
-    float
+    float or ndarray
         Critical pipe length l_c [m], bounded by 0 < l_c < 0.5 * L.
+        Broadcasts over ``D_aq``.
 
     Notes
     -----
     Valid for homogeneous aquifers, for which Pol et al. (2024, SIE)
     report good agreement with 2D numerical piping simulations
-    (Sellmeijer 2006; Rosenbrand et al. 2022). Scalar only: the formula
-    is cheap and smooth, and numpy broadcasting through ``np.tanh`` works
-    unchanged if arrays are passed, so no vectorized variant is provided.
+    (Sellmeijer 2006; Rosenbrand et al. 2022). The formula is smooth and
+    cheap, and broadcasts through ``np.tanh`` unchanged, so no separate
+    vectorized variant is needed.
     """
-    raise NotImplementedError
+    return 0.5 * L * np.tanh(2.0 * D_aq / L)

@@ -7,11 +7,11 @@ Expected values trace to:
   and 8) and the IJkdijk large-scale validation (section 7, Figs. 5-7).
 - Pol et al. (2024), Structure and Infrastructure Engineering: Eq. (12)
   (restated Sellmeijer rule) and Eq. (13) (l_c formula).
-- The user-provided IJkdijk / Pol scale-analysis reference sheet for the
-  tabulated parameter sets: the 2011 EJECE paper reports the IJkdijk
-  parameters only in prose and figures (its Table 2 is parameter limits,
-  not test data). Values marked FLAG below should be confirmed against the
-  paper copies.
+- Pol (2022), PhD Thesis, Appendix A, Table A.3: exact tabulated values for
+  the IJkdijk experiments (k_aq and H_c per test).
+- Pol et al. (2024), Computers and Geotechnics: Table 2 (S2-2 sand
+  parameters) and Figure 8(a) / thesis Figure 5.8(a) (H_c/L <= 0.10 at
+  L = 30 m for the 2D Sellmeijer model).
 """
 
 import numpy as np
@@ -30,13 +30,13 @@ from bep_reliability_engine.sellmeijer import (
 PARAM_NAMES = ["k_aq", "d_70", "D_aq", "D_bl", "k_bl", "gamma_s_sub", "C_e"]
 
 # Submerged particle unit weight of the IJkdijk sand [kN/m^3]:
-# rho_s = 2.50 Mg/m^3, rho_w = 1.00 Mg/m^3 (user-provided IJkdijk reference
-# sheet, section 4): (2500 - 1000) * 9.81 / 1000 = 14.715.
+# rho_s = 2.50 Mg/m^3, rho_w = 1.00 Mg/m^3 (Pol 2022 thesis Appendix A,
+# Table A.3 footnote): (2500 - 1000) * 9.81 / 1000 = 14.715.
 GAMMA_SUB_IJKDIJK_KN_M3 = 14.715
 
 # Submerged particle unit weight of Pol's base-case sand S2-2 [kN/m^3]:
-# rho_s = 2650 kg/m^3 (reference sheet, section 5):
-# (2650 - 1000) * 9.81 / 1000 = 16.1865.
+# rho_s = 2650 kg/m^3 (Pol et al. 2024, Computers and Geotechnics,
+# Table 2): (2650 - 1000) * 9.81 / 1000 = 16.1865.
 GAMMA_SUB_POL_BASE_KN_M3 = 16.1865
 
 
@@ -117,32 +117,30 @@ def test_factor_fg_known_values():
 def test_hc_ijkdijk_case_1():
     # IJkdijk test 1 (IJkfs01): fine sand d_70 = 180 um, L = 15 m,
     # D = 3.00 m, k_aq = 8.0e-5 m/s; observed critical head H_c = 2.30 m.
-    # Source: Sellmeijer (2011) section 7 / Fig. 5 (5% silt head
-    # correction); tabulated values from the user-provided reference
-    # sheet, section 4. FLAG: confirm H_c = 2.30 m and k_aq = 8.0e-5 m/s
-    # against the paper copy -- the EJECE PDF tabulates neither.
-    # Tolerance 15%: the paper reports ~13% scatter (13.2% regression
-    # noise, section 6; 13.4% model drift, section 6) and states the fine
+    # Source: k_aq and H_c from Pol (2022) thesis Appendix A, Table A.3;
+    # Sellmeijer (2011) section 7 / Fig. 5 describes the test (5% silt
+    # head correction applied).
+    # Tolerance 15%: Sellmeijer (2011) reports ~13% scatter (13.2%
+    # regression noise, section 6; 13.4% model drift) and states the fine
     # sand predictions "agree quite well" (section 8). Formula [6]
     # evaluates to 2.07 m for these inputs (-10% vs observed).
     theta = _theta_row(8.0e-5, 180e-6, 3.00, GAMMA_SUB_IJKDIJK_KN_M3)
-    h_c = compute_critical_head(theta, {"L": 15.0})
+    h_c = compute_critical_head(theta, {"L": 15.0}).H_c
     assert h_c == pytest.approx(2.30, rel=0.15)
 
 
 def test_hc_ijkdijk_case_2():
     # IJkdijk test 2 (IJkfs02): coarse sand d_70 = 260 um, L = 15 m,
     # D = 2.85 m, k_aq = 1.4e-4 m/s; observed critical head H_c = 1.75 m.
-    # Source: Sellmeijer (2011) section 7 / Fig. 6 (10% silt head
-    # correction); tabulated values from the user-provided reference
-    # sheet, section 4. FLAG: confirm H_c = 1.75 m and k_aq = 1.4e-4 m/s
-    # against the paper copy.
-    # Tolerance 25%: the paper itself reports that the formula [6]
+    # Source: k_aq and H_c from Pol (2022) thesis Appendix A, Table A.3;
+    # Sellmeijer (2011) section 7 / Fig. 6 describes the test (10% silt
+    # head correction applied).
+    # Tolerance 25%: Sellmeijer (2011) itself reports that the formula [6]
     # prediction for this coarse-sand test "deviates from the experiment
     # by 25%" (sections 8 and 9). Formula [6] evaluates to 2.01 m for
     # these inputs (+15% vs observed).
     theta = _theta_row(1.4e-4, 260e-6, 2.85, GAMMA_SUB_IJKDIJK_KN_M3)
-    h_c = compute_critical_head(theta, {"L": 15.0})
+    h_c = compute_critical_head(theta, {"L": 15.0}).H_c
     assert h_c == pytest.approx(1.75, rel=0.25)
 
 
@@ -150,13 +148,12 @@ def test_hc_ijkdijk_case_3():
     # IJkdijk test 3 (IJkfs03): fine sand d_70 = 180 um, L = 15 m,
     # D = 3.00 m, k_aq = 8.0e-5 m/s (same sand and geometry as test 1,
     # silt sedimentation removed, 0% correction); observed critical head
-    # H_c = 2.10 m. Source: Sellmeijer (2011) section 7 / Fig. 7;
-    # tabulated values from the user-provided reference sheet, section 4.
-    # FLAG: confirm H_c = 2.10 m against the paper copy.
+    # H_c = 2.10 m. Source: H_c from Pol (2022) thesis Appendix A,
+    # Table A.3; Sellmeijer (2011) section 7 / Fig. 7 describes the test.
     # Tolerance 15% as in case 1; formula [6] evaluates to 2.07 m for
     # these inputs (-1.6% vs observed).
     theta = _theta_row(8.0e-5, 180e-6, 3.00, GAMMA_SUB_IJKDIJK_KN_M3)
-    h_c = compute_critical_head(theta, {"L": 15.0})
+    h_c = compute_critical_head(theta, {"L": 15.0}).H_c
     assert h_c == pytest.approx(2.10, rel=0.15)
 
 
@@ -165,16 +162,16 @@ def test_hc_pol_base_case():
     # D_aq = 10 m (= L/3), k_aq = 1.62e-4 m/s (from intrinsic permeability
     # K = 2.2e-11 m^2 with mu = 1.33e-3 Pa.s, rho_w = 1000 kg/m^3),
     # d_70 = 0.200 mm, gamma'_p = 16.19 kN/m^3 (rho_s = 2650 kg/m^3).
-    # The Sellmeijer (2011) reference for this case is H_c/L <~ 0.10,
-    # i.e. H_c ~ 2.7-3.0 m. Source: user-provided reference sheet,
-    # section 5 (cf. pol_compgeo_2024). FLAG: range value, not an exact
-    # paper number -- confirm against the paper copy.
-    # Direct evaluation of formula [6] with these inputs and the module's
-    # nu = 1.3e-6 m^2/s gives H_c = 2.66 m (the sheet's K = 2.2e-11 m^2
-    # implies nu = 1.33e-6, a 0.8% difference in F_s), so the assertion
-    # brackets [2.4, 3.0] together with the paper's gradient bound.
+    # Source: Pol et al. (2024, Computers and Geotechnics) Table 2 (S2-2
+    # sand parameters, kappa = 2.2e-11 m^2, d_50 = 0.200 mm) and
+    # Section 4.1 (D = L/3 geometry, L = 30 m); the H_c/L <= 0.10 bound
+    # is read from Figure 8(a) of that paper (thesis Fig. 5.8(a)), where
+    # the 2D Sellmeijer yellow trendline sits at ~0.09 at L = 30 m.
+    # Direct evaluation of formula [6] gives H_c = 2.66 m (nu = 1.3e-6
+    # m^2/s vs the paper's implied 1.33e-6, a 0.8% difference in F_s),
+    # so the assertion brackets [2.4, 3.0] with the gradient bound.
     theta = _theta_row(1.62e-4, 200e-6, 10.0, GAMMA_SUB_POL_BASE_KN_M3)
-    h_c = compute_critical_head(theta, {"L": 30.0})
+    h_c = compute_critical_head(theta, {"L": 30.0}).H_c
     assert 2.4 <= h_c <= 3.0
     assert h_c / 30.0 <= 0.10
 
@@ -191,15 +188,15 @@ def test_alpha_exponent_hook():
     # Spec section 12, failure mode 4: substituting the 3D hole-type-exit
     # scale exponent alpha = -1/2 for the 2D Sellmeijer value alpha = -1/3
     # must strictly lower H_c at field seepage lengths (van Beek 2015
-    # scale-effect divergence; Pol's 3D simulations report H_c = 0.470 m
-    # for a hole-type exit vs ~2.7-3.0 m for the 2D Sellmeijer reference,
-    # user-provided reference sheet section 5).
+    # scale-effect divergence; Pol (2024, Computers and Geotechnics)
+    # Fig. 8(a) shows the 3D hole-exit H_c = 0.470 m at L = 30 m vs
+    # ~2.7 m for the 2D Sellmeijer model).
     # Representative field-scale set: L = 50 m, D_aq = 10 m, Pol base-case
     # sand (k_aq = 1.62e-4 m/s, d_70 = 0.200 mm, gamma'_p = 16.19 kN/m^3).
     theta = _theta_row(1.62e-4, 200e-6, 10.0, GAMMA_SUB_POL_BASE_KN_M3)
     geometry = {"L": 50.0}
-    h_c_2d = compute_critical_head(theta, geometry, alpha_exponent=-1.0 / 3.0)
-    h_c_3d = compute_critical_head(theta, geometry, alpha_exponent=-1.0 / 2.0)
+    h_c_2d = compute_critical_head(theta, geometry, alpha_exponent=-1.0 / 3.0).H_c
+    h_c_3d = compute_critical_head(theta, geometry, alpha_exponent=-1.0 / 2.0).H_c
     assert h_c_3d < h_c_2d
 
 
@@ -212,7 +209,7 @@ def test_hc_positive_for_large_sample():
     rng = np.random.default_rng(20260610)
     n = 1000
     theta_matrix = _random_theta_matrix(rng, n)
-    h_c = compute_critical_head_vectorized(theta_matrix, {"L": 50.0})
+    h_c = compute_critical_head_vectorized(theta_matrix, {"L": 50.0}).H_c
     assert h_c.shape == (n,)
     assert np.all(np.isfinite(h_c))
     assert np.all(h_c > 0.0)
@@ -225,8 +222,11 @@ def test_vectorized_matches_scalar():
     n = 50
     theta_matrix = _random_theta_matrix(rng, n)
     geometry = {"L": 30.0}
-    h_c_vec = compute_critical_head_vectorized(theta_matrix, geometry)
-    h_c_scalar = np.array(
-        [compute_critical_head(theta_matrix[j], geometry) for j in range(n)]
-    )
-    np.testing.assert_allclose(h_c_vec, h_c_scalar, rtol=1e-12, atol=0.0)
+    result_vec = compute_critical_head_vectorized(theta_matrix, geometry)
+    scalar_results = [
+        compute_critical_head(theta_matrix[j], geometry) for j in range(n)
+    ]
+    h_c_scalar = np.array([r.H_c for r in scalar_results])
+    l_c_scalar = np.array([r.l_c for r in scalar_results])
+    np.testing.assert_allclose(result_vec.H_c, h_c_scalar, rtol=1e-12, atol=0.0)
+    np.testing.assert_allclose(result_vec.l_c, l_c_scalar, rtol=1e-12, atol=0.0)
