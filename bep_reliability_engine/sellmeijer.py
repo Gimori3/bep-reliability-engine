@@ -33,6 +33,7 @@ All computations are in strict SI base units (m, s, m/s, radians); unit
 weights are in kN/m^3, consistent with ``constants.GAMMA_W``.
 """
 
+import logging
 import math
 from typing import NamedTuple
 
@@ -40,6 +41,8 @@ import numpy as np
 import numpy.typing as npt
 
 from .constants import GAMMA_W, GRAVITY
+
+logger = logging.getLogger(__name__)
 
 __all__ = [
     "GAMMA_W",
@@ -382,15 +385,23 @@ def compute_critical_head_vectorized(
     SellmeijerResult
         Named tuple ``(H_c, l_c)`` of (N,)-shaped float64 arrays.
 
+    Raises
+    ------
+    ValueError
+        If any row of the H_c array is NaN, Inf or non-positive. The
+        offending row indices and rate are logged at ERROR level before
+        raising.
+
     Notes
     -----
     Same mathematical assumptions as :func:`compute_critical_head`. This
     is the production path for N = 1e5 fragility runs; the scalar variant
     exists for single-realization tracing and for the Phase 2 evaluator
-    import path (M8). Unlike the scalar function, no positivity guard is
-    raised here: the spec (section 12, failure mode 2) prescribes
-    log-and-skip handling of non-positive H_c realizations at the caller
-    level, which a raise across the whole batch would prevent.
+    import path (M8). The whole output batch is validated before
+    returning: an invalid row indicates a theta draw that escaped the
+    sampler-stage prior clipping of spec section 12 (failure mode 2), and
+    aborts the run rather than propagating silently. The prescribed fix
+    is prevention -- re-bound the priors in M2 -- not skipping here.
     """
     seepage_length_m = geometry["L"]
     k_aq_mps = theta_matrix[:, _PARAM_NAMES.index("k_aq")]
@@ -404,6 +415,25 @@ def compute_critical_head_vectorized(
         * _factor_Fs(d_70_m, k_aq_mps, seepage_length_m, alpha_exponent)
         * _factor_Fg(D_aq_m, seepage_length_m)
     )
+    # isfinite & (> 0) in one mask: rejects NaN, +/-Inf and non-positive
+    # rows alike (a bare "h_c <= 0" comparison would miss NaN and +Inf).
+    invalid_rows = np.flatnonzero(~(np.isfinite(h_c) & (h_c > 0.0)))
+    if invalid_rows.size > 0:
+        logger.error(
+            "Invalid critical head (NaN, Inf or <= 0) in %d of %d "
+            "realizations (%.2f%%), row indices %s; re-bound the priors at "
+            "the sampler stage (spec section 12, failure mode 2).",
+            invalid_rows.size,
+            h_c.size,
+            100.0 * invalid_rows.size / h_c.size,
+            invalid_rows,
+        )
+        raise ValueError(
+            f"Invalid critical head (NaN, Inf or <= 0) in "
+            f"{invalid_rows.size} of {h_c.size} realizations, row indices "
+            f"{invalid_rows}; re-bound the priors at the sampler stage "
+            "(spec section 12, failure mode 2)."
+        )
     l_c = compute_critical_pipe_length(D_aq_m, seepage_length_m)
     return SellmeijerResult(H_c=h_c, l_c=l_c)
 
@@ -443,3 +473,19 @@ def compute_critical_pipe_length(
     vectorized variant is needed.
     """
     return 0.5 * L * np.tanh(2.0 * D_aq / L)
+
+
+if __name__ == "__main__":
+    # Hand-checkable decomposition for IJkdijk test 1 (IJkfs01):
+    # L = 15 m, D_aq = 3.00 m, d_70 = 180 um, k_aq = 8.0e-5 m/s,
+    # gamma'_p = 14.715 kN/m^3 (Pol 2022 thesis, Appendix A, Table A.3;
+    # Sellmeijer 2011 section 7). Observed H_c = 2.30 m; formula [6]
+    # evaluates to ~2.07 m (-10%, inside the ~13% regression scatter).
+    theta_ijkfs01 = np.array([8.0e-5, 180e-6, 3.00, 4.0, 1.0e-7, 14.715, 0.014])
+    result = compute_critical_head(theta_ijkfs01, {"L": 15.0})
+    print("IJkdijk test 1 (IJkfs01), L = 15.0 m")
+    print(f"  F_r = {_factor_Fr(14.715):.6f}   (hand value 0.28258)")
+    print(f"  F_s = {_factor_Fs(180e-6, 8.0e-5, 15.0):.6f}   (hand value 0.36235)")
+    print(f"  F_g = {_factor_Fg(3.00, 15.0):.6f}   (hand value 1.3458)")
+    print(f"  H_c = {result.H_c:.6f} m (= L*Fr*Fs*Fg; observed 2.30 m)")
+    print(f"  l_c = {result.l_c:.6f} m (= 0.5*L*tanh(2*D_aq/L))")

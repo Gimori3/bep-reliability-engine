@@ -200,6 +200,15 @@ def test_alpha_exponent_hook():
     assert h_c_3d < h_c_2d
 
 
+def test_scalar_raises_on_nonphysical_hc():
+    # Spec section 12, failure mode 2 guard: gamma'_s = 0 zeroes F_r and
+    # hence H_c exactly, which the scalar evaluator must reject with a
+    # ValueError naming the offending parameters rather than return.
+    theta = _theta_row(8.0e-5, 180e-6, 3.00, 0.0)
+    with pytest.raises(ValueError, match="Non-positive critical head"):
+        compute_critical_head(theta, {"L": 15.0})
+
+
 def test_hc_positive_for_large_sample():
     # Spec section 12, failure mode 2: H_c must remain positive and finite
     # over physically defensible parameter bounds. Bounds: d_70 within the
