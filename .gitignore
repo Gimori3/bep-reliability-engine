@@ -229,3 +229,6 @@ __pycache__/
 .pytest_cache/
 .venv/
 .env
+
+# Reference papers and documentation
+docs/references/
