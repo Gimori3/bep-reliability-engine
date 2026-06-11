@@ -1,0 +1,500 @@
+"""M4 ``hydraulic_translator``: river stage to landside aquifer piezometric head.
+
+Single responsibility (spec §1, M4): given a realization's sampled subsoil
+parameters and the cross-section geometry, compute the Mazure leakage lengths
+and the response factor r_e, and expose the aquifer head h_aq(t) at the
+landside exit point in one of two forms behind a single interface:
+
+1. **Instantaneous translation** (the default form)::
+
+       h_aq(t) = z_toe + r_e * (h_river(t) - z_toe)
+
+   This is Pol SIE 2024 Eq. (10) with phi_it = h_aq and h_e = z_toe. It embeds
+   the quasi-static assumption: the aquifer head responds without time lag to
+   the river stage.
+
+2. **Linear-reservoir lag** (gated)::
+
+       dh_aq/dt = (1/tau_aq) * [z_toe + r_e * (h_river(t) - z_toe) - h_aq(t)]
+
+   advanced per timestep with the exact exponential update (ADR-0004)::
+
+       h_aq <- h_aq + (1 - exp(-dt/tau_aq)) * (h_aq_inst - h_aq)
+
+Which form is active, and why: the instantaneous form is the default; the lag
+form is activated per run by the aquifer-response diagnostic of spec §11
+(tau_aq / T_flood at representative parameter values), and the outcome is
+recorded in run metadata (``aquifer_lag_active``, ``tau_aq``). The
+instantaneous default is *not* assumed permanent. Downstream modules (M5
+initiation, M7 progression) consume h_aq(t) through :class:`AquiferHeadModel`
+identically in both cases, so activating the lag changes one config flag and
+no downstream code (spec §6).
+
+Hydraulic schematization (Pol 2022 thesis, Eq. (7.13); USACE 2000 blanket
+theory case 7a; TAW 2004 model 4A): steady horizontal Darcy flow in a leaky
+aquifer, vertical leakage through the blankets, semi-infinite hinterland
+blanket. Under this schematization the ratio
+``r_e = lambda_in / (lambda_out_eff + L + lambda_in)`` is exact, not a
+first-order approximation. Finite foreshore extent enters through the
+effective entry length
+``lambda_out_eff = lambda_out * tanh(B_f / lambda_out)`` (TR Zandmeevoerende
+Wellen 1999 Eq. (19); TAW 2004 App. I Eq. (A.I.9); ADR-0006). The in-L
+hyperbolic refinement is not implemented; its validity domain is monitored
+per realization by :func:`leakage_ratio_diagnostic` (ADR-0006).
+
+Units and datum
+---------------
+Strict SI base units throughout (m, s, m/s). Unit conversion happens only in
+M1 config loading or M3 hydrograph loading, never inside this module. All
+heads and elevations are in meters above one common vertical datum.
+``z_toe_m`` is the polder surface elevation at the landside exit point and
+equals h_e in Pol SIE 2024 Eqs. (6) and (8) (ADR-0007).
+
+All kernels are vectorized: parameters accept scalars or ``(N,)`` arrays and
+broadcast per NumPy rules across realizations (spec §6).
+
+References
+----------
+Pol (2022), doctoral thesis, Eq. (7.13), p. 158 — derivation of the response
+factor. Pol, Kanning, Jonkman & Kok (2024), Structure and Infrastructure
+Engineering, Eq. (10) — usage. TR Zandmeevoerende Wellen (TAW, 1999), §4.4.1
+Eq. (19). TR Waterspanningen bij dijken (TAW, 2004), App. I Eq. (A.I.9).
+USACE EM 1110-2-1913 (2000). ADR-0004 through ADR-0007.
+"""
+
+from __future__ import annotations
+
+from typing import Protocol
+
+import numpy as np
+from numpy.typing import ArrayLike, NDArray
+
+__all__ = [
+    "AquiferHeadModel",
+    "InstantaneousHead",
+    "LaggedHead",
+    "aquifer_response_time",
+    "leakage_length_in",
+    "leakage_length_out",
+    "leakage_ratio_diagnostic",
+    "make_head_model",
+    "response_factor",
+    "translate_instantaneous",
+]
+
+
+def leakage_length_in(
+    k_aq_mps: ArrayLike,
+    d_aq_m: ArrayLike,
+    d_bl_m: ArrayLike,
+    k_bl_mps: ArrayLike,
+) -> NDArray[np.float64]:
+    """Hinterland (polder-side) Mazure leakage length lambda_in.
+
+    Implements::
+
+        lambda_in = sqrt(k_aq * D_aq * D_bl / k_bl)
+
+    Parameters
+    ----------
+    k_aq_mps : array_like of float
+        Aquifer horizontal hydraulic conductivity [m/s]. Sampled (theta).
+    d_aq_m : array_like of float
+        Aquifer thickness [m]. Sampled (theta).
+    d_bl_m : array_like of float
+        Hinterland blanket thickness [m]. Sampled (theta).
+    k_bl_mps : array_like of float
+        Hinterland blanket vertical hydraulic conductivity [m/s].
+        Sampled (theta).
+
+    Returns
+    -------
+    numpy.ndarray of float
+        Leakage length lambda_in [m], broadcast over the inputs.
+
+    Notes
+    -----
+    Mathematical assumptions (Pol 2022 thesis Eq. (7.13) schematization):
+    steady horizontal Darcy flow in a leaky aquifer, vertical leakage through
+    the blanket, semi-infinite hinterland blanket. lambda_in is the distance
+    scale over which excess aquifer head decays landward of the exit point.
+    """
+    raise NotImplementedError
+
+
+def leakage_length_out(
+    k_aq_mps: ArrayLike,
+    d_aq_m: ArrayLike,
+    d_fore_m: ArrayLike,
+    k_fore_mps: ArrayLike,
+    foreshore_width_m: ArrayLike,
+) -> NDArray[np.float64]:
+    """Effective riverside (entry) leakage length lambda_out_eff.
+
+    Implements the semi-infinite foreshore leakage length with the
+    finite-width hyperbolic-tangent correction (ADR-0005, ADR-0006)::
+
+        lambda_out     = sqrt(k_aq * D_aq * D_fore / k_fore)
+        lambda_out_eff = lambda_out * tanh(B_f / lambda_out)
+
+    Parameters
+    ----------
+    k_aq_mps : array_like of float
+        Aquifer horizontal hydraulic conductivity [m/s]. Sampled (theta);
+        the same draw feeds :func:`leakage_length_in` per the shared-sample
+        contract (ADR-0002).
+    d_aq_m : array_like of float
+        Aquifer thickness [m]. Sampled (theta).
+    d_fore_m : array_like of float
+        Foreshore blanket thickness [m]. Deterministic geometry input; per
+        ADR-0005 populated with the hinterland A_c value as proxy unless
+        separate foreland data exists.
+    k_fore_mps : array_like of float
+        Foreshore blanket vertical hydraulic conductivity [m/s].
+        Deterministic geometry input (A_c proxy, ADR-0005).
+    foreshore_width_m : array_like of float
+        Foreshore width B_f [m]. ``numpy.inf`` recovers the semi-infinite
+        lambda_out; ``0.0`` yields 0, deriving (rather than asserting) the
+        no-foreshore treatment (ADR-0006).
+
+    Returns
+    -------
+    numpy.ndarray of float
+        Effective entry leakage length lambda_out_eff [m].
+
+    Notes
+    -----
+    The tanh correction is TR Zandmeevoerende Wellen (1999) §4.4.1 Eq. (19)
+    (there ``L'_v = lambda_1 * tanh(L_v / lambda_1)``), corroborated by TAW
+    (2004) App. I Eq. (A.I.9). Asymptotics: lambda_out_eff -> B_f for narrow
+    foreshores and -> lambda_out for wide ones. The implementation must guard
+    the vanishing-lambda_out limit (return 0.0 without division by zero).
+    """
+    raise NotImplementedError
+
+
+def response_factor(
+    lambda_in_m: ArrayLike,
+    lambda_out_eff_m: ArrayLike,
+    seepage_length_m: ArrayLike,
+) -> NDArray[np.float64]:
+    """Aquifer head response factor r_e at the landside exit point.
+
+    Implements::
+
+        r_e = lambda_in / (lambda_out_eff + L + lambda_in)
+
+    Parameters
+    ----------
+    lambda_in_m : array_like of float
+        Hinterland leakage length [m], from :func:`leakage_length_in`.
+    lambda_out_eff_m : array_like of float
+        Effective riverside leakage length [m], from
+        :func:`leakage_length_out`.
+    seepage_length_m : array_like of float
+        Seepage length L across the levee base [m]. Geometry input.
+
+    Returns
+    -------
+    numpy.ndarray of float
+        Response factor r_e [-], in the open interval (0, 1) for physical
+        inputs.
+
+    Notes
+    -----
+    Exact — not a first-order approximation — under the Pol 2022 Eq. (7.13)
+    schematization: steady horizontal flow in a leaky aquifer, vertical
+    leakage, semi-infinite blankets, quasi-static response. Validity against
+    the seepage length is monitored separately by
+    :func:`leakage_ratio_diagnostic` (ADR-0006). r_e is stochastic: it
+    depends on four of the seven sampled variables through the leakage
+    lengths and must be computed per realization, never precomputed once
+    (spec Property 3).
+    """
+    raise NotImplementedError
+
+
+def aquifer_response_time(
+    d_aq_m: ArrayLike,
+    d_bl_m: ArrayLike,
+    k_bl_mps: ArrayLike,
+    specific_storage_per_m: float,
+) -> NDArray[np.float64]:
+    """Aquifer response time tau_aq for the linear-reservoir lag option.
+
+    Implements::
+
+        tau_aq = S_s * D_aq * D_bl / k_bl
+
+    which is identically ``lambda_in**2 * S_s / k_aq``: k_aq cancels, so
+    tau_aq depends on three of the seven sampled variables (D_aq, D_bl,
+    k_bl) times the deterministic specific storage (ADR-0004).
+
+    Parameters
+    ----------
+    d_aq_m : array_like of float
+        Aquifer thickness [m]. Sampled (theta).
+    d_bl_m : array_like of float
+        Hinterland blanket thickness [m]. Sampled (theta).
+    k_bl_mps : array_like of float
+        Hinterland blanket vertical hydraulic conductivity [m/s].
+        Sampled (theta).
+    specific_storage_per_m : float
+        Specific storage S_s of the aquifer [1/m]. Deterministic literature
+        value from config — not an eighth random variable (ADR-0004); S_s
+        uncertainty is handled as a bounded sensitivity run.
+
+    Returns
+    -------
+    numpy.ndarray of float
+        Response time tau_aq [s], one value per realization.
+
+    Notes
+    -----
+    Feeds the spec §11 aquifer-response diagnostic (tau_aq / T_flood,
+    evaluated at representative values to set the run-global lag flag) and,
+    when the lag is active, :class:`LaggedHead` per realization.
+    """
+    raise NotImplementedError
+
+
+def translate_instantaneous(
+    h_river_m: ArrayLike,
+    r_e: ArrayLike,
+    z_toe_m: ArrayLike,
+) -> NDArray[np.float64]:
+    """Instantaneous river-stage-to-aquifer-head translation.
+
+    Implements Pol SIE 2024 Eq. (10)::
+
+        h_aq = z_toe + r_e * (h_river - z_toe)
+
+    Parameters
+    ----------
+    h_river_m : array_like of float
+        River stage [m above datum]. A scalar per timestep in the M7 loop,
+        or a full ``(T,)`` series.
+    r_e : array_like of float
+        Response factor [-], from :func:`response_factor`.
+    z_toe_m : array_like of float
+        Polder surface elevation at the landside exit point [m above
+        datum]; equals h_e in Pol SIE 2024 Eqs. (6) and (8) (ADR-0007).
+
+    Returns
+    -------
+    numpy.ndarray of float
+        Aquifer head h_aq [m above datum], broadcast over the inputs.
+
+    Notes
+    -----
+    Single source of the translation formula: used by the static-branch peak
+    translation (spec §3 step 4), by :class:`InstantaneousHead`, and as the
+    equilibrium initial condition of :class:`LaggedHead` (ADR-0004). The
+    same r_e feeds both limit-state branches per the shared-sample contract
+    (ADR-0002). Assumes quasi-static aquifer response (no time lag).
+    """
+    raise NotImplementedError
+
+
+def leakage_ratio_diagnostic(
+    seepage_length_m: ArrayLike,
+    lambda_in_m: ArrayLike,
+    *,
+    ratio_threshold: float = 0.2,
+    warn_fraction: float = 0.01,
+) -> NDArray[np.bool_]:
+    """Validity diagnostic for the simplified (semi-infinite) Mazure ratio.
+
+    Flags realizations whose L / lambda_in exceeds ``ratio_threshold``,
+    i.e. where the seepage length is not small relative to the hinterland
+    leakage length and the in-L hyperbolic refinement could matter
+    (ADR-0006). Emits a :class:`UserWarning` when the flagged fraction
+    exceeds ``warn_fraction``.
+
+    Parameters
+    ----------
+    seepage_length_m : array_like of float
+        Seepage length L [m].
+    lambda_in_m : array_like of float
+        Hinterland leakage length [m], per realization.
+    ratio_threshold : float, optional
+        Maximum acceptable L / lambda_in [-]. Provisional default 0.2,
+        pending M1 config integration.
+    warn_fraction : float, optional
+        Flagged-realization fraction [-] above which a warning is emitted.
+        Provisional default 0.01.
+
+    Returns
+    -------
+    numpy.ndarray of bool
+        True where L / lambda_in > ratio_threshold.
+
+    Notes
+    -----
+    Per ADR-0006 the full hyperbolic Mazure solution in L/lambda_in is a
+    documented extension, not an automatic fallback: this diagnostic is
+    logged and the run is not altered. At Tokachi scale (L of tens of
+    meters, lambda_in of hundreds of meters) the bulk of the prior is
+    expected to satisfy the condition.
+    """
+    raise NotImplementedError
+
+
+class AquiferHeadModel(Protocol):
+    """Unified per-timestep interface for the aquifer head at the exit point.
+
+    The downstream initiation (M5) and progression (M7) modules hold one
+    instance and call :meth:`step` once per timestep; the instantaneous and
+    lagged forms are interchangeable behind this protocol, so activating the
+    lag changes one config flag and no downstream code (spec §6).
+
+    State management contract (spec §5): model state is re-initialized per
+    event via :meth:`reset` and carries across timesteps within one event
+    only. Pipe length is the sole cross-event state in the engine; the
+    aquifer head is not.
+    """
+
+    def reset(self, h_river_initial_m: float) -> None:
+        """Re-initialize the model state for a new event.
+
+        Parameters
+        ----------
+        h_river_initial_m : float
+            River stage at the first sample of the event hydrograph
+            [m above datum].
+        """
+        ...
+
+    def step(self, h_river_m: float, dt_s: float) -> NDArray[np.float64]:
+        """Advance one timestep and return the aquifer head.
+
+        Parameters
+        ----------
+        h_river_m : float
+            River stage at the current timestep [m above datum].
+        dt_s : float
+            Timestep [s]. Ignored by the instantaneous form.
+
+        Returns
+        -------
+        numpy.ndarray of float
+            Aquifer head h_aq at the landside exit point [m above datum];
+            shape ``(N,)`` for per-realization (vector) r_e, scalar for
+            scalar r_e.
+        """
+        ...
+
+
+class InstantaneousHead:
+    """Instantaneous (quasi-static) aquifer head model — the default form.
+
+    Stateless: :meth:`step` returns
+    ``translate_instantaneous(h_river_m, r_e, z_toe_m)`` and ignores
+    ``dt_s``; :meth:`reset` is a no-op retained for interface symmetry with
+    :class:`AquiferHeadModel`.
+
+    Parameters
+    ----------
+    r_e : array_like of float
+        Response factor [-] per realization, from :func:`response_factor`.
+    z_toe_m : float
+        Polder surface elevation at the landside exit point [m above datum]
+        (equals h_e in Pol SIE 2024 Eqs. (6) and (8), ADR-0007).
+    """
+
+    def __init__(self, r_e: ArrayLike, z_toe_m: float) -> None:
+        raise NotImplementedError
+
+    def reset(self, h_river_initial_m: float) -> None:
+        """No-op (stateless model); see :class:`AquiferHeadModel`."""
+        raise NotImplementedError
+
+    def step(self, h_river_m: float, dt_s: float) -> NDArray[np.float64]:
+        """Return the instantaneous translation; ``dt_s`` is ignored."""
+        raise NotImplementedError
+
+
+class LaggedHead:
+    """First-order linear-reservoir aquifer head model (lag form, gated).
+
+    Integrates ``dh_aq/dt = (h_inst(t) - h_aq) / tau_aq`` with the exact
+    exponential update for piecewise-constant forcing (ADR-0004)::
+
+        h_aq <- h_aq + (1 - exp(-dt_s / tau_aq_s)) * (h_inst - h_aq)
+
+    where ``h_inst = translate_instantaneous(h_river_m, r_e, z_toe_m)``.
+    The update factor lies in (0, 1) for all positive ``dt_s`` and
+    ``tau_aq_s``: unconditionally stable, exact for the assumed forcing,
+    equal to the explicit-Euler form in the limit ``dt_s << tau_aq_s``, and
+    collapsing exactly to the instantaneous translation as
+    ``tau_aq_s -> 0``. Explicit Euler, by contrast, overshoots for
+    ``dt_s > tau_aq_s`` and diverges for ``dt_s > 2 * tau_aq_s``.
+
+    :meth:`reset` initializes the state in equilibrium with the initial
+    river stage, ``h_aq(0) = translate_instantaneous(h0, r_e, z_toe_m)``
+    (ADR-0004): the aquifer has been at base stage long before the event; a
+    cold start at z_toe would inject a spurious filling transient.
+
+    State carries across timesteps within one event only and is reset per
+    event; it does not carry across events (spec §5).
+
+    Parameters
+    ----------
+    r_e : array_like of float
+        Response factor [-] per realization, from :func:`response_factor`.
+    z_toe_m : float
+        Polder surface elevation at the landside exit point [m above datum]
+        (equals h_e in Pol SIE 2024 Eqs. (6) and (8), ADR-0007).
+    tau_aq_s : array_like of float
+        Aquifer response time [s] per realization, from
+        :func:`aquifer_response_time`.
+    """
+
+    def __init__(self, r_e: ArrayLike, z_toe_m: float, tau_aq_s: ArrayLike) -> None:
+        raise NotImplementedError
+
+    def reset(self, h_river_initial_m: float) -> None:
+        """Set the state to equilibrium with the initial river stage."""
+        raise NotImplementedError
+
+    def step(self, h_river_m: float, dt_s: float) -> NDArray[np.float64]:
+        """Advance the lag state by ``dt_s`` and return the aquifer head."""
+        raise NotImplementedError
+
+
+def make_head_model(
+    r_e: ArrayLike,
+    z_toe_m: float,
+    *,
+    lag_active: bool,
+    tau_aq_s: ArrayLike | None = None,
+) -> AquiferHeadModel:
+    """Factory dispatching on the run-global aquifer-lag flag.
+
+    Parameters
+    ----------
+    r_e : array_like of float
+        Response factor [-] per realization, from :func:`response_factor`.
+    z_toe_m : float
+        Polder surface elevation at the landside exit point [m above datum]
+        (equals h_e in Pol SIE 2024 Eqs. (6) and (8), ADR-0007).
+    lag_active : bool
+        Run-global flag from M1 config, set by the spec §11 tau_aq/T_flood
+        diagnostic at representative parameter values (ADR-0004) and
+        recorded in run metadata (``aquifer_lag_active``, ``tau_aq``).
+    tau_aq_s : array_like of float, optional
+        Per-realization response time [s], from
+        :func:`aquifer_response_time`. Required when ``lag_active`` is True.
+
+    Returns
+    -------
+    AquiferHeadModel
+        :class:`InstantaneousHead` when ``lag_active`` is False, otherwise
+        :class:`LaggedHead`.
+
+    Raises
+    ------
+    ValueError
+        If ``lag_active`` is True and ``tau_aq_s`` is None.
+    """
+    raise NotImplementedError

@@ -30,7 +30,7 @@ The architecture decomposes into nine logical modules. Each has one clear respon
 
 **M3, `hydrograph_loader`** ingests the d4PDF hydrograph ensemble and exposes it as a clean object: for each event, a (t, h(t)) array plus metadata (event ID, duration, peak, scenario tag, historical or +4K). Also exposes the conditioning grid extraction logic: for the static comparison you need a representative scalar h_peak per event, but for the transient you need the full h(t). This module isolates all input/output and units handling, and records the native temporal resolution so the timestep and the rising-limb resolution can be checked against the flashy peaks that define the loading regime.
 
-**M4, `hydraulic_translator`** computes, given a θ sample and cross-section geometry, the response factor r_e and returns h_aquifer(t). Single responsibility: river stage to landside aquifer piezometric head. This is where λ_in = √(k_aq · D_aq · D_bl / k_bl) and the full Mazure r_e formula live. The module exposes h_aquifer(t) through a unified interface that can produce it in either of two forms: the algebraic instantaneous translation h_aq(t) = z_toe + r_e · (h_river(t) − z_toe), which is the default, or a first-order linear-reservoir lag state dh_aq/dt = (1/τ_aq)·[z_toe + r_e·(h(t) − z_toe) − h_aq(t)]. The choice between the two is made by the aquifer-response diagnostic described in §11, which compares τ_aq ~ λ_in² · S_s / k_aq against the flood duration; the downstream limit state and progression modules consume h_aquifer(t) identically in both cases and require no restructuring. The module docstring must state which form is active and why, and must not assume the instantaneous form is permanent.
+**M4, `hydraulic_translator`** computes, given a θ sample and cross-section geometry, the response factor r_e and returns h_aquifer(t). Single responsibility: river stage to landside aquifer piezometric head. This is where λ_in = √(k_aq · D_aq · D_bl / k_bl), the per-realization λ_out = √(k_aq · D_aq · D_fore / k_fore) (sampled transmissivity, deterministic foreshore blanket properties; ADR-0005), the finite-foreshore correction λ_out,eff = λ_out · tanh(B_f / λ_out) (ADR-0006), and the response factor r_e = λ_in / (λ_out,eff + L + λ_in) live. The ratio traces to Pol 2022 thesis Eq. (7.13) and is exact for semi-infinite blankets under quasi-static response; the full in-L hyperbolic form is demoted to a logged L/λ_in validity diagnostic (ADR-0006). The module exposes h_aquifer(t) through a unified interface that can produce it in either of two forms: the algebraic instantaneous translation h_aq(t) = z_toe + r_e · (h_river(t) − z_toe), which is the default, or a first-order linear-reservoir lag state dh_aq/dt = (1/τ_aq)·[z_toe + r_e·(h(t) − z_toe) − h_aq(t)], advanced by the exact exponential update h_aq ← h_aq + (1 − exp(−Δt/τ_aq))·(h_aq,inst − h_aq) and initialized in equilibrium with the initial river stage (ADR-0004). The choice between the two is made by the aquifer-response diagnostic described in §11, which compares τ_aq ~ λ_in² · S_s / k_aq against the flood duration; the downstream limit state and progression modules consume h_aquifer(t) identically in both cases and require no restructuring. The module docstring must state which form is active and why, and must not assume the instantaneous form is permanent.
 
 **M5, `initiation_evaluator`** evaluates Z_uplift(t) and Z_heave(t) at each timestep given Δh_blanket(t) from M4 and the sampled (D_bl, γ'_s). Both checks use the un-reduced aquifer overpressure Δh_blanket(t), not the erosion-driving head, because uplift and heave respond to the full pore pressure on the blanket base. The module exposes (a) the boolean indicator I_er(t) per Pol's formulation, true once the running minimum of Z_uplift has gone negative AND heave is currently active, OR if l_ini > 0 AND heave is currently active, and (b) the time t_uh of first co-occurrence. Single responsibility: STPH gating logic. Note that Pol's third I_er clause, which suspends progression once organised flood fighting is deployed, is deliberately omitted; this yields an unconditional upper bound on transient failure whose conservatism grows under the elongated +4K hydrographs.
 
@@ -77,7 +77,9 @@ The core inner contract, and the one needing the most care, is the signature of 
 Input:
   theta_row:    ndarray (7,)            # one realization's parameter vector
   hydrograph:   HydrographRecord
-  geometry:     dict                    # L, z_toe, foreshore_width, lambda_out_params
+  geometry:     dict                    # L, z_toe, foreshore_width, D_fore, k_fore (ADR-0005);
+                                        # z_toe = polder surface elevation at the landside exit
+                                        # point, ≡ h_e in Pol SIE 2024 Eqs. (6) and (8) (ADR-0007)
   l_ini:        float                   # initial pipe length (default 0)
   store_trajectory: bool                # default False to save memory
 
@@ -240,7 +242,9 @@ Vectorization opportunities decompose along the three loop levels.
 H_c_vec     = sellmeijer_vectorized(theta_matrix)        # shape (N,)
 l_c_vec     = 0.5 * L * np.tanh(2 * theta_matrix[:, idx_D_aq] / L)
 lambda_in   = np.sqrt(k_aq_vec * D_aq_vec * D_bl_vec / k_bl_vec)
-r_e_vec     = lambda_in / (lambda_out + L + lambda_in)
+lambda_out  = np.sqrt(k_aq_vec * D_aq_vec * D_fore / k_fore)    # per realization (ADR-0005)
+lambda_out_eff = lambda_out * np.tanh(B_f / lambda_out)         # finite foreshore (ADR-0006)
+r_e_vec     = lambda_in / (lambda_out_eff + L + lambda_in)
 ```
 
 The static limit state is fully vectorizable: a single boolean comparison across N realizations. The static branch is essentially O(N) with a tiny constant and runs in seconds for N = 10^5.
@@ -271,7 +275,7 @@ dldt_vec           = np.where(I_er_vec, dldt_vec, 0.0)
 l_current_vec     += dldt_vec * dt
 ```
 
-If the aquifer-lag option is active, insert one line before `delta_h_vec` that advances the lag state, `h_aq_vec += (dt / tau_aq_vec) * (z_toe + r_e_vec * (h_t - z_toe) - h_aq_vec)`, and then set `delta_h_vec = h_aq_vec - z_toe`. The rest of the loop is unchanged, which is the point of the unified M4 interface.
+If the aquifer-lag option is active, insert one line before `delta_h_vec` that advances the lag state with the exact exponential update, `h_aq_vec += (1 - np.exp(-dt / tau_aq_vec)) * (z_toe + r_e_vec * (h_t - z_toe) - h_aq_vec)` (explicit Euler overshoots for Δt > τ_aq and diverges for Δt > 2·τ_aq; ADR-0004), and then set `delta_h_vec = h_aq_vec - z_toe`. The rest of the loop is unchanged, which is the point of the unified M4 interface.
 
 Total operation count: N times T elementwise ops, all in numpy. For N = 10^5 and T about 1000, that is about 10^8 fused operations, well within numpy's reach in minutes.
 
@@ -460,7 +464,7 @@ Everything else, the 10^5-iteration machinery, is in the package.
 
 **Convergence diagnostic.** Monitor the coefficient of variation of P_f-hat at the lowest failure probability of interest as N increases. Standard practice (Schweckendiek 2014) targets CoV < 5% across the relevant failure range; sample sizes of order 10^5 typically achieve this, and this sufficiency is verified directly for each cross-section once the engine runs rather than assumed. For levels where P_f-hat < 10^-4, monitor CoV explicitly and increase N if needed. Bootstrap resampling of the realization set provides confidence bands on fitted fragility curves.
 
-**Aquifer-response diagnostic (gates the M4 lag option).** For each governing cross-section, estimate τ_aq ~ λ_in² · S_s / k_aq using a literature specific-storage range for the dense sand-gravel, and compare it against the characteristic flood duration for the 2016 event and representative d4PDF members. Separately, confirm from M3 that the native d4PDF temporal resolution resolves the flashy peaks (on the order of a 1.5 hour plateau). If τ_aq/T_flood is non-negligible at any governing section, or the resolution is insufficient, activate the linear-reservoir lag form in M4; otherwise the diagnostic itself justifies the instantaneous default. Record the outcome and τ_aq in metadata.
+**Aquifer-response diagnostic (gates the M4 lag option).** For each governing cross-section, estimate τ_aq ~ λ_in² · S_s / k_aq (≡ S_s · D_aq · D_bl / k_bl — k_aq cancels, so τ_aq depends on three of the seven sampled variables; S_s is a deterministic config value, the activation flag is global per run, and τ_aq is a per-realization vector once active, ADR-0004) using a literature specific-storage range for the dense sand-gravel, and compare it against the characteristic flood duration for the 2016 event and representative d4PDF members. Separately, confirm from M3 that the native d4PDF temporal resolution resolves the flashy peaks (on the order of a 1.5 hour plateau). If τ_aq/T_flood is non-negligible at any governing section, or the resolution is insufficient, activate the linear-reservoir lag form in M4; otherwise the diagnostic itself justifies the instantaneous default. Record the outcome and τ_aq in metadata.
 
 **Timestep convergence test.** Because forward-Euler overshoot is most severe on steep rising limbs, run this test on a genuinely flashy d4PDF rising-limb event, not a smooth design hydrograph, with the parameter combination drawn from the high-progression-rate tail that most stresses the scheme: high k_aq, high C_e, and low D_bl. Compare l_e at Δt and Δt/2 and confirm it differs by less than 1%. Pol uses Δt = 10 s for small-scale and 100 s for large-scale. For field-scale typhoons, 600 s (10 min) is likely safe but verify. Native d4PDF resolution is the starting default.
 
@@ -512,8 +516,8 @@ For quick reference during implementation, the architectural decisions that shou
 | Sample size per cross-section | N = 10^5 |
 | Conditioning grid size | N_h about 30 (refine as needed) |
 | Shared sampling for static/transient | Mandatory, single θ_j feeds both |
-| Hydraulic translation | Instantaneous Mazure r_e by default; linear-reservoir lag hook retained in M4, activated if the τ_aq/T_flood diagnostic requires |
-| Erosion-driving head | H_erosion = Δh_blanket − 0.3·D_bl in the ODE only; uplift and heave use the un-reduced Δh_blanket |
+| Hydraulic translation | Instantaneous Mazure r_e by default; linear-reservoir lag hook retained in M4 (exact exponential update, ADR-0004), activated if the τ_aq/T_flood diagnostic requires; per-realization λ_out with finite-foreshore tanh correction (ADR-0005, ADR-0006) |
+| Erosion-driving head | H_erosion = Δh_blanket − 0.3·D_bl in the ODE only; uplift and heave use the un-reduced Δh_blanket; Δh_blanket is the r_e-translated head — intentional deviation from the untranslated head of Pol SIE 2024 Eq. (6) (ADR-0007) |
 | Static comparator hydraulic input | r_e · (h_peak − z_toe), gross peak head, not raw h_peak and not reduced by 0.3·D_bl |
 | ODE integrator | Forward Euler |
 | Timestep | Native d4PDF resolution, validated by Δt/2 test on a flashy rising limb |
