@@ -30,6 +30,12 @@ initiation, M7 progression) consume h_aq(t) through :class:`AquiferHeadModel`
 identically in both cases, so activating the lag changes one config flag and
 no downstream code (spec §6).
 
+The module is stateless: every kernel is a pure function, including the
+lag-state advance :func:`advance_lag_state`, which takes the previous h_aq
+and returns the next. The only state in this module is the per-event h_aq
+held by the thin :class:`LaggedHead` wrapper that adapts the pure kernel to
+the :class:`AquiferHeadModel` protocol.
+
 Hydraulic schematization (Pol 2022 thesis, Eq. (7.13); USACE 2000 blanket
 theory case 7a; TAW 2004 model 4A): steady horizontal Darcy flow in a leaky
 aquifer, vertical leakage through the blankets, semi-infinite hinterland
@@ -39,8 +45,11 @@ first-order approximation. Finite foreshore extent enters through the
 effective entry length
 ``lambda_out_eff = lambda_out * tanh(B_f / lambda_out)`` (TR Zandmeevoerende
 Wellen 1999 Eq. (19); TAW 2004 App. I Eq. (A.I.9); ADR-0006). The in-L
-hyperbolic refinement is not implemented; its validity domain is monitored
-per realization by :func:`leakage_ratio_diagnostic` (ADR-0006).
+hyperbolic refinement is deliberately not implemented and there is no
+automatic switch to it: per ADR-0006 its validity domain is monitored per
+realization by :func:`leakage_ratio_diagnostic` (logged and warned, run
+unaltered), and the full form is a documented extension to be implemented
+against a verified source only if the diagnostic triggers materially.
 
 Units and datum
 ---------------
@@ -64,6 +73,7 @@ USACE EM 1110-2-1913 (2000). ADR-0004 through ADR-0007.
 
 from __future__ import annotations
 
+import warnings
 from typing import Protocol
 
 import numpy as np
@@ -73,6 +83,7 @@ __all__ = [
     "AquiferHeadModel",
     "InstantaneousHead",
     "LaggedHead",
+    "advance_lag_state",
     "aquifer_response_time",
     "leakage_length_in",
     "leakage_length_out",
@@ -119,7 +130,11 @@ def leakage_length_in(
     the blanket, semi-infinite hinterland blanket. lambda_in is the distance
     scale over which excess aquifer head decays landward of the exit point.
     """
-    raise NotImplementedError
+    k_aq = np.asarray(k_aq_mps, dtype=np.float64)
+    d_aq = np.asarray(d_aq_m, dtype=np.float64)
+    d_bl = np.asarray(d_bl_m, dtype=np.float64)
+    k_bl = np.asarray(k_bl_mps, dtype=np.float64)
+    return np.sqrt(k_aq * d_aq * d_bl / k_bl)
 
 
 def leakage_length_out(
@@ -167,10 +182,21 @@ def leakage_length_out(
     The tanh correction is TR Zandmeevoerende Wellen (1999) §4.4.1 Eq. (19)
     (there ``L'_v = lambda_1 * tanh(L_v / lambda_1)``), corroborated by TAW
     (2004) App. I Eq. (A.I.9). Asymptotics: lambda_out_eff -> B_f for narrow
-    foreshores and -> lambda_out for wide ones. The implementation must guard
-    the vanishing-lambda_out limit (return 0.0 without division by zero).
+    foreshores and -> lambda_out for wide ones. The vanishing-lambda_out
+    limit is guarded: it returns 0.0 without dividing by zero.
     """
-    raise NotImplementedError
+    k_aq = np.asarray(k_aq_mps, dtype=np.float64)
+    d_aq = np.asarray(d_aq_m, dtype=np.float64)
+    d_fore = np.asarray(d_fore_m, dtype=np.float64)
+    k_fore = np.asarray(k_fore_mps, dtype=np.float64)
+    b_f = np.asarray(foreshore_width_m, dtype=np.float64)
+
+    lam_out = np.sqrt(k_aq * d_aq * d_fore / k_fore)
+    # Guard lambda_out -> 0 (e.g. a vanishing foreshore blanket): the
+    # effective length is then 0 regardless of B_f, without dividing by zero.
+    lam_safe = np.where(lam_out > 0.0, lam_out, 1.0)
+    lam_eff = lam_out * np.tanh(b_f / lam_safe)
+    return np.where(lam_out > 0.0, lam_eff, 0.0)
 
 
 def response_factor(
@@ -204,14 +230,19 @@ def response_factor(
     -----
     Exact — not a first-order approximation — under the Pol 2022 Eq. (7.13)
     schematization: steady horizontal flow in a leaky aquifer, vertical
-    leakage, semi-infinite blankets, quasi-static response. Validity against
-    the seepage length is monitored separately by
-    :func:`leakage_ratio_diagnostic` (ADR-0006). r_e is stochastic: it
-    depends on four of the seven sampled variables through the leakage
-    lengths and must be computed per realization, never precomputed once
-    (spec Property 3).
+    leakage, semi-infinite blankets, quasi-static response. Per ADR-0006
+    there is deliberately no automatic switch to the in-L hyperbolic form
+    when L is not small relative to lambda_in: violations are surfaced by
+    :func:`leakage_ratio_diagnostic` (logged, warned, run unaltered), and
+    the full form remains a documented extension pending a verified source.
+    r_e is stochastic: it depends on four of the seven sampled variables
+    through the leakage lengths and must be computed per realization, never
+    precomputed once (spec Property 3).
     """
-    raise NotImplementedError
+    lam_in = np.asarray(lambda_in_m, dtype=np.float64)
+    lam_out_eff = np.asarray(lambda_out_eff_m, dtype=np.float64)
+    length = np.asarray(seepage_length_m, dtype=np.float64)
+    return lam_in / (lam_out_eff + length + lam_in)
 
 
 def aquifer_response_time(
@@ -255,7 +286,10 @@ def aquifer_response_time(
     evaluated at representative values to set the run-global lag flag) and,
     when the lag is active, :class:`LaggedHead` per realization.
     """
-    raise NotImplementedError
+    d_aq = np.asarray(d_aq_m, dtype=np.float64)
+    d_bl = np.asarray(d_bl_m, dtype=np.float64)
+    k_bl = np.asarray(k_bl_mps, dtype=np.float64)
+    return specific_storage_per_m * d_aq * d_bl / k_bl
 
 
 def translate_instantaneous(
@@ -293,7 +327,69 @@ def translate_instantaneous(
     same r_e feeds both limit-state branches per the shared-sample contract
     (ADR-0002). Assumes quasi-static aquifer response (no time lag).
     """
-    raise NotImplementedError
+    h_river = np.asarray(h_river_m, dtype=np.float64)
+    r_factor = np.asarray(r_e, dtype=np.float64)
+    z_toe = np.asarray(z_toe_m, dtype=np.float64)
+    return z_toe + r_factor * (h_river - z_toe)
+
+
+def advance_lag_state(
+    h_aq_prev_m: ArrayLike,
+    h_river_m: ArrayLike,
+    r_e: ArrayLike,
+    z_toe_m: ArrayLike,
+    dt_s: float,
+    tau_aq_s: ArrayLike,
+) -> NDArray[np.float64]:
+    """Pure one-timestep advance of the linear-reservoir lag state.
+
+    Takes the previous aquifer head and returns the next; holds no state
+    itself. Implements the exact solution of the linear-reservoir ODE under
+    piecewise-constant forcing (ADR-0004)::
+
+        h_aq_next = h_aq_prev + (1 - exp(-dt/tau_aq)) * (h_inst - h_aq_prev)
+
+    with ``h_inst = translate_instantaneous(h_river_m, r_e, z_toe_m)``.
+
+    Parameters
+    ----------
+    h_aq_prev_m : array_like of float
+        Aquifer head at the previous timestep [m above datum].
+    h_river_m : array_like of float
+        River stage at the current timestep [m above datum].
+    r_e : array_like of float
+        Response factor [-], from :func:`response_factor`.
+    z_toe_m : array_like of float
+        Polder surface elevation at the landside exit point [m above datum]
+        (equals h_e in Pol SIE 2024 Eqs. (6) and (8), ADR-0007).
+    dt_s : float
+        Timestep [s].
+    tau_aq_s : array_like of float
+        Aquifer response time [s] per realization, from
+        :func:`aquifer_response_time`. Must be positive.
+
+    Returns
+    -------
+    numpy.ndarray of float
+        Aquifer head at the current timestep [m above datum].
+
+    Notes
+    -----
+    The update factor ``1 - exp(-dt/tau_aq)`` lies in (0, 1) for all
+    positive ``dt_s`` and ``tau_aq_s``: unconditionally stable (the state is
+    a convex combination of its previous value and the instantaneous head),
+    exact for the assumed forcing, equal to the explicit-Euler form in the
+    limit ``dt_s << tau_aq_s``, and collapsing to the instantaneous
+    translation as ``tau_aq_s -> 0``. Explicit Euler, by contrast,
+    overshoots for ``dt_s > tau_aq_s`` and diverges for
+    ``dt_s > 2 * tau_aq_s`` (ADR-0004). The factor is computed as
+    ``-expm1(-dt/tau_aq)`` for accuracy when ``dt_s << tau_aq_s``.
+    """
+    h_prev = np.asarray(h_aq_prev_m, dtype=np.float64)
+    tau_aq = np.asarray(tau_aq_s, dtype=np.float64)
+    h_inst = translate_instantaneous(h_river_m, r_e, z_toe_m)
+    factor = -np.expm1(-dt_s / tau_aq)
+    return h_prev + factor * (h_inst - h_prev)
 
 
 def leakage_ratio_diagnostic(
@@ -337,7 +433,23 @@ def leakage_ratio_diagnostic(
     meters, lambda_in of hundreds of meters) the bulk of the prior is
     expected to satisfy the condition.
     """
-    raise NotImplementedError
+    length = np.asarray(seepage_length_m, dtype=np.float64)
+    lam_in = np.asarray(lambda_in_m, dtype=np.float64)
+    ratio = length / lam_in
+    mask = ratio > ratio_threshold
+
+    flagged_fraction = float(np.mean(mask))
+    if flagged_fraction > warn_fraction:
+        warnings.warn(
+            "Simplified Mazure ratio validity violated: "
+            f"{flagged_fraction:.1%} of realizations have "
+            f"L/lambda_in > {ratio_threshold:g} "
+            f"(max ratio {float(np.max(ratio)):.3g}). Per ADR-0006 the run "
+            "is unaltered; consider the documented hyperbolic extension.",
+            UserWarning,
+            stacklevel=2,
+        )
+    return mask
 
 
 class AquiferHeadModel(Protocol):
@@ -403,32 +515,29 @@ class InstantaneousHead:
     """
 
     def __init__(self, r_e: ArrayLike, z_toe_m: float) -> None:
-        raise NotImplementedError
+        self._r_e = np.asarray(r_e, dtype=np.float64)
+        self._z_toe_m = z_toe_m
 
     def reset(self, h_river_initial_m: float) -> None:
         """No-op (stateless model); see :class:`AquiferHeadModel`."""
-        raise NotImplementedError
 
     def step(self, h_river_m: float, dt_s: float) -> NDArray[np.float64]:
         """Return the instantaneous translation; ``dt_s`` is ignored."""
-        raise NotImplementedError
+        return translate_instantaneous(h_river_m, self._r_e, self._z_toe_m)
 
 
 class LaggedHead:
     """First-order linear-reservoir aquifer head model (lag form, gated).
 
-    Integrates ``dh_aq/dt = (h_inst(t) - h_aq) / tau_aq`` with the exact
-    exponential update for piecewise-constant forcing (ADR-0004)::
+    A thin stateful adapter: the physics lives in the pure kernel
+    :func:`advance_lag_state`; this class only carries the per-event head
+    between :meth:`step` calls to satisfy :class:`AquiferHeadModel`.
 
-        h_aq <- h_aq + (1 - exp(-dt_s / tau_aq_s)) * (h_inst - h_aq)
-
-    where ``h_inst = translate_instantaneous(h_river_m, r_e, z_toe_m)``.
     The update factor lies in (0, 1) for all positive ``dt_s`` and
-    ``tau_aq_s``: unconditionally stable, exact for the assumed forcing,
-    equal to the explicit-Euler form in the limit ``dt_s << tau_aq_s``, and
-    collapsing exactly to the instantaneous translation as
-    ``tau_aq_s -> 0``. Explicit Euler, by contrast, overshoots for
-    ``dt_s > tau_aq_s`` and diverges for ``dt_s > 2 * tau_aq_s``.
+    ``tau_aq_s``: unconditionally stable, exact for piecewise-constant
+    forcing, equal to the explicit-Euler form in the limit
+    ``dt_s << tau_aq_s``, and collapsing exactly to the instantaneous
+    translation as ``tau_aq_s -> 0`` (ADR-0004).
 
     :meth:`reset` initializes the state in equilibrium with the initial
     river stage, ``h_aq(0) = translate_instantaneous(h0, r_e, z_toe_m)``
@@ -447,19 +556,37 @@ class LaggedHead:
         (equals h_e in Pol SIE 2024 Eqs. (6) and (8), ADR-0007).
     tau_aq_s : array_like of float
         Aquifer response time [s] per realization, from
-        :func:`aquifer_response_time`.
+        :func:`aquifer_response_time`. Must be positive.
+
+    Raises
+    ------
+    ValueError
+        If any ``tau_aq_s`` is not strictly positive.
     """
 
     def __init__(self, r_e: ArrayLike, z_toe_m: float, tau_aq_s: ArrayLike) -> None:
-        raise NotImplementedError
+        tau_aq = np.asarray(tau_aq_s, dtype=np.float64)
+        if np.any(tau_aq <= 0.0):
+            raise ValueError("tau_aq_s must be strictly positive")
+        self._r_e = np.asarray(r_e, dtype=np.float64)
+        self._z_toe_m = z_toe_m
+        self._tau_aq_s = tau_aq
+        self._h_aq_m: NDArray[np.float64] | None = None
 
     def reset(self, h_river_initial_m: float) -> None:
         """Set the state to equilibrium with the initial river stage."""
-        raise NotImplementedError
+        self._h_aq_m = translate_instantaneous(
+            h_river_initial_m, self._r_e, self._z_toe_m
+        )
 
     def step(self, h_river_m: float, dt_s: float) -> NDArray[np.float64]:
         """Advance the lag state by ``dt_s`` and return the aquifer head."""
-        raise NotImplementedError
+        if self._h_aq_m is None:
+            raise RuntimeError("LaggedHead.step() called before reset()")
+        self._h_aq_m = advance_lag_state(
+            self._h_aq_m, h_river_m, self._r_e, self._z_toe_m, dt_s, self._tau_aq_s
+        )
+        return self._h_aq_m
 
 
 def make_head_model(
@@ -497,4 +624,8 @@ def make_head_model(
     ValueError
         If ``lag_active`` is True and ``tau_aq_s`` is None.
     """
-    raise NotImplementedError
+    if lag_active:
+        if tau_aq_s is None:
+            raise ValueError("tau_aq_s is required when lag_active is True")
+        return LaggedHead(r_e, z_toe_m, tau_aq_s)
+    return InstantaneousHead(r_e, z_toe_m)
