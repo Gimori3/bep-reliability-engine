@@ -1,0 +1,192 @@
+# M7 Physics Note: Pol ODE Reference Equations and Test Values
+
+Date: 2026-06-12 (updated 2026-06-13: digitized figure data committed; M4 datum cross-check; C_e flag status)
+Status: Reference note (pre-implementation, M7 `progression.py`). Not an ADR — no decision is taken here; this note fixes the paper-traceable equations and numbers that M7 code and tests must reproduce.
+
+Sources (page numbers refer to the article/book pagination, not PDF pages):
+
+- **[CG24]** Pol, Noordam & Kanning (2024), *A 3D time-dependent backward erosion piping model*, Computers and Geotechnics 167, 106068.
+- **[SIE24]** Pol, Kanning, Jonkman & Kok (2024), *Time-dependent reliability analysis of flood defenses under cumulative internal erosion*, Structure and Infrastructure Engineering.
+- **[T22]** Pol (2022), *Time-dependent development of backward erosion piping*, PhD thesis, TU Delft.
+
+Convention in this note: a value is given only if it appears as **text or a table** in a source. Values that exist **only in a figure** are identified as such and are *not* quoted from the figures directly. Update 2026-06-13: every figure-only series flagged in §5 has since been manually digitized against the publisher PDFs and committed under `data/digitized/` (provenance in `data/digitized/MANIFEST.md`); digitized landmark values quoted in this note are marked *(digitized)* and are reliable to ≤2 significant figures only.
+
+---
+
+## 1. The progression-rate equation (coefficient 89, exponent 0.81)
+
+**[SIE24] Eq. (5)** (identically [T22] Eq. (6.5)):
+
+```
+dl/dt = 89 · C_e · ( k · (H(t) − H_eq(l)) / L )^0.81     if I_er = true
+dl/dt = 0                                                 else
+```
+
+with `C_e` erosion coefficient [−], `k` hydraulic conductivity [m/s], `H` imposed head difference [m], `H_eq` equilibrium head [m], `L` seepage length [m]; dl/dt in [m/s]. "89 and 0.81 are regression coefficients" ([SIE24] §2.3, citing [CG24]).
+
+**Origin: [CG24] Eq. (15)** (identically [T22] Eq. (5.18)) — a regression for the *instantaneous* progression rate fitted on DgFlow finite-element simulations:
+
+```
+dl/dt(t) = 89 · C_e · ( k · (H(t) − H_eq(l)) / L )^0.81      [m/s]
+```
+
+Derivation basis ([CG24] §4.4; [T22] §5.4.4):
+
+- Fitted on **hole-type-exit** DgFlow simulations: four base cases (sands S22 and S42; seepage lengths L = 3 m and 30 m), with variations in overloading and C_e; 31 simulations giving 3100 data points (seepage length divided into 100 segments). 80 % used for fitting, 20 % for validation; **R² = 0.94**.
+- Equivalent d₅₀-based form: [T22] Eq. (5.16)/(5.17) (coefficient 1.3·10⁵, d₅₀^1.65); Eq. (5.18) replaces d₅₀ by k "with virtually the same result" (R² = 0.94). Form is Kézdi (1979)-like, extended with an overloading term and an exponent on the seepage velocity.
+- Stated validity domain (for the companion average-rate regression [T22] Eq. (5.15), derived from the same simulation campaign): hole-type (localized) exits, homogeneous aquifers with **D/L = 1/3**, **0.2 ≤ d₅₀ ≤ 0.4 mm**, **2 ≤ C_u ≤ 3**, overloading up to **H/H_c ≤ 1.4**; scales spanned L = 0.9–90 m. Plane-exit cases are captured in order of magnitude only ([CG24] §4.4; deviating plane-exit configurations under-predicted by a factor 1.5–3, [T22] p. 111).
+- Regression-vs-simulation scatter: [CG24] Fig. 13 / [T22] Fig. 5.15 plot 1:1 and 1:3 guide lines; individual cases deviate from the regression by up to roughly a factor 3. **Tests must not assert tight agreement between Eq. (15) and individual DgFlow table values** (see §5).
+
+Implementation remarks (consistent with spec §3/§5 and `docs/conventions.md`):
+
+- **Dimensional, SI-only formula.** Because the velocity group is raised to 0.81, the coefficient 89 carries implicit units (m/s)^0.19. Inputs must be strict SI (k in m/s, H and L in m); output is m/s. No unit conversion may occur inside the kernel.
+- **Erosion threshold.** The papers define erosion only for H > H_eq ("a threshold below which no erosion occurs as the grains in the pipe are in equilibrium", [SIE24] §2.1). The spec's `max(0, H_erosion − H_eq)` positive-part operator is the implementation of this threshold; combined with the I_er gate it makes l(t) monotonically non-decreasing.
+- The gate I_er is [SIE24] Eq. (7) / [T22] Eq. (6.6); its repo realization (flood-fighting clause omitted, Terzaghi collapse) is governed by M5 and ADR-0008, not by this note.
+
+---
+
+## 2. Equilibrium curve H_eq(l) and critical pipe length l_c
+
+**Anchors — [SIE24] Eq. (11)** (identically [T22] Eq. (6.10), where H_c is written H_c,p):
+
+```
+H_eq(0)   = 0
+H_eq(l_c) = H_c
+H_eq(L)   = 0.9 · H_c
+```
+
+with linear interpolation between the three points. The 0.9·H_c end anchor and the straight segments are "a conservative estimate based on equilibrium curves following from the numerical simulations in Pol et al. (2024)" ([SIE24] §2.3; [T22] p. 126 referencing Fig. 5.7). Physical basis ([CG24] §4.2, Fig. 7; [T22] §5.4.2): for 3D **hole-type** exits H_eq rises to the maximum H_c at the critical pipe length and "decreases only slightly" beyond it; plane-type exits show steadily decreasing H_eq (initiation-dominated) and are *not* represented by this curve.
+
+**Critical head H_c — [SIE24] Eq. (12)** (= [T22] Eq. (6.11)): the revised Sellmeijer 2011 model, H_c = L·F_r·F_s·F_g. Single source in this repo is M6 `sellmeijer.py`; M7 receives H_c, never recomputes it. Experimental-mean constants quoted with Eq. (12): D_r,m = 0.725, d₇₀,m = 2.08·10⁻⁴ m, C_u,m = 1.81, KAS_m = 0.498.
+
+**Critical pipe length — [SIE24] Eq. (13)** (identically [T22] Eq. (6.12)):
+
+```
+l_c / L = (1/2) · tanh( 2 · D / L )
+```
+
+with D the aquifer depth [m]. Stated basis: "For homogeneous aquifers, this function agrees well with **2D** numerical piping model simulations such as those from Sellmeijer (2006) and Rosenbrand et al. (2022)" ([SIE24] §2.3).
+
+> **Caution — do not cross-validate Eq. (13) against the DgFlow 3D critical length.** [T22] Fig. 5.9 caption states the DgFlow critical length for the L = 3 m, S2-2 hole-exit case is **l = 1.36 m** (l/L ≈ 0.45), while Eq. (13) with that geometry (D = L/3) gives l_c = 0.5·tanh(2/3)·L ≈ 0.29·L ≈ 0.87 m. The tanh formula is a simplified 2D-anchored proposal adopted by [SIE24] for the reliability model; the spec adopts it as-is (M6). A test pinning Eq. (13) must test the formula algebraically, not against 1.36 m.
+
+---
+
+## 3. Head datum of [SIE24] Eqs. (6) and (8), and where 0.3·D_bl enters
+
+**[SIE24] Eq. (6)** (in-text in [T22] §6.2.2, p. 126):
+
+```
+H = h − h_e − 0.3 · D_bl
+```
+
+"where h is outer water level, h_e polder level at the exit point and D_bl polder blanket thickness." The imposed head difference "is reduced by a head loss over the blanket (vertical pipe) due to resistance of the fluidized sediment (e.g. Schweckendiek, Vrouwenvelder, & Calle, 2014; TAW, 1999)".
+
+**[SIE24] Eq. (8)** (= [T22] Eq. (6.7)) — uplift limit state — and its companions:
+
+```
+Z_u(t) = D_bl · (γ_bl,sat − γ_w)/γ_w − (φ_it(t) − h_e)        (8)   [resistance − load reading; see note below]
+Z_h(t) = i_c,h − (φ_it(t) − h_e)/D_bl                          (9)
+φ_it(t) = h_e + r_e · ( h(t) − h_e )                           (10)
+```
+
+where φ_it [m] is the aquifer head at the inner levee toe, r_e the head response factor, γ_bl,sat the saturated blanket weight [kN/m³], i_c,h the critical heave gradient [−].
+
+> **Sign-convention note.** The printed term order in [SIE24] Eqs. (8)–(9) / [T22] Eqs. (6.7)–(6.8) reads load-minus-resistance, which contradicts the `Z < 0` criticality tests inside the papers' own I_er definition (Eq. (7)/(6.6)). The resistance-minus-load reading is the only interpretation found to be internally consistent with the Z<0 criticality tests and is therefore adopted in ADR-0008. It was confirmed against the paper copy on 2026-06-12 and is recorded in **ADR-0008** (which also documents the repo's i_c,h = γ'_s/γ_w substitution and the resulting I_er collapse). This note quotes the confirmed reading.
+
+**Precise datum statement.** Every head in Eqs. (6), (8), (9), (10) is referenced to **h_e, the polder surface level at the landside exit point**:
+
+- In Eq. (6), H is the head *difference* between the outer (river/sea) water level h and the polder level h_e, both elevations above a common vertical datum (m +NAP in the papers); the absolute datum cancels in the difference, and the landside reference is the polder surface at the exit — not a ditch level, not the aquifer head at the toe.
+- In Eqs. (8)–(9), the load is φ_it − h_e: the aquifer head at the inner toe *in excess of the same polder level*. Eq. (10) shows the r_e translation also pivots about h_e.
+- H_eq(l) and H_c are compared directly against H (Eq. (5)) and therefore live on the same datum: head differences relative to h_e.
+
+**Where 0.3·D_bl enters the balance.** Exactly once, on the load side of the *erosion* balance: it is subtracted from the gross head difference (h − h_e) to form the erosion-driving head H of Eq. (6), which is then compared against H_eq(l) inside Eq. (5) (and inside the H > H_eq clause of the t_uh definition). It does **not** enter the uplift load (Eq. (8)) or the heave gradient (Eq. (9)) — both use the un-reduced φ_it − h_e — and it does not modify H_eq or H_c. It is a constant head loss across the vertical crack through the blanket (fluidized-sand resistance), adopted by Pol from TAW (1999) / Schweckendiek et al. (2014); the chapters of [T22] reviewed here state it identically with the same citations rather than re-deriving the 0.3 factor.
+
+**Verification of the repo convention (cross-checked against the implemented M4, 2026-06-13).** The implemented M4 (`hydraulics.py`) returns the **absolute aquifer head** h_aq(t) [m above datum] through the `AquiferHeadModel.step()` interface; its instantaneous kernel `translate_instantaneous` implements `h_aq = z_toe + r_e·(h_river − z_toe)`, which is Eq. (10) verbatim with φ_it ≡ h_aq and h_e ≡ z_toe (so stated in the M4 docstrings, per ADR-0007). The blanket overpressure is then formed downstream as
+
+```
+Δh_blanket(t) = h_aq(t) − z_toe      (spec §3 step b)  ≡  φ_it(t) − h_e of Eqs. (8)–(9)
+```
+
+which in the instantaneous default equals r_e·(h(t) − z_toe). When the lag form is active (`LaggedHead` / `advance_lag_state`, ADR-0004), Δh_blanket = h_aq(t) − z_toe still holds with h_aq the lag state — the instantaneous identity with r_e·(h − z_toe) is then only the steady-state limit, but the **datum is unchanged**, because the lag state is initialized and advanced in absolute head about the same z_toe. The erosion driver H_erosion(t) = Δh_blanket(t) − 0.3·D_bl (spec §3 steps c, j) therefore **shares the datum of Eqs. (6) and (8)**: heads in excess of the polder surface at the exit point, with the crack-resistance loss applied only to the erosion driver and the un-reduced Δh_blanket feeding uplift/heave. The one deliberate deviation, documented in **ADR-0007**, is that Eq. (6) uses the *untranslated* outer level h while the repo applies the r_e translation before subtracting 0.3·D_bl; in the calibration configurations of §4 below the outer water acts directly on the aquifer (r_e = 1), so the two conventions coincide there, which is what the M7 head-datum verification test must exploit.
+
+**t_uh definitional difference (diagnostic only).** In [SIE24] Eq. (7), t_uh is the first time that uplift, heave **and erosion (H > H_eq)** co-occur (proxy for sand-boil formation), feeding the flood-fighting clause. The repo's t_uh diagnostic (spec §2, M8 output) is the first uplift+heave co-occurrence, without the H > H_eq clause, and the flood-fighting clause is deliberately omitted (spec M5). When comparing diagnostics against Pol's published event traces, the two t_uh definitions must not be conflated.
+
+---
+
+## 4. Calibration cases: parameters and calibrated C_e
+
+From **[CG24] Table 1** (identically [T22] Table 5.1) plus text values as noted. The calibrated parameters are **DgFlow model calibrations**: η, w/a, i_tip,c were calibrated (small scale) on the critical condition, C_e on the pipe-length development over time; for the large-scale test only w/a and C_e were calibrated, with η = 0.4 from measured critical shear stress and i_tip,c = 1.1 translated from the measured critical gradient of 0.28 over 80 cm spacing via the secant-gradient relation [CG24] Eq. (14) / [T22] Eq. (5.14).
+
+| Quantity | Unit | B25-245 (small-scale, loose) | FPH (large-scale) | Source |
+|---|---|---|---|---|
+| d₅₀ | mm | 0.228 | 0.185 | Table 1 / 5.1 |
+| ρ_s | kg/m³ | 2650 | 2610 | Table 1 / 5.1 |
+| ρ_w | kg/m³ | 1000 | 1000 | Table 1 / 5.1 |
+| κ (intrinsic) | 10⁻¹¹ m² | 3.16 | 1.2 | Table 1 / 5.1 |
+| n (porosity) | − | 0.402 | 0.383 | Table 1 / 5.1 |
+| θ (bedding angle) | ° | 29.36 | 31.06 | Table 1 / 5.1 |
+| μ (viscosity) | Pa·s | 0.001 | 0.00133 | Table 1 / 5.1 |
+| η (White) | − | 0.3 (calibrated) | 0.4 (input) | Table 1 / 5.1 |
+| i_tip,c | − | 0.9 (calibrated, 1 cm grid) | 1.1 (input, 5 cm grid) | Table 1 / 5.1 |
+| w/a (pipe width/depth) | − | 25 (calibrated) | 700 (calibrated) | Table 1 / 5.1 |
+| **C_e (calibrated)** | − | **0.010 (table) — but see flag below** | **0.014** | Table 1 / 5.1; [CG24] §3.2.2 text |
+| Seepage length L | m | 0.35 | 7.2 | [T22] Summary (text); [CG24] §3.2.2 / [T22] p. 104 ("straight pipe length of 7.2 m") |
+| Max. head difference | m | ≈ 0.063 *(digitized peak of `B25-245_head-BC_Hcorr.csv`; figure-only in the sources)* | 1.8 | [T22] Summary (text); §5C |
+| k = κ·ρ_w·g/μ (derived, g = 9.81) | m/s | 3.10·10⁻⁴ *(derived, not printed)* | 8.85·10⁻⁵ *(derived, not printed)* | computed from κ, μ above |
+| DgFlow pipe grid Δx / timestep Δt | m / s | 0.01 / 10 | 0.05 / 100 | [CG24] §3.1.1–3.1.2 |
+
+> **⚠ FLAG — B25-245 C_e is internally inconsistent in both sources.** [CG24] Table 1 and [T22] Table 5.1 give **C_e = 0.010** for B25-245, but the best-fit figure captions in *both* sources — [CG24] Fig. 5 and [T22] Fig. 5.5: "(i_tip,c = 0.9, η = 0.3, **C_e = 0.014**)" — give 0.014 (the same value as the FPH column). The η and i_tip,c caption values match the table, so only C_e is in doubt. Note the implication: if the *plotted* curve (the thing a digitized-trajectory test compares against) was produced with 0.014, a test pairing the table's 0.010 with the digitized Fig. 5(c) data would embed a ~33 % rate error (dl/dt is linear in C_e).
+>
+> **Status 2026-06-13:** the user verified both readings against the paper copies — the inconsistency is real in the publications, not an extraction artifact. Which value to pair with the digitized trajectory remains an open choice to be settled at test-design time. Recommendation: treat the **Table 1 / 5.1 value (0.010)** as the authoritative calibrated set (the captions' 0.014 plausibly carries over from the FPH/large-scale calibration discussed in the adjacent text), set the replay tolerance wide enough to cover both (a ±40 % rate band, comfortably inside the §1 factor-3 regression scatter), and state the choice and this flag in the test docstring.
+
+**C_e context across the sources** (for interpreting test values, not for re-litigating the ADR-0001 prior):
+
+- DgFlow calibration on Pol's own experiments: small-scale range **0.007 < C_e < 0.030 (average 0.016)**; large-scale FPH **C_e = 0.014** ([CG24] §3.2.3 / [T22] §5.3.2). These are a factor ≈ 3–10 below the Shields-based a-priori C_e = 0.08 of [CG24] Eq. (13), attributed to the straight-rectangular-channel idealization.
+- Comparing the average-rate regression against the wider historical-experiment compilation (Pol et al. 2019) gives higher values: measured rates of the 7 progression-dominated tests are a factor 3–5 above predictions with C_e = 0.016, leading to Ln(mean 0.044, σ 0.048) used in [T22] Ch. 6, updated to **Ln(mean 0.055, σ 0.043)** with all experiments ([T22] p. 112, App. E) — the latter is the [SIE24] Table 2 base-case distribution.
+- The repo prior (ADR-0001: Lognormal, mean 0.014, COV 0.50) is anchored on the DgFlow-calibrated experiment values, spanning the 0.007–0.030 calibration range. Reference-case tests must use the **per-experiment calibrated C_e**, not the prior mean.
+
+---
+
+## 5. Quantitative outcomes usable as numerical test targets
+
+Grouped by reliability. Only group A values support exact assertions.
+
+### A. Exact targets (algebraic, from the quoted equations)
+
+1. **Coefficient/exponent pinning.** One worked evaluation of Eq. (15) to guard against transcription errors (this arithmetic is derived here, not printed in the papers): with C_e = 0.08, k = 2.158·10⁻⁴ m/s (S2-2: κ = 2.2·10⁻¹¹ m², μ = 0.001 Pa·s), H − H_eq = 0.0144 m, L = 3 m: dl/dt = 89·0.08·(2.158·10⁻⁴·0.0144/3)^0.81 ≈ **1.01·10⁻⁴ m/s**.
+2. **H_eq anchors.** H_eq(0) = 0; H_eq(l_c) = H_c; H_eq(L) = 0.9·H_c; piecewise-linear in between (Eq. (11)), with per-realization breakpoints.
+3. **l_c formula.** Eq. (13): for D/L = 1/3, l_c/L = 0.5·tanh(2/3) ≈ 0.2914 (algebraic check; see §2 caution — not 1.36 m).
+4. **Head-datum test (ADR-0007 consequence).** For a paper-configuration geometry with r_e = 1 and z_toe = h_e, the implemented H_erosion must equal Eq. (6)'s H = h − h_e − 0.3·D_bl exactly, while the uplift/heave loads remain the un-reduced φ_it − h_e. The test docstring must state the datum: *all heads in excess of the polder surface level at the landside exit point (h_e ≡ z_toe), per [SIE24] Eqs. (6), (8), (10)*.
+5. **Linearity in C_e.** dl/dt is exactly proportional to C_e in Eq. (15) (and DgFlow showed approximately linear dependence, [CG24] §4.3.3) — cheap property test.
+
+### B. Approximate targets (text/table values; assert order of magnitude or stated tolerance)
+
+6. **FPH average progression rate.** Measured **≈ 0.3 m/hour ≈ 8.3·10⁻⁵ m/s** ([T22] Summary, text). With the §4 FPH parameters (k = 8.85·10⁻⁵ m/s, L = 7.2 m, C_e = 0.014), the Eq.-(15) trajectory's average rate in the progressive phase should match within the regression scatter (factor ≈ 3, see §1). The measured tip trajectory is now available digitized (`FPH_xtip_measured.csv`, §5C) for piecewise-rate comparison.
+7. **Small-scale rate order.** Progression rates in the small-scale tests were "in the order of 0.1–1 m/hour" ([T22] Summary) i.e. ~10⁻⁴–10⁻³ m/s expected during progression ([T22] §5.3.1) — order-of-magnitude band for a B25-245 replay.
+8. **FPH slowdown landmark.** A temporary decrease in progression rate around the critical length, **x_tip ≈ 2.95 m**, observed in both measurement and simulation ([CG24] §3.2.2 / [T22] p. 104). Qualitative target: the Eq.-(5) trajectory exhibits reduced dl/dt near l ≈ l_c (where H − H_eq pinches), not a numeric assertion.
+9. **DgFlow parametric anchors** ([CG24] Tables A.4–A.6, text tables; = [T22] App. D): e.g. S22, hole exit, w/a = 20: H_c = 0.084 m (L = 0.9 m), 0.144 m (L = 3 m), 0.254 m (L = 9 m), 0.470 m (L = 30 m), 0.864 m (L = 90 m); reference progression case (L = 3 m, S22, C_e = 0.08, 10 % overload): average dl/dt = 7.08·10⁻⁵ m/s, with Δt-sensitivity 6.93·10⁻⁵ (Δt = 5 s) and 7.38·10⁻⁵ (Δt = 20 s). **Caveat:** these are DgFlow *simulation* outputs — the data Eq. (15) was regressed on, with up to factor-3 individual scatter (my §A.1 worked value of ~1.0·10⁻⁴ m/s vs the table's 7.08·10⁻⁵ m/s for nearby conditions illustrates the gap). Use as order-of-magnitude cross-checks only; the H_c values belong to M6-adjacent scale-effect discussion, not to M7 assertions.
+10. **Timestep-sensitivity context.** Doubling the DgFlow timestep (5 s → 10 s) changed the average progression rate by ~2 % ([CG24] §4.3.3). Not directly transferable to our forward-Euler-on-Eq.-(5) scheme, but a reasonable expectation scale for the spec §11 Δt/2 convergence test.
+
+### C. Digitized figure data (committed under `data/digitized/`, 2026-06-13)
+
+All figure-only series previously flagged here were manually digitized by the user against the publisher PDFs (400 DPI render, axis-calibrated, overlay-verified) and committed to `data/digitized/`; per-file provenance is in `data/digitized/MANIFEST.md`. Accuracy ≈ 1–2 % of the relevant axis range; continuous curves were thinned and lightly median-smoothed. Usage rules for tests:
+
+- **Trajectory/shape references only**, never asserted beyond 2 significant figures (manifest accuracy statement).
+- **Clean curve-crossing artifacts before use.** The underlying physical curves l(t) and x_tip(t) are monotone non-decreasing, so non-monotonic excursions in the digitized *model* curves are digitization artifacts where plotted curves cross. Largest offenders: `FPH_xtip_model_exit13mm_wa350-700.csv` (e.g. the dips at t ≈ 23.3 h and ≈ 29.4 h) and isolated points in `B25-245_head-BC_Hcorr.csv` (e.g. the single 0.0215 m sample at t = 1554 s between neighbours at ≈ 0.041–0.046 m — H_corr is a staircase BC, not physically monotone, but a 50 % single-sample drop-and-return is a crossing artifact). Pre-clean with a running maximum (trajectories) or a median/window filter (the head BC), and say so in the test.
+- The two head-profile files are committed for completeness but remain **`DO-NOT-USE`** per the digitization request; nothing may be asserted against them (B25-245 H_c therefore still has no usable digitized value — see the to-read item at the end of this section).
+- The `l_exp` / `FPH_xtip_measured` series are *measured* data carrying experimental scatter on top of digitization error; they bound the replay tolerance, they do not tighten it.
+
+Datasets and landmark values (all *(digitized)* unless noted):
+
+- **B25-245 ([CG24] Fig. 5(c))** — `B25-245_head-BC_Hcorr.csv` (imposed head BC, right axis), `B25-245_pipelength_l-exp.csv` (measured), `B25-245_pipelength_l-model.csv` (DgFlow). Model trajectory plateaus at l ≈ 0.354 m ≈ L (breach) from t ≈ 7.5·10³ s; head BC peaks at ≈ 0.063 m (t ≈ 6.2·10³ s). This unlocks the §11-spec "Pol small-scale reproduction" replay: drive Eq. (5) with the cleaned H_corr(t) − the datum is already the head difference over the sample, r_e = 1, no further 0.3·D_bl subtraction (the BC is corrected for filter/exit losses, [CG24] §3.1.1) − subject to the §4 C_e flag.
+- **FPH ([CG24] Fig. 6(b))** — `FPH_xtip_measured.csv` (9 points: (≈ 0 h, 1.28 m) → (38.3 h, 7.97 m)) plus three DgFlow variant curves. Note the measured series is tip *position* with a developed pipe already at recording start (x_tip(0) ≈ 1.3 m, not 0): the M7 replay target is rate and shape (incl. the ≈ 2.95 m slowdown, §5B.8), not the absolute origin.
+- **L = 3 m S2-2 ([CG24] Fig. 10 / [T22] Fig. 5.10)** — `L3m_S2-2_pipelength_l-t.csv`. H = 0.157 m and H_c = 0.143 m are caption text (§5B.9); digitized landmarks: crosses the DgFlow critical length 1.36 m at t ≈ 9.8·10³ s, breach (l = L = 3 m, digitized plateau 2.997 m) at t ≈ 3.25·10⁴ s. Order-of-magnitude target for an Eq.-(5) replay at constant H with C_e = 0.08, within the §1 factor-3 regression scatter (this trajectory is DgFlow, not the regression).
+- **[SIE24] Fig. 3** — `SIE_equilibrium_simulated.csv` + `SIE_equilibrium_simplified.csv`. The digitized simplified relation breaks at l/L ≈ 0.40 with H_eq/H_c ≈ 0.99 (nominally 1.0) and ends at ≈ 0.90 at l/L = 1 — a shape check for the Eq. (11) interpolation. Caution: the figure's geometry implies l_c/L ≈ 0.4; do **not** assume D/L = 1/3 for this figure, and the first few simplified-curve points (l/L < 0.02) are visibly noisy — exclude them from any fit.
+- **[SIE24] Fig. 4 (coastal base-case example)** — `SIE_coastal-example_waterlevel.csv` (left axis, m +NAP), `SIE_coastal-example_pipelength.csv` (right axis, l/L; plateau ≈ 0.075), `SIE_coastal-example_events.csv` (heave ≈ −15.0 h, uplift ≈ −13.7 h, critical head ≈ −12.0 h, intervention ≈ −3.0 h; no failure). Qualitative integration-test template for event sequencing, with two structural caveats: (i) the repo omits the flood-fighting clause (spec M5), so a repo replay keeps eroding past the intervention marker and will **not** reproduce the post-intervention plateau — by design; (ii) the heave-before-uplift marker ordering is a realization of Pol's independent i_c,h, which the repo's collapsed Terzaghi gate (ADR-0008) deliberately does not reproduce (both latch simultaneously). Use for water-level-driven shape comparison up to the intervention time only.
+
+Remaining gap (text, **not** a digitization request): the B25-245 measured critical head and box geometry (aquifer depth D for l_c), and the FPH aquifer geometry, live as text/tables in [T22] Chapters 3–4 (experiment chapters, not yet read for this note). They must be pulled from there when the reproduction tests are designed.
+
+### Not M7 targets
+
+- B25-245 computed pipe **depth** 1 mm vs measured 0.8 mm, Re ≈ 20 ([CG24] §3.2.1): a DgFlow pipe-hydraulics result; the lumped Eq.-(5) model carries no pipe-depth state. Recorded here only to document that the calibration regime was laminar.
+- The FPH **recovery** observations (nine-month reload: 20 % lower critical head, 140 % higher progression rate, [T22] Summary): Phase 1 sets r_l = 0 (spec §5); relevant to the Phase 2 discussion only.

@@ -1,0 +1,6 @@
+event,t_h,waterlevel_mNAP
+critical_head_asterisk,-12.0,4.98
+uplift_triangle,-13.7,3.39
+heave_square,-15.0,2.38
+intervention_circle,-3.0,5.16
+failure_x,NA,NA (no failure in this example; l/L~0.1<1)
