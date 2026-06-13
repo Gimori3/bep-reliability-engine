@@ -60,6 +60,9 @@ select = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = [
+    'slow: expensive reference-reproduction and timestep-convergence tests (deselect with -m "not slow")',
+]
 
 [tool.mypy]
 python_version = "3.11"
