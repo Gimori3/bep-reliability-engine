@@ -1,7 +1,7 @@
 # M7 Physics Note: Pol ODE Reference Equations and Test Values
 
-Date: 2026-06-12 (updated 2026-06-13: digitized figure data committed; M4 datum cross-check; B25-245 C_e resolved to 0.010; tanh-l_c open question; M7 implemented and B25-245 demoted to a qualitative gate with the quantitative rate gate moved to the in-domain L = 3 m case, §4 / §5D)
-Status: Reference note (pre-implementation, M7 `progression.py`). Not an ADR — no decision is taken here; this note fixes the paper-traceable equations and numbers that M7 code and tests must reproduce.
+Date: 2026-06-12 (updated 2026-06-13: digitized figure data committed; M4 datum cross-check; B25-245 C_e resolved to 0.010; tanh-l_c open question; M7 implemented and B25-245 demoted to a qualitative gate with the quantitative rate gate moved to the in-domain L = 3 m case, §4 / §5D. Updated 2026-06-14: M7 finalized — slow tests pass [Δt 600 vs 300 = 0.349 %], docstrings completed with Pol equation numbers, consolidated final-state added as §7.)
+Status: Reference + finalization note for M7 `progression.py` (implemented and finalized 2026-06-14). Fixes the paper-traceable equations and numbers M7 code and tests reproduce; decisions are recorded in the cross-referenced ADRs (0001, 0007, 0008, 0009). Start at §7 for the consolidated final state.
 
 Sources (page numbers refer to the article/book pagination, not PDF pages):
 
@@ -262,3 +262,34 @@ Because B25-245 is out of domain (§4), the quantitative post-critical rate band
 
    Both exceed the formula, consistent with it being 2D plane-strain while real hole-exit erosion is strongly 3D ([T22] §5.4.2; van Beek 2015). This is **not cosmetic**: M6 uses Eq. (13) to place the (l_c, H_c) peak of the H_eq curve, so a systematic ~1.5–2× under-prediction of l_c shifts the H_eq peak landward and changes the modeled progression dynamics (the rising segment of H_eq is steeper, so the overload H_erosion − H_eq and hence dl/dt are larger over 0 < l < l_c). **To confirm with Pol:** whether the tanh l_c was ever validated at field scale (tens-of-metres L) and for 3D hole-exit geometry, or whether a 3D-corrected l_c (or a scale-dependent multiplier) should be substituted for the Tokachi sections. Until confirmed, M6 keeps Eq. (13) as specified — it is the published [SIE24] choice and changing it is a deviation requiring its own ADR — and the B25-245 replay deliberately bypasses it (§4 anchor decision). This question feeds the spec §12 failure-mode-4 scale-exponent sensitivity, which already provides a hook to vary the static-branch scaling; an analogous l_c sensitivity may be warranted.
 2. **B25-245 caption C_e (closed; recorded for traceability).** Resolved to 0.010 (§4); listed here only so the publication inconsistency is not later rediscovered as a fresh issue. No action unless Pol's raw calibration logs become available and contradict the table.
+
+---
+
+## 7. Final consolidated state of M7 (finalization, 2026-06-14)
+
+Single-place summary of the finished module; detailed derivations are in the sections cited. M7 (`progression.py`) is implemented, vectorized across realizations on one code path (spec §6, verified bitwise against a scalar loop), and validated by 11 tests in `tests/test_progression.py` (4 marked `slow`); the full repo suite is green.
+
+**Verified converged timestep.** Field-scale **Δt = 600 s (10 min) is confirmed converged** on the spec §11 sharpened worst case — the flashy 0→6 m-in-2 h rising limb with the high-progression-rate corner (k_aq = 1·10⁻³ m/s, C_e = 0.030, D_bl = 0.5 m): l_e(600 s) = 21.514 m vs l_e(300 s) = 21.439 m, a **0.349 % difference** (gate < 1 %); halving again to 150 s gives 21.414 m (0.116 %), the ≈ 4× drop per halving expected of first-order forward Euler. Production still defaults to the native d4PDF resolution and re-verifies per cross-section (spec §11), but 600 s is a validated safe field default. (`test_timestep_convergence_on_steep_rising_limb_worst_case_theta`.)
+
+**The C_e values in play — three, with distinct uses; do not conflate them.**
+
+| C_e | Use | Source |
+|---|---|---|
+| **0.010** | B25-245 small-scale **qualitative** gate (fixed) | calibrated value, [CG24] Table 1 / [T22] Table 5.1 (the caption's 0.014 is an error, §4) |
+| **0.08** | S2-2 in-domain **quantitative** gate — the DgFlow Fig. 10 parametric run (fixed) | a-priori Shields value, [CG24] §4.1 / Eq. (13) |
+| **Ln(mean 0.014, COV 0.50)** | production fragility **sampling** (not a reproduction test) | repo prior, ADR-0001 (spans the 0.007–0.030 calibration range; Phase 2 constrains it) |
+
+The two reproduction gates run at fixed 0.010 and 0.08; the stochastic 0.014-mean prior is what the real N = 10⁵ runs draw. (The FPH calibrated 0.014 of §4 is *not* used as an M7 gate — S2-2 was chosen over FPH, §5D.)
+
+**B25-245 — qualitative gate (out of domain).** L = 0.352 m is below the Eq. (15) fitted range (0.9–90 m), so M7 under-predicts (0.36× the measured rate, non-breaching). A quantitative rate band is impossible without self-reference: the caption-error C_e = 0.014 would pass a factor-2 band while the correct 0.010 fails, so any passing band is drawn around our own output, not Pol's data (§4). The gate asserts the out-of-domain-robust behaviours instead — progressive-phase entry, monotone staircase, regressive-phase shape tracking (≤ 0.18·L) with no overshoot (≤ 0.15·L), the two-sided breach-threshold pin (no breach at C_e = 0.020, breach at 0.022; true ≈ 0.0215), and C_e-rate monotonicity (`test_b25_245_qualitative_shape_and_behavior`).
+
+**S2-2 — quantitative gate (in domain).** L = 3 m is a regression base case (D/L = 1/3), so this carries M7's *only* quantitative progressive-phase check (`test_s2_2_in_domain_shape_and_rate`):
+
+- **Shape = the Pol-anchored validation.** The normalized trajectory tracks the digitized DgFlow l(t) within an envelope of **0.10** (measured 0.064; front-loading 0.45 = 0.45).
+- **Rate pin = a regression guard, NOT a Pol-validated absolute rate.** The actual integrated [L/2, L] average **1.3825·10⁻⁴ m/s** is pinned at ±5 % — the literal number, not the 7.08·10⁻⁵ × 1.95 reconstruction, so it stays auditable. It *encodes* (does not hide) the ≈ 1.95× over-prediction; a future rate-law or H_eq change trips it.
+- Coefficients **89 / 0.81** are validated exactly and separately by the pinned-worked-value unit test (§5A.1).
+
+**Two findings that must propagate beyond M7.**
+
+1. **Out-of-domain under-prediction at small scale.** Eq. (15) is fitted on L = 0.9–90 m; below that range (B25-245, L = 0.352 m) M7 under-predicts the rate by ~3× (0.36× measured). The Tokachi field sections are tens of metres — in domain — so this does not affect the production fragility, but **M7 must not be used to extrapolate below ~0.9 m**, and any sub-metre sensitivity study must treat its rate as a lower bound only.
+2. **≈ 1.95× H_eq progressive-phase conservatism — a fourth, non-temporal component of the static-transient gap.** The piecewise-linear Eq. (11) H_eq (0.90·H_c end anchor) sits below DgFlow's effective ≈ 1.0·H_c, inflating the in-domain progressive-phase rate ≈ 1.95× (root-caused in §5D). This is Pol's intended conservatism (SIE 2024 §2.3), faithfully implemented, but it makes the transient branch intrinsically more conservative than DgFlow. **ADR-0009** records it as the fourth gap component (alongside temporal, 2D-vs-3D dimensional, and head-convention); the **Stage 6 bias decomposition and the discussion must carry it** so the gap is not over-attributed to the temporal effect (spec §12, Failure Mode 4). Open question for Pol: whether DgFlow's effective H_eq stays ≈ 1.0·H_c at field scale (§6, ADR-0009).

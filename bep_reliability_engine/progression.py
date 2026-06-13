@@ -138,18 +138,19 @@ class ProgressionResult(NamedTuple):
     N = 1e5, spec §12 failure mode 6)."""
 
     uplift_occurred: NDArray[np.bool_]
-    """Per-event uplift latch at termination (Z_uplift < 0 at any step),
-    shape ``R``."""
+    """Per-event uplift latch at termination (Z_uplift < 0 at any step;
+    [SIE24] Eq. (8), M5), shape ``R``."""
 
     heave_occurred: NDArray[np.bool_]
-    """True where Z_heave < 0 occurred at any step, shape ``R``. Under the
-    ADR-0008 collapse this latches at the same step as uplift_occurred."""
+    """True where Z_heave < 0 ([SIE24] Eq. (9), M5) occurred at any step, shape
+    ``R``. Under the ADR-0008 collapse this latches at the same step as
+    uplift_occurred."""
 
     t_uh_s: NDArray[np.float64]
     """Time of first uplift+heave co-occurrence [s], shape ``R``; sample k
-    maps to t = k * dt_s (first sample at t = 0). NaN where never. This is
-    the repo diagnostic, not Pol's three-way sand-boil proxy (module
-    docstring)."""
+    maps to t = k * dt_s (first sample at t = 0). NaN where never. This is the
+    repo diagnostic, NOT [SIE24] Eq. (7)'s three-way sand-boil proxy, which
+    adds an H > H_eq clause (module docstring)."""
 
 
 def equilibrium_head(
@@ -324,6 +325,12 @@ def integrate_progression(
             H_eq        = equilibrium_head(l_current, H_c, l_c, L)
             rate        = progression_rate(H_erosion, H_eq, ...)  # (j)
             l_current   = min(L, l_current + dt_s * rate * I_er)
+
+    Pol equation map for the loop: (c) H_erosion is [SIE24] Eq. (6); (d) Z_u is
+    Eq. (8) and (f,g) Z_h is Eq. (9), both M5 in the resistance-minus-load
+    reading (ADR-0008); (i) I_er is Eq. (7) (flood-fighting clause omitted,
+    Terzaghi collapse, ADR-0008); H_eq is Eq. (11); (j) the rate is Eq. (5) =
+    [CG24] Eq. (15) = [T22] Eqs. (5.18)/(6.5).
 
     All per-realization inputs broadcast to a common realization shape R;
     the loop is vectorized across R within each timestep (spec §6) and is

@@ -31,11 +31,11 @@ The decomposition assumes DgFlow's effective equilibrium head is ≈ 1.0·H_c in
 - **M7's transient branch runs ≈ 2× faster than a DgFlow-faithful model in the progressive phase**, so the transient limit state is *more conservative* (higher P_f) than DgFlow by design. Acceptable (it is Pol's own conservatism), but now a named, quantified part of the gap rather than a hidden one.
 - The in-domain test `test_s2_2_in_domain_shape_and_rate` gates the progressive-phase **shape** against DgFlow (Pol-anchored, ≤ 0.10 normalized; measured 0.064) and **pins the actual integrated rate 1.3825·10⁻⁴ m/s as a regression guard** encoding this ≈ 1.95× offset; its docstring states the pin is *not* a Pol-validated absolute rate.
 - B25-245's progressive phase is not gated (out of domain, §4 note), so S2-2's shape gate is the only quantitative progressive-phase validation in M7 and is treated as load-bearing.
-- Cross-reference: M7 reference note §5D (the integration, the Eq.-(15) inversion, and the shape numbers); architecture §12 Failure Mode 4 (extended here from three components to four).
+- Cross-reference: M7 reference note §5D (the integration, the Eq.-(15) inversion, and the shape numbers) and §7 (consolidated M7 final state, where this is finding 2 of the two that propagate beyond M7); architecture §12 Failure Mode 4 (extended here from three components to four).
 
 ## References
 - Pol SIE 2024, Eq. (11) and §2.3 ("a conservative estimate"); Eq. (15) rate law.
 - Pol, Noordam & Kanning (CG24) 2024, Fig. 10 and Table A.5 (L = 3 m S2-2; 7.08·10⁻⁵ m/s).
-- `docs/decisions/m7-pol-ode-reference-values.md` §5D (quantified finding and inversion).
+- `docs/decisions/m7-pol-ode-reference-values.md` §5D (quantified finding and inversion) and §7 (M7 consolidated final state).
 - `docs/architecture.md` §12, Failure Mode 4 (three-component decomposition this extends).
 - ADR-0007 (head-convention component — distinct from this equilibrium-curve component).

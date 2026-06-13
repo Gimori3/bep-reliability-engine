@@ -778,7 +778,103 @@ def test_timestep_convergence_on_steep_rising_limb_worst_case_theta() -> None:
 
 
 # ---------------------------------------------------------------------------
-# (10) Interface guard (passes before implementation)
+# (10) Across-realizations equivalence (slow; spec §6 vectorization).
+#      One vectorized code path -- no scalar fork -- must equal a per-row loop.
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.slow
+def test_across_realizations_matches_scalar_loop() -> None:
+    """The vectorized N-row path equals a per-row scalar loop (spec §6).
+
+    1,000 random parameter rows across realistic prior ranges (note §7
+    families/COVs) share one hydrograph. The terminal l_e from a single
+    vectorized ``integrate_progression`` call -- and the t_uh and uplift
+    diagnostics -- must match a per-row scalar loop to floating-point
+    tolerance. There is ONE implementation, vectorized via numpy broadcasting
+    (N-vector pipe lengths and latched uplift states, np.where piecewise H_eq
+    over per-realization breakpoints, indicator-gated rate); this test guards
+    against a scalar-only regression or an accidental second code path.
+
+    The batch is checked to actually exercise the branches it claims (breach
+    and non-breach, l_c crossing, and flat realizations), so a future seed or
+    range change cannot quietly make the equivalence trivial.
+    """
+    rng = np.random.default_rng(12345)  # deterministic seed (conventions)
+    n = 1000
+    length, z_toe, dt_s = 8.0, 0.0, 600.0
+
+    def _lognormal(median: float, cov: float, size: int) -> np.ndarray:
+        sigma = np.sqrt(np.log(1.0 + cov**2))
+        return median * np.exp(rng.normal(0.0, sigma, size))
+
+    k_aq = _lognormal(3e-4, 0.5, n)  # §7 COV 0.50
+    c_e = _lognormal(0.014, 0.5, n)  # §7 COV 0.50
+    d_bl = _lognormal(3.0, 0.2, n)  # §7 COV 0.20
+    d_aq = _lognormal(3.3, 0.2, n)  # §7 COV 0.20 (D/L ~ 1/3)
+    gamma_s_sub = np.clip(rng.normal(10.0, 0.5, n), 1.0, None)  # §7 COV 0.05
+    h_c = _lognormal(1.0, 0.4, n)  # plausible field critical head
+    l_c = 0.5 * length * np.tanh(2.0 * d_aq / length)  # Eq. (13) per realization
+    r_e = rng.uniform(0.3, 0.8, n)
+    l_ini = np.where(rng.random(n) < 0.3, rng.uniform(0.0, 2.0, n), 0.0)
+
+    # shared two-peak hydrograph (the trough exercises the per-event latch);
+    # sized so the 1,000-row batch spans breach / non-breach / l_c / flat.
+    h_river = np.concatenate([np.full(40, 6.0), np.full(25, 1.5), np.full(40, 7.0)])
+
+    vec = integrate_progression(
+        h_river,
+        dt_s,
+        InstantaneousHead(r_e, z_toe),
+        z_toe,
+        c_e=c_e,
+        k_aq_mps=k_aq,
+        d_bl_m=d_bl,
+        gamma_s_sub_knpm3=gamma_s_sub,
+        h_c_m=h_c,
+        l_c_m=l_c,
+        seepage_length_m=length,
+        l_ini_m=l_ini,
+    )
+
+    l_loop = np.empty(n)
+    t_uh_loop = np.empty(n)
+    uplift_loop = np.empty(n, dtype=bool)
+    for i in range(n):
+        row = integrate_progression(
+            h_river,
+            dt_s,
+            InstantaneousHead(float(r_e[i]), z_toe),
+            z_toe,
+            c_e=float(c_e[i]),
+            k_aq_mps=float(k_aq[i]),
+            d_bl_m=float(d_bl[i]),
+            gamma_s_sub_knpm3=float(gamma_s_sub[i]),
+            h_c_m=float(h_c[i]),
+            l_c_m=float(l_c[i]),
+            seepage_length_m=length,
+            l_ini_m=float(l_ini[i]),
+        )
+        l_loop[i] = float(row.l_final_m)
+        t_uh_loop[i] = float(row.t_uh_s)
+        uplift_loop[i] = bool(row.uplift_occurred)
+
+    # Equivalence (expected bitwise-identical; tolerance guards platform pow).
+    np.testing.assert_allclose(vec.l_final_m, l_loop, rtol=1e-12, atol=1e-12)
+    assert np.array_equal(np.asarray(vec.t_uh_s), t_uh_loop, equal_nan=True)
+    assert np.array_equal(np.asarray(vec.uplift_occurred), uplift_loop)
+
+    # The batch must actually span the branches (not a degenerate all-breach or
+    # all-flat draw), or the equivalence above would be vacuous.
+    l_final = np.asarray(vec.l_final_m)
+    assert (l_final >= length - 1e-9).any(), "no realization breached"
+    assert (l_final < length - 1e-9).any(), "every realization breached"
+    assert (l_final > l_c).any(), "no realization crossed l_c"
+    assert np.isclose(l_final, l_ini).any(), "no realization stayed flat"
+
+
+# ---------------------------------------------------------------------------
+# (11) Interface guard (passes before implementation)
 # ---------------------------------------------------------------------------
 
 
