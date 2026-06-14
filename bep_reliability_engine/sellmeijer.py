@@ -292,8 +292,9 @@ def compute_critical_head(
         static branch has no C_e exposure by design (ADR-0001).
     geometry : dict
         Cross-section geometry; only ``geometry['L']`` (seepage length
-        [m]) is read here. Other keys (``z_toe``, ``foreshore_width``,
-        ``lambda_out_params``) are accepted and ignored.
+        [m]) is read here. The other canonical keys (``z_toe``,
+        ``foreshore_width``, ``D_fore``, ``k_fore``; ADR-0010) are accepted
+        and ignored.
     alpha_exponent : float, optional
         Scale exponent alpha [-] passed to the scale factor F_s. Default
         -1/3 (2D Sellmeijer); -1/2 substitutes the 3D hole-type-exit
