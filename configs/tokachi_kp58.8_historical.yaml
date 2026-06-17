@@ -1,0 +1,79 @@
+# =============================================================================
+# Example Phase 1 run config — Tokachi River, segment KP58.8, historical scenario
+# =============================================================================
+# TEMPLATE / EXAMPLE. Loads via bep_reliability_engine.config.Config.from_yaml.
+#
+# Value provenance — three categories, do NOT conflate:
+#   REAL        finalized site value, used as-is.
+#   FIXED       pinned by spec §7 / Pol 2024 calibration; NOT site-tunable.
+#   PROVISIONAL placeholder stand-in. The seven prior MEANS and the k_aq-d_70
+#               correlation will be populated by the Stage 7 config generator
+#               from the OYO 1999 grain-size and permeability records; the
+#               placeholder geometry (everything except the real foreshore width)
+#               awaits the finalized cross-section schematization. Every
+#               PROVISIONAL value is tagged inline below.
+#
+# Reminder: the prior COVs are FIXED by spec §7 — only the MEANS are provisional.
+# C_e (mean 0.014, COV 0.50) is FIXED from Pol 2024, not site data from OYO 1999.
+# =============================================================================
+
+cross_section_id: "tokachi_kp58.8"   # run identity (provenance only)
+segment_id: "KP58.8"                  # 200 m segment id (provenance only)
+scenario: "historical"               # 'historical' or '+4K'
+remediation_state: "none"            # baseline; provenance label only
+
+# --- Cross-section geometry (the flat dict M8 unpacks; ADR-0010) -------------
+geometry:
+  L: 50.0                 # PROVISIONAL seepage length [m] — cross-section survey
+  z_toe: 0.0              # PROVISIONAL exit-point polder elevation [m above datum]
+  foreshore_width: 325.0  # REAL foreshore width B_f [m] — KP58.8 reach
+  D_fore: 3.0             # PROVISIONAL foreshore blanket thickness [m] (A_c proxy, ADR-0005)
+  k_fore: 2.0e-6          # PROVISIONAL foreshore blanket k [m/s] (A_c proxy, ADR-0005)
+
+# --- Seven stochastic prior marginals (spec §7) ------------------------------
+# COVs FIXED by spec §7; means PROVISIONAL (OYO 1999 via Stage 7), except C_e
+# (FIXED, Pol 2024). The matrix d70 interpretation is recorded with the marginal.
+priors:
+  k_aq:        { family: lognormal, mean: 2.0e-3, cov: 0.50 }  # mean PROVISIONAL (OYO 1999, A_g framework)
+  d_70:        { family: lognormal, mean: 2.0e-4, cov: 0.10 }  # mean PROVISIONAL (OYO 1999, matrix grain size)
+  D_aq:        { family: lognormal, mean: 20.0,   cov: 0.20 }  # mean PROVISIONAL (OYO 1999, borehole logs)
+  D_bl:        { family: lognormal, mean: 3.0,    cov: 0.20 }  # mean PROVISIONAL (OYO 1999, borehole logs)
+  k_bl:        { family: lognormal, mean: 2.0e-6, cov: 0.50 }  # mean PROVISIONAL (OYO 1999, A_c blanket)
+  gamma_s_sub: { family: normal,    mean: 10.0,   cov: 0.05 }  # mean PROVISIONAL (OYO 1999, lab tests)
+  C_e:         { family: lognormal, mean: 0.014,  cov: 0.50 }  # FIXED — Pol 2024 calibration (NOT OYO)
+  bounds:
+    d_70: [50.0e-6, 1.0e-3]      # §12 fm2 tail clip [m] (pathological-H_c guard)
+  d70_interpretation: "matrix"   # this run samples the matrix (sand) grain size
+
+# --- Mandatory k_aq-d_70 coupling (spec §7) ----------------------------------
+correlation:
+  rho_log_kaq_d70: 0.6      # PROVISIONAL — estimate from OYO 1999 paired records (Stage 7)
+  coupling: "correlated"    # switch to 'two_population' if OYO shows decoupling
+
+# --- Monte Carlo + conditioning grid -----------------------------------------
+mc:
+  n_samples: 100000
+  seed: 20260617
+  # PROVISIONAL illustrative conditioning levels [m above datum]; spec targets N_h ~ 30.
+  conditioning_grid: [4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0]
+  sampling_scheme: "latin_hypercube"
+
+# --- Timestepper / convergence / aquifer-lag (ADR-0013, ADR-0014) ------------
+timestepper:
+  integration_scheme: "forward_euler"
+  target_dt_seconds: null        # null = use the hydrograph native_dt (ADR-0013)
+  convergence_test: false
+  convergence_threshold: 0.01
+  aquifer_lag_active: false      # Phase 1 default: instantaneous Mazure r_e (§13)
+  specific_storage_per_m: null   # required only if aquifer_lag_active = true (ADR-0014)
+
+# --- Output / persistence ----------------------------------------------------
+output:
+  store_trajectories: false      # default off (~800 MB at N=1e5; §12 fm6)
+  persistence_format: "hdf5"
+  results_dir: "results"
+
+# --- Deterministic Sellmeijer / model inputs (ADR-0015) ----------------------
+theta_repose_deg: 37.0                # FIXED (spec §7)
+relative_density_insitu: 0.725        # in-situ D_r (F_r numerator); Pol base case
+alpha_exponent: -0.3333333333333333   # = -1/3 (2D baseline); -0.5 for the 3D sensitivity
