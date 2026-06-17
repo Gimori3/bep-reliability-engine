@@ -232,3 +232,6 @@ __pycache__/
 
 # Reference papers and documentation
 docs/references/
+
+# project workflow
+project-notes.md
