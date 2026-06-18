@@ -10,7 +10,7 @@ BOTH gated behaviours the tests check separately:
 so growth initiates on peak 1, plateaus through the trough, RESUMES on the real
 second peak (uplift latched + heave reactivates), and does NOT resume on the
 dead peak (1.5 m < the 2.04 m heave threshold) even though uplift is latched and
-l > 0. Parameters are identical to ``test_two_peak_*`` (D_bl = 2.0, gamma'_s =
+l > 0. Parameters are identical to ``test_two_peak_*`` (D_bl = 2.0, gamma'_bl =
 10.0, dt = 600 s, etc.).
 
 Four stacked panels on a shared time axis: river stage h(t); pipe length l(t);
@@ -41,8 +41,8 @@ from bep_reliability_engine.progression import (
 plt.switch_backend("Agg")  # headless: save only, never show
 
 # --- configuration (identical to test_two_peak_* + the shared theta) --------
-D_BL_M = 2.0  # blanket thickness -> heave threshold gamma'_s*D_bl/gamma_w
-GAMMA_S_SUB = 10.0
+D_BL_M = 2.0  # blanket thickness -> heave threshold gamma'_bl*D_bl/gamma_w
+GAMMA_BL_SUB = 10.0
 STEPS = 30  # steps per segment
 DT_S = 600.0
 C_E = 0.014
@@ -50,7 +50,7 @@ K_MPS = 1.0e-4
 H_C_M = 5.0
 L_C_M = 10.0
 L_M = 50.0
-THRESHOLD_M = GAMMA_S_SUB * D_BL_M / GAMMA_W  # 2.039 m (ADR-0008 collapse)
+THRESHOLD_M = GAMMA_BL_SUB * D_BL_M / GAMMA_W  # 2.039 m (ADR-0008 collapse)
 
 REPO = Path(__file__).resolve().parents[1]
 OUT_DIR = REPO / "results" / "diagnostics"
@@ -78,7 +78,7 @@ def main() -> None:
         c_e=C_E,
         k_aq_mps=K_MPS,
         d_bl_m=D_BL_M,
-        gamma_s_sub_knpm3=GAMMA_S_SUB,
+        gamma_bl_sub_knpm3=GAMMA_BL_SUB,
         h_c_m=H_C_M,
         l_c_m=L_C_M,
         seepage_length_m=L_M,
@@ -90,8 +90,8 @@ def main() -> None:
     # r_e = 1 and z_toe = 0, so Delta_h_blanket(t) = h(t).
     delta_h = h_river
     h_erosion = delta_h - CRACK_RESISTANCE_FACTOR * D_BL_M
-    uplift_now = z_uplift(delta_h, GAMMA_S_SUB, D_BL_M) < 0.0
-    heave_now = z_heave(delta_h, GAMMA_S_SUB, D_BL_M) < 0.0
+    uplift_now = z_uplift(delta_h, GAMMA_BL_SUB, D_BL_M) < 0.0
+    heave_now = z_heave(delta_h, GAMMA_BL_SUB, D_BL_M) < 0.0
     uplift_ever = np.logical_or.accumulate(uplift_now)
     # l going INTO step k (the value the integrator's I_er sees): l_ini for k=0,
     # else the trajectory after step k-1.
@@ -121,7 +121,7 @@ def main() -> None:
     ax_h.text(
         0.2,
         THRESHOLD_M + 0.1,
-        f"heave/uplift threshold gamma'_s*D_bl/gamma_w = {THRESHOLD_M:.2f} m",
+        f"heave/uplift threshold gamma'_bl*D_bl/gamma_w = {THRESHOLD_M:.2f} m",
         fontsize=8,
     )
     ax_h.set_ylabel("river stage h [m]")

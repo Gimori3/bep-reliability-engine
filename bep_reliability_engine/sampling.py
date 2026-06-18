@@ -14,7 +14,7 @@ perfect LHS stratification" below and in the :func:`sample_theta` docstring.
 
 Canonical column order (the M2 data-flow contract, spec §2)
 -----------------------------------------------------------
-``PARAM_NAMES = ['k_aq', 'd_70', 'D_aq', 'D_bl', 'k_bl', 'gamma_s_sub', 'C_e']``
+``PARAM_NAMES = ['k_aq', 'd_70', 'D_aq', 'D_bl', 'k_bl', 'gamma_bl_sub', 'C_e']``
 
 This is the single authoritative ordering for the whole engine; the consuming
 modules (M6 ``sellmeijer``, M4 ``hydraulics``, M8 ``evaluator``) read their
@@ -50,8 +50,8 @@ lognormal are exactly its logs, so a correlation target stated as
 ``rho(ln k_aq, ln d_70)`` *is* the Gaussian-copula correlation directly:
 ``rho_gauss = rho_log`` with no Nataf root-finding. This is precisely why the
 spec supplies the target in log space (spec §7; this module's
-``rho_log_kaq_d70`` argument). Generalizing to a correlation that involves the
-*normal* gamma_s_sub, or to a target stated in physical space, would reinstate
+``rho_log_kaq_d70`` argument). Generalizing to a correlation that involves a
+*normal* marginal, or to a target stated in physical space, would reinstate
 the Nataf integral and is a documented future extension (spec §7: "any further
 empirically identified correlations applied through the same transform").
 
@@ -90,7 +90,7 @@ sampling math.
 Units and reproducibility
 -------------------------
 Marginals are specified and returned in strict SI / kN-m^3 physical units
-(docs/conventions.md): k_aq, k_bl [m/s]; d_70, D_aq, D_bl [m]; gamma_s_sub
+(docs/conventions.md): k_aq, k_bl [m/s]; d_70, D_aq, D_bl [m]; gamma_bl_sub
 [kN/m^3]; C_e [-]. Unit conversion happens only in M1 config loading, never
 here. M1 ``config`` does not exist yet, so the marginal specs, the target
 log-space correlation, the seed, and the d70 interpretation are taken as direct
@@ -138,7 +138,7 @@ PARAM_NAMES: list[str] = [
     "D_aq",
     "D_bl",
     "k_bl",
-    "gamma_s_sub",
+    "gamma_bl_sub",
     "C_e",
 ]
 
@@ -160,9 +160,10 @@ class MarginalSpec:
     name : str
         Parameter name; must be one of :data:`PARAM_NAMES`.
     family : {'lognormal', 'normal'}
-        Marginal family. Per spec §7 the six geotechnical/erosion variables
-        (k_aq, d_70, D_aq, D_bl, k_bl, C_e) are Lognormal and gamma_s_sub is
-        Normal.
+        Marginal family. All seven canonical variables are Lognormal;
+        gamma_bl_sub (the submerged blanket weight) is Lognormal per ADR-0016
+        and the thesis blanket prior, deviating from the Normal of spec §7.
+        The 'normal' family remains supported by this data holder.
     mean : float
         Marginal mean in physical units (m/s, m, kN/m^3 or dimensionless as
         appropriate). Must be > 0 for a lognormal family.

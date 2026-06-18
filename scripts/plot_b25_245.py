@@ -63,7 +63,7 @@ def main() -> None:
         c_e=C_E,
         k_aq_mps=K_MPS,
         d_bl_m=0.0,
-        gamma_s_sub_knpm3=9.7,
+        gamma_bl_sub_knpm3=9.7,
         h_c_m=H_C_M,
         l_c_m=L_C_M,
         seepage_length_m=L_M,

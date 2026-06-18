@@ -10,7 +10,7 @@
     *   Lengths / Thicknesses / Diameters: Meters ($m$)
     *   Time / Timesteps ($\Delta t$): Seconds ($s$)
     *   Hydraulic Conductivities ($k_{aq}, k_{bl}$): Meters per second ($m/s$)
-    *   Unit Weights ($\gamma'_s, \gamma_w$): Kilonewtons per cubic meter ($kN/m^3$) or Newtons per cubic meter ($N/m^3$). *Note: Maintain absolute internal consistency to eliminate factor-of-1000 conversion slips between Pascal / kPa values during calculation.*
+    *   Unit Weights ($\gamma'_\mathrm{bl}, \gamma'_\mathrm{p}, \gamma_w$): Kilonewtons per cubic meter ($kN/m^3$) or Newtons per cubic meter ($N/m^3$). *Note: Maintain absolute internal consistency to eliminate factor-of-1000 conversion slips between Pascal / kPa values during calculation.*
     *   Erosion Coefficient ($C_e$): Dimensionless ($-$)
 *   **Angles:** Must be maintained as **Radians** internally.
 *   **I/O Boundaries:** Conversions from standard site data units (e.g., permeability in $m/\text{day}$, grain size in $mm$, or angles in degrees) must happen *exclusively* inside `M1 (config)` loading or `M3 (hydrograph_loader)`. No hidden adjustments are permitted inside physics kernels.

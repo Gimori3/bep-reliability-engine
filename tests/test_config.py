@@ -11,7 +11,7 @@ order.
 
 Representative values are the Tokachi A_c/A_g stand-ins used across the suite
 (``tests/test_sampling.py``, ``tests/test_hydraulics.py``): k_aq ~ 2e-3 m/s,
-k_bl ~ 2e-6 m/s, d_70 ~ 2e-4 m, gamma_s_sub ~ 10 kN/m^3, C_e ~ 0.014.
+k_bl ~ 2e-6 m/s, d_70 ~ 2e-4 m, gamma_bl_sub ~ 6.9 kN/m^3, C_e ~ 0.014.
 """
 
 import copy
@@ -42,7 +42,7 @@ def _valid_config_dict() -> dict:
                 "D_aq": {"family": "lognormal", "mean": 20.0, "cov": 0.20},
                 "D_bl": {"family": "lognormal", "mean": 3.0, "cov": 0.20},
                 "k_bl": {"family": "lognormal", "mean": 2.0e-6, "cov": 0.50},
-                "gamma_s_sub": {"family": "normal", "mean": 10.0, "cov": 0.05},
+                "gamma_bl_sub": {"family": "lognormal", "mean": 6.9, "cov": 0.056},
                 "C_e": {"family": "lognormal", "mean": 0.014, "cov": 0.50},
                 "bounds": {"d_70": [50.0e-6, 1.0e-3]},
                 "d70_interpretation": "matrix",
@@ -141,7 +141,9 @@ def test_to_marginal_specs_canonical_order_and_values() -> None:
     assert by_name["k_aq"].family == "lognormal"
     assert by_name["k_aq"].mean == 2.0e-3
     assert by_name["k_aq"].cov == 0.50
-    assert by_name["gamma_s_sub"].family == "normal"
+    assert by_name["gamma_bl_sub"].family == "lognormal"
+    assert by_name["gamma_bl_sub"].mean == 6.9
+    assert by_name["gamma_bl_sub"].cov == 0.056
     assert by_name["C_e"].mean == 0.014
 
 

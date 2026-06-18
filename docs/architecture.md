@@ -52,7 +52,7 @@ The architecture decomposes into nine logical modules. Each has one clear respon
 
 ```
 theta_matrix: ndarray shape (N, 7)
-param_names:  ['k_aq', 'd_70', 'D_aq', 'D_bl', 'k_bl', 'gamma_s_sub', 'C_e']
+param_names:  ['k_aq', 'd_70', 'D_aq', 'D_bl', 'k_bl', 'gamma_bl_sub', 'C_e']
 ```
 
 Contract: rows are LHS draws with the mandatory k_aq–d70 Nataf correlation imposed (see §7), and any further empirically identified correlations applied through the same transform; columns are physical-units parameter values; and the RNG seed in config fully determines the matrix. All downstream modules access columns by name via `theta_matrix[:, param_names.index('k_aq')]` or, preferably, via a thin wrapper that exposes named access.
@@ -256,10 +256,10 @@ The static limit state is fully vectorizable: a single boolean comparison across
 h_t                = h_river[k]                                            # scalar
 delta_h_vec        = r_e_vec * (h_t - z_toe)                              # shape (N,)
 H_erosion_vec      = delta_h_vec - 0.3 * D_bl_vec                         # erosion driver only
-Z_u_vec            = (gamma_s_sub_vec * D_bl_vec) / gamma_w - delta_h_vec
+Z_u_vec            = (gamma_bl_sub_vec * D_bl_vec) / gamma_w - delta_h_vec
 uplift_ever_vec   |= (Z_u_vec < 0)
 i_exit_vec         = delta_h_vec / D_bl_vec
-Z_h_vec            = gamma_s_sub_vec / gamma_w - i_exit_vec
+Z_h_vec            = gamma_bl_sub_vec / gamma_w - i_exit_vec
 heave_now_vec      = (Z_h_vec < 0)
 I_er_vec           = (uplift_ever_vec | (l_current_vec > 0)) & heave_now_vec
 

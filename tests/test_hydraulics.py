@@ -49,7 +49,7 @@ FORESHORE_WIDTHS_M = (44.0, 200.0, 325.0, 600.0)
 DT_S = 600.0
 
 # Spec §2 theta column order; M4 consumes k_aq, D_aq, D_bl, k_bl.
-PARAM_NAMES = ["k_aq", "d_70", "D_aq", "D_bl", "k_bl", "gamma_s_sub", "C_e"]
+PARAM_NAMES = ["k_aq", "d_70", "D_aq", "D_bl", "k_bl", "gamma_bl_sub", "C_e"]
 
 
 def _flashy_hydrograph(
@@ -100,7 +100,7 @@ def _theta_matrix(n: int, seed: int) -> np.ndarray:
             rng.lognormal(np.log(20.0), 0.2, n),  # D_aq [m]
             rng.lognormal(np.log(3.0), 0.2, n),  # D_bl [m]
             rng.lognormal(np.log(2.0e-6), 0.4, n),  # k_bl [m/s], A_c
-            rng.normal(10.0, 0.5, n),  # gamma_s_sub [kN/m3] (unused)
+            rng.normal(10.0, 0.5, n),  # gamma_bl_sub [kN/m3] (unused)
             rng.lognormal(np.log(0.014), 0.5, n),  # C_e [-] (unused in M4)
         ]
     )

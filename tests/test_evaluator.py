@@ -55,7 +55,7 @@ from bep_reliability_engine.progression import (
 from bep_reliability_engine.sellmeijer import compute_critical_head
 
 # Canonical theta column order (spec §2, M2 contract).
-PARAM_NAMES = ["k_aq", "d_70", "D_aq", "D_bl", "k_bl", "gamma_s_sub", "C_e"]
+PARAM_NAMES = ["k_aq", "d_70", "D_aq", "D_bl", "k_bl", "gamma_bl_sub", "C_e"]
 I_K_AQ, I_D70, I_D_AQ, I_D_BL, I_K_BL, I_GAMMA, I_C_E = range(7)
 
 # Deterministic fixture. lambda_in = sqrt(k_aq*D_aq*D_bl/k_bl)
@@ -292,7 +292,7 @@ def test_subcritical_peak_no_failure_no_growth() -> None:
     """A sub-threshold peak: both branches safe, no growth, flags off, t_uh NaN.
 
     delta_h_blanket = r_e*(4 - 2) = 1.0 m is below the uplift/heave threshold
-    gamma'_s*D_bl/gamma_w = 16*3/9.81 = 4.89 m, so the gate never opens: l stays
+    gamma'_bl*D_bl/gamma_w = 16*3/9.81 = 4.89 m, so the gate never opens: l stays
     at l_ini = 0, Z_transient = L, and uplift/heave never latch.
     """
     H_c, _l_c, _lambda_in, r_e = _reference_preamble(THETA, GEOMETRY)
@@ -426,7 +426,7 @@ THETA_ROWS = [
 ]
 
 # Peak high enough that the uplift/heave gate opens on every row (the highest
-# threshold is row C: gamma'_s*D_bl/gamma_w = 18*4/9.81 = 7.34 m; r_e*(20-2)
+# threshold is row C: gamma'_bl*D_bl/gamma_w = 18*4/9.81 = 7.34 m; r_e*(20-2)
 # clears it on all three rows), so the transient grows and the crack offset can
 # be checked through l_e on each row.
 CROSS_ROW_PEAK = 20.0

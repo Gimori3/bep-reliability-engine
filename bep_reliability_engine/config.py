@@ -98,16 +98,18 @@ __all__ = [
 # for heavy-tailed priors while rejecting the unit slip decisively.
 MAX_COV: float = 2.0
 
-# Canonical marginal family per parameter (spec §7): the six geotechnical /
-# erosion variables are Lognormal; gamma_s_sub is Normal. Families are fixed by
-# the spec, so config validates them rather than treating them as free choices.
+# Canonical marginal family per parameter: all seven variables are Lognormal.
+# gamma_bl_sub (the submerged blanket weight) is Lognormal per ADR-0016 and the
+# thesis blanket prior -- a deliberate deviation from the Normal of spec §7,
+# adopted together with the gamma'_s -> {gamma'_bl, gamma'_p} split. Families are
+# fixed here, so config validates them rather than treating them as free choices.
 CANONICAL_FAMILY: dict[str, MarginalFamily] = {
     "k_aq": "lognormal",
     "d_70": "lognormal",
     "D_aq": "lognormal",
     "D_bl": "lognormal",
     "k_bl": "lognormal",
-    "gamma_s_sub": "normal",
+    "gamma_bl_sub": "lognormal",
     "C_e": "lognormal",
 }
 
@@ -230,9 +232,10 @@ class PriorSpecs(_StrictModel):
 
     Attributes
     ----------
-    k_aq, d_70, D_aq, D_bl, k_bl, gamma_s_sub, C_e : PriorSpec
-        The seven marginals in canonical order. Six lognormal, gamma_s_sub
-        normal (spec §7).
+    k_aq, d_70, D_aq, D_bl, k_bl, gamma_bl_sub, C_e : PriorSpec
+        The seven marginals in canonical order. All seven Lognormal;
+        gamma_bl_sub is Lognormal per ADR-0016 / the thesis blanket prior
+        (deviating from the Normal of spec §7).
     bounds : dict of str to tuple of (float, float), optional
         Per-parameter physical clip ``(low, high)`` applied at the sampler
         stage (spec §12 failure mode 2; e.g. ``{'d_70': (50e-6, 1e-3)}``).
@@ -252,7 +255,7 @@ class PriorSpecs(_StrictModel):
     D_aq: PriorSpec
     D_bl: PriorSpec
     k_bl: PriorSpec
-    gamma_s_sub: PriorSpec
+    gamma_bl_sub: PriorSpec
     C_e: PriorSpec
     bounds: dict[str, tuple[float, float]] | None = Field(
         default=None, description="Optional per-parameter (low, high) clip (§12 fm2)."

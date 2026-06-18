@@ -39,7 +39,7 @@ import numpy as np
 from bep_reliability_engine.evaluator import EvaluationResult, evaluate_realization
 
 # Small prior-style theta matrix in the canonical column order
-# ['k_aq', 'd_70', 'D_aq', 'D_bl', 'k_bl', 'gamma_s_sub', 'C_e'] (spec §2).
+# ['k_aq', 'd_70', 'D_aq', 'D_bl', 'k_bl', 'gamma_bl_sub', 'C_e'] (spec §2).
 # Plausible SI values spanning weak-to-strong configurations; chosen only so
 # every row yields a positive H_c, not to force any particular failure pattern.
 THETA_MATRIX = np.array(

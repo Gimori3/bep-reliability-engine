@@ -27,7 +27,7 @@ from bep_reliability_engine.sellmeijer import (
 )
 
 # Canonical theta-vector column order (spec section 2, M2 contract).
-PARAM_NAMES = ["k_aq", "d_70", "D_aq", "D_bl", "k_bl", "gamma_s_sub", "C_e"]
+PARAM_NAMES = ["k_aq", "d_70", "D_aq", "D_bl", "k_bl", "gamma_bl_sub", "C_e"]
 
 # Submerged particle unit weight of the IJkdijk sand [kN/m^3]:
 # rho_s = 2.50 Mg/m^3, rho_w = 1.00 Mg/m^3 (Pol 2022 thesis Appendix A,
@@ -40,13 +40,16 @@ GAMMA_SUB_IJKDIJK_KN_M3 = 14.715
 GAMMA_SUB_POL_BASE_KN_M3 = 16.1865
 
 
-def _theta_row(k_aq, d_70, D_aq, gamma_s_sub, D_bl=4.0, k_bl=1.0e-7, C_e=0.014):
+def _theta_row(k_aq, d_70, D_aq, D_bl=4.0, k_bl=1.0e-7, gamma_bl_sub=6.9, C_e=0.014):
     """Assemble one theta row in the canonical column order.
 
-    D_bl, k_bl and C_e do not enter H_c (the static branch has no C_e
-    exposure by design, ADR-0001); plausible filler values are used.
+    None of D_bl, k_bl, the blanket weight gamma_bl_sub, or C_e enters H_c:
+    the static branch has no C_e exposure by design (ADR-0001), and the
+    Sellmeijer particle weight gamma'_p is a deterministic argument to
+    ``compute_critical_head``, not the theta blanket entry (ADR-0016).
+    Plausible filler values are used for the unused columns.
     """
-    return np.array([k_aq, d_70, D_aq, D_bl, k_bl, gamma_s_sub, C_e])
+    return np.array([k_aq, d_70, D_aq, D_bl, k_bl, gamma_bl_sub, C_e])
 
 
 def _random_theta_matrix(rng, n):
@@ -59,7 +62,7 @@ def _random_theta_matrix(rng, n):
             rng.uniform(2.0, 40.0, n),  # D_aq [m]
             rng.uniform(0.5, 10.0, n),  # D_bl [m] (unused by H_c)
             rng.uniform(1.0e-9, 1.0e-6, n),  # k_bl [m/s] (unused by H_c)
-            rng.uniform(13.0, 18.0, n),  # gamma_s_sub [kN/m^3]
+            rng.uniform(5.0, 12.0, n),  # gamma_bl_sub [kN/m^3] (unused by H_c)
             rng.uniform(0.005, 0.05, n),  # C_e [-] (unused by H_c)
         ]
     )
@@ -124,8 +127,10 @@ def test_hc_ijkdijk_case_1():
     # regression noise, section 6; 13.4% model drift) and states the fine
     # sand predictions "agree quite well" (section 8). Formula [6]
     # evaluates to 2.07 m for these inputs (-10% vs observed).
-    theta = _theta_row(8.0e-5, 180e-6, 3.00, GAMMA_SUB_IJKDIJK_KN_M3)
-    h_c = compute_critical_head(theta, {"L": 15.0}).H_c
+    theta = _theta_row(8.0e-5, 180e-6, 3.00)
+    h_c = compute_critical_head(
+        theta, {"L": 15.0}, gamma_p_sub_kn_m3=GAMMA_SUB_IJKDIJK_KN_M3
+    ).H_c
     assert h_c == pytest.approx(2.30, rel=0.15)
 
 
@@ -139,8 +144,10 @@ def test_hc_ijkdijk_case_2():
     # prediction for this coarse-sand test "deviates from the experiment
     # by 25%" (sections 8 and 9). Formula [6] evaluates to 2.01 m for
     # these inputs (+15% vs observed).
-    theta = _theta_row(1.4e-4, 260e-6, 2.85, GAMMA_SUB_IJKDIJK_KN_M3)
-    h_c = compute_critical_head(theta, {"L": 15.0}).H_c
+    theta = _theta_row(1.4e-4, 260e-6, 2.85)
+    h_c = compute_critical_head(
+        theta, {"L": 15.0}, gamma_p_sub_kn_m3=GAMMA_SUB_IJKDIJK_KN_M3
+    ).H_c
     assert h_c == pytest.approx(1.75, rel=0.25)
 
 
@@ -152,8 +159,10 @@ def test_hc_ijkdijk_case_3():
     # Table A.3; Sellmeijer (2011) section 7 / Fig. 7 describes the test.
     # Tolerance 15% as in case 1; formula [6] evaluates to 2.07 m for
     # these inputs (-1.6% vs observed).
-    theta = _theta_row(8.0e-5, 180e-6, 3.00, GAMMA_SUB_IJKDIJK_KN_M3)
-    h_c = compute_critical_head(theta, {"L": 15.0}).H_c
+    theta = _theta_row(8.0e-5, 180e-6, 3.00)
+    h_c = compute_critical_head(
+        theta, {"L": 15.0}, gamma_p_sub_kn_m3=GAMMA_SUB_IJKDIJK_KN_M3
+    ).H_c
     assert h_c == pytest.approx(2.10, rel=0.15)
 
 
@@ -170,8 +179,10 @@ def test_hc_pol_base_case():
     # Direct evaluation of formula [6] gives H_c = 2.66 m (nu = 1.3e-6
     # m^2/s vs the paper's implied 1.33e-6, a 0.8% difference in F_s),
     # so the assertion brackets [2.4, 3.0] with the gradient bound.
-    theta = _theta_row(1.62e-4, 200e-6, 10.0, GAMMA_SUB_POL_BASE_KN_M3)
-    h_c = compute_critical_head(theta, {"L": 30.0}).H_c
+    theta = _theta_row(1.62e-4, 200e-6, 10.0)
+    h_c = compute_critical_head(
+        theta, {"L": 30.0}, gamma_p_sub_kn_m3=GAMMA_SUB_POL_BASE_KN_M3
+    ).H_c
     assert 2.4 <= h_c <= 3.0
     assert h_c / 30.0 <= 0.10
 
@@ -193,20 +204,30 @@ def test_alpha_exponent_hook():
     # ~2.7 m for the 2D Sellmeijer model).
     # Representative field-scale set: L = 50 m, D_aq = 10 m, Pol base-case
     # sand (k_aq = 1.62e-4 m/s, d_70 = 0.200 mm, gamma'_p = 16.19 kN/m^3).
-    theta = _theta_row(1.62e-4, 200e-6, 10.0, GAMMA_SUB_POL_BASE_KN_M3)
+    theta = _theta_row(1.62e-4, 200e-6, 10.0)
     geometry = {"L": 50.0}
-    h_c_2d = compute_critical_head(theta, geometry, alpha_exponent=-1.0 / 3.0).H_c
-    h_c_3d = compute_critical_head(theta, geometry, alpha_exponent=-1.0 / 2.0).H_c
+    h_c_2d = compute_critical_head(
+        theta,
+        geometry,
+        alpha_exponent=-1.0 / 3.0,
+        gamma_p_sub_kn_m3=GAMMA_SUB_POL_BASE_KN_M3,
+    ).H_c
+    h_c_3d = compute_critical_head(
+        theta,
+        geometry,
+        alpha_exponent=-1.0 / 2.0,
+        gamma_p_sub_kn_m3=GAMMA_SUB_POL_BASE_KN_M3,
+    ).H_c
     assert h_c_3d < h_c_2d
 
 
 def test_scalar_raises_on_nonphysical_hc():
-    # Spec section 12, failure mode 2 guard: gamma'_s = 0 zeroes F_r and
+    # Spec section 12, failure mode 2 guard: gamma'_p = 0 zeroes F_r and
     # hence H_c exactly, which the scalar evaluator must reject with a
     # ValueError naming the offending parameters rather than return.
-    theta = _theta_row(8.0e-5, 180e-6, 3.00, 0.0)
+    theta = _theta_row(8.0e-5, 180e-6, 3.00)
     with pytest.raises(ValueError, match="Non-positive critical head"):
-        compute_critical_head(theta, {"L": 15.0})
+        compute_critical_head(theta, {"L": 15.0}, gamma_p_sub_kn_m3=0.0)
 
 
 def test_hc_positive_for_large_sample():
@@ -214,7 +235,8 @@ def test_hc_positive_for_large_sample():
     # over physically defensible parameter bounds. Bounds: d_70 within the
     # Sellmeijer (2011) Table 2 validity range [150 um, 430 um]; k_aq in
     # [1e-5, 1e-3] m/s (silty sand to coarse sand/gravel); D_aq in
-    # [2, 40] m; gamma'_p in [13, 18] kN/m^3 (quartz-density sands).
+    # [2, 40] m. gamma'_p is deterministic (GAMMA_P_SUB_DEFAULT, ADR-0016),
+    # so the blanket-weight column does not enter H_c here.
     rng = np.random.default_rng(20260610)
     n = 1000
     theta_matrix = _random_theta_matrix(rng, n)

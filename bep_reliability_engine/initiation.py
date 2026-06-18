@@ -1,7 +1,7 @@
 """M5 ``initiation_evaluator``: uplift and heave limit states and the I_er gate.
 
 Single responsibility (spec §1, M5): STPH gating logic. Given the un-reduced
-blanket overpressure Delta_h_blanket(t) from M4 and the sampled (gamma'_s,
+blanket overpressure Delta_h_blanket(t) from M4 and the sampled (gamma'_bl,
 D_bl), evaluate the uplift and heave limit states (spec §3 steps d and g) and
 combine the caller-held gate booleans into the erosion indicator I_er(t)
 (step 8i) that switches the M7 progression rate on and off.
@@ -51,7 +51,7 @@ conservatism grows under the elongated +4K hydrographs.
 
 ADR-0008 collapse
 -----------------
-With the Terzaghi critical gradient gamma'_s/gamma_w in place of Pol's
+With the Terzaghi critical gradient gamma'_bl/gamma_w in place of Pol's
 independent i_c,h, the two limit states are one threshold at two scales::
 
     Z_heave = Z_uplift / D_bl
@@ -60,7 +60,7 @@ so they change sign at the same instant and I_er reduces to ``heave_now``
 under the baseline parameterization. Diagnostics showing ``uplift_occurred``
 and ``heave_occurred`` latching at the same timestep are correct, not a bug.
 The full three-input gate is nonetheless retained: it becomes load-bearing
-the moment i_c,h is decoupled from gamma'_s/gamma_w (e.g. a sensitivity run
+the moment i_c,h is decoupled from gamma'_bl/gamma_w (e.g. a sensitivity run
 with Pol's Lognormal(0.7, 0.1)). See ADR-0008 for the algebra and the
 conservatism consequence.
 
@@ -78,7 +78,7 @@ Units and datum
 ---------------
 Heads and lengths in strict SI (m). Unit weights are passed in the units of
 ``constants.GAMMA_W`` (kN/m3, per the spec §7 theta contract): only the
-dimensionless ratio gamma'_s/gamma_w enters the kernels, so the ratio is
+dimensionless ratio gamma'_bl/gamma_w enters the kernels, so the ratio is
 unit-safe as long as the two share units. Delta_h_blanket is an overpressure
 relative to z_toe, the polder surface elevation at the landside exit point,
 identical to Pol's h_e datum of Eqs. (6) and (8) (ADR-0007).
@@ -107,14 +107,14 @@ __all__ = [
 
 def z_uplift(
     delta_h_blanket_m: ArrayLike,
-    gamma_s_sub_knpm3: ArrayLike,
+    gamma_bl_sub_knpm3: ArrayLike,
     d_bl_m: ArrayLike,
 ) -> NDArray[np.float64]:
     """Uplift limit state Z_u at the blanket base (spec §3 step d).
 
     Implements::
 
-        Z_uplift = (gamma_s_sub * D_bl) / gamma_w - delta_h_blanket
+        Z_uplift = (gamma_bl_sub * D_bl) / gamma_w - delta_h_blanket
 
     with gamma_w = ``constants.GAMMA_W``. Resistance minus load: negative
     where the blanket overpressure exceeds the submerged blanket weight.
@@ -125,11 +125,11 @@ def z_uplift(
         Un-reduced blanket overpressure Delta_h_blanket = h_aq - z_toe [m]
         from the M4 head model (spec §3 step b). Never the crack-reduced
         erosion head, which is M7-only (module docstring, Driving head).
-    gamma_s_sub_knpm3 : array_like of float
+    gamma_bl_sub_knpm3 : array_like of float
         Submerged (effective) blanket unit weight
-        gamma'_s = gamma_bl,sat - gamma_w [kN/m3]. Sampled (theta). Must
+        gamma'_bl = gamma_bl,sat - gamma_w [kN/m3]. Sampled (theta). Must
         share units with ``constants.GAMMA_W``; only the ratio
-        gamma'_s/gamma_w enters.
+        gamma'_bl/gamma_w enters.
     d_bl_m : array_like of float
         Hinterland blanket thickness D_bl [m]. Sampled (theta).
 
@@ -145,21 +145,21 @@ def z_uplift(
     rigid blanket column over a unit area; no shear, cohesion, or model
     factor (Pol's m_u is deliberately not carried; model-uncertainty
     calibration concentrates in the stochastic C_e, ADR-0008). This is Pol
-    SIE 2024 Eq. (8) / thesis Eq. (6.7) with gamma'_s = gamma_bl,sat -
+    SIE 2024 Eq. (8) / thesis Eq. (6.7) with gamma'_bl = gamma_bl,sat -
     gamma_w, in the resistance-minus-load reading (the printed term order
     is flipped; module docstring, Sign convention). The running-minimum
     latch min_{0..t} Z_u < 0 is the caller's responsibility: M7 latches
     ``uplift_ever`` from this kernel's sign once per timestep, per event.
     """
     delta_h = np.asarray(delta_h_blanket_m, dtype=np.float64)
-    gamma_s_sub = np.asarray(gamma_s_sub_knpm3, dtype=np.float64)
+    gamma_bl_sub = np.asarray(gamma_bl_sub_knpm3, dtype=np.float64)
     d_bl = np.asarray(d_bl_m, dtype=np.float64)
-    return (gamma_s_sub * d_bl) / GAMMA_W - delta_h
+    return (gamma_bl_sub * d_bl) / GAMMA_W - delta_h
 
 
 def z_heave(
     delta_h_blanket_m: ArrayLike,
-    gamma_s_sub_knpm3: ArrayLike,
+    gamma_bl_sub_knpm3: ArrayLike,
     d_bl_m: ArrayLike,
 ) -> NDArray[np.float64]:
     """Heave limit state Z_h at the exit point (spec §3 steps f and g).
@@ -167,7 +167,7 @@ def z_heave(
     Implements::
 
         i_exit  = delta_h_blanket / D_bl
-        Z_heave = gamma_s_sub / gamma_w - i_exit
+        Z_heave = gamma_bl_sub / gamma_w - i_exit
 
     with gamma_w = ``constants.GAMMA_W``. Resistance minus load: negative
     where the exit gradient exceeds the Terzaghi critical gradient.
@@ -178,11 +178,11 @@ def z_heave(
         Un-reduced blanket overpressure Delta_h_blanket = h_aq - z_toe [m]
         from the M4 head model (spec §3 step b). Never the crack-reduced
         erosion head, which is M7-only (module docstring, Driving head).
-    gamma_s_sub_knpm3 : array_like of float
+    gamma_bl_sub_knpm3 : array_like of float
         Submerged (effective) blanket unit weight
-        gamma'_s = gamma_bl,sat - gamma_w [kN/m3]. Sampled (theta). Must
+        gamma'_bl = gamma_bl,sat - gamma_w [kN/m3]. Sampled (theta). Must
         share units with ``constants.GAMMA_W``; only the ratio
-        gamma'_s/gamma_w enters.
+        gamma'_bl/gamma_w enters.
     d_bl_m : array_like of float
         Hinterland blanket thickness D_bl [m]. Sampled (theta).
 
@@ -197,7 +197,7 @@ def z_heave(
     Mathematical assumptions: linear head loss across the blanket
     thickness, so the exit gradient is i_exit = Delta_h_blanket / D_bl
     (spec §3 step f); the critical gradient is the Terzaghi fluidization
-    value i_c = gamma'_s/gamma_w, substituted for Pol's independent
+    value i_c = gamma'_bl/gamma_w, substituted for Pol's independent
     empirical i_c,h ~ Lognormal(0.7, 0.1) (Schweckendiek et al. 2014; SIE
     2024 Table 2) per ADR-0008. The substitution makes this kernel
     identically ``z_uplift(...) / D_bl``: both limit states flip sign at
@@ -211,10 +211,10 @@ def z_heave(
     (module docstring, Sign convention).
     """
     delta_h = np.asarray(delta_h_blanket_m, dtype=np.float64)
-    gamma_s_sub = np.asarray(gamma_s_sub_knpm3, dtype=np.float64)
+    gamma_bl_sub = np.asarray(gamma_bl_sub_knpm3, dtype=np.float64)
     d_bl = np.asarray(d_bl_m, dtype=np.float64)
     i_exit = delta_h / d_bl
-    return gamma_s_sub / GAMMA_W - i_exit
+    return gamma_bl_sub / GAMMA_W - i_exit
 
 
 def erosion_indicator(
@@ -265,7 +265,7 @@ def erosion_indicator(
     ``heave_now``, because Z_heave = Z_uplift / D_bl makes ``heave_now``
     imply ``uplift_ever`` from the same timestep onward. The full
     three-input structure is retained on purpose: it becomes load-bearing
-    the moment i_c,h is decoupled from gamma'_s/gamma_w (e.g. a
+    the moment i_c,h is decoupled from gamma'_bl/gamma_w (e.g. a
     sensitivity run with Pol's Lognormal(0.7, 0.1)). Do not simplify it
     away (ADR-0008).
     """

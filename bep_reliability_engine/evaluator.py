@@ -230,7 +230,7 @@ def evaluate_realization(
     ----------
     theta_row : numpy.ndarray, shape (7,)
         One realization's parameter vector in the canonical column order
-        ``['k_aq', 'd_70', 'D_aq', 'D_bl', 'k_bl', 'gamma_s_sub', 'C_e']``
+        ``['k_aq', 'd_70', 'D_aq', 'D_bl', 'k_bl', 'gamma_bl_sub', 'C_e']``
         (spec §2, M2 contract), in strict SI / kN-m^3 units. Consumed by all
         of M4, M6 and M7; ``C_e`` enters only the transient branch (the static
         branch has no C_e exposure by design, ADR-0001).
@@ -300,7 +300,7 @@ def evaluate_realization(
     d_aq_m = float(theta_row[2])
     d_bl_m = float(theta_row[3])
     k_bl_mps = float(theta_row[4])
-    gamma_s_sub_knpm3 = float(theta_row[5])
+    gamma_bl_sub_knpm3 = float(theta_row[5])
     c_e = float(theta_row[6])
 
     # --- Shared preamble (spec §3 steps 1-3; §4): computed exactly once and
@@ -354,7 +354,7 @@ def evaluate_realization(
         c_e=c_e,
         k_aq_mps=k_aq_mps,
         d_bl_m=d_bl_m,
-        gamma_s_sub_knpm3=gamma_s_sub_knpm3,
+        gamma_bl_sub_knpm3=gamma_bl_sub_knpm3,
         h_c_m=h_c_m,
         l_c_m=l_c_m,
         seepage_length_m=seepage_length_m,

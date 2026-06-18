@@ -13,7 +13,7 @@ is implemented (the M4 precedent). Two tiers:
 
 Marginal values are physically representative of the Tokachi A_c / A_g
 stratigraphy (matching ``tests/test_hydraulics.py``): k_aq ~ 2e-3 m/s (A_g),
-k_bl ~ 2e-6 m/s (A_c), d_70 ~ 2e-4 m, gamma_s_sub ~ 10 kN/m^3, C_e ~ 0.014.
+k_bl ~ 2e-6 m/s (A_c), d_70 ~ 2e-4 m, gamma_bl_sub ~ 6.9 kN/m^3, C_e ~ 0.014.
 The COVs are fixed by spec §7; the means are site-stand-ins. The expected
 lognormal/normal moment-matching is recomputed here independently of the
 module, so these are genuine checks rather than a mirror of the implementation.
@@ -38,7 +38,7 @@ MARGINAL_TABLE: dict[str, tuple[str, float, float]] = {
     "D_aq": ("lognormal", 20.0, 0.20),
     "D_bl": ("lognormal", 3.0, 0.20),
     "k_bl": ("lognormal", 2.0e-6, 0.50),
-    "gamma_s_sub": ("normal", 10.0, 0.05),
+    "gamma_bl_sub": ("lognormal", 6.9, 0.056),
     "C_e": ("lognormal", 0.014, 0.50),
 }
 
@@ -112,7 +112,7 @@ def test_param_names_is_the_canonical_order() -> None:
         "D_aq",
         "D_bl",
         "k_bl",
-        "gamma_s_sub",
+        "gamma_bl_sub",
         "C_e",
     ]
 
@@ -138,8 +138,14 @@ def test_marginalspec_rejects_nonpositive_lognormal_mean() -> None:
 
 
 def test_normal_marginal_allows_any_mean_sign() -> None:
-    """Only lognormals require a positive mean; normals do not."""
-    spec = MarginalSpec("gamma_s_sub", "normal", 10.0, 0.05)
+    """Only lognormals require a positive mean; the normal family does not.
+
+    The canonical vector no longer contains a Normal marginal (gamma_bl_sub is
+    Lognormal per ADR-0016), but ``MarginalSpec`` still supports the 'normal'
+    family and does not bind a name to a family, so this exercises that branch
+    directly with a deliberately off-canonical construction.
+    """
+    spec = MarginalSpec("gamma_bl_sub", "normal", -5.0, 0.05)
     assert spec.family == "normal"
 
 
@@ -266,7 +272,7 @@ def test_lhs_stratification_with_correlation_perturbation() -> None:
         n_samples=n,
     )
     # Variables untouched by the correlation keep pristine one-per-stratum LHS.
-    for name in ["D_aq", "D_bl", "k_bl", "gamma_s_sub", "C_e"]:
+    for name in ["D_aq", "D_bl", "k_bl", "gamma_bl_sub", "C_e"]:
         u = _uniform_percentiles(sample.column(name), name)
         assert _is_perfectly_stratified(u, n), name
 
@@ -347,7 +353,7 @@ def test_metadata_records_provenance_in_correlated_mode() -> None:
     assert md["seed"] == 41
     assert md["c_e_stochastic"] is True
     assert md["prior_covs"]["k_aq"] == pytest.approx(0.50)
-    assert md["prior_families"]["gamma_s_sub"] == "normal"
+    assert md["prior_families"]["gamma_bl_sub"] == "lognormal"
 
 
 def test_bounds_clip_pathological_tails() -> None:

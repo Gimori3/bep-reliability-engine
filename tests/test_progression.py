@@ -164,10 +164,10 @@ def test_progression_rate_exactly_linear_in_c_e() -> None:
 # Nonzero datum so a datum error cannot cancel: z_toe = h_e = 2.0 m.
 DATUM_Z_TOE_M = 2.0
 DATUM_D_BL_M = 1.0
-DATUM_GAMMA_S_SUB = 10.0
+DATUM_GAMMA_BL_SUB = 10.0
 # Uplift = heave threshold overpressure (ADR-0008 collapse):
-# gamma'_s * D_bl / gamma_w = 10/9.81 = 1.0194 m.
-DATUM_THRESHOLD_M = DATUM_GAMMA_S_SUB * DATUM_D_BL_M / GAMMA_W
+# gamma'_bl * D_bl / gamma_w = 10/9.81 = 1.0194 m.
+DATUM_THRESHOLD_M = DATUM_GAMMA_BL_SUB * DATUM_D_BL_M / GAMMA_W
 
 
 def _one_step(delta_h_blanket_m: float) -> ProgressionResult:
@@ -181,7 +181,7 @@ def _one_step(delta_h_blanket_m: float) -> ProgressionResult:
         c_e=0.014,
         k_aq_mps=1e-4,
         d_bl_m=DATUM_D_BL_M,
-        gamma_s_sub_knpm3=DATUM_GAMMA_S_SUB,
+        gamma_bl_sub_knpm3=DATUM_GAMMA_BL_SUB,
         h_c_m=5.0,
         l_c_m=10.0,
         seepage_length_m=50.0,
@@ -258,7 +258,7 @@ def _two_peak_event(second_peak_m: float) -> ProgressionResult:
         c_e=0.014,
         k_aq_mps=1e-4,
         d_bl_m=TWO_PEAK_D_BL,
-        gamma_s_sub_knpm3=TWO_PEAK_GAMMA,
+        gamma_bl_sub_knpm3=TWO_PEAK_GAMMA,
         h_c_m=5.0,
         l_c_m=10.0,
         seepage_length_m=50.0,
@@ -340,7 +340,7 @@ def test_monotone_nondecreasing_and_bounded_by_seepage_length() -> None:
         c_e=rng.lognormal(np.log(0.014), 0.5, n_real),
         k_aq_mps=rng.lognormal(np.log(3e-4), 0.7, n_real),
         d_bl_m=rng.lognormal(np.log(1.5), 0.3, n_real),
-        gamma_s_sub_knpm3=rng.normal(10.0, 0.5, n_real),
+        gamma_bl_sub_knpm3=rng.normal(10.0, 0.5, n_real),
         h_c_m=rng.uniform(0.5, 3.0, n_real),
         l_c_m=rng.uniform(5.0, 20.0, n_real),
         seepage_length_m=length,
@@ -375,7 +375,7 @@ def test_vanishing_c_e_freezes_pipe_regardless_of_hydrograph() -> None:
         c_e=np.array([0.0, 0.014]),
         k_aq_mps=3e-4,
         d_bl_m=1.0,
-        gamma_s_sub_knpm3=10.0,
+        gamma_bl_sub_knpm3=10.0,
         h_c_m=2.0,
         l_c_m=10.0,
         seepage_length_m=50.0,
@@ -395,7 +395,7 @@ def test_vanishing_k_aq_freezes_pipe_regardless_of_hydrograph() -> None:
         c_e=0.014,
         k_aq_mps=np.array([0.0, 3e-4]),
         d_bl_m=1.0,
-        gamma_s_sub_knpm3=10.0,
+        gamma_bl_sub_knpm3=10.0,
         h_c_m=2.0,
         l_c_m=10.0,
         seepage_length_m=50.0,
@@ -472,7 +472,7 @@ def _b25_245_replay(
         c_e=c_e,
         k_aq_mps=B25_K_MPS,
         d_bl_m=0.0,  # no-blanket laboratory configuration
-        gamma_s_sub_knpm3=9.7,  # inert at D_bl = 0
+        gamma_bl_sub_knpm3=9.7,  # inert at D_bl = 0
         h_c_m=B25_H_C_M,
         l_c_m=B25_L_C_M,
         seepage_length_m=B25_L_M,
@@ -632,7 +632,7 @@ def _s2_2_replay(
         c_e=S2_C_E,
         k_aq_mps=S2_K_MPS,
         d_bl_m=0.0,
-        gamma_s_sub_knpm3=10.0,  # inert at D_bl = 0
+        gamma_bl_sub_knpm3=10.0,  # inert at D_bl = 0
         h_c_m=S2_H_C_M,
         l_c_m=S2_L_C_M,
         seepage_length_m=S2_L_M,
@@ -746,7 +746,7 @@ def _run_convergence_case(dt_s: float) -> float:
         c_e=0.030,  # high: top of the small-scale calibration range (note §4)
         k_aq_mps=1.0e-3,  # high: ~FS35-238 k (kappa 10.2e-11, note §4); fixture
         d_bl_m=0.5,  # low: weakest gate, earliest onset
-        gamma_s_sub_knpm3=10.0,
+        gamma_bl_sub_knpm3=10.0,
         h_c_m=2.0,
         l_c_m=16.6,
         seepage_length_m=50.0,
@@ -812,7 +812,7 @@ def test_across_realizations_matches_scalar_loop() -> None:
     c_e = _lognormal(0.014, 0.5, n)  # §7 COV 0.50
     d_bl = _lognormal(3.0, 0.2, n)  # §7 COV 0.20
     d_aq = _lognormal(3.3, 0.2, n)  # §7 COV 0.20 (D/L ~ 1/3)
-    gamma_s_sub = np.clip(rng.normal(10.0, 0.5, n), 1.0, None)  # §7 COV 0.05
+    gamma_bl_sub = np.clip(rng.normal(10.0, 0.5, n), 1.0, None)  # §7 COV 0.05
     h_c = _lognormal(1.0, 0.4, n)  # plausible field critical head
     l_c = 0.5 * length * np.tanh(2.0 * d_aq / length)  # Eq. (13) per realization
     r_e = rng.uniform(0.3, 0.8, n)
@@ -830,7 +830,7 @@ def test_across_realizations_matches_scalar_loop() -> None:
         c_e=c_e,
         k_aq_mps=k_aq,
         d_bl_m=d_bl,
-        gamma_s_sub_knpm3=gamma_s_sub,
+        gamma_bl_sub_knpm3=gamma_bl_sub,
         h_c_m=h_c,
         l_c_m=l_c,
         seepage_length_m=length,
@@ -849,7 +849,7 @@ def test_across_realizations_matches_scalar_loop() -> None:
             c_e=float(c_e[i]),
             k_aq_mps=float(k_aq[i]),
             d_bl_m=float(d_bl[i]),
-            gamma_s_sub_knpm3=float(gamma_s_sub[i]),
+            gamma_bl_sub_knpm3=float(gamma_bl_sub[i]),
             h_c_m=float(h_c[i]),
             l_c_m=float(l_c[i]),
             seepage_length_m=length,
@@ -925,7 +925,7 @@ def test_public_interface_and_pinned_constants() -> None:
             "c_e",
             "k_aq_mps",
             "d_bl_m",
-            "gamma_s_sub_knpm3",
+            "gamma_bl_sub_knpm3",
             "h_c_m",
             "l_c_m",
             "seepage_length_m",

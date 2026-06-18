@@ -39,7 +39,7 @@ priors:
   D_aq:        { family: lognormal, mean: 20.0,   cov: 0.20 }  # mean PROVISIONAL (OYO 1999, borehole logs)
   D_bl:        { family: lognormal, mean: 3.0,    cov: 0.20 }  # mean PROVISIONAL (OYO 1999, borehole logs)
   k_bl:        { family: lognormal, mean: 2.0e-6, cov: 0.50 }  # mean PROVISIONAL (OYO 1999, A_c blanket)
-  gamma_s_sub: { family: normal,    mean: 10.0,   cov: 0.05 }  # mean PROVISIONAL (OYO 1999, lab tests)
+  gamma_bl_sub: { family: lognormal, mean: 6.9,   cov: 0.056 } # blanket gamma'_bl = gamma_sat,bl - gamma_w (OYO 1999 A_c; thesis, ADR-0016)
   C_e:         { family: lognormal, mean: 0.014,  cov: 0.50 }  # FIXED — Pol 2024 calibration (NOT OYO)
   bounds:
     d_70: [50.0e-6, 1.0e-3]      # §12 fm2 tail clip [m] (pathological-H_c guard)

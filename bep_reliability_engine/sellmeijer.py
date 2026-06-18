@@ -49,6 +49,7 @@ __all__ = [
     "ETA_WHITE",
     "THETA_REPOSE_DEFAULT",
     "D_R_DEFAULT",
+    "GAMMA_P_SUB_DEFAULT",
     "D_R_MEAN",
     "C_U_MEAN",
     "KAS_MEAN",
@@ -76,6 +77,14 @@ THETA_REPOSE_DEFAULT: float = math.radians(37.0)
 # (spec section 7: "C_u, KAS evaluated at experimental mean values").
 D_R_DEFAULT: float = 0.725
 
+# Submerged unit weight of the aquifer sand particles gamma'_p [kN/m^3],
+# deterministic (Tokachi basin-wide value from the A_g specific gravities;
+# thesis "Fixed Parameters"). Per ADR-0016 this particle weight is what enters
+# the Sellmeijer resistance factor F_r; it is distinct from, and must not be
+# confused with, the stochastic submerged blanket weight gamma_bl_sub of the
+# theta vector, which drives the M5 uplift and heave limit states only.
+GAMMA_P_SUB_DEFAULT: float = 16.87
+
 # --- Sellmeijer (2011) experimental mean values -----------------------------
 # Means of the small-scale test programme used to normalize the regression
 # ratio terms in F_r and F_s (Sellmeijer 2011, Table 2; restated below
@@ -97,7 +106,7 @@ _PARAM_NAMES: list[str] = [
     "D_aq",
     "D_bl",
     "k_bl",
-    "gamma_s_sub",
+    "gamma_bl_sub",
     "C_e",
 ]
 
@@ -115,7 +124,7 @@ class SellmeijerResult(NamedTuple):
 
 
 def _factor_Fr(
-    gamma_s_sub_kn_m3: float | npt.NDArray[np.float64],
+    gamma_p_sub_kn_m3: float | npt.NDArray[np.float64] = GAMMA_P_SUB_DEFAULT,
     theta_repose_rad: float = THETA_REPOSE_DEFAULT,
     relative_density: float = D_R_DEFAULT,
     uniformity_cu: float = C_U_MEAN,
@@ -131,10 +140,14 @@ def _factor_Fr(
 
     Parameters
     ----------
-    gamma_s_sub_kn_m3 : float or ndarray
-        Submerged particle unit weight gamma'_p = (rho_s - rho_w) * g
-        [kN/m^3]. This is the ``gamma_s_sub`` entry of the theta vector;
-        it enters as the dimensionless ratio gamma'_p / gamma_w.
+    gamma_p_sub_kn_m3 : float or ndarray, optional
+        Submerged unit weight of the aquifer sand particles
+        gamma'_p = (rho_s - rho_w) * g [kN/m^3]. Deterministic on the
+        production path (default ``GAMMA_P_SUB_DEFAULT``, ADR-0016); it is
+        *not* read from the theta vector and is distinct from the stochastic
+        blanket weight ``gamma_bl_sub``. It enters as the dimensionless ratio
+        gamma'_p / gamma_w. Reference-case tests override it with the
+        case-specific particle weight.
     theta_repose_rad : float, optional
         Bedding (repose) angle of the sand [rad]. Deterministic, default
         37 degrees (spec section 7).
@@ -154,7 +167,7 @@ def _factor_Fr(
     -------
     float or ndarray
         Dimensionless resistance factor F_r [-], broadcasting over
-        ``gamma_s_sub_kn_m3``.
+        ``gamma_p_sub_kn_m3``.
 
     Notes
     -----
@@ -166,7 +179,7 @@ def _factor_Fr(
     """
     return (
         eta
-        * (gamma_s_sub_kn_m3 / GAMMA_W)
+        * (gamma_p_sub_kn_m3 / GAMMA_W)
         * math.tan(theta_repose_rad)
         * (relative_density / D_R_MEAN) ** 0.35
         * (uniformity_cu / C_U_MEAN) ** 0.13
@@ -273,6 +286,7 @@ def compute_critical_head(
     theta_row: npt.NDArray[np.float64],
     geometry: dict,
     alpha_exponent: float = -1.0 / 3.0,
+    gamma_p_sub_kn_m3: float = GAMMA_P_SUB_DEFAULT,
 ) -> SellmeijerResult:
     """Critical head H_c and critical pipe length l_c, one realization.
 
@@ -285,11 +299,13 @@ def compute_critical_head(
     ----------
     theta_row : ndarray, shape (7,)
         One realization's parameter vector in the canonical column order
-        ``['k_aq', 'd_70', 'D_aq', 'D_bl', 'k_bl', 'gamma_s_sub', 'C_e']``
-        (spec section 2). Consumed here: ``k_aq`` [m/s], ``d_70`` [m],
-        ``D_aq`` [m] and ``gamma_s_sub`` [kN/m^3, submerged particle unit
-        weight]. ``D_bl``, ``k_bl`` and ``C_e`` do not enter H_c -- the
-        static branch has no C_e exposure by design (ADR-0001).
+        ``['k_aq', 'd_70', 'D_aq', 'D_bl', 'k_bl', 'gamma_bl_sub', 'C_e']``
+        (spec section 2). Consumed here: ``k_aq`` [m/s], ``d_70`` [m] and
+        ``D_aq`` [m]. The submerged particle unit weight gamma'_p enters via
+        the deterministic ``gamma_p_sub_kn_m3`` argument, not from the theta
+        vector (ADR-0016); ``D_bl``, ``k_bl``, the blanket weight
+        ``gamma_bl_sub`` and ``C_e`` do not enter H_c -- the static branch
+        has no C_e exposure by design (ADR-0001).
     geometry : dict
         Cross-section geometry; only ``geometry['L']`` (seepage length
         [m]) is read here. The other canonical keys (``z_toe``,
@@ -300,6 +316,11 @@ def compute_critical_head(
         -1/3 (2D Sellmeijer); -1/2 substitutes the 3D hole-type-exit
         value for the sensitivity decomposition of spec section 12,
         failure mode 4.
+    gamma_p_sub_kn_m3 : float, optional
+        Submerged aquifer particle unit weight gamma'_p [kN/m^3] for the
+        resistance factor F_r. Deterministic (default
+        ``GAMMA_P_SUB_DEFAULT``, ADR-0016); reference-case tests override it
+        with the case-specific particle weight.
 
     Returns
     -------
@@ -332,11 +353,10 @@ def compute_critical_head(
     k_aq_mps = float(theta_row[_PARAM_NAMES.index("k_aq")])
     d_70_m = float(theta_row[_PARAM_NAMES.index("d_70")])
     D_aq_m = float(theta_row[_PARAM_NAMES.index("D_aq")])
-    gamma_s_sub_kn_m3 = float(theta_row[_PARAM_NAMES.index("gamma_s_sub")])
 
     h_c = (
         seepage_length_m
-        * _factor_Fr(gamma_s_sub_kn_m3)
+        * _factor_Fr(gamma_p_sub_kn_m3)
         * _factor_Fs(d_70_m, k_aq_mps, seepage_length_m, alpha_exponent)
         * _factor_Fg(D_aq_m, seepage_length_m)
     )
@@ -346,7 +366,7 @@ def compute_critical_head(
         raise ValueError(
             f"Non-positive critical head H_c={h_c} for k_aq={k_aq_mps} m/s, "
             f"d_70={d_70_m} m, D_aq={D_aq_m} m, "
-            f"gamma_s_sub={gamma_s_sub_kn_m3} kN/m^3, L={seepage_length_m} m, "
+            f"gamma_p_sub={gamma_p_sub_kn_m3} kN/m^3, L={seepage_length_m} m, "
             f"alpha_exponent={alpha_exponent}; re-bound the priors "
             "(spec section 12, failure mode 2)."
         )
@@ -358,6 +378,7 @@ def compute_critical_head_vectorized(
     theta_matrix: npt.NDArray[np.float64],
     geometry: dict,
     alpha_exponent: float = -1.0 / 3.0,
+    gamma_p_sub_kn_m3: float = GAMMA_P_SUB_DEFAULT,
 ) -> SellmeijerResult:
     """Critical head H_c and critical pipe length l_c for all N
     realizations at once.
@@ -372,7 +393,7 @@ def compute_critical_head_vectorized(
     ----------
     theta_matrix : ndarray, shape (N, 7)
         LHS sample matrix in the canonical column order
-        ``['k_aq', 'd_70', 'D_aq', 'D_bl', 'k_bl', 'gamma_s_sub', 'C_e']``
+        ``['k_aq', 'd_70', 'D_aq', 'D_bl', 'k_bl', 'gamma_bl_sub', 'C_e']``
         (spec section 2), physical units as in
         :func:`compute_critical_head`.
     geometry : dict
@@ -380,6 +401,9 @@ def compute_critical_head_vectorized(
         [m]) is read here.
     alpha_exponent : float, optional
         Scale exponent alpha [-] (see :func:`compute_critical_head`).
+    gamma_p_sub_kn_m3 : float, optional
+        Deterministic submerged aquifer particle unit weight gamma'_p
+        [kN/m^3] for F_r (default ``GAMMA_P_SUB_DEFAULT``, ADR-0016).
 
     Returns
     -------
@@ -408,11 +432,10 @@ def compute_critical_head_vectorized(
     k_aq_mps = theta_matrix[:, _PARAM_NAMES.index("k_aq")]
     d_70_m = theta_matrix[:, _PARAM_NAMES.index("d_70")]
     D_aq_m = theta_matrix[:, _PARAM_NAMES.index("D_aq")]
-    gamma_s_sub_kn_m3 = theta_matrix[:, _PARAM_NAMES.index("gamma_s_sub")]
 
     h_c = (
         seepage_length_m
-        * _factor_Fr(gamma_s_sub_kn_m3)
+        * _factor_Fr(gamma_p_sub_kn_m3)
         * _factor_Fs(d_70_m, k_aq_mps, seepage_length_m, alpha_exponent)
         * _factor_Fg(D_aq_m, seepage_length_m)
     )

@@ -53,7 +53,7 @@ from bep_reliability_engine.fragility import (
 
 # Canonical theta column order (spec §2, M2 contract). M9 only retains the
 # matrix and its names; the column contents are immaterial to the fragility math.
-PARAM_NAMES = ["k_aq", "d_70", "D_aq", "D_bl", "k_bl", "gamma_s_sub", "C_e"]
+PARAM_NAMES = ["k_aq", "d_70", "D_aq", "D_bl", "k_bl", "gamma_bl_sub", "C_e"]
 
 # FragilityResult field listing, in the exact spec §2 order (the "defines the
 # dataclass exactly per the spec" requirement).
@@ -155,7 +155,7 @@ def _metadata() -> dict:
             "D_aq": 3.0,
             "D_bl": 3.0,
             "k_bl": 1.0e-6,
-            "gamma_s_sub": 16.0,
+            "gamma_bl_sub": 16.0,
             "C_e": 0.014,
         },
         "prior_covs": {
@@ -164,7 +164,7 @@ def _metadata() -> dict:
             "D_aq": 0.20,
             "D_bl": 0.20,
             "k_bl": 0.50,
-            "gamma_s_sub": 0.05,
+            "gamma_bl_sub": 0.05,
             "C_e": 0.50,
         },
         "config": {

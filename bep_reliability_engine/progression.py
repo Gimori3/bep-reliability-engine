@@ -298,7 +298,7 @@ def integrate_progression(
     c_e: ArrayLike,
     k_aq_mps: ArrayLike,
     d_bl_m: ArrayLike,
-    gamma_s_sub_knpm3: ArrayLike,
+    gamma_bl_sub_knpm3: ArrayLike,
     h_c_m: ArrayLike,
     l_c_m: ArrayLike,
     seepage_length_m: float,
@@ -368,8 +368,8 @@ def integrate_progression(
         ``0.0`` selects the no-blanket laboratory configuration (module
         docstring): zero crack term, gate open for any positive
         overpressure, no NaN or warnings.
-    gamma_s_sub_knpm3 : array_like of float
-        Submerged blanket unit weight gamma'_s [kN/m3], theta column.
+    gamma_bl_sub_knpm3 : array_like of float
+        Submerged blanket unit weight gamma'_bl [kN/m3], theta column.
         Gate kernels only; inert when ``d_bl_m = 0``.
     h_c_m : array_like of float
         Critical head H_c [m] from M6 (single source, spec §1).
@@ -416,7 +416,7 @@ def integrate_progression(
     c_e_arr = np.asarray(c_e, dtype=np.float64)
     k_aq = np.asarray(k_aq_mps, dtype=np.float64)
     d_bl = np.asarray(d_bl_m, dtype=np.float64)
-    gamma_s_sub = np.asarray(gamma_s_sub_knpm3, dtype=np.float64)
+    gamma_bl_sub = np.asarray(gamma_bl_sub_knpm3, dtype=np.float64)
     h_c = np.asarray(h_c_m, dtype=np.float64)
     l_c = np.asarray(l_c_m, dtype=np.float64)
 
@@ -446,7 +446,7 @@ def integrate_progression(
         h_erosion = delta_h_blanket - CRACK_RESISTANCE_FACTOR * d_bl
 
         # (d, e) uplift limit state (un-reduced head) and its running latch.
-        uplift_now = z_uplift(delta_h_blanket, gamma_s_sub, d_bl) < 0.0
+        uplift_now = z_uplift(delta_h_blanket, gamma_bl_sub, d_bl) < 0.0
         uplift_ever = uplift_ever | uplift_now
 
         # (f, g, h) heave limit state (un-reduced head), checked
@@ -455,7 +455,7 @@ def integrate_progression(
         # and Z_heave < 0 still resolves to the intended "heave active iff
         # overpressure > 0" with no warning and no NaN leaking into the gate.
         with np.errstate(divide="ignore", invalid="ignore"):
-            heave_now = z_heave(delta_h_blanket, gamma_s_sub, d_bl) < 0.0
+            heave_now = z_heave(delta_h_blanket, gamma_bl_sub, d_bl) < 0.0
 
         # t_uh diagnostic: first uplift+heave co-occurrence (NOT Pol's
         # three-way sand-boil proxy; module docstring).
