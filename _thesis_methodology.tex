@@ -1,0 +1,836 @@
+\chapter{Methodology}
+\label{chap: Methodology}
+
+\section{Overview of the Three-Phase Computational Architecture}
+\label{sec: Overview of the Three-Phase Computational Architecture}
+
+The methodology developed in this study is organized into three sequentially
+connected computational phases, each corresponding to a distinct set of
+research objectives and directly addressing the sub-questions formulated in
+Chapter~\ref{chap: Introduction}. Phase~1 constructs an event-based Monte
+Carlo simulation engine equipped with a time-stepping physical solver to
+generate prior BEP fragility curves under both static steady-state and
+transient kinematic failure assumptions, thereby quantifying the
+scenario-dependent biases introduced by steady-state modeling approaches when
+applied to flashy river hydrographs. Phase~2 applies Bayesian reliability
+updating via Monte Carlo Accept-Reject filtering, conditioning the prior
+fragility on the documented historical survival of the study levee segments
+during the August 2016 consecutive typhoons to produce calibrated posterior
+fragility curves that honor observed field behavior. Phase~3 integrates these
+posterior BEP fragility curves with pre-calculated surface failure fragility
+curves from \textcite{uemura_phd_2025} using series-system joint-probability
+mathematics and applies the unified framework to both historical and +4K
+warming d4PDF hydrograph ensembles to evaluate climate-driven shifts in
+failure probability and mechanism dominance. The causal
+structure linking independent variables to dependent outcomes is summarized in
+Figure~\ref{fig:conceptual_framework}, and the complete computational
+architecture connecting inputs, processes, and outputs across all three phases
+is illustrated in Figure~\ref{fig:updated_research_flow_v8}.
+
+% --- Figure 1: Conceptual Framework ---
+\begingroup
+\definecolor{procColor}{RGB}{255, 240, 220}
+\definecolor{inputColor}{RGB}{230, 240, 255}
+\definecolor{outColor}{RGB}{230, 250, 230}
+\definecolor{lineColor}{RGB}{80, 80, 80}
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}[
+    block/.style = {
+        rectangle,
+        draw=gray!40,
+        thick,
+        rounded corners=4pt,
+        text width=4.4cm,
+        align=center,
+        minimum height=1.4cm,
+        font=\sffamily\footnotesize,
+        blur shadow={shadow blur steps=5}
+    },
+    input/.style   = {block, fill=inputColor},
+    process/.style = {block, fill=procColor},
+    output/.style  = {block, fill=outColor},
+    line/.style = {draw=lineColor, thick, -{Latex[length=2.5mm]}},
+    dashed_line/.style = {draw=lineColor, thick, dashed,
+                          -{Latex[length=2.5mm]}},
+    group_box/.style = {rectangle, draw=none, inner sep=0.4cm,
+                        rounded corners=5pt}
+]
+% Column 1: Independent Variables
+\node [input] (climate)
+    {\textbf{Future Climate Scenarios}\\(d4PDF Ensemble)\\
+     \textit{[\cite{uemura_phd_2025}]}};
+\node [input, below=0.7cm of climate] (levee)
+    {\textbf{Local Borehole Data}\\
+     ($A_c/A_g$ strata: $k, d_{70}, \gamma, L, D_{aq}, D_{bl}$)};
+\node [input, below=0.7cm of levee] (history)
+    {\textbf{Historical Survival Data}\\
+     ($h_{2016}(t)$, 2016 Typhoons)\\\textit{[Transient Constraint]}};
+\node [input, below=0.7cm of history] (uemura_curves)
+    {\textbf{Pre-Calculated Fragility}\\(Overflow \& Scour)\\
+     \textit{[\cite{uemura_phd_2025}]}};
+% Column 2: Physical & System Processes
+\node [process, right=0.8cm of climate] (hydro)
+    {\textbf{Transient Hydrographs $h(t)$}\\
+     (Peak \& Series Extraction)\\\textit{[from d4PDF]}};
+\node [process, right=0.8cm of levee] (mcs)
+    {\textbf{Event-Based Monte Carlo}\\
+     (Time-Stepped Piping Solver)\\$10^5$ Iterations};
+\node [process, right=0.8cm of history] (updating)
+    {\textbf{Bayesian Reliability Updating}\\
+     (Posterior Calibration)\\\textit{[MC Filtering]}};
+\node [process, right=0.8cm of uemura_curves] (integration)
+    {\textbf{Multi-Mechanism Integration}\\
+     (Series System Joint-Prob.)\\$1 - \prod(1-P_{f,i})$};
+% Column 3: Dependent Variables
+\node [output, right=0.8cm of mcs] (conservatism)
+    {\textbf{Bias Quantification}\\(Static vs.\ Transient BEP)\\
+     \textit{[Climate Sensitivity]}};
+\node [output, right=0.8cm of integration] (fragility)
+    {\textbf{Integrated System Fragility}\\
+     ($P_{f, \text{sys}}$ Risk Profile)};
+% Connections
+\draw [line] (climate)       -- (hydro);
+\draw [line] (hydro)         -- (mcs);
+\draw [line] (levee)         -- (mcs);
+\draw [line] (mcs)           -- (updating);
+\draw [line] (history)       -- (updating);
+\draw [line] (updating)      -- (integration);
+\draw [line] (uemura_curves) -- (integration);
+\draw [line] (mcs)           -- (conservatism);
+\draw [line] (integration)   -- (fragility);
+% Background Groups
+\begin{scope}[on background layer]
+    \node[group_box,
+          fit=(climate)(levee)(history)(uemura_curves),
+          fill=blue!5] (g1) {};
+    \node [above, font=\bfseries\sffamily\color{gray}] at (g1.north)
+        {Independent Variables};
+    \node[group_box,
+          fit=(hydro)(mcs)(updating)(integration),
+          fill=orange!5] (g2) {};
+    \node [above, font=\bfseries\sffamily\color{gray}] at (g2.north)
+        {Physical \& Computational Processes};
+    \node[group_box,
+          fit=(conservatism)(fragility),
+          fill=green!5] (g3) {};
+    \node [above, font=\bfseries\sffamily\color{gray}] at (g3.north)
+        {Dependent Variables};
+\end{scope}
+\end{tikzpicture}
+\caption{Conceptual framework mapping independent variables (climate scenarios,
+geotechnical data, historical survival observations, and pre-calculated surface
+fragilities) through the three computational processes to the two dependent
+outputs: static-versus-transient bias quantification and the integrated
+multi-mechanism system fragility $P_{f,\mathrm{sys}}$.}
+\label{fig:conceptual_framework}
+\end{figure}
+\endgroup
+
+\newpage
+
+% --- Figure 2: Three-Phase Computational Architecture ---
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[
+        model/.style = {
+            rectangle,
+            rounded corners=4pt,
+            text width=3.4cm,
+            minimum width=3.6cm,
+            minimum height=1.5cm,
+            align=center,
+            draw=black!80,
+            thick,
+            fill=blue!10,
+            font=\footnotesize
+        },
+        widemodel/.style = {
+            rectangle,
+            rounded corners=4pt,
+            text width=5.8cm,
+            minimum width=6cm,
+            minimum height=1.4cm,
+            align=center,
+            draw=black!80,
+            thick,
+            fill=blue!10,
+            font=\footnotesize
+        },
+        data/.style = {
+            trapezium,
+            trapezium left angle=75,
+            trapezium right angle=105,
+            text width=3cm,
+            minimum width=3.2cm,
+            minimum height=1.4cm,
+            align=center,
+            draw=black!80,
+            thick,
+            fill=green!10,
+            font=\footnotesize
+        },
+        fragility_input/.style = {
+            trapezium,
+            trapezium left angle=75,
+            trapezium right angle=105,
+            text width=3.2cm,
+            minimum width=3.4cm,
+            minimum height=1.4cm,
+            align=center,
+            draw=black!80,
+            thick,
+            fill=gray!15,
+            font=\footnotesize
+        },
+        output/.style = {
+            rectangle,
+            minimum width=3cm,
+            minimum height=1.4cm,
+            text width=2.8cm,
+            align=center,
+            draw=black!80,
+            thick,
+            fill=red!20,
+            font=\footnotesize
+        },
+        final_output/.style = {
+            rectangle,
+            minimum width=6cm,
+            minimum height=1.4cm,
+            text width=5.8cm,
+            align=center,
+            draw=black!80,
+            thick,
+            fill=red!60,
+            font=\footnotesize
+        },
+        arrow/.style = {thick, ->, >=stealth},
+        group_box/.style = {rectangle, draw=none, inner sep=0.4cm,
+                            rounded corners=5pt}
+    ]
+
+        % ==========================================
+        % 1. SIMULATION PHASE
+        % ==========================================
+
+        \node (steady)[model] at (-2.5, 0)
+            {\textbf{Static Limit State}\\ \mdseries Steady-State BEP\\
+             (Baseline Evaluation)\\\textit{[Sellmeijer, 2011]}};
+        \node (transient)[model] at (2.5, 0)
+            {\textbf{Transient Limit State}\\ \mdseries Time-Dependent BEP\\
+             ($dl/dt$ Progression)\\\textit{[Pol, 2024]}};
+
+        \node (mcs) [widemodel] at (0, -2.6)
+            {\textbf{Event-Based Monte Carlo Engine}\\
+             \mdseries($10^5$ Iterations: Stochastic Sampling\\
+             \& Time-Stepped Limit State)};
+
+        \node (hydro)[data] at (-5.8, -2.6)
+            {\textbf{Transient\\Hydrographs}\\
+             $h(t)$ (Series) and $h_p$ (Peaks) from d4PDF};
+
+        \node (geo)[data] at (5.8, -2.6)
+            {\textbf{Geotech \&\\Geometry}\\
+             ($k, d_{70}, \gamma,\\L, D_{aq}, D_{bl}$)};
+
+        \node (steady_curve) [output] at (-2.5, -5.5)
+            {\textbf{Static BEP Fragility Curves}\\
+             \mdseries $P_{f, \text{static,bep}}(h)$};
+        \node (trans_curve)[output] at (2.5, -5.5)
+            {\textbf{Transient BEP Fragility Curves}\\
+             \mdseries $P_{f, \text{trans,bep}}(h)$};
+
+        \draw[thick, <->, >=stealth, dashed, draw=black]
+            (steady_curve.east) --
+            node[above, font=\scriptsize\bfseries, text=black,
+                 align=center, yshift=0.05cm]
+                {Compare \&\\Quantify\\Biases}
+            (trans_curve.west);
+
+        % ==========================================
+        % 2. POST-PROCESSING PHASE
+        % ==========================================
+
+        \node (update)[widemodel] at (0, -8.7)
+            {\textbf{Bayesian Reliability Updating}\\
+             \mdseries(MC Accept-Reject Filtering)};
+
+        \node (hist_data)[data] at (-5.8, -8.7)
+            {\textbf{Historical\\Constraint}\\
+             2016 Survived\\Hydrograph $h_{2016}(t)$};
+
+        \node (integrate)[widemodel] at (0, -11.9)
+            {\textbf{Multi-Mechanism Integration}\\
+             \mdseries(Series System Joint-Probability:
+             $P_{f,sys} = 1 - \prod(1-P_{f,i})$)};
+
+        \node (uemura_curves)[fragility_input] at (-5.8, -11.9)
+            {\textbf{Pre-Calculated Fragility Curves}\\
+             \mdseries(Overflow \& Scour)\\
+             \textit{[\cite{uemura_phd_2025}]}};
+
+        \node (out) [final_output] at (0, -14.5)
+            {\textbf{Integrated System Fragility} ($P_{f, \text{sys}}$)\\
+             \mdseries Time-Dependent Fragility Curves \&\\
+             Climate Sensitivity Analysis};
+
+        % ==========================================
+        % 3. ARROWS
+        % ==========================================
+
+        \draw [arrow] (steady.south) -- (steady.south |- mcs.north);
+        \draw [arrow] (transient.south) -- (transient.south |- mcs.north);
+        \draw [arrow] (hydro.east) -- (mcs.west);
+        \draw [arrow] (geo.west) -- (mcs.east);
+        \draw [arrow] (mcs.south -| steady_curve.north) -- (steady_curve.north);
+        \draw [arrow] (mcs.south -| trans_curve.north) -- (trans_curve.north);
+        \draw [arrow] (trans_curve.south) -- ++(0,-1.3) -| (update.north);
+        \draw [arrow] (hist_data.east) -- (update.west);
+        \draw [arrow] (update.south) -- (integrate.north);
+        \draw [arrow] (uemura_curves.east) -- (integrate.west);
+        \draw [arrow] (integrate.south) -- (out.north);
+
+        % ==========================================
+        % 4. BACKGROUND GROUPS
+        % ==========================================
+        \begin{scope}[on background layer]
+            \node[group_box,
+                  fit=(steady)(transient)(hydro)(geo)(mcs)
+                      (steady_curve)(trans_curve),
+                  fill=blue!5] (g1) {};
+            \node[above right,
+                  font=\bfseries\sffamily\color{gray!80}]
+                at (g1.north west)
+                {Phase 1: Stochastic Simulation \& Transient Physics};
+
+            \node[group_box, fit=(update)(hist_data), fill=orange!5] (g2) {};
+            \node[above right,
+                  font=\bfseries\sffamily\color{gray!80}]
+                at (g2.north west)
+                {Phase 2: Empirical Calibration};
+
+            \node[group_box,
+                  fit=(integrate)(uemura_curves)(out),
+                  fill=green!5] (g3) {};
+            \node[above right,
+                  font=\bfseries\sffamily\color{gray!80}]
+                at (g3.north west)
+                {Phase 3: Surface Threats \& System Integration};
+        \end{scope}
+
+    \end{tikzpicture}
+    \caption{Three-phase computational architecture. Phase~1: an event-based Monte Carlo engine evaluates static (Sellmeijer, 2011) and transient (Pol, 2024) BEP limit states in parallel, yielding prior fragility curves $P_{f,\mathrm{static}}(h)$ and $P_{f,\mathrm{trans}}(h)$. Phase~2: the prior transient curve is conditioned on the 2016 typhoon survival hydrograph $h_{2016}(t)$ via Accept-Reject filtering, producing a calibrated posterior. Phase~3: the posterior BEP curve is integrated with the overflow and scour fragilities of \textcite{uemura_phd_2025} via series-system joint-probability mathematics, yielding the unified system fragility $P_{f,\mathrm{sys}}$.} \label{fig:updated_research_flow_v8}
+\end{figure}
+
+A key design principle of the framework is computational modularity: each
+phase produces a well-defined probabilistic output in the form of conditional
+fragility curves $P_f(h)$ that serves as the input to the subsequent phase,
+ensuring that the progressive refinement from prior to posterior to integrated
+system fragility is both transparent and reproducible. All computations exploit
+vectorized array operations for the $10^5$ Monte Carlo iterations required to
+achieve adequate convergence at the low failure probabilities relevant to flood
+safety engineering ($\beta \approx 3$--$4$, corresponding to
+$P_f \approx 10^{-3}$--$10^{-4}$). The parallel evaluation of the static and
+transient limit states within each realization is organized around a shared
+computational preamble (common sampling of the parameter vector and common
+hydraulic translation) followed by divergent limit state evaluation, ensuring
+that the quantified static-versus-transient bias reflects genuine physical
+differences in the limit state formulations rather than independent sampling
+noise across two separately constructed engines.
+
+The following sections describe the mathematical formulation and physical
+reasoning underlying each component of Phase~1, proceeding from the hydraulic
+translation procedure
+(Section~\ref{sec: Hydraulic Translation: River Stage to Aquifer Pressure}),
+through the two sequential initiation prerequisites
+(Section~\ref{sec: Initiation Prerequisites: Blanket Uplift and Heave Limit States}),
+to the two parallel limit state functions
+(Sections~\ref{sec: Static Limit State: Sellmeijer Steady-State Benchmark}
+and~\ref{sec: Transient Limit State: The Race Condition and the Kinematic LSF}),
+the time-stepping solver
+(Section~\ref{sec: The Time-Stepping Solver: Integrating dl/dt over the Transient Hydrograph}),
+the compound event memory model
+(Section~\ref{sec: Compound Event Modelling: Cumulative Memory and Irreversible Pipe Growth}),
+and finally the architecture of the Monte Carlo engine itself
+(Section~\ref{sec: Monte Carlo Engine Implementation and Sampling Strategy}).
+The Bayesian calibration procedure of Phase~2 and the series-system
+integration of Phase~3 are described in subsequent chapters.
+
+\section{Hydraulic Translation: River Stage to Aquifer Pressure}
+\label{sec: Hydraulic Translation: River Stage to Aquifer Pressure}
+
+The primary hydraulic boundary condition for the BEP assessment is the transient river
+stage hydrograph $h(t)$, extracted from the d4PDF climate ensemble as continuous
+multi-peak time series as described in Section~\ref{sec: The d4PDF Climate Ensemble:
+Structure, Downscaling, and Hydrograph Extraction}. To evaluate the initiation
+prerequisites and pipe progression dynamics at each timestep, this external hydraulic
+loading must first be translated into a net piezometric head at the base of the confining
+$A_c$ blanket layer on the landside of the levee, since it is the upward-acting aquifer
+pressure rather than the river stage itself that drives both the uplift limit state and
+the seepage gradient sustaining pipe progression.
+
+Following the time-dependent piping framework of \textcite{pol_sie_2024}, this
+translation employs the instantaneous analytical head response factor $r_e$. In
+\textcite{pol_sie_2024} this factor enters as a prescribed scalar input (their
+Eq.~(10)); the leakage-length derivation from which it is computed here is given in the underlying dissertation \parencite[Eq.~7.13]{pol_thesis_2022}, with the
+finite-foreshore correction adopted below following the Dutch design guidance
+\parencite{TRZmw1999, TAW2004}. This dimensionless scalar, derived from the
+cross-sectional levee geometry and the permeability contrast between the confining
+blanket and the underlying aquifer, expresses the fraction of the external river head
+difference that is transmitted to the aquifer base at the landside toe.Under
+the instantaneous transmission assumption, the piezometric head at the base of the $A_g$
+aquifer at the landside toe responds to the river stage without temporal lag:
+
+$$h_\mathrm{aq}(t) = z_\mathrm{toe} + r_e \cdot \bigl(h(t) - z_\mathrm{toe}\bigr)$$
+
+where $z_\mathrm{toe}$ is the landside toe elevation. The accuracy of this assumption
+depends on the ratio of the aquifer hydraulic diffusivity timescale $\tau_\mathrm{aq}$
+to the flood duration $T_\mathrm{flood}$. On the rising limb, instantaneous transmission
+provides an upper bound on peak aquifer overpressure, since real diffusive lag would
+attenuate and delay the pressure response. However, the same lag that clips the peak
+also extends the pressure tail into the recession phase, smearing energy that the river
+has already shed back into the aquifer. For a rapidly receding flashy hydrograph,
+instantaneous transmission therefore simultaneously overestimates peak-phase loading
+and underestimates recession-phase loading. Since both the erosion indicator criterion
+$I_{er}$ (Section~\ref{subsec: The Erosion Indicator and Composite STPH Failure}) and the pipe progression integral $\int \dot{l}\,\mathrm{d}t$
+(Section~\ref{sec: The Time-Stepping Solver: Integrating dl/dt over the Transient Hydrograph}) depend on cumulative time above threshold rather than instantaneous
+peak amplitude alone, the net effect of the no-lag assumption on computed failure
+probability is not sign-definite and cannot be characterised as globally conservative
+without further analysis.
+
+The validity of the instantaneous approximation is therefore treated as an explicit
+diagnostic to be resolved prior to the production runs. For each governing cross-section,
+the lumped aquifer response timescale is estimated as
+%
+\begin{equation}
+    \tau_\mathrm{aq} \sim \frac{\lambda_\mathrm{in}^{2}\, S_s}{k_\mathrm{aq}}
+    \label{eq:tau_aq}
+\end{equation}
+%
+where $S_s$ is the specific storage of the $A_g$ aquifer and $\lambda_\mathrm{in}$ is
+the hinterland leakage length defined below. Substituting
+$\lambda_\mathrm{in}^2 = k_\mathrm{aquifer} D_\mathrm{aq} D_{bl}/k_{bl}$ shows that the
+aquifer conductivity cancels, $\tau_\mathrm{aq} \sim S_s D_\mathrm{aq} D_{bl}/k_{bl}$, so
+the response timescale is governed by the aquifer and blanket geometry and the blanket
+conductivity rather than by $k_\mathrm{aquifer}$. The specific storage $S_s$ is held at
+a deterministic literature value rather than sampled, and the lag option, where
+activated, is applied as a single run-wide setting per cross-section. This timescale is compared against the
+characteristic flood duration $T_\mathrm{flood}$ for both the 2016 design event and the
+representative d4PDF ensemble members. In parallel, the native temporal resolution of
+the d4PDF/RCM5 output is verified to confirm that it resolves the short-plateau flashy
+peaks (on the order of 1.5~h at the Obihiro gauging station) that define the loading
+regime of this study. If the ratio $\tau_\mathrm{aq}/T_\mathrm{flood}$ is found to be
+non-negligible at any governing section, or if the d4PDF resolution is insufficient to
+represent the above-threshold window, a first-order linear-reservoir lag state is
+introduced into the hydraulic translation module:
+%
+\begin{equation}
+    \frac{\mathrm{d}h_\mathrm{aq}}{\mathrm{d}t}
+    = \frac{1}{\tau_\mathrm{aq}}\Bigl[z_\mathrm{toe} + r_e\bigl(h(t) - z_\mathrm{toe}
+    \bigr) - h_\mathrm{aq}(t)\Bigr]
+    \label{eq:lag_ode}
+\end{equation}
+%
+which nests directly inside the existing timestepper as a single additional state
+variable. This lag state is advanced not by an explicit Euler step --- which would be
+numerically unstable whenever the timestep exceeds $2\tau_\mathrm{aq}$, a condition that
+individual high-diffusivity realizations can meet at the native d4PDF resolution --- but
+by the exact analytical solution of Eq.~\eqref{eq:lag_ode} for piecewise-constant
+forcing over each step,
+$$h_\mathrm{aq}(t_{n+1}) = h_\mathrm{aq}(t_n) + \bigl(1 - e^{-\Delta t/\tau_\mathrm{aq}}\bigr)
+\Bigl[z_\mathrm{toe} + r_e\bigl(h(t_{n+1}) - z_\mathrm{toe}\bigr) - h_\mathrm{aq}(t_n)\Bigr],$$
+initialized at the start of each event in equilibrium with the initial river stage,
+$h_\mathrm{aq}(t_0) = z_\mathrm{toe} + r_e\,(h(t_0) - z_\mathrm{toe})$. This update is
+unconditionally stable, reduces to the explicit Euler step in the limit
+$\Delta t \ll \tau_\mathrm{aq}$, and collapses smoothly to the instantaneous translation
+as $\tau_\mathrm{aq} \to 0$. The forward-Euler scheme is retained for the pipe-length
+ODE of
+Section~\ref{sec: The Time-Stepping Solver: Integrating dl/dt over the Transient Hydrograph},
+consistent with \textcite{pol_compgeo_2024}. The hydraulic translation module (module M4 of the computational architecture) is designed from the outset so that $h_\mathrm{aq}(t)$ is produced
+through a unified interface that accepts either the algebraic instantaneous form or the
+ODE~\eqref{eq:lag_ode}, without requiring restructuring of the downstream limit state
+or pipe progression modules. The outcome of the diagnostic described above determines
+which form is activated; the justification is reported in Section~\ref{sec: Results}.
+
+The response factor $r_e$ is computed analytically for each cross-sectional geometry
+using the Mazure leakage length formulation \parencite{pol_sie_2024}. The drainage
+resistance of the hinterland confining blanket is first calculated as $c = D_{bl}/k_{bl}$,
+where $D_{bl}$ is the blanket thickness and $k_{bl}$ is its vertical hydraulic
+conductivity. The hinterland leakage length then follows as:
+
+$$\lambda_\mathrm{in} = \sqrt{k_\mathrm{aquifer} \cdot D_\mathrm{aq} \cdot c}
+= \sqrt{\frac{k_\mathrm{aquifer} \cdot D_\mathrm{aq} \cdot D_{bl}}{k_{bl}}}$$
+
+For cross-sections where a wide foreshore separates the river channel from the levee toe (specifically KP57.4 (200~m foreshore), KP58.8 (325~m foreshore), and KP60.0 (600~m foreshore) \parencite{oyo_1999}) a foreland leakage length
+$\lambda_\mathrm{out}$ is computed analogously to $\lambda_\mathrm{in}$, from the same stochastically sampled aquifer transmissivity $k_\mathrm{aquifer} D_\mathrm{aq}$ and the foreshore blanket properties. As the \textcite{oyo_1999} dataset contains no separate foreland blanket investigation, the foreshore blanket thickness and conductivity are set equal to the hinterland $A_c$ values as a proxy, an assumption carried explicitly as a modeling limitation. Because a finite foreshore of width $B_f$ does not behave as a semi-infinite blanket, the entry length is corrected to its effective value through the hyperbolic-tangent relation of the Dutch design guidance
+\parencite{TRZmw1999, TAW2004}:
+
+$$\lambda_\mathrm{out,eff} = \lambda_\mathrm{out}\cdot\tanh\!\left(\frac{B_f}{\lambda_\mathrm{out}}\right),$$
+
+which recovers the semi-infinite value $\lambda_\mathrm{out}$ for wide foreshores
+($B_f \gg \lambda_\mathrm{out}$) and reduces to $\lambda_\mathrm{out,eff} \approx B_f$ for narrow ones ($B_f \ll \lambda_\mathrm{out}$). The response factor is then given by:
+
+$$r_e = \frac{\lambda_\mathrm{in}}{\lambda_\mathrm{out,eff} + L + \lambda_\mathrm{in}}.$$
+
+For cross-sections such as KP62.0, where the foreshore narrows to 44~m and the river approaches directly toward the levee toe \parencite{oyo_1999}, the $\tanh$ correction drives $\lambda_\mathrm{out,eff} \to B_f$, so that the near-complete transmission of the river head to the foundation emerges directly from the foreshore geometry rather than being imposed as a separate $\lambda_\mathrm{out} \approx 0$ assumption.
+
+This ratio is the exact solution of the leaky-aquifer schematization of
+\textcite{pol_thesis_2022} (Eq.~7.13) under a semi-infinite hinterland blanket and
+quasi-static response; it is not a truncation in $L/\lambda_\mathrm{in}$. The residual hyperbolic dependence on $L/\lambda_\mathrm{in}$, which would enter only for a finite hinterland-blanket extent, is not applied as an automatic correction. Instead, the ratio $L/\lambda_\mathrm{in}$ is computed and recorded for every realization as a validity diagnostic; should a material fraction of realizations at any governing section violate the condition $L \ll \lambda_\mathrm{in}$, the full hyperbolic formulation is introduced as a documented extension against a verified analytical source. At Tokachi seepage lengths ($L$ of order tens of metres) and the leakage lengths produced by the $A_c$/$A_g$ contrast ($\lambda_\mathrm{in}$ of order hundreds of metres), the bulk of the prior is expected to satisfy this condition; the diagnostic outcome is reported in Section~\ref{sec: Results}.
+
+Because $r_e$ depends on the stochastically sampled parameters $k_\mathrm{aquifer}$,
+$D_\mathrm{aq}$, $D_{bl}$, and $k_{bl}$, it is recomputed within each Monte Carlo
+realization rather than held as a fixed pre-processing constant. This treatment
+naturally propagates geotechnical parameter uncertainty into the transient hydraulic
+loading and ensures that the sampled parameter vector enters the engine consistently
+at both the hydraulic translation step and the subsequent limit state evaluations.
+
+The net upward-acting pressure head across the confining blanket at the landside toe,
+which drives both the uplift and heave limit states, is then:
+
+$$\Delta h_\mathrm{blanket}(t) = h_\mathrm{aq}(t) - z_\mathrm{toe}
+= r_e \cdot \bigl(h(t) - z_\mathrm{toe}\bigr)$$
+
+The spatial variability of foreshore width across the study reach introduces a dominant
+source of cross-section-to-cross-section heterogeneity in $r_e$ and, consequently, in
+piping risk. At KP60.0, where the foreshore reaches 600~m \parencite{oyo_1999}, the
+resulting $\lambda_\mathrm{out}$ substantially exceeds $L$, suppressing $r_e$ toward
+zero and rendering BEP initiation conditions effectively unreachable at realistic flood
+stages. In contrast, at KP62.0, where the foreshore narrows to only 44~m
+\parencite{oyo_1999}, the river hydraulic head is transmitted near-completely to the
+aquifer foundation and piping conditions are most readily activated. This roughly fourteen-fold
+variation in foreshore width within a single study reach underscores why a single
+representative cross-section would systematically misrepresent the spatial distribution
+of risk, and provides physical justification for the 200-metre spatial discretization
+inherited from \textcite{uemura_phd_2025}.
+
+The leakage length $\lambda_\mathrm{in}$ also governs the lateral extent over which
+aquifer overpressure acts landward of the levee toe, with the piezometric head decaying
+approximately exponentially with horizontal distance $x$ from the toe according to
+$h_\mathrm{aq}(x,t) \approx h_\mathrm{aq}(t) \exp(-x/\lambda_\mathrm{in})$
+\parencite{bezuijen_2017}. Although the limit state evaluations are formulated at the
+toe and do not require the spatial decay profile explicitly, $\lambda_\mathrm{in}$ is
+retained as a diagnostic output of each realization. This permits the spatial extent of
+the modelled pressure influence to be verified against the borehole-constrained
+cross-sectional geometry of each study segment and against the distal sand boil
+locations documented along the Tokoro River during the 2016 events
+\parencite{kawajiri_2025}.
+
+\section{Initiation Prerequisites: Blanket Uplift and Heave Limit States}
+\label{sec: Initiation Prerequisites: Blanket Uplift and Heave Limit States}
+
+Consistent with the Dutch WBI+ treatment of the composite STPH failure mechanism reviewed in Section~\ref{subsec: The Sequential STPH Failure Mechanism}, time-dependent pipe progression is strictly conditional on the prior sequential occurrence of two initiation sub-mechanisms: blanket uplift and heave. These sub-mechanisms are evaluated as probabilistic limit states at each timestep within each Monte Carlo realization rather than as deterministic binary gates, allowing the framework to identify whether the composite failure probability at a given cross-section is governed by initiation conditions or by progression dynamics. Their combined satisfaction acts as the gating condition that enables but does not in itself cause the progression of an erosion pipe.
+
+\subsection{Blanket Uplift Limit State}
+\label{subsec: Blanket Uplift Limit State}
+
+Blanket uplift occurs when the net upward piezometric pressure transmitted from the confined $A_g$ aquifer exceeds the effective overburden resistance of the $A_c$ blanket. The corresponding limit state function, evaluated at each timestep $t$, is:
+
+$$Z_\mathrm{uplift}(t) = \frac{\gamma'_\mathrm{bl} \cdot D_{bl}}{\gamma_w} - \Delta h_\mathrm{blanket}(t)$$
+
+where $\gamma'_\mathrm{bl}$ is the submerged (buoyant) bulk unit weight of the $A_c$ blanket material, $D_{bl}$ is the blanket thickness, $\gamma_w$ is the unit weight of water, and $\Delta h_\mathrm{blanket}(t)$ is the transient net upward head across the blanket computed from the hydraulic translation in Section~\ref{sec: Hydraulic Translation: River Stage to Aquifer Pressure}. Uplift failure corresponds to $Z_\mathrm{uplift}(t) < 0$, and once this condition is satisfied at any time $\tau$ within an event, the rupture of the confining blanket is treated as a non-reversible state for the remainder of that event.
+
+\subsection{Heave at the Exit Point}
+\label{subsec: Heave at the Exit Point}
+
+Should uplift conditions be satisfied, a concentrated seepage exit can form at the landside toe, and the local exit hydraulic gradient $i_\mathrm{exit}$ develops across the ruptured blanket. This gradient is evaluated at each timestep as:
+
+$$i_\mathrm{exit}(t) = \frac{\Delta h_\mathrm{blanket}(t)}{D_{bl}}$$
+
+Heave occurs when $i_\mathrm{exit}$ exceeds the classical critical heave gradient $i_c = \gamma'_\mathrm{bl}/\gamma_w$ \parencite{terzaghi1943}. The heave limit state function is:
+
+$$Z_\mathrm{heave}(t) = i_c - i_\mathrm{exit}(t) = \frac{\gamma'_\mathrm{bl}}{\gamma_w} - \frac{\Delta h_\mathrm{blanket}(t)}{D_{bl}}$$
+
+Heave failure corresponds to $Z_\mathrm{heave}(t) < 0$. Unlike uplift, heave is evaluated instantaneously at each timestep: vertical particle transport at the exit point is interpreted as physically possible only while the gradient condition is currently satisfied, since a recession of the river stage immediately reduces the exit gradient and arrests heave.
+
+\subsection{The Erosion Indicator and Composite STPH Failure}
+\label{subsec: The Erosion Indicator and Composite STPH Failure}
+
+Following the formulation of \textcite{pol_sie_2024}, the gating logic that determines whether pipe progression is physically active at timestep $t$ is encoded by the binary erosion indicator $I_{er}(t)$:
+
+$$I_{er}(t) = \Bigl[\min_{0\le\tau\le t}\{Z_\mathrm{uplift}(\tau)\} < 0\;\;\cup\;\; l_\mathrm{ini} > 0\Bigr] \;\cap\;\bigl[Z_\mathrm{heave}(t) < 0\bigr]$$
+
+The first clause is satisfied if blanket uplift has occurred at any earlier moment within the event, or alternatively if a residual pipe length is already present at the start of the event (as in compound event sequences, where uplift need not be re-triggered to resume progression). The second clause requires heave to be currently active. Only when both conditions hold simultaneously is pipe progression permitted at that timestep; otherwise the instantaneous progression rate is set to zero. Implementationally, the running minimum of $Z_\mathrm{uplift}$ is tracked through a single latching scalar that becomes and remains true the first time the uplift limit state is violated, ensuring that brief inter-peak recessions do not artificially reset the uplift state. A consequence of the Terzaghi parameterization of the critical heave gradient adopted in Section~\ref{subsec: Heave at the Exit Point} deserves explicit statement, because it determines how the two initiation clauses interact in the baseline analysis. Substituting $i_c = \gamma'\mathrm{bl}/\gamma_w$ into the heave limit state makes it identically a rescaling of the uplift limit state,
+$$Z\mathrm{heave}(t) = \frac{\gamma'\mathrm{bl}}{\gamma_w} - \frac{\Delta h\mathrm{blanket}(t)}{D_{bl}} = \frac{Z_\mathrm{uplift}(t)}{D_{bl}},$$
+since both reduce to the single condition $\Delta h_\mathrm{blanket}(t) > \gamma'\mathrm{bl} D{bl}/\gamma_w$. The two limit states therefore change sign at the same instant: instantaneous heave activity implies that the uplift threshold is exceeded at that same timestep, so the latched first clause is automatically satisfied whenever the second clause is, and the indicator reduces in the baseline to $I_{er}(t) = \bigl[,Z_\mathrm{heave}(t) < 0,\bigr]$. The uplift latch and the $l_\mathrm{ini} > 0$ clause are nonetheless retained in the implementation for two reasons: they preserve the correct compound-event behaviour when a residual pipe is carried into an event with $l_\mathrm{ini} > 0$, and they become load-bearing again under any sensitivity analysis that decouples the critical heave gradient from the Terzaghi value, for instance by reinstating the independent empirical $i_{c,h}$ of \textcite{pol_sie_2024}. The one substantive consequence of the collapse is a small loss of conservatism relative to the Pol base case: Pol's independent $i_{c,h}$ sits below the uplift gradient, opening a hysteresis band in which erosion is sustained during recession after the load has dropped below the uplift point but not yet below the heave point, and collapsing the two thresholds removes that band. For the flashy hydrographs that govern this study the band is narrow, but the resulting slight anti-conservatism in the sustain phase is noted here and revisited in Chapter~\ref{chap: Discussion}.
+
+The full \textcite{pol_sie_2024} formulation includes a third clause that suspends pipe progression once organised flood-fighting measures are deployed ($t > t_{uh} + t_{ff}/I_{ff}$, where $t_{uh}$ is the time at which the alert threshold is exceeded and $t_{ff}/I_{ff}$ is the effective mobilisation delay). This clause is deliberately omitted here. For the Tokachi context, flood-fighting response capacity is not characterised in the available event records, and its inclusion would require assumptions about Japanese river-authority mobilisation protocols that lie outside the scope of the present study. The omission yields an unconditional upper bound on transient failure probability: all realisations in which pipe progression would otherwise have been arrested by flood fighting are instead permitted to run to completion. It should be noted, however, that this conservatism is not uniform across climate scenarios. \textcite{pol_sie_2024} demonstrate (their Table~3) that the flood-fighting clause accounts for a minor share of the time-dependence effect under short-duration, flashy events, but becomes the dominant term under the long-duration river-type hydrographs characteristic of the +4\,K climate projection. The upper-bound bias therefore grows with warming scenario severity, and the +4\,K fragility estimates presented in Chapter~\ref{chap: Results} should be interpreted accordingly.
+
+Because the complete STPH mechanism requires initiation, comprising uplift and heave, and pipe progression to occur in sequence, the governing conditional failure probability at any given water level is determined by whichever sub-process has the lowest individual failure probability, constituting the weakest link in the sequential chain \parencite{ENW2017}. Under the Terzaghi parameterization the uplift and heave thresholds coincide, as shown above, so their individual failure probabilities are identical and the weakest-link comparison reduces to a two-way contest between initiation and progression:
+
+$$P_{f,\mathrm{STPH}}(h) = \min!\bigl(P_{f,\mathrm{init}}(h),; P_{f,\mathrm{pipe}}(h)\bigr), \qquad P_{f,\mathrm{init}}(h) = P_{f,\mathrm{uplift}}(h) = P_{f,\mathrm{heave}}(h).$$
+
+This formulation has direct practical consequences for the Tokachi levee geometry. The historical safety evaluations documented by \textcite{oyo_1999} explicitly identified critical exit gradients at the landside toe under the prevailing $A_c$/$A_g$ stratigraphy ($I_c \geq 0.5$), suggesting that initiation may govern the composite failure probability at several cross-sections rather than pipe progression itself. By evaluating the initiation and progression probabilities separately within each realization, the framework identifies which of the two controls the fragility curve for each 200-metre segment, rather than assuming that pipe progression uniformly dominates.
+
+A specific parameterization applies to segments where landside toe drains were installed during the Heisei 11--15 remediation programme \parencite{fukuda_2025_internal}. A functioning toe drain actively relieves seepage pressure at the landside exit point, dissipating the net upward head $\Delta h_\mathrm{blanket}$ before it can generate a critical exit gradient. This hydraulic effect is implemented by setting the exit head boundary condition to zero at drained segments. Under this condition, $Z_\mathrm{uplift}$ and $Z_\mathrm{heave}$ remain positive for all realizable flood stages, $I_{er}(t)$ remains false throughout the event, and the pipe progression ODE is never activated. The resulting near-zero BEP failure probability for drained segments is a physically accurate representation of the drain's function within the sequential STPH framework \parencite{ENW2017}, not a conservative model exclusion. This zero-head idealization is, however, conditional on continued drain functionality. It represents the as-designed performance of the toe drains and does not account for partial clogging, biofouling, or long-term degradation, any of which would restore a positive exit head and reactivate the initiation prerequisites. With respect to the future reliability of the drainage system the assumption is therefore optimistic rather than conservative, and the sensitivity of the drained-segment result to a degraded-drain condition is identified as a limitation in Chapter~\ref{chap: Discussion}. For segments where only side berm widening was performed, the post-remediation levee geometry is applied specifically the increased seepage length $L$ derived from the updated cross-section while the original $A_c$/$A_g$ foundation soil parameters from \textcite{oyo_1999} are retained, as the surface earthworks do not alter the underlying foundation stratigraphy. The spatial allocation of drain-equipped, berm-only, and unreinforced segments to individual 200-metre evaluation nodes follows the current-state documentation of \textcite{fukuda_2025_internal}.
+
+\section{Static Limit State: Sellmeijer Steady-State Benchmark}
+\label{sec: Static Limit State: Sellmeijer Steady-State Benchmark}
+
+To enable direct quantification of the scenario-dependent biases introduced by conventional steady-state assessment when applied to flashy river systems, the Monte Carlo engine evaluates two parallel limit state functions for each event. The first is the progression-based static limit state, which applies the \textcite{sellmeijer_2011} critical head criterion using only the peak hydraulic head of each event and explicitly neglects flood duration:
+
+$$Z_\mathrm{static} = H_c - H_\mathrm{load,peak}$$
+
+where $H_\mathrm{load,peak} = r_e \cdot (h_p - z_\mathrm{toe})$ is the peak net head difference applied across the aquifer at the landside toe, and $H_c$ is the critical head above which full backward pipe retrogression is physically predicted to be possible according to the revised Sellmeijer model. Failure is defined as $Z_\mathrm{static} \leq 0$. Note that the static comparator is evaluated using the same hydraulic translation $r_e$ as the transient comparator; applying the static criterion to the raw river stage $h_p$ rather than the translated aquifer head would conflate the static-versus-transient bias with an inconsistent treatment of the hydraulic boundary condition and obscure the temporal dimension that this comparison is designed to isolate.
+
+The critical head $H_c$ is computed from the revised Sellmeijer formulation \parencite{sellmeijer_2011} as the product of three multiplicative factor groups:
+
+$$H_c = L \cdot F_r \cdot F_s \cdot F_g$$
+
+where $F_r$ is the resistance factor governing grain mobilization at the pipe head, $F_s$ is the scale factor relating grain size to seepage path length, and $F_g$ is the geometric shape factor accounting for the relationship between aquifer thickness and seepage length:
+
+\begin{align} F_r &= \eta \cdot \frac{\gamma'_\mathrm{p}}{\gamma_w} \cdot \tan\theta \cdot \left(\frac{D_r}{D_{r,m}}\right)^{0.35} \left(\frac{C_u}{C_{u,m}}\right)^{0.13} \left(\frac{\mathrm{KAS}}{\mathrm{KAS}_m}\right)^{-0.02} \\ F_s &= \frac{d_{70}}{\sqrt[3]{\kappa L}} \left(\frac{d_{70,m}}{d_{70}}\right)^{0.6}, \quad \kappa = k_\mathrm{aquifer}\cdot\frac{\nu}{g} \\ F_g &= 0.91 \left(\frac{D_\mathrm{aq}}{L}\right)^{0.28/[(D_\mathrm{aq}/L)^{2.8}-1]+0.04} \end{align}
+
+where $\eta = 0.25$ is the White coefficient, $\theta = 37^\circ$ is the angle of repose, $\gamma'\mathrm{p} = 16.87$~kN/m\textsuperscript{3} is the deterministic submerged unit weight of the aquifer sand particles (distinct from the stochastic blanket bulk unit weight $\gamma'\mathrm{bl}$ governing the uplift and heave limit states), $D_r$ is the relative density, $C_u$ is the uniformity coefficient, $\mathrm{KAS}$ is the grain angularity, $d_{70,m}$, $D_{r,m}$, $C_{u,m}$, and $\mathrm{KAS}_m$ are the mean values from the experimental dataset used in the multivariate regression of \textcite{sellmeijer_2011}, $\nu = 1.3 \times 10^{-6}$~m$^2$/s is the kinematic viscosity of water at $10^\circ$C, and $g$ is the gravitational acceleration. Following the conventions of \textcite{sellmeijer_2011} and \textcite{pol_sie_2024}, the relative density, uniformity, and angularity dependencies are evaluated at their experimental mean values, leaving $L$, $D_\mathrm{aq}$, $k_\mathrm{aquifer}$, and $d_{70}$ as the active variable inputs, with the bedding angle ($\theta = 37^\circ$), the White coefficient ($\eta = 0.25$), and the submerged particle unit weight ($\gamma'_\mathrm{p} = 16.87$~kN/m\textsuperscript{3}) held at deterministic, site-derived or literature, values.
+
+Within each Monte Carlo realization, $H_c$ is recomputed using the stochastically sampled parameter set $\boldsymbol{\theta}_j$, propagating geotechnical parameter uncertainty directly into the static fragility curve. The static limit state is therefore not a deterministic threshold but a stochastic random variable whose distribution across the prior is exactly the prior fragility curve $P_{f,\mathrm{static}}(h)$. It is important to emphasize that the static limit state has no exposure whatsoever to the erosion coefficient $C_e$ governing the transient ODE; $C_e$ is a transient-branch parameter only, and the static comparator depends on five of the six remaining stochastic geotechnical variables of the parameter vector ($k_\mathrm{aquifer}$, $d_{70}$, $D_\mathrm{aq}$, $D_{bl}$, $k_{bl}$) together with the deterministic constant $\gamma'_\mathrm{p}$; the stochastic blanket bulk unit weight $\gamma'_\mathrm{bl}$ enters only the initiation limit states and has no bearing on the Sellmeijer critical head.
+
+The deliberate restriction of the static assessment to the peak hydraulic head means it cannot distinguish between events in which the peak head is sustained long enough for full pipe retrogression and events in which an equivalent peak head is applied only briefly before the flood wave recedes. This is precisely the scenario-dependent bias that the transient limit state is designed to resolve. For isolated, short-duration flashy flood events with peak heads exceeding $H_c$, the static model classifies these as failures regardless of whether the flood wave recedes before a pipe could physically traverse the full seepage length, yielding a systematic overestimation of failure probability relative to the time-dependent model. Conversely, for compound multi-peak events in which no individual peak exceeds $H_c$ but cumulative pipe progression across successive sub-critical peaks eventually reaches full breakthrough, the static model yields a failure probability of zero, underestimating the actual risk. Quantifying this directional bias across isolated and compound event types is the primary output of the comparison between $Z_\mathrm{static}$ and $Z_\mathrm{transient}$, and directly addresses Sub-question~1.
+
+As noted in Section~\ref{subsec: The Dutch Progression-Based Sellmeijer Model and Its Application}, a known theoretical limitation applies to the static Sellmeijer benchmark at the potentially long seepage paths present in the Tokachi levee geometries. The Sellmeijer (2011) model predicts that piping resistance decreases as seepage length $L$ increases, whereas the Shields-Darcy model suggests scale effects on progression velocity become negligible beyond a threshold seepage path length \parencite{van_beek_2015}. This divergence affects whether the static benchmark is conservative or unconservative at the relevant scales. This is acknowledged as a limitation of the static comparator only and does not affect the transient kinematic limit state, which captures instantaneous pipe growth dynamics independently of the steady-state scaling assumption.
+
+\section{Transient Limit State: The Race Condition and the Kinematic LSF}
+\label{sec: Transient Limit State: The Race Condition and the Kinematic LSF}
+
+The central limit state function of the methodology is the transient kinematic limit state, which defines failure not as the exceedance of a static threshold but as the completion of a physical race between retrogressive pipe progression and flood wave recession. As established in Section~\ref{subsec: Initiation-Dominated vs. Progression-Dominated Behavioral Regimes}, this race condition can be expressed conceptually as:
+
+$$\mathrm{Failure} \iff T_\mathrm{load} > T_\mathrm{breach} \approx \frac{L - l_c}{v_\mathrm{progression}(k_\mathrm{aquifer},\, H/H_c)}$$
+
+where $T_\mathrm{load}$ is the duration for which the applied head exceeds the critical initiation threshold, $L$ is the total seepage length, $l_c$ is the critical pipe length at initiation, and $v_\mathrm{progression}$ is the mean pipe progression velocity, which increases with both aquifer hydraulic conductivity and the degree of hydraulic overloading $H/H_c$ \parencite{van_beek_2015, vandenboer_2019}.
+
+The formal Monte Carlo implementation replaces this scalar velocity approximation with the time-resolved kinematic limit state of \textcite{pol_compgeo_2024}:
+
+$$Z_\mathrm{transient} = L - l_e(t_\mathrm{end})$$
+
+where $l_e(t_\mathrm{end})$ is the cumulative eroded pipe length at the end of the hydrograph, obtained by integrating the instantaneous pipe progression rate $dl/dt$ over the complete transient loading history. Failure is defined as $Z_\mathrm{transient} \leq 0$, corresponding to the condition in which the eroded pipe length reaches or exceeds the total seepage length before the flood wave recedes.
+
+The kinematic nature of $Z_\mathrm{transient}$ introduces mathematical properties that preclude the use of traditional First-Order Reliability Method (FORM) analysis and necessitate Monte Carlo simulation. Three properties specific to this problem motivate this choice. First, the ODE integration involves logical conditionals tied to the erosion indicator $I_{er}(t)$ and the race between progression and hydrograph recession, introducing discontinuities in the limit state surface that are incompatible with FORM's linearization at the Most Probable Point. Second, the pre-calculated surface failure fragility curves from \textcite{uemura_phd_2025} were generated via Monte Carlo simulation; integrating BEP fragility derived from FORM with these curves would require imposing unverifiable assumptions about the shape of the correlation between failure mechanisms. Third, the resulting fragility curves function as pre-calculated lookup tables during operational risk assessment, meaning the upfront computational cost of Monte Carlo simulation is incurred only once per cross-section and scenario, after which they can be queried at any water level without additional computation.
+
+A structural property of the engine architecture worth emphasising here is that $Z_\mathrm{static}$ and $Z_\mathrm{transient}$ are evaluated within the same Monte Carlo realization, sharing the same sampled parameter vector $\boldsymbol{\theta}_j$ and the same hydraulic translation $r_e$. The shared sampling is essential to the bias quantification: independent draws for the two limit states would conflate genuine physical differences in the failure formulation with statistical noise from independent Monte Carlo experiments, undermining the central scientific deliverable of Phase~1.
+
+It must be noted, however, that the static--transient gap captured by this comparison reflects a \emph{combination} of two structurally distinct sources of bias rather than a purely temporal effect. The first is the temporal bias that motivates the thesis: the static formulation evaluates the limit state at peak head, ignoring whether the pipe can physically complete before flood recession. The second is a dimensional bias inherited from the Pol framework itself: the 2D Sellmeijer critical head $H_c$ is applied against a pipe-progression rate calibrated on three-dimensional hole-exit DgFlow simulations, which yield a scale exponent $\alpha \approx -\tfrac{1}{2}$ rather than the two-dimensional value of $-\tfrac{1}{3}$~\parencite{pol_compgeo_2024}. At field seepage lengths $L \sim 50$--$150$~m, this dimensional discrepancy alone can reduce the effective three-dimensional critical head to approximately half the two-dimensional value, a magnitude comparable to the temporal effect. Phase~1 therefore quantifies the \emph{combined} temporal and dimensional bias inherent in comparing a static 2D resistance against a transient 3D-rate model; no claim is made that the reported gap is attributable to the temporal mechanism alone. A dedicated sensitivity study substituting $\alpha = -\tfrac{1}{2}$ into the Sellmeijer scale factor $F_s$---and hence into the critical head $H_c$ that anchors the equilibrium curve $H_\mathrm{eq}(l)$---is planned in the Phase~3 sensitivity analysis to attempt a decomposition of the two contributions. In this decomposition, the exponent swap is applied exclusively to the $H_c$ governing the transient progression branch while the static comparator retains $\alpha = -\tfrac{1}{3}$; without this asymmetric treatment, both branches would shift simultaneously, conflating the dimensional bias with the temporal bias this study is designed to isolate. It should be noted that this substitution constitutes an idealized scale-exponent sensitivity rather than a validated three-dimensional model, and should not be expected to reproduce Pol's actual hole-exit DgFlow critical head values.
+
+Within each realization, the parameter vector $\boldsymbol{\theta}_j$ feeds a shared preamble that computes $H_c$ once via the Sellmeijer formulation and $r_e$ once via the Mazure formulation. The static branch then performs a single scalar comparison with negligible additional cost, while the transient branch executes the full time-stepping integration described in the following section.
+
+\section{The Time-Stepping Solver: Integrating \texorpdfstring{$dl/dt$}{dl/dt} over the Transient Hydrograph}
+\label{sec: The Time-Stepping Solver: Integrating dl/dt over the Transient Hydrograph}
+
+The transient pipe progression is computed within each Monte Carlo realization using the robust 1D analytical time-stepping physical solver of \textcite{pol_compgeo_2024}. This analytical approach is deliberately selected over fully coupled transient finite-element simulations (e.g., PLAXIS, SEEP/W). As noted by \textcite{vanderLinde2025}, resolving macro-scale groundwater flow alongside micro-scale erosion creates a mathematical singularity that makes large-scale numerical modeling computationally prohibitive and subject to high internal flow uncertainties. By employing this validated analytical configuration, computational tractability is preserved at the $10^5$ realizations per cross-section required for reliability convergence.
+
+\subsection{The Pol (2024) Progression ODE}
+\label{subsec: The Pol Progression ODE}
+
+The instantaneous pipe progression rate, derived in \textcite{pol_compgeo_2024} from a sediment mass balance at the pipe head coupling laminar pipe flow with grain stability at the pipe tip, is given by:
+
+$$\frac{dl}{dt} = \begin{cases} 89 \cdot C_e \cdot \left(k_\mathrm{aquifer} \cdot \dfrac{H_\mathrm{erosion}(t) - H_\mathrm{eq}(l)}{L}\right)^{0.81} & \text{if } I_{er}(t) = \text{true}\\[6pt] 0 & \text{otherwise} \end{cases}$$
+
+where $C_e$ is the empirical erosion coefficient, $k_\mathrm{aquifer}$ is the aquifer hydraulic conductivity, $H_\mathrm{erosion}(t)$ is the effective erosion-driving head defined below, $H_\mathrm{eq}(l)$ is the equilibrium head required to sustain a pipe of current length $l$, $L$ is the total seepage length, and $I_{er}(t)$ is the erosion indicator from Section~\ref{subsec: The Erosion Indicator and Composite STPH Failure}. The dimensionless coefficients $89$ and $0.81$ are the regression exponents obtained by \textcite{pol_compgeo_2024} from the curve-fit of the underlying three-dimensional finite-element DgFlow simulations.
+
+\paragraph{Head decomposition: erosion driver versus uplift/heave driver.}
+Following \textcite{pol_sie_2024} Eq.~(6), the net head driving erosion is not identical to the net aquifer overpressure across the blanket.\footnote{\textcite{pol_sie_2024} Eq.~(6) is written for the configuration in which the outer water level acts directly on the aquifer ($r_e = 1$); here the crack-resistance reduction is applied to the response-factor-translated head, $H_\mathrm{erosion}(t) = \Delta h_\mathrm{blanket}(t) - 0.3\,D_{bl}$ with $\Delta h_\mathrm{blanket}(t) = r_e\,(h(t) - z_\mathrm{toe})$, i.e.\ after the hydraulic translation, consistent with the assessment convention of evaluating the local exit head. The $0.3\,D_{bl}$ crack loss, being local to the exit column, is subtracted after rather than scaled by $r_e$.} The vertical seepage path through the fluidised-sediment column in the crack above the pipe tip introduces an additional head loss proportional to the blanket thickness:
+
+$$H_\mathrm{erosion}(t) = \Delta h_\mathrm{blanket}(t) - 0.3\,D_\mathrm{bl}$$
+
+where $\Delta h_\mathrm{blanket}(t)$ is the time-varying net head across the blanket computed by the hydraulic translation (Section~\ref{sec: Hydraulic Translation: River Stage to Aquifer Pressure}) and $D_\mathrm{bl}$ is the blanket thickness. The $0.3\,D_\mathrm{bl}$ term represents the crack-resistance head: \textcite{pol_sie_2024} show that a thicker blanket sustains a higher resistance in the vertical pipe column, causing erosion to arrest earlier during the recession limb. Dropping this term would inflate pipe progression during recession â precisely the phase in which the race condition between progression and flood retreat is decisive for the flashy hydrographs of the Tokachi basin.
+
+This head is distinct from the head governing the uplift and heave limit states. Following \textcite{pol_sie_2024} Eq.~(8), the uplift and heave checks are driven by the un-reduced aquifer overpressure $\Delta h_\mathrm{blanket}(t)$, because those failure modes respond to the full pore pressure acting on the blanket base, without the crack-resistance attenuation that is specific to the sediment-transport process in the erosion column. The two heads are therefore kept separate throughout the integration: $H_\mathrm{erosion}(t)$ enters only the ODE progression rate, while $\Delta h_\mathrm{blanket}(t)$ enters only $Z_\mathrm{uplift}$ and $Z_\mathrm{heave}$. Both quantities are computed at each timestep from the same hydraulic translation output; no additional hydraulic model is required.
+
+The equilibrium head $H_\mathrm{eq}(l)$ governs the physical race condition: pipe progression occurs only when the erosion-driving head exceeds the head required to sustain a pipe of the current length. Following \textcite{pol_sie_2024}, $H_\mathrm{eq}(l)$ is parameterized by piecewise linear interpolation between three physically significant points:
+
+$$H_\mathrm{eq}(0) = 0,\qquad H_\mathrm{eq}(l_c) = H_c,\qquad H_\mathrm{eq}(L) = 0.9\,H_c$$
+
+The first point reflects that no head is required to sustain a pipe of zero length. The second point defines $l_c$ as the critical pipe length at which the equilibrium head reaches the Sellmeijer critical head $H_c$ â the boundary between the regressive phase, in which $H_\mathrm{eq}$ increases with $l$, and the progressive phase, in which a developing pipe becomes increasingly easy to extend. The third point captures the modest reduction in required head as the pipe approaches the upstream boundary, due to flow concentration near the pipe tip. The critical pipe length is computed for homogeneous aquifers as \parencite{pol_sie_2024}:
+
+$$\frac{l_c}{L} = \frac{1}{2}\tanh\!\left(2\,\frac{D_\mathrm{aq}}{L}\right)$$
+
+Both $H_c$ and $l_c$ are recomputed within each Monte Carlo realization using the sampled parameter vector, ensuring that the equilibrium curve $H_\mathrm{eq}(l)$ and consequently the dynamics of pipe progression fully reflect the parametric uncertainty rather than being governed by a fixed deterministic boundary. Importantly, the critical head $H_c$ computed here via the full Sellmeijer formulation is the same $H_c$ used in the static limit state of Section~\ref{sec: Static Limit State: Sellmeijer Steady-State Benchmark}; the static and transient branches therefore share an internally consistent definition of the steady-state piping threshold, with the transient branch extending this threshold into a time-resolved progression model rather than replacing it.
+
+\subsection{Irreversibility and the Positive-Part Operator}
+\label{subsec: Irreversibility and the Positive-Part Operator}
+
+A fundamental physical constraint of the formulation is the irreversibility of pipe growth: the underlying sediment mass balance equations of \textcite{pol_compgeo_2024} employ a positive-part operator $\langle\cdot\rangle$ to explicitly prevent any simulated decrease in eroded pipe length. This ensures that partially eroded pipes remain statically open during periods when the instantaneous hydraulic head drops below the equilibrium head between sub-peaks of a compound event. Combined with the conditional structure imposed by $I_{er}(t)$, the operational progression rate is therefore:
+
+$$\frac{dl}{dt}\bigg|_\mathrm{operational} = \left\langle\frac{dl}{dt}\right\rangle = \max\!\left(0,\; \frac{dl}{dt}\right)$$
+
+The cumulative eroded pipe length at any time $t$ is then:
+
+$$l_e(t) = l_\mathrm{ini} + \int_0^{t} \left\langle\frac{dl}{d\tau}\right\rangle \mathrm{d}\tau$$
+
+where $l_\mathrm{ini}$ is the initial pipe length at the start of the event, equal to zero for isolated events and non-zero for subsequent peaks in compound event sequences, as described in Section~\ref{sec: Compound Event Modelling: Cumulative Memory and Irreversible Pipe Growth}. In practice this means that during inter-peak recession troughs the pipe length holds steady at its accumulated value rather than decaying, producing the characteristic staircase-shaped trajectory $l(t)$ in which growth segments at peaks alternate with plateau segments at troughs. This behavior is the physical signature of the memory model and is preserved exactly through the numerical integration.
+
+\subsection{Numerical Integration Scheme}
+\label{subsec: Numerical Integration Scheme}
+
+The ODE is integrated numerically using a forward Euler scheme, consistent with \textcite{pol_compgeo_2024} and \textcite{pol_sie_2024}. Higher-order integrators are not employed because the empirical coefficients ($C_e$, the regression exponents) carry uncertainty substantially larger than the numerical truncation error of the Euler scheme, and because the logical discontinuities introduced by $I_{er}(t)$ would frustrate the adaptive step-size control of standard adaptive integrators. The integration timestep $\Delta t$ is set to the native resolution of the d4PDF hydrograph output. Convergence of the numerical integration is verified by comparing failure probability estimates at the native timestep resolution against those obtained at a halved timestep. Because forward-Euler overshoot is most severe on steep rising limbs, this test is performed not on a smooth design hydrograph but on a genuinely flashy d4PDF rising-limb event, with the parameter combination drawn from the high-progression-rate tail that most stresses the scheme: high $k_\mathrm{aquifer}$, high $C_e$, and low $D_{bl}$. The integration is deemed converged when the resulting
+\[
+l_e(t_\mathrm{end})
+\]
+values differ by less than $1\%$.
+
+At each timestep $t_n$, the sequence of operations is: (i) the net aquifer overpressure $\Delta h_\mathrm{blanket}(t_n)$ is computed from $h(t_n)$ via the hydraulic translation; (ia) the erosion-driving head is formed as $H_\mathrm{erosion}(t_n) = \Delta h_\mathrm{blanket}(t_n) - 0.3\,D_\mathrm{bl}$; (ii) the uplift and heave limit states $Z_\mathrm{uplift}(t_n)$ and $Z_\mathrm{heave}(t_n)$ are evaluated using $\Delta h_\mathrm{blanket}(t_n)$, and the latching uplift state and the instantaneous heave state are updated; (iii) the erosion indicator $I_{er}(t_n)$ is computed; (iv) the equilibrium head $H_\mathrm{eq}(l(t_n))$ is evaluated by piecewise linear interpolation; (v) the progression rate $dl/dt$ is computed conditionally on $I_{er}(t_n)$, using $H_\mathrm{erosion}(t_n)$ in the overload term; (vi) the positive-part operator is applied; and (vii) the pipe length is updated as $l(t_n + \Delta t) = l(t_n) + \langle dl/dt\rangle \cdot \Delta t$. The cycle repeats for the entire hydrograph record.
+
+\subsection{Physical Sensitivity and Implications for the Tokachi Context}
+\label{subsec: Physical Sensitivity and Implications for the Tokachi Context}
+
+A key physical sensitivity of the Pol (2024) progression model that is particularly significant for the Tokachi context is the appearance of $k_\mathrm{aquifer}$ directly within the overloading term of the ODE. The instantaneous progression rate scales as $k_\mathrm{aquifer}^{0.81}$ at fixed overloading, which mathematically captures why pipes progressing through the highly permeable alluvial gravels of the $A_g$ layer will exhibit substantially accelerated progression velocities compared to fine-sand aquifers. This is the mechanism by which even brief but intense flood waves characteristic of flashy high-gradient rivers can drive meaningful pipe growth, as discussed conceptually in Section~\ref{subsec: Initiation-Dominated vs. Progression-Dominated Behavioral Regimes}, and it motivates the explicit time-dependent treatment rather than the adoption of either a purely static or a simple velocity-averaging approach. The race condition is therefore not abstract: it is parameterized by the same conductivity that determines whether a Tokachi cross-section falls toward the initiation-dominated or progression-dominated regime.
+
+\section{Compound Event Modelling: Cumulative Memory and Irreversible Pipe Growth}
+\label{sec: Compound Event Modelling: Cumulative Memory and Irreversible Pipe Growth}
+
+A fundamental limitation of the historical deterministic safety assessments for the Tokachi basin is their reliance on geometrically idealized single-peak design hydrographs \parencite{oyo_1999}. The physical reality of the August 2016 consecutive typhoon sequence and the projected increase in compound event frequency under future climate scenarios \parencite{yamada_iahr_2020, hoshino2023spatiotemporal} require a formulation that explicitly tracks the cumulative state of pipe development across multiple successive flood peaks within a single continuous event record.
+
+The compound event memory model, following \textcite{pol_sie_2024}, operates by carrying forward the partially eroded pipe length from one event peak to the next as a non-recoverable initial condition. If an initial peak initiates piping but recedes before full breakthrough occurs, the eroded pipe length $l_e$ at the end of that peak is preserved as the initial pipe length for the subsequent peak through the recovery parameter formulation:
+
+$$l_\mathrm{ini,\,n+1} = (1 - r_l) \cdot l_{e,\,n}$$
+
+where $r_l \in [0,1]$ is the fractional strength recovery parameter representing the degree to which natural pipe collapse and sediment infilling reduce the residual pipe length during the inter-event recession period \parencite{pol_compgeo_2024}.
+
+For the closely spaced, successive typhoon peaks characteristic of the compound events captured in the d4PDF ensemble, the recovery parameter is set to $r_l = 0$, yielding strictly cumulative and fully irreversible pipe progression:
+
+$$l_\mathrm{ini,\,n+1} = l_{e,\,n}$$
+
+This conservative assignment is physically justified by the large-scale field experiments of \textcite{pol_thesis_2022}, which demonstrated that even after nine months of inter-event rest, natural pipe recovery remains only partial and that subsequent reloading produces progression rates approximately 140\% higher than those observed during initial loading, due to residual loosening and disturbance of the foundation soil structure. For the timescales of successive typhoon landfalls within the same season typically days to weeks the assumption of zero recovery represents a robust upper bound on compound event risk that is physically grounded in direct experimental evidence.
+
+In practice, the compound memory is not implemented through a separate inter-event bookkeeping step. The time-stepping solver instead ingests the full continuous multi-peak hydrograph time series extracted directly from the d4PDF ensemble, and the pipe length state variable $l(t)$ is tracked continuously across the entire event record. The positive-part operator $\langle\cdot\rangle$ at each timestep ensures that the residual erosion accumulated from all preceding sub-peaks automatically constitutes $l_\mathrm{ini}$ at the onset of each new peak, without any explicit "reset between peaks" operation. This unified treatment eliminates the need to manually identify and separate individual sub-peak events and ensures that the complete temporal phasing, inter-peak recession depth, and receding limb character of each sub-peak are fully preserved in the progression calculation. This is particularly important for accurately representing the compound loading conditions characteristic of the 2016 consecutive typhoon sequence and their projected analogues under future climate warming.
+
+A second consequence of this formulation concerns the gating clause $l_\mathrm{ini} > 0$ in the erosion indicator $I_{er}(t)$, which allows progression to resume on a subsequent event, without re-triggering the uplift sub-mechanism, when a residual pipe is carried forward. Under the threshold collapse established in Section~\ref{subsec: The Erosion Indicator and Composite STPH Failure}, within a single continuous multi-peak record this clause and the uplift latch are in fact redundant, because instantaneous heave activity already implies uplift exceedance at the same timestep; progression on each successive peak is therefore gated by heave alone, reactivating whenever the rising stage of the next peak re-exceeds the heave threshold. The clause is retained because it correctly represents the physical reality that a ruptured blanket and a partially formed erosion channel carried across a genuine inter-event gap, as a non-zero $l_\mathrm{ini}$, remain hydraulically accessible during a subsequent flood independently of whether uplift is re-attained.
+
+\section{Monte Carlo Engine Implementation and Sampling Strategy}
+\label{sec: Monte Carlo Engine Implementation and Sampling Strategy}
+
+The Monte Carlo engine performs $N = 10^5$ stochastic realizations for each cross-section and hydrograph scenario. In each realization, a complete set of time-invariant parameters is drawn from the joint prior distributions established in Section~\ref{sec: Prior Parameter Distributions: Derivation and Statistical Fitting}. These parameters are held constant throughout the time-stepping integration within that realization, reflecting the assumption that the governing soil properties at a given cross-section can be represented by spatially averaged values whose uncertainty is characterized by the autocorrelation-corrected segment-level distributions described in Section~\ref{sec: The Length Effect and Spatial Autocorrelation of Governing Parameters}.
+
+\subsection{Stochastic Parameter Vector}
+\label{subsec: Stochastic Parameter Vector}
+
+The stochastic parameter vector comprises seven random variables:
+
+$$\boldsymbol{\theta} = \bigl(k_\mathrm{aquifer},; d_{70},; D_\mathrm{aq},; D_{bl},; k_{bl},; \gamma'_\mathrm{bl},; C_e\bigr)$$
+
+The first six are time-invariant geotechnical quantities whose spatial variability, as characterized by the continuous borehole and laboratory dataset of \textcite{oyo_1999}, introduces meaningful uncertainty into both the initiation and progression limit states. Specifically, $k_\mathrm{aquifer}$ governs both the leakage length and the progression velocity through the Pol (2024) ODE; $d_{70}$ governs grain entrainment resistance at the pipe head through the Sellmeijer $F_s$ factor and the equilibrium head; $D_\mathrm{aq}$ governs both the leakage length and the critical pipe length $l_c$; $D_{bl}$ and $k_{bl}$ govern the leakage length and, together with $\gamma'\mathrm{bl}$, the uplift and heave limit states; and $\gamma'\mathrm{bl}$ is the submerged bulk unit weight of the $A_c$ confining blanket, governing the overburden resistance in the uplift limit state and the critical heave gradient $i_c = \gamma'\mathrm{bl}/\gamma_w$. The submerged unit weight of the aquifer sand particles, $\gamma'\mathrm{p}$, which governs grain entrainment resistance at the pipe head through the Sellmeijer $F_r$ factor and the equilibrium head $H_\mathrm{eq}(l)$, is a physically distinct quantity held deterministic at the basin-wide value $16.87$kN/m\textsuperscript{3} (Section\ref{subsec: Fixed Parameters Prior}) rather than carried in the sampled vector $\boldsymbol{\theta}$, because its measured variability across the $A_g$ specimens is negligible. The seepage length $L$ is treated as a deterministic geometric parameter fixed by the cross-sectional levee geometry at each study segment, as is the angle of repose $\theta = 37^\circ$ and the relative density $D_r = 0.725$ following the Pol base case parameterization.
+
+The seventh random variable, the empirical erosion coefficient $C_e$, requires specific methodological justification. The Pol (2024) ODE was derived from a sediment transport formulation calibrated against small-scale and large-scale piping experiments, all conducted under laminar pipe flow conditions ($\mathrm{Re} < 2100$). Recent Japanese centrifuge modeling demonstrates that prototype-scale pipe flow frequently transitions to turbulent flow, introducing hydraulic friction that slows progression relative to laminar predictions \parencite{Okamura2022, Okamura2025_prediction}. The conservative laminar-flow assumption therefore biases the deterministic application of the Pol ODE toward overestimating progression rates at field scale. Rather than modifying the ODE itself with empirically unvalidated turbulence corrections, this study treats the calibration uncertainty in $C_e$ as an explicit component of the stochastic parameter space. This methodological choice is critical for the coherence of the Phase~2 Bayesian filtering: if $C_e$ were held deterministic, the filter could constrain $k_\mathrm{aquifer}$, $D_{bl}$, and the other geotechnical variables, but could not adjust the single parameter most directly encoding the laminar-to-turbulent progression rate discrepancy. Promoting $C_e$ to a stochastic variable resolves this consistently and allows the 2016 survival observation to constrain laminar-flow conservatism through the same mechanism that constrains the geotechnical priors.
+
+The prior distribution for $C_e$ is specified as $\mathrm{Lognormal}$ with mean $0.014$ (corresponding to the Pol large-scale FPH calibration) and coefficient of variation $0.50$, spanning the small-scale calibration range of approximately $0.007$ to $0.030$ reported by \textcite{pol_compgeo_2024}.
+
+The distributional specifications and coefficients of variation for the full parameter vector, together with their grounding in the OYO (1999) dataset, are summarized in Table~\ref{tab:priors_phase1} and described in detail in Section~\ref{sec: Prior Parameter Distributions: Derivation and Statistical Fitting}. To ground these variables in the local site geology, the aquifer thickness $D_\mathrm{aq}$ and hydraulic conductivity $k_\mathrm{aquifer}$ are stochastically sampled based specifically on the properties of the alluvial gravel layer (denoted locally as the $A_g$ layer and $N_s$ terrace deposits), while the confining blanket thickness $D_{bl}$, vertical conductivity $k_{bl}$, and submerged bulk unit weight $\gamma'_\mathrm{bl}$ are parameterized using the properties of the overlying clayey silt floodplain deposits (the $A_c$ layer). Standardized ranges derived from field permeability tests and grain-size distribution curves are mapped directly to the targeted cross-sections. Most random variables are sampled independently, with one mandatory exception. The aquifer conductivity $k_\mathrm{aquifer}$ and the representative grain size $d_{70}$ cannot be drawn independently, because the baseline parameterization adopts the sand-matrix $d_{70}$ (to remain near the validated Sellmeijer grain-size range) while $k_\mathrm{aquifer}$ is anchored to the bulk gravel framework. Sampling the two independently would pair a fine-matrix grain size with a coarse-framework conductivity inside a single realization, describing a soil that does not physically exist and artificially inflating the prior progression rate. They are therefore sampled jointly through a Nataf transformation using the empirical correlation \[ \rho\!\left(\ln k_\mathrm{aquifer}, \ln d_{70}\right), \] estimated from the paired grain-size and permeability records of \textcite{oyo_1999}, as derived in Section~\ref{sec: Prior Parameter Distributions: Derivation and Statistical Fitting}.  Both the matrix and the bulk $d_{70}$ interpretations are carried forward as primary results rather than as a single nominal choice, so that the dependence of the fragility curves on the grain-size definition is reported explicitly. Should the paired records show that matrix grain size and bulk conductivity are statistically decoupled, a two-population soil model, treating the erodible matrix separately from the armouring gravel framework, is adopted in place of the single correlated population. Any further significant correlations identified in the borehole dataset are incorporated through the same Nataf procedure.
+
+While this bipartite $A_c$/$A_g$ stratigraphy effectively isolates the primary regional vulnerability, it represents an idealized baseline. To maintain the idealized 2D plane-strain conditions necessary for computational tractability, two localized geotechnical complexities are excluded from the model domain: the historical use of highly permeable clean sands in some 1950s levee cores, and the presence of highly compressible soft peat layers in the lower-basin foundation \parencite{tsai_2018}. These exclusions are not bounding in a single direction. Omitting a relict permeable core or lens removes a feature that would tend to raise local seepage transmission, so the simplification is not guaranteed to be conservative wherever such features are present; it is adopted for tractability and revisited as a limitation in Chapter~\ref{chap: Discussion}.
+
+\subsection{Sampling Strategy: Latin Hypercube Sampling}
+\label{subsec: Sampling Strategy: Latin Hypercube Sampling}
+
+To achieve adequate convergence of failure probability estimates at the low probabilities relevant to flood safety, Latin Hypercube Sampling (LHS) is employed in place of crude Monte Carlo sampling. LHS stratifies the cumulative probability range of each input variable into $N$ equal-probability intervals and draws exactly one sample from each interval, ensuring uniform coverage of the full probability distribution along every marginal axis even at sample sizes achievable within practical computational budgets. The stratified design is constructed in seven dimensions corresponding to the parameter vector $\boldsymbol{\theta}$.
+
+By improving the coverage of each marginal axis, LHS is expected to tighten the coefficient of variation of the estimated failure probability relative to crude Monte Carlo at the same $N$, which is advantageous for the sensitivity studies and cross-section sweeps performed at reduced sample sizes. This expectation requires a caveat specific to the present problem. The deepest part of the failure tail is governed not by a single marginal but by the multiplicative interaction
+\[
+C_e \cdot k_\mathrm{aquifer}
+\]
+in the progression rate, and LHS stratifies marginal distributions rather than interactions. The realized tail-variance advantage is therefore verified empirically against crude Monte Carlo at the operating sample size, evaluated on the failure tail specifically rather than on the bulk of the distribution. Should the advantage prove weak in the deep tail, a variance-reduction scheme targeted at the joint tail, such as importance sampling or subset simulation, is considered for the lowest conditioning levels.
+
+A single LHS design matrix of dimension $N \times 7$ is generated per cross-section and scenario, and the same realizations are used to evaluate both the static and transient limit states. This shared-sample principle is essential: it ensures that the quantified bias between $P_{f,\mathrm{static}}(h)$ and $P_{f,\mathrm{trans}}(h)$ reflects genuine differences in the limit state physics rather than independent sampling variability between two separate Monte Carlo experiments.
+
+\subsection{Fragility Curve Generation and Convergence}
+\label{subsec: Fragility Curve Generation and Convergence}
+
+For each cross-section, the Monte Carlo engine is evaluated across a discrete set of conditioning water levels $\{h_1,\dots,h_{N_h}\}$, spanning from the threshold below which no realizations produce a failure outcome to the level at which the failure probability approaches unity. At each conditioning level, the hydraulic boundary condition for the static assessment is the scalar peak $H_\mathrm{load,peak} = r_e \cdot (h_i - z_\mathrm{toe})$, and for the transient assessment the corresponding full hydrograph time series, scaled to match the target peak. The conditional failure probability at water level $h_i$ is estimated as:
+
+$$\hat{P}_f(h_i) = \frac{1}{N}\sum_{j=1}^{N}\mathbf{1}\!\left[Z(h_i,\,\boldsymbol{\theta}_j) \leq 0\right]$$
+
+where $\boldsymbol{\theta}_j$ is the sampled parameter vector for realization $j$ and $\mathbf{1}[\cdot]$ is the indicator function. The estimator is computed separately for $Z = Z_\mathrm{static}$ and $Z = Z_\mathrm{transient}$, producing two empirical fragility point sets $\{(h_i, \hat{P}_{f,\mathrm{static}}(h_i))\}$ and $\{(h_i, \hat{P}_{f,\mathrm{trans}}(h_i))\}$. Each set is then fitted with a lognormal fragility function:
+
+$$P_f(h) = \Phi\!\left(\frac{\ln h - \mu}{\sigma}\right)$$
+
+where $\Phi$ is the standard normal cumulative distribution function and $(\mu, \sigma)$ are the fitted lognormal fragility parameters. The fitted curves provide smooth, continuously interpolable fragility representations suitable for the series-system integration of Phase~3.
+
+A critical operational consequence of the sampling architecture is that the indicator matrix $\mathbf{1}[Z_\mathrm{transient}(h_i, \boldsymbol{\theta}_j) \leq 0]$ and the underlying parameter matrix $\boldsymbol{\theta}_j$ are retained in their entirety for use in Phase~2. The Bayesian Accept-Reject filtering of Phase~2 operates by re-evaluating $Z_\mathrm{transient}$ for each prior realization against the 2016 historical hydrograph $h_{2016}(t)$ and rejecting realizations that predict failure under the observed survival event. This procedure requires the full prior parameter matrix, not merely the fitted prior fragility curve, and the Phase~1 deliverable is therefore designed as both a fitted curve and a complete set of retained realizations.
+
+Convergence is assessed by monitoring the coefficient of variation (CoV) of $\hat{P}_f(h_i)$ as a function of $N$ at the conditioning level that produces the lowest failure probability of interest. A target of $N = 10^5$ LHS realizations is adopted on the basis of standard practice in probabilistic levee reliability assessment \parencite{schweckendiek_2014}, in which sample sizes of this order typically achieve a coefficient of variation (CoV) below $5\%$ across the relevant failure probability range. This sufficiency is verified directly for each cross-section once the engine is operational, and the sample size is increased wherever the convergence criterion defined below is not satisfied. For conditioning levels at which $\hat{P}_f(h_i)$ falls below $10^{-4}$, the CoV is monitored explicitly and the sample size is increased if necessary to maintain the convergence criterion. Bootstrap resampling of the realization set is used to construct confidence bands on the fitted fragility curves, providing an uncertainty envelope around the point estimates that propagates into the Phase~2 calibration and Phase~3 integration.
+
+%% Phase 2: Bayesian Reliability Updating
+
+\section{The Historical Constraint: The 2016 Transient Hydrograph as Empirical Boundary}
+\label{sec: The Historical Constraint: The 2016 Transient Hydrograph as Empirical Boundary}
+
+The prior BEP fragility curves generated in Phase~1 are derived from distributions of geotechnical parameters that carry substantial epistemic uncertainty arising from several sources: natural spatial variability in the $A_c$/$A_g$ stratigraphy, measurement uncertainty in the borehole and laboratory dataset, the idealized 2D plane-strain cross-sectional geometry, and the conservative laminar flow assumption underlying the Pol (2024) ODE. As documented by \textcite{Okamura2022, Okamura2025_prediction}, prototype-scale pipe flow in levees frequently transitions to turbulent flow regimes, introducing hydraulic friction that reduces progression rates relative to purely laminar predictions and introducing a conservative bias into the prior fragility curves. Rather than correcting the ODE with empirically unvalidated turbulence modifications, this study constrains the prior parameter space using the empirical evidence of historical levee survival through Bayesian reliability updating, following the exact benchmark method of \textcite{schweckendiek_2014}.
+
+The benchmark historical constraint is the fully time-resolved hydrograph of the August 2016 consecutive typhoon event, denoted $h_{2016}(t)$. This event is selected as the primary calibration constraint for three reasons. First, it represents the most severe compound hydraulic loading event in the modern observational record for the Tokachi basin, with four successive typhoons producing the highest sustained river stages and piezometric heads observed at the study cross-sections during the instrumental period. Second, official post-disaster investigations explicitly confirmed the complete absence of sand boils and piping failures along the Tokachi and Satsunai river segments studied here during this event \parencite{tokachi_levee_committee_2017}, providing a precisely documented and defensible survival observation. Third, this documented survival stands in apparent paradox with the earlier deterministic safety evaluations of \textcite{oyo_1999}, which explicitly warned of critical piping instability at these exact segments, creating precisely the type of informative empirical constraint that Bayesian reliability updating can exploit \parencite{schweckendiek_2014, hkv_2023}. It must be emphasised that the informativeness of this constraint for the \emph{time-dependent} mechanism is not assumed in advance. As established in Chapters~\ref{chap: Introduction} and~\ref{chap: Study Area, Geological Setting, and Data}, the 2016 survival admits several explanations besides progression time, including foreshore-controlled head attenuation, the 1999--2003 remediation, static material resistance, and simple non-attainment of the critical initiation head. The filtering procedure described below is therefore embedded within an analytical architecture deliberately constructed to distinguish among these explanations rather than to presuppose the time-dependent one, as made explicit in the following subsection and in the parallel static evaluation of Section~\ref{sec: Static Limit State: Sellmeijer Steady-State Benchmark}.
+
+The use of the full transient hydrograph $h_{2016}(t)$ rather than a peak-level scalar is a deliberate methodological choice, motivated by the time-dependent nature of the BEP mechanism established in Section~\ref{subsec: The Time-Dependent ODE Framework of Pol as the Bridge}: a peak-based survival constraint would falsely assign zero failure probability to any future long-duration event whose peak is lower than the 2016 event but whose extended duration drives sufficient cumulative pipe progression for breakthrough. Crucially, the computational efficiency of the 1D ODE solver allows this study to explicitly bypass the standard WBI+ 1D peak-based truncation approximation which is typically employed precisely to avoid the prohibitive costs of complex limit state models and instead utilize the full transient hydrograph. By supplying the full $h_{2016}(t)$ time series to the same time-stepping solver used in Phase~1, the updating procedure directly captures the temporal structure of the survival constraint, ensuring physical consistency with the time-dependent limit state.
+
+\section{Accept-Reject Filtering: Procedure and Posterior Parameter Distributions}
+\label{sec: Accept-Reject Filtering: Procedure and Posterior Parameter Distributions}
+
+The Bayesian reliability updating is implemented using Monte Carlo Accept-Reject filtering, which constitutes the exact benchmark Bayesian updating method as defined by \textcite{schweckendiek_2014}. The procedure operates on the full set of $N = 10^5$ parameter realizations from Phase~1 and can be described in four sequential steps.
+
+In the first step, the complete prior realization set is retained. Each realization $j$ comprises the full seven-dimensional parameter vector
+\[
+\boldsymbol{\theta}_j =
+\left(
+k_{\mathrm{aquifer},j},\,
+d_{70,j},\,
+D_{\mathrm{aq},j},\,
+D_{bl,j},\,
+k_{bl,j},\,
+\gamma'_{\mathrm{bl},j},
+C_{e,j}
+\right),
+\]
+drawn from the prior distributions, identical to the vector defined in Section~\ref{subsec: Stochastic Parameter Vector}. The erosion coefficient $C_e$ is retained explicitly here because the survival constraint acts on it directly: filtering cannot adjust the laminar-flow conservatism encoded in $C_e$ unless $C_e$ is part of the realization set being filtered.
+
+In the second step, the time-stepping solver is applied to each realization $j$ with $h_{2016}(t)$ as the hydraulic boundary condition, computing the cumulative eroded pipe length $l_{e,j}(t_\mathrm{end})$ under the historical compound loading of the four successive typhoons. The full multi-peak structure of $h_{2016}(t)$ is preserved, and the compound event memory formulation of Section~\ref{sec: Compound Event Modelling: Cumulative Memory and Irreversible Pipe Growth} is applied with $r_l = 0$ for the inter-peak recession periods.
+
+In the third step, each realization is classified as accepted or rejected according to the survival criterion. Because the official investigations confirmed no piping failure occurred at the study segments during the 2016 event \parencite{tokachi_levee_committee_2017}, any parameter combination that produces a simulated pipe breakthrough under $h_{2016}(t)$ represents a physically impossible realization. It predicts failure for an event that demonstrably did not cause failure, and is therefore assigned a conditional probability of zero ($P(F \mid \text{Survival}) = 0$) and excluded from the ensemble:
+
+$$\text{Accept realization } j \iff Z_\mathrm{transient}\!\left(h_{2016}(t),\, \boldsymbol{\theta}_j\right) > 0$$
+
+$$\text{Reject realization } j \iff Z_\mathrm{transient}\!\left(h_{2016}(t),\, \boldsymbol{\theta}_j\right) \leq 0$$
+
+In the fourth step, the accepted realizations constitute the calibrated joint posterior distribution of the geotechnical parameters:
+
+$$\pi_\mathrm{post}(\boldsymbol{\theta}) \propto \pi_\mathrm{prior}(\boldsymbol{\theta}) \cdot P\!\left(\mathrm{Survival}\mid \boldsymbol{\theta},\, h_{2016}(t)\right)$$
+
+where $P(\mathrm{Survival}\mid \boldsymbol{\theta},\, h_{2016}(t)) = 1$ for accepted realizations and $0$ for rejected realizations \parencite{schweckendiek_2014, hkv_2023}.
+
+The posterior fragility curves are generated by re-evaluating $Z_\mathrm{transient}$ for each accepted realization across the full set of d4PDF conditioning water levels, using the identical fragility curve generation procedure as in Phase~1 but restricted to the posterior parameter set. The expected physical effect of the filtering is to preferentially eliminate realizations associated with high aquifer permeabilities, which produce rapid pipe progression under the 2016 loading, and thin blanket layers, which produce low heave resistance, thereby shifting the posterior parameter distributions toward combinations consistent with the observed field resilience. The fraction of realizations rejected and the shift in the marginal posterior distributions relative to the priors are reported as diagnostic outputs, enabling direct quantification of the informativeness of the 2016 constraint and its effect on epistemic uncertainty reduction. These diagnostics also furnish the means to address the discrimination problem raised in Chapters~\ref{chap: Introduction} and~\ref{chap: Study Area, Geological Setting, and Data}, namely how much the 2016 survival genuinely constrains the time-dependent progression mechanism, as distinct from being already explained by geometry, remediation, material resistance, or sub-critical loading. Because the static Sellmeijer limit state is evaluated on the identical prior sample (Section~\ref{sec: Static Limit State: Sellmeijer Steady-State Benchmark}), the survival can first be assessed against the static, geometry-attenuated limit state alone. Realizations that already survive 2016 under the static criterion owe their survival to the critical head never being exceeded, that is, to geometry, material resistance, or sub-critical loading, rather than to any time constraint; for these, the transient filtering contributes no additional information about progression. The \emph{marginal} informativeness of the 2016 survival for the time-dependent mechanism is therefore isolated as the additional rejection produced by the transient limit state beyond that already implied by the static one, evaluated within the remediation state assigned to each segment. Reporting the rejection fraction under both limit states side by side, rather than under the transient state alone, ensures that the calibrated posterior is interpreted as conditional evidence about progression and prevents the headline prior-to-posterior shift from being mistaken for confirmation of a mechanism that the simpler explanations may already account for.
+
+As a supplementary updating step, the well-documented peak water levels from the September 2011 flood event are incorporated as an additional survival constraint, applied sequentially to the posterior parameter set derived from the 2016 filtering. This provides an independent empirical anchor at a different position in the hydrograph severity spectrum and further constrains the tails of the posterior parameter distributions.
+
+%% Phase 3: Surface Threats and System Integration
+
+\section{Multi-Mechanism Integration: Series-System Joint-Probability Formulation}
+\label{sec: Multi-Mechanism Integration: Series-System Joint-Probability Formulation}
+
+To generate a comprehensive multi-mechanism risk profile for the Obihiro levee system without redundant computational overhead, the posterior BEP fragility curves derived in Phase~2 are mathematically integrated with pre-calculated surface failure fragility curves from \textcite{uemura_phd_2025} within a series-system joint-probability framework. The integration is performed at the 200-metre segment level, maintaining the exact spatial correspondence with the Uemura framework required for direct comparison and for producing failure probabilities that are relevant to the specific inundation zones used in regional flood risk management.
+
+\subsection{Imported Surface Failure Fragility Curves}
+\label{subsec: Imported Surface Failure Fragility Curves}
+
+Two surface failure mechanisms are imported from \textcite{uemura_phd_2025} and \textcite{uemura_wp2_2024}:
+
+\textit{Overflow:} The overflow fragility is based on cumulative damage theory \parencite{dean_2010}, which evaluates the time-integrated overtopping flow velocity on the landside levee slope relative to the critical flow velocity for the onset of grass cover erosion, according to the mathematical formulation $\int (u_{\text{slope}}^3 - u_c^3)\,\mathrm{d}t$. The conditional failure probability $P_{f,\mathrm{overflow}}(h)$ accounts for uncertainty in the stage-discharge rating curve, the levee crest height, and the grass cover quality parameter.
+
+\textit{Fluvial Scour:} The fluvial scour fragility is based on a time-integrated bed shear stress model, evaluating the cumulative excess shear $\int (\tau_s - \tau_c)\,\mathrm{d}t$ relative to the critical erosion threshold of the riverbed at the levee toe. The conditional failure probability $P_{f,\mathrm{scour}}(h)$ accounts for uncertainty in the hydraulic bed roughness and the geotechnical erosion susceptibility of the foundation material.
+
+Both surface failure fragility curves were generated by \textcite{uemura_phd_2025} at the identical 200-metre spatial nodes as the BEP assessment and using the same d4PDF transient hydrograph ensembles, ensuring that all three mechanisms operate under consistent hydraulic boundary conditions and can be directly integrated.
+
+\subsection{Independence Assumption and Series System Formulation}
+\label{subsec: Independence Assumption and Series System Formulation}
+
+Following the framework of \textcite{pol_ress_2023}, the three failure mechanisms (overflow, fluvial scour, and BEP) are treated as conditionally statistically independent given the hydraulic loading $h$. This assumption is justified by the distinct physical processes governing each mechanism: overflow is driven by crest exceedance at the peak stage, fluvial scour by cumulative bed shear stress over the event duration, and BEP by retrogressive pipe progression through the foundation over timescales governed by the soil permeability and the hydraulic head. Fully coupled dynamic interactions between mechanisms within a single event (for example, fluvial scour progressively shortening the seepage length $L$ during the same event, thereby accelerating BEP) are explicitly excluded to preserve analytical tractability and to isolate the standalone contribution of BEP to the overall risk profile. Were such coupling active, it would amplify failure probability, for example by shortening LL L mid-event and accelerating progression; neglecting it therefore causes the integrated estimate to underestimate the true coupled risk. This is a non-conservative simplification, adopted for tractability and acknowledged as a model limitation in Chapter~\ref{chap: Discussion}.
+
+Under conditional independence, the combined probability that at least one of the three mechanisms causes failure at a given 200-metre segment under water level $h$ is given by the series-system joint-probability equation:
+
+$$P_{f,\mathrm{segment}}(h) = 1 - \prod_{i\,\in\,\{\mathrm{overflow,\,scour,\,BEP}\}} \bigl(1 - P_{f,i}(h)\bigr)$$
+
+Because the cross-sections are evaluated independently, without accounting for the hydrodynamic capping effect by which upstream levee breaches reduce the hydraulic load on downstream segments, the resulting $P_{f,\mathrm{segment}}(h)$ values represent upper-bound estimates of the cross-sectional failure probability \parencite{pol_ress_2023}. This conservative treatment is deliberately chosen to provide an upper-bound characterization of the absolute risk to the Obihiro urban center and to avoid the distributional equity complications of implicitly treating rural upstream areas as hydraulic safety valves for the city.
+
+\section{Climate Sensitivity Assessment: Historical Baseline vs.\ \texorpdfstring{+4K}{+4K} Warming Scenario}
+\label{sec: Climate Sensitivity Assessment: Historical Baseline vs. +4K Warming Scenario}
+
+The final component of the methodology evaluates how the integrated multi-mechanism system fragility responds to the climate-driven changes in hydrograph character projected by the d4PDF ensemble. The unified framework is applied separately to two d4PDF hydrograph ensembles: the 3,000-year historical baseline (50 ensemble members, 1951 to 2010) and the 5,400-year +4K warming scenario (90 ensemble members, RCP8.5 end-of-21st-century equivalent). For each ensemble, the per-event conditional failure probabilities $P_{f,\mathrm{segment}}(h_i)$ are computed across the full set of conditioning water levels using the posterior BEP fragility curves from Phase~2 combined with the imported surface failure curves from \textcite{uemura_phd_2025}, producing scenario-specific system fragility curves.
+
+The climate sensitivity analysis is structured around three quantitative metrics. First, the shift in the integrated system fragility curve between the historical and +4K scenarios, expressed as the change in $P_{f,\mathrm{segment}}$ at given return-period water levels, quantifies the overall climate-driven increase in risk at the segment level. Second, the relative contribution of each failure mechanism to the total system fragility is evaluated by comparing $P_{f,\mathrm{BEP}}(h)$, $P_{f,\mathrm{overflow}}(h)$, and $P_{f,\mathrm{scour}}(h)$ against $P_{f,\mathrm{segment}}(h)$ at each conditioning level for both scenarios. This comparison directly addresses the question of whether climate change shifts the dominant failure mode from surface overflow to subsurface internal erosion, providing the computational evidence for the strategic adaptation assessment in Chapter~\ref{chap: Discussion}. Third, the sensitivity of the BEP contribution specifically to individual hydrograph characteristics (peak magnitude, flood duration, and compound event sequencing) is examined by stratifying the +4K ensemble by these properties and comparing the resulting BEP failure probability distributions across strata. This attribution step isolates the respective contributions of increased peak intensity, elongated duration, and higher compound event frequency to the overall shift in BEP risk, directly addressing the fourth sub-question.
+
+The BEP fragility curves employed in this climate sensitivity analysis are the posterior curves from Phase~2, conditioned on the 2016 survival constraint. The surface failure fragility curves from \textcite{uemura_phd_2025} were themselves generated using the same d4PDF ensembles, ensuring full internal consistency in the treatment of hydraulic boundary conditions across all three failure mechanisms in the comparative analysis.

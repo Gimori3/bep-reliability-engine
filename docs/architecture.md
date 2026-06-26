@@ -306,7 +306,7 @@ Random variables sampled via LHS:
 | D_aq | Aquifer thickness [m] | Lognormal | (site-specific) | 0.20 | OYO 1999 borehole logs |
 | D_bl | Blanket thickness [m] | Lognormal | (site-specific) | 0.20 | OYO 1999 borehole logs |
 | k_bl | Blanket vertical conductivity [m/s] | Lognormal | (site-specific) | 0.50 | OYO 1999 (or proxy) |
-| γ'_s | Submerged unit weight [kN/m^3] | Normal | (site-specific) | 0.05 | OYO 1999 lab tests |
+| γ'_bl | Blanket submerged unit weight [kN/m^3] | Lognormal | 6.9 | 0.056 | OYO 1999 Form 5 (A_c sat. density); see ADR-0016 |
 | C_e | Erosion coefficient [-] | Lognormal | 0.014 | 0.50 | Pol 2024 calibration |
 
 Fixed within every realization:
