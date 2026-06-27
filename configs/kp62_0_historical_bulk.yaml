@@ -1,0 +1,98 @@
+# ======================================================================
+# GENERATED -- Tokachi KP 62.0, scenario historical, d70 bulk
+# Source: data/processed/tokachi_bep_inputs.csv via scripts/generate_configs.py
+# Do not hand-edit; re-run the generator.
+#
+# REAL (CSV per section): L, foreshore_width; means of k_aq,
+#   d_70(matrix), D_aq, D_bl, k_bl; remediation_state.
+# FIXED (spec 7 / ADR-0016 / Pol 2024): all COVs; gamma_bl_sub
+#   (6.9, 0.056); C_e (0.014, 0.50); theta_repose_deg; D_r; alpha.
+# PROVISIONAL: z_toe, rho_log_kaq_d70, conditioning_grid, seed;
+#   D_fore/k_fore = landside D_bl/k_bl proxy (ADR-0005).
+# gamma: CSV gamma_sub_kNm3 = 16.80 kN/m^3 is gamma'_p (aquifer
+#   particle, Sellmeijer F_r), used via the pinned constant
+#   sellmeijer.GAMMA_P_SUB_DEFAULT = 16.87; NOT a config field and
+#   deliberately not written below (ADR-0016).
+# bulk: d_70 is the bulk-gravel co-primary (provenance 3.3), far
+#   outside Sellmeijer's 150-430 um range; H_c is extrapolated.
+# KP62: remediation 'unreinforced' is berm-uncertain (3.2);
+#   conservative best estimate -- see REMEDIATION_OVERRIDES.
+# ======================================================================
+
+cross_section_id: tokachi_kp62.0
+segment_id: KP62.0
+scenario: historical
+remediation_state: unreinforced
+geometry:
+  L: 47.0
+  z_toe: 0.0
+  foreshore_width: 44.0
+  D_fore: 2.0
+  k_fore: 3.0e-06
+priors:
+  k_aq:
+    family: lognormal
+    mean: 0.001
+    cov: 0.5
+  d_70:
+    family: lognormal
+    mean: 0.0135
+    cov: 0.1
+  D_aq:
+    family: lognormal
+    mean: 10.0
+    cov: 0.2
+  D_bl:
+    family: lognormal
+    mean: 2.0
+    cov: 0.2
+  k_bl:
+    family: lognormal
+    mean: 3.0e-06
+    cov: 0.5
+  gamma_bl_sub:
+    family: lognormal
+    mean: 6.9
+    cov: 0.056
+  C_e:
+    family: lognormal
+    mean: 0.014
+    cov: 0.5
+  bounds:
+    d_70:
+    - 0.0005
+    - 0.05
+  d70_interpretation: bulk
+correlation:
+  rho_log_kaq_d70: 0.6
+  coupling: correlated
+mc:
+  n_samples: 100000
+  seed: 20260626
+  conditioning_grid:
+  - 4.0
+  - 4.5
+  - 5.0
+  - 5.5
+  - 6.0
+  - 6.5
+  - 7.0
+  - 7.5
+  - 8.0
+  - 8.5
+  - 9.0
+  sampling_scheme: latin_hypercube
+timestepper:
+  integration_scheme: forward_euler
+  target_dt_seconds: null
+  convergence_test: false
+  convergence_threshold: 0.01
+  aquifer_lag_active: false
+  specific_storage_per_m: null
+output:
+  store_trajectories: false
+  persistence_format: hdf5
+  results_dir: results
+theta_repose_deg: 37.0
+relative_density_insitu: 0.725
+alpha_exponent: -0.3333333333333333
