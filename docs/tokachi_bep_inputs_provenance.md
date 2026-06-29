@@ -56,7 +56,7 @@ methodology, which is a modeling step, not data transcription.
 | `D_aq_m` | thickness table | none | combined A_g + N_s to K_1p base |
 | `k_aq_mps` | Form 5, A_g layer | cm/s to m/s, divide by 100 | analysis constants, not field/lab |
 | `d70_m` | derived, not measured | mm to m, x 1e-3 | matrix-fraction interpretation; see 3.3 |
-| `D_bl_m` | thickness table | none | A_c thickness at landside toe; conflict flagged in 3.8 |
+| `D_bl_m` | thickness table | none | A_c thickness at landside toe; KP 62.0 corrected to 0.45 m (0.3 to 0.6 m), see 3.8 |
 | `k_bl_mps` | Form 5, A_c layer | cm/s to m/s, divide by 100 | NaN at KP 63.4 (A_c absent); see 3.4 note and 4 |
 | `gamma_sub_kNm3` | grain-size table rho_s | (G_s - 1) x 9.81 | per-section particle submerged weight; confirmed; see 3.4 |
 | `foreshore_width_m` | inventory | none | KP 63.4 "river-tight" encoded 0; see 3.5 |
@@ -240,7 +240,7 @@ and 0.20 m/h recession. The defensible figure is the main text's approximately 4
 the other four sections. HWL is not a CSV column; recorded for the audit trail and as an
 appendix correction item.
 
-### 3.8 PARTIALLY RESOLVED: blanket thickness `D_bl_m` vs the L memo A_c thickness
+### 3.8 KP 62.0 RESOLVED; KP 57.4/58.8/60.0 pending: blanket thickness `D_bl_m` vs the OYO geological-section A_c thickness
 
 Cross-referencing the L memo against the thesis thickness table surfaced a material
 disagreement on the A_c blanket thickness, which is the `D_bl_m` column. The two documents
@@ -251,7 +251,7 @@ differ by roughly a factor of 2 to 3:
 | 57.4 | 2.5 | about 0.8 | about 3 |
 | 58.8 | 2.0 | about 0.85 | about 2.4 |
 | 60.0 | 1.6 | 0.85 to 1.35 | about 1.2 to 1.9 |
-| 62.0 | 2.0 | 0.3 to 0.6 | about 3 to 7 |
+| 62.0 | 0.45 (corrected from 2.0) | 0.3 to 0.6 (図4-1-4 legend, report p.37) | about 1 |
 | 63.4 | 1.0 (nominal, A_c absent) | none | n/a |
 
 Status after review of the latest Chapter 3 (file
@@ -268,24 +268,32 @@ landside specimen at KP 58.8 as evidence of a possibly breached blanket, not on 
 thinness. A reader of Chapter 3 alone therefore sees one consistent set of A_c thicknesses;
 the clashing pair no longer appears inside the thesis.
 
-UNDERLYING DISCREPANCY: NOT RECONCILED. The chapter committed to the thicker thickness-table
-values; the memo's thinner per-section readings (0.3 to 1.4 m) still contradict them and now
-live only in the memo. The physical question of the true A_c thickness is unanswered. It
-still has teeth because `D_bl` feeds the uplift limit state and the heave gradient directly,
-both scaling inversely with blanket thickness: if the memo's thinner readings are correct,
-those initiation limit states use a blanket 2 to 3x too thick, biasing them toward false
-safety. This is worst at KP 62.0, the governing piping section, where the chapter's 2.0 m
-stands against the memo's 0.3 to 0.6 m. The chapter's continuity-based L argument is
-unaffected by this (it does not depend on absolute thickness), so the open item is confined
-to the `D_bl` value used in uplift and heave.
+RESOLUTION (KP 62.0). The governing section is resolved. The A_c blanket thickness at
+KP 62.0 is 0.3 to 0.6 m, stated verbatim in the OYO geological cross-section 図4-1-4
+(地質横断図, 十勝川右岸 KP62.0), 地質凡例 Ac row, 記事 column ("標高45m付近に層厚 0.3〜0.6m
+程度で薄く分布する"), bound report PDF p.37 (printed p.32, scale 1:200). It is corroborated by
+borehole B-9 (the landside toe) in 様式-4 (R062_000.pdf p.2): every B-9 sample classifies as
+gravel-with-fines [GF]/[G-F], with clean A_g gravel only by 5 to 6 m depth, so there is no
+2 m clay blanket at the exit. The earlier 2.0 m was the 様式-5 lumped computational layer
+(R062_000.pdf p.3, layer 2, parameters assigned "他と比較 N=3", i.e. by analogy, not measured
+here), which equals the cover-to-aquifer depth (B-9 surface EL+46.55 to A_g top EL+43.9 is
+about 2.6 m), not the mapped competent aquitard. D_bl(62.0) is corrected to mean 0.45 m
+(midpoint of 0.3 to 0.6); with the existing CoV = 0.167 the lognormal +/-2 sigma interval is
+0.30 to 0.60 m, matching the mapped range, so the CoV is unchanged and mu_ln becomes -0.812.
 
-CSV STATUS: `D_bl_m` and `L_m` in the CSV match the latest Chapter 3 line for line, so the
-table is aligned with the thesis as written; no CSV change is required. Recommend resolving
-the absolute A_c thickness against 様式-3 and 様式-5 per section (and the 土層縦断図 if
-obtained) before the first fragility run, since the alignment is to a value the chapter
-adopted by omission rather than by reconciliation. Candidate explanations to check: different
-boreholes (landside toe vs under-levee), the thickness table reading A_c down to a deeper
-transitional contact, or a transcription error in one document.
+OTHER SECTIONS: NOT YET VERIFIED. KP 57.4 (2.5 vs ~0.8), 58.8 (2.0 vs ~0.85), and 60.0
+(1.6 vs 0.85 to 1.35) still carry the thick thickness-table values. Their thin readings come
+from the same OYO geological-section legends (図4-1-1/-1-2/-1-3) that proved authoritative at
+KP 62.0, so the same over-thickening very likely applies to all three and should be verified
+identically (read each section's 図4-1-X 地質凡例 Ac row and cross-check the landside borehole)
+before the first fragility run. The teeth are unchanged: D_bl feeds the uplift limit state and
+heave gradient directly, both scaling inversely with blanket thickness, so any uncorrected
+over-thickness biases initiation toward false safety. The continuity-based L argument is
+unaffected (it does not depend on absolute thickness).
+
+CSV STATUS: the CSV KP 62.0 row is corrected to D_bl_m = 0.45; rows 57.4/58.8/60.0 are left at
+the thickness-table values pending the verification above. The CSV is therefore aligned with
+the chapter for KP 62.0 and flagged as provisional for the other three confined sections.
 
 ---
 
@@ -329,9 +337,10 @@ transitional contact, or a transcription error in one document.
 - `L_m` 47: L memo, toe-to-toe including landside berm (range 40 to 55). Failure mode in
   表6-3-1 is explicitly 基盤漏水によるパイピング (foundation-seepage piping). State
   `unreinforced` but see open sub-item.
-- `D_aq_m` 10, `D_bl_m` 2.0: thickness table. D_bl conflicts most strongly with L memo A_c
-  0.3 to 0.6 m, factor 3 to 7 (3.8). This is the governing section, so the conflict is most
-  consequential here.
+- `D_aq_m` 10, `D_bl_m` 0.45 (corrected): A_c thickness 0.3 to 0.6 m, read directly from the
+  OYO geological cross-section 図4-1-4 legend (report p.37) and corroborated by B-9 (様式-4:
+  all samples gravel-with-fines, no clay). The earlier 2.0 m was the 様式-5 lumped layer /
+  cover-to-aquifer depth, not the mapped blanket. Governing section; resolved (3.8).
 - `k_aq_mps` 1.0e-3, `k_bl_mps` 3.0e-6: Form 5.
 - `d70_m` 7.0e-4: assigned by analogy (no clean matrix sample; shallow specimens gravelly).
   Bulk co-primary 13.5 mm.
