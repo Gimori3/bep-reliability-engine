@@ -172,12 +172,23 @@ KP 62.0 and KP 63.4 d_70 are assigned by analogy: their shallowest specimens are
 (62.0-1 d_60 = 7.87 mm, B-9-1 d_60 = 3.46 mm), so no section-specific sand-matrix sample
 exists. This remains a judgment item even though the interpretation is approved.
 
-### 3.4 CONFIRMED: `gamma_sub_kNm3`
+### 3.4 CONFIRMED: `gamma_sub_kNm3` (audit-trail only; the engine uses 16.87 basin-wide)
 
-The engineer has confirmed this column is the particle submerged unit weight of the
-aquifer sand, gamma'_s = (G_s - 1) x gamma_w, which is the quantity consumed by F_r, and
-that per-section values are wanted (not a single basin-wide constant). The definitional
-question raised in the prior revision is therefore closed.
+This column is the particle submerged unit weight of the aquifer sand,
+gamma'_p = (G_s - 1) x gamma_w, the quantity consumed by the Sellmeijer resistance
+factor F_r. **Canonical-value decision (review item #10): the engine uses the basin-wide
+deterministic gamma'_p = 16.87 kN/m3** (the pinned constant
+`sellmeijer.GAMMA_P_SUB_DEFAULT`), consistent with the thesis Methodology, which fixes
+gamma'_p as a single deterministic basin-wide value. The per-section column below is
+therefore **recorded for the audit trail only and is not threaded into the engine**:
+`scripts/generate_configs.py` does not read it (it has no config field, ADR-0016), and
+the per-section spread (16.49 to 16.85) is < 2 % from the 16.87 basin-wide mean, so the
+simplification is numerically negligible. (An earlier revision noted "per-section values
+are wanted"; that is superseded by the basin-wide decision here. If per-section gamma'_p
+is ever required, it would be threaded via the same M8 -> M6 channel as the other
+deterministic Sellmeijer inputs, review item #6.) Do not confuse gamma'_p with the
+distinct stochastic *blanket* weight gamma'_bl (6.9 kN/m3, CoV 0.056) that drives the
+uplift and heave limit states and is carried in the theta vector.
 
 | KP | A_g specimens averaged | mean G_s | gamma'_s = (G_s - 1) x 9.81 |
 |------|------------------------|----------|------------------------------|

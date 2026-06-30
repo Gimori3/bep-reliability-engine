@@ -287,6 +287,8 @@ def compute_critical_head(
     geometry: dict,
     alpha_exponent: float = -1.0 / 3.0,
     gamma_p_sub_kn_m3: float = GAMMA_P_SUB_DEFAULT,
+    theta_repose_rad: float = THETA_REPOSE_DEFAULT,
+    relative_density: float = D_R_DEFAULT,
 ) -> SellmeijerResult:
     """Critical head H_c and critical pipe length l_c, one realization.
 
@@ -321,6 +323,16 @@ def compute_critical_head(
         resistance factor F_r. Deterministic (default
         ``GAMMA_P_SUB_DEFAULT``, ADR-0016); reference-case tests override it
         with the case-specific particle weight.
+    theta_repose_rad : float, optional
+        Bedding (repose) angle [rad] entering F_r through tan(theta).
+        Deterministic, run-owned (ADR-0015); default ``THETA_REPOSE_DEFAULT``
+        (37 deg). Threaded from ``config.theta_repose_rad`` by M8 so a run can
+        override it without editing the module constant.
+    relative_density : float, optional
+        In-situ relative density D_r [-], the numerator of the F_r ratio
+        ``(D_r / D_r,m)^0.35`` (ADR-0015). Default ``D_R_DEFAULT`` (= D_r,m, so
+        the ratio is 1). The regression-mean denominator ``D_r,m`` stays the
+        pinned module constant ``D_R_MEAN``.
 
     Returns
     -------
@@ -356,7 +368,11 @@ def compute_critical_head(
 
     h_c = (
         seepage_length_m
-        * _factor_Fr(gamma_p_sub_kn_m3)
+        * _factor_Fr(
+            gamma_p_sub_kn_m3,
+            theta_repose_rad=theta_repose_rad,
+            relative_density=relative_density,
+        )
         * _factor_Fs(d_70_m, k_aq_mps, seepage_length_m, alpha_exponent)
         * _factor_Fg(D_aq_m, seepage_length_m)
     )
@@ -379,6 +395,8 @@ def compute_critical_head_vectorized(
     geometry: dict,
     alpha_exponent: float = -1.0 / 3.0,
     gamma_p_sub_kn_m3: float = GAMMA_P_SUB_DEFAULT,
+    theta_repose_rad: float = THETA_REPOSE_DEFAULT,
+    relative_density: float = D_R_DEFAULT,
 ) -> SellmeijerResult:
     """Critical head H_c and critical pipe length l_c for all N
     realizations at once.
@@ -404,6 +422,12 @@ def compute_critical_head_vectorized(
     gamma_p_sub_kn_m3 : float, optional
         Deterministic submerged aquifer particle unit weight gamma'_p
         [kN/m^3] for F_r (default ``GAMMA_P_SUB_DEFAULT``, ADR-0016).
+    theta_repose_rad : float, optional
+        Bedding (repose) angle [rad] for F_r (see
+        :func:`compute_critical_head`); default ``THETA_REPOSE_DEFAULT``.
+    relative_density : float, optional
+        In-situ relative density D_r [-] for F_r (see
+        :func:`compute_critical_head`); default ``D_R_DEFAULT``.
 
     Returns
     -------
@@ -422,11 +446,15 @@ def compute_critical_head_vectorized(
     Same mathematical assumptions as :func:`compute_critical_head`. This
     is the production path for N = 1e5 fragility runs; the scalar variant
     exists for single-realization tracing and for the Phase 2 evaluator
-    import path (M8). The whole output batch is validated before
-    returning: an invalid row indicates a theta draw that escaped the
-    sampler-stage prior clipping of spec section 12 (failure mode 2), and
-    aborts the run rather than propagating silently. The prescribed fix
-    is prevention -- re-bound the priors in M2 -- not skipping here.
+    import path (M8). ``geometry['L']`` may be a scalar (deterministic
+    seepage length) or an ``(N,)`` array (stochastic per-realization L, drawn
+    independently of theta); every term broadcasts, so H_c and l_c become
+    per-realization in L as well as in the theta columns. The whole output
+    batch is validated before returning: an invalid row indicates a theta
+    draw that escaped the sampler-stage prior clipping of spec section 12
+    (failure mode 2), and aborts the run rather than propagating silently.
+    The prescribed fix is prevention -- re-bound the priors in M2 -- not
+    skipping here.
     """
     seepage_length_m = geometry["L"]
     k_aq_mps = theta_matrix[:, _PARAM_NAMES.index("k_aq")]
@@ -435,7 +463,11 @@ def compute_critical_head_vectorized(
 
     h_c = (
         seepage_length_m
-        * _factor_Fr(gamma_p_sub_kn_m3)
+        * _factor_Fr(
+            gamma_p_sub_kn_m3,
+            theta_repose_rad=theta_repose_rad,
+            relative_density=relative_density,
+        )
         * _factor_Fs(d_70_m, k_aq_mps, seepage_length_m, alpha_exponent)
         * _factor_Fg(D_aq_m, seepage_length_m)
     )

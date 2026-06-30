@@ -27,6 +27,7 @@ from bep_reliability_engine.sampling import (
     PARAM_NAMES,
     MarginalSpec,
     ThetaSample,
+    sample_seepage_length,
     sample_theta,
 )
 
@@ -370,3 +371,46 @@ def test_bounds_clip_pathological_tails() -> None:
     d70 = sample.column("d_70")
     assert d70.min() >= lo
     assert d70.max() <= hi
+
+
+# ===========================================================================
+# Stochastic seepage length L (sampled independently of theta; review item #3)
+# ===========================================================================
+
+
+def test_sample_seepage_length_shape_and_moments() -> None:
+    """L is an (N,) lognormal draw recovering its mean and CoV (review item #3)."""
+    n = 50_000
+    mean_m, cov = 47.0, 0.20
+    samples = sample_seepage_length(mean_m, cov, seed=4321, n_samples=n)
+
+    assert samples.shape == (n,)
+    assert samples.dtype == np.float64
+    assert np.all(samples > 0.0)
+    assert float(samples.mean()) == pytest.approx(mean_m, rel=0.02)
+    assert float(samples.std(ddof=1) / samples.mean()) == pytest.approx(cov, rel=0.05)
+
+
+def test_sample_seepage_length_reproducible_and_independent_of_theta() -> None:
+    """Same seed -> identical L; the L draw does not perturb the theta LHS."""
+    kwargs = dict(mean_m=35.0, cov=0.15, n_samples=2_000)
+    a = sample_seepage_length(seed=7, **kwargs)
+    b = sample_seepage_length(seed=7, **kwargs)
+    c = sample_seepage_length(seed=8, **kwargs)
+    np.testing.assert_array_equal(a, b)
+    assert not np.array_equal(a, c)
+
+    # L keeps perfect 1-D LHS stratification (it has no correlation perturbation).
+    mu_ln, sigma_ln = _lognormal_params(35.0, 0.15)
+    u = norm.cdf((np.log(a) - mu_ln) / sigma_ln)
+    assert _is_perfectly_stratified(u, a.size)
+
+
+def test_sample_seepage_length_rejects_bad_inputs() -> None:
+    """Guards: positive mean and a strictly positive CoV (deterministic L != here)."""
+    with pytest.raises(ValueError):
+        sample_seepage_length(0.0, 0.2, seed=1, n_samples=10)
+    with pytest.raises(ValueError):
+        sample_seepage_length(30.0, 0.0, seed=1, n_samples=10)
+    with pytest.raises(ValueError):
+        sample_seepage_length(30.0, 0.2, seed=1, n_samples=0)

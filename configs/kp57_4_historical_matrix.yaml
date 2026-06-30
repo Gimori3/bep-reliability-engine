@@ -9,10 +9,13 @@
 #   (6.9, 0.056); C_e (0.014, 0.50); theta_repose_deg; D_r; alpha.
 # PROVISIONAL: z_toe, rho_log_kaq_d70, conditioning_grid, seed;
 #   D_fore/k_fore = landside D_bl/k_bl proxy (ADR-0005).
-# gamma: CSV gamma_sub_kNm3 = 16.84 kN/m^3 is gamma'_p (aquifer
-#   particle, Sellmeijer F_r), used via the pinned constant
-#   sellmeijer.GAMMA_P_SUB_DEFAULT = 16.87; NOT a config field and
-#   deliberately not written below (ADR-0016).
+# gamma: CSV gamma_sub_kNm3 = 16.84 kN/m^3 is the per-section
+#   aquifer particle weight gamma'_p (Sellmeijer F_r). It is recorded here
+#   for the audit trail ONLY and is NOT used: the run uses the canonical
+#   basin-wide deterministic gamma'_p = 16.87 (the pinned constant
+#   sellmeijer.GAMMA_P_SUB_DEFAULT), per the review-item-#10 decision.
+#   gamma'_p is not a config field (ADR-0016); gamma_bl_sub below is the
+#   distinct stochastic BLANKET weight that drives uplift/heave.
 # ======================================================================
 
 cross_section_id: tokachi_kp57.4
@@ -23,7 +26,7 @@ geometry:
   L: 33.0
   z_toe: 0.0
   foreshore_width: 200.0
-  D_fore: 2.5
+  D_fore: 0.8
   k_fore: 1.6e-06
 priors:
   k_aq:
@@ -33,15 +36,15 @@ priors:
   d_70:
     family: lognormal
     mean: 0.0007
-    cov: 0.1
+    cov: 0.3
   D_aq:
     family: lognormal
     mean: 7.0
-    cov: 0.2
+    cov: 0.1
   D_bl:
     family: lognormal
-    mean: 2.5
-    cov: 0.2
+    mean: 0.8
+    cov: 0.167
   k_bl:
     family: lognormal
     mean: 1.6e-06
@@ -92,3 +95,4 @@ output:
 theta_repose_deg: 37.0
 relative_density_insitu: 0.725
 alpha_exponent: -0.3333333333333333
+seepage_length_cov: 0.2

@@ -340,7 +340,7 @@ Phase 2 needs:
 The cleanest interface: expose M8 as a public function with a stable signature, and have Phase 2 import it directly. The filtering becomes:
 
 ```python
-from bep_phase1.evaluator import evaluate_realization
+from bep_reliability_engine.evaluator import evaluate_realization
 
 results_2016 = [
     evaluate_realization(theta_matrix[j], h_2016, geometry, l_ini=0.0)
@@ -389,8 +389,8 @@ Reasons against pure-notebook architecture:
 **Recommended layout:**
 
 ```
-bep_phase1/
-├── bep_phase1/                       # importable package
+bep-reliability-engine/
+├── bep_reliability_engine/           # importable package
 │   ├── __init__.py
 │   ├── config.py                     # M1: pydantic dataclasses
 │   ├── sampling.py                   # M2: LHS sampler + Nataf correlation
@@ -420,10 +420,10 @@ bep_phase1/
 └── README.md
 ```
 
-Notebooks become thin drivers: they import from `bep_phase1`, configure a run, execute, and visualize. They do not contain physics. The notebook for a fragility run is essentially:
+Notebooks become thin drivers: they import from `bep_reliability_engine`, configure a run, execute, and visualize. They do not contain physics. The notebook for a fragility run is essentially:
 
 ```python
-from bep_phase1 import Config, run_fragility_analysis, plot_fragility
+from bep_reliability_engine import Config, run_fragility_analysis, plot_fragility
 cfg = Config.from_yaml("configs/tokachi_kp58.yaml")
 result = run_fragility_analysis(cfg)
 result.save("results/tokachi_kp58_historical.h5")
@@ -486,7 +486,7 @@ Everything else, the 10^5-iteration machinery, is in the package.
 
 **Failure mode 3, forward Euler timestep too large for steep rising limbs.** For typhoon peak rising limbs in flashy rivers, the effective time constant of the dl/dt response can be short. If Δt is too large, l_e can overshoot. Mitigation: the timestep convergence test in §11, run on a flashy rising limb with a high-progression-rate θ.
 
-**Failure mode 4, static-vs-transient bias conflates three physical effects.** The intended finding "static overestimates because it ignores time" is partly conflated with two non-temporal effects. First, the static Sellmeijer assumes 2D plane-strain and inherits the 2D scale exponent α = −1/3, while the Pol ODE was calibrated against 3D experiments carrying α = −1/2; at field seepage lengths the 3D critical head can be roughly half the 2D value, a magnitude comparable to the temporal effect. Second, the transient branch applies Pol's crack-resistance reduction H_erosion = Δh_blanket − 0.3·D_bl, while the static comparator uses the gross peak head, faithful to conventional deterministic practice; this introduces a smaller non-temporal head-convention offset. The static-transient gap therefore combines a temporal component, a 2D-versus-3D dimensional component, and a head-convention offset. Mitigation: do not claim the entire gap is purely temporal; provide a hook in M6/M7 to substitute the 3D scale exponent α = −1/2 in the equilibrium curve for a sensitivity decomposition, report the head-convention difference explicitly, and acknowledge all three components in the discussion.
+**Failure mode 4, static-vs-transient bias conflates three physical effects.** The intended finding "static overestimates because it ignores time" is partly conflated with two non-temporal effects. First, the static Sellmeijer assumes 2D plane-strain and inherits the 2D scale exponent α = −1/3, while the Pol ODE was calibrated against 3D experiments carrying α = −1/2; at field seepage lengths the 3D critical head can be roughly half the 2D value, a magnitude comparable to the temporal effect. Second, the transient branch applies Pol's crack-resistance reduction H_erosion = Δh_blanket − 0.3·D_bl, while the static comparator uses the gross peak head, faithful to conventional deterministic practice; this introduces a smaller non-temporal head-convention offset. The static-transient gap therefore combines a temporal component, a 2D-versus-3D dimensional component, and a head-convention offset. Mitigation: do not claim the entire gap is purely temporal; provide a hook in M6/M7 to substitute the 3D scale exponent α = −1/2 in the equilibrium curve for a sensitivity decomposition, report the head-convention difference explicitly, and acknowledge all three components in the discussion. (The dimensional hook is now implemented as the transient-only `alpha_exponent_transient`, which recomputes a separate transient H_c at α = −1/2 while the static comparator keeps α = −1/3 — ADR-0017; a fourth component, H_eq-conservatism, was added in ADR-0009.)
 
 **Failure mode 5, LHS variance reduction in the tails.** LHS improves the coverage of each marginal axis, so it is expected to tighten the coefficient of variation of P_f-hat relative to crude Monte Carlo at the same N, which is advantageous for the sensitivity studies and cross-section sweeps that run at reduced N (typically 10^4). This expectation carries a caveat specific to this problem and partly in tension with Failure mode 7: the deepest part of the failure tail is governed not by a single marginal but by the multiplicative interaction C_e times k_aq, and LHS stratifies marginals, not interactions. The realized tail-variance advantage is therefore not assumed; it is verified empirically against crude Monte Carlo at the operating N, evaluated on the failure tail specifically rather than on the bulk. Mitigation: design the engine around LHS from the start and treat crude MC as a debug fallback; if the advantage proves weak in the deep tail, a variance-reduction scheme targeted at the joint tail (importance sampling or subset simulation) is considered for the lowest conditioning levels, so leave the sampler interface open to substitution.
 

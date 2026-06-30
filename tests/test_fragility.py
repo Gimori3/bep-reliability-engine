@@ -49,6 +49,7 @@ from bep_reliability_engine.fragility import (
     LognormFragility,
     assemble_fragility,
     fit_lognormal_fragility,
+    upscale_length_effect,
 )
 
 # Canonical theta column order (spec §2, M2 contract). M9 only retains the
@@ -438,3 +439,52 @@ def test_save_load_round_trip(tmp_path) -> None:
         lo1, hi1 = loaded.bootstrap_bands[key]
         np.testing.assert_array_equal(np.asarray(lo1), np.asarray(lo0))
         np.testing.assert_array_equal(np.asarray(hi1), np.asarray(hi0))
+
+
+# ---------------------------------------------------------------------------
+# (4) Length-effect upscaling: weakest-link transform (review item #9)
+# ---------------------------------------------------------------------------
+
+
+def test_upscale_length_effect_weakest_link() -> None:
+    """``P_f,seg = 1 - (1 - P_f,cs)^n_eff`` upscales a per-cross-section curve.
+
+    Pins the thesis "Length Effect Upscaling" transform: it raises the segment
+    failure probability above the per-cross-section one (weakest link), returns
+    the input unchanged at ``n_eff = 1``, matches the ``n_eff * P_f``
+    linearization in the small-``P_f`` limit, stays a proper ``[0, 1]``
+    probability, and broadcasts over a fitted fragility curve sampled on a grid.
+    """
+    grid = np.linspace(4.0, 10.0, 13)
+    p_cs = _analytic_pf(grid, float(np.log(7.0)), 0.35)
+    n_eff = 4.0
+
+    p_seg = upscale_length_effect(p_cs, n_eff)
+    assert p_seg.shape == p_cs.shape
+    # Weakest link: the segment is at least as likely to fail as one section,
+    # strictly more wherever 0 < P_f < 1.
+    assert np.all(p_seg >= p_cs - 1e-15)
+    interior = (p_cs > 1e-6) & (p_cs < 1 - 1e-6)
+    assert np.all(p_seg[interior] > p_cs[interior])
+    assert np.all((p_seg >= 0.0) & (p_seg <= 1.0))
+    np.testing.assert_array_equal(p_seg, 1.0 - (1.0 - p_cs) ** n_eff)
+
+    # n_eff = 1 is the identity (segment == one cross-section).
+    np.testing.assert_allclose(upscale_length_effect(p_cs, 1.0), p_cs, atol=0.0)
+
+    # Small-P_f limit reduces to the linear approximation n_eff * P_f.
+    small = 1.0e-4
+    assert upscale_length_effect(small, n_eff) == pytest.approx(n_eff * small, rel=1e-3)
+
+    # Scalar input returns a float.
+    assert isinstance(upscale_length_effect(0.1, 3.0), float)
+
+
+def test_upscale_length_effect_validates_inputs() -> None:
+    """Guards: ``n_eff >= 1`` and ``P_f in [0, 1]`` (review item #9)."""
+    with pytest.raises(ValueError, match="n_eff"):
+        upscale_length_effect(0.1, 0.5)
+    with pytest.raises(ValueError, match=r"\[0, 1\]"):
+        upscale_length_effect(1.5, 2.0)
+    with pytest.raises(ValueError, match=r"\[0, 1\]"):
+        upscale_length_effect(-0.1, 2.0)

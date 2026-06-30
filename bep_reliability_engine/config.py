@@ -34,15 +34,21 @@ Handoff shapes (verified against the built modules)
   would read ``specific_storage_per_m`` is unbuilt (ADR-0014). τ_aq is *derived*
   from S_s downstream, never stored here.
 
-Deferred threading note
------------------------
-``theta_repose_deg``, ``relative_density_insitu`` and ``alpha_exponent`` are
-config-owned (ADR-0015) but reach M6 only once the geometry/run-settings dict
-channel is threaded through M8 (ADR-0014); their Phase 1 defaults equal the
-present M6 constants, so they are baseline-neutral until a run overrides them.
-Likewise the conditioning grid and ``target_dt_seconds`` await the unbuilt
-orchestrator/M3 (ADR-0013); config is the single source, with no live consumer
-in the engine yet.
+Threading status
+----------------
+``theta_repose_deg`` (via :attr:`theta_repose_rad`), ``relative_density_insitu``
+and ``alpha_exponent`` are config-owned (ADR-0015) and are now **threaded
+through M8** (``run.py`` passes them to ``evaluate_batch`` ->
+``compute_critical_head``), so a run that overrides them is honored rather than
+silently ignored. Their defaults still equal the M6 constants, so an
+un-overridden run is baseline-neutral. ``alpha_exponent`` feeds the single shared
+H_c (a *symmetric* knob: both branches shift together); the transient-only
+``alpha_exponent_transient`` (ADR-0017) delivers the spec §12 fm4 dimensional-bias
+decomposition by recomputing a separate transient H_c (None by default ->
+single-source preserved). ``seepage_length_cov`` is consumed by ``run.py``
+(stochastic L draw). The conditioning grid and
+``target_dt_seconds`` still await the unbuilt M3 (ADR-0013); config is the
+single source, with no live consumer in the engine yet.
 
 Units and reproducibility (docs/conventions.md)
 -----------------------------------------------
@@ -510,8 +516,26 @@ class Config(_StrictModel):
         Default 0.725; equal to ``D_r,m`` only by the coincidence of the Pol
         base case sitting at the Sellmeijer experimental mean.
     alpha_exponent : float
-        Sellmeijer scale exponent selector (ADR-0015, spec §12 fm4): ``-1/3``
-        (2D baseline) or ``-1/2`` (3D sensitivity). Default ``-1/3``.
+        Sellmeijer **static/baseline** scale exponent (ADR-0015, spec §12 fm4):
+        ``-1/3`` (2D baseline) or ``-1/2`` (3D, symmetric — shifts both branches).
+        Default ``-1/3``.
+    alpha_exponent_transient : float or None
+        **Transient-only** scale-exponent override for the dimensional-bias
+        decomposition (ADR-0017). ``None`` (default) keeps the single-source H_c
+        (the transient H_eq anchor is the same H_c as the static comparator,
+        bit-identical to baseline). Set to ``-1/2`` to recompute the transient
+        H_c at the 3D exponent while the static comparator retains
+        ``alpha_exponent`` (``-1/3``), isolating the 2D-vs-3D dimensional bias
+        from the temporal bias. Production configs leave this ``None``; it is set
+        only for the dedicated sensitivity run.
+    seepage_length_cov : float or None
+        Coefficient of variation of the seepage length L. ``None`` (default)
+        keeps L deterministic at ``geometry.L``; a positive value (``0 < CoV
+        <= MAX_COV``) makes the engine draw L ~ Lognormal(mean ``geometry.L``,
+        cov this) **independently of the Nataf-coupled theta vector**, per the
+        thesis seepage-length prior. The mean L lives in ``geometry.L``; this
+        field only adds its spread. Sampled once per run with a seed derived
+        from ``mc.seed`` so the parallel sweep stays reproducible.
     cross_section_id : str
         Cross-section identifier; provenance only (spec §8).
     segment_id : str
@@ -544,6 +568,24 @@ class Config(_StrictModel):
     )
     alpha_exponent: float = Field(
         default=-1.0 / 3.0, description="Scale exponent: -1/3 (2D) or -1/2 (3D)."
+    )
+    alpha_exponent_transient: float | None = Field(
+        default=None,
+        description=(
+            "Transient-only scale-exponent override (ADR-0017). None = "
+            "single-source H_c (baseline); set to -1/2 for the dimensional-bias "
+            "decomposition (static keeps alpha_exponent, transient uses this)."
+        ),
+    )
+    seepage_length_cov: float | None = Field(
+        default=None,
+        gt=0.0,
+        le=MAX_COV,
+        description=(
+            "CoV of the per-section stochastic seepage length L. None = L "
+            "deterministic at geometry.L; a positive value samples L ~ "
+            "Lognormal(mean=geometry.L, cov=this) independently of theta."
+        ),
     )
 
     # Run identity / provenance (spec §8 metadata attrs; no engine consumer).

@@ -210,16 +210,16 @@ The blanket and aquifer thicknesses extracted from the borehole panels and the c
 \toprule
 KP & Embankment & $D_{bl}$ ($A_c$, m) & $D_\mathrm{aq}$ ($A_g$/$N_s$, m) & Notes \\
 \midrule
-57.40 & $B_c$ (silty)        & 2.5 & 7  & $N>30$ in $A_g$, frequently $>50$ in $N_s$; base $\approx$ EL~23 \\
-58.80 & $B_c + B_s$          & 2.0 & 8  & thick $A_g$ \\
-60.00 & $B_s + B_g$          & 1.6 & 9  & fine sandy upper $A_g$ over gravel; base $\approx$ EL~30 \\
-62.00 & $B_g$                & 2.0 & 10 & high blow-count $A_g$ throughout; 44~m foreshore; base $\approx$ EL~32 \\
+57.40 & $B_c$ (silty)        & 0.80 & 7  & $A_c$ thin homogeneous silt, $\approx$0.8~m ($N=3$); $N>30$ in $A_g$, frequently $>50$ in $N_s$; base $\approx$ EL~23 \\
+58.80 & $B_c + B_s$          & 0.85 & 8  & $A_c$ thin sandy silt, $\approx$0.85~m ($N=5$); thick $A_g$ \\
+60.00 & $B_s + B_g$          & 0.85 & 9  & $A_c$ thin sandy silt, 0.85 to 1.35~m, thickening riverside (landside toe $\approx$0.85~m, $N=5$ to 6); fine sandy upper $A_g$ over gravel; base $\approx$ EL~30 \\
+62.00 & $B_g$                & 0.45 & 10 & $A_c$ thin/transitional, 0.3--0.6~m; high blow-count $A_g$; 44~m foreshore; base $\approx$ EL~32 \\
 63.40 & $B_g$                & 1.0 & 11 & $A_c$ effectively absent; modelled as a single gravelly unit \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Two sections define the extremes of blanket-controlled vulnerability. The thickest blanket occurs at KP~57.4 ($D_{bl} \approx 2.5$~m), which, in combination with its wide foreshore, accounts for its passing the 1998 gradient check. The thinnest blanket occurs at KP~63.4, where the $A_c$ unit is effectively absent and the OYO model collapses the foundation into a single gravelly unit ($D_{bl} \approx 1$~m). Because both the uplift limit state and the heave gradient scale inversely with blanket thickness, KP~63.4 represents the worst-case configuration for initiation. This section is, however, anomalous in several other respects, including its use of a different design hydrograph, an aquifer conductivity roughly one and a half orders of magnitude below the other sections, and a distinct borehole naming convention, and it is consequently treated as a structurally distinct section throughout the prior derivation of Section~\ref{sec: Prior Parameter Distributions: Derivation and Statistical Fitting}, with a deliberate decision required as to whether it belongs in the same fragility population as the remaining sections.
+The confining blanket is uniformly thin across all four confined sections, spanning only 0.45 to 0.85~m, so blanket-controlled vulnerability is governed by where within this narrow band each section falls rather than by any genuinely thick aquitard. The thinnest blanket occurs at KP~62.0, where the $A_c$ unit is a thin, gravelly, transitional layer of only 0.3 to 0.6~m at its updip pinch-out; the thickest, at KP~58.8 and KP~60.0, reaches only about 0.85~m at the landside toe, with KP~60.0 thickening to 1.35~m toward the riverside but thinning to its landside value at the exit where $D_{bl}$ is evaluated. KP~57.4 sits just below these at about 0.8~m. A short distance upstream at KP~63.4 the $A_c$ is absent altogether and the OYO model collapses the foundation into a single gravelly unit ($D_{bl} \approx 1$~m, nominal). Notably, KP~57.4 passes the 1998 gradient check despite its thin blanket: that pass is secured by its wide 200~m foreshore alone, which suppresses the head transmitted to the toe, and not by any blanket resistance, reinforcing the foreshore-width control of Section~\ref{subsec: Cross-Section Inventory and the Foreshore-Width Control on Risk}. Because both the uplift limit state and the heave gradient scale inversely with blanket thickness, and because its narrow 44~m foreshore transmits nearly the full river head to the toe, KP~62.0 combines the thinnest blanket with the least foreland attenuation and therefore carries the worst-case configuration for initiation among the confined sections, consistent with its failing 1998 uplift and gradient ratings and its role as the governing piping section. KP~63.4 is in any case anomalous in several other respects, including its use of a different design hydrograph, an aquifer conductivity roughly one and a half orders of magnitude below the other sections, and a distinct borehole naming convention, and it is consequently treated as a structurally distinct section throughout the prior derivation of Section~\ref{sec: Prior Parameter Distributions: Derivation and Statistical Fitting}, with a deliberate decision required as to whether it belongs in the same fragility population as the remaining sections.
 
 \subsection{Stratigraphic Control on the Leakage Length}
 \label{subsec: Stratigraphic Control on the Leakage Length}
@@ -407,7 +407,7 @@ $C_e$                & Lognormal & 0.50  & 0.472 & Pol large-scale calibration (
       $d_{70}$ (mm)              & 0.70  & 0.53  & 0.26  & 0.70  & 0.70  \\
       \quad{\tiny[bulk, co-primary]}  & {\tiny 5.5} & {\tiny 13} & {\tiny 1.3} & {\tiny 13.5} & {\tiny 9.5} \\
       $D_\mathrm{aq}$ (m)        & 7     & 8     & 9     & 10    & 11    \\
-      $D_{bl}$ (m)               & 2.5   & 2.0   & 1.6   & 2.0   & 1.0   \\
+      $D_{bl}$ (m)               & 0.80  & 0.85  & 0.85  & 0.45  & 1.0   \\
       $k_{bl}$ (m/s)             & $1.6\times10^{-6}$ & $1.0\times10^{-6}$ & $1.0\times10^{-6}$ & $3.0\times10^{-6}$ & n/a \\
       $\gamma'_\mathrm{bl}$ (kN/m$^3$) & 6.9 & 6.9 & 6.9 & 6.9 & n/a \\
       $C_e$ (--)                 & \multicolumn{5}{c}{0.014 (basin-wide)} \\
@@ -425,7 +425,7 @@ $C_e$                & Lognormal & 0.50  & 0.472 & Pol large-scale calibration (
       $k_\mathrm{aquifer}$ & $-5.921$  & $-6.326$  & $-7.019$  & $-7.019$  & $-9.833$ \\
       $d_{70}$             & $-7.308$  & $-7.586$  & $-8.298$  & $-7.308$  & $-7.308$ \\
       $D_\mathrm{aq}$      & $1.941$   & $2.074$   & $2.192$   & $2.298$   & $2.393$  \\
-      $D_{bl}$             & $0.903$   & $0.679$   & $0.456$   & $0.679$   & $-0.014$ \\
+      $D_{bl}$             & $-0.237$  & $-0.176$  & $-0.176$  & $-0.812$  & $-0.014$ \\
       $k_{bl}$             & $-13.457$ & $-13.927$ & $-13.927$ & $-12.829$ & n/a      \\
       $\gamma'_\mathrm{bl}$ & $1.930$   & $1.930$   & $1.930$   & $1.930$   & n/a      \\
       $C_e$                & \multicolumn{5}{c}{$-4.381$ (basin-wide)} \\

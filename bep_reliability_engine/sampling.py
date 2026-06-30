@@ -12,6 +12,12 @@ The sampling kernel :func:`sample_theta` and the data containers
 over Iman-Conover rank reordering, is recorded under "Which column keeps
 perfect LHS stratification" below and in the :func:`sample_theta` docstring.
 
+The seepage length L is **not** part of the seven-dimensional theta vector: the
+thesis samples it as a per-section stochastic geometric parameter independent of
+the soil properties, so :func:`sample_seepage_length` draws it from a standalone
+1-D LHS keyed by its own (run-derived) seed, leaving the k_aq-d_70 copula
+untouched.
+
 Canonical column order (the M2 data-flow contract, spec §2)
 -----------------------------------------------------------
 ``PARAM_NAMES = ['k_aq', 'd_70', 'D_aq', 'D_bl', 'k_bl', 'gamma_bl_sub', 'C_e']``
@@ -127,6 +133,7 @@ __all__ = [
     "MarginalSpec",
     "ThetaSample",
     "sample_theta",
+    "sample_seepage_length",
 ]
 
 # Canonical theta-vector column order (spec §2, the M2 data-flow contract).
@@ -504,3 +511,69 @@ def sample_theta(
         param_names=list(PARAM_NAMES),
         metadata=metadata,
     )
+
+
+def sample_seepage_length(
+    mean_m: float,
+    cov: float,
+    *,
+    seed: int,
+    n_samples: int = 100_000,
+) -> NDArray[np.float64]:
+    """Draw the ``(N,)`` stochastic seepage length L, independent of theta.
+
+    The thesis carries the seepage length L as a per-cross-section stochastic
+    geometric parameter (lognormal), sampled **independently of the Nataf-
+    coupled theta vector** rather than as the eighth column of
+    :func:`sample_theta`. This keeps L out of the k_aq-d_70 copula entirely (it
+    is geometric, not a soil property) while still propagating its uncertainty
+    into H_c (linear in L), l_c, r_e, the H_eq curve and Z_transient = L - l_e.
+
+    A standalone 1-D Latin Hypercube design is used so L keeps the same one-
+    point-per-stratum marginal coverage as the theta columns; the ``seed`` is
+    derived by the caller from the run seed so the draw is reproducible and
+    independent of the theta LHS (``run.py`` derives it via ``SeedSequence``).
+
+    Parameters
+    ----------
+    mean_m : float
+        Arithmetic mean seepage length [m] (the per-section ``geometry.L``).
+        Must be > 0.
+    cov : float
+        Coefficient of variation (std / mean) [-], a fraction. Must be > 0
+        (use the deterministic path, not this function, for a fixed L).
+    seed : int
+        RNG seed for the 1-D LHS. Deterministic: the same seed yields the
+        bit-identical draw.
+    n_samples : int, optional
+        Number of realizations N. Default ``100_000`` (spec §13); must match
+        the theta-matrix row count so L_j pairs with theta_j row-for-row.
+
+    Returns
+    -------
+    numpy.ndarray, shape (N,)
+        Stratified lognormal seepage-length draws [m], in physical units. The
+        empirical mean and COV recover ``mean_m`` and ``cov`` within sampling
+        tolerance via the same moment-matching as the theta marginals
+        (``sigma_ln**2 = ln(1+cov**2)``, ``mu_ln = ln(mean) - sigma_ln**2/2``).
+
+    Raises
+    ------
+    ValueError
+        If ``mean_m <= 0``, ``cov <= 0`` or ``n_samples < 1``.
+    """
+    if not mean_m > 0.0:
+        raise ValueError(f"mean_m must be > 0, got {mean_m!r}.")
+    if not cov > 0.0:
+        raise ValueError(
+            f"cov must be > 0 for a stochastic seepage length, got {cov!r}; "
+            "use the deterministic geometry.L path for a fixed L."
+        )
+    if n_samples < 1:
+        raise ValueError(f"n_samples must be a positive integer, got {n_samples}.")
+
+    design = LatinHypercube(d=1, seed=seed).random(n_samples)[:, 0]
+    z = norm.ppf(design)
+    sigma_ln = np.sqrt(np.log(1.0 + cov**2))
+    mu_ln = np.log(mean_m) - 0.5 * sigma_ln**2
+    return np.exp(mu_ln + sigma_ln * z)

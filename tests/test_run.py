@@ -400,3 +400,89 @@ def test_serial_parallel_failure_matrices_bit_identical() -> None:
     np.testing.assert_array_equal(
         serial.failure_matrix_tran, parallel.failure_matrix_tran
     )
+
+
+# ---------------------------------------------------------------------------
+# (6) Stochastic seepage length L wiring (review item #3)
+# ---------------------------------------------------------------------------
+
+
+def test_stochastic_seepage_length_run_wiring() -> None:
+    """``seepage_length_cov`` makes run.py draw a per-realization L (review #3).
+
+    Locks the orchestrator wiring of the stochastic seepage length: with the CoV
+    set the run records it in metadata, stays reproducible across worker counts
+    (the L draw is front-loaded like theta), and produces failure matrices that
+    differ from the deterministic-L run (so L genuinely moved). With the CoV
+    unset, metadata reports deterministic L.
+    """
+    base = _make_config(n_samples=_TOY_N, conditioning_grid=_TOY_GRID)
+    stoch = _make_config(
+        n_samples=_TOY_N, conditioning_grid=_TOY_GRID, seepage_length_cov=0.20
+    )
+
+    det_result = run_fragility_analysis(base, n_jobs=1, progress=False, persist=False)
+    serial = run_fragility_analysis(stoch, n_jobs=1, progress=False, persist=False)
+    parallel = run_fragility_analysis(stoch, n_jobs=2, progress=False, persist=False)
+
+    # Metadata records the stochastic-L decision both ways.
+    assert det_result.metadata["seepage_length"]["stochastic"] is False
+    assert serial.metadata["seepage_length"]["stochastic"] is True
+    assert serial.metadata["seepage_length"]["cov"] == pytest.approx(0.20)
+    assert serial.metadata["seepage_length"]["mean_m"] == pytest.approx(
+        stoch.geometry.L
+    )
+
+    # Reproducible across worker counts (L draw front-loaded in the main process).
+    np.testing.assert_array_equal(
+        serial.failure_matrix_tran, parallel.failure_matrix_tran
+    )
+    np.testing.assert_array_equal(
+        serial.failure_matrix_stat, parallel.failure_matrix_stat
+    )
+
+    # Stochastic L genuinely changes the outcome vs deterministic geometry.L.
+    assert not np.array_equal(
+        serial.failure_matrix_tran, det_result.failure_matrix_tran
+    )
+
+
+# ---------------------------------------------------------------------------
+# (7) Asymmetric-alpha dimensional-bias decomposition wiring (ADR-0017)
+# ---------------------------------------------------------------------------
+
+
+def test_dimensional_decomposition_run_wiring() -> None:
+    """``alpha_exponent_transient`` runs the decomposition through run.py (ADR-0017).
+
+    Locks the run-level wiring: with the transient-only override set, run.py
+    records it in metadata, leaves the STATIC failure matrix bit-identical to the
+    baseline (the static comparator keeps -1/3 — the decomposition does not shift
+    it), and shifts the TRANSIENT matrix toward more failures (the lower 3D
+    transient H_c lowers H_eq and speeds progression).
+    """
+    base = _make_config(n_samples=_TOY_N, conditioning_grid=_TOY_GRID)
+    decomp = _make_config(
+        n_samples=_TOY_N,
+        conditioning_grid=_TOY_GRID,
+        alpha_exponent_transient=-1.0 / 2.0,
+    )
+
+    base_res = run_fragility_analysis(base, n_jobs=1, progress=False, persist=False)
+    decomp_res = run_fragility_analysis(decomp, n_jobs=1, progress=False, persist=False)
+
+    # Metadata records the decomposition state both ways.
+    assert base_res.metadata["alpha_exponent_transient"] is None
+    assert base_res.metadata["dimensional_decomposition_active"] is False
+    assert decomp_res.metadata["alpha_exponent_transient"] == pytest.approx(-0.5)
+    assert decomp_res.metadata["dimensional_decomposition_active"] is True
+
+    # The static branch is untouched (the whole point of the asymmetric form).
+    np.testing.assert_array_equal(
+        decomp_res.failure_matrix_stat, base_res.failure_matrix_stat
+    )
+    # The transient branch shifts toward more failures (lower 3D transient H_c).
+    assert not np.array_equal(
+        decomp_res.failure_matrix_tran, base_res.failure_matrix_tran
+    )
+    assert decomp_res.failure_matrix_tran.sum() > base_res.failure_matrix_tran.sum()

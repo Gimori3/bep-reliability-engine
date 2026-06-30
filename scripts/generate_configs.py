@@ -26,14 +26,20 @@ Value provenance (three categories, never conflated)
 * PROVISIONAL -- placeholder awaiting finalized schematization; flagged in each
                  file's header.
 
-Two non-obvious mappings, verified against the built modules
-------------------------------------------------------------
+Three non-obvious mappings, verified against the built modules
+--------------------------------------------------------------
 * **gamma.** The config prior ``gamma_bl_sub`` is the *blanket* submerged unit
   weight, FIXED at (mean 6.9, COV 0.056) per ADR-0016 -- it is NOT read from the
   CSV. The CSV ``gamma_sub_kNm3`` column is the aquifer *particle* weight
-  gamma'_p, which enters Sellmeijer F_r via the pinned module constant
-  ``sellmeijer.GAMMA_P_SUB_DEFAULT = 16.87`` and has no config field. The CSV
-  value is recorded in each YAML header for the audit trail, never as an input.
+  gamma'_p; it is recorded in each YAML header for the audit trail ONLY and is
+  **not used** -- the run uses the canonical basin-wide deterministic
+  gamma'_p = 16.87 (the pinned ``sellmeijer.GAMMA_P_SUB_DEFAULT``), per the
+  review-item-#10 decision, so the per-section CSV spread (16.49--16.85) never
+  enters F_r. gamma'_p has no config field.
+* **seepage length L.** ``geometry.L`` is the per-section MEAN; its uncertainty
+  is carried by the top-level ``seepage_length_cov`` (thesis prior
+  `tab:seepage_length_prior`: 0.15 at KP 60.0, 0.20 elsewhere), so the engine
+  samples L ~ Lognormal(mean=geometry.L, cov) independently of theta (review #3).
 * **foreshore.** ``geometry.D_fore`` / ``geometry.k_fore`` (deterministic
   foreshore blanket, ADR-0005) are per-section proxies copied from the landside
   blanket ``D_bl`` / ``k_bl``, so a single CSV ``D_bl_m`` edit (e.g. resolving
@@ -85,17 +91,34 @@ SCENARIOS: list[tuple[str, str]] = [
 ]
 INTERPRETATIONS: list[str] = ["matrix", "bulk"]
 
-# --- FIXED priors (spec section 7 / ADR-0016 / Pol 2024) ---------------------
+# --- FIXED priors (thesis prior table `tab:priors_phase1` / ADR-0016) ---------
 # COVs are specification constants, identical in every config; the CSV has no
 # COV columns. Means for the five geotech variables come from the CSV per row.
+# These match the thesis Study-Area prior table (NOT the older architecture
+# spec-section-7 table): d_70 widened to 0.30 (within-section grading), D_aq
+# tightened to 0.10 (rescaled Pol absolute sigma), D_bl 0.167 (Pol absolute
+# sigma; the same 0.167 the provenance doc uses for the mu_ln values). The
+# corresponding mu_ln reproduce thesis Table `tab:priors_muln` (review item #2).
 FIXED_COVS: dict[str, float] = {
     "k_aq": 0.50,
-    "d_70": 0.10,
-    "D_aq": 0.20,
-    "D_bl": 0.20,
+    "d_70": 0.30,
+    "D_aq": 0.10,
+    "D_bl": 0.167,
     "k_bl": 0.50,
     "gamma_bl_sub": 0.056,
     "C_e": 0.50,
+}
+
+# Per-section CoV of the stochastic seepage length L (thesis seepage-length prior
+# `tab:seepage_length_prior`): 0.15 at the best-constrained KP 60.0, 0.20 at the
+# remaining confined sections. L is sampled independently of theta (review #3);
+# its mean is the CSV L_m. KP 63.4 (unconfined) is excluded by default.
+SEEPAGE_LENGTH_COV: dict[str, float] = {
+    "57.4": 0.20,
+    "58.8": 0.20,
+    "60.0": 0.15,
+    "62.0": 0.20,
+    "63.4": 0.20,
 }
 
 # gamma_bl_sub is the *blanket* submerged weight (ADR-0016), FIXED for every
@@ -282,6 +305,7 @@ def build_config_dict(
         "theta_repose_deg": THETA_REPOSE_DEG,
         "relative_density_insitu": RELATIVE_DENSITY_INSITU,
         "alpha_exponent": ALPHA_EXPONENT,
+        "seepage_length_cov": SEEPAGE_LENGTH_COV[kp],
     }
 
 
@@ -309,10 +333,13 @@ def header_comment(
         "#   (6.9, 0.056); C_e (0.014, 0.50); theta_repose_deg; D_r; alpha.",
         "# PROVISIONAL: z_toe, rho_log_kaq_d70, conditioning_grid, seed;",
         "#   D_fore/k_fore = landside D_bl/k_bl proxy (ADR-0005).",
-        f"# gamma: CSV gamma_sub_kNm3 = {gamma_p_csv} kN/m^3 is gamma'_p (aquifer",
-        "#   particle, Sellmeijer F_r), used via the pinned constant",
-        "#   sellmeijer.GAMMA_P_SUB_DEFAULT = 16.87; NOT a config field and",
-        "#   deliberately not written below (ADR-0016).",
+        f"# gamma: CSV gamma_sub_kNm3 = {gamma_p_csv} kN/m^3 is the per-section",
+        "#   aquifer particle weight gamma'_p (Sellmeijer F_r). It is recorded here",
+        "#   for the audit trail ONLY and is NOT used: the run uses the canonical",
+        "#   basin-wide deterministic gamma'_p = 16.87 (the pinned constant",
+        "#   sellmeijer.GAMMA_P_SUB_DEFAULT), per the review-item-#10 decision.",
+        "#   gamma'_p is not a config field (ADR-0016); gamma_bl_sub below is the",
+        "#   distinct stochastic BLANKET weight that drives uplift/heave.",
     ]
     if interpretation == "bulk":
         lines.append("# bulk: d_70 is the bulk-gravel co-primary (provenance 3.3), far")

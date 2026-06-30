@@ -14,8 +14,11 @@ Three nested levels, mapped onto the *as-built* scalar M8:
 * **Outer — conditioning levels h_i** (``config.mc.conditioning_grid``,
   N_h ~ 30). Embarrassingly parallel (spec §6); this is the ``joblib`` axis
   (:func:`_evaluate_level`, one task per level).
-* **Middle — realizations j in {1..N}** (``config.mc.n_samples``). A loop calling
-  scalar :func:`evaluate_realization` once per row (:func:`_scan_realizations`).
+* **Middle — realizations j in {1..N}** (``config.mc.n_samples``). One
+  vectorized :func:`~bep_reliability_engine.evaluator.evaluate_batch` call per
+  level, advancing all N realizations through the M4/M6/M7 kernels in a single
+  pass (spec §6; review item #5) — bit-identical to looping the scalar
+  ``evaluate_realization`` over the rows.
 * **Inner — timesteps t_k.** Irreducibly serial; lives entirely inside M7 and is
   invisible here.
 
@@ -76,14 +79,14 @@ Two marked seams (both grep-able, both single-function body swaps)
    (see its ``TODO(M3)``), so the swap is **one line**: replace the synthetic body
    with ``return hydrographs.hydrograph_for_level(level_m, config)`` (and drop
    :class:`_StubHydrograph`). The call site is unchanged.
-2. **SCALAR-EVALUATION SEAM** (:func:`_scan_realizations`). The middle loop is a
-   scalar ``for j in range(N)`` over M8, matching the spec §8 Phase-2 idiom and
-   the as-built scalar M7/M8. The spec §6 across-realization vectorization was
-   never built into M7; at full N (1e5) x N_h (~30) this scalar path is the
-   performance ceiling. It is isolated in this one function so that swapping in a
-   future vectorized ``evaluate_batch(theta_matrix, ...)`` (an M7/M8 change, not
-   a run.py change) is a single-function body swap — needed before the
-   production sweep.
+2. **VECTORIZED MIDDLE LOOP** (:func:`_evaluate_level` ->
+   :func:`~bep_reliability_engine.evaluator.evaluate_batch`). The former scalar
+   ``for j in range(N)`` seam is now wired to the vectorized M8 batch path (spec
+   §6; review item #5): each level is one ``evaluate_batch`` call across all N
+   realizations. It is bit-identical to the scalar loop (locked by
+   ``test_orchestration_matches_reference_loop``), so the spec §8 Phase-2 idiom
+   (per-row ``evaluate_realization``) and the M9 row-bootstrap are unaffected.
+   This lifts the former N (1e5) x N_h (~30) scalar performance ceiling.
 
 Persistence (spec §2, §8; confirmed decisions)
 ----------------------------------------------
@@ -133,9 +136,13 @@ from numpy.typing import NDArray
 from tqdm import tqdm
 
 from bep_reliability_engine.config import Config
-from bep_reliability_engine.evaluator import evaluate_realization
+from bep_reliability_engine.evaluator import evaluate_batch
 from bep_reliability_engine.fragility import FragilityResult, assemble_fragility
-from bep_reliability_engine.sampling import ThetaSample, sample_theta
+from bep_reliability_engine.sampling import (
+    ThetaSample,
+    sample_seepage_length,
+    sample_theta,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -164,6 +171,44 @@ _BOOTSTRAP_CONFIDENCE: float = 0.95
 
 # Phase 1 prior fragility integrates every event from a virgin blanket (spec §5).
 _L_INI_M: float = 0.0
+
+# Salt for the stochastic-L seed: derived from config.mc.seed via SeedSequence so
+# the seepage-length draw is reproducible AND independent of the 7-D theta LHS
+# (review item #3). Keeping it front-loaded in the main process preserves the
+# parallel == serial guarantee.
+_SEEPAGE_LENGTH_SEED_SALT: int = 0x5EE_1E9
+
+
+@dataclass(frozen=True)
+class _EvalSettings:
+    """Per-run evaluation knobs handed to every conditioning-level task.
+
+    Constant across the conditioning grid, so one instance is built in the main
+    process and passed to each :func:`_evaluate_level` task (picklable for loky;
+    the large ``seepage_length_samples`` array is memmapped read-only by loky).
+
+    Attributes
+    ----------
+    l_ini_m : float
+        Initial pipe length [m] (0 for Phase 1 prior fragility).
+    seepage_length_samples : numpy.ndarray or None
+        Per-realization stochastic L [m], or None for deterministic geometry.L.
+    alpha_exponent, theta_repose_rad, relative_density : float
+        Deterministic run-owned Sellmeijer inputs threaded to M6 (ADR-0015,
+        review item #6). gamma'_p stays the basin-wide pinned M6 constant
+        (16.87, review item #10), so it is not carried here.
+    alpha_exponent_transient : float or None
+        Transient-only scale-exponent override (ADR-0017). None keeps the
+        single-source H_c (baseline); a value (e.g. -1/2) drives the
+        dimensional-bias decomposition.
+    """
+
+    l_ini_m: float
+    seepage_length_samples: NDArray[np.float64] | None
+    alpha_exponent: float
+    theta_repose_rad: float
+    relative_density: float
+    alpha_exponent_transient: float | None
 
 
 # ============================================================================
@@ -292,80 +337,29 @@ def _hydrograph_for_level(level_m: float, config: Config) -> _StubHydrograph:
 
 
 # ============================================================================
-# SCALAR-EVALUATION SEAM — replace the body of _scan_realizations with the
-# vectorized M7/M8 batch path (evaluate_batch(theta_matrix, ...)) before the
-# production sweep. This is the single function to swap; _evaluate_level and the
-# rest of run.py are agnostic to scalar-vs-batch. (Module docstring, seam 2.)
+# VECTORIZED EVALUATION (was the scalar seam). The middle loop is now a single
+# vectorized M8 ``evaluate_batch`` call per conditioning level, advancing all N
+# realizations through the already-vectorized M4/M6/M7 kernels in one pass (spec
+# §6, review item #5). It is bit-identical to looping the scalar
+# ``evaluate_realization`` over the rows — locked end to end by
+# ``tests/test_run.py::test_orchestration_matches_reference_loop``.
 # ============================================================================
-def _scan_realizations(
-    theta_matrix: NDArray[np.float64],
-    hydrograph: _StubHydrograph,
-    geometry: dict[str, float],
-    l_ini_m: float,
-) -> tuple[NDArray[np.bool_], NDArray[np.bool_]]:
-    """Evaluate all N realizations at one conditioning level (the middle loop).
-
-    Scalar fallback: loops :func:`evaluate_realization` over the N rows of
-    ``theta_matrix`` against the same ``hydrograph``, reading only the two failure
-    flags (the diagnostics and trajectories the result also carries are discarded
-    here — the bulk fragility run keeps neither, per spec §12 failure mode 6).
-
-    **This is the deferred-vectorization seam.** When the M7/M8 batch path lands,
-    replace the loop with a single ``evaluate_batch(theta_matrix, hydrograph,
-    geometry, l_ini=l_ini_m)`` call returning the two boolean columns directly;
-    nothing else in run.py changes.
-
-    Parameters
-    ----------
-    theta_matrix : numpy.ndarray, shape (N, 7)
-        The shared prior population in canonical column order (read-only).
-    hydrograph : _StubHydrograph
-        This level's loading record (``peak`` == the conditioning level).
-    geometry : dict of str to float
-        The flat M8 geometry dict (``Geometry.as_evaluator_dict``).
-    l_ini_m : float
-        Initial pipe length [m]; 0 for Phase 1 prior fragility.
-
-    Returns
-    -------
-    col_static, col_trans : numpy.ndarray, shape (N,), dtype bool
-        Per-realization static and transient failure indicators at this level.
-    """
-    n_samples = theta_matrix.shape[0]
-    col_static = np.empty(n_samples, dtype=bool)
-    col_trans = np.empty(n_samples, dtype=bool)
-    for j in range(n_samples):
-        result = evaluate_realization(
-            theta_matrix[j],
-            hydrograph,
-            geometry,
-            l_ini=l_ini_m,
-            store_trajectory=False,
-        )
-        col_static[j] = result.failure_static
-        col_trans[j] = result.failure_trans
-    return col_static, col_trans
-
-
-# ============================================================================
-# END SCALAR-EVALUATION SEAM
-# ============================================================================
-
-
 def _evaluate_level(
     level_index: int,
     hydrograph: _StubHydrograph,
     theta_matrix: NDArray[np.float64],
     geometry: dict[str, float],
-    l_ini_m: float,
+    settings: _EvalSettings,
 ) -> tuple[int, NDArray[np.bool_], NDArray[np.bool_]]:
-    """Outer-loop task: one conditioning level, all N realizations.
+    """Outer-loop task: one conditioning level, all N realizations (vectorized).
 
-    Module-level (picklable for loky): scans the realizations against the
+    Module-level (picklable for loky): evaluates the realizations against the
     already-built ``hydrograph`` (the M3 stub is called in the main process, not
-    here), and returns its own ``level_index`` so the caller can assemble the
-    failure matrices by index, independent of task completion order (the
-    reproducibility guarantee).
+    here) via one :func:`~bep_reliability_engine.evaluator.evaluate_batch` call,
+    and returns its own ``level_index`` so the caller can assemble the failure
+    matrices by index, independent of task completion order (the reproducibility
+    guarantee). Only the two boolean failure columns are kept — the bulk run
+    retains neither diagnostics nor trajectories (spec §12 failure mode 6).
 
     Parameters
     ----------
@@ -378,8 +372,9 @@ def _evaluate_level(
         The shared prior population (read-only).
     geometry : dict of str to float
         The flat M8 geometry dict.
-    l_ini_m : float
-        Initial pipe length [m].
+    settings : _EvalSettings
+        The run-constant evaluation knobs (l_ini, stochastic-L samples, and the
+        threaded Sellmeijer inputs), shared across every level.
 
     Returns
     -------
@@ -387,8 +382,16 @@ def _evaluate_level(
         ``(level_index, col_static, col_trans)`` with both columns shape (N,)
         and dtype bool.
     """
-    col_static, col_trans = _scan_realizations(
-        theta_matrix, hydrograph, geometry, l_ini_m
+    col_static, col_trans = evaluate_batch(
+        theta_matrix,
+        hydrograph,
+        geometry,
+        l_ini=settings.l_ini_m,
+        seepage_length_samples=settings.seepage_length_samples,
+        alpha_exponent=settings.alpha_exponent,
+        alpha_exponent_transient=settings.alpha_exponent_transient,
+        theta_repose_rad=settings.theta_repose_rad,
+        relative_density=settings.relative_density,
     )
     return level_index, col_static, col_trans
 
@@ -403,6 +406,31 @@ def _sample_prior(config: Config) -> ThetaSample:
         n_samples=config.mc.n_samples,
         coupling=config.correlation.coupling,
         bounds=config.priors.bounds,
+    )
+
+
+def _sample_seepage_length_or_none(config: Config) -> NDArray[np.float64] | None:
+    """Draw the stochastic seepage length L, or None when L is deterministic.
+
+    Returns None when ``config.seepage_length_cov`` is unset (L stays the scalar
+    ``config.geometry.L`` for every realization). Otherwise draws the ``(N,)``
+    lognormal L (mean ``geometry.L``, cov ``seepage_length_cov``) with a seed
+    derived from ``config.mc.seed`` via ``SeedSequence`` so it is reproducible
+    and independent of the theta LHS (review item #3). Front-loaded in the main
+    process, like the theta draw, so the parallel sweep stays bit-reproducible.
+    """
+    if config.seepage_length_cov is None:
+        return None
+    l_seed = int(
+        np.random.SeedSequence(
+            [config.mc.seed, _SEEPAGE_LENGTH_SEED_SALT]
+        ).generate_state(1)[0]
+    )
+    return sample_seepage_length(
+        config.geometry.L,
+        config.seepage_length_cov,
+        seed=l_seed,
+        n_samples=config.mc.n_samples,
     )
 
 
@@ -447,6 +475,7 @@ def _build_metadata(
     theta_sample: ThetaSample,
     runtime_seconds: float,
     n_jobs: int,
+    seepage_length_stochastic: bool,
 ) -> dict[str, Any]:
     """Assemble the spec §8 provenance block for the FragilityResult sidecar.
 
@@ -480,6 +509,29 @@ def _build_metadata(
         "c_e_stochastic": True,
         "aquifer_lag_active": bool(config.timestepper.aquifer_lag_active),
         "tau_aq": None,  # lag inactive in Phase 1 (ADR-0014); from S_s when active.
+        # Sellmeijer inputs threaded to M6 (review #6); gamma'_p stays the pinned
+        # basin-wide M6 constant 16.87 (review #10), not run-varying.
+        "alpha_exponent": float(config.alpha_exponent),
+        # Transient-only scale exponent for the dimensional-bias decomposition
+        # (ADR-0017); None = single-source H_c (baseline).
+        "alpha_exponent_transient": (
+            None
+            if config.alpha_exponent_transient is None
+            else float(config.alpha_exponent_transient)
+        ),
+        "dimensional_decomposition_active": config.alpha_exponent_transient is not None,
+        "theta_repose_deg": float(config.theta_repose_deg),
+        "relative_density_insitu": float(config.relative_density_insitu),
+        # Stochastic seepage length L (review #3); mean lives in geometry.L.
+        "seepage_length": {
+            "stochastic": bool(seepage_length_stochastic),
+            "mean_m": float(config.geometry.L),
+            "cov": (
+                None
+                if config.seepage_length_cov is None
+                else float(config.seepage_length_cov)
+            ),
+        },
         "hydrograph_source": _HYDROGRAPH_SOURCE,
         "bootstrap": {
             "n_bootstrap": int(_BOOTSTRAP_N),
@@ -567,13 +619,24 @@ def run_fragility_analysis(
         resolved_path = _resolve_output_path(config, output_path)
         _guard_no_overwrite(resolved_path, overwrite)
 
-    # 2. Sample theta ONCE (front-load all RNG; shared read-only across levels).
+    # 2. Sample theta ONCE, and the stochastic seepage length L ONCE (front-load
+    #    all RNG in the main process; both shared read-only across every level).
     theta_sample = _sample_prior(config)
     theta_matrix = theta_sample.theta_matrix
     n_samples = theta_sample.n_samples
+    seepage_length_samples = _sample_seepage_length_or_none(config)
 
-    # 3. Shared, read-only per-level inputs.
+    # 3. Shared, read-only per-level inputs and the run-constant eval settings
+    #    (l_ini, stochastic-L samples, threaded Sellmeijer inputs; review #3/#6).
     geometry = config.geometry.as_evaluator_dict()
+    settings = _EvalSettings(
+        l_ini_m=_L_INI_M,
+        seepage_length_samples=seepage_length_samples,
+        alpha_exponent=config.alpha_exponent,
+        theta_repose_rad=config.theta_repose_rad,
+        relative_density=config.relative_density_insitu,
+        alpha_exponent_transient=config.alpha_exponent_transient,
+    )
     grid = np.asarray(config.mc.conditioning_grid, dtype=np.float64)
     n_levels = int(grid.size)
 
@@ -604,7 +667,7 @@ def run_fragility_analysis(
             _hydrograph_for_level(float(level_m), config),  # M3 seam, main process
             theta_matrix,
             geometry,
-            _L_INI_M,
+            settings,
         )
         for level_index, level_m in level_iter
     )
@@ -620,7 +683,13 @@ def run_fragility_analysis(
 
     # 6. Assemble the FragilityResult (M9). Bootstrap runs serially here, seeded
     #    from config.mc.seed, so it too is independent of n_jobs.
-    metadata = _build_metadata(config, theta_sample, runtime_seconds, n_jobs)
+    metadata = _build_metadata(
+        config,
+        theta_sample,
+        runtime_seconds,
+        n_jobs,
+        seepage_length_stochastic=seepage_length_samples is not None,
+    )
     result = assemble_fragility(
         theta_matrix,
         theta_sample.param_names,

@@ -301,7 +301,7 @@ def integrate_progression(
     gamma_bl_sub_knpm3: ArrayLike,
     h_c_m: ArrayLike,
     l_c_m: ArrayLike,
-    seepage_length_m: float,
+    seepage_length_m: ArrayLike,
     *,
     l_ini_m: ArrayLike = 0.0,
     store_trajectory: bool = False,
@@ -375,9 +375,12 @@ def integrate_progression(
         Critical head H_c [m] from M6 (single source, spec §1).
     l_c_m : array_like of float
         Critical pipe length l_c [m] from M6, or measured (replays).
-    seepage_length_m : float
-        Seepage length L [m]. Z_transient = L - l_e in M8; breach when
-        l reaches L.
+    seepage_length_m : array_like of float
+        Seepage length L [m]. Z_transient = L - l_e in M8; breach when l
+        reaches L. A scalar for deterministic L, or an ``(N,)`` array when L is
+        a per-realization stochastic draw (sampled independently of theta): the
+        breach clip ``min(l, L)`` and every L-dependent term then broadcast
+        per realization.
     l_ini_m : array_like of float, optional
         Initial pipe length [m], default 0. Non-zero values bypass the
         uplift gate via the ``l_current > 0`` clause (an existing pipe

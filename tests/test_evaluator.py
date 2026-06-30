@@ -41,7 +41,11 @@ import numpy as np
 import pytest
 
 from bep_reliability_engine import evaluator
-from bep_reliability_engine.evaluator import EvaluationResult, evaluate_realization
+from bep_reliability_engine.evaluator import (
+    EvaluationResult,
+    evaluate_batch,
+    evaluate_realization,
+)
 from bep_reliability_engine.hydraulics import (
     leakage_length_in,
     leakage_length_out,
@@ -380,7 +384,11 @@ def test_public_interface() -> None:
     stable API Phase 2 imports (spec §8). Field names, the parameter tuple, and
     the defaults (l_ini = 0.0, store_trajectory = False) are pinned here.
     """
-    assert set(evaluator.__all__) == {"EvaluationResult", "evaluate_realization"}
+    assert set(evaluator.__all__) == {
+        "EvaluationResult",
+        "evaluate_realization",
+        "evaluate_batch",
+    }
 
     assert is_dataclass(EvaluationResult)
     assert tuple(f.name for f in fields(EvaluationResult)) == (
@@ -389,6 +397,7 @@ def test_public_interface() -> None:
         "l_e_final",
         "l_trajectory",
         "H_c",
+        "H_c_transient",
         "l_c",
         "lambda_in",
         "r_e",
@@ -399,8 +408,12 @@ def test_public_interface() -> None:
         "heave_occurred",
     )
 
+    # The frozen Phase 2 contract is the five leading parameters (positional) with
+    # their defaults; the threaded Sellmeijer inputs (review item #6) are added
+    # purely as keyword-only options defaulting to None (M6 fallback), so an
+    # un-overridden call is unchanged.
     signature = inspect.signature(evaluate_realization)
-    assert tuple(signature.parameters) == (
+    assert tuple(signature.parameters)[:5] == (
         "theta_row",
         "hydrograph",
         "geometry",
@@ -409,6 +422,16 @@ def test_public_interface() -> None:
     )
     assert signature.parameters["l_ini"].default == 0.0
     assert signature.parameters["store_trajectory"].default is False
+    for name in (
+        "alpha_exponent",
+        "alpha_exponent_transient",
+        "theta_repose_rad",
+        "relative_density",
+        "gamma_p_sub_kn_m3",
+    ):
+        param = signature.parameters[name]
+        assert param.kind is inspect.Parameter.KEYWORD_ONLY
+        assert param.default is None
 
 
 # ---------------------------------------------------------------------------
@@ -495,3 +518,239 @@ def test_re_and_Hc_vary_across_distinct_theta_rows() -> None:
 
     assert len({round(x, 12) for x in r_es}) == len(r_es), "r_e not distinct per row"
     assert len({round(x, 12) for x in h_cs}) == len(h_cs), "H_c not distinct per row"
+
+
+# ---------------------------------------------------------------------------
+# (8) Vectorized batch path: bit-identical to the scalar loop (review item #5),
+#     stochastic seepage length L (review item #3), threaded alpha (review #6)
+# ---------------------------------------------------------------------------
+
+# A long, sustained multi-peak hydrograph (rise -> long plateau -> trough ->
+# second plateau -> recede, ~220 steps at dt = 600 s ~= 37 h) so the transient
+# branch genuinely mixes pass/fail across the random prior at L = 30 m: the
+# high-k_aq / high-C_e tail breaches, the slow tail does not. (A short event
+# breaches nothing at L = 30 m and makes the non-degeneracy check vacuous.)
+_BATCH_HYDRO = _make_hydrograph(
+    np.concatenate(
+        [
+            np.linspace(2.0, 16.0, 10),
+            np.full(100, 16.0),
+            np.linspace(16.0, 3.0, 10),
+            np.full(10, 3.0),
+            np.linspace(3.0, 15.0, 10),
+            np.full(60, 15.0),
+            np.linspace(15.0, 2.0, 20),
+        ]
+    ),
+    peak=16.0,
+)
+
+
+def _random_theta_matrix(rng: np.random.Generator, n: int) -> np.ndarray:
+    """N rows of physically defensible theta (canonical order), positive H_c."""
+    return np.column_stack(
+        [
+            rng.uniform(1.0e-5, 1.0e-3, n),  # k_aq [m/s]
+            rng.uniform(150e-6, 430e-6, n),  # d_70 [m] (Sellmeijer range)
+            rng.uniform(3.0, 12.0, n),  # D_aq [m]
+            rng.uniform(0.4, 4.0, n),  # D_bl [m]
+            rng.uniform(1.0e-7, 5.0e-6, n),  # k_bl [m/s]
+            rng.uniform(5.0, 9.0, n),  # gamma_bl_sub [kN/m^3]
+            rng.uniform(0.005, 0.05, n),  # C_e [-]
+        ]
+    )
+
+
+def _scalar_failure_columns(
+    theta_matrix: np.ndarray,
+    hydrograph,
+    geometry: dict,
+    *,
+    seepage_length_samples: np.ndarray | None = None,
+    **sell_kwargs,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Reference: loop the scalar evaluator over the rows (per-row L via geometry)."""
+    n = theta_matrix.shape[0]
+    fs = np.empty(n, dtype=bool)
+    ft = np.empty(n, dtype=bool)
+    for j in range(n):
+        geom = geometry
+        if seepage_length_samples is not None:
+            geom = {**geometry, "L": float(seepage_length_samples[j])}
+        r = evaluate_realization(theta_matrix[j], hydrograph, geom, **sell_kwargs)
+        fs[j] = r.failure_static
+        ft[j] = r.failure_trans
+    return fs, ft
+
+
+def test_evaluate_batch_is_bit_identical_to_scalar_loop() -> None:
+    """``evaluate_batch`` equals looping ``evaluate_realization`` over the rows.
+
+    The production-path guarantee (spec §6, review item #5): the vectorized M8
+    must reproduce the scalar evaluator's failure flags element-for-element over
+    a large random prior, so swapping run.py onto the batch path cannot change a
+    single fragility point. Bit-identical equality (``array_equal``), not a
+    tolerance.
+    """
+    rng = np.random.default_rng(20260630)
+    theta_matrix = _random_theta_matrix(rng, 200)
+
+    fs_batch, ft_batch = evaluate_batch(theta_matrix, _BATCH_HYDRO, GEOMETRY)
+    fs_ref, ft_ref = _scalar_failure_columns(theta_matrix, _BATCH_HYDRO, GEOMETRY)
+
+    assert fs_batch.dtype == np.bool_ and ft_batch.dtype == np.bool_
+    np.testing.assert_array_equal(fs_batch, fs_ref)
+    np.testing.assert_array_equal(ft_batch, ft_ref)
+    # The case is non-degenerate: the transient branch genuinely mixes pass/fail.
+    assert ft_ref.any() and not ft_ref.all()
+
+
+def test_evaluate_batch_stochastic_L_matches_per_row_scalar() -> None:
+    """Per-realization stochastic L (review item #3) is honored and bit-identical.
+
+    With ``seepage_length_samples`` the batch must reproduce the scalar evaluator
+    called with ``geometry['L'] = L_j`` per row — proving L_j threads correctly
+    through H_c, l_c, r_e, the H_eq curve and Z_transient = L_j - l_e_j — and the
+    result must differ from the deterministic-L run (so L really moved).
+    """
+    rng = np.random.default_rng(7)
+    n = 200
+    theta_matrix = _random_theta_matrix(rng, n)
+    # Lognormal-ish per-row L around the geometry mean, all positive.
+    l_samples = np.exp(rng.normal(np.log(GEOMETRY["L"]), 0.2, n))
+
+    fs_batch, ft_batch = evaluate_batch(
+        theta_matrix, _BATCH_HYDRO, GEOMETRY, seepage_length_samples=l_samples
+    )
+    fs_ref, ft_ref = _scalar_failure_columns(
+        theta_matrix, _BATCH_HYDRO, GEOMETRY, seepage_length_samples=l_samples
+    )
+    np.testing.assert_array_equal(fs_batch, fs_ref)
+    np.testing.assert_array_equal(ft_batch, ft_ref)
+
+    # Stochastic L genuinely changes the outcome vs the deterministic geometry.L.
+    fs_det, ft_det = evaluate_batch(theta_matrix, _BATCH_HYDRO, GEOMETRY)
+    assert not (np.array_equal(fs_batch, fs_det) and np.array_equal(ft_batch, ft_det))
+
+
+def test_alpha_exponent_threaded_through_both_entry_points() -> None:
+    """The 3D scale exponent reaches M6 from both M8 entry points (review item #6).
+
+    Scalar: ``alpha_exponent = -1/2`` lowers H_c vs the -1/3 baseline (van Beek
+    scale effect), and the ``None`` default equals -1/3, so a config override is
+    honored rather than silently ignored. Batch: passing ``alpha_exponent`` is
+    bit-identical to the scalar loop carrying the same override, proving the
+    thread reaches the vectorized path too.
+    """
+    hydro = _make_hydrograph([CROSS_ROW_PEAK], peak=CROSS_ROW_PEAK)
+
+    r_2d = evaluate_realization(THETA, hydro, GEOMETRY, alpha_exponent=-1.0 / 3.0)
+    r_3d = evaluate_realization(THETA, hydro, GEOMETRY, alpha_exponent=-1.0 / 2.0)
+    r_default = evaluate_realization(THETA, hydro, GEOMETRY)
+
+    assert r_3d.H_c < r_2d.H_c  # 3D hole-exit lowers the critical head
+    assert r_default.H_c == pytest.approx(r_2d.H_c, rel=1e-12)  # None -> -1/3
+
+    rng = np.random.default_rng(99)
+    theta_matrix = _random_theta_matrix(rng, 150)
+    fs_batch, ft_batch = evaluate_batch(
+        theta_matrix, _BATCH_HYDRO, GEOMETRY, alpha_exponent=-1.0 / 2.0
+    )
+    fs_ref, ft_ref = _scalar_failure_columns(
+        theta_matrix, _BATCH_HYDRO, GEOMETRY, alpha_exponent=-1.0 / 2.0
+    )
+    np.testing.assert_array_equal(fs_batch, fs_ref)
+    np.testing.assert_array_equal(ft_batch, ft_ref)
+
+
+# ---------------------------------------------------------------------------
+# (9) Asymmetric-alpha dimensional-bias decomposition (ADR-0017)
+# ---------------------------------------------------------------------------
+
+# Dedicated theta with a realistic, easily-opened initiation gate (thin blanket
+# D_bl = 1 m, gamma'_bl = 7 kN/m^3 -> uplift threshold ~0.71 m, vs THETA's 4.89 m),
+# so a moderate peak opens the gate AND both branches stall partway (H_eq overtakes
+# the erosion head before breach), leaving clean headroom: the lowered 3D transient
+# H_c stalls LATER, so asym l_e > baseline l_e without either branch breaching.
+_DECOMP_THETA = np.array([1.0e-4, 2.0e-4, 3.0, 1.0, 1.0e-6, 7.0, 0.014])
+_DECOMP_HYDRO = _make_hydrograph(
+    np.concatenate(
+        [np.linspace(2.0, 8.0, 8), np.full(240, 8.0), np.linspace(8.0, 2.0, 8)]
+    ),
+    peak=8.0,
+)
+
+
+def test_asymmetric_alpha_decomposition_isolates_transient_Hc() -> None:
+    """``alpha_exponent_transient`` lowers ONLY the transient H_c (ADR-0017).
+
+    The dimensional-bias decomposition the spec §12 fm4 calls for: with
+    ``alpha_exponent_transient = -1/2`` the transient H_c (the H_eq anchor) is
+    recomputed at the 3D exponent while the static comparator keeps -1/3. So
+    ``H_c`` (static) is unchanged from baseline and the static margin Z_static is
+    identical (the static branch is NOT shifted — the whole point), while the
+    lower transient H_c lowers H_eq, raises the overload, and grows l_e (lowers
+    Z_transient). The default (None) keeps the single-source contract
+    (H_c == H_c_transient), bit-identical to baseline.
+    """
+    base = evaluate_realization(_DECOMP_THETA, _DECOMP_HYDRO, GEOMETRY)
+    # Default: single-source H_c preserved (no drift, spec §1/§4).
+    assert base.H_c_transient == pytest.approx(base.H_c, rel=1e-12)
+
+    asym = evaluate_realization(
+        _DECOMP_THETA, _DECOMP_HYDRO, GEOMETRY, alpha_exponent_transient=-1.0 / 2.0
+    )
+    # Static H_c and the static margin are untouched (the decomposition isolates
+    # the dimensional bias to the transient branch, not conflating it with the
+    # static comparator).
+    assert asym.H_c == pytest.approx(base.H_c, rel=1e-12)
+    assert asym.Z_static == pytest.approx(base.Z_static, rel=1e-12)
+    assert asym.failure_static == base.failure_static
+    # Transient H_c is the lowered 3D value; it drives the transient branch.
+    assert asym.H_c_transient < asym.H_c
+    # Baseline progressed only partially (headroom remains); the lower transient
+    # H_c grows the pipe further and shrinks the transient margin.
+    assert 0.0 < base.l_e_final < GEOMETRY["L"]
+    assert asym.l_e_final > base.l_e_final
+    assert asym.Z_transient < base.Z_transient
+
+    # A SYMMETRIC -1/2 run shifts BOTH branches: its static margin differs from
+    # baseline, unlike the asymmetric run. Its transient H_c equals the
+    # asymmetric one (same -1/2), confirming the asymmetric run left static at -1/3.
+    sym = evaluate_realization(
+        _DECOMP_THETA, _DECOMP_HYDRO, GEOMETRY, alpha_exponent=-1.0 / 2.0
+    )
+    assert sym.H_c == pytest.approx(sym.H_c_transient, rel=1e-12)  # symmetric source
+    assert sym.H_c_transient == pytest.approx(asym.H_c_transient, rel=1e-12)
+    assert sym.Z_static != pytest.approx(base.Z_static, rel=1e-9)  # static DID shift
+
+
+def test_asymmetric_alpha_batch_matches_scalar_and_default_is_unchanged() -> None:
+    """``evaluate_batch`` honors ``alpha_exponent_transient`` bit-identically.
+
+    The transient-only override threads through the vectorized path exactly as
+    through the scalar loop, and the None default leaves the batch result
+    unchanged from the no-override baseline (single-source preserved).
+    """
+    rng = np.random.default_rng(2027)
+    theta_matrix = _random_theta_matrix(rng, 200)
+
+    fs_batch, ft_batch = evaluate_batch(
+        theta_matrix, _BATCH_HYDRO, GEOMETRY, alpha_exponent_transient=-1.0 / 2.0
+    )
+    fs_ref, ft_ref = _scalar_failure_columns(
+        theta_matrix, _BATCH_HYDRO, GEOMETRY, alpha_exponent_transient=-1.0 / 2.0
+    )
+    np.testing.assert_array_equal(fs_batch, fs_ref)
+    np.testing.assert_array_equal(ft_batch, ft_ref)
+
+    # None default is bit-identical to the no-override baseline, and the static
+    # column is unchanged by the transient-only override (only transient moves).
+    fs_base, ft_base = evaluate_batch(theta_matrix, _BATCH_HYDRO, GEOMETRY)
+    fs_none, ft_none = evaluate_batch(
+        theta_matrix, _BATCH_HYDRO, GEOMETRY, alpha_exponent_transient=None
+    )
+    np.testing.assert_array_equal(fs_none, fs_base)
+    np.testing.assert_array_equal(ft_none, ft_base)
+    np.testing.assert_array_equal(fs_batch, fs_base)  # static unaffected
+    assert not np.array_equal(ft_batch, ft_base)  # transient genuinely shifted

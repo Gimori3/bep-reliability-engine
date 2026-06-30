@@ -49,6 +49,15 @@ conditioning level, is the ``(lo, hi)`` band. The RNG is seeded solely from
 ``n_bootstrap`` share identical resamples and differ only in the percentile cut
 — a wider ``confidence`` is then a strictly wider band.
 
+Length-effect upscaling (thesis §"Length Effect Upscaling")
+-----------------------------------------------------------
+:func:`upscale_length_effect` provides the weakest-link transform
+``P_f,BEP = 1 - (1 - P_f,cs)^(L_seg/lambda_ac)`` from a per-cross-section curve
+to the 200 m segment level. It is a documented post-processing step, **not wired
+into the default pipeline**: the autocorrelation length ``lambda_ac`` is still
+undetermined, so the function takes ``n_eff`` explicitly and ``run.py`` never
+calls it. Apply it to the fitted prior/posterior curve once ``lambda_ac`` is fixed.
+
 Persistence (spec §2, §8)
 -------------------------
 :meth:`FragilityResult.save` writes one HDF5 file (the arrays: ``theta_matrix``,
@@ -85,6 +94,7 @@ __all__ = [
     "FragilityResult",
     "fit_lognormal_fragility",
     "assemble_fragility",
+    "upscale_length_effect",
 ]
 
 
@@ -182,6 +192,64 @@ def fit_lognormal_fragility(
     sigma = 1.0 / slope
     mu = -intercept / slope
     return LognormFragility(mu=float(mu), sigma=float(sigma))
+
+
+def upscale_length_effect(
+    p_f_cross_section: float | NDArray[np.float64],
+    n_eff: float,
+) -> float | NDArray[np.float64]:
+    """Weakest-link upscaling of a per-cross-section P_f to the segment level.
+
+    Implements the thesis "Length Effect Upscaling" relation::
+
+        P_f,BEP(h) = 1 - (1 - P_f,cs(h)) ** n_eff,    n_eff = L_seg / lambda_ac
+
+    Piping is a weakest-link mechanism, so a finite 200 m segment containing
+    ``n_eff`` effectively independent cross-sections fails if *any* of them does;
+    a single representative cross-section therefore under-states the segment
+    failure probability (Kanning 2012; Hoffmans 2014). The exact expression is
+    retained (not the ``n_eff * P_f`` linearization) so the high-loading tail is
+    not under-estimated.
+
+    .. important::
+       **Not yet wired into the default Phase 1 pipeline.** The autocorrelation
+       length ``lambda_ac`` of the governing parameters (D_bl, k_aquifer) — and
+       hence ``n_eff`` — is still undetermined (it must be estimated from the OYO
+       longitudinal profile / literature; thesis §"The Length Effect and Spatial
+       Autocorrelation"). This function therefore takes ``n_eff`` as an explicit
+       argument with **no default**: the caller supplies it once ``lambda_ac`` is
+       fixed, and applies the transform to the fitted prior/posterior fragility
+       curve as a post-processing step. ``run.py`` does not call it.
+
+    Parameters
+    ----------
+    p_f_cross_section : float or numpy.ndarray
+        Per-cross-section conditional failure probability P_f,cs(h), in
+        ``[0, 1]`` (a scalar, or the curve sampled on a head grid).
+    n_eff : float
+        Effective number of independent cross-sections in the segment,
+        ``L_seg / lambda_ac``; ``>= 1`` for a segment longer than one
+        autocorrelation length (``n_eff = 1`` returns the input unchanged).
+
+    Returns
+    -------
+    float or numpy.ndarray
+        The segment-level conditional failure probability P_f,BEP(h), the
+        quantity passed into the Phase 3 series-system integration. Same shape
+        as ``p_f_cross_section``.
+
+    Raises
+    ------
+    ValueError
+        If ``n_eff < 1`` or any ``p_f_cross_section`` is outside ``[0, 1]``.
+    """
+    if not n_eff >= 1.0:
+        raise ValueError(f"n_eff must be >= 1 (L_seg / lambda_ac), got {n_eff!r}.")
+    p_cs = np.asarray(p_f_cross_section, dtype=np.float64)
+    if np.any((p_cs < 0.0) | (p_cs > 1.0)):
+        raise ValueError("p_f_cross_section must lie in [0, 1].")
+    p_seg = 1.0 - np.power(1.0 - p_cs, n_eff)
+    return float(p_seg) if p_seg.ndim == 0 else p_seg
 
 
 def _bootstrap_bands(
