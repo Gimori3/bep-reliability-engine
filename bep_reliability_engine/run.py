@@ -44,10 +44,12 @@ The parallel sweep is bit-identical to a serial run, and identical across
   executed in the main process outside the parallel region.
 * :func:`evaluate_realization` is a pure deterministic function (forward Euler,
   no RNG anywhere in M4-M8).
-* The M3 stub is a deterministic pure function of (level, config) — **no RNG**
-  (decision-log constraint: when the real M3 *selects* a d4PDF event it must
-  derive a per-level seed deterministically from ``config.mc.seed`` and the
-  level index / event_id, or this guarantee breaks).
+* Hydrograph construction has **no RNG on either path**: the canonical d4PDF
+  shape is loaded **once, in the main process** (the event is pinned by
+  ``config.hydrograph_source.canonical_event_ids[0]``, ADR-0020 §5) and the
+  per-level scaling (:func:`~bep_reliability_engine.hydrographs.\
+conditioning_record_for_level`) is a pure function of (shape, level); the
+  synthetic stub is likewise a pure function of (level, config).
 * Aggregation is **index-addressed**: each task returns its own ``level_index``
   and the main process writes column ``level_index``, so the result is invariant
   to task completion order and worker count.
@@ -61,32 +63,41 @@ Backend note: the scalar M8 middle loop is CPU-bound pure Python, so processes
 (loky, the joblib default) are used — a threading backend would serialize on the
 GIL.
 
-Two marked seams (both grep-able, both single-function body swaps)
-------------------------------------------------------------------
-1. **M3 STUB** (:func:`_hydrograph_for_level`). M3 (``hydrographs.py``) does not
-   exist yet, so the per-level loading is a *single clearly marked synthetic
-   stub*: a deterministic two-peak (compound) raised-cosine event from the polder
-   baseline peaking at h_i. Its only job is to exercise the M8 plumbing — the two
-   peaks deliberately drive the spec §5 memory model; the fragility curve
-   it produces is **not physical**, and ``metadata['hydrograph_source']`` is
-   stamped ``'phase1_synthetic_stub'`` so no synthetic run is mistaken for a real
-   one. It is called **once per level in the main process** (the outer loop), and
-   the built record — which duck-types the spec §2 ``HydrographRecord`` (it
-   carries ``.h``, ``.peak`` and ``.native_dt``, the three fields M8 reads, plus
-   ``.t/.duration_hours/.scenario/.event_id``) — is handed to the worker, so the
-   workers never see the stub. The stub already has **the exact signature the
-   real loader will have**, ``(level_m: float, config: Config) -> HydrographRecord``
-   (see its ``TODO(M3)``), so the swap is **one line**: replace the synthetic body
-   with ``return hydrographs.hydrograph_for_level(level_m, config)`` (and drop
-   :class:`_StubHydrograph`). The call site is unchanged.
-2. **VECTORIZED MIDDLE LOOP** (:func:`_evaluate_level` ->
-   :func:`~bep_reliability_engine.evaluator.evaluate_batch`). The former scalar
-   ``for j in range(N)`` seam is now wired to the vectorized M8 batch path (spec
-   §6; review item #5): each level is one ``evaluate_batch`` call across all N
-   realizations. It is bit-identical to the scalar loop (locked by
-   ``test_orchestration_matches_reference_loop``), so the spec §8 Phase-2 idiom
-   (per-row ``evaluate_realization``) and the M9 row-bootstrap are unaffected.
-   This lifts the former N (1e5) x N_h (~30) scalar performance ceiling.
+Per-level hydrograph construction: two config-selected paths
+-------------------------------------------------------------
+:func:`_hydrograph_for_level` builds each conditioning level's loading record
+(a concrete M3 :class:`~bep_reliability_engine.hydrographs.HydrographRecord`)
+in the **main process**; workers receive the built record only.
+
+1. **CANONICAL d4PDF SHAPE (production).** When ``config.hydrograph_source``
+   is set (ADR-0020), the canonical event — the *first* entry of
+   ``canonical_event_ids`` — is loaded **once per run** in the main process
+   (:func:`~bep_reliability_engine.hydrographs.load_canonical_shape`: band
+   workbook resolved by the event's own experiment, stage under the node's own
+   local rating, ADR-0019 §7 proxy honored) and normalized in stage domain.
+   Each level is then the pure rescaling ``h(t) = h_base + (h_i - h_base) *
+   shape(t)`` with the trough floor pinned at the section's base-flow stage
+   h_base (ADR-0021 item 4 — NOT z_toe) and ``peak = h_i`` verbatim (ADR-0010).
+   The MSL datum guard
+   (:func:`~bep_reliability_engine.hydrographs.validate_datum_consistency`)
+   runs at load time, **before any expensive work**, so an unresolved
+   provisional ``z_toe = 0.0`` fails loudly rather than silently producing
+   ~35 m heads. ``metadata['hydrograph_source']`` is stamped
+   ``'d4pdf_scaled_canonical'`` and ``metadata['hydrograph']`` carries the full
+   shape provenance (gap G5).
+2. **SYNTHETIC STUB (plumbing/dev only).** When ``hydrograph_source`` is None,
+   the legacy deterministic two-peak raised-cosine event from the polder
+   baseline peaking at h_i is used. It exercises the M8 plumbing (the two peaks
+   drive the spec §5 memory model) but is **not physical**;
+   ``metadata['hydrograph_source']`` stays ``'phase1_synthetic_stub'`` so no
+   synthetic run is mistaken for a real one.
+
+**VECTORIZED MIDDLE LOOP** (:func:`_evaluate_level` ->
+:func:`~bep_reliability_engine.evaluator.evaluate_batch`): each level is one
+``evaluate_batch`` call across all N realizations, bit-identical to looping the
+scalar ``evaluate_realization`` (locked by
+``test_orchestration_matches_reference_loop``), so the spec §8 Phase-2 idiom
+(per-row ``evaluate_realization``) and the M9 row-bootstrap are unaffected.
 
 Persistence (spec §2, §8; confirmed decisions)
 ----------------------------------------------
@@ -106,9 +117,10 @@ Deferred decisions recorded for the decision log
   derived from ``config.mc.seed``, and all three are recorded under
   ``metadata['bootstrap']`` so the bands stay config-reproducible. Promoting
   them to :class:`Config` is a clean follow-up.
-* **M3-stub determinism constraint (accepted).** See the reproducibility note
-  above: the real M3 must keep event selection deterministic-given-config (or
-  explicitly per-level seeded) to preserve parallel == serial.
+* **M3 determinism constraint (discharged).** Event selection is
+  config-pinned (``canonical_event_ids[0]``, ADR-0020 §5) and the per-level
+  scaling is a pure function, so parallel == serial holds on the real path by
+  construction (locked by the n_jobs-invariance test, gap G4).
 
 References
 ----------
@@ -138,6 +150,13 @@ from tqdm import tqdm
 from bep_reliability_engine.config import Config
 from bep_reliability_engine.evaluator import evaluate_batch
 from bep_reliability_engine.fragility import FragilityResult, assemble_fragility
+from bep_reliability_engine.hydrographs import (
+    CanonicalShape,
+    HydrographRecord,
+    conditioning_record_for_level,
+    load_canonical_shape,
+    validate_datum_consistency,
+)
 from bep_reliability_engine.sampling import (
     ThetaSample,
     sample_seepage_length,
@@ -148,9 +167,11 @@ logger = logging.getLogger(__name__)
 
 __all__ = ["run_fragility_analysis"]
 
-# Provenance marker stamped into metadata so a synthetic-stub run is never
-# mistaken for a real d4PDF-driven fragility result (see the M3 STUB seam).
-_HYDROGRAPH_SOURCE: str = "phase1_synthetic_stub"
+# Provenance markers stamped into metadata['hydrograph_source'] so a
+# synthetic-stub run is never mistaken for a real d4PDF-driven result and
+# vice versa (module docstring: the two config-selected paths).
+_SOURCE_SYNTHETIC: str = "phase1_synthetic_stub"
+_SOURCE_D4PDF: str = "d4pdf_scaled_canonical"
 
 # M3-stub shape constants (placeholder physics only). 10 min native resolution is
 # the spec §11 field-scale default; the duration is a multi-day compound-event
@@ -212,96 +233,89 @@ class _EvalSettings:
 
 
 # ============================================================================
-# M3 STUB — the single synthetic-hydrograph seam (module docstring, seam 1).
-# _hydrograph_for_level already has the exact signature the real M3 loader will
-# have, (level_m, config) -> HydrographRecord, so the swap is one line in its
-# body (see the TODO inside). M8 only duck-types .h/.peak/.native_dt.
+# PER-LEVEL HYDROGRAPH CONSTRUCTION — two config-selected paths (module
+# docstring): the canonical d4PDF shape (production; hydrograph_source set) or
+# the legacy synthetic stub (plumbing/dev; hydrograph_source None). Both build
+# a concrete M3 HydrographRecord in the main process.
 # ============================================================================
-@dataclass(frozen=True)
-class _StubHydrograph:
-    """Duck-typed stand-in for the unbuilt M3 ``HydrographRecord`` (spec §2).
+def _load_canonical_or_none(config: Config) -> CanonicalShape | None:
+    """Load the run's canonical d4PDF shape once, or None for the stub path.
 
-    Field names mirror the real schema so the M3 swap is mechanical. M8 reads
-    only ``h``, ``peak`` and ``native_dt``; the rest are forward-compat carriers.
+    Called **once per run, in the main process, before any expensive work**:
 
-    Attributes
-    ----------
-    t : numpy.ndarray, shape (T,)
-        Time axis [s] at ``native_dt`` spacing.
-    h : numpy.ndarray, shape (T,)
-        River stage [m above datum]; the synthetic two-peak bump.
-    peak : float
-        Static comparator level h_peak [m above datum]; set exactly to the
-        conditioning level (authoritative, M8 ambiguity 3).
-    duration_hours : float
-        Event duration [h].
-    scenario : str
-        Climate scenario tag carried from the config (provenance only).
-    event_id : str
-        Synthetic event identifier.
-    native_dt : float
-        Native temporal resolution / integration timestep [s].
+    * ``config.hydrograph_source`` is None -> None (the synthetic-stub path;
+      the only path available to pre-ADR-0020 configs).
+    * Otherwise the **first** canonical event (ADR-0020 ordered-list
+      semantics) is loaded at the node's KP via
+      :func:`~bep_reliability_engine.hydrographs.load_canonical_shape`, and
+      the MSL datum guard runs immediately: real d4PDF stages are m MSL
+      (ADR-0019 §3), so an unresolved provisional ``z_toe = 0.0`` raises here
+      — fail fast — rather than silently driving M8 with ~35 m heads (gap G2).
+
+    Returns
+    -------
+    CanonicalShape or None
+        The loaded, datum-checked shape, or None for the stub path.
     """
+    if config.hydrograph_source is None:
+        return None
+    source = config.hydrograph_source
+    canonical = load_canonical_shape(
+        source.data_root,
+        river=source.river,
+        kp=source.kp,
+        event_id=source.canonical_event_ids[0],
+    )
+    validate_datum_consistency(canonical.source_record, config.geometry.z_toe)
+    return canonical
 
-    t: NDArray[np.float64]
-    h: NDArray[np.float64]
-    peak: float
-    duration_hours: float
-    scenario: str
-    event_id: str
-    native_dt: float
 
+def _hydrograph_for_level(
+    level_m: float, config: Config, canonical: CanonicalShape | None = None
+) -> HydrographRecord:
+    """Build the loading record for conditioning level ``level_m``.
 
-def _hydrograph_for_level(level_m: float, config: Config) -> _StubHydrograph:
-    """Return the loading hydrograph for conditioning level ``level_m`` (M3 STUB).
+    Pure, deterministic function of its arguments (no RNG, no I/O — the
+    canonical shape was already loaded by :func:`_load_canonical_or_none`),
+    which is what keeps the parallel sweep identical to a serial run.
 
-    .. note:: TODO(M3) — replace the body of this function with a one-line
-       delegation to the real loader once ``bep_reliability_engine/hydrographs.py``
-       exists::
+    **Canonical path** (``canonical`` given): the pure G1 rescaling via
+    :func:`~bep_reliability_engine.hydrographs.conditioning_record_for_level`
+    — ``h(t) = h_base + (level_m - h_base) * shape(t)``, trough floor pinned
+    at the section's base-flow stage h_base (ADR-0021 item 4), ``peak =
+    level_m`` verbatim (ADR-0010), full source window at native resolution.
 
-           return hydrograph_for_level(level_m, config)  # real M3 loader
-
-       This function's signature, ``(level_m: float, config: Config) ->
-       HydrographRecord``, is **already the real loader's signature**, so the swap
-       touches only this body (and drops :class:`_StubHydrograph`); the call site
-       in :func:`run_fragility_analysis` is unchanged.
-
-    Placeholder loading for fragility-curve construction: a synthetic **two-peak
-    compound event** — two raised-cosine bumps separated by an inter-peak trough
-    at the polder baseline ``config.geometry.z_toe``, asymmetric in the
-    typhoon-like sense of a smaller leading precursor peak
-    (``_STUB_PRECURSOR_FRACTION`` of full height) followed by the larger main
-    peak at ``level_m``. It is **not physical**, but the two-peak shape
-    deliberately exercises the
-    spec §5 compound-event memory model — the gate closes in the trough (flat,
-    staircase l(t)) and the second peak resumes progression through the
-    ``l_current > 0`` clause without re-triggering uplift — so the orchestration
-    plumbing is validated against the transient branch's distinguishing feature.
-    The real M3 will replace this with an actual d4PDF event anchored at
-    ``level_m`` (or a canonical shape scaled to it).
-
-    The function is a **pure, deterministic** function of its arguments (no RNG),
-    which is what keeps the parallel sweep identical to a serial run (module
-    docstring; decision-log constraint). The native timestep follows the ADR-0013
-    policy: ``config.timestepper.target_dt_seconds`` when set, else the stub
-    default :data:`_STUB_NATIVE_DT_S`.
+    **Stub path** (``canonical`` None): the legacy synthetic **two-peak
+    compound event** — two raised-cosine bumps separated by an inter-peak
+    trough at the polder baseline ``config.geometry.z_toe``, a smaller leading
+    precursor peak (``_STUB_PRECURSOR_FRACTION`` of full height) then the
+    larger main peak at ``level_m``. Not physical, but the two-peak shape
+    deliberately exercises the spec §5 compound-event memory model (gate
+    closes in the trough, progression resumes through the ``l_current > 0``
+    clause). Native timestep per ADR-0013:
+    ``config.timestepper.target_dt_seconds`` when set, else
+    :data:`_STUB_NATIVE_DT_S`.
 
     Parameters
     ----------
     level_m : float
-        Conditioning level h_i [m above datum]; becomes both ``peak`` and the
-        bump maximum.
+        Conditioning level h_i; becomes ``peak`` on both paths. MSL stage on
+        the canonical path; the legacy above-datum convention on the stub path.
     config : Config
-        The run configuration (M1). The stub reads ``geometry.z_toe`` (baseline),
-        ``timestepper.target_dt_seconds`` (native dt) and ``scenario`` (provenance
-        tag); the real loader will read whatever it needs from the same object.
+        The run configuration (M1).
+    canonical : CanonicalShape, optional
+        The run's loaded canonical shape (None -> stub path).
 
     Returns
     -------
-    _StubHydrograph
-        A record duck-typing the spec §2 ``HydrographRecord`` with ``peak`` set
-        exactly to ``level_m``.
+    HydrographRecord
+        The level's loading record, ``peak`` set exactly to ``level_m``.
     """
+    if canonical is not None:
+        return conditioning_record_for_level(
+            canonical, level_m, scenario=config.scenario
+        )
+
     z_toe_m = float(config.geometry.z_toe)
     native_dt_s = (
         float(config.timestepper.target_dt_seconds)
@@ -320,7 +334,7 @@ def _hydrograph_for_level(level_m: float, config: Config) -> _StubHydrograph:
     shape = np.concatenate([_STUB_PRECURSOR_FRACTION * hump_first, hump_second])
     shape /= shape.max()
     h = z_toe_m + (level_m - z_toe_m) * shape
-    return _StubHydrograph(
+    return HydrographRecord(
         t=t,
         h=h,
         peak=float(level_m),
@@ -328,11 +342,12 @@ def _hydrograph_for_level(level_m: float, config: Config) -> _StubHydrograph:
         scenario=config.scenario,
         event_id=f"stub_h{level_m:g}",
         native_dt=float(native_dt_s),
+        provenance={"source": _SOURCE_SYNTHETIC},
     )
 
 
 # ============================================================================
-# END M3 STUB
+# END PER-LEVEL HYDROGRAPH CONSTRUCTION
 # ============================================================================
 
 
@@ -346,7 +361,7 @@ def _hydrograph_for_level(level_m: float, config: Config) -> _StubHydrograph:
 # ============================================================================
 def _evaluate_level(
     level_index: int,
-    hydrograph: _StubHydrograph,
+    hydrograph: HydrographRecord,
     theta_matrix: NDArray[np.float64],
     geometry: dict[str, float],
     settings: _EvalSettings,
@@ -354,8 +369,8 @@ def _evaluate_level(
     """Outer-loop task: one conditioning level, all N realizations (vectorized).
 
     Module-level (picklable for loky): evaluates the realizations against the
-    already-built ``hydrograph`` (the M3 stub is called in the main process, not
-    here) via one :func:`~bep_reliability_engine.evaluator.evaluate_batch` call,
+    already-built ``hydrograph`` (constructed in the main process, not here)
+    via one :func:`~bep_reliability_engine.evaluator.evaluate_batch` call,
     and returns its own ``level_index`` so the caller can assemble the failure
     matrices by index, independent of task completion order (the reproducibility
     guarantee). Only the two boolean failure columns are kept — the bulk run
@@ -365,7 +380,7 @@ def _evaluate_level(
     ----------
     level_index : int
         Column index of this level in the (N, N_h) failure matrices.
-    hydrograph : _StubHydrograph
+    hydrograph : HydrographRecord
         This level's loading record, built once in the main process by
         :func:`_hydrograph_for_level` (``peak`` == the conditioning level).
     theta_matrix : numpy.ndarray, shape (N, 7)
@@ -476,11 +491,14 @@ def _build_metadata(
     runtime_seconds: float,
     n_jobs: int,
     seepage_length_stochastic: bool,
+    canonical: CanonicalShape | None,
 ) -> dict[str, Any]:
     """Assemble the spec §8 provenance block for the FragilityResult sidecar.
 
     Merges the full config snapshot and hash, the M2 sampling provenance, runtime
-    fields, the loud stub marker, and the deferred bootstrap settings.
+    fields, the loud hydrograph-source marker plus the full shape provenance
+    (gap G5; ADR-0019 §9 scenario tags and §1 member provenance flow through
+    here), and the deferred bootstrap settings.
 
     The assembled dict is **canonicalized to JSON-native types** before return
     (``json.loads(json.dumps(...))`` — the same operation M9's save/load applies),
@@ -532,7 +550,30 @@ def _build_metadata(
                 else float(config.seepage_length_cov)
             ),
         },
-        "hydrograph_source": _HYDROGRAPH_SOURCE,
+        # Hydrograph path marker + full shape provenance (gap G5). The 'scenario'
+        # key above is the RUN identity; the canonical shape's own source
+        # experiment/scenario (HPB/'historical' for the approved events, driving
+        # both scenarios by design) lives inside the provenance block.
+        "hydrograph_source": (
+            _SOURCE_SYNTHETIC if canonical is None else _SOURCE_D4PDF
+        ),
+        "hydrograph": (
+            None
+            if canonical is None
+            else {
+                "shape_event_id": canonical.source_record.event_id,
+                # Ordered ADR-0020 list: [0] is the shape used above; the rest
+                # are the approved alternates recorded for provenance.
+                "canonical_event_ids": list(
+                    config.hydrograph_source.canonical_event_ids
+                ),
+                "h_base_m_msl": float(canonical.h_base_m),
+                "source_peak_stage_m_msl": float(canonical.source_record.peak),
+                "native_dt_s": float(canonical.source_record.native_dt),
+                "duration_hours": float(canonical.source_record.duration_hours),
+                "provenance": dict(canonical.source_record.provenance),
+            }
+        ),
         "bootstrap": {
             "n_bootstrap": int(_BOOTSTRAP_N),
             "confidence": float(_BOOTSTRAP_CONFIDENCE),
@@ -570,9 +611,11 @@ def run_fragility_analysis(
     ``n_jobs`` (see the module docstring).
 
     .. warning::
-       The transient loading is a **synthetic stub** while M3 is unbuilt
-       (``metadata['hydrograph_source'] == 'phase1_synthetic_stub'``); the curves
-       validate the engine plumbing, not site physics.
+       With ``config.hydrograph_source`` unset the transient loading is the
+       legacy **synthetic stub**
+       (``metadata['hydrograph_source'] == 'phase1_synthetic_stub'``) and the
+       curves validate the engine plumbing, not site physics. Production runs
+       set the block (ADR-0020) and are stamped ``'d4pdf_scaled_canonical'``.
 
     Parameters
     ----------
@@ -608,9 +651,12 @@ def run_fragility_analysis(
         If ``persist`` and the resolved output (or its sidecar) already exists and
         ``overwrite`` is False.
     ValueError
-        Propagated from M9 if a fragility branch has fewer than two interior
-        (``0 < P_f < 1``) conditioning levels — i.e. the grid does not bracket the
-        transition for that branch.
+        If the canonical shape cannot be loaded (missing data, unknown event)
+        or the MSL datum guard trips (``z_toe`` still the provisional 0.0 with
+        real MSL stages, gap G2) — both raised **before** the sweep; or,
+        propagated from M9, if a fragility branch has fewer than two interior
+        (``0 < P_f < 1``) conditioning levels — i.e. the grid does not bracket
+        the transition for that branch.
     """
     # 1. Resolve and guard the output path BEFORE any expensive work (fail fast,
     #    so a long run is never lost to a refused write at the end).
@@ -618,6 +664,10 @@ def run_fragility_analysis(
     if persist:
         resolved_path = _resolve_output_path(config, output_path)
         _guard_no_overwrite(resolved_path, overwrite)
+
+    # 1b. Load the canonical d4PDF shape ONCE (main process) and run the MSL
+    #     datum guard — also before any expensive work. None => stub path.
+    canonical = _load_canonical_or_none(config)
 
     # 2. Sample theta ONCE, and the stochastic seepage length L ONCE (front-load
     #    all RNG in the main process; both shared read-only across every level).
@@ -645,15 +695,16 @@ def run_fragility_analysis(
         n_samples,
         n_levels,
         n_jobs,
-        _HYDROGRAPH_SOURCE,
+        _SOURCE_SYNTHETIC if canonical is None else _SOURCE_D4PDF,
     )
 
     # 4. Outer loop over conditioning levels (parallel). Each level's hydrograph
-    #    is built once in THIS (main) process by the M3 seam — delayed() evaluates
-    #    its arguments here before dispatch — and the built record is handed to the
-    #    worker, which never touches the stub. tqdm wraps the task iterable;
-    #    joblib pulls from it as workers free up, tracking progress for any n_jobs.
-    #    n_jobs=1 forces fully serial execution (the reproducibility-check path).
+    #    is built once in THIS (main) process — delayed() evaluates its arguments
+    #    here before dispatch — and the built record is handed to the worker; the
+    #    canonical shape (or the stub construction) never crosses into workers.
+    #    tqdm wraps the task iterable; joblib pulls from it as workers free up,
+    #    tracking progress for any n_jobs. n_jobs=1 forces fully serial execution
+    #    (the reproducibility-check path).
     level_iter: Any = enumerate(grid)
     if progress:
         level_iter = tqdm(
@@ -664,7 +715,7 @@ def run_fragility_analysis(
     level_results = Parallel(n_jobs=n_jobs)(
         delayed(_evaluate_level)(
             level_index,
-            _hydrograph_for_level(float(level_m), config),  # M3 seam, main process
+            _hydrograph_for_level(float(level_m), config, canonical),  # main process
             theta_matrix,
             geometry,
             settings,
@@ -689,6 +740,7 @@ def run_fragility_analysis(
         runtime_seconds,
         n_jobs,
         seepage_length_stochastic=seepage_length_samples is not None,
+        canonical=canonical,
     )
     result = assemble_fragility(
         theta_matrix,

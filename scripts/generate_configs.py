@@ -50,6 +50,16 @@ Three non-obvious mappings, verified against the built modules
   (strict 0.2 km grid match, ADR-0018) — REAL, but from the bank-height CSVs,
   not the geotech table. The ``DesignBankHeight_L/R`` crest columns are Phase 3
   overflow inputs and never enter M1.
+* **z_toe / h_e.** ``geometry.z_toe`` is the per-section landside-toe elevation
+  [m MSL] from ADR-0021 (OYO 1999 transverse sections, +/-0.3 m) — REAL, from
+  its own table below (``Z_TOE_MSL``), not the geotech CSV. One value serves as
+  both the head-translation datum and the M5/M7 exit reference h_e (ADR-0007
+  ``z_toe == h_e``); the former PROVISIONAL 0.0 is retired, which is what
+  unblocks real (MSL-datum) M3 hydrographs past ``validate_datum_consistency``.
+* **conditioning grid.** ``mc.conditioning_grid`` is now river STAGE in m MSL
+  (the M3 / ADR-0021 / HWL datum), per section (``CONDITIONING_GRID_MSL``):
+  sub-toe anchors + a 0.25 m sweep from just above the toe to HWL + 4 m. The
+  former PROVISIONAL above-toe grid is retired.
 
 COVs are FIXED constants (the CSV carries no COV columns); only the five geotech
 *means* come from the table per row.
@@ -157,22 +167,61 @@ D70_BOUNDS: dict[str, tuple[float, float]] = {
     "bulk": (5.0e-4, 5.0e-2),
 }
 
+# --- REAL landside-toe elevations [m MSL / T.P.] (ADR-0021) -------------------
+# Read from the OYO (1999) transverse soil sections (1:200, +/-0.3 m), datum
+# cross-checked against the 2019 bank-height data. Each value serves as BOTH
+# the head-translation datum z_toe AND the exit / polder reference h_e for
+# uplift, heave and the piping exit (ADR-0007 z_toe == h_e; ADR-0021 replaces
+# the foreshore-crest placeholder). The former PROVISIONAL_Z_TOE = 0.0 is
+# retired. KP 63.4 is deliberately absent: excluded by default, and admitting
+# it requires reading its toe from the OYO sheet first (abort, never invent).
+Z_TOE_MSL: dict[str, float] = {
+    "57.4": 38.3,
+    "58.8": 38.5,
+    "60.0": 40.0,
+    "62.0": 44.9,
+}
+
+
+def _quarters(start_q: int, end_q: int) -> list[float]:
+    """Inclusive quarter-metre range: [start_q/4, ..., end_q/4] (exact floats)."""
+    return [q / 4.0 for q in range(start_q, end_q + 1)]
+
+
+# --- Per-section MSL conditioning grids (approved 2026-07-03; audit gap G2) ----
+# Levels are river STAGE h_i [m MSL], the same datum as the M3 hydrographs, the
+# ADR-0021 toe and the 2019 HWL — the former PROVISIONAL above-toe grid is
+# retired. Construction per section: three sub-toe anchors (from the base-flow
+# stage h_base = Eq. 4.19 at Q = 75.44 m^3/s under the local rating, pinning
+# the zero-load floor: below the toe, delta_h_blanket < 0 and the gate never
+# opens) + a uniform 0.25 m sweep from just above the toe (where the uplift/
+# heave transition lives) to HWL + 4 m (covering the extreme-HFB stage range,
+# so the fitted curve is not extrapolated in the scenario analysis). N_h =
+# 23/29/30/26 against the spec target ~30. Derivation inputs: ADR-0021 toe,
+# 2019 HWL, HQrelation_TokachiRiv_2017.csv ratings (h_base = 34.77 / 36.52 /
+# 38.29 / 41.70 m MSL at KP 57.4 / 58.8 / 60.0 / 62.0).
+CONDITIONING_GRID_MSL: dict[str, list[float]] = {
+    "57.4": [34.75, 36.50, 38.00, *_quarters(154, 173)],  # 38.50..43.25, N_h=23
+    "58.8": [36.50, 37.50, 38.25, *_quarters(155, 180)],  # 38.75..45.00, N_h=29
+    "60.0": [38.25, 39.25, 39.75, *_quarters(161, 187)],  # 40.25..46.75, N_h=30
+    "62.0": [41.75, 43.25, 44.50, *_quarters(180, 202)],  # 45.00..50.50, N_h=26
+}
+
+# --- Canonical d4PDF shape events (ADR-0020; approved 2026-07-03, gap G1) -----
+# ORDERED: the first entry is the shape the run uses — HPB_m064_1987, the
+# compound production default (3rd-largest HPB peak 7,214 m^3/s at t = 37 h,
+# secondary peak 64% of max at t = 75 h, inter-peak trough 30%; mirrors the
+# 2016 typhoon-sequence character and exercises the spec §5 memory model).
+# Second: HPB_m067_1978, the isolated single-peak end-member (largest HPB peak
+# 7,581 m^3/s, 32 h rise) recorded as the approved shape-sensitivity alternate
+# (a sensitivity config reorders the list; selection stays config-side).
+CANONICAL_EVENT_IDS: list[str] = ["HPB_m064_1987", "HPB_m067_1978"]
+
+# Root of the raw data drop (ADR-0020): hydrographs/ + rating_curves/ beneath.
+HYDROGRAPH_DATA_ROOT: str = "data/raw"
+
 # --- PROVISIONAL placeholders (flagged; await finalized schematization) ------
-PROVISIONAL_Z_TOE: float = 0.0  # exit-point polder elevation [m]; datum convention
 PROVISIONAL_RHO_LOG: float = 0.6  # rho(ln k_aq, ln d_70); estimate from OYO pairs
-PROVISIONAL_GRID: list[float] = [  # conditioning levels [m above toe]; target N_h~30
-    4.0,
-    4.5,
-    5.0,
-    5.5,
-    6.0,
-    6.5,
-    7.0,
-    7.5,
-    8.0,
-    8.5,
-    9.0,
-]
 BASE_SEED: int = 20260626  # one shared seed -> common random numbers across the sweep
 
 # --- Deterministic Sellmeijer inputs (ADR-0015) ------------------------------
@@ -263,6 +312,22 @@ def build_config_dict(
 
     remediation = REMEDIATION_OVERRIDES.get(kp, row["remediation_state"])
 
+    # ADR-0021 toe + approved MSL grid: both tables cover exactly the four
+    # confined sections. A missing KP (i.e. 63.4 admitted via --include-kp634)
+    # aborts loudly — its toe must be read from the OYO sheet and a grid
+    # derived before a config can exist for it (never invent an elevation).
+    try:
+        z_toe_msl = Z_TOE_MSL[kp]
+        conditioning_grid = CONDITIONING_GRID_MSL[kp]
+    except KeyError:
+        raise SystemExit(
+            f"[FATAL] KP {kp}: no ADR-0021 landside-toe elevation / approved "
+            "MSL conditioning grid is defined for this section. Add the toe "
+            "(read from the OYO transverse sheet) to Z_TOE_MSL and derive its "
+            "grid into CONDITIONING_GRID_MSL in scripts/generate_configs.py "
+            "before generating a config for it."
+        ) from None
+
     return {
         "cross_section_id": f"tokachi_kp{kp}",
         "segment_id": f"KP{kp}",
@@ -270,7 +335,9 @@ def build_config_dict(
         "remediation_state": remediation,
         "geometry": {
             "L": _f(row["L_m"]),
-            "z_toe": PROVISIONAL_Z_TOE,
+            # ADR-0021 landside toe [m MSL]: head-translation datum AND exit
+            # reference h_e in one value (ADR-0007 z_toe == h_e).
+            "z_toe": z_toe_msl,
             "foreshore_width": _f(row["foreshore_width_m"]),
             "D_fore": d_bl,  # per-section proxy = landside D_bl (ADR-0005)
             "k_fore": k_bl,  # per-section proxy = landside k_bl (ADR-0005)
@@ -295,7 +362,8 @@ def build_config_dict(
         "mc": {
             "n_samples": 100_000,
             "seed": BASE_SEED,
-            "conditioning_grid": list(PROVISIONAL_GRID),
+            # Approved per-section MSL stage grid (see CONDITIONING_GRID_MSL).
+            "conditioning_grid": list(conditioning_grid),
             "sampling_scheme": "latin_hypercube",
         },
         "timestepper": {
@@ -310,6 +378,17 @@ def build_config_dict(
             "store_trajectories": False,
             "persistence_format": "hdf5",
             "results_dir": "results",
+        },
+        # ADR-0020: d4PDF source location + the ordered canonical shape events.
+        # River/KP are explicit config data (never parsed from the ID strings);
+        # the rating path, experiment (HPB/HFB) and band workbook are derived
+        # downstream by M3 (rating_curve_path / experiment_for_scenario /
+        # resolve_band_workbook, incl. the ADR-0019 §7 KP 62.x proxy routing).
+        "hydrograph_source": {
+            "data_root": HYDROGRAPH_DATA_ROOT,
+            "river": row["river"],
+            "kp": float(kp),
+            "canonical_event_ids": list(CANONICAL_EVENT_IDS),
         },
         "theta_repose_deg": THETA_REPOSE_DEG,
         "relative_density_insitu": RELATIVE_DENSITY_INSITU,
@@ -340,9 +419,18 @@ def header_comment(
         "#   d_70(matrix), D_aq, D_bl, k_bl; remediation_state.",
         "# REAL (2019 bank-height CSV, data/raw/geometry): geometry.HWL",
         "#   [m MSL] per river/KP (ADR-0018); DesignBankHeight_* never read.",
+        "# REAL (ADR-0021, OYO 1999 transverse sections, +/-0.3 m): geometry.z_toe",
+        "#   [m MSL] = the landside-toe elevation, serving as BOTH the head-",
+        "#   translation datum and the exit reference h_e (ADR-0007 z_toe == h_e).",
+        "# DERIVED (ADR-0021 toe + 2019 HWL + rating h_base; approved 2026-07-03):",
+        "#   mc.conditioning_grid = per-section MSL STAGE levels (sub-toe anchors",
+        "#   + 0.25 m sweep to HWL + 4 m); same datum as the M3 hydrographs.",
+        "# ADR-0020: hydrograph_source pins the d4PDF drop + the ORDERED canonical",
+        "#   shape events (first = production compound HPB_m064_1987; second =",
+        "#   isolated sensitivity end-member HPB_m067_1978).",
         "# FIXED (spec 7 / ADR-0016 / Pol 2024): all COVs; gamma_bl_sub",
         "#   (6.9, 0.056); C_e (0.014, 0.50); theta_repose_deg; D_r; alpha.",
-        "# PROVISIONAL: z_toe, rho_log_kaq_d70, conditioning_grid, seed;",
+        "# PROVISIONAL: rho_log_kaq_d70, seed;",
         "#   D_fore/k_fore = landside D_bl/k_bl proxy (ADR-0005).",
         f"# gamma: CSV gamma_sub_kNm3 = {gamma_p_csv} kN/m^3 is the per-section",
         "#   aquifer particle weight gamma'_p (Sellmeijer F_r). It is recorded here",

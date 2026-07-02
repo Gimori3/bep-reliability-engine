@@ -97,6 +97,7 @@ __all__ = [
     "MCSettings",
     "TimestepperSettings",
     "OutputSettings",
+    "HydrographSource",
     "Config",
 ]
 
@@ -496,6 +497,86 @@ class OutputSettings(_StrictModel):
     results_dir: str = Field(default="results", description="Result output directory.")
 
 
+class HydrographSource(_StrictModel):
+    """Where the d4PDF hydrograph data lives + the canonical shape events.
+
+    The ADR-0020 block that makes M3 reachable from a config: the data-drop
+    root, the explicit river/KP (never parsed out of ``cross_section_id`` —
+    ID strings are labels, not data), and the **ordered** canonical event
+    list that pins the G1 conditioning-level shapes. The block is optional on
+    :class:`Config` (``None`` default): a config without it can only run the
+    synthetic-stub path, and the orchestrator refuses the real-hydrograph
+    path without it.
+
+    Derived, not stored here: the rating CSV path
+    (:func:`~bep_reliability_engine.hydrographs.rating_curve_path`), the
+    scenario -> experiment mapping
+    (:func:`~bep_reliability_engine.hydrographs.experiment_for_scenario`),
+    and the band workbook
+    (:func:`~bep_reliability_engine.hydrographs.resolve_band_workbook`,
+    which also applies the ADR-0019 §7 upper-Tokachi proxy routing).
+
+    Attributes
+    ----------
+    data_root : str
+        Root of the raw data drop; the loader expects ``hydrographs/`` and
+        ``rating_curves/`` beneath it. Default ``'data/raw'``.
+    river : {'Tokachi', 'Satsunai'}
+        The study node's river (closed literal; feeds the rating filename
+        convention and the band-file scan).
+    kp : float
+        The study node's KP, ``> 0``. Selects the rating coefficients and —
+        after the §7 proxy routing — the band workbook.
+    canonical_event_ids : tuple of str
+        Verbatim d4PDF member headers (ADR-0019 §1 grammar, validated at
+        load time) whose shapes drive the conditioning-level scaling
+        (ADR-0020 Decision 1). **Ordered: the first entry is the shape the
+        run uses**; subsequent entries are approved alternates recorded for
+        provenance (a shape-sensitivity run is a config with the list
+        reordered — selection stays config-side so one config still fully
+        determines one result).
+    """
+
+    data_root: str = Field(
+        default="data/raw", description="Root of the raw data drop (ADR-0020)."
+    )
+    river: Literal["Tokachi", "Satsunai"] = Field(
+        description="Study node's river (explicit, never parsed from IDs)."
+    )
+    kp: float = Field(gt=0.0, description="Study node's KP, > 0.")
+    canonical_event_ids: tuple[str, ...] = Field(
+        min_length=1,
+        description=(
+            "Ordered d4PDF member headers pinning the G1 canonical shapes; "
+            "the first entry is the shape the run uses (ADR-0020)."
+        ),
+    )
+
+    @field_validator("canonical_event_ids")
+    @classmethod
+    def _ids_parse_as_member_headers(cls, value: tuple[str, ...]) -> tuple[str, ...]:
+        """Reject event IDs that are not valid d4PDF member headers.
+
+        The load-time guard against a typo'd member ID surfacing hours into a
+        run: every entry must satisfy the ADR-0019 §1 header grammar
+        (``HPB_mXXX_YYYY`` / ``HFB_{SST}_mXXX_YYYY``).
+        """
+        # Imported here to keep M1 import-light and one-directional (M3 never
+        # imports config, so no cycle either way; this just keeps the module
+        # graph lazy).
+        from bep_reliability_engine.hydrographs import parse_member_header
+
+        for index, event_id in enumerate(value):
+            try:
+                parse_member_header(event_id)
+            except ValueError as exc:
+                raise ValueError(
+                    f"canonical_event_ids[{index}] = {event_id!r} is not a "
+                    f"d4PDF member header (ADR-0019 §1): {exc}"
+                ) from exc
+        return value
+
+
 class Config(_StrictModel):
     """Complete deterministic input set for one reproducible run (spec §1, M1).
 
@@ -520,6 +601,10 @@ class Config(_StrictModel):
         Integration/convergence policy and the aquifer-lag fields.
     output : OutputSettings
         Trajectory-storage and persistence settings.
+    hydrograph_source : HydrographSource or None
+        d4PDF data location, explicit river/KP, and the ordered canonical
+        shape events (ADR-0020). ``None`` (default) keeps pre-ADR-0020
+        configs valid; the real-hydrograph path requires the block.
     theta_repose_deg : float
         Bedding (repose) angle [degrees], ``0 < θ < 90`` (ADR-0015). Converted
         to radians at this boundary by :attr:`theta_repose_rad`. Default 37°.
@@ -572,6 +657,17 @@ class Config(_StrictModel):
     mc: MCSettings
     timestepper: TimestepperSettings
     output: OutputSettings
+
+    # d4PDF hydrograph source (ADR-0020). Optional: None keeps every
+    # pre-ADR-0020 config valid and restricts the run to the synthetic-stub
+    # path; the orchestrator refuses the real-hydrograph path without it.
+    hydrograph_source: HydrographSource | None = Field(
+        default=None,
+        description=(
+            "d4PDF data location, river/KP, and the ordered canonical shape "
+            "events (ADR-0020). None = synthetic-stub path only."
+        ),
+    )
 
     # Deterministic Sellmeijer/model inputs (ADR-0015). Defaults equal the
     # present M6 constants, so they are baseline-neutral until threaded.

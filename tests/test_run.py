@@ -35,8 +35,8 @@ from bep_reliability_engine import FragilityResult, run_fragility_analysis
 from bep_reliability_engine.config import Config
 from bep_reliability_engine.evaluator import evaluate_realization
 from bep_reliability_engine.run import (
-    _HYDROGRAPH_SOURCE,
     _L_INI_M,
+    _SOURCE_SYNTHETIC,
     _hydrograph_for_level,
     _resolve_output_path,
 )
@@ -199,7 +199,7 @@ def test_orchestration_matches_reference_loop() -> None:
     assert np.all(np.diff(result.P_f_trans_raw) >= 0.0)
 
     # Loud provenance: the run is a synthetic stub, marked as such.
-    assert result.metadata["hydrograph_source"] == _HYDROGRAPH_SOURCE
+    assert result.metadata["hydrograph_source"] == _SOURCE_SYNTHETIC
 
 
 # ---------------------------------------------------------------------------
@@ -273,7 +273,7 @@ def test_persistence_round_trip(tmp_path) -> None:
         loaded.failure_matrix_tran, result.failure_matrix_tran
     )
     np.testing.assert_array_equal(loaded.theta_matrix, result.theta_matrix)
-    assert loaded.metadata["hydrograph_source"] == _HYDROGRAPH_SOURCE
+    assert loaded.metadata["hydrograph_source"] == _SOURCE_SYNTHETIC
     # The deferred bootstrap settings are recorded in metadata (decision log).
     assert loaded.metadata["bootstrap"]["seed"] == config.mc.seed
     # The full metadata round-trips bit-for-bit (the M9 contract applied to a real
@@ -487,3 +487,258 @@ def test_dimensional_decomposition_run_wiring() -> None:
         decomp_res.failure_matrix_tran, base_res.failure_matrix_tran
     )
     assert decomp_res.failure_matrix_tran.sum() > base_res.failure_matrix_tran.sum()
+
+
+# ---------------------------------------------------------------------------
+# (8) Real-hydrograph path: canonical d4PDF shape (G1), determinism (G4),
+#     provenance metadata (G5), and the fail-fast MSL datum guard (G2)
+# ---------------------------------------------------------------------------
+# Hermetic: a fake ADR-0020 data drop (rating CSV + band workbook) is written
+# to tmp_path, so the real path runs end-to-end without the untracked d4PDF
+# files. Rating a=1, b=-30 => h = sqrt(Q) + 30 (exact stages); base flow Q=4
+# => h_base = 32.0 m "MSL". Values tuned so both branches are interior on the
+# grid (static ~0.02->1.0, transient ~0->0.98 across [33.5, 40.0]).
+
+_REAL_GRID = [33.5, 34.5, 35.5, 36.5, 37.5, 38.5, 40.0]
+_REAL_H_BASE = 32.0
+_REAL_Z_TOE = 33.0
+
+# Compound (two-peak) discharge for the production event; single-peak for the
+# recorded alternate. 48 hourly samples each.
+_Q_COMPOUND = np.concatenate(
+    [
+        np.full(4, 4.0),
+        np.linspace(4.0, 49.0, 6),
+        np.full(4, 49.0),
+        np.linspace(49.0, 9.0, 4),
+        np.full(4, 9.0),
+        np.linspace(9.0, 100.0, 6),
+        np.full(8, 100.0),
+        np.linspace(100.0, 4.0, 8),
+        np.full(4, 4.0),
+    ]
+)
+_Q_SINGLE = np.concatenate(
+    [
+        np.full(10, 4.0),
+        np.linspace(4.0, 100.0, 10),
+        np.full(8, 100.0),
+        np.linspace(100.0, 4.0, 12),
+        np.full(8, 4.0),
+    ]
+)
+
+
+@pytest.fixture()
+def real_data_root(tmp_path):
+    """Write the fake ADR-0020 drop and return its root."""
+    from openpyxl import Workbook
+
+    rating_dir = tmp_path / "rating_curves"
+    rating_dir.mkdir()
+    header = "River,KP,HQ_ａ,HQ_ｂ"  # full-width a/b (ADR-0019 S5)
+    (rating_dir / "HQrelation_TokachiRiv_2017.csv").write_bytes(
+        (header + "\r\nTokachi,57.4,1.0,-30.0\r\n").encode("shift_jis")
+    )
+
+    hydro_dir = tmp_path / "hydrographs"
+    hydro_dir.mkdir()
+    workbook = Workbook()
+    sheet = workbook.active
+    sheet.title = "QT"
+    sheet.append(["Time", "HPB_m064_1987", "HPB_m067_1978"])
+    for hour in range(_Q_COMPOUND.size):
+        sheet.append([hour + 1, float(_Q_COMPOUND[hour]), float(_Q_SINGLE[hour])])
+    workbook.save(hydro_dir / "Hydro Data, HPB, Tokachi Riv. KP056.20-KP061.80.xlsx")
+    return tmp_path
+
+
+def _make_real_config(data_root, **overrides) -> Config:
+    """A config on the real path: MSL-ish geometry/grid + hydrograph_source."""
+    geometry = overrides.pop(
+        "geometry",
+        {
+            "L": 10.0,
+            "z_toe": _REAL_Z_TOE,
+            "foreshore_width": 0.0,
+            "D_fore": 3.0,
+            "k_fore": 1.0e-6,
+            "HWL": 36.0,
+        },
+    )
+    return _make_config(
+        conditioning_grid=_REAL_GRID,
+        geometry=geometry,
+        # Native hourly resolution drives the timestep (ADR-0013/0019 S6).
+        timestepper={
+            "integration_scheme": "forward_euler",
+            "target_dt_seconds": None,
+            "convergence_test": False,
+            "convergence_threshold": 0.01,
+            "aquifer_lag_active": False,
+            "specific_storage_per_m": None,
+        },
+        hydrograph_source={
+            "data_root": str(data_root),
+            "river": "Tokachi",
+            "kp": 57.4,
+            "canonical_event_ids": ["HPB_m064_1987", "HPB_m067_1978"],
+        },
+        **overrides,
+    )
+
+
+def test_real_path_matches_reference_scalar_loop(real_data_root) -> None:
+    """The canonical-shape sweep reproduces an independent scalar reference.
+
+    The real-path twin of ``test_orchestration_matches_reference_loop``:
+    the reference rebuilds each level's record through the same
+    ``load_canonical_shape`` + ``conditioning_record_for_level`` seam and
+    loops the scalar ``evaluate_realization`` — locking the shared-sample
+    contract, ``peak == h_i`` verbatim, the h_base trough floor, and the
+    index-addressed aggregation, end to end on the real path.
+    """
+    from bep_reliability_engine.hydrographs import (
+        conditioning_record_for_level,
+        load_canonical_shape,
+    )
+
+    config = _make_real_config(real_data_root)
+    canonical = load_canonical_shape(
+        real_data_root, river="Tokachi", kp=57.4, event_id="HPB_m064_1987"
+    )
+    assert canonical.h_base_m == pytest.approx(_REAL_H_BASE)
+
+    theta = sample_theta(
+        config.priors.to_marginal_specs(),
+        seed=config.mc.seed,
+        rho_log_kaq_d70=config.correlation.rho_log_kaq_d70,
+        d70_interpretation=config.priors.d70_interpretation,
+        n_samples=config.mc.n_samples,
+        coupling=config.correlation.coupling,
+        bounds=config.priors.bounds,
+    ).theta_matrix
+
+    geometry = config.geometry.as_evaluator_dict()
+    grid = np.asarray(config.mc.conditioning_grid)
+    ref_stat = np.empty((theta.shape[0], grid.size), dtype=bool)
+    ref_tran = np.empty((theta.shape[0], grid.size), dtype=bool)
+    for i, level in enumerate(grid):
+        record = conditioning_record_for_level(
+            canonical, float(level), scenario=config.scenario
+        )
+        assert record.peak == float(level)  # verbatim conditioning anchor
+        assert float(record.h.min()) >= _REAL_H_BASE  # trough floor pinned
+        for j in range(theta.shape[0]):
+            r = evaluate_realization(
+                theta[j], record, geometry, l_ini=_L_INI_M, store_trajectory=False
+            )
+            ref_stat[j, i] = r.failure_static
+            ref_tran[j, i] = r.failure_trans
+
+    result = run_fragility_analysis(config, n_jobs=1, progress=False, persist=False)
+    np.testing.assert_array_equal(result.failure_matrix_stat, ref_stat)
+    np.testing.assert_array_equal(result.failure_matrix_tran, ref_tran)
+    # Non-degenerate: both branches genuinely transition across the grid.
+    assert 0.0 < result.failure_matrix_stat.mean() < 1.0
+    assert 0.0 < result.failure_matrix_tran.mean() < 1.0
+
+
+def test_real_path_njobs_invariance(real_data_root) -> None:
+    """Parallel == serial on the real path (gap G4 determinism test).
+
+    The canonical shape is loaded once in the main process and the per-level
+    scaling is pure, so ``n_jobs`` must not change a single bit: failure
+    matrices, raw and fitted curves, and bootstrap bands all match.
+    """
+    config = _make_real_config(real_data_root)
+    serial = run_fragility_analysis(config, n_jobs=1, progress=False, persist=False)
+    parallel = run_fragility_analysis(config, n_jobs=2, progress=False, persist=False)
+
+    np.testing.assert_array_equal(
+        serial.failure_matrix_stat, parallel.failure_matrix_stat
+    )
+    np.testing.assert_array_equal(
+        serial.failure_matrix_tran, parallel.failure_matrix_tran
+    )
+    np.testing.assert_array_equal(serial.theta_matrix, parallel.theta_matrix)
+    np.testing.assert_array_equal(serial.P_f_static_raw, parallel.P_f_static_raw)
+    np.testing.assert_array_equal(serial.P_f_trans_raw, parallel.P_f_trans_raw)
+    assert serial.P_f_static_fit == parallel.P_f_static_fit
+    assert serial.P_f_trans_fit == parallel.P_f_trans_fit
+    for curve in serial.bootstrap_bands:
+        np.testing.assert_array_equal(
+            serial.bootstrap_bands[curve][0], parallel.bootstrap_bands[curve][0]
+        )
+        np.testing.assert_array_equal(
+            serial.bootstrap_bands[curve][1], parallel.bootstrap_bands[curve][1]
+        )
+
+
+def test_real_path_metadata_provenance(real_data_root) -> None:
+    """Real-path metadata carries the loud marker + full shape provenance (G5).
+
+    ``hydrograph_source`` flips to ``'d4pdf_scaled_canonical'`` and the
+    ``hydrograph`` block records the shape event, the ordered canonical list,
+    h_base, and the ADR-0019 member provenance — while ``scenario`` stays the
+    RUN identity (the config's), with the shape source's own tags inside the
+    provenance block.
+    """
+    config = _make_real_config(real_data_root)
+    result = run_fragility_analysis(config, n_jobs=1, progress=False, persist=False)
+
+    assert result.metadata["hydrograph_source"] == "d4pdf_scaled_canonical"
+    assert result.metadata["scenario"] == "historical"  # run identity
+
+    block = result.metadata["hydrograph"]
+    assert block["shape_event_id"] == "HPB_m064_1987"
+    assert block["canonical_event_ids"] == ["HPB_m064_1987", "HPB_m067_1978"]
+    assert block["h_base_m_msl"] == pytest.approx(_REAL_H_BASE)
+    assert block["source_peak_stage_m_msl"] == pytest.approx(40.0)
+    assert block["native_dt_s"] == 3600.0
+    prov = block["provenance"]
+    assert prov["experiment"] == "HPB"
+    assert prov["member_id"] == "m064"
+    assert prov["year"] == 1987
+    assert prov["kp"] == pytest.approx(57.4)
+    assert prov["rating_csv"] == "HQrelation_TokachiRiv_2017.csv"
+    assert prov["band_workbook"].endswith(".xlsx")
+    assert "discharge_proxied_from" not in prov  # KP 57.4 has own coverage
+
+    # The stub marker and the real marker are mutually exclusive.
+    assert result.metadata["hydrograph_source"] != _SOURCE_SYNTHETIC
+
+
+def test_real_path_datum_guard_fails_fast(real_data_root) -> None:
+    """A provisional z_toe = 0.0 on the real path raises BEFORE the sweep (G2).
+
+    The run-level wiring of ``validate_datum_consistency``: MSL stages against
+    the retired placeholder must refuse loudly at load time, not produce ~35 m
+    heads for hours.
+    """
+    config = _make_real_config(
+        real_data_root,
+        geometry={
+            "L": 10.0,
+            "z_toe": 0.0,  # the retired provisional placeholder
+            "foreshore_width": 0.0,
+            "D_fore": 3.0,
+            "k_fore": 1.0e-6,
+            "HWL": 36.0,
+        },
+    )
+    with pytest.raises(ValueError, match="z_toe"):
+        run_fragility_analysis(config, n_jobs=1, progress=False, persist=False)
+
+
+def test_stub_path_still_available_without_source_block() -> None:
+    """A config without hydrograph_source keeps the marked stub path (ADR-0020).
+
+    The block is optional; its absence selects the synthetic stub and the
+    metadata stays loudly marked, with no hydrograph provenance block.
+    """
+    config = _make_config(n_samples=_TOY_N, conditioning_grid=_TOY_GRID)
+    assert config.hydrograph_source is None
+    result = run_fragility_analysis(config, n_jobs=1, progress=False, persist=False)
+    assert result.metadata["hydrograph_source"] == _SOURCE_SYNTHETIC
+    assert result.metadata["hydrograph"] is None

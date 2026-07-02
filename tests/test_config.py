@@ -381,3 +381,99 @@ def test_load_hwl_missing_or_non_numeric_hwl_is_rejected(tmp_path) -> None:
     )
     with pytest.raises(ValueError, match="HWL"):
         load_hwl("Satsunai", 2.8, data_dir=tmp_path)
+
+
+# ---------------------------------------------------------------------------
+# hydrograph_source block (ADR-0020)
+# ---------------------------------------------------------------------------
+
+
+def _valid_hydrograph_source() -> dict:
+    """A valid ADR-0020 hydrograph_source block (the approved G1 event pair)."""
+    return {
+        "data_root": "data/raw",
+        "river": "Tokachi",
+        "kp": 57.4,
+        "canonical_event_ids": ["HPB_m064_1987", "HPB_m067_1978"],
+    }
+
+
+def test_hydrograph_source_defaults_to_none() -> None:
+    """The block is optional (ADR-0020): a config without it stays valid.
+
+    Backwards compatibility for every pre-ADR-0020 config; the orchestrator
+    refuses the real-hydrograph path when the block is None, so omission is
+    safe, not silent.
+    """
+    config = Config.model_validate(_valid_config_dict())
+    assert config.hydrograph_source is None
+
+
+def test_hydrograph_source_loads_and_round_trips(tmp_path) -> None:
+    """A config with the block loads, exposes its fields, and round-trips.
+
+    The ordered-list semantics matter (ADR-0020: the FIRST entry is the shape
+    the run uses), so order must survive the YAML round trip.
+    """
+    data = _valid_config_dict()
+    data["hydrograph_source"] = _valid_hydrograph_source()
+    config = Config.model_validate(data)
+
+    src = config.hydrograph_source
+    assert src is not None
+    assert src.data_root == "data/raw"
+    assert src.river == "Tokachi"
+    assert src.kp == pytest.approx(57.4)
+    assert list(src.canonical_event_ids) == ["HPB_m064_1987", "HPB_m067_1978"]
+
+    path = tmp_path / "with_source.yaml"
+    config.to_yaml(path)
+    reloaded = Config.from_yaml(path)
+    assert reloaded.config_hash() == config.config_hash()
+    assert list(reloaded.hydrograph_source.canonical_event_ids) == list(
+        src.canonical_event_ids
+    )
+
+
+def test_hydrograph_source_rejects_unknown_river() -> None:
+    """river is a closed literal ('Tokachi' | 'Satsunai'); typos fail at load."""
+    data = _valid_config_dict()
+    data["hydrograph_source"] = {**_valid_hydrograph_source(), "river": "Tokachii"}
+    with pytest.raises(ValidationError):
+        Config.model_validate(data)
+
+
+def test_hydrograph_source_rejects_empty_event_list() -> None:
+    """canonical_event_ids must be non-empty (ADR-0020: it pins the G1 shape)."""
+    data = _valid_config_dict()
+    data["hydrograph_source"] = {
+        **_valid_hydrograph_source(),
+        "canonical_event_ids": [],
+    }
+    with pytest.raises(ValidationError):
+        Config.model_validate(data)
+
+
+def test_hydrograph_source_rejects_malformed_event_id() -> None:
+    """Each canonical event ID must parse as a d4PDF member header.
+
+    The load-time guard against a typo'd member ID failing deep inside a
+    multi-hour run: 'HXB_m001_1951' (unknown experiment) and a free-text
+    label are both rejected by the ADR-0019 header grammar.
+    """
+    for bad in ("HXB_m001_1951", "typhoon-2016"):
+        data = _valid_config_dict()
+        data["hydrograph_source"] = {
+            **_valid_hydrograph_source(),
+            "canonical_event_ids": ["HPB_m064_1987", bad],
+        }
+        with pytest.raises(ValidationError, match="canonical_event_ids"):
+            Config.model_validate(data)
+
+
+def test_hydrograph_source_rejects_non_positive_kp() -> None:
+    """kp must be strictly positive."""
+    data = _valid_config_dict()
+    data["hydrograph_source"] = {**_valid_hydrograph_source(), "kp": 0.0}
+    with pytest.raises(ValidationError):
+        Config.model_validate(data)

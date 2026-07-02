@@ -17,6 +17,16 @@ never regenerated after the CSV fix). It pins, for every file in ``configs/``:
 4. **geometry.HWL equals the official 2019 bank-height value** for the row's
    river/KP (ADR-0018), re-read here independently of ``bank_heights.load_hwl``
    so a drifted config, a drifted loader, or an edited bank-height CSV all fail.
+5. **geometry.z_toe equals the ADR-0021 landside-toe elevation** [m MSL] — the
+   value serving as BOTH the head-translation datum and the exit reference h_e
+   (ADR-0007 ``z_toe == h_e``) — and is physically consistent (below HWL, not
+   the retired PROVISIONAL 0.0).
+6. **mc.conditioning_grid is the approved per-section MSL grid** (2026-07-03,
+   audit gap G2): three sub-toe anchors from the base-flow stage region plus a
+   0.25 m sweep from just above the toe to HWL + 4 m, bracketing toe and HWL.
+7. **hydrograph_source is the ADR-0020 block** with the CSV row's river, the
+   section's KP, and the approved ordered canonical event pair (compound
+   production shape first, isolated sensitivity end-member second).
 
 It does not re-test the engine physics (other modules do that); it locks the
 *configuration layer* against the exact staleness this review found.
@@ -27,9 +37,14 @@ from __future__ import annotations
 import csv
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 from bep_reliability_engine.config import Config
+from bep_reliability_engine.hydrographs import (
+    build_hydrograph_record,
+    validate_datum_consistency,
+)
 
 _REPO_ROOT = Path(__file__).resolve().parents[1]
 _CSV_PATH = _REPO_ROOT / "data" / "processed" / "tokachi_bep_inputs.csv"
@@ -50,6 +65,35 @@ _EXPECTED_COVS = {
 }
 _GAMMA_BL_SUB_MEAN = 6.9
 _C_E_MEAN = 0.014
+
+# ADR-0021 landside-toe elevations [m MSL / T.P.] (OYO 1999 transverse sections,
+# +/-0.3 m). These serve as BOTH the head-translation datum z_toe and the exit
+# reference h_e (ADR-0007 z_toe == h_e); the PROVISIONAL 0.0 is retired.
+_Z_TOE_MSL = {
+    "57.4": 38.3,
+    "58.8": 38.5,
+    "60.0": 40.0,
+    "62.0": 44.9,
+}
+
+
+def _quarters(start_q: int, end_q: int) -> list[float]:
+    """Inclusive quarter-metre range: [start_q/4, ..., end_q/4] (exact floats)."""
+    return [q / 4.0 for q in range(start_q, end_q + 1)]
+
+
+# Approved per-section MSL conditioning grids (2026-07-03; audit gap G2):
+# three sub-toe anchors (base-flow stage region — zero-load floor of the
+# fragility curve) + a 0.25 m sweep from just above the ADR-0021 toe up to
+# HWL + 4 m (covering the extreme-HFB stage range so the fitted curve is not
+# extrapolated in the scenario analysis). Duplicated here from the generator
+# deliberately: this file is the drift guard, not a re-derivation.
+_EXPECTED_GRID_MSL = {
+    "57.4": [34.75, 36.50, 38.00, *_quarters(154, 173)],  # 38.50..43.25, N_h=23
+    "58.8": [36.50, 37.50, 38.25, *_quarters(155, 180)],  # 38.75..45.00, N_h=29
+    "60.0": [38.25, 39.25, 39.75, *_quarters(161, 187)],  # 40.25..46.75, N_h=30
+    "62.0": [41.75, 43.25, 44.50, *_quarters(180, 202)],  # 45.00..50.50, N_h=26
+}
 
 
 def _csv_rows_by_kp() -> dict[str, dict[str, str]]:
@@ -117,3 +161,60 @@ def test_config_matches_csv_and_thesis_priors(path: Path) -> None:
 
     # --- (4) HWL equals the official 2019 bank-height value (ADR-0018) --------
     assert cfg.geometry.HWL == pytest.approx(_hwl_2019(row["river"], float(kp)))
+
+    # --- (5) z_toe is the ADR-0021 landside-toe elevation [m MSL] -------------
+    # One value serves as both the head-translation datum and the exit
+    # reference h_e (ADR-0007 z_toe == h_e); the PROVISIONAL 0.0 is retired,
+    # and the toe must sit below the design HWL (ADR-0021 cross-check table).
+    assert cfg.geometry.z_toe == pytest.approx(_Z_TOE_MSL[kp])
+    assert cfg.geometry.z_toe != 0.0
+    assert cfg.geometry.z_toe < cfg.geometry.HWL
+
+    # --- (6) Conditioning grid is the approved per-section MSL grid (G2) ------
+    grid = list(cfg.mc.conditioning_grid)
+    expected_grid = _EXPECTED_GRID_MSL[kp]
+    assert grid == pytest.approx(expected_grid), (
+        f"{path.name}: conditioning_grid drifted from the approved MSL grid "
+        f"(got {len(grid)} levels, expected {len(expected_grid)})"
+    )
+    # Structural sanity independent of the exact values: strictly increasing,
+    # bracketing both the toe (zero-load floor below, loaded levels above) and
+    # the design HWL (upper tail covers extreme-HFB stages).
+    assert all(b > a for a, b in zip(grid, grid[1:]))
+    assert grid[0] < cfg.geometry.z_toe < grid[-1]
+    assert grid[-1] > cfg.geometry.HWL
+
+    # --- (7) hydrograph_source is the ADR-0020 block (gap G3) -----------------
+    # River/KP explicit (never parsed from cross_section_id); the canonical
+    # event list is the approved, ORDERED pair: compound production shape
+    # first (the one the run uses), isolated sensitivity end-member second.
+    src = cfg.hydrograph_source
+    assert src is not None, f"{path.name}: hydrograph_source block missing"
+    assert src.data_root == "data/raw"
+    assert src.river == row["river"]
+    assert src.kp == pytest.approx(float(kp))
+    assert list(src.canonical_event_ids) == ["HPB_m064_1987", "HPB_m067_1978"]
+
+
+@pytest.mark.parametrize("path", _CONFIG_PATHS, ids=lambda p: p.name)
+def test_datum_guard_passes_with_real_z_toe(path: Path) -> None:
+    """The MSL datum guard accepts every generated config's z_toe (gap G2).
+
+    The counterpart of ``test_datum_guard_refuses_provisional_z_toe``
+    (tests/test_hydrographs.py): with the ADR-0021 toe elevations in place,
+    an MSL-datum M3 record paired with a generated config's ``z_toe`` must
+    pass ``validate_datum_consistency`` silently — the real-hydrograph path
+    is no longer datum-blocked.
+    """
+    cfg = Config.from_yaml(path)
+    # A minimal MSL-stage record via the real construction path (Obihiro
+    # rating, ADR-0019 §4), peaking near the reach's HWL band.
+    record = build_hydrograph_record(
+        np.array([1.0, 2.0, 3.0]),
+        np.array([1000.0, 4180.0, 1000.0]),
+        a_kp=140.33,
+        b_kp=-32.49,
+        scenario=cfg.scenario,
+        event_id="datum_guard_pass_case",
+    )
+    assert validate_datum_consistency(record, cfg.geometry.z_toe) is None

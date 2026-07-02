@@ -7,9 +7,18 @@
 #   d_70(matrix), D_aq, D_bl, k_bl; remediation_state.
 # REAL (2019 bank-height CSV, data/raw/geometry): geometry.HWL
 #   [m MSL] per river/KP (ADR-0018); DesignBankHeight_* never read.
+# REAL (ADR-0021, OYO 1999 transverse sections, +/-0.3 m): geometry.z_toe
+#   [m MSL] = the landside-toe elevation, serving as BOTH the head-
+#   translation datum and the exit reference h_e (ADR-0007 z_toe == h_e).
+# DERIVED (ADR-0021 toe + 2019 HWL + rating h_base; approved 2026-07-03):
+#   mc.conditioning_grid = per-section MSL STAGE levels (sub-toe anchors
+#   + 0.25 m sweep to HWL + 4 m); same datum as the M3 hydrographs.
+# ADR-0020: hydrograph_source pins the d4PDF drop + the ORDERED canonical
+#   shape events (first = production compound HPB_m064_1987; second =
+#   isolated sensitivity end-member HPB_m067_1978).
 # FIXED (spec 7 / ADR-0016 / Pol 2024): all COVs; gamma_bl_sub
 #   (6.9, 0.056); C_e (0.014, 0.50); theta_repose_deg; D_r; alpha.
-# PROVISIONAL: z_toe, rho_log_kaq_d70, conditioning_grid, seed;
+# PROVISIONAL: rho_log_kaq_d70, seed;
 #   D_fore/k_fore = landside D_bl/k_bl proxy (ADR-0005).
 # gamma: CSV gamma_sub_kNm3 = 16.80 kN/m^3 is the per-section
 #   aquifer particle weight gamma'_p (Sellmeijer F_r). It is recorded here
@@ -28,7 +37,7 @@ scenario: +4K
 remediation_state: unreinforced
 geometry:
   L: 47.0
-  z_toe: 0.0
+  z_toe: 44.9
   foreshore_width: 44.0
   D_fore: 0.45
   k_fore: 3.0e-06
@@ -74,17 +83,32 @@ mc:
   n_samples: 100000
   seed: 20260626
   conditioning_grid:
-  - 4.0
-  - 4.5
-  - 5.0
-  - 5.5
-  - 6.0
-  - 6.5
-  - 7.0
-  - 7.5
-  - 8.0
-  - 8.5
-  - 9.0
+  - 41.75
+  - 43.25
+  - 44.5
+  - 45.0
+  - 45.25
+  - 45.5
+  - 45.75
+  - 46.0
+  - 46.25
+  - 46.5
+  - 46.75
+  - 47.0
+  - 47.25
+  - 47.5
+  - 47.75
+  - 48.0
+  - 48.25
+  - 48.5
+  - 48.75
+  - 49.0
+  - 49.25
+  - 49.5
+  - 49.75
+  - 50.0
+  - 50.25
+  - 50.5
   sampling_scheme: latin_hypercube
 timestepper:
   integration_scheme: forward_euler
@@ -97,6 +121,13 @@ output:
   store_trajectories: false
   persistence_format: hdf5
   results_dir: results
+hydrograph_source:
+  data_root: data/raw
+  river: Tokachi
+  kp: 62.0
+  canonical_event_ids:
+  - HPB_m064_1987
+  - HPB_m067_1978
 theta_repose_deg: 37.0
 relative_density_insitu: 0.725
 alpha_exponent: -0.3333333333333333

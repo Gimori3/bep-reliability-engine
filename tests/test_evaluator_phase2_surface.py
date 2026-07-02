@@ -30,13 +30,13 @@ sets, and importability in a bare interpreter.
 import subprocess
 import sys
 import textwrap
-from types import SimpleNamespace
 
 import numpy as np
 
 # The exact clean top-level import Phase 2 performs: the evaluator symbol comes
 # straight from its module, with no package-level orchestration pulled in.
 from bep_reliability_engine.evaluator import EvaluationResult, evaluate_realization
+from bep_reliability_engine.hydrographs import HydrographRecord
 
 # Small prior-style theta matrix in the canonical column order
 # ['k_aq', 'd_70', 'D_aq', 'D_bl', 'k_bl', 'gamma_bl_sub', 'C_e'] (spec §2).
@@ -62,14 +62,18 @@ GEOMETRY = {
 }
 
 
-def _synthetic_2016_hydrograph(dt_s: float = 600.0) -> SimpleNamespace:
+def _synthetic_2016_hydrograph(dt_s: float = 600.0) -> HydrographRecord:
     """A synthetic, multi-peak stand-in for the 2016 typhoon hydrograph.
 
     Compound (two-peak) shape only to mirror the real event's character; the
-    physics is irrelevant to this interface test. Carries the canonical
-    HydrographRecord fields (ADR-0010): ``h`` (SI stage series), ``peak``
-    (max instantaneous stage), ``native_dt`` (authoritative timestep), plus
-    the descriptive fields M8 ignores.
+    physics is irrelevant to this interface test. Now a concrete M3
+    :class:`HydrographRecord` (the ADR-0010 Consequences swap) with **empty
+    provenance** — exactly the interface the real 2016 observed hydrograph
+    uses when it enters Phase 2 (ADR-0019 Consequences: "the 2016 observed
+    hydrograph loads through the same HydrographRecord interface"). Carries
+    the canonical fields: ``h`` (SI stage series), ``peak`` (max instantaneous
+    stage), ``native_dt`` (authoritative timestep), plus the descriptive
+    fields M8 ignores.
     """
     h = np.concatenate(
         [
@@ -83,7 +87,7 @@ def _synthetic_2016_hydrograph(dt_s: float = 600.0) -> SimpleNamespace:
             np.linspace(15.0, 2.0, 15),
         ]
     )
-    return SimpleNamespace(
+    return HydrographRecord(
         t=np.arange(h.size, dtype=np.float64) * dt_s,
         h=h,
         peak=float(h.max()),
@@ -91,6 +95,7 @@ def _synthetic_2016_hydrograph(dt_s: float = 600.0) -> SimpleNamespace:
         scenario="historical",
         event_id="typhoon-2016-synthetic",
         native_dt=dt_s,
+        provenance={},  # the 2016-observed idiom: no ensemble provenance
     )
 
 
@@ -202,6 +207,10 @@ def test_import_surface_is_self_contained_in_a_bare_interpreter() -> None:
     numpy) and runs one call. If the evaluator module ever grew a heavy or
     notebook-bound import, this would fail in isolation even while the in-process
     tests pass.
+
+    The record here stays a ``SimpleNamespace`` **deliberately** (not a missed
+    ADR-0010 swap): M8 consumes the record by duck typing, and this test proves
+    the M8 surface works without importing ``hydrographs`` at all.
     """
     script = textwrap.dedent(
         """

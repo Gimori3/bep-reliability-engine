@@ -35,7 +35,6 @@ makes the shared-r_e arithmetic auditable.
 
 import inspect
 from dataclasses import fields, is_dataclass
-from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -50,6 +49,10 @@ from bep_reliability_engine.hydraulics import (
     leakage_length_in,
     leakage_length_out,
     response_factor,
+)
+from bep_reliability_engine.hydrographs import (
+    HydrographRecord,
+    build_hydrograph_record,
 )
 from bep_reliability_engine.progression import (
     CRACK_RESISTANCE_FACTOR,
@@ -84,18 +87,23 @@ def _make_hydrograph(
     h: list[float] | np.ndarray,
     dt_s: float = DT_S,
     peak: float | None = None,
-) -> SimpleNamespace:
-    """Structural stand-in for the not-yet-implemented M3 HydrographRecord.
+) -> HydrographRecord:
+    """Build a real M3 :class:`HydrographRecord` directly from a stage series.
 
-    M3 (``hydrographs.py``) is unimplemented, so ``HydrographRecord`` does not
-    exist yet; M8 consumes a record by duck typing (module docstring ambiguity
-    1). This builds the three fields evaluate_realization reads — ``h`` (river
-    stage), ``native_dt`` (timestep), ``peak`` (static comparator) — plus the
-    rest of the spec §2 record for completeness. ``peak`` defaults to max(h).
+    M3 (``hydrographs.py``) is implemented, so the former ``SimpleNamespace``
+    stand-in is replaced by the concrete frozen dataclass (the ADR-0010
+    Consequences swap). The record is constructed *directly* (not through
+    ``build_hydrograph_record``) so the deterministic single-sample (T = 1)
+    Euler-step cases stay expressible — the loader requires T >= 2 to derive
+    ``native_dt``, but the record type itself does not. The real construction
+    path (hours -> seconds, Eq. 4.19) is exercised separately by
+    ``test_real_m3_built_record_feeds_both_entry_points``. ``peak`` defaults
+    to max(h) (ADR-0010); the explicit override is retained for the
+    conditioning-level idiom where ``peak`` is authoritative (M8 ambiguity 3).
     """
     h_arr = np.asarray(h, dtype=np.float64)
     t = np.arange(h_arr.size, dtype=np.float64) * dt_s
-    return SimpleNamespace(
+    return HydrographRecord(
         t=t,
         h=h_arr,
         peak=float(np.max(h_arr)) if peak is None else float(peak),
@@ -754,3 +762,79 @@ def test_asymmetric_alpha_batch_matches_scalar_and_default_is_unchanged() -> Non
     np.testing.assert_array_equal(ft_none, ft_base)
     np.testing.assert_array_equal(fs_batch, fs_base)  # static unaffected
     assert not np.array_equal(ft_batch, ft_base)  # transient genuinely shifted
+
+
+# ---------------------------------------------------------------------------
+# (10) Real M3 construction path feeds M8 (ADR-0010 Consequences; ADR-0019)
+# ---------------------------------------------------------------------------
+
+
+def test_real_m3_built_record_feeds_both_entry_points() -> None:
+    """A record built via the real M3 loader path drives M8 unchanged.
+
+    Closes the ADR-0010 Consequences item ("when M3 lands ... the test stand-in
+    can be swapped for it") at the construction seam: the record here comes
+    through :func:`build_hydrograph_record` — the actual ADR-0019 unit boundary
+    (hourly time axis -> SI seconds, Eq. 4.19 discharge -> stage) — not direct
+    field construction. Verifies (a) the SI facts M8 assumes at its boundary
+    (module docstring ambiguities 2, 3, 7) hold on the *built* record:
+    ``native_dt`` in seconds (hourly source => 3600.0), ``t`` in seconds,
+    ``peak == max(h)``; and (b) both M8 entry points consume the concrete
+    frozen dataclass and return results bit-identical to the same stage series
+    delivered through a directly-constructed record — so real M3 output and
+    the test records exercise one and the same M8 path.
+    """
+    # Target stage series [m above datum]: multi-peak, 48 h at 1 h resolution
+    # (the d4PDF native resolution, ADR-0019 §6), mixing sub- and over-critical
+    # stages against GEOMETRY/THETA. Delivered as discharge under an invertible
+    # identity-like rating (a = 1, b = 0 => h = sqrt(Q), so Q = h^2).
+    h_target = np.concatenate(
+        [
+            np.linspace(2.0, 16.0, 8),
+            np.full(20, 16.0),
+            np.linspace(16.0, 3.0, 6),
+            np.linspace(3.0, 15.0, 6),
+            np.full(4, 15.0),
+            np.linspace(15.0, 2.0, 4),
+        ]
+    )
+    time_hours = np.arange(1.0, h_target.size + 1.0)  # d4PDF-style 1..T hours
+    record = build_hydrograph_record(
+        time_hours,
+        h_target**2,  # Q = a*(h + b)^2 with a = 1, b = 0
+        a_kp=1.0,
+        b_kp=0.0,
+        scenario="historical",
+        event_id="built-through-m3",
+    )
+
+    # (a) The M8 boundary facts hold on the built record.
+    assert isinstance(record, HydrographRecord)
+    assert record.native_dt == 3600.0  # hours -> SI seconds (ambiguity 2, 7)
+    np.testing.assert_array_equal(record.t, time_hours * 3600.0)
+    assert record.peak == float(np.max(record.h))  # ADR-0010 (ambiguity 3)
+    np.testing.assert_allclose(record.h, h_target, rtol=1e-12)
+
+    # (b) Bit-identical to the same stage series via direct construction.
+    # The direct twin reuses record.h (not h_target) so sqrt(h^2) float
+    # rounding cannot masquerade as an M8 difference.
+    direct = _make_hydrograph(record.h, dt_s=record.native_dt)
+
+    r_built = evaluate_realization(THETA, record, GEOMETRY)
+    r_direct = evaluate_realization(THETA, direct, GEOMETRY)
+    assert r_built.Z_static == r_direct.Z_static
+    assert r_built.Z_transient == r_direct.Z_transient
+    assert r_built.l_e_final == r_direct.l_e_final
+    assert r_built.r_e == r_direct.r_e
+    assert r_built.H_c == r_direct.H_c
+    assert r_built.failure_static == r_direct.failure_static
+    assert r_built.failure_trans == r_direct.failure_trans
+
+    rng = np.random.default_rng(20260702)
+    theta_matrix = _random_theta_matrix(rng, 100)
+    fs_built, ft_built = evaluate_batch(theta_matrix, record, GEOMETRY)
+    fs_direct, ft_direct = evaluate_batch(theta_matrix, direct, GEOMETRY)
+    np.testing.assert_array_equal(fs_built, fs_direct)
+    np.testing.assert_array_equal(ft_built, ft_direct)
+    # Non-degenerate: the built record genuinely mixes outcomes across the prior.
+    assert fs_built.any() and not fs_built.all()
