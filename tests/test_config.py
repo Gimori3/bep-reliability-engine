@@ -1,13 +1,16 @@
 """Tests for M1 config (``bep_reliability_engine.config``).
 
-Three things are locked here: (1) a complete, representative config loads and
+Four things are locked here: (1) a complete, representative config loads and
 round-trips through YAML without loss; (2) every validator the spec §1 requires
 rejects the corresponding bad input (the COV unit-error guard, positive seepage
 length, strictly ascending conditioning grid, correlation in the open interval,
 plus the lognormal-mean, canonical-family, unknown-key and lag-without-S_s
-guards); and (3) the handoff shapes match what the *built* modules consume — the
-flat M8 geometry dict (ADR-0010) and the seven ``MarginalSpec`` in canonical M2
-order.
+guards); (3) the handoff shapes match what the *built* modules consume — the
+flat M8 geometry dict (ADR-0010, which excludes HWL) and the seven
+``MarginalSpec`` in canonical M2 order; and (4) the per-KP HWL lookup from the
+official 2019 design bank-height data (``bank_heights.load_hwl``, ADR-0018):
+correct value for a known KP, correct river-file selection, strict rejection of
+off-grid KPs, and clear errors for missing or non-numeric HWL cells.
 
 Representative values are the Tokachi A_c/A_g stand-ins used across the suite
 (``tests/test_sampling.py``, ``tests/test_hydraulics.py``): k_aq ~ 2e-3 m/s,
@@ -21,6 +24,7 @@ import math
 import pytest
 from pydantic import ValidationError
 
+from bep_reliability_engine.bank_heights import load_hwl
 from bep_reliability_engine.config import MAX_COV, Config, Geometry
 from bep_reliability_engine.sampling import PARAM_NAMES, MarginalSpec
 
@@ -35,6 +39,7 @@ def _valid_config_dict() -> dict:
                 "foreshore_width": 325.0,
                 "D_fore": 2.0,
                 "k_fore": 2.0e-6,
+                "HWL": 40.0,
             },
             "priors": {
                 "k_aq": {"family": "lognormal", "mean": 2.0e-3, "cov": 0.50},
@@ -118,11 +123,16 @@ def test_from_yaml_rejects_non_mapping_document(tmp_path) -> None:
 
 
 def test_geometry_as_evaluator_dict_matches_m8_keys() -> None:
-    """Geometry emits exactly the flat dict M8 unpacks (ADR-0010)."""
+    """Geometry emits exactly the flat dict M8 unpacks (ADR-0010).
+
+    HWL is config-carried (spec §1) but is *not* part of the frozen five-key
+    M8 contract, so it must be excluded here (ADR-0018).
+    """
     cfg = Config.model_validate(_valid_config_dict())
     geom = cfg.geometry.as_evaluator_dict()
 
     assert set(geom) == {"L", "z_toe", "foreshore_width", "D_fore", "k_fore"}
+    assert "HWL" not in geom
     assert geom["L"] == 50.0
     assert geom["foreshore_width"] == 325.0
     assert geom["D_fore"] == 2.0
@@ -288,5 +298,86 @@ def test_frozen_config_is_immutable() -> None:
 
 def test_geometry_constructs_directly() -> None:
     """Geometry is usable standalone (e.g. for targeted unit tests)."""
-    geom = Geometry(L=30.0, z_toe=2.0, foreshore_width=0.0, D_fore=3.0, k_fore=1.0e-6)
+    geom = Geometry(
+        L=30.0, z_toe=2.0, foreshore_width=0.0, D_fore=3.0, k_fore=1.0e-6, HWL=38.14
+    )
+    assert geom.HWL == 38.14
     assert geom.as_evaluator_dict()["z_toe"] == 2.0
+
+
+# ===========================================================================
+# (4) HWL: required Geometry field + the 2019 bank-height loader (ADR-0018)
+# ===========================================================================
+
+
+def test_geometry_hwl_is_required_and_positive() -> None:
+    """HWL is a mandatory, strictly positive elevation [m MSL]."""
+    missing = _valid_config_dict()
+    del missing["geometry"]["HWL"]
+    with pytest.raises(ValidationError):
+        Config.model_validate(missing)
+
+    for bad_hwl in (0.0, -38.14):
+        bad = _valid_config_dict()
+        bad["geometry"]["HWL"] = bad_hwl
+        with pytest.raises(ValidationError):
+            Config.model_validate(bad)
+
+
+def test_load_hwl_reads_known_tokachi_values() -> None:
+    """The loader returns the official 2019 HWL for known grid KPs [m MSL].
+
+    KP 56.6 is the documented reference value; KP 57.4 is a study section;
+    KP 62.0 is stored as the integer string ``"62"`` in the CSV, locking the
+    float (not string) KP matching.
+    """
+    assert load_hwl("Tokachi", 56.6) == pytest.approx(38.14)
+    assert load_hwl("Tokachi", 57.4) == pytest.approx(39.21)
+    assert load_hwl("Tokachi", 62.0) == pytest.approx(46.39)
+
+
+def test_load_hwl_selects_the_correct_river_file() -> None:
+    """The same KP resolves against the requested river's file, not the other's."""
+    tokachi = load_hwl("Tokachi", 10.0)
+    satsunai = load_hwl("Satsunai", 10.0)
+    assert tokachi == pytest.approx(8.64)
+    assert satsunai == pytest.approx(59.08)
+    assert tokachi != satsunai
+
+
+def test_load_hwl_unknown_river_is_rejected() -> None:
+    """A river without a 2019 bank-height file is a clear error."""
+    with pytest.raises(ValueError, match="[Uu]nknown river"):
+        load_hwl("Chiyoda", 10.0)
+
+
+def test_load_hwl_off_grid_kp_is_a_strict_error() -> None:
+    """An off-grid KP is rejected (strict match, ADR-0018), naming neighbours."""
+    with pytest.raises(ValueError) as excinfo:
+        load_hwl("Tokachi", 56.7)
+    message = str(excinfo.value)
+    assert "56.6" in message
+    assert "56.8" in message
+
+
+def test_load_hwl_missing_or_non_numeric_hwl_is_rejected(tmp_path) -> None:
+    """Empty, non-numeric, or non-positive HWL cells raise clear errors."""
+    header = "River,KP,HWL,DesignBankHeight_L,DesignBankHeight_R\n"
+    (tmp_path / "BankHeight_TokachiRiv_2019.csv").write_text(
+        header
+        + "Tokachi,1.0,,3.0,3.0\n"
+        + "Tokachi,1.2,abc,3.0,3.0\n"
+        + "Tokachi,1.4,-5.0,3.0,3.0\n",
+        encoding="utf-8",
+    )
+    for bad_kp in (1.0, 1.2, 1.4):
+        with pytest.raises(ValueError, match="HWL"):
+            load_hwl("Tokachi", bad_kp, data_dir=tmp_path)
+
+    # A file missing the HWL column entirely is rejected up front.
+    (tmp_path / "BankHeight_SatsunaiRiv_2019.csv").write_text(
+        "River,KP,DesignBankHeight_L,DesignBankHeight_R\nSatsunai,2.8,34.93,34.93\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="HWL"):
+        load_hwl("Satsunai", 2.8, data_dir=tmp_path)

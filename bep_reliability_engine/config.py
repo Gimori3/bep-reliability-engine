@@ -22,6 +22,8 @@ Handoff shapes (verified against the built modules)
 * :meth:`Geometry.as_evaluator_dict` returns exactly the flat dict M8
   ``evaluate_realization`` unpacks — ``{L, z_toe, foreshore_width, D_fore,
   k_fore}`` (ADR-0010). M4 takes unpacked scalars; only M8 sees the dict.
+  ``Geometry.HWL`` (the 2019 design high-water level, ADR-0018) is
+  config-carried but deliberately excluded from that frozen contract.
 * :meth:`PriorSpecs.to_marginal_specs` returns the seven
   :class:`~bep_reliability_engine.sampling.MarginalSpec` in the canonical
   :data:`~bep_reliability_engine.sampling.PARAM_NAMES` order M2 requires;
@@ -134,12 +136,13 @@ class _StrictModel(BaseModel):
 
 
 class Geometry(_StrictModel):
-    """Cross-section geometry; the flat dict M8 unpacks (ADR-0010).
+    """Cross-section geometry; carries the flat dict M8 unpacks (ADR-0010).
 
     Field names are the exact, case-sensitive keys M8
-    ``evaluate_realization`` reads, so :meth:`as_evaluator_dict` is a direct
-    ``model_dump``. The built M4 kernels take unpacked scalars and never see
-    this dict; M6 reads only ``L``.
+    ``evaluate_realization`` reads, plus ``HWL`` which is config-carried only:
+    :meth:`as_evaluator_dict` emits the frozen five-key ADR-0010 dict and
+    excludes ``HWL`` (ADR-0018). The built M4 kernels take unpacked scalars
+    and never see this dict; M6 reads only ``L``.
 
     Attributes
     ----------
@@ -159,6 +162,14 @@ class Geometry(_StrictModel):
     k_fore : float
         Deterministic foreshore blanket vertical conductivity [m/s]
         (ADR-0005); ``> 0``.
+    HWL : float
+        Design high-water level [m MSL]; ``> 0``. Sourced from the official
+        2019 design bank-height data
+        (``data/raw/geometry/BankHeight_*Riv_2019.csv`` via
+        ``bank_heights.load_hwl``, ADR-0018), on the same MSL datum as the M3
+        stage hydrographs. Not directly comparable to ``z_toe`` until z_toe
+        carries its true MSL elevation (a PROVISIONAL 0.0 in generated
+        configs). Excluded from :meth:`as_evaluator_dict`.
     """
 
     L: float = Field(gt=0.0, description="Seepage length [m], > 0.")
@@ -166,6 +177,9 @@ class Geometry(_StrictModel):
     foreshore_width: float = Field(ge=0.0, description="Foreshore width B_f [m], >= 0.")
     D_fore: float = Field(gt=0.0, description="Foreshore blanket thickness [m], > 0.")
     k_fore: float = Field(gt=0.0, description="Foreshore blanket k [m/s], > 0.")
+    HWL: float = Field(
+        gt=0.0, description="Design high-water level [m MSL], > 0 (ADR-0018)."
+    )
 
     def as_evaluator_dict(self) -> dict[str, float]:
         """Return the flat geometry dict M8 ``evaluate_realization`` consumes.
@@ -175,8 +189,12 @@ class Geometry(_StrictModel):
         dict of str to float
             ``{'L', 'z_toe', 'foreshore_width', 'D_fore', 'k_fore'}`` in SI
             units — the exact keys the built evaluator unpacks (ADR-0010).
+            ``HWL`` is excluded: the M8 contract is frozen and the evaluator
+            has no HWL consumer (ADR-0018).
         """
-        return self.model_dump()
+        return self.model_dump(
+            include={"L", "z_toe", "foreshore_width", "D_fore", "k_fore"}
+        )
 
 
 class PriorSpec(_StrictModel):

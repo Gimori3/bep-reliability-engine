@@ -5,6 +5,8 @@
 #
 # REAL (CSV per section): L, foreshore_width; means of k_aq,
 #   d_70(matrix), D_aq, D_bl, k_bl; remediation_state.
+# REAL (2019 bank-height CSV, data/raw/geometry): geometry.HWL
+#   [m MSL] per river/KP (ADR-0018); DesignBankHeight_* never read.
 # FIXED (spec 7 / ADR-0016 / Pol 2024): all COVs; gamma_bl_sub
 #   (6.9, 0.056); C_e (0.014, 0.50); theta_repose_deg; D_r; alpha.
 # PROVISIONAL: z_toe, rho_log_kaq_d70, conditioning_grid, seed;
@@ -28,6 +30,7 @@ geometry:
   foreshore_width: 200.0
   D_fore: 0.8
   k_fore: 1.6e-06
+  HWL: 39.21
 priors:
   k_aq:
     family: lognormal

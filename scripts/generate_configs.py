@@ -44,6 +44,12 @@ Three non-obvious mappings, verified against the built modules
   foreshore blanket, ADR-0005) are per-section proxies copied from the landside
   blanket ``D_bl`` / ``k_bl``, so a single CSV ``D_bl_m`` edit (e.g. resolving
   the provenance 3.8 thickness conflict) moves both ``D_bl`` and ``D_fore``.
+* **HWL.** ``geometry.HWL`` is the official 2019 design high-water level
+  [m MSL], looked up per river/KP from
+  ``data/raw/geometry/BankHeight_*Riv_2019.csv`` via ``bank_heights.load_hwl``
+  (strict 0.2 km grid match, ADR-0018) — REAL, but from the bank-height CSVs,
+  not the geotech table. The ``DesignBankHeight_L/R`` crest columns are Phase 3
+  overflow inputs and never enter M1.
 
 COVs are FIXED constants (the CSV carries no COV columns); only the five geotech
 *means* come from the table per row.
@@ -58,6 +64,7 @@ from typing import Any
 
 import yaml
 
+from bep_reliability_engine.bank_heights import load_hwl
 from bep_reliability_engine.config import Config
 
 # --- Paths -------------------------------------------------------------------
@@ -267,6 +274,8 @@ def build_config_dict(
             "foreshore_width": _f(row["foreshore_width_m"]),
             "D_fore": d_bl,  # per-section proxy = landside D_bl (ADR-0005)
             "k_fore": k_bl,  # per-section proxy = landside k_bl (ADR-0005)
+            # Official 2019 design HWL [m MSL], strict per-KP lookup (ADR-0018)
+            "HWL": load_hwl(row["river"], float(kp)),
         },
         "priors": {
             "k_aq": _marginal(_f(row["k_aq_mps"]), FIXED_COVS["k_aq"]),
@@ -329,6 +338,8 @@ def header_comment(
         "#",
         "# REAL (CSV per section): L, foreshore_width; means of k_aq,",
         "#   d_70(matrix), D_aq, D_bl, k_bl; remediation_state.",
+        "# REAL (2019 bank-height CSV, data/raw/geometry): geometry.HWL",
+        "#   [m MSL] per river/KP (ADR-0018); DesignBankHeight_* never read.",
         "# FIXED (spec 7 / ADR-0016 / Pol 2024): all COVs; gamma_bl_sub",
         "#   (6.9, 0.056); C_e (0.014, 0.50); theta_repose_deg; D_r; alpha.",
         "# PROVISIONAL: z_toe, rho_log_kaq_d70, conditioning_grid, seed;",

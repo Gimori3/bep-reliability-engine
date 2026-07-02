@@ -71,6 +71,7 @@ def _make_config(
             "foreshore_width": 0.0,
             "D_fore": 3.0,
             "k_fore": 1.0e-6,
+            "HWL": 16.0,
         },
         "priors": {
             "k_aq": {"family": "lognormal", "mean": 1.0e-4, "cov": 0.50},

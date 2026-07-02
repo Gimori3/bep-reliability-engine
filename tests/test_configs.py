@@ -14,6 +14,9 @@ never regenerated after the CSV fix). It pins, for every file in ``configs/``:
 3. **gamma / C_e priors and the per-section seepage-length CoV** (review items
    #3, #10): gamma_bl_sub is the FIXED blanket weight (6.9, 0.056), C_e is FIXED
    (0.014, 0.50), and ``seepage_length_cov`` is 0.15 at KP 60.0 / 0.20 elsewhere.
+4. **geometry.HWL equals the official 2019 bank-height value** for the row's
+   river/KP (ADR-0018), re-read here independently of ``bank_heights.load_hwl``
+   so a drifted config, a drifted loader, or an edited bank-height CSV all fail.
 
 It does not re-test the engine physics (other modules do that); it locks the
 *configuration layer* against the exact staleness this review found.
@@ -31,6 +34,7 @@ from bep_reliability_engine.config import Config
 _REPO_ROOT = Path(__file__).resolve().parents[1]
 _CSV_PATH = _REPO_ROOT / "data" / "processed" / "tokachi_bep_inputs.csv"
 _CONFIG_DIR = _REPO_ROOT / "configs"
+_BANK_HEIGHT_DIR = _REPO_ROOT / "data" / "raw" / "geometry"
 
 # Thesis prior table `tab:priors_phase1` CoVs (review item #2). These are what
 # the configs must carry; the old architecture spec-section-7 values (d_70 0.10,
@@ -51,6 +55,16 @@ _C_E_MEAN = 0.014
 def _csv_rows_by_kp() -> dict[str, dict[str, str]]:
     with open(_CSV_PATH, newline="", encoding="utf-8") as handle:
         return {row["kp"]: row for row in csv.DictReader(handle)}
+
+
+def _hwl_2019(river: str, kp: float) -> float:
+    """Independently re-read the 2019 bank-height HWL (not via bank_heights)."""
+    path = _BANK_HEIGHT_DIR / f"BankHeight_{river}Riv_2019.csv"
+    with open(path, newline="", encoding="utf-8") as handle:
+        for row in csv.DictReader(handle):
+            if abs(float(row["KP"]) - kp) <= 1e-9:
+                return float(row["HWL"])
+    raise AssertionError(f"KP {kp} not found in {path.name}")
 
 
 _CSV_BY_KP = _csv_rows_by_kp()
@@ -100,3 +114,6 @@ def test_config_matches_csv_and_thesis_priors(path: Path) -> None:
     assert cfg.priors.C_e.mean == pytest.approx(_C_E_MEAN)
     expected_l_cov = 0.15 if kp == "60.0" else 0.20
     assert cfg.seepage_length_cov == pytest.approx(expected_l_cov)
+
+    # --- (4) HWL equals the official 2019 bank-height value (ADR-0018) --------
+    assert cfg.geometry.HWL == pytest.approx(_hwl_2019(row["river"], float(kp)))
