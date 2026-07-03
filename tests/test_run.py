@@ -395,11 +395,12 @@ def test_leakage_ratio_diagnostic_recorded_and_warns() -> None:
     # The toy prior sits at the validity boundary by construction.
     assert diagnostic["flagged_fraction"] > 0.9
 
-    # Finding-5 standing decision (2026-07-03): runs carry the provisional-rho
-    # marker until the empirical value from the OYO pairs lands (ADR-0012).
+    # ADR-0012 (accepted 2026-07-03): the empirical OYO analysis adopted the
+    # two-population decoupling, retiring the provisional rho = 0.6 and the
+    # provisional_pending marker with it. Runs now carry the empirical status.
     assert (
         result.metadata["correlation_rho_k_d70_status"]
-        == "provisional_pending_adr_0012"
+        == "empirical_two_population_adr_0012"
     )
 
 

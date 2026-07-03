@@ -76,22 +76,32 @@ multiplicative C_e * k_aq interaction (spec §7; §12 failure modes 5 and 7),
 so preserving its stratification preserves the LHS variance reduction exactly
 where it pays off, whereas d_70 (COV 0.10, tight) absorbs the perturbation at
 little cost. This asymmetry is the "perturbation that imposing correlation
-introduces" the stratification test must account for, and is a candidate for a
-dedicated ADR.
+introduces" the stratification test must account for. Under the production
+parameterization the question is moot: ADR-0012 adopted the two-population
+mode, in which no column is perturbed and every marginal keeps exact
+one-per-stratum coverage; the anchoring choice matters only if a correlated
+sensitivity run is configured.
 
-Two-population fallback (spec §7, §13)
---------------------------------------
-If the OYO 1999 paired records show the matrix grain size and the bulk
-conductivity to be statistically decoupled, the single correlated population
-is replaced by a two-population soil model (erodible sand matrix vs armouring
-gravel framework) in which k_aq and d_70 are sampled independently. Select it
-with ``coupling='two_population'``: step 3 is skipped, ``rho_log_kaq_d70`` is
-not imposed, and both k_aq and d_70 then retain perfect LHS stratification.
-Both the matrix and bulk d_70 interpretations are carried as primary runs, so
-``d70_interpretation`` ('matrix' | 'bulk') is recorded in the returned metadata
-for the §8 stratified decomposition; it labels which physical grain-size
-definition the supplied d_70 marginal represents and does not itself alter the
-sampling math.
+Two-population mode — the ADR-0012 production parameterization
+---------------------------------------------------------------
+The OYO 1999 paired records showed the matrix grain size and the bulk
+conductivity to be statistically decoupled (pooled r² below the
+pre-registered 0.3 threshold, with the single sand-matrix specimen inverting
+the grain-size–permeability relation), so **ADR-0012 (accepted 2026-07-03)
+adopted the spec §7/§13 two-population fallback as the production mode**: the
+erodible sand matrix (d_70, Sellmeijer resistance) and the armouring gravel
+framework (k_aq, seepage/progression) are distinct soils, sampled decoupled.
+Select it with ``coupling='two_population'``: step 3 is skipped,
+``rho_log_kaq_d70`` is recorded but not imposed (``rho_imposed: False``), and
+both k_aq and d_70 retain perfect LHS stratification. The generated configs
+carry ``rho_log_kaq_d70 = 0.0`` for schema/audit only; the mode is
+numerically identical (bit-identical theta at the same seed) to the
+``'correlated'`` path at ρ = 0. The ``'correlated'`` mode remains supported
+for sensitivity studies. Both the matrix and bulk d_70 interpretations are
+carried as primary runs, so ``d70_interpretation`` ('matrix' | 'bulk') is
+recorded in the returned metadata for the §8 stratified decomposition; it
+labels which physical grain-size definition the supplied d_70 marginal
+represents and does not itself alter the sampling math.
 
 Units and reproducibility
 -------------------------

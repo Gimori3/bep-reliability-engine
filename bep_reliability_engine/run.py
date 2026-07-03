@@ -595,13 +595,14 @@ def _build_metadata(
         "d70_interpretation": config.priors.d70_interpretation,
         "lhs_seed": int(config.mc.seed),
         "correlation_rho_k_d70": float(config.correlation.rho_log_kaq_d70),
-        # Standing decision (2026-07-03, health-assessment finding 5): the
-        # rho = 0.6 coupling is PROVISIONAL until the empirical value is
-        # derived from the OYO 1999 paired records (reserved ADR-0012). Every
-        # run persisted before then carries this marker so no provisional-rho
-        # result can silently feed Phase 2; update the marker when ADR-0012
-        # lands with the empirical rho.
-        "correlation_rho_k_d70_status": "provisional_pending_adr_0012",
+        # ADR-0012 (accepted 2026-07-03): the empirical OYO paired-record
+        # analysis adopted the two-population decoupling — matrix d_70 and
+        # framework k_aq sampled decoupled, rho recorded as 0.0 but never
+        # imposed (metadata['sampling']['rho_imposed'] is False). This status
+        # replaces the former provisional_pending_adr_0012 marker; runs
+        # persisted before ADR-0012 still carry that older marker and are not
+        # retroactively re-blessed.
+        "correlation_rho_k_d70_status": "empirical_two_population_adr_0012",
         # ADR-0006 validity monitoring for the simplified Mazure ratio: the
         # per-realization L/lambda_in picture behind r_e (fix 4).
         "leakage_ratio_diagnostic": dict(leakage_validity),

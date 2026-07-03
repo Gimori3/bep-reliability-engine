@@ -27,6 +27,9 @@ never regenerated after the CSV fix). It pins, for every file in ``configs/``:
 7. **hydrograph_source is the ADR-0020 block** with the CSV row's river, the
    section's KP, and the approved ordered canonical event pair (compound
    production shape first, isolated sensitivity end-member second).
+8. **The k_aq-d_70 coupling is the ADR-0012 two-population decoupling**
+   (``coupling: two_population``, ``rho_log_kaq_d70: 0.0`` recorded but never
+   imposed); a reappearing nonzero rho or 'correlated' mode is a regression.
 
 It does not re-test the engine physics (other modules do that); it locks the
 *configuration layer* against the exact staleness this review found.
@@ -208,6 +211,21 @@ def test_config_matches_csv_and_thesis_priors(path: Path) -> None:
     assert src.river == row["river"]
     assert src.kp == pytest.approx(float(kp))
     assert list(src.canonical_event_ids) == ["HPB_m064_1987", "HPB_m067_1978"]
+
+    # --- (8) k_aq-d_70 coupling is the ADR-0012 two-population decoupling -----
+    # The empirical OYO analysis retired the provisional rho = 0.6: matrix
+    # d_70 and framework k_aq are distinct soils, sampled decoupled. rho is
+    # carried as 0.0 for schema/audit only (recorded, never imposed;
+    # metadata['rho_imposed'] is False). A reappearing nonzero rho or a
+    # 'correlated' coupling is a regression against ADR-0012.
+    assert cfg.correlation.coupling == "two_population", (
+        f"{path.name}: coupling {cfg.correlation.coupling!r} != "
+        "'two_population' (ADR-0012)"
+    )
+    assert cfg.correlation.rho_log_kaq_d70 == 0.0, (
+        f"{path.name}: rho_log_kaq_d70 {cfg.correlation.rho_log_kaq_d70!r} "
+        "!= 0.0 (ADR-0012 retired the provisional 0.6)"
+    )
 
 
 @pytest.mark.parametrize("path", _CONFIG_PATHS, ids=lambda p: p.name)

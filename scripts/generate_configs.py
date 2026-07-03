@@ -220,8 +220,18 @@ CANONICAL_EVENT_IDS: list[str] = ["HPB_m064_1987", "HPB_m067_1978"]
 # Root of the raw data drop (ADR-0020): hydrographs/ + rating_curves/ beneath.
 HYDROGRAPH_DATA_ROOT: str = "data/raw"
 
+# --- k_aq-d_70 coupling (ADR-0012, accepted 2026-07-03) -----------------------
+# The empirical OYO paired-record analysis selected the spec section 7/13
+# two-population fallback: the matrix d_70 (Sellmeijer resistance) and the
+# framework k_aq (seepage/progression) are physically distinct soils and are
+# sampled decoupled. rho is carried as 0.0 for schema/audit only — required by
+# CorrelationSpecs, recorded by M2 with rho_imposed=False, never imposed. The
+# former PROVISIONAL_RHO_LOG = 0.6 is retired; see ADR-0012 and its companion
+# analysis note (docs/decisions/adr0012-kaq-d70-analysis.md).
+COUPLING_MODE: str = "two_population"
+RHO_LOG_KAQ_D70: float = 0.0
+
 # --- PROVISIONAL placeholders (flagged; await finalized schematization) ------
-PROVISIONAL_RHO_LOG: float = 0.6  # rho(ln k_aq, ln d_70); estimate from OYO pairs
 BASE_SEED: int = 20260626  # one shared seed -> common random numbers across the sweep
 
 # --- Deterministic Sellmeijer inputs (ADR-0015) ------------------------------
@@ -355,9 +365,10 @@ def build_config_dict(
             "bounds": {"d_70": list(D70_BOUNDS[interpretation])},
             "d70_interpretation": interpretation,
         },
+        # ADR-0012: two-population decoupling; rho recorded (0.0), never imposed.
         "correlation": {
-            "rho_log_kaq_d70": PROVISIONAL_RHO_LOG,
-            "coupling": "correlated",
+            "rho_log_kaq_d70": RHO_LOG_KAQ_D70,
+            "coupling": COUPLING_MODE,
         },
         "mc": {
             "n_samples": 100_000,
@@ -430,7 +441,11 @@ def header_comment(
         "#   isolated sensitivity end-member HPB_m067_1978).",
         "# FIXED (spec 7 / ADR-0016 / Pol 2024): all COVs; gamma_bl_sub",
         "#   (6.9, 0.056); C_e (0.014, 0.50); theta_repose_deg; D_r; alpha.",
-        "# PROVISIONAL: rho_log_kaq_d70, seed;",
+        "# ADR-0012: k_aq-d_70 coupling = two_population (empirical OYO result;",
+        "#   matrix d_70 and framework k_aq are distinct soils, sampled",
+        "#   decoupled). rho_log_kaq_d70 = 0.0 is schema/audit only, never",
+        "#   imposed; the former provisional 0.6 is retired.",
+        "# PROVISIONAL: seed;",
         "#   D_fore/k_fore = landside D_bl/k_bl proxy (ADR-0005).",
         f"# gamma: CSV gamma_sub_kNm3 = {gamma_p_csv} kN/m^3 is the per-section",
         "#   aquifer particle weight gamma'_p (Sellmeijer F_r). It is recorded here",
