@@ -109,6 +109,14 @@ sidecar via M9's :meth:`FragilityResult.save`, to ``output_path`` or, if omitted
 result file (or its sidecar) is **never silently overwritten** — it raises
 ``FileExistsError`` unless ``overwrite=True``.
 
+**Crash recovery (raw payload before fitting).** The sweep is the expensive
+part; the M9 fitting/bootstrap that follows can fail on a tail-dominated grid.
+A persisting run therefore writes the raw payload (theta matrix, grid, both
+failure matrices, metadata) to ``<output>.raw.h5`` + ``.raw.json`` *before*
+:func:`~bep_reliability_engine.fragility.assemble_fragility` is called, so an
+assembly failure can never destroy a completed sweep. On success the recovery
+pair is removed once the full result is saved.
+
 Deferred decisions recorded for the decision log
 -------------------------------------------------
 * **Bootstrap settings deferral (accepted).** ``n_bootstrap`` and ``confidence``
@@ -149,7 +157,16 @@ from tqdm import tqdm
 
 from bep_reliability_engine.config import Config
 from bep_reliability_engine.evaluator import evaluate_batch
-from bep_reliability_engine.fragility import FragilityResult, assemble_fragility
+from bep_reliability_engine.fragility import (
+    FragilityResult,
+    assemble_fragility,
+    save_raw_failure_payload,
+)
+from bep_reliability_engine.hydraulics import (
+    LEAKAGE_RATIO_THRESHOLD_DEFAULT,
+    leakage_length_in,
+    leakage_ratio_diagnostic,
+)
 from bep_reliability_engine.hydrographs import (
     CanonicalShape,
     HydrographRecord,
@@ -449,6 +466,59 @@ def _sample_seepage_length_or_none(config: Config) -> NDArray[np.float64] | None
     )
 
 
+def _leakage_validity_block(
+    theta_sample: ThetaSample,
+    seepage_length_samples: NDArray[np.float64] | None,
+    config: Config,
+) -> dict[str, float]:
+    """ADR-0006 monitoring: L/lambda_in over the sampled prior, logged + recorded.
+
+    ADR-0006 demoted the full hyperbolic Mazure form on the obligation to
+    "compute and log L/lambda_in per realization [and] warn if a material
+    fraction of realizations violates L << lambda_in". This is that monitor,
+    run once per fragility run in the main process, where the full prior
+    population is visible: lambda_in depends only on theta (not on the
+    conditioning level), so one pass covers the whole sweep. The per-population
+    warning itself is emitted by
+    :func:`~bep_reliability_engine.hydraulics.leakage_ratio_diagnostic`; the
+    returned block goes to ``metadata['leakage_ratio_diagnostic']`` so the
+    validity picture is persisted with the result, not only warned about.
+
+    When L is stochastic the per-realization L_j pairs with theta_j
+    row-for-row, exactly as in the evaluation itself.
+    """
+    lambda_in = leakage_length_in(
+        theta_sample.column("k_aq"),
+        theta_sample.column("D_aq"),
+        theta_sample.column("D_bl"),
+        theta_sample.column("k_bl"),
+    )
+    seepage: NDArray[np.float64] | float = (
+        seepage_length_samples
+        if seepage_length_samples is not None
+        else float(config.geometry.L)
+    )
+    flagged = leakage_ratio_diagnostic(seepage, lambda_in)
+    ratio = np.asarray(seepage, dtype=np.float64) / lambda_in
+    block = {
+        "ratio_threshold": float(LEAKAGE_RATIO_THRESHOLD_DEFAULT),
+        "flagged_fraction": float(np.mean(flagged)),
+        "median_ratio": float(np.median(ratio)),
+        "p95_ratio": float(np.percentile(ratio, 95.0)),
+        "max_ratio": float(np.max(ratio)),
+    }
+    logger.info(
+        "ADR-0006 L/lambda_in validity: %.1f%% of realizations above %.2g "
+        "(median %.3g, p95 %.3g, max %.3g).",
+        100.0 * block["flagged_fraction"],
+        block["ratio_threshold"],
+        block["median_ratio"],
+        block["p95_ratio"],
+        block["max_ratio"],
+    )
+    return block
+
+
 def _code_version() -> str:
     """Return the installed package version, or ``'unknown'`` if not installed."""
     try:
@@ -492,6 +562,7 @@ def _build_metadata(
     n_jobs: int,
     seepage_length_stochastic: bool,
     canonical: CanonicalShape | None,
+    leakage_validity: dict[str, float],
 ) -> dict[str, Any]:
     """Assemble the spec §8 provenance block for the FragilityResult sidecar.
 
@@ -524,6 +595,16 @@ def _build_metadata(
         "d70_interpretation": config.priors.d70_interpretation,
         "lhs_seed": int(config.mc.seed),
         "correlation_rho_k_d70": float(config.correlation.rho_log_kaq_d70),
+        # Standing decision (2026-07-03, health-assessment finding 5): the
+        # rho = 0.6 coupling is PROVISIONAL until the empirical value is
+        # derived from the OYO 1999 paired records (reserved ADR-0012). Every
+        # run persisted before then carries this marker so no provisional-rho
+        # result can silently feed Phase 2; update the marker when ADR-0012
+        # lands with the empirical rho.
+        "correlation_rho_k_d70_status": "provisional_pending_adr_0012",
+        # ADR-0006 validity monitoring for the simplified Mazure ratio: the
+        # per-realization L/lambda_in picture behind r_e (fix 4).
+        "leakage_ratio_diagnostic": dict(leakage_validity),
         "c_e_stochastic": True,
         "aquifer_lag_active": bool(config.timestepper.aquifer_lag_active),
         "tau_aq": None,  # lag inactive in Phase 1 (ADR-0014); from S_s when active.
@@ -676,6 +757,14 @@ def run_fragility_analysis(
     n_samples = theta_sample.n_samples
     seepage_length_samples = _sample_seepage_length_or_none(config)
 
+    # 2b. ADR-0006 validity monitoring: compute, log and (if material) warn on
+    #     the per-realization L/lambda_in ratio behind the simplified Mazure
+    #     r_e, once for the whole run (lambda_in is level-independent). The
+    #     block is recorded in metadata below.
+    leakage_validity = _leakage_validity_block(
+        theta_sample, seepage_length_samples, config
+    )
+
     # 3. Shared, read-only per-level inputs and the run-constant eval settings
     #    (l_ini, stochastic-L samples, threaded Sellmeijer inputs; review #3/#6).
     geometry = config.geometry.as_evaluator_dict()
@@ -732,8 +821,10 @@ def run_fragility_analysis(
         failure_matrix_stat[:, level_index] = col_static
         failure_matrix_tran[:, level_index] = col_trans
 
-    # 6. Assemble the FragilityResult (M9). Bootstrap runs serially here, seeded
-    #    from config.mc.seed, so it too is independent of n_jobs.
+    # 6. Persist the raw failure payload BEFORE any fitting (crash recovery):
+    #    the sweep is the expensive part, and an M9 fitting/bootstrap failure on
+    #    a tail-dominated grid must never destroy it. On success the recovery
+    #    pair is removed after the full result is saved (step 8).
     metadata = _build_metadata(
         config,
         theta_sample,
@@ -741,22 +832,58 @@ def run_fragility_analysis(
         n_jobs,
         seepage_length_stochastic=seepage_length_samples is not None,
         canonical=canonical,
+        leakage_validity=leakage_validity,
     )
-    result = assemble_fragility(
-        theta_matrix,
-        theta_sample.param_names,
-        grid,
-        failure_matrix_stat,
-        failure_matrix_tran,
-        metadata,
-        n_bootstrap=_BOOTSTRAP_N,
-        confidence=_BOOTSTRAP_CONFIDENCE,
-        seed=config.mc.seed,
-    )
+    raw_path: Path | None = None
+    if resolved_path is not None:
+        raw_path = resolved_path.with_suffix(".raw.h5")
+        save_raw_failure_payload(
+            raw_path,
+            theta_matrix=theta_matrix,
+            param_names=theta_sample.param_names,
+            conditioning_grid=grid,
+            failure_matrix_stat=failure_matrix_stat,
+            failure_matrix_tran=failure_matrix_tran,
+            metadata=metadata,
+        )
+        logger.info(
+            "Wrote raw failure payload to %s (crash recovery; removed on success).",
+            raw_path,
+        )
 
-    # 7. Persist (HDF5 + JSON sidecar) if requested.
+    # 7. Assemble the FragilityResult (M9). Bootstrap runs serially here, seeded
+    #    from config.mc.seed, so it too is independent of n_jobs.
+    try:
+        result = assemble_fragility(
+            theta_matrix,
+            theta_sample.param_names,
+            grid,
+            failure_matrix_stat,
+            failure_matrix_tran,
+            metadata,
+            n_bootstrap=_BOOTSTRAP_N,
+            confidence=_BOOTSTRAP_CONFIDENCE,
+            seed=config.mc.seed,
+            # Fits are anchored to the load excess above the exit point, so
+            # (mu, sigma) are datum-invariant (fix 5, 2026-07-03).
+            datum_m=float(config.geometry.z_toe),
+        )
+    except Exception:
+        if raw_path is not None:
+            logger.error(
+                "Fragility assembly failed after the sweep; the raw failure "
+                "payload survives at %s (+ JSON sidecar) for recovery.",
+                raw_path,
+            )
+        raise
+
+    # 8. Persist the full result (HDF5 + JSON sidecar) if requested; the raw
+    #    recovery pair is then superseded and removed.
     if resolved_path is not None:
         result.save(resolved_path)
+        if raw_path is not None:
+            raw_path.unlink(missing_ok=True)
+            raw_path.with_suffix(".json").unlink(missing_ok=True)
         logger.info(
             "Wrote fragility result to %s (+ JSON sidecar %s).",
             resolved_path,

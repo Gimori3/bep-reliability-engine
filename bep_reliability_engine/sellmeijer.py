@@ -48,7 +48,6 @@ __all__ = [
     "GAMMA_W",
     "ETA_WHITE",
     "THETA_REPOSE_DEFAULT",
-    "D_R_DEFAULT",
     "GAMMA_P_SUB_DEFAULT",
     "D_R_MEAN",
     "C_U_MEAN",
@@ -72,11 +71,6 @@ ETA_WHITE: float = 0.25
 # section 7. Stored in radians per docs/conventions.md section 2.
 THETA_REPOSE_DEFAULT: float = math.radians(37.0)
 
-# Default relative density D_r [-]: Pol et al. (2024) base case, equal to
-# the Sellmeijer experimental mean so the (D_r / D_r,m) ratio term is 1
-# (spec section 7: "C_u, KAS evaluated at experimental mean values").
-D_R_DEFAULT: float = 0.725
-
 # Submerged unit weight of the aquifer sand particles gamma'_p [kN/m^3],
 # deterministic (Tokachi basin-wide value from the A_g specific gravities;
 # thesis "Fixed Parameters"). Per ADR-0016 this particle weight is what enters
@@ -88,7 +82,12 @@ GAMMA_P_SUB_DEFAULT: float = 16.87
 # --- Sellmeijer (2011) experimental mean values -----------------------------
 # Means of the small-scale test programme used to normalize the regression
 # ratio terms in F_r and F_s (Sellmeijer 2011, Table 2; restated below
-# Eq. (12) of Pol et al. 2024 SIE).
+# Eq. (12) of Pol et al. 2024 SIE). D_R_MEAN doubles as the in-situ
+# relative-density *default* (the Pol base case sits at the experimental mean,
+# making the F_r ratio term exactly 1); the separate run-value duplicate
+# D_R_DEFAULT was retired per the ADR-0015 cleanup mandate once config's
+# ``relative_density_insitu`` threading landed — the run value is config-owned,
+# and this normalization mean is the sole 0.725 constant in M6.
 
 D_R_MEAN: float = 0.725  # mean relative density D_r,m [-]
 C_U_MEAN: float = 1.81  # mean uniformity coefficient C_u,m [-]
@@ -126,7 +125,7 @@ class SellmeijerResult(NamedTuple):
 def _factor_Fr(
     gamma_p_sub_kn_m3: float | npt.NDArray[np.float64] = GAMMA_P_SUB_DEFAULT,
     theta_repose_rad: float = THETA_REPOSE_DEFAULT,
-    relative_density: float = D_R_DEFAULT,
+    relative_density: float = D_R_MEAN,
     uniformity_cu: float = C_U_MEAN,
     angularity_kas: float = KAS_MEAN,
     eta: float = ETA_WHITE,
@@ -152,8 +151,10 @@ def _factor_Fr(
         Bedding (repose) angle of the sand [rad]. Deterministic, default
         37 degrees (spec section 7).
     relative_density : float, optional
-        Relative density D_r [-]. Default ``D_R_DEFAULT`` makes the
-        regression ratio term equal to 1.
+        In-situ relative density D_r [-], the F_r ratio numerator. Default
+        ``D_R_MEAN`` (the run value equals the experimental mean, the Pol
+        base case) makes the regression ratio term equal to 1; the run value
+        is config-owned (``relative_density_insitu``, ADR-0015).
     uniformity_cu : float, optional
         Uniformity coefficient C_u = d_60/d_10 [-]. Default ``C_U_MEAN``
         makes the regression ratio term equal to 1.
@@ -288,7 +289,7 @@ def compute_critical_head(
     alpha_exponent: float = -1.0 / 3.0,
     gamma_p_sub_kn_m3: float = GAMMA_P_SUB_DEFAULT,
     theta_repose_rad: float = THETA_REPOSE_DEFAULT,
-    relative_density: float = D_R_DEFAULT,
+    relative_density: float = D_R_MEAN,
 ) -> SellmeijerResult:
     """Critical head H_c and critical pipe length l_c, one realization.
 
@@ -330,9 +331,10 @@ def compute_critical_head(
         override it without editing the module constant.
     relative_density : float, optional
         In-situ relative density D_r [-], the numerator of the F_r ratio
-        ``(D_r / D_r,m)^0.35`` (ADR-0015). Default ``D_R_DEFAULT`` (= D_r,m, so
-        the ratio is 1). The regression-mean denominator ``D_r,m`` stays the
-        pinned module constant ``D_R_MEAN``.
+        ``(D_r / D_r,m)^0.35`` (ADR-0015). Defaults to ``D_R_MEAN`` (the run
+        value equals the regression-mean denominator D_r,m, so the ratio is
+        1 — the Pol base case); the run value is config-owned
+        (``relative_density_insitu``) and threaded here by M8.
 
     Returns
     -------
@@ -396,7 +398,7 @@ def compute_critical_head_vectorized(
     alpha_exponent: float = -1.0 / 3.0,
     gamma_p_sub_kn_m3: float = GAMMA_P_SUB_DEFAULT,
     theta_repose_rad: float = THETA_REPOSE_DEFAULT,
-    relative_density: float = D_R_DEFAULT,
+    relative_density: float = D_R_MEAN,
 ) -> SellmeijerResult:
     """Critical head H_c and critical pipe length l_c for all N
     realizations at once.
@@ -427,7 +429,7 @@ def compute_critical_head_vectorized(
         :func:`compute_critical_head`); default ``THETA_REPOSE_DEFAULT``.
     relative_density : float, optional
         In-situ relative density D_r [-] for F_r (see
-        :func:`compute_critical_head`); default ``D_R_DEFAULT``.
+        :func:`compute_critical_head`); default ``D_R_MEAN`` (ratio term 1).
 
     Returns
     -------

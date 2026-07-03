@@ -48,9 +48,11 @@ H_c (a *symmetric* knob: both branches shift together); the transient-only
 ``alpha_exponent_transient`` (ADR-0017) delivers the spec §12 fm4 dimensional-bias
 decomposition by recomputing a separate transient H_c (None by default ->
 single-source preserved). ``seepage_length_cov`` is consumed by ``run.py``
-(stochastic L draw). The conditioning grid and
-``target_dt_seconds`` still await the unbuilt M3 (ADR-0013); config is the
-single source, with no live consumer in the engine yet.
+(stochastic L draw), and the conditioning grid drives the ``run.py`` sweep.
+``target_dt_seconds`` is honored on the synthetic-stub path only: on the
+canonical d4PDF path records keep their native resolution, and the ADR-0013
+resample-at-record-construction hook remains a forward requirement (it is the
+mechanism for the ADR-0022 Phase 2 native/2 replay).
 
 Units and reproducibility (docs/conventions.md)
 -----------------------------------------------
@@ -168,9 +170,9 @@ class Geometry(_StrictModel):
         2019 design bank-height data
         (``data/raw/geometry/BankHeight_*Riv_2019.csv`` via
         ``bank_heights.load_hwl``, ADR-0018), on the same MSL datum as the M3
-        stage hydrographs. Not directly comparable to ``z_toe`` until z_toe
-        carries its true MSL elevation (a PROVISIONAL 0.0 in generated
-        configs). Excluded from :meth:`as_evaluator_dict`.
+        stage hydrographs and as ``z_toe`` (the generated configs carry the
+        ADR-0021 landside-toe elevations in m MSL, retiring the former
+        PROVISIONAL 0.0). Excluded from :meth:`as_evaluator_dict`.
     """
 
     L: float = Field(gt=0.0, description="Seepage length [m], > 0.")
@@ -379,8 +381,8 @@ class MCSettings(_StrictModel):
         RNG seed; ``>= 0``. Fully determines the sample matrix (spec §13).
     conditioning_grid : tuple of float
         The strictly ascending conditioning levels ``{h_1, ..., h_Nh}`` [m
-        above datum]; non-empty (spec §1, §13). Consumed by the unbuilt outer
-        loop; config is the single source.
+        above datum]; non-empty (spec §1, §13). Config is the single source;
+        ``run.py`` sweeps it as the outer (parallel) loop.
     sampling_scheme : {'latin_hypercube'}
         Fixed at Latin Hypercube (spec §13); recorded for provenance.
     """
@@ -417,10 +419,13 @@ class TimestepperSettings(_StrictModel):
     """Integration, convergence-policy and aquifer-lag settings.
 
     Per ADR-0013 the operative Δt is the hydrograph ``native_dt`` at the M8
-    boundary; config owns only the resolution/convergence *policy* and an
-    optional coarsening applied at M3 record construction (M3 unbuilt). Per
-    ADR-0014 the aquifer-lag fields are metadata-only with a deferred consumer
-    (the unbuilt §11 diagnostic); τ_aq is derived from S_s, never stored.
+    boundary; config owns only the resolution/convergence *policy*. The
+    ``target_dt_seconds`` coarsening is currently applied on the synthetic-stub
+    path only — the ADR-0013 resample hook at canonical (d4PDF) record
+    construction is a forward requirement, needed for the ADR-0022 Phase 2
+    native/2 replay. Per ADR-0014 the aquifer-lag fields are metadata-only with
+    a deferred consumer (the unbuilt §11 diagnostic); τ_aq is derived from S_s,
+    never stored.
 
     Attributes
     ----------

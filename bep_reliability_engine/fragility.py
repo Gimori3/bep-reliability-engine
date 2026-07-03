@@ -12,23 +12,32 @@ sidecar for the metadata block (spec §8 "Persistence format").
 Lognormal fragility model (spec §2)
 -----------------------------------
 A fragility curve gives the conditional failure probability as a function of the
-conditioning head ``h``::
+conditioning head ``h``, parameterized in the load excess above a datum::
 
-    P_f(h) = Phi((ln h - mu) / sigma)
+    P_f(h) = Phi((ln(h - datum_m) - mu) / sigma)
 
 with ``mu`` and ``sigma`` the location and scale of the lognormal "capacity"
-(the mean and standard deviation of ``ln`` capacity). This is the
-:class:`LognormFragility` curve. The fit consumes the *empirical point set*
-``(conditioning_grid, P_f_raw)`` — the Monte Carlo point estimates — rather than
-per-realization capacities, because a lognormal fragility is a straight line in
-probit space::
+excess (the mean and standard deviation of ``ln(capacity - datum_m)``). This is
+the :class:`LognormFragility` curve. The orchestrator passes ``datum_m =
+z_toe`` (the exit-point elevation), which makes the fitted parameters
+datum-invariant and physically anchored — the load variable is the stage
+excess the driving head ``r_e * (h - z_toe)`` is linear in — instead of the
+vertical-reference-dependent ``ln(absolute MSL stage)``; ``datum_m = 0``
+reproduces the original spec §2 ``ln h`` form. The fit consumes the *empirical
+point set* ``(conditioning_grid, P_f_raw)`` — the Monte Carlo point estimates —
+rather than per-realization capacities, because a lognormal fragility is a
+straight line in probit space::
 
-    Phi^-1(P_f) = (1/sigma) * ln h - mu/sigma
+    Phi^-1(P_f) = (1/sigma) * ln(h - datum_m) - mu/sigma
 
-so an ordinary least-squares line through ``(ln h_i, Phi^-1(P_f_i))`` recovers
+so a least-squares line through ``(ln(h_i - datum), Phi^-1(P_f_i))`` recovers
 ``sigma = 1/slope`` and ``mu = -intercept/slope`` exactly when the points lie on
-a true curve (:func:`fit_lognormal_fragility`). Degenerate points where
-``P_f`` is exactly 0 or 1 (probit ``= -+inf``) are masked before the fit.
+a true curve (:func:`fit_lognormal_fragility`). The line is fitted with
+inverse-variance probit weights (delta method: ``Var(Phi^-1(p_hat)) ~=
+p(1-p)/(N phi(z)^2)``), so noisy deep-tail levels — a P_f carried by one or two
+failing realizations — no longer weigh as much as well-resolved mid-curve
+levels. Degenerate points where ``P_f`` is exactly 0 or 1 (probit ``= -+inf``)
+are masked before the fit.
 
 Separate static and transient fits (spec §2, §4)
 ------------------------------------------------
@@ -48,6 +57,14 @@ conditioning level, is the ``(lo, hi)`` band. The RNG is seeded solely from
 ``seed`` (independent of ``confidence``), so two runs at the same ``seed`` and
 ``n_bootstrap`` share identical resamples and differ only in the percentile cut
 — a wider ``confidence`` is then a strictly wider band.
+
+Degenerate replicates (tail-dominated grids) are skipped, never fatal: a
+resample whose point set cannot be refit (fewer than two interior levels, or a
+non-increasing probit slope) contributes NaN to that curve only, the band is
+the ``nanpercentile`` over the surviving replicates, a ``UserWarning`` reports
+the skipped fraction, and the per-curve skip counts are recorded in
+``metadata['bootstrap_degenerate_replicates']``. This is the fix for the
+observed post-sweep crash on a deep-tail production grid (2026-07-03).
 
 Length-effect upscaling (thesis §"Length Effect Upscaling")
 -----------------------------------------------------------
@@ -80,6 +97,7 @@ ADR-0002 (shared realizations across both limit states).
 from __future__ import annotations
 
 import json
+import warnings
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -90,33 +108,87 @@ from numpy.typing import NDArray
 from scipy.stats import norm
 
 __all__ = [
+    "PF_COV_TARGET",
     "LognormFragility",
     "FragilityResult",
     "fit_lognormal_fragility",
     "assemble_fragility",
+    "mc_cov_of_pf",
+    "save_raw_failure_payload",
     "upscale_length_effect",
 ]
+
+# Spec §11 convergence target: CoV of the Monte Carlo P_f estimator across the
+# relevant failure range (Schweckendiek 2014 practice). Recorded next to the
+# computed per-level CoVs in metadata['mc_convergence'] so every run carries
+# its own §11 sufficiency verdict instead of assuming it.
+PF_COV_TARGET: float = 0.05
+
+
+def mc_cov_of_pf(p_f: NDArray[np.float64], n_realizations: int) -> list[float | None]:
+    """Coefficient of variation of the Monte Carlo P_f estimator, per level.
+
+    For the binomial point estimate ``p_hat = k / N`` the estimator CoV is::
+
+        CoV(p_hat) = sqrt((1 - p) / (N * p))
+
+    evaluated here at the observed ``p_hat`` per conditioning level (spec §11).
+    Levels with ``p`` exactly 0 or 1 carry no interior information (the CoV is
+    undefined at 0 and vacuous at 1) and map to ``None`` — deliberately not
+    NaN, so the list stays JSON-round-trip-exact in the metadata sidecar.
+
+    Parameters
+    ----------
+    p_f : numpy.ndarray, shape (N_h,)
+        Empirical failure probabilities (the Monte Carlo point estimates).
+    n_realizations : int
+        Number of realizations N behind each estimate.
+
+    Returns
+    -------
+    list of (float or None)
+        Estimator CoV per level; ``None`` where ``p_f`` is 0 or 1.
+    """
+    covs: list[float | None] = []
+    for p in np.asarray(p_f, dtype=np.float64):
+        if 0.0 < p < 1.0:
+            covs.append(float(np.sqrt((1.0 - p) / (n_realizations * p))))
+        else:
+            covs.append(None)
+    return covs
 
 
 @dataclass(frozen=True)
 class LognormFragility:
-    """A fitted lognormal fragility curve ``P_f(h) = Phi((ln h - mu)/sigma)``.
+    """A fitted lognormal fragility curve in the load excess ``h - datum_m``.
 
-    The two-parameter handoff curve of spec §2 (``P_f_static_fit`` /
-    ``P_f_trans_fit``). ``mu`` and ``sigma`` are the location and scale of the
-    lognormal capacity (mean and standard deviation of ``ln`` capacity), so the
-    median capacity is ``exp(mu)`` and ``P_f(exp(mu)) = 0.5``.
+    ``P_f(h) = Phi((ln(h - datum_m) - mu)/sigma)`` for ``h > datum_m`` and
+    exactly 0 at or below the datum. The two-parameter handoff curve of spec §2
+    (``P_f_static_fit`` / ``P_f_trans_fit``). ``mu`` and ``sigma`` are the
+    location and scale of the lognormal capacity *excess* (mean and standard
+    deviation of ``ln(capacity - datum_m)``), so the median capacity is
+    ``datum_m + exp(mu)`` and ``P_f(datum_m + exp(mu)) = 0.5``.
+
+    Anchoring the curve at the exit-point elevation ``z_toe`` makes the fitted
+    parameters datum-invariant and physically meaningful (the load variable is
+    the stage excess above the seepage exit, the quantity the driving head
+    ``r_e * (h - z_toe)`` is linear in); ``datum_m = 0`` reproduces the
+    original spec §2 ``ln(h)`` parametrization for backward compatibility.
 
     Attributes
     ----------
     mu : float
-        Location parameter (mean of ``ln`` capacity) [ln-m].
+        Location parameter (mean of ``ln`` capacity excess) [ln-m].
     sigma : float
-        Scale parameter (std of ``ln`` capacity) [-]; ``> 0``.
+        Scale parameter (std of ``ln`` capacity excess) [-]; ``> 0``.
+    datum_m : float
+        Load datum [m above the vertical reference]; the curve lives in
+        ``h - datum_m``. Default ``0.0`` (the original absolute-stage form).
     """
 
     mu: float
     sigma: float
+    datum_m: float = 0.0
 
     def probability_of_failure(
         self, conditioning_level: float | NDArray[np.float64]
@@ -126,63 +198,99 @@ class LognormFragility:
         Parameters
         ----------
         conditioning_level : float or numpy.ndarray
-            Conditioning head(s) h [m above datum], strictly positive.
+            Conditioning head(s) h [m above the vertical reference]. Levels at
+            or below ``datum_m`` return exactly 0 (no load excess above the
+            exit elevation).
 
         Returns
         -------
         float or numpy.ndarray
-            ``Phi((ln h - mu)/sigma)``: a Python float for scalar input, an
-            array of the same shape for array input.
+            ``Phi((ln(h - datum_m) - mu)/sigma)`` where ``h > datum_m``, else
+            0.0: a Python float for scalar input, an array of the same shape
+            for array input.
         """
         head = np.asarray(conditioning_level, dtype=np.float64)
-        probability = norm.cdf((np.log(head) - self.mu) / self.sigma)
+        excess = head - self.datum_m
+        positive = excess > 0.0
+        # Guard the log argument so sub-datum levels never produce NaN; the
+        # placeholder 1.0 is discarded by the final where().
+        safe_excess = np.where(positive, excess, 1.0)
+        probability = np.where(
+            positive,
+            norm.cdf((np.log(safe_excess) - self.mu) / self.sigma),
+            0.0,
+        )
         return float(probability) if probability.ndim == 0 else probability
 
 
 def fit_lognormal_fragility(
-    conditioning_grid: NDArray[np.float64], p_f: NDArray[np.float64]
+    conditioning_grid: NDArray[np.float64],
+    p_f: NDArray[np.float64],
+    datum_m: float = 0.0,
 ) -> LognormFragility:
     """Fit a lognormal fragility curve to an empirical ``(h, P_f)`` point set.
 
-    Fits ``P_f(h) = Phi((ln h - mu)/sigma)`` by ordinary least squares in probit
-    space: a lognormal fragility is the straight line
-    ``Phi^-1(P_f) = (1/sigma) ln h - mu/sigma``, so a degree-1 fit of
-    ``Phi^-1(P_f)`` against ``ln h`` gives ``sigma = 1/slope`` and
+    Fits ``P_f(h) = Phi((ln(h - datum_m) - mu)/sigma)`` by weighted least
+    squares in probit space: a lognormal fragility is the straight line
+    ``Phi^-1(P_f) = (1/sigma) ln(h - datum) - mu/sigma``, so a degree-1 fit of
+    ``Phi^-1(P_f)`` against ``ln(h - datum)`` gives ``sigma = 1/slope`` and
     ``mu = -intercept/slope``. Points with ``P_f`` exactly 0 or 1 (probit
-    ``-+inf``) carry no finite information and are dropped before the fit.
+    ``-+inf``), and any point at or below the datum, carry no finite
+    information and are dropped before the fit.
+
+    **Deep-tail weighting.** The probit-transformed Monte Carlo estimates are
+    strongly heteroscedastic: by the delta method
+    ``Var(Phi^-1(p_hat)) ~= p (1 - p) / (N * phi(z)^2)`` with ``z =
+    Phi^-1(p)``, so a P_f ~ 1e-4 level (one or two failing realizations)
+    carries orders of magnitude more probit noise than a mid-curve level. The
+    fit therefore uses inverse-standard-deviation weights ``w = phi(z) /
+    sqrt(p (1 - p))`` (the common factor ``sqrt(N)`` cancels), which is
+    standard probit-regression GLS weighting. Points lying exactly on a true
+    lognormal curve are still recovered exactly, weights or not.
 
     Parameters
     ----------
     conditioning_grid : numpy.ndarray, shape (N_h,)
-        Conditioning heads h [m above datum], strictly positive.
+        Conditioning heads h [m above the vertical reference].
     p_f : numpy.ndarray, shape (N_h,)
         Empirical failure probabilities at each conditioning level, in
         ``[0, 1]`` (the Monte Carlo point estimates).
+    datum_m : float, optional
+        Load datum [m]; the fit variable is the excess ``h - datum_m``.
+        Default ``0.0`` (the original absolute-stage ``ln h`` form). The
+        orchestrator passes the exit-point elevation ``z_toe`` so the fitted
+        parameters are datum-invariant and physically anchored.
 
     Returns
     -------
     LognormFragility
-        The fitted curve.
+        The fitted curve, carrying ``datum_m``.
 
     Raises
     ------
     ValueError
-        If fewer than two interior (``0 < P_f < 1``) points remain, or the
-        fitted slope is non-positive (not a monotone-increasing fragility).
+        If fewer than two interior (``0 < P_f < 1``, ``h > datum_m``) points
+        remain, or the fitted slope is non-positive (not a monotone-increasing
+        fragility).
     """
     grid = np.asarray(conditioning_grid, dtype=np.float64)
     probabilities = np.asarray(p_f, dtype=np.float64)
 
-    interior = (probabilities > 0.0) & (probabilities < 1.0)
+    excess = grid - datum_m
+    interior = (probabilities > 0.0) & (probabilities < 1.0) & (excess > 0.0)
     if int(np.count_nonzero(interior)) < 2:
         raise ValueError(
-            "fit_lognormal_fragility needs at least two interior (0 < P_f < 1) "
-            f"points; got {int(np.count_nonzero(interior))}."
+            "fit_lognormal_fragility needs at least two interior (0 < P_f < 1, "
+            f"h > datum) points; got {int(np.count_nonzero(interior))}."
         )
 
-    ln_head = np.log(grid[interior])
-    probit = norm.ppf(probabilities[interior])
-    slope, intercept = np.polyfit(ln_head, probit, 1)
+    ln_excess = np.log(excess[interior])
+    p_interior = probabilities[interior]
+    probit = norm.ppf(p_interior)
+    # Inverse-std weights from the delta method (see docstring); numpy.polyfit
+    # applies w to the unsquared residuals, i.e. minimizes sum (w * r)^2.
+    weights = norm.pdf(probit) / np.sqrt(p_interior * (1.0 - p_interior))
+    slope, intercept = np.polyfit(ln_excess, probit, 1, w=weights)
     if not slope > 0.0:
         raise ValueError(
             f"fitted probit slope {slope!r} is non-positive; the point set is "
@@ -191,7 +299,7 @@ def fit_lognormal_fragility(
 
     sigma = 1.0 / slope
     mu = -intercept / slope
-    return LognormFragility(mu=float(mu), sigma=float(sigma))
+    return LognormFragility(mu=float(mu), sigma=float(sigma), datum_m=float(datum_m))
 
 
 def upscale_length_effect(
@@ -259,7 +367,11 @@ def _bootstrap_bands(
     n_bootstrap: int,
     confidence: float,
     seed: int,
-) -> dict[str, tuple[NDArray[np.float64], NDArray[np.float64]]]:
+    datum_m: float = 0.0,
+) -> tuple[
+    dict[str, tuple[NDArray[np.float64], NDArray[np.float64]]],
+    dict[str, int],
+]:
     """Bootstrap ``(lo, hi)`` bands on the fitted curves (spec §11).
 
     Each replicate draws one row index set with replacement and applies it to
@@ -268,36 +380,72 @@ def _bootstrap_bands(
     per-level ``confidence`` percentile interval of those refit curves. The RNG
     depends only on ``seed`` (not ``confidence``), so the resamples are shared
     across confidence levels.
+
+    Degenerate replicates — resamples whose point set has fewer than two
+    interior levels or a non-increasing probit slope, which occurs on
+    tail-dominated grids where an interior level is carried by a handful of
+    rows — are **skipped, never fatal**: the replicate's row is left NaN for
+    that curve only (the shared row draw still feeds the other curve), the
+    band is taken over the surviving replicates via ``nanpercentile``, and a
+    :class:`UserWarning` reports the skipped fraction. If *every* replicate
+    degenerates for a curve, its band is all-NaN. The per-curve skip counts
+    are returned so :func:`assemble_fragility` can record them in metadata.
+
+    Returns
+    -------
+    tuple of (dict, dict)
+        ``(bands, degenerate)``: the ``{'static'|'transient': (lo, hi)}`` band
+        dict and the per-curve degenerate-replicate counts.
     """
     n_realizations = failure_matrix_stat.shape[0]
     n_levels = conditioning_grid.shape[0]
     rng = np.random.default_rng(seed)
 
-    boot_static = np.empty((n_bootstrap, n_levels), dtype=np.float64)
-    boot_trans = np.empty((n_bootstrap, n_levels), dtype=np.float64)
+    boot = {
+        "static": np.full((n_bootstrap, n_levels), np.nan),
+        "transient": np.full((n_bootstrap, n_levels), np.nan),
+    }
+    matrices = {"static": failure_matrix_stat, "transient": failure_matrix_tran}
+    degenerate = {"static": 0, "transient": 0}
     for b in range(n_bootstrap):
         rows = rng.integers(0, n_realizations, size=n_realizations)
-        p_f_static = failure_matrix_stat[rows].mean(axis=0)
-        p_f_trans = failure_matrix_tran[rows].mean(axis=0)
-        boot_static[b] = fit_lognormal_fragility(
-            conditioning_grid, p_f_static
-        ).probability_of_failure(conditioning_grid)
-        boot_trans[b] = fit_lognormal_fragility(
-            conditioning_grid, p_f_trans
-        ).probability_of_failure(conditioning_grid)
+        for key, matrix in matrices.items():
+            p_f = matrix[rows].mean(axis=0)
+            try:
+                fit = fit_lognormal_fragility(conditioning_grid, p_f, datum_m)
+            except ValueError:
+                degenerate[key] += 1
+                continue
+            boot[key][b] = fit.probability_of_failure(conditioning_grid)
 
     lower_pct = 100.0 * (1.0 - confidence) / 2.0
     upper_pct = 100.0 * (1.0 + confidence) / 2.0
-    return {
-        "static": (
-            np.percentile(boot_static, lower_pct, axis=0),
-            np.percentile(boot_static, upper_pct, axis=0),
-        ),
-        "transient": (
-            np.percentile(boot_trans, lower_pct, axis=0),
-            np.percentile(boot_trans, upper_pct, axis=0),
-        ),
-    }
+    bands: dict[str, tuple[NDArray[np.float64], NDArray[np.float64]]] = {}
+    for key in ("static", "transient"):
+        n_skipped = degenerate[key]
+        if n_skipped:
+            warnings.warn(
+                f"{n_skipped} of {n_bootstrap} bootstrap replicates were "
+                f"degenerate for the {key} fragility curve (fewer than two "
+                "interior points or non-increasing probit slope) and were "
+                "skipped; the band uses the remaining "
+                f"{n_bootstrap - n_skipped} replicates. A large skipped "
+                "fraction indicates a tail-dominated conditioning grid "
+                "(spec §11).",
+                UserWarning,
+                stacklevel=3,
+            )
+        if n_skipped == n_bootstrap:
+            bands[key] = (
+                np.full(n_levels, np.nan),
+                np.full(n_levels, np.nan),
+            )
+            continue
+        bands[key] = (
+            np.nanpercentile(boot[key], lower_pct, axis=0),
+            np.nanpercentile(boot[key], upper_pct, axis=0),
+        )
+    return bands, degenerate
 
 
 def assemble_fragility(
@@ -311,6 +459,7 @@ def assemble_fragility(
     n_bootstrap: int = 1000,
     confidence: float = 0.95,
     seed: int = 0,
+    datum_m: float = 0.0,
 ) -> FragilityResult:
     """Assemble the Phase 2 :class:`FragilityResult` from the raw matrices (M9).
 
@@ -342,6 +491,12 @@ def assemble_fragility(
     seed : int, optional
         RNG seed for the bootstrap resampling; fully determines the bands.
         Default 0.
+    datum_m : float, optional
+        Load datum [m] for the fits (see :func:`fit_lognormal_fragility`):
+        the curves are lognormal in the excess ``h - datum_m``. Default
+        ``0.0`` (the original absolute-stage form); the orchestrator passes
+        the exit-point elevation ``z_toe``. Recorded, with the weighting
+        scheme, under ``metadata['fragility_fit']``.
 
     Returns
     -------
@@ -355,10 +510,59 @@ def assemble_fragility(
     p_f_static_raw = fm_stat.mean(axis=0)
     p_f_trans_raw = fm_tran.mean(axis=0)
 
-    p_f_static_fit = fit_lognormal_fragility(grid, p_f_static_raw)
-    p_f_trans_fit = fit_lognormal_fragility(grid, p_f_trans_raw)
+    p_f_static_fit = fit_lognormal_fragility(grid, p_f_static_raw, datum_m)
+    p_f_trans_fit = fit_lognormal_fragility(grid, p_f_trans_raw, datum_m)
 
-    bands = _bootstrap_bands(fm_stat, fm_tran, grid, n_bootstrap, confidence, seed)
+    bands, degenerate = _bootstrap_bands(
+        fm_stat, fm_tran, grid, n_bootstrap, confidence, seed, datum_m
+    )
+
+    # Annotate a shallow copy of the metadata (never mutate the caller's dict)
+    # with the degenerate-replicate counts, so a tail-dominated grid is visible
+    # in the persisted provenance and not only in a transient warning.
+    metadata = dict(metadata)
+    metadata["bootstrap_degenerate_replicates"] = {
+        "static": int(degenerate["static"]),
+        "transient": int(degenerate["transient"]),
+        "n_bootstrap": int(n_bootstrap),
+    }
+
+    # Spec §11 convergence monitoring: compute (not assume) the CoV of the
+    # Monte Carlo P_f estimator per level and per branch, with the worst
+    # interior CoV and the target verdict recorded for the run's provenance.
+    n_realizations = int(fm_stat.shape[0])
+    cov_static = mc_cov_of_pf(p_f_static_raw, n_realizations)
+    cov_trans = mc_cov_of_pf(p_f_trans_raw, n_realizations)
+
+    def _worst_and_verdict(
+        covs: list[float | None],
+    ) -> tuple[float | None, bool | None]:
+        interior = [c for c in covs if c is not None]
+        if not interior:
+            return None, None
+        worst = max(interior)
+        return worst, bool(worst <= PF_COV_TARGET)
+
+    # Fit provenance: which load variable and weighting produced (mu, sigma),
+    # so the parameters are interpretable without reading the code version.
+    metadata["fragility_fit"] = {
+        "load_variable": "conditioning_level_minus_datum",
+        "datum_m": float(datum_m),
+        "weighting": "inverse_variance_probit",
+    }
+
+    max_cov_static, meets_static = _worst_and_verdict(cov_static)
+    max_cov_trans, meets_trans = _worst_and_verdict(cov_trans)
+    metadata["mc_convergence"] = {
+        "n_realizations": n_realizations,
+        "cov_target": float(PF_COV_TARGET),
+        "cov_pf_static": cov_static,
+        "cov_pf_trans": cov_trans,
+        "max_cov_static": max_cov_static,
+        "max_cov_trans": max_cov_trans,
+        "meets_cov_target_static": meets_static,
+        "meets_cov_target_trans": meets_trans,
+    }
 
     return FragilityResult(
         conditioning_grid=grid,
@@ -483,8 +687,10 @@ class FragilityResult:
 
             handle.attrs["fit_static_mu"] = float(self.P_f_static_fit.mu)
             handle.attrs["fit_static_sigma"] = float(self.P_f_static_fit.sigma)
+            handle.attrs["fit_static_datum_m"] = float(self.P_f_static_fit.datum_m)
             handle.attrs["fit_trans_mu"] = float(self.P_f_trans_fit.mu)
             handle.attrs["fit_trans_sigma"] = float(self.P_f_trans_fit.sigma)
+            handle.attrs["fit_trans_datum_m"] = float(self.P_f_trans_fit.datum_m)
 
         sidecar = self._sidecar_path(path)
         with open(sidecar, "w", encoding="utf-8") as handle:
@@ -532,13 +738,18 @@ class FragilityResult:
                 ),
             }
 
+            # Files written before the datum-anchored fit carry no datum
+            # attrs; they load with the backward-compatible 0.0 (the original
+            # absolute-stage ln(h) parametrization).
             p_f_static_fit = LognormFragility(
                 mu=float(handle.attrs["fit_static_mu"]),
                 sigma=float(handle.attrs["fit_static_sigma"]),
+                datum_m=float(handle.attrs.get("fit_static_datum_m", 0.0)),
             )
             p_f_trans_fit = LognormFragility(
                 mu=float(handle.attrs["fit_trans_mu"]),
                 sigma=float(handle.attrs["fit_trans_sigma"]),
+                datum_m=float(handle.attrs.get("fit_trans_datum_m", 0.0)),
             )
 
         with open(cls._sidecar_path(path), encoding="utf-8") as handle:
@@ -557,3 +768,77 @@ class FragilityResult:
             failure_matrix_tran=failure_matrix_tran,
             metadata=metadata,
         )
+
+
+def save_raw_failure_payload(
+    path: str | Path,
+    *,
+    theta_matrix: NDArray[np.float64],
+    param_names: list[str],
+    conditioning_grid: NDArray[np.float64],
+    failure_matrix_stat: NDArray[np.bool_],
+    failure_matrix_tran: NDArray[np.bool_],
+    metadata: dict[str, Any],
+) -> None:
+    """Persist the raw sweep payload (no fits) as a crash-recovery file.
+
+    The sweep is the expensive part of a fragility run; the M9 fitting and
+    bootstrap that follow can fail on a tail-dominated grid (degenerate probit
+    point sets). The orchestrator therefore writes this payload *before* any
+    fitting, so an assembly failure can never destroy a completed sweep: the
+    raw arrays — everything Phase 2 filtering actually needs (spec §8) — stay
+    recoverable on disk. On a successful run the orchestrator removes the
+    recovery pair after the full :class:`FragilityResult` is saved.
+
+    Dataset names follow the spec §8 HDF5 schema, identical to
+    :meth:`FragilityResult.save` (``failure_matrix_static`` /
+    ``failure_matrix_trans``), so recovery tooling reads one layout. The
+    metadata block goes to a JSON sidecar at ``path`` with a ``.json`` suffix,
+    exactly as for the full result.
+
+    Parameters
+    ----------
+    path : str or pathlib.Path
+        Destination HDF5 path; by convention the orchestrator uses the final
+        result path with a ``.raw.h5`` suffix so a leftover recovery file is
+        self-identifying.
+    theta_matrix : numpy.ndarray, shape (N, 7)
+        The prior sample matrix (spec §2, §8).
+    param_names : list of str
+        Canonical column names of ``theta_matrix``.
+    conditioning_grid : numpy.ndarray, shape (N_h,)
+        Conditioning heads.
+    failure_matrix_stat, failure_matrix_tran : numpy.ndarray, shape (N, N_h)
+        Boolean static / transient failure indicators from the sweep.
+    metadata : dict
+        The provenance block (JSON-serializable), written to the sidecar.
+    """
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    string_dtype = h5py.string_dtype(encoding="utf-8")
+    with h5py.File(path, "w") as handle:
+        handle.create_dataset(
+            "theta_matrix", data=np.asarray(theta_matrix, dtype=np.float64)
+        )
+        handle.create_dataset(
+            "conditioning_grid",
+            data=np.asarray(conditioning_grid, dtype=np.float64),
+        )
+        handle.create_dataset(
+            "failure_matrix_static",
+            data=np.asarray(failure_matrix_stat, dtype=bool),
+        )
+        handle.create_dataset(
+            "failure_matrix_trans",
+            data=np.asarray(failure_matrix_tran, dtype=bool),
+        )
+        handle.create_dataset(
+            "param_names",
+            data=np.array(list(param_names), dtype=object),
+            dtype=string_dtype,
+        )
+
+    sidecar = path.with_suffix(".json")
+    with open(sidecar, "w", encoding="utf-8") as handle:
+        json.dump(metadata, handle, indent=2, sort_keys=False)

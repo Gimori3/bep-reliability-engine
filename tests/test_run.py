@@ -28,6 +28,9 @@ test — is what is under test here.
 
 from __future__ import annotations
 
+import json
+
+import h5py
 import numpy as np
 import pytest
 
@@ -338,6 +341,176 @@ def test_refuses_to_overwrite_existing_result(tmp_path) -> None:
     )
     assert isinstance(result, FragilityResult)
     assert out.exists()
+
+
+# ---------------------------------------------------------------------------
+# (4a) ADR-0006 L/lambda_in validity monitoring (health-assessment fix 4)
+# ---------------------------------------------------------------------------
+
+
+def test_leakage_ratio_diagnostic_recorded_and_warns() -> None:
+    """The ADR-0006 monitoring obligation is wired and recorded per run.
+
+    ADR-0006 demoted the full hyperbolic Mazure form on condition that
+    L/lambda_in is computed per realization, logged, and warned about when a
+    material fraction violates L << lambda_in. The toy prior violates it by
+    construction (median lambda_in ~ 30 m against L = 30 m), so the run must
+    emit the ADR-0006 ``UserWarning`` and record the flagged fraction and
+    ratio statistics in ``metadata['leakage_ratio_diagnostic']`` — matching an
+    independent recomputation from the same config-determined sample.
+    """
+    from bep_reliability_engine.hydraulics import leakage_length_in
+
+    config = _make_config(n_samples=_TOY_N, conditioning_grid=_TOY_GRID)
+    with pytest.warns(UserWarning, match="Mazure"):
+        result = run_fragility_analysis(config, n_jobs=1, progress=False, persist=False)
+
+    diagnostic = result.metadata["leakage_ratio_diagnostic"]
+    assert diagnostic["ratio_threshold"] == pytest.approx(0.2)
+
+    # Independent reference from the same config-determined prior draw.
+    sample = sample_theta(
+        config.priors.to_marginal_specs(),
+        seed=config.mc.seed,
+        rho_log_kaq_d70=config.correlation.rho_log_kaq_d70,
+        d70_interpretation=config.priors.d70_interpretation,
+        n_samples=config.mc.n_samples,
+        coupling=config.correlation.coupling,
+        bounds=config.priors.bounds,
+    )
+    lambda_in = leakage_length_in(
+        sample.column("k_aq"),
+        sample.column("D_aq"),
+        sample.column("D_bl"),
+        sample.column("k_bl"),
+    )
+    ratio = config.geometry.L / lambda_in
+    assert diagnostic["flagged_fraction"] == pytest.approx(float(np.mean(ratio > 0.2)))
+    assert diagnostic["median_ratio"] == pytest.approx(float(np.median(ratio)))
+    assert diagnostic["p95_ratio"] == pytest.approx(float(np.percentile(ratio, 95.0)))
+    assert diagnostic["max_ratio"] == pytest.approx(float(np.max(ratio)))
+    assert (
+        diagnostic["median_ratio"] <= diagnostic["p95_ratio"] <= diagnostic["max_ratio"]
+    )
+    # The toy prior sits at the validity boundary by construction.
+    assert diagnostic["flagged_fraction"] > 0.9
+
+    # Finding-5 standing decision (2026-07-03): runs carry the provisional-rho
+    # marker until the empirical value from the OYO pairs lands (ADR-0012).
+    assert (
+        result.metadata["correlation_rho_k_d70_status"]
+        == "provisional_pending_adr_0012"
+    )
+
+
+def test_leakage_ratio_uses_stochastic_L_when_sampled() -> None:
+    """With stochastic L the diagnostic pairs L_j with theta_j row-for-row."""
+    from bep_reliability_engine.hydraulics import leakage_length_in
+    from bep_reliability_engine.run import _sample_seepage_length_or_none
+
+    config = _make_config(
+        n_samples=_TOY_N, conditioning_grid=_TOY_GRID, seepage_length_cov=0.2
+    )
+    with pytest.warns(UserWarning, match="Mazure"):
+        result = run_fragility_analysis(config, n_jobs=1, progress=False, persist=False)
+
+    sample = sample_theta(
+        config.priors.to_marginal_specs(),
+        seed=config.mc.seed,
+        rho_log_kaq_d70=config.correlation.rho_log_kaq_d70,
+        d70_interpretation=config.priors.d70_interpretation,
+        n_samples=config.mc.n_samples,
+        coupling=config.correlation.coupling,
+        bounds=config.priors.bounds,
+    )
+    lambda_in = leakage_length_in(
+        sample.column("k_aq"),
+        sample.column("D_aq"),
+        sample.column("D_bl"),
+        sample.column("k_bl"),
+    )
+    seepage = _sample_seepage_length_or_none(config)
+    assert seepage is not None
+    ratio = seepage / lambda_in
+    diagnostic = result.metadata["leakage_ratio_diagnostic"]
+    assert diagnostic["median_ratio"] == pytest.approx(float(np.median(ratio)))
+    assert diagnostic["max_ratio"] == pytest.approx(float(np.max(ratio)))
+
+
+# ---------------------------------------------------------------------------
+# (4b) Raw-payload crash recovery: a fit failure never destroys a completed
+#      sweep (health-assessment fix 1, 2026-07-03)
+# ---------------------------------------------------------------------------
+
+
+def test_fit_failure_preserves_raw_payload(tmp_path, monkeypatch) -> None:
+    """An M9 assembly failure after the sweep leaves the raw payload on disk.
+
+    The sweep is the expensive part; fitting is cheap and can fail on a
+    tail-dominated grid (degenerate probit point sets). The orchestrator must
+    therefore persist the raw failure matrices *before* any fitting, so the
+    completed sweep survives: the ``.raw.h5`` recovery file (plus its JSON
+    sidecar) must exist and carry the exact matrices an unbroken run produces,
+    while the final result file is never written.
+    """
+    config = _make_config(n_samples=_TOY_N, conditioning_grid=_TOY_GRID)
+    out = tmp_path / "res.h5"
+
+    # Reference matrices from an unbroken run of the same config (same seed
+    # => bit-identical sweep).
+    reference = run_fragility_analysis(config, n_jobs=1, progress=False, persist=False)
+
+    def _boom(*args, **kwargs):
+        raise ValueError("synthetic fit failure")
+
+    monkeypatch.setattr("bep_reliability_engine.run.assemble_fragility", _boom)
+    with pytest.raises(ValueError, match="synthetic fit failure"):
+        run_fragility_analysis(config, n_jobs=1, progress=False, output_path=out)
+
+    raw = tmp_path / "res.raw.h5"
+    sidecar = tmp_path / "res.raw.json"
+    assert raw.exists(), "raw recovery payload missing after fit failure"
+    assert sidecar.exists(), "raw recovery JSON sidecar missing after fit failure"
+    assert not out.exists()
+    assert not out.with_suffix(".json").exists()
+
+    with h5py.File(raw, "r") as handle:
+        np.testing.assert_array_equal(
+            handle["failure_matrix_static"][:].astype(bool),
+            reference.failure_matrix_stat,
+        )
+        np.testing.assert_array_equal(
+            handle["failure_matrix_trans"][:].astype(bool),
+            reference.failure_matrix_tran,
+        )
+        np.testing.assert_array_equal(handle["theta_matrix"][:], reference.theta_matrix)
+        np.testing.assert_array_equal(
+            handle["conditioning_grid"][:],
+            np.asarray(config.mc.conditioning_grid, dtype=np.float64),
+        )
+        names = [str(name) for name in handle["param_names"].asstr()[:]]
+        assert names == reference.param_names
+
+    metadata = json.loads(sidecar.read_text(encoding="utf-8"))
+    assert metadata["config_hash"] == config.config_hash()
+
+
+def test_raw_payload_removed_after_successful_persist(tmp_path) -> None:
+    """On success the recovery payload is superseded by the final result.
+
+    The ``.raw.h5`` file exists only to survive a fitting crash; once the full
+    ``FragilityResult`` (fits, bands, raw arrays) is written, the recovery pair
+    is removed so the results directory holds exactly one artifact per run.
+    """
+    config = _make_config(n_samples=_TOY_N, conditioning_grid=_TOY_GRID)
+    out = tmp_path / "res.h5"
+
+    run_fragility_analysis(config, n_jobs=1, progress=False, output_path=out)
+
+    assert out.exists()
+    assert out.with_suffix(".json").exists()
+    assert not (tmp_path / "res.raw.h5").exists()
+    assert not (tmp_path / "res.raw.json").exists()
 
 
 # ---------------------------------------------------------------------------

@@ -1,17 +1,18 @@
 # Phase 2 Interface: Loading Phase 1 Fragility Output and Replaying M8 on the 2016 Hydrograph
 
 Status: drafted 2026-06-18, against the completed M8 (`evaluator.py`) and M9
-(`fragility.py`). Companion to the authoritative spec `docs/architecture.md`
-(§2, §8). This document is the operational contract for Phase 2 Bayesian
-filtering: how to load a Phase 1 `FragilityResult` from disk, reconstruct the
-two extra inputs Phase 1 does *not* persist (the 2016 hydrograph and the
-cross-section geometry), call `evaluate_realization` row-by-row against the 2016
-event, and assemble the Accept–Reject posterior and the survival-discrimination
+(`fragility.py`); updated 2026-07-03 for the built M3 (`hydrographs.py`,
+ADR-0019/0020), the built run driver (`run.py`), the datum-anchored fragility
+fits (`LognormFragility.datum_m`), and the ADR-0022 Phase 2 replay timestep.
+Companion to the authoritative spec `docs/architecture.md` (§2, §8). This
+document is the operational contract for Phase 2 Bayesian filtering: how to
+load a Phase 1 `FragilityResult` from disk, reconstruct the two extra inputs
+Phase 1 does *not* persist (the 2016 hydrograph and the cross-section
+geometry), call `evaluate_realization` row-by-row against the 2016 event, and
+assemble the Accept–Reject posterior and the survival-discrimination
 decomposition.
 
-It documents the code as built; it does not introduce new decisions. Where a
-detail is owned by an as-yet-unbuilt module (M3 `hydrographs.py`, the run
-driver), that is flagged.
+It documents the code as built; it does not introduce new decisions.
 
 ---
 
@@ -58,8 +59,16 @@ transient rejection genuinely constrains progression.
 /bootstrap_bands/static_hi (N_h,)   float64
 /bootstrap_bands/trans_lo  (N_h,)   float64
 /bootstrap_bands/trans_hi  (N_h,)   float64
-/attrs: fit_static_mu, fit_static_sigma, fit_trans_mu, fit_trans_sigma
+/attrs: fit_static_mu, fit_static_sigma, fit_static_datum_m,
+        fit_trans_mu, fit_trans_sigma, fit_trans_datum_m
 ```
+
+The fitted curves are lognormal in the load excess `h − datum_m` with
+`datum_m = z_toe` (datum-anchored fit, 2026-07-03); files written before the
+datum existed load with the backward-compatible `datum_m = 0`. A transient
+`<output>.raw.h5` + `.raw.json` pair may exist next to a *crashed* run — it is
+the pre-fit recovery payload (raw arrays only, same dataset names), not a
+handoff artifact.
 
 **Dataset-naming note (important).** The on-disk failure-matrix datasets use the
 spec §8 schema names `failure_matrix_static` / `failure_matrix_trans`, but the
@@ -167,38 +176,44 @@ event itself; no pre-existing pipe.
 
 ### 3.1 The 2016 hydrograph record
 
-M8 consumes a hydrograph by **duck typing** on exactly three fields (ADR-0010);
-M3 `hydrographs.py` is not built yet, so Phase 2 constructs a structural
-stand-in (as `tests/test_evaluator.py` does). All quantities strict SI:
+M8 consumes a hydrograph by **duck typing** on exactly three fields (ADR-0010).
+M3 `hydrographs.py` is built (ADR-0019): the preferred construction is
+`build_hydrograph_record` — feed it the 2016 observed discharge (or a stage
+series via a direct `HydrographRecord`) and it handles the hours→seconds
+conversion, the Eq. 4.19 rating at the section's KP, and `peak`/`native_dt`
+derivation, all on the m MSL datum. A structural stand-in (as parts of
+`tests/test_evaluator.py` use) remains valid. All quantities strict SI:
 
-- `h` — river stage series, `ndarray (T,)`, **metres above the common datum**,
-  uniformly sampled at `native_dt`.
+- `h` — river stage series, `ndarray (T,)`, **metres above the common datum**
+  (m MSL for M3-built records), uniformly sampled at `native_dt`.
 - `peak` — scalar static comparator level `h_peak` [m above datum]; authoritative
   (M8 uses `record.peak`, not `max(h)`). For a real event `peak = max(h)`.
 - `native_dt` — the authoritative integration timestep `dt_s` **in seconds**
   (M8 uses this directly, not `diff(t)`).
 
 ```python
-from types import SimpleNamespace
-import numpy as np
+from bep_reliability_engine.hydrographs import build_hydrograph_record
 
-def make_record(h_m, native_dt_s, peak_m=None):
-    h_m = np.asarray(h_m, dtype=np.float64)
-    return SimpleNamespace(
-        h=h_m,
-        native_dt=float(native_dt_s),
-        peak=float(np.max(h_m)) if peak_m is None else float(peak_m),
-    )
-
-# h_2016 must be in metres above the SAME datum as z_toe, sampled at the
-# resolution validated by the §11 Δt/2 timestep test, oriented historical scenario.
-h_2016 = make_record(h_2016_series_m, native_dt_s=600.0)
+# Preferred: through M3, from the observed 2016 discharge at the section's KP
+# rating (a_kp, b_kp from load_rating_coefficients). Stage lands in m MSL.
+h_2016 = build_hydrograph_record(
+    time_hours, q_2016_m3s, a_kp=a_kp, b_kp=b_kp,
+    scenario="historical", event_id="typhoon_2016",
+)
 ```
 
+**Replay timestep (ADR-0022):** Phase 1 fragility integrates at the native
+hourly resolution (3600 s), but the Phase 2 per-realization replay runs at
+**native/2 = 1800 s** — per-row `l_e` accuracy governs the Accept–Reject
+filter, and at 3600 s individual realizations near the breach boundary carry
+up to tens of percent of `l_e` sensitivity. Resample `h` onto the 1800 s grid
+(linear interpolation) and set `native_dt = 1800.0` on the record before the
+replay.
+
 Datum and units are load-bearing: `h` and `z_toe` must share the vertical datum
-(`z_toe ≡ h_e` in Pol SIE 2024 Eqs. 6/8, ADR-0007), `native_dt` is seconds, and
-all heads are metres. When M3 lands, `HydrographRecord` replaces this stand-in
-with no change to the call.
+(`z_toe ≡ h_e` in Pol SIE 2024 Eqs. 6/8, ADR-0007; the generated configs carry
+the ADR-0021 toe elevations in m MSL), `native_dt` is seconds, and all heads
+are metres.
 
 ### 3.2 The geometry dict (must equal Phase 1's exactly)
 
@@ -225,13 +240,11 @@ geometry = dict(result.metadata["config"]["geometry"])
 # geometry = Geometry(**result.metadata["config"]["geometry"]).as_evaluator_dict()
 ```
 
-> Provenance dependency (flagged): the exact nesting of the config snapshot is
-> set by the Phase 1 fragility run driver (the notebook/orchestrator that calls
-> `assemble_fragility`), which is not yet built — `assemble_fragility` stores
-> whatever `metadata` it is given, verbatim. The **recommended convention** is to
-> embed the full `Config.to_metadata()` under `metadata["config"]` so geometry
-> (and the priors, seed, scenario) are recoverable. Phase 2 should assert the
-> five keys are present rather than trusting the layout blindly.
+> Provenance note: the run driver (`run.py`, built) embeds the full
+> `Config.to_metadata()` under `metadata["config"]`, so geometry (and the
+> priors, seed, scenario) are recoverable exactly as shown above. Phase 2
+> should still assert the five keys are present rather than trusting the
+> layout blindly.
 
 ---
 
@@ -383,8 +396,10 @@ geometry    = dict(result.metadata["config"]["geometry"])
 assert {"L", "z_toe", "foreshore_width", "D_fore", "k_fore"} <= geometry.keys()
 
 # 2. Build the 2016 record (SI: metres above the z_toe datum, dt in seconds).
-h2016 = np.asarray(load_h2016_series_m(), dtype=np.float64)  # project-specific
-h_2016 = SimpleNamespace(h=h2016, native_dt=600.0, peak=float(h2016.max()))
+#    ADR-0022: the Phase 2 replay runs at native/2 = 1800 s — resample the
+#    hourly series onto the 1800 s grid first (see §3.1).
+h2016 = np.asarray(load_h2016_series_1800s_m(), dtype=np.float64)  # project-specific
+h_2016 = SimpleNamespace(h=h2016, native_dt=1800.0, peak=float(h2016.max()))
 
 # 3. Replay M8 on every prior row.
 res = [evaluate_realization(theta[j], h_2016, geometry, l_ini=0.0)
@@ -406,7 +421,8 @@ print(theta_posterior.shape, f_static_reject, f_trans_reject, f_marginal)
 
 - [ ] Use the **historical** scenario file for the 2016 replay.
 - [ ] `h_2016.h` and `geometry["z_toe"]` share the vertical datum; both in metres.
-- [ ] `native_dt` is **seconds**, at the resolution passing the §11 Δt/2 test.
+- [ ] `native_dt` is **seconds**, at the ADR-0022 replay resolution
+      (native/2 = 1800 s for the per-realization 2016 replay).
 - [ ] `geometry` is the **identical** Phase 1 geometry (from the config snapshot),
       not a hand-entered copy.
 - [ ] `l_ini = 0.0` (spec §5).
@@ -428,7 +444,9 @@ print(theta_posterior.shape, f_static_reject, f_trans_reject, f_marginal)
 - ADR-0001 (C_e stochastic; static branch has no C_e exposure), ADR-0002
   (shared-sample contract), ADR-0007 (`z_toe ≡ h_e` datum, r_e-translated head),
   ADR-0008 (`Z ≤ 0` failure convention), ADR-0010 (HydrographRecord and geometry
-  dict schemas), ADR-0011 (M8 orchestration contract / frozen import surface).
+  dict schemas), ADR-0011 (M8 orchestration contract / frozen import surface),
+  ADR-0019 (M3 data facts and Eq. 4.19), ADR-0021 (MSL toe elevations),
+  ADR-0022 (Phase 1 native 3600 s acceptance; Phase 2 replay at 1800 s).
 - Code: `bep_reliability_engine/evaluator.py` (M8 `evaluate_realization`,
   `EvaluationResult`), `bep_reliability_engine/fragility.py` (M9
   `FragilityResult.load`/`save`).

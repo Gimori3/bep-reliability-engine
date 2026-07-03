@@ -78,16 +78,19 @@ the 2016 calibration run and visualization subsets.
 
 Spec ambiguities flagged at the M8 boundary
 -------------------------------------------
-These are points where the spec does not fully pin the M8/M3 contract; the
-choices made here are provisional and are called out for the user to confirm
-when M3 (``hydrographs.py``) is implemented:
+These are points where the spec did not fully pin the M8/M3 contract. The
+choices below were pinned by ADR-0010 and are now confirmed against the built
+M3 (``hydrographs.py``, ADR-0019/0020); the numbering is kept for
+cross-reference stability:
 
-1. **HydrographRecord is undefined (M3 not implemented).** Spec §2 types the
-   ``hydrograph`` argument as ``HydrographRecord``; that class does not exist
-   yet. The annotation here is a forward reference and the function consumes
-   only three documented fields by duck typing: ``.h`` (river-stage series),
-   ``.peak`` (static comparator level) and ``.native_dt`` (timestep). The
-   test suite uses a structural stand-in with those fields.
+1. **HydrographRecord is consumed structurally (resolved; M3 built).** Spec §2
+   types the ``hydrograph`` argument as ``HydrographRecord``; the concrete
+   class now lives in M3 (``hydrographs.HydrographRecord``, ADR-0019/0020).
+   The function still consumes only three documented fields by duck typing
+   per ADR-0010 — ``.h`` (river-stage series), ``.peak`` (static comparator
+   level) and ``.native_dt`` (timestep) — so structural stand-ins (used by
+   parts of the test suite and permitted to Phase 2 for the 2016 record)
+   remain valid alongside the real M3 type.
 2. **Integration timestep source.** The spec does not state whether dt_s is
    ``hydrograph.native_dt`` or the spacing of ``hydrograph.t``. This boundary
    uses ``native_dt`` (the M3-recorded native resolution, spec §1, §11) and
@@ -154,9 +157,9 @@ from bep_reliability_engine.sellmeijer import (
 )
 
 if TYPE_CHECKING:  # pragma: no cover
-    # M3 is not implemented yet; HydrographRecord is a forward reference only
-    # (spec ambiguity 1 in the module docstring). evaluate_realization consumes
-    # the record structurally via .h, .peak and .native_dt.
+    # Typing-only import: M8 consumes the record structurally via .h, .peak
+    # and .native_dt (ADR-0010), so the concrete M3 HydrographRecord is not a
+    # runtime dependency and duck-typed stand-ins remain valid.
     from numpy import float64
 
     from bep_reliability_engine.hydrographs import HydrographRecord
@@ -284,12 +287,13 @@ def evaluate_realization(
         of M4, M6 and M7; ``C_e`` enters only the transient branch (the static
         branch has no C_e exposure by design, ADR-0001).
     hydrograph : HydrographRecord
-        One event's loading record (M3). Consumed fields (duck-typed; M3 is
-        not implemented yet, see module docstring ambiguity 1): ``h`` — the
-        river-stage series [m above datum], shape (T,); ``peak`` — the scalar
-        static comparator level h_peak [m above datum] (spec §1); and
-        ``native_dt`` — the integration timestep dt_s [s], at which ``h`` is
-        assumed uniformly sampled (ambiguities 2-3).
+        One event's loading record (M3 ``hydrographs.HydrographRecord``, or
+        any structural stand-in — consumption is duck-typed per ADR-0010, see
+        module docstring point 1): ``h`` — the river-stage series [m above
+        datum], shape (T,); ``peak`` — the scalar static comparator level
+        h_peak [m above datum] (spec §1); and ``native_dt`` — the integration
+        timestep dt_s [s], at which ``h`` is assumed uniformly sampled
+        (ambiguities 2-3).
     geometry : dict
         Cross-section geometry (spec §2), read-only. Required keys:
         ``'L'`` (seepage length [m]), ``'z_toe'`` (polder surface elevation

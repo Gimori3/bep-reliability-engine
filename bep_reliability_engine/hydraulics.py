@@ -80,6 +80,8 @@ import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
 __all__ = [
+    "LEAKAGE_RATIO_THRESHOLD_DEFAULT",
+    "LEAKAGE_RATIO_WARN_FRACTION_DEFAULT",
     "AquiferHeadModel",
     "InstantaneousHead",
     "LaggedHead",
@@ -92,6 +94,14 @@ __all__ = [
     "response_factor",
     "translate_instantaneous",
 ]
+
+# ADR-0006 validity-monitoring defaults for the simplified Mazure ratio:
+# realizations with L / lambda_in above the threshold are flagged, and a
+# UserWarning fires when the flagged fraction exceeds the warn fraction.
+# Named constants (rather than bare literals in the signature) so the
+# orchestrator can record the operative threshold in run metadata.
+LEAKAGE_RATIO_THRESHOLD_DEFAULT: float = 0.2
+LEAKAGE_RATIO_WARN_FRACTION_DEFAULT: float = 0.01
 
 
 def leakage_length_in(
@@ -396,8 +406,8 @@ def leakage_ratio_diagnostic(
     seepage_length_m: ArrayLike,
     lambda_in_m: ArrayLike,
     *,
-    ratio_threshold: float = 0.2,
-    warn_fraction: float = 0.01,
+    ratio_threshold: float = LEAKAGE_RATIO_THRESHOLD_DEFAULT,
+    warn_fraction: float = LEAKAGE_RATIO_WARN_FRACTION_DEFAULT,
 ) -> NDArray[np.bool_]:
     """Validity diagnostic for the simplified (semi-infinite) Mazure ratio.
 
@@ -414,11 +424,12 @@ def leakage_ratio_diagnostic(
     lambda_in_m : array_like of float
         Hinterland leakage length [m], per realization.
     ratio_threshold : float, optional
-        Maximum acceptable L / lambda_in [-]. Provisional default 0.2,
-        pending M1 config integration.
+        Maximum acceptable L / lambda_in [-]. Default
+        :data:`LEAKAGE_RATIO_THRESHOLD_DEFAULT` (0.2); the orchestrator
+        records the operative value in run metadata.
     warn_fraction : float, optional
         Flagged-realization fraction [-] above which a warning is emitted.
-        Provisional default 0.01.
+        Default :data:`LEAKAGE_RATIO_WARN_FRACTION_DEFAULT` (0.01).
 
     Returns
     -------

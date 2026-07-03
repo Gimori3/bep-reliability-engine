@@ -35,6 +35,7 @@ It does not re-test the engine physics (other modules do that); it locks the
 from __future__ import annotations
 
 import csv
+import re
 from pathlib import Path
 
 import numpy as np
@@ -112,12 +113,25 @@ def _hwl_2019(river: str, kp: float) -> float:
 
 
 _CSV_BY_KP = _csv_rows_by_kp()
-_CONFIG_PATHS = sorted(_CONFIG_DIR.glob("kp*.yaml"))
+# Glob EVERYTHING in configs/ (not just "kp*.yaml"): a stray or legacy file
+# must fail the guard, not silently escape it (2026-07-03 health assessment:
+# a dead pre-MSL example config sat invisible to the old "kp*" glob).
+_CONFIG_PATHS = sorted(_CONFIG_DIR.glob("*.yaml"))
+_CONFIG_NAME_RE = re.compile(r"kp\d{2}_\d_(historical|plus4k)_(matrix|bulk)\.yaml\Z")
 
 
 def test_configs_exist() -> None:
-    """The generated sweep is present (4 sections x 2 scenarios x 2 interps)."""
+    """The generated sweep is present and nothing else (4 x 2 x 2 = 16 files).
+
+    Every YAML in ``configs/`` must be one of the sixteen generated files with
+    the canonical name pattern; a seventeenth file — however named — fails
+    here rather than sitting in the directory unvalidated.
+    """
     assert len(_CONFIG_PATHS) == 16, [p.name for p in _CONFIG_PATHS]
+    nonconforming = [
+        p.name for p in _CONFIG_PATHS if not _CONFIG_NAME_RE.fullmatch(p.name)
+    ]
+    assert nonconforming == [], nonconforming
 
 
 @pytest.mark.parametrize("path", _CONFIG_PATHS, ids=lambda p: p.name)

@@ -98,9 +98,10 @@ Units and reproducibility
 Marginals are specified and returned in strict SI / kN-m^3 physical units
 (docs/conventions.md): k_aq, k_bl [m/s]; d_70, D_aq, D_bl [m]; gamma_bl_sub
 [kN/m^3]; C_e [-]. Unit conversion happens only in M1 config loading, never
-here. M1 ``config`` does not exist yet, so the marginal specs, the target
-log-space correlation, the seed, and the d70 interpretation are taken as direct
-arguments rather than read from a config object.
+here. The marginal specs, the target log-space correlation, the seed, and the
+d70 interpretation are taken as direct arguments (this module reads no config
+object); M1 ``config`` supplies them via ``PriorSpecs.to_marginal_specs()``
+and ``run.py`` wires the call.
 
 References
 ----------
@@ -324,7 +325,8 @@ def sample_theta(
     marginals : sequence of MarginalSpec
         Exactly the seven canonical marginals, in any order; they are sorted
         into :data:`PARAM_NAMES` order internally. Taken as a direct argument
-        because M1 ``config`` does not exist yet (it will later supply these).
+        (M2 reads no config object); M1 ``config`` supplies them via
+        ``PriorSpecs.to_marginal_specs()``.
     seed : int
         RNG seed for ``scipy.stats.qmc.LatinHypercube``. Deterministic: the
         same seed yields the bit-identical ``theta_matrix`` (spec §13;

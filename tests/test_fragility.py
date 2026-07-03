@@ -40,6 +40,7 @@ is what is under test.
 import json
 from dataclasses import fields, is_dataclass
 
+import h5py
 import numpy as np
 import pytest
 from scipy.stats import norm
@@ -334,6 +335,298 @@ def test_bootstrap_bands_nest_central_curve() -> None:
         width_50 = hi50 - lo50
         assert np.all(width_95 >= width_50 - 1e-12)
         assert np.any(width_95 > width_50 + 1e-9)
+
+
+def test_bootstrap_survives_degenerate_replicates() -> None:
+    """Degenerate bootstrap replicates are skipped, never fatal (fix 2).
+
+    A tail-dominated branch (here: a transient curve held up by two interior
+    levels with 1 and 2 failing rows out of 60) produces resamples whose point
+    set collapses to fewer than two interior points or a non-increasing probit
+    slope. Previously any such replicate raised out of ``_bootstrap_bands``
+    *after* the sweep, destroying the run (observed end-to-end on the KP 62.0
+    production config at reduced N, 2026-07-03 health assessment). Now the
+    replicate is skipped: the run completes, a ``UserWarning`` reports the
+    skipped fraction, the bands come from the surviving replicates only, and
+    the skip counts are recorded in the result metadata.
+    """
+    grid = np.array([4.0, 6.0, 8.0, 10.0])
+    n = 60
+    # Healthy static branch: comfortably interior at every level.
+    fm_stat = _lognormal_failure_matrix(float(np.log(7.0)), 0.30, grid, n)
+    # Tail-dominated transient branch: p = [0, 0, 1/60, 2/60]. Any resample
+    # that omits row 0 (probability ~(59/60)^60 ~ 0.37 per replicate) leaves a
+    # single interior point -> a degenerate refit.
+    fm_tran = np.zeros((n, grid.size), dtype=bool)
+    fm_tran[0, 2] = True
+    fm_tran[0, 3] = True
+    fm_tran[1, 3] = True
+    theta = np.zeros((n, len(PARAM_NAMES)))
+
+    with pytest.warns(UserWarning, match="degenerate"):
+        result = assemble_fragility(
+            theta,
+            list(PARAM_NAMES),
+            grid,
+            fm_stat,
+            fm_tran,
+            _metadata(),
+            n_bootstrap=200,
+            seed=3,
+        )
+
+    # Skip counts are recorded per curve; only the transient branch degenerates.
+    info = result.metadata["bootstrap_degenerate_replicates"]
+    assert info["n_bootstrap"] == 200
+    assert info["static"] == 0
+    assert 0 < info["transient"] < 200
+
+    # The healthy branch's band is untouched: finite, ordered, in [0, 1].
+    lo_s, hi_s = (np.asarray(b) for b in result.bootstrap_bands["static"])
+    assert np.all(np.isfinite(lo_s)) and np.all(np.isfinite(hi_s))
+    assert np.all(lo_s <= hi_s)
+
+    # The degenerate branch still yields a band from the surviving replicates.
+    lo_t, hi_t = (np.asarray(b) for b in result.bootstrap_bands["transient"])
+    assert np.all(np.isfinite(lo_t)) and np.all(np.isfinite(hi_t))
+    assert np.all(lo_t <= hi_t)
+    assert np.all((lo_t >= 0.0) & (hi_t <= 1.0))
+
+
+def test_bootstrap_all_degenerate_yields_nan_band_not_crash() -> None:
+    """If every replicate degenerates the band is NaN and the run still completes.
+
+    Extreme tail case, pinned at the ``_bootstrap_bands`` level: the transient
+    branch has a *single* interior level (one failing row at the top level
+    only), so every resample yields at most one interior point and every one of
+    the ``n_bootstrap`` refits is degenerate. (The corresponding main fit would
+    refuse this point set too, which is why this is tested on the band helper
+    directly rather than through ``assemble_fragility``.) The contract: an
+    all-NaN band plus a warning — never an exception after the sweep. The
+    healthy static branch sharing the same resamples must keep its full band.
+    """
+    from bep_reliability_engine.fragility import _bootstrap_bands
+
+    grid = np.array([4.0, 6.0, 8.0, 10.0])
+    n = 40
+    fm_stat = _lognormal_failure_matrix(float(np.log(7.0)), 0.30, grid, n)
+    fm_single = np.zeros((n, grid.size), dtype=bool)
+    fm_single[0, 3] = True  # one interior level at most, in every resample
+
+    with pytest.warns(UserWarning, match="degenerate"):
+        bands, degenerate = _bootstrap_bands(
+            fm_stat, fm_single, grid, n_bootstrap=50, confidence=0.95, seed=5
+        )
+
+    assert degenerate["static"] == 0
+    assert degenerate["transient"] == 50
+    lo_t, hi_t = (np.asarray(b) for b in bands["transient"])
+    assert np.all(np.isnan(lo_t)) and np.all(np.isnan(hi_t))
+    lo_s, hi_s = (np.asarray(b) for b in bands["static"])
+    assert np.all(np.isfinite(lo_s)) and np.all(np.isfinite(hi_s))
+
+
+# ---------------------------------------------------------------------------
+# (1b) Datum-anchored fit and deep-tail weighting (health-assessment fix 5)
+# ---------------------------------------------------------------------------
+
+
+def test_fit_with_datum_recovers_parameters_and_is_zero_below_datum() -> None:
+    """The fit is anchored to the load excess (h - datum), not absolute stage.
+
+    Fitting in ln(absolute MSL stage) makes (mu, sigma) depend on the vertical
+    datum — physically meaningless parameters. With ``datum_m`` the curve is
+    lognormal in the excess ``h - datum``: exact analytic points generated in
+    excess space must be recovered exactly, the median-capacity property holds
+    at ``datum + exp(mu)``, and the curve is identically zero at and below the
+    datum (no load above the exit elevation means no failure probability).
+    """
+    datum = 38.3  # a real toe elevation (ADR-0021, KP 57.4)
+    grid = datum + np.linspace(0.5, 6.0, 15)
+    mu_true, sigma_true = float(np.log(2.5)), 0.40
+    p_f = norm.cdf((np.log(grid - datum) - mu_true) / sigma_true)
+
+    fit = fit_lognormal_fragility(grid, p_f, datum_m=datum)
+    assert fit.datum_m == datum
+    assert fit.mu == pytest.approx(mu_true, abs=1e-6)
+    assert fit.sigma == pytest.approx(sigma_true, abs=1e-6)
+
+    # Median property in excess space; the fitted curve reproduces the inputs.
+    assert fit.probability_of_failure(datum + float(np.exp(mu_true))) == pytest.approx(
+        0.5, abs=1e-9
+    )
+    np.testing.assert_allclose(fit.probability_of_failure(grid), p_f, atol=1e-9)
+
+    # Identically zero at and below the datum, scalar and array alike.
+    assert fit.probability_of_failure(datum) == 0.0
+    assert fit.probability_of_failure(datum - 5.0) == 0.0
+    mixed = np.array([datum - 1.0, datum, datum + 1.0])
+    out = fit.probability_of_failure(mixed)
+    assert out[0] == 0.0 and out[1] == 0.0 and out[2] > 0.0
+
+    # datum_m = 0 (the default) reproduces the original ln(h) parametrization.
+    legacy = fit_lognormal_fragility(grid - datum, p_f)
+    assert legacy.datum_m == 0.0
+    assert legacy.mu == pytest.approx(mu_true, abs=1e-6)
+    assert legacy.sigma == pytest.approx(sigma_true, abs=1e-6)
+
+
+def test_deep_tail_weighting_downweights_noisy_tail_points() -> None:
+    """Inverse-variance probit weights damp the deep-tail estimator noise.
+
+    An equal-weight probit OLS gives a P_f ~ 1e-4 point (one or two failing
+    realizations) the same say as a well-resolved mid-curve point, although its
+    probit-space noise is orders of magnitude larger. With the delta-method
+    weights ``w = phi(z) / sqrt(p (1 - p))`` a corrupted deepest-tail point
+    (a factor-5 fluctuation, i.e. a 1-vs-5-failure difference) must move the
+    fitted parameters strictly less than the equal-weight fit computed here as
+    the reference (the pre-fix behavior).
+    """
+    grid = np.linspace(4.0, 12.0, 9)
+    mu_true, sigma_true = float(np.log(9.0)), 0.25
+    p_exact = norm.cdf((np.log(grid) - mu_true) / sigma_true)
+    p_noisy = p_exact.copy()
+    p_noisy[0] *= 5.0  # deepest tail point: ~6e-4 -> ~3e-3
+
+    fit_weighted = fit_lognormal_fragility(grid, p_noisy)
+
+    # Equal-weight reference: the plain probit OLS the fitter used previously.
+    probit = norm.ppf(p_noisy)
+    slope, intercept = np.polyfit(np.log(grid), probit, 1)
+    mu_ols, sigma_ols = -intercept / slope, 1.0 / slope
+
+    assert abs(fit_weighted.mu - mu_true) < abs(mu_ols - mu_true)
+    assert abs(fit_weighted.sigma - sigma_true) < abs(sigma_ols - sigma_true)
+
+
+def test_save_load_round_trips_datum_and_legacy_files_default_to_zero(
+    tmp_path,
+) -> None:
+    """``datum_m`` persists through save/load; legacy files load as datum 0.
+
+    The fitted curves' datum is part of their meaning (P_f is evaluated in
+    excess space), so it must survive the HDF5 round trip. Files written
+    before the datum existed carry no datum attrs and must load with the
+    backward-compatible ``datum_m = 0.0`` (the original ln(h) form).
+    """
+    datum = 2.0
+    grid = np.linspace(4.5, 10.0, 9)
+    n = 256
+    fm_stat = _lognormal_failure_matrix(float(np.log(7.0)), 0.30, grid, n)
+    fm_tran = _lognormal_failure_matrix(float(np.log(5.0)), 0.45, grid, n)
+    theta = np.zeros((n, len(PARAM_NAMES)))
+
+    result = assemble_fragility(
+        theta,
+        list(PARAM_NAMES),
+        grid,
+        fm_stat,
+        fm_tran,
+        _metadata(),
+        n_bootstrap=25,
+        seed=4,
+        datum_m=datum,
+    )
+    assert result.P_f_static_fit.datum_m == datum
+    assert result.P_f_trans_fit.datum_m == datum
+    # The fit provenance is recorded alongside the curves.
+    assert result.metadata["fragility_fit"]["datum_m"] == pytest.approx(datum)
+
+    path = tmp_path / "datum.h5"
+    result.save(path)
+    loaded = FragilityResult.load(path)
+    assert loaded.P_f_static_fit == result.P_f_static_fit
+    assert loaded.P_f_trans_fit == result.P_f_trans_fit
+
+    # Legacy file: strip the datum attrs and reload -> datum defaults to 0.0.
+    with h5py.File(path, "a") as handle:
+        del handle.attrs["fit_static_datum_m"]
+        del handle.attrs["fit_trans_datum_m"]
+    legacy = FragilityResult.load(path)
+    assert legacy.P_f_static_fit.datum_m == 0.0
+    assert legacy.P_f_trans_fit.datum_m == 0.0
+
+
+# ---------------------------------------------------------------------------
+# (2b) Spec §11 Monte Carlo convergence monitoring (health-assessment fix 3)
+# ---------------------------------------------------------------------------
+
+
+def test_mc_convergence_cov_recorded_in_metadata(tmp_path) -> None:
+    """The §11 CoV of the P_f estimator is computed and persisted, not assumed.
+
+    Spec §11 targets CoV(P_f-hat) < 5% across the relevant failure range and
+    says the sufficiency "is verified directly for each cross-section once the
+    engine runs" — so the assembler must compute the binomial-estimator CoV
+    ``sqrt((1 - p) / (N * p))`` per conditioning level and record it in the
+    result metadata: ``None`` outside the interior (p = 0 or 1), the worst
+    interior CoV per branch, and whether the branch meets the target. The block
+    must survive the HDF5 + JSON round trip (None/float mixing is the classic
+    failure).
+    """
+    from bep_reliability_engine.fragility import PF_COV_TARGET, mc_cov_of_pf
+
+    grid = np.array([4.0, 6.0, 8.0, 10.0])
+    n = 400
+
+    def matrix(fractions: list[float]) -> np.ndarray:
+        out = np.zeros((n, len(fractions)), dtype=bool)
+        for j, fraction in enumerate(fractions):
+            out[: int(round(fraction * n)), j] = True
+        return out
+
+    fm_stat = matrix([0.0, 0.25, 0.50, 0.80])
+    fm_tran = matrix([0.0, 0.05, 0.20, 0.50])
+    theta = np.zeros((n, len(PARAM_NAMES)))
+
+    result = assemble_fragility(
+        theta,
+        list(PARAM_NAMES),
+        grid,
+        fm_stat,
+        fm_tran,
+        _metadata(),
+        n_bootstrap=50,
+        seed=2,
+    )
+
+    convergence = result.metadata["mc_convergence"]
+    assert convergence["n_realizations"] == n
+    assert convergence["cov_target"] == pytest.approx(PF_COV_TARGET)
+
+    def expected_cov(p: float) -> float:
+        return float(np.sqrt((1.0 - p) / (n * p)))
+
+    cov_static = convergence["cov_pf_static"]
+    assert cov_static[0] is None  # p = 0: estimator CoV undefined
+    assert cov_static[1] == pytest.approx(expected_cov(0.25))
+    assert cov_static[2] == pytest.approx(expected_cov(0.50))
+    assert cov_static[3] == pytest.approx(expected_cov(0.80))
+
+    cov_trans = convergence["cov_pf_trans"]
+    assert cov_trans[0] is None
+    assert cov_trans[1] == pytest.approx(expected_cov(0.05))
+
+    # Worst interior CoV and the target verdict, per branch. At N = 400 the
+    # static worst is ~0.087 (p = 0.25) and the transient worst ~0.218
+    # (p = 0.05): both above the 5% target, so both verdicts are False.
+    assert convergence["max_cov_static"] == pytest.approx(expected_cov(0.25))
+    assert convergence["max_cov_trans"] == pytest.approx(expected_cov(0.05))
+    assert convergence["meets_cov_target_static"] is False
+    assert convergence["meets_cov_target_trans"] is False
+
+    # The standalone helper agrees and handles the boundary levels with None.
+    assert mc_cov_of_pf(np.array([0.0, 0.25, 1.0]), n) == [
+        None,
+        pytest.approx(expected_cov(0.25)),
+        None,
+    ]
+
+    # The block survives persistence (None/float lists through the JSON sidecar).
+    path = tmp_path / "cov.h5"
+    result.save(path)
+    loaded = FragilityResult.load(path)
+    assert loaded.metadata["mc_convergence"] == result.metadata["mc_convergence"]
 
 
 # ---------------------------------------------------------------------------

@@ -5,7 +5,7 @@ All quantities are declared in strict SI units or standard geotech conventions.
 
 # Hydro-Geotechnical Properties
 GRAVITY: float = 9.81  # Acceleration due to gravity [m/s²]
-GAMMA_W: float = 9.81  # Submerged unit weight of water [kN/m³]
+GAMMA_W: float = 9.81  # Unit weight of water [kN/m³]
 RHO_W: float = 1000.0  # Density of water [kg/m³]
 
 # Temporal Conversion Scaling

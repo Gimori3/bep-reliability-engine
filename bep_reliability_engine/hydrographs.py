@@ -133,9 +133,10 @@ _PROXY_SOURCE_KP: float = 61.8
 _PROXY_NODE_KPS: tuple[float, ...] = (62.0, 62.2, 62.4, 62.6, 62.8)
 _KP_MATCH_ATOL: float = 1e-6
 
-# The PROVISIONAL exit-point elevation the generated configs still carry
-# (ADR-0018; scripts/generate_configs.py PROVISIONAL_Z_TOE). M3 stages are
-# m MSL (ADR-0019 §3), so pairing them with this placeholder is a datum error.
+# The RETIRED ADR-0018 exit-point placeholder: generated configs now carry the
+# ADR-0021 landside-toe elevations in m MSL, but a hand-built or legacy config
+# could still pair an MSL stage record with a zero z_toe — a datum error the
+# guard below refuses (M3 stages are m MSL, ADR-0019 §3).
 _PROVISIONAL_Z_TOE_M: float = 0.0
 
 # Scenario tag -> d4PDF experiment (ADR-0019 §9, ADR-0020 §3). The single
@@ -165,9 +166,10 @@ class HydrographRecord:
     """One loaded event: stage series plus metadata (the spec §2 M3 output).
 
     Emitted by :func:`build_hydrograph_record` and, per ensemble member, by
-    :func:`load_hydrograph_ensemble`. The field names mirror the schema the
-    ``run.py`` M3 stub duck-types; M8 reads only ``h``, ``peak`` and
-    ``native_dt``, while the remaining fields carry provenance and the
+    :func:`load_hydrograph_ensemble`; both ``run.py`` hydrograph paths (the
+    canonical d4PDF scaler and the synthetic stub) construct this concrete
+    type. M8 reads only ``h``, ``peak`` and ``native_dt`` (duck-typed,
+    ADR-0010), while the remaining fields carry provenance and the
     static-comparison scalar.
 
     Attributes
@@ -477,21 +479,18 @@ def validate_datum_consistency(record: HydrographRecord, z_toe_m: float) -> None
     """Refuse to pair an M3 stage record with an unresolved z_toe datum.
 
     M3 stage records are referenced to **mean sea level** by construction
-    (ADR-0019 §3; ~33-40 m MSL on the study reach), while the generated
-    configs still carry the PROVISIONAL ``z_toe = 0.0`` placeholder
-    (ADR-0018) on an unresolved "above datum" convention. M8 computes the
-    driving head as ``r_e * (h - z_toe)``, so feeding an MSL record against
-    the placeholder would *silently* produce ~35 m heads — physically
-    nonsensical, but numerically runnable. This guard makes that datum
-    incompatibility loud instead: it must be called wherever a real M3
-    record enters the M8 fragility path, and it raises until z_toe carries
-    a true per-section MSL elevation.
+    (ADR-0019 §3; ~33-40 m MSL on the study reach). The generated configs now
+    carry the ADR-0021 landside-toe elevations in m MSL, but a hand-built or
+    legacy config could still pair an MSL record with the retired ADR-0018
+    ``z_toe = 0.0`` placeholder. M8 computes the driving head as
+    ``r_e * (h - z_toe)``, so feeding an MSL record against the placeholder
+    would *silently* produce ~35 m heads — physically nonsensical, but
+    numerically runnable. This guard makes that datum incompatibility loud
+    instead: it is called wherever a real M3 record enters the M8 fragility
+    path, and it raises on the placeholder.
 
     The check is necessary, not sufficient: it cannot prove an arbitrary
     nonzero z_toe is on the MSL datum, only refuse the known placeholder.
-    Resolving the per-section MSL toe elevations is a separate schematization
-    task (ADR-0018 Consequences); this function does not attempt to infer
-    them.
 
     Parameters
     ----------
@@ -512,11 +511,12 @@ def validate_datum_consistency(record: HydrographRecord, z_toe_m: float) -> None
         raise ValueError(
             "datum mismatch: this HydrographRecord's stages are m MSL "
             f"(ADR-0019 §3; event {record.event_id!r}, peak "
-            f"{record.peak:.2f} m MSL) but z_toe is still the PROVISIONAL "
+            f"{record.peak:.2f} m MSL) but z_toe is the retired PROVISIONAL "
             "0.0 placeholder (ADR-0018). Running M8 like this would "
             f"silently apply ~{record.peak:.0f} m driving heads. Set "
             "geometry.z_toe to the section's true exit-point elevation in "
-            "m MSL before feeding real hydrographs to the engine."
+            "m MSL (the ADR-0021 landside-toe values in the generated "
+            "configs) before feeding real hydrographs to the engine."
         )
 
 
