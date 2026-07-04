@@ -30,6 +30,9 @@ never regenerated after the CSV fix). It pins, for every file in ``configs/``:
 8. **The k_aq-d_70 coupling is the ADR-0012 two-population decoupling**
    (``coupling: two_population``, ``rho_log_kaq_d70: 0.0`` recorded but never
    imposed); a reappearing nonzero rho or 'correlated' mode is a regression.
+9. **The sweep is historical-only (ADR-0023):** the +4K fragility equals the
+   historical fragility by shape invariance, so no ``*_plus4k_*`` config
+   exists; climate differentiation lives on the Phase 3 hazard side.
 
 It does not re-test the engine physics (other modules do that); it locks the
 *configuration layer* against the exact staleness this review found.
@@ -120,17 +123,20 @@ _CSV_BY_KP = _csv_rows_by_kp()
 # must fail the guard, not silently escape it (2026-07-03 health assessment:
 # a dead pre-MSL example config sat invisible to the old "kp*" glob).
 _CONFIG_PATHS = sorted(_CONFIG_DIR.glob("*.yaml"))
-_CONFIG_NAME_RE = re.compile(r"kp\d{2}_\d_(historical|plus4k)_(matrix|bulk)\.yaml\Z")
+# Historical-only per ADR-0023: a reappearing *_plus4k_* file is a regression
+# (the +4K fragility IS the historical fragility; no separate run exists).
+_CONFIG_NAME_RE = re.compile(r"kp\d{2}_\d_historical_(matrix|bulk)\.yaml\Z")
 
 
 def test_configs_exist() -> None:
-    """The generated sweep is present and nothing else (4 x 2 x 2 = 16 files).
+    """The generated sweep is present and nothing else (4 x 2 = 8 files).
 
-    Every YAML in ``configs/`` must be one of the sixteen generated files with
-    the canonical name pattern; a seventeenth file — however named — fails
+    Every YAML in ``configs/`` must be one of the eight generated
+    historical-scenario files (ADR-0023 dropped the bit-identical +4K set)
+    with the canonical name pattern; a ninth file — however named — fails
     here rather than sitting in the directory unvalidated.
     """
-    assert len(_CONFIG_PATHS) == 16, [p.name for p in _CONFIG_PATHS]
+    assert len(_CONFIG_PATHS) == 8, [p.name for p in _CONFIG_PATHS]
     nonconforming = [
         p.name for p in _CONFIG_PATHS if not _CONFIG_NAME_RE.fullmatch(p.name)
     ]

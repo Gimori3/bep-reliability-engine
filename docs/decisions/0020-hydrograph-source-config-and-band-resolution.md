@@ -1,7 +1,7 @@
 # ADR 0020: Hydrograph-Source Config Block and KP -> Band-File Resolution
 
 Date: 2026-07-02 (Accepted 2026-07-03)
-Status: Accepted
+Status: Accepted (Decision 3's workbook-selection wording superseded by ADR-0023: the canonical shape's band workbook is selected by the event's own experiment, not config.scenario)
 Module: M1 (config.py), M3 (hydrographs.py), orchestrator (run.py)
 
 ## Context

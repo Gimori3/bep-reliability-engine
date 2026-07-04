@@ -102,9 +102,14 @@ EXCLUDED_KP_DEFAULT = "63.4"
 
 # --- Sweep axes --------------------------------------------------------------
 # (config field value, filename token); '+4K' is not filename-safe.
+# Historical-only per ADR-0023 (shape-invariant climate axis): the +4K
+# fragility equals the historical fragility by construction — the canonical
+# HPB shape drives all scenarios and the ensembles differ in peak intensity,
+# not normalized shape — so the former ("+4K", "plus4k") entry is dropped;
+# climate differentiation lives on the Phase 3 hazard side. The '+4K' literal
+# stays in the Config schema (scenario remains the run identity).
 SCENARIOS: list[tuple[str, str]] = [
     ("historical", "historical"),
-    ("+4K", "plus4k"),
 ]
 INTERPRETATIONS: list[str] = ["matrix", "bulk"]
 
