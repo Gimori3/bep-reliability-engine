@@ -117,6 +117,26 @@ def test_from_yaml_rejects_non_mapping_document(tmp_path) -> None:
         Config.from_yaml(path)
 
 
+def test_foreland_treatment_field_default_and_validation() -> None:
+    """``foreland_treatment`` defaults to the ADR-0025 blanketed baseline.
+
+    The open-entry end is a one-flag, on-demand sensitivity ('open_entry');
+    anything else is rejected at load time, and the field is carried into the
+    metadata snapshot so every result records which foreland physics ran.
+    """
+    cfg = Config.model_validate(_valid_config_dict())
+    assert cfg.foreland_treatment == "blanketed_tanh"
+    assert cfg.to_metadata()["foreland_treatment"] == "blanketed_tanh"
+
+    data = _valid_config_dict()
+    data["foreland_treatment"] = "open_entry"
+    assert Config.model_validate(data).foreland_treatment == "open_entry"
+
+    data["foreland_treatment"] = "radial_entry"  # not a defined treatment
+    with pytest.raises(ValidationError):
+        Config.model_validate(data)
+
+
 # ===========================================================================
 # (2) Handoff shapes match the built modules
 # ===========================================================================

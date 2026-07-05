@@ -644,6 +644,13 @@ class Config(_StrictModel):
         thesis seepage-length prior. The mean L lives in ``geometry.L``; this
         field only adds its spread. Sampled once per run with a seed derived
         from ``mc.seed`` so the parallel sweep stays reproducible.
+    foreland_treatment : {'blanketed_tanh', 'open_entry'}
+        Foreland entry treatment (ADR-0025). ``'blanketed_tanh'`` (default,
+        the adopted baseline): leaky foreland blanket with the ADR-0006
+        finite-width tanh entry length. ``'open_entry'``: the USACE x1 = 0
+        bound — the evidence-disfavored KP 62.0 sensitivity, runnable on
+        demand with this one flag but never generated into the production
+        sweep. Recorded in run metadata.
     cross_section_id : str
         Cross-section identifier; provenance only (spec §8).
     segment_id : str
@@ -704,6 +711,17 @@ class Config(_StrictModel):
             "CoV of the per-section stochastic seepage length L. None = L "
             "deterministic at geometry.L; a positive value samples L ~ "
             "Lognormal(mean=geometry.L, cov=this) independently of theta."
+        ),
+    )
+    foreland_treatment: Literal["blanketed_tanh", "open_entry"] = Field(
+        default="blanketed_tanh",
+        description=(
+            "Foreland entry treatment (ADR-0025). 'blanketed_tanh' (baseline): "
+            "leaky foreland blanket with the ADR-0006 finite-width tanh entry "
+            "length. 'open_entry': the USACE x1 = 0 bound (river head applied "
+            "directly at the riverside toe) — the evidence-disfavored "
+            "sensitivity for the KP 62.0 foreland-confinement question, run "
+            "on demand only, never a production-sweep member."
         ),
     )
 

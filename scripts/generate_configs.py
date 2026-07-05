@@ -410,6 +410,12 @@ def build_config_dict(
         "relative_density_insitu": RELATIVE_DENSITY_INSITU,
         "alpha_exponent": ALPHA_EXPONENT,
         "seepage_length_cov": SEEPAGE_LENGTH_COV[kp],
+        # ADR-0025: blanketed foreland is the adopted baseline at every
+        # section (emitted explicitly for provenance, though it is the
+        # default). The open-entry end is an on-demand sensitivity run from a
+        # hand-derived config with foreland_treatment: open_entry — never a
+        # generated sweep member.
+        "foreland_treatment": "blanketed_tanh",
     }
 
 
@@ -450,6 +456,8 @@ def header_comment(
         "#   matrix d_70 and framework k_aq are distinct soils, sampled",
         "#   decoupled). rho_log_kaq_d70 = 0.0 is schema/audit only, never",
         "#   imposed; the former provisional 0.6 is retired.",
+        "# ADR-0025: foreland_treatment = blanketed_tanh (adopted baseline;",
+        "#   open_entry is an on-demand sensitivity, never a sweep member).",
         "# PROVISIONAL: seed;",
         "#   D_fore/k_fore = landside D_bl/k_bl proxy (ADR-0005).",
         f"# gamma: CSV gamma_sub_kNm3 = {gamma_p_csv} kN/m^3 is the per-section",

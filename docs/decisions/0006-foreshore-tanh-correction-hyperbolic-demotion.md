@@ -1,7 +1,7 @@
 # ADR-0006: Finite-Foreshore tanh Correction in the Baseline; the L/λ_in "Validity Monitor" Withdrawn as a Category Error (2026-07-05 Amendment)
 
 Date: 2026-06-11 (amended 2026-07-05)
-Status: Accepted (amended: Decision 2's L/λ_in diagnostic was a category error — corrected below with the citation trail re-anchored to the primary sources. The amendment does NOT close all r_e questions: the KP 62.0 foreland confinement remains open and potentially non-conservative — see the Open Item section and ADR-0025.)
+Status: Accepted (amended: Decision 2's L/λ_in diagnostic was a category error — corrected below with the citation trail re-anchored to the primary sources. The amendment did NOT itself close all r_e questions: the KP 62.0 foreland confinement was left open — see the Open Item section — and was resolved the same day by ADR-0025: blanketed baseline adopted, open-entry logged as an evidence-disfavored on-demand sensitivity.)
 
 ## Context (amended)
 
@@ -102,16 +102,19 @@ ditch leaves the confined condition intact. A finite-hinterland sensitivity
 at KP 57.4/62.0 is warranted only if the bed elevations (帯広開発建設部)
 confirm aquifer daylighting. Either way the baseline is safe-side.
 
-## Open item — NOT closed by this amendment (see ADR-0025)
+## Open item — NOT closed by this amendment (resolved same-day by ADR-0025)
 
 This amendment closes the citation trail, the L/λ_in category error, and the
 hinterland extents (conservative). It does **not** close the **KP 62.0
-foreland confinement**, which is a live, potentially **non-conservative**
-item: if the 44 m foreshore is effectively unblanketed rather than the
-modeled leaky cover, r_e at the governing section rises from ≈ 0.33 toward
-≈ 0.45 (+23–37% on the driving head). That item is quantified, evidenced and
-dispositioned in **ADR-0025** and is deliberately kept out of this
-documentation cleanup so it cannot be mistaken for closed.
+foreland confinement**, which was at amendment time a live, potentially
+**non-conservative** item: if the 44 m foreshore were effectively
+unblanketed rather than the modeled leaky cover, r_e at the governing
+section would rise from ≈ 0.33 toward ≈ 0.45 (+23–37% on the driving head).
+That item was quantified, evidenced and dispositioned in **ADR-0025**
+(accepted 2026-07-05, after the B-7/様式-5 read: blanketed baseline adopted;
+open-entry logged as an evidence-disfavored, on-demand sensitivity via
+``config.foreland_treatment``) and was deliberately kept out of this
+documentation cleanup so the two could not be conflated.
 
 ## Consequences (amended)
 
@@ -152,4 +155,4 @@ numbers:
 *   Companion notes: `adr0006-leakage-boundary-ratios.md` (leakage lengths
     and boundary ratios, corrected D_bl), `adr0006-hinterland-l3-resolution.md`
     (HDB facility register, per-section verdicts); ADR-0025 (KP 62.0
-    foreland, open).
+    foreland — resolved: blanketed baseline, open-entry logged sensitivity).

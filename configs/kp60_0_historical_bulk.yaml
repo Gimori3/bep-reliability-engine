@@ -22,6 +22,8 @@
 #   matrix d_70 and framework k_aq are distinct soils, sampled
 #   decoupled). rho_log_kaq_d70 = 0.0 is schema/audit only, never
 #   imposed; the former provisional 0.6 is retired.
+# ADR-0025: foreland_treatment = blanketed_tanh (adopted baseline;
+#   open_entry is an on-demand sensitivity, never a sweep member).
 # PROVISIONAL: seed;
 #   D_fore/k_fore = landside D_bl/k_bl proxy (ADR-0005).
 # gamma: CSV gamma_sub_kNm3 = 16.72 kN/m^3 is the per-section
@@ -140,3 +142,4 @@ theta_repose_deg: 37.0
 relative_density_insitu: 0.725
 alpha_exponent: -0.3333333333333333
 seepage_length_cov: 0.15
+foreland_treatment: blanketed_tanh

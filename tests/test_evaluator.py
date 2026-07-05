@@ -441,6 +441,12 @@ def test_public_interface() -> None:
         assert param.kind is inspect.Parameter.KEYWORD_ONLY
         assert param.default is None
 
+    # ADR-0025: the open-entry sensitivity hook is likewise keyword-only and
+    # off by default (blanketed baseline), so an un-flagged call is unchanged.
+    foreland = signature.parameters["foreland_open"]
+    assert foreland.kind is inspect.Parameter.KEYWORD_ONLY
+    assert foreland.default is False
+
 
 # ---------------------------------------------------------------------------
 # (7) Cross-row shared-sample properties on distinct live inputs
@@ -838,3 +844,75 @@ def test_real_m3_built_record_feeds_both_entry_points() -> None:
     np.testing.assert_array_equal(ft_built, ft_direct)
     # Non-degenerate: the built record genuinely mixes outcomes across the prior.
     assert fs_built.any() and not fs_built.all()
+
+
+# ---------------------------------------------------------------------------
+# ADR-0025: foreland_treatment hook — the open-entry sensitivity (KP 62.0)
+# ---------------------------------------------------------------------------
+
+# Wide foreshore so the blanketed treatment carries a saturated tanh entry
+# length; the open-entry flag must remove exactly that term (USACE x1 = 0)
+# without mutating the measured geometry.
+_FORELAND_GEOMETRY = {**GEOMETRY, "foreshore_width": 325.0}
+
+
+def test_foreland_open_zeroes_entry_length_default_unchanged() -> None:
+    """``foreland_open=True`` sets x1 = 0; the default is bit-identical.
+
+    ADR-0025 adopts the blanketed foreland as the KP 62.0 baseline and keeps
+    the open-entry end as a one-flag sensitivity: r_e must become exactly
+    lambda_in / (L + lambda_in) (the USACE Case 7a form with x1 = 0 — also
+    Pol thesis Eq. 7.13's own no-riverside-blanket case), the shared H_c must
+    be untouched (no foreland dependence), the driving head must rise
+    (smaller Z_static, l_e never smaller), and the measured foreshore_width
+    must never be mutated. Omitting the flag stays bit-identical to before.
+    """
+    theta = THETA_ROWS[0]
+    base = evaluate_realization(theta, _DECOMP_HYDRO, _FORELAND_GEOMETRY)
+    explicit = evaluate_realization(
+        theta, _DECOMP_HYDRO, _FORELAND_GEOMETRY, foreland_open=False
+    )
+    opened = evaluate_realization(
+        theta, _DECOMP_HYDRO, _FORELAND_GEOMETRY, foreland_open=True
+    )
+
+    # Default and explicit False are the same code path, bit for bit
+    # (field-wise: t_uh is NaN here, and NaN never compares equal).
+    assert explicit.Z_static == base.Z_static
+    assert explicit.Z_transient == base.Z_transient
+    assert explicit.l_e_final == base.l_e_final
+    assert explicit.r_e == base.r_e
+    assert explicit.H_c == base.H_c
+    assert explicit.failure_static == base.failure_static
+    assert explicit.failure_trans == base.failure_trans
+    assert np.isnan(explicit.t_uh) == np.isnan(base.t_uh)
+
+    # Open entry: x1 = 0 exactly, so r_e = lambda_in / (L + lambda_in).
+    assert opened.lambda_in == base.lambda_in
+    assert opened.r_e == pytest.approx(
+        base.lambda_in / (_FORELAND_GEOMETRY["L"] + base.lambda_in), rel=1e-12
+    )
+    assert opened.r_e > base.r_e
+
+    # The shared H_c has no foreland dependence; the head rises, the margins
+    # shrink monotonically.
+    assert opened.H_c == base.H_c
+    assert opened.Z_static < base.Z_static
+    assert opened.l_e_final >= base.l_e_final
+
+    # The measured geometry is never mutated by the flag.
+    assert _FORELAND_GEOMETRY["foreshore_width"] == 325.0
+
+
+def test_foreland_open_batch_matches_scalar() -> None:
+    """The batch path honors ``foreland_open`` identically to the scalar."""
+    theta_matrix = np.vstack(THETA_ROWS)
+    fs_open, ft_open = evaluate_batch(
+        theta_matrix, _DECOMP_HYDRO, _FORELAND_GEOMETRY, foreland_open=True
+    )
+    for j, theta in enumerate(THETA_ROWS):
+        scalar = evaluate_realization(
+            theta, _DECOMP_HYDRO, _FORELAND_GEOMETRY, foreland_open=True
+        )
+        assert bool(fs_open[j]) == scalar.failure_static
+        assert bool(ft_open[j]) == scalar.failure_trans

@@ -259,6 +259,7 @@ def evaluate_realization(
     theta_repose_rad: float | None = None,
     relative_density: float | None = None,
     gamma_p_sub_kn_m3: float | None = None,
+    foreland_open: bool = False,
 ) -> EvaluationResult:
     """Evaluate both limit states for one realization (M8, spec §2-§4).
 
@@ -329,6 +330,14 @@ float, optional
         while the static comparator retains ``alpha_exponent``, so the 2D-vs-3D
         dimensional bias is isolated from the temporal bias rather than shifting
         both branches together.
+    foreland_open : bool, optional
+        Keyword-only ADR-0025 sensitivity hook, default False (the adopted
+        blanketed baseline — unchanged behaviour). True substitutes the USACE
+        Case 7a x1 = 0 bound: the effective foreland entry length is zeroed,
+        so r_e = lambda_in / (L + lambda_in) (Pol thesis Eq. 7.13's own
+        no-riverside-blanket form). The measured ``geometry`` is never
+        mutated. On-demand only (the KP 62.0 foreland-confinement
+        sensitivity); production configs stay blanketed.
 
     Returns
     -------
@@ -419,6 +428,12 @@ float, optional
             geometry["foreshore_width"],
         )
     )
+    if foreland_open:
+        # ADR-0025 open-entry sensitivity: the USACE Case 7a x1 = 0 bound
+        # (river head applied directly at the riverside toe). The measured
+        # geometry['foreshore_width'] is never mutated — only the entry
+        # length used by this evaluation is zeroed.
+        lambda_out_eff_m = 0.0
     # r_e is stochastic (four sampled variables) and lives in the per-realization
     # path -- never precomputed once (spec Property 3). The same r_e feeds both
     # branches (shared-sample contract, ADR-0002).
@@ -493,6 +508,7 @@ def evaluate_batch(
     theta_repose_rad: float | None = None,
     relative_density: float | None = None,
     gamma_p_sub_kn_m3: float | None = None,
+    foreland_open: bool = False,
 ) -> tuple[npt.NDArray[np.bool_], npt.NDArray[np.bool_]]:
     """Evaluate both limit states for all N realizations at one level (M8 batch).
 
@@ -545,6 +561,10 @@ float, optional
         H_c, bit-identical to before); when set, the transient H_c is recomputed
         at this exponent for the spec §12 fm4 dimensional-bias decomposition,
         while the static comparator retains ``alpha_exponent``.
+    foreland_open : bool, optional
+        ADR-0025 open-entry sensitivity (default False = blanketed baseline,
+        unchanged behaviour): zeroes the effective foreland entry length for
+        every realization. Same semantics as :func:`evaluate_realization`.
 
     Returns
     -------
@@ -612,6 +632,10 @@ float, optional
         geometry["k_fore"],
         geometry["foreshore_width"],
     )
+    if foreland_open:
+        # ADR-0025 open-entry sensitivity: x1 = 0 for every realization,
+        # identical to the scalar path; the measured geometry is untouched.
+        lambda_out_eff = np.zeros_like(lambda_out_eff)
     # r_e is stochastic (four sampled variables, plus L when L is sampled) and
     # feeds both branches (shared-sample contract, ADR-0002).
     r_e = response_factor(lambda_in, lambda_out_eff, seepage_length)

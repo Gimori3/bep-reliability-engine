@@ -233,6 +233,15 @@ def test_config_matches_csv_and_thesis_priors(path: Path) -> None:
         "!= 0.0 (ADR-0012 retired the provisional 0.6)"
     )
 
+    # --- (10) Foreland treatment is the ADR-0025 blanketed baseline -----------
+    # The open-entry end is an on-demand sensitivity, never a sweep member
+    # (the filename pattern above already rejects any *_openfore_* file); a
+    # config carrying 'open_entry' into the production set is a regression.
+    assert cfg.foreland_treatment == "blanketed_tanh", (
+        f"{path.name}: foreland_treatment {cfg.foreland_treatment!r} != "
+        "'blanketed_tanh' (ADR-0025 baseline)"
+    )
+
 
 @pytest.mark.parametrize("path", _CONFIG_PATHS, ids=lambda p: p.name)
 def test_datum_guard_passes_with_real_z_toe(path: Path) -> None:

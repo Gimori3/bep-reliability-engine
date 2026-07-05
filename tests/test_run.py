@@ -467,6 +467,58 @@ def test_leakage_geometry_pairs_stochastic_L_rowwise() -> None:
 
 
 # ---------------------------------------------------------------------------
+# (4a-ii) ADR-0025: foreland_treatment threading (blanketed baseline; the
+#         open-entry end is a one-flag, on-demand sensitivity)
+# ---------------------------------------------------------------------------
+
+
+def test_foreland_treatment_threaded_and_recorded() -> None:
+    """``config.foreland_treatment`` reaches M8 and is recorded in metadata.
+
+    A wide-foreshore toy geometry gives the blanketed baseline a saturated
+    tanh entry length; the ``open_entry`` sensitivity removes it (USACE
+    x1 = 0), so every realization sees a strictly higher driving head at
+    every level: the open run's failure sets must be supersets of the
+    baseline's (strictly larger somewhere), both treatments must be stamped
+    into metadata, and the leakage-geometry record must cohere with the
+    physics actually run (zero foreland entry length under open_entry).
+    """
+    geometry = {
+        "L": 30.0,
+        "z_toe": 2.0,
+        "foreshore_width": 200.0,
+        "D_fore": 3.0,
+        "k_fore": 1.0e-6,
+        "HWL": 16.0,
+    }
+    grid = [10.0, 12.0, 14.0, 16.0, 18.0, 20.0, 22.0, 24.0]
+    base_cfg = _make_config(n_samples=400, conditioning_grid=grid, geometry=geometry)
+    open_cfg = _make_config(
+        n_samples=400,
+        conditioning_grid=grid,
+        geometry=geometry,
+        foreland_treatment="open_entry",
+    )
+
+    base = run_fragility_analysis(base_cfg, n_jobs=1, progress=False, persist=False)
+    opened = run_fragility_analysis(open_cfg, n_jobs=1, progress=False, persist=False)
+
+    assert base.metadata["foreland_treatment"] == "blanketed_tanh"
+    assert opened.metadata["foreland_treatment"] == "open_entry"
+
+    # Monotonicity: a strictly higher r_e per realization can only add
+    # failures, never remove them — on both branches.
+    assert np.all(opened.failure_matrix_stat >= base.failure_matrix_stat)
+    assert opened.failure_matrix_stat.sum() > base.failure_matrix_stat.sum()
+    assert np.all(opened.failure_matrix_tran >= base.failure_matrix_tran)
+
+    # The leakage-geometry record reflects the physics actually run.
+    assert base.metadata["leakage_geometry"]["median_lambda_out_eff_m"] > 0.0
+    assert opened.metadata["leakage_geometry"]["median_lambda_out_eff_m"] == 0.0
+    assert opened.metadata["leakage_geometry"]["median_foreland_tanh_credit"] == 0.0
+
+
+# ---------------------------------------------------------------------------
 # (4b) Raw-payload crash recovery: a fit failure never destroys a completed
 #      sweep (health-assessment fix 1, 2026-07-03)
 # ---------------------------------------------------------------------------

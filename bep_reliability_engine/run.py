@@ -238,6 +238,10 @@ class _EvalSettings:
         Transient-only scale-exponent override (ADR-0017). None keeps the
         single-source H_c (baseline); a value (e.g. -1/2) drives the
         dimensional-bias decomposition.
+    foreland_open : bool
+        ADR-0025 foreland treatment: False = blanketed baseline (the adopted
+        production setting), True = the open-entry (x1 = 0) on-demand
+        sensitivity, from ``config.foreland_treatment``.
     """
 
     l_ini_m: float
@@ -246,6 +250,7 @@ class _EvalSettings:
     theta_repose_rad: float
     relative_density: float
     alpha_exponent_transient: float | None
+    foreland_open: bool
 
 
 # ============================================================================
@@ -423,6 +428,7 @@ def _evaluate_level(
         alpha_exponent_transient=settings.alpha_exponent_transient,
         theta_repose_rad=settings.theta_repose_rad,
         relative_density=settings.relative_density,
+        foreland_open=settings.foreland_open,
     )
     return level_index, col_static, col_trans
 
@@ -508,6 +514,10 @@ def _leakage_geometry_block(
         config.geometry.k_fore,
         config.geometry.foreshore_width,
     )
+    if config.foreland_treatment == "open_entry":
+        # ADR-0025 sensitivity: record the geometry the run actually uses
+        # (x1 = 0), not the blanketed value the measured foreshore would give.
+        lambda_out_eff = np.zeros_like(lambda_in)
     seepage: NDArray[np.float64] | float = (
         seepage_length_samples
         if seepage_length_samples is not None
@@ -651,6 +661,10 @@ def _build_metadata(
         "dimensional_decomposition_active": config.alpha_exponent_transient is not None,
         "theta_repose_deg": float(config.theta_repose_deg),
         "relative_density_insitu": float(config.relative_density_insitu),
+        # ADR-0025: which foreland entry physics ran. 'blanketed_tanh' is the
+        # adopted baseline; 'open_entry' marks the on-demand KP 62.0
+        # sensitivity so its results can never masquerade as baseline.
+        "foreland_treatment": config.foreland_treatment,
         # Stochastic seepage length L (review #3); mean lives in geometry.L.
         "seepage_length": {
             "stochastic": bool(seepage_length_stochastic),
@@ -805,6 +819,7 @@ def run_fragility_analysis(
         theta_repose_rad=config.theta_repose_rad,
         relative_density=config.relative_density_insitu,
         alpha_exponent_transient=config.alpha_exponent_transient,
+        foreland_open=config.foreland_treatment == "open_entry",
     )
     grid = np.asarray(config.mc.conditioning_grid, dtype=np.float64)
     n_levels = int(grid.size)
