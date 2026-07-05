@@ -163,9 +163,8 @@ from bep_reliability_engine.fragility import (
     save_raw_failure_payload,
 )
 from bep_reliability_engine.hydraulics import (
-    LEAKAGE_RATIO_THRESHOLD_DEFAULT,
     leakage_length_in,
-    leakage_ratio_diagnostic,
+    leakage_length_out,
 )
 from bep_reliability_engine.hydrographs import (
     CanonicalShape,
@@ -466,23 +465,25 @@ def _sample_seepage_length_or_none(config: Config) -> NDArray[np.float64] | None
     )
 
 
-def _leakage_validity_block(
+def _leakage_geometry_block(
     theta_sample: ThetaSample,
     seepage_length_samples: NDArray[np.float64] | None,
     config: Config,
-) -> dict[str, float]:
-    """ADR-0006 monitoring: L/lambda_in over the sampled prior, logged + recorded.
+) -> dict[str, float | str]:
+    """ADR-0006 (amended 2026-07-05) leakage-geometry record — descriptive only.
 
-    ADR-0006 demoted the full hyperbolic Mazure form on the obligation to
-    "compute and log L/lambda_in per realization [and] warn if a material
-    fraction of realizations violates L << lambda_in". This is that monitor,
-    run once per fragility run in the main process, where the full prior
-    population is visible: lambda_in depends only on theta (not on the
-    conditioning level), so one pass covers the whole sweep. The per-population
-    warning itself is emitted by
-    :func:`~bep_reliability_engine.hydraulics.leakage_ratio_diagnostic`; the
-    returned block goes to ``metadata['leakage_ratio_diagnostic']`` so the
-    validity picture is persisted with the result, not only warned about.
+    The predecessor of this block was an L/lambda_in "validity" alarm; the
+    amendment withdrew it as a category error (L is the exact linear USACE-L2
+    base-width term of the ratio form and carries no smallness condition; the
+    genuine finite-extent corrections act on the foreland and hinterland
+    extents). What remains worth recording per run is the *geometry* behind
+    r_e over the sampled prior: the median leakage lengths, the foreland tanh
+    credit (how far B_f is from semi-infinite), the median shares of the
+    three r_e denominator terms, the descriptive L/lambda_in (reported, NOT a
+    gate), and the hinterland semi-infinite assumption with the 3*lambda_in
+    extent threshold its site verification needs — auto-generating the
+    numbers the L3 resolution reads. Nothing here warns and nothing gates;
+    the block goes to ``metadata['leakage_geometry']``.
 
     When L is stochastic the per-realization L_j pairs with theta_j
     row-for-row, exactly as in the evaluation itself.
@@ -493,28 +494,54 @@ def _leakage_validity_block(
         theta_sample.column("D_bl"),
         theta_sample.column("k_bl"),
     )
+    lambda_out = leakage_length_out(
+        theta_sample.column("k_aq"),
+        theta_sample.column("D_aq"),
+        config.geometry.D_fore,
+        config.geometry.k_fore,
+        np.inf,  # semi-infinite reference for the tanh-credit ratio
+    )
+    lambda_out_eff = leakage_length_out(
+        theta_sample.column("k_aq"),
+        theta_sample.column("D_aq"),
+        config.geometry.D_fore,
+        config.geometry.k_fore,
+        config.geometry.foreshore_width,
+    )
     seepage: NDArray[np.float64] | float = (
         seepage_length_samples
         if seepage_length_samples is not None
         else float(config.geometry.L)
     )
-    flagged = leakage_ratio_diagnostic(seepage, lambda_in)
-    ratio = np.asarray(seepage, dtype=np.float64) / lambda_in
-    block = {
-        "ratio_threshold": float(LEAKAGE_RATIO_THRESHOLD_DEFAULT),
-        "flagged_fraction": float(np.mean(flagged)),
-        "median_ratio": float(np.median(ratio)),
-        "p95_ratio": float(np.percentile(ratio, 95.0)),
-        "max_ratio": float(np.max(ratio)),
+    denominator = lambda_out_eff + seepage + lambda_in
+    median_lambda_in = float(np.median(lambda_in))
+    block: dict[str, float | str] = {
+        "median_lambda_in_m": median_lambda_in,
+        "median_lambda_out_eff_m": float(np.median(lambda_out_eff)),
+        "foreshore_width_m": float(config.geometry.foreshore_width),
+        "median_foreland_tanh_credit": float(np.median(lambda_out_eff / lambda_out)),
+        "median_L_over_lambda_in": float(np.median(seepage / lambda_in)),
+        "denominator_share_foreland_median": float(
+            np.median(lambda_out_eff / denominator)
+        ),
+        "denominator_share_base_L_median": float(np.median(seepage / denominator)),
+        "denominator_share_hinterland_median": float(
+            np.median(lambda_in / denominator)
+        ),
+        "hinterland_assumption": "semi_infinite",
+        "hinterland_semi_infinite_threshold_m": 3.0 * median_lambda_in,
     }
     logger.info(
-        "ADR-0006 L/lambda_in validity: %.1f%% of realizations above %.2g "
-        "(median %.3g, p95 %.3g, max %.3g).",
-        100.0 * block["flagged_fraction"],
-        block["ratio_threshold"],
-        block["median_ratio"],
-        block["p95_ratio"],
-        block["max_ratio"],
+        "Leakage geometry (ADR-0006): median lambda_in %.3g m, lambda_out_eff "
+        "%.3g m (tanh credit %.2f); denominator shares foreland/L/hinterland "
+        "%.2f/%.2f/%.2f; hinterland semi-infinite needs >= %.0f m.",
+        block["median_lambda_in_m"],
+        block["median_lambda_out_eff_m"],
+        block["median_foreland_tanh_credit"],
+        block["denominator_share_foreland_median"],
+        block["denominator_share_base_L_median"],
+        block["denominator_share_hinterland_median"],
+        block["hinterland_semi_infinite_threshold_m"],
     )
     return block
 
@@ -562,7 +589,7 @@ def _build_metadata(
     n_jobs: int,
     seepage_length_stochastic: bool,
     canonical: CanonicalShape | None,
-    leakage_validity: dict[str, float],
+    leakage_geometry: dict[str, float | str],
 ) -> dict[str, Any]:
     """Assemble the spec §8 provenance block for the FragilityResult sidecar.
 
@@ -603,9 +630,11 @@ def _build_metadata(
         # persisted before ADR-0012 still carry that older marker and are not
         # retroactively re-blessed.
         "correlation_rho_k_d70_status": "empirical_two_population_adr_0012",
-        # ADR-0006 validity monitoring for the simplified Mazure ratio: the
-        # per-realization L/lambda_in picture behind r_e (fix 4).
-        "leakage_ratio_diagnostic": dict(leakage_validity),
+        # ADR-0006 (amended 2026-07-05): descriptive leakage geometry behind
+        # r_e (medians, denominator shares, foreland tanh credit, hinterland
+        # semi-infinite status). Records only; the former L/lambda_in alarm
+        # was withdrawn as a category error by the amendment.
+        "leakage_geometry": dict(leakage_geometry),
         "c_e_stochastic": True,
         "aquifer_lag_active": bool(config.timestepper.aquifer_lag_active),
         "tau_aq": None,  # lag inactive in Phase 1 (ADR-0014); from S_s when active.
@@ -758,11 +787,11 @@ def run_fragility_analysis(
     n_samples = theta_sample.n_samples
     seepage_length_samples = _sample_seepage_length_or_none(config)
 
-    # 2b. ADR-0006 validity monitoring: compute, log and (if material) warn on
-    #     the per-realization L/lambda_in ratio behind the simplified Mazure
-    #     r_e, once for the whole run (lambda_in is level-independent). The
-    #     block is recorded in metadata below.
-    leakage_validity = _leakage_validity_block(
+    # 2b. ADR-0006 (amended) leakage-geometry record: the descriptive geometry
+    #     behind r_e over the sampled prior, computed once for the whole run
+    #     (lambda_in is level-independent). Records, never gates or warns —
+    #     the former L/lambda_in alarm was a category error (amendment).
+    leakage_geometry = _leakage_geometry_block(
         theta_sample, seepage_length_samples, config
     )
 
@@ -833,7 +862,7 @@ def run_fragility_analysis(
         n_jobs,
         seepage_length_stochastic=seepage_length_samples is not None,
         canonical=canonical,
-        leakage_validity=leakage_validity,
+        leakage_geometry=leakage_geometry,
     )
     raw_path: Path | None = None
     if resolved_path is not None:

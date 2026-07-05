@@ -11,8 +11,6 @@ cross-section foreshore widths 44 / 200 / 325 / 600 m. Foreshore blanket
 properties use the hinterland A_c values as proxy (ADR-0005).
 """
 
-import warnings
-
 import numpy as np
 import pytest
 
@@ -22,7 +20,6 @@ from bep_reliability_engine.hydraulics import (
     aquifer_response_time,
     leakage_length_in,
     leakage_length_out,
-    leakage_ratio_diagnostic,
     make_head_model,
     response_factor,
     translate_instantaneous,
@@ -381,31 +378,13 @@ def test_vectorized_lag_trajectory_matches_scalar_rowwise() -> None:
 
 
 # ---------------------------------------------------------------------------
-# (7) L / lambda_in validity diagnostic (ADR-0006)
+# (7) [retired 2026-07-05] The L/lambda_in "validity diagnostic" tests were
+# removed with leakage_ratio_diagnostic itself: ADR-0006 (amended) found the
+# ratio was a category error — L is the exact linear USACE-L2 term of the
+# ratio form and carries no smallness condition. The descriptive
+# leakage-geometry record that replaced the alarm is tested at the run level
+# (tests/test_run.py::test_leakage_geometry_recorded_without_warning).
 # ---------------------------------------------------------------------------
-
-
-def test_validity_diagnostic_flags_and_warns() -> None:
-    """Flags rows with L / lambda_in above threshold; warns on the fraction."""
-    lam_in_m = np.array([400.0, 200.0, 60.0, 25.0])
-    # L / lambda_in = [0.125, 0.25, 0.833, 2.0] against threshold 0.5;
-    # flagged fraction 0.5 exceeds warn_fraction 0.25.
-    with pytest.warns(UserWarning):
-        mask = leakage_ratio_diagnostic(
-            SEEPAGE_LENGTH_M, lam_in_m, ratio_threshold=0.5, warn_fraction=0.25
-        )
-    np.testing.assert_array_equal(mask, [False, False, True, True])
-
-
-def test_validity_diagnostic_silent_when_valid() -> None:
-    """No flags and no warning when L << lambda_in for all realizations."""
-    lam_in_m = np.array([400.0, 500.0, 1000.0])  # ratios 0.125, 0.10, 0.05
-    with warnings.catch_warnings():
-        warnings.simplefilter("error")
-        mask = leakage_ratio_diagnostic(
-            SEEPAGE_LENGTH_M, lam_in_m, ratio_threshold=0.5, warn_fraction=0.01
-        )
-    assert not np.asarray(mask).any()
 
 
 # ---------------------------------------------------------------------------

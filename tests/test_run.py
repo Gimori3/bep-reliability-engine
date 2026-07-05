@@ -29,6 +29,7 @@ test — is what is under test here.
 from __future__ import annotations
 
 import json
+import warnings
 
 import h5py
 import numpy as np
@@ -344,31 +345,21 @@ def test_refuses_to_overwrite_existing_result(tmp_path) -> None:
 
 
 # ---------------------------------------------------------------------------
-# (4a) ADR-0006 L/lambda_in validity monitoring (health-assessment fix 4)
+# (4a) ADR-0006 (amended 2026-07-05) leakage-geometry record. The former
+#      L/lambda_in "validity" alarm was a category error — L is the exact
+#      linear USACE-L2 term and carries no smallness condition — so the
+#      monitor is repurposed: descriptive geometry of the r_e denominator,
+#      recorded per run, gating nothing and warning about nothing.
 # ---------------------------------------------------------------------------
 
 
-def test_leakage_ratio_diagnostic_recorded_and_warns() -> None:
-    """The ADR-0006 monitoring obligation is wired and recorded per run.
+def _independent_leakage_arrays(config):
+    """Recompute lambda_in / lambda_out_eff from the config-determined draw."""
+    from bep_reliability_engine.hydraulics import (
+        leakage_length_in,
+        leakage_length_out,
+    )
 
-    ADR-0006 demoted the full hyperbolic Mazure form on condition that
-    L/lambda_in is computed per realization, logged, and warned about when a
-    material fraction violates L << lambda_in. The toy prior violates it by
-    construction (median lambda_in ~ 30 m against L = 30 m), so the run must
-    emit the ADR-0006 ``UserWarning`` and record the flagged fraction and
-    ratio statistics in ``metadata['leakage_ratio_diagnostic']`` — matching an
-    independent recomputation from the same config-determined sample.
-    """
-    from bep_reliability_engine.hydraulics import leakage_length_in
-
-    config = _make_config(n_samples=_TOY_N, conditioning_grid=_TOY_GRID)
-    with pytest.warns(UserWarning, match="Mazure"):
-        result = run_fragility_analysis(config, n_jobs=1, progress=False, persist=False)
-
-    diagnostic = result.metadata["leakage_ratio_diagnostic"]
-    assert diagnostic["ratio_threshold"] == pytest.approx(0.2)
-
-    # Independent reference from the same config-determined prior draw.
     sample = sample_theta(
         config.priors.to_marginal_specs(),
         seed=config.mc.seed,
@@ -384,58 +375,95 @@ def test_leakage_ratio_diagnostic_recorded_and_warns() -> None:
         sample.column("D_bl"),
         sample.column("k_bl"),
     )
-    ratio = config.geometry.L / lambda_in
-    assert diagnostic["flagged_fraction"] == pytest.approx(float(np.mean(ratio > 0.2)))
-    assert diagnostic["median_ratio"] == pytest.approx(float(np.median(ratio)))
-    assert diagnostic["p95_ratio"] == pytest.approx(float(np.percentile(ratio, 95.0)))
-    assert diagnostic["max_ratio"] == pytest.approx(float(np.max(ratio)))
-    assert (
-        diagnostic["median_ratio"] <= diagnostic["p95_ratio"] <= diagnostic["max_ratio"]
+    lambda_out_eff = leakage_length_out(
+        sample.column("k_aq"),
+        sample.column("D_aq"),
+        config.geometry.D_fore,
+        config.geometry.k_fore,
+        config.geometry.foreshore_width,
     )
-    # The toy prior sits at the validity boundary by construction.
-    assert diagnostic["flagged_fraction"] > 0.9
+    return lambda_in, lambda_out_eff
 
-    # ADR-0012 (accepted 2026-07-03): the empirical OYO analysis adopted the
-    # two-population decoupling, retiring the provisional rho = 0.6 and the
-    # provisional_pending marker with it. Runs now carry the empirical status.
+
+def test_leakage_geometry_recorded_without_warning() -> None:
+    """The repurposed monitor records geometry and no longer false-alarms.
+
+    The toy prior has median lambda_in ~ 30 m against L = 30 m — exactly the
+    configuration the retired L/lambda_in alarm misread as '100% invalid'.
+    Under the amended ADR-0006 the run must complete with NO Mazure warning
+    (the ratio form is exact in L), and ``metadata['leakage_geometry']`` must
+    carry the descriptive record: median leakage lengths, the foreland tanh
+    credit, the r_e denominator shares, the descriptive L/lambda_in, and the
+    hinterland semi-infinite assumption with its 3*lambda_in threshold — all
+    matching an independent recomputation from the same config-determined
+    sample.
+    """
+    config = _make_config(n_samples=_TOY_N, conditioning_grid=_TOY_GRID)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", UserWarning)
+        result = run_fragility_analysis(config, n_jobs=1, progress=False, persist=False)
+
+    block = result.metadata["leakage_geometry"]
+    lambda_in, lambda_out_eff = _independent_leakage_arrays(config)
+    length = config.geometry.L
+    denominator = lambda_out_eff + length + lambda_in
+
+    assert block["median_lambda_in_m"] == pytest.approx(float(np.median(lambda_in)))
+    assert block["median_lambda_out_eff_m"] == pytest.approx(
+        float(np.median(lambda_out_eff))
+    )
+    # Toy geometry has B_f = 0: no foreland credit, zero foreland share.
+    assert block["foreshore_width_m"] == pytest.approx(0.0)
+    assert block["median_foreland_tanh_credit"] == pytest.approx(0.0)
+    assert block["denominator_share_foreland_median"] == pytest.approx(0.0)
+    assert block["denominator_share_base_L_median"] == pytest.approx(
+        float(np.median(length / denominator))
+    )
+    assert block["denominator_share_hinterland_median"] == pytest.approx(
+        float(np.median(lambda_in / denominator))
+    )
+    # Descriptive only — present, ~1.0 for this prior, and gating nothing.
+    assert block["median_L_over_lambda_in"] == pytest.approx(
+        float(np.median(length / lambda_in))
+    )
+    assert block["median_L_over_lambda_in"] > 0.9
+    # The hinterland semi-infinite assumption is surfaced with its threshold,
+    # auto-generating the numbers the L3 site resolution needs.
+    assert block["hinterland_assumption"] == "semi_infinite"
+    assert block["hinterland_semi_infinite_threshold_m"] == pytest.approx(
+        3.0 * float(np.median(lambda_in))
+    )
+
+    # ADR-0012 (accepted 2026-07-03): runs carry the empirical-rho status.
     assert (
         result.metadata["correlation_rho_k_d70_status"]
         == "empirical_two_population_adr_0012"
     )
 
 
-def test_leakage_ratio_uses_stochastic_L_when_sampled() -> None:
-    """With stochastic L the diagnostic pairs L_j with theta_j row-for-row."""
-    from bep_reliability_engine.hydraulics import leakage_length_in
+def test_leakage_geometry_pairs_stochastic_L_rowwise() -> None:
+    """With stochastic L the record pairs L_j with theta_j row-for-row."""
     from bep_reliability_engine.run import _sample_seepage_length_or_none
 
     config = _make_config(
         n_samples=_TOY_N, conditioning_grid=_TOY_GRID, seepage_length_cov=0.2
     )
-    with pytest.warns(UserWarning, match="Mazure"):
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", UserWarning)
         result = run_fragility_analysis(config, n_jobs=1, progress=False, persist=False)
 
-    sample = sample_theta(
-        config.priors.to_marginal_specs(),
-        seed=config.mc.seed,
-        rho_log_kaq_d70=config.correlation.rho_log_kaq_d70,
-        d70_interpretation=config.priors.d70_interpretation,
-        n_samples=config.mc.n_samples,
-        coupling=config.correlation.coupling,
-        bounds=config.priors.bounds,
-    )
-    lambda_in = leakage_length_in(
-        sample.column("k_aq"),
-        sample.column("D_aq"),
-        sample.column("D_bl"),
-        sample.column("k_bl"),
-    )
+    lambda_in, lambda_out_eff = _independent_leakage_arrays(config)
     seepage = _sample_seepage_length_or_none(config)
     assert seepage is not None
-    ratio = seepage / lambda_in
-    diagnostic = result.metadata["leakage_ratio_diagnostic"]
-    assert diagnostic["median_ratio"] == pytest.approx(float(np.median(ratio)))
-    assert diagnostic["max_ratio"] == pytest.approx(float(np.max(ratio)))
+    denominator = lambda_out_eff + seepage + lambda_in
+
+    block = result.metadata["leakage_geometry"]
+    assert block["median_L_over_lambda_in"] == pytest.approx(
+        float(np.median(seepage / lambda_in))
+    )
+    assert block["denominator_share_base_L_median"] == pytest.approx(
+        float(np.median(seepage / denominator))
+    )
 
 
 # ---------------------------------------------------------------------------

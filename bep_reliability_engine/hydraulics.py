@@ -36,20 +36,30 @@ and returns the next. The only state in this module is the per-event h_aq
 held by the thin :class:`LaggedHead` wrapper that adapts the pure kernel to
 the :class:`AquiferHeadModel` protocol.
 
-Hydraulic schematization (Pol 2022 thesis, Eq. (7.13); USACE 2000 blanket
-theory case 7a; TAW 2004 model 4A): steady horizontal Darcy flow in a leaky
-aquifer, vertical leakage through the blankets, semi-infinite hinterland
-blanket. Under this schematization the ratio
-``r_e = lambda_in / (lambda_out_eff + L + lambda_in)`` is exact, not a
-first-order approximation. Finite foreshore extent enters through the
-effective entry length
-``lambda_out_eff = lambda_out * tanh(B_f / lambda_out)`` (TR Zandmeevoerende
-Wellen 1999 Eq. (19); TAW 2004 App. I Eq. (A.I.9); ADR-0006). The in-L
-hyperbolic refinement is deliberately not implemented and there is no
-automatic switch to it: per ADR-0006 its validity domain is monitored per
-realization by :func:`leakage_ratio_diagnostic` (logged and warned, run
-unaltered), and the full form is a documented extension to be implemented
-against a verified source only if the diagnostic triggers materially.
+Hydraulic schematization and provenance (ADR-0006, amended 2026-07-05): the
+three-term ratio ``r_e = lambda_in / (lambda_out_eff + L + lambda_in)`` is
+the **exact closed form** of USACE (2000) EM 1110-2-1913 Appendix B blanket
+theory (Case 7a; landside head factor x3/(x1 + L2 + x3), Eqs. B-3/B-5/B-7)
+and of TAW (2004) Model 4A (total resistance = the sum of the subregion
+resistances L_n/kD of foreland, dike and hinterland; head linear in the
+resistances). Pol (2022) thesis Eq. (7.13), r_e = lambda/(L + lambda), is
+its special case with no riverside blanket and an infinitely long polder
+blanket; Pol SIE 2024 / CG24 take r_e as a bare deterministic input (0.6).
+
+Under this schematization L (= USACE L2, the levee base width) is the exact
+*linear* horizontal-resistance term of the under-levee segment: it is never
+inside a tanh and carries **no smallness condition** — there is no "in-L
+hyperbolic form" to fall back to (the former L/lambda_in validity monitor
+was a category error, withdrawn by the ADR-0006 amendment). The genuine
+finite-extent (tanh) corrections apply to the *foreland and hinterland
+extents*: the foreland is handled in-model through the effective entry
+length ``lambda_out_eff = lambda_out * tanh(B_f / lambda_out)`` (USACE Eq.
+B-7; TR Zandmeevoerende Wellen 1999 Eq. (19); TAW 2004 App. I Eq. (A.I.9);
+ADR-0006 Decision 1), while the hinterland is taken semi-infinite
+(x3 = lambda_in, USACE Eq. B-3, matching Pol Eq. (7.13)) — a site-data
+assumption whose status is recorded per run in
+``metadata['leakage_geometry']`` (see ADR-0006 Consequences and the
+companion note ``docs/decisions/adr0006-leakage-boundary-ratios.md``).
 
 Units and datum
 ---------------
@@ -73,15 +83,12 @@ USACE EM 1110-2-1913 (2000). ADR-0004 through ADR-0007.
 
 from __future__ import annotations
 
-import warnings
 from typing import Protocol
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
 __all__ = [
-    "LEAKAGE_RATIO_THRESHOLD_DEFAULT",
-    "LEAKAGE_RATIO_WARN_FRACTION_DEFAULT",
     "AquiferHeadModel",
     "InstantaneousHead",
     "LaggedHead",
@@ -89,19 +96,10 @@ __all__ = [
     "aquifer_response_time",
     "leakage_length_in",
     "leakage_length_out",
-    "leakage_ratio_diagnostic",
     "make_head_model",
     "response_factor",
     "translate_instantaneous",
 ]
-
-# ADR-0006 validity-monitoring defaults for the simplified Mazure ratio:
-# realizations with L / lambda_in above the threshold are flagged, and a
-# UserWarning fires when the flagged fraction exceeds the warn fraction.
-# Named constants (rather than bare literals in the signature) so the
-# orchestrator can record the operative threshold in run metadata.
-LEAKAGE_RATIO_THRESHOLD_DEFAULT: float = 0.2
-LEAKAGE_RATIO_WARN_FRACTION_DEFAULT: float = 0.01
 
 
 def leakage_length_in(
@@ -238,16 +236,18 @@ def response_factor(
 
     Notes
     -----
-    Exact — not a first-order approximation — under the Pol 2022 Eq. (7.13)
-    schematization: steady horizontal flow in a leaky aquifer, vertical
-    leakage, semi-infinite blankets, quasi-static response. Per ADR-0006
-    there is deliberately no automatic switch to the in-L hyperbolic form
-    when L is not small relative to lambda_in: violations are surfaced by
-    :func:`leakage_ratio_diagnostic` (logged, warned, run unaltered), and
-    the full form remains a documented extension pending a verified source.
-    r_e is stochastic: it depends on four of the seven sampled variables
-    through the leakage lengths and must be computed per realization, never
-    precomputed once (spec Property 3).
+    Exact — for any L — under the USACE (2000) Case 7a / TAW (2004) Model 4A
+    schematization: steady horizontal Darcy flow in a leaky aquifer, vertical
+    leakage through the blankets, quasi-static response. This is the USACE
+    landside head factor x3/(x1 + L2 + x3) with x1 = ``lambda_out_eff_m``
+    (finite foreland, Eq. B-7), L2 = ``seepage_length_m`` (levee base width,
+    an exact linear resistance never inside a tanh — the retired L/lambda_in
+    "validity" monitor compared the wrong two lengths, ADR-0006 amendment)
+    and x3 = ``lambda_in_m`` (semi-infinite hinterland, Eq. B-3; the
+    hinterland-extent assumption is a recorded site-data item). Pol (2022)
+    Eq. (7.13) is the x1 = 0 special case. r_e is stochastic: it depends on
+    four of the seven sampled variables through the leakage lengths and must
+    be computed per realization, never precomputed once (spec Property 3).
     """
     lam_in = np.asarray(lambda_in_m, dtype=np.float64)
     lam_out_eff = np.asarray(lambda_out_eff_m, dtype=np.float64)
@@ -400,67 +400,6 @@ def advance_lag_state(
     h_inst = translate_instantaneous(h_river_m, r_e, z_toe_m)
     factor = -np.expm1(-dt_s / tau_aq)
     return h_prev + factor * (h_inst - h_prev)
-
-
-def leakage_ratio_diagnostic(
-    seepage_length_m: ArrayLike,
-    lambda_in_m: ArrayLike,
-    *,
-    ratio_threshold: float = LEAKAGE_RATIO_THRESHOLD_DEFAULT,
-    warn_fraction: float = LEAKAGE_RATIO_WARN_FRACTION_DEFAULT,
-) -> NDArray[np.bool_]:
-    """Validity diagnostic for the simplified (semi-infinite) Mazure ratio.
-
-    Flags realizations whose L / lambda_in exceeds ``ratio_threshold``,
-    i.e. where the seepage length is not small relative to the hinterland
-    leakage length and the in-L hyperbolic refinement could matter
-    (ADR-0006). Emits a :class:`UserWarning` when the flagged fraction
-    exceeds ``warn_fraction``.
-
-    Parameters
-    ----------
-    seepage_length_m : array_like of float
-        Seepage length L [m].
-    lambda_in_m : array_like of float
-        Hinterland leakage length [m], per realization.
-    ratio_threshold : float, optional
-        Maximum acceptable L / lambda_in [-]. Default
-        :data:`LEAKAGE_RATIO_THRESHOLD_DEFAULT` (0.2); the orchestrator
-        records the operative value in run metadata.
-    warn_fraction : float, optional
-        Flagged-realization fraction [-] above which a warning is emitted.
-        Default :data:`LEAKAGE_RATIO_WARN_FRACTION_DEFAULT` (0.01).
-
-    Returns
-    -------
-    numpy.ndarray of bool
-        True where L / lambda_in > ratio_threshold.
-
-    Notes
-    -----
-    Per ADR-0006 the full hyperbolic Mazure solution in L/lambda_in is a
-    documented extension, not an automatic fallback: this diagnostic is
-    logged and the run is not altered. At Tokachi scale (L of tens of
-    meters, lambda_in of hundreds of meters) the bulk of the prior is
-    expected to satisfy the condition.
-    """
-    length = np.asarray(seepage_length_m, dtype=np.float64)
-    lam_in = np.asarray(lambda_in_m, dtype=np.float64)
-    ratio = length / lam_in
-    mask = ratio > ratio_threshold
-
-    flagged_fraction = float(np.mean(mask))
-    if flagged_fraction > warn_fraction:
-        warnings.warn(
-            "Simplified Mazure ratio validity violated: "
-            f"{flagged_fraction:.1%} of realizations have "
-            f"L/lambda_in > {ratio_threshold:g} "
-            f"(max ratio {float(np.max(ratio)):.3g}). Per ADR-0006 the run "
-            "is unaltered; consider the documented hyperbolic extension.",
-            UserWarning,
-            stacklevel=2,
-        )
-    return mask
 
 
 class AquiferHeadModel(Protocol):
