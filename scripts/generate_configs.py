@@ -202,14 +202,33 @@ def _quarters(start_q: int, end_q: int) -> list[float]:
 # opens) + a uniform 0.25 m sweep from just above the toe (where the uplift/
 # heave transition lives) to HWL + 4 m (covering the extreme-HFB stage range,
 # so the fitted curve is not extrapolated in the scenario analysis). N_h =
-# 23/29/30/26 against the spec target ~30. Derivation inputs: ADR-0021 toe,
+# 23/29/30/38 against the spec target ~30. Derivation inputs: ADR-0021 toe,
 # 2019 HWL, HQrelation_TokachiRiv_2017.csv ratings (h_base = 34.77 / 36.52 /
 # 38.29 / 41.70 m MSL at KP 57.4 / 58.8 / 60.0 / 62.0).
+#
+# KP 62.0 static-bracketing extension (ADR-0024): 0.5 m steps from 51.0 to
+# 56.5 m MSL (12 levels, N_h 26 -> 38). These upper levels are HYPOTHETICAL
+# fit-stabilizers — they exceed the design crest (47.89 m MSL, ADR-0021
+# cross-check table) and the maximum attainable d4PDF stage (~51.5 m MSL at
+# the KP 62.0 rating) — added only so the STATIC transition (P_f ~ 0.54 at
+# 56.5 per the 2026-07-03 probe) is bracketed and its lognormal fit is
+# data-supported. They carry no hazard weight in the fragility x hazard
+# composition and must not be plotted as attainable states. The TRANSIENT
+# transition (~67 m MSL) is deliberately not chased: per ADR-0024 that
+# branch's deliverable is the raw tail with binomial CIs.
+_KP62_STATIC_BRACKETING_EXT: list[float] = [51.0 + 0.5 * i for i in range(12)]
+
 CONDITIONING_GRID_MSL: dict[str, list[float]] = {
     "57.4": [34.75, 36.50, 38.00, *_quarters(154, 173)],  # 38.50..43.25, N_h=23
     "58.8": [36.50, 37.50, 38.25, *_quarters(155, 180)],  # 38.75..45.00, N_h=29
     "60.0": [38.25, 39.25, 39.75, *_quarters(161, 187)],  # 40.25..46.75, N_h=30
-    "62.0": [41.75, 43.25, 44.50, *_quarters(180, 202)],  # 45.00..50.50, N_h=26
+    "62.0": [
+        41.75,
+        43.25,
+        44.50,
+        *_quarters(180, 202),  # 45.00..50.50 (0.25 m sweep to HWL + 4)
+        *_KP62_STATIC_BRACKETING_EXT,  # 51.0..56.5 (ADR-0024), N_h=38
+    ],
 }
 
 # --- Canonical d4PDF shape events (ADR-0020; approved 2026-07-03, gap G1) -----

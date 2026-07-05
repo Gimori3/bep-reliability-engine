@@ -93,13 +93,25 @@ def _quarters(start_q: int, end_q: int) -> list[float]:
 # three sub-toe anchors (base-flow stage region — zero-load floor of the
 # fragility curve) + a 0.25 m sweep from just above the ADR-0021 toe up to
 # HWL + 4 m (covering the extreme-HFB stage range so the fitted curve is not
-# extrapolated in the scenario analysis). Duplicated here from the generator
-# deliberately: this file is the drift guard, not a re-derivation.
+# extrapolated in the scenario analysis). KP 62.0 additionally carries the
+# ADR-0024 static-bracketing extension: 0.5 m steps from 51.0 to 56.5 m MSL
+# (12 levels, N_h 26 -> 38), hypothetical fit-stabilizers above the crest
+# (47.89 m) and the max attainable stage (~51.5 m) so the static transition
+# (P_f ~ 0.54 at 56.5 per the 2026-07-03 probe) is bracketed; the transient
+# transition is deliberately NOT chased (raw-tail deliverable instead).
+# Duplicated here from the generator deliberately: this file is the drift
+# guard, not a re-derivation.
 _EXPECTED_GRID_MSL = {
     "57.4": [34.75, 36.50, 38.00, *_quarters(154, 173)],  # 38.50..43.25, N_h=23
     "58.8": [36.50, 37.50, 38.25, *_quarters(155, 180)],  # 38.75..45.00, N_h=29
     "60.0": [38.25, 39.25, 39.75, *_quarters(161, 187)],  # 40.25..46.75, N_h=30
-    "62.0": [41.75, 43.25, 44.50, *_quarters(180, 202)],  # 45.00..50.50, N_h=26
+    "62.0": [
+        41.75,
+        43.25,
+        44.50,
+        *_quarters(180, 202),  # 45.00..50.50 (0.25 m sweep)
+        *[51.0 + 0.5 * i for i in range(12)],  # 51.0..56.5 (ADR-0024), N_h=38
+    ],
 }
 
 

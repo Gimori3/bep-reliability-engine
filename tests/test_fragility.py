@@ -57,8 +57,10 @@ from bep_reliability_engine.fragility import (
 # matrix and its names; the column contents are immaterial to the fragility math.
 PARAM_NAMES = ["k_aq", "d_70", "D_aq", "D_bl", "k_bl", "gamma_bl_sub", "C_e"]
 
-# FragilityResult field listing, in the exact spec §2 order (the "defines the
-# dataclass exactly per the spec" requirement).
+# FragilityResult field listing, in the exact spec §2 order plus the additive
+# ADR-0024 extension: ``binomial_ci`` follows ``bootstrap_bands`` (the ADR-0017
+# contract-extension precedent — additive field, pinned here, Phase 2 reads by
+# attribute name and constructs nothing).
 EXPECTED_FRAGILITY_FIELDS = (
     "conditioning_grid",
     "P_f_static_raw",
@@ -66,6 +68,7 @@ EXPECTED_FRAGILITY_FIELDS = (
     "P_f_static_fit",
     "P_f_trans_fit",
     "bootstrap_bands",
+    "binomial_ci",
     "theta_matrix",
     "param_names",
     "failure_matrix_stat",
@@ -545,6 +548,230 @@ def test_save_load_round_trips_datum_and_legacy_files_default_to_zero(
     legacy = FragilityResult.load(path)
     assert legacy.P_f_static_fit.datum_m == 0.0
     assert legacy.P_f_trans_fit.datum_m == 0.0
+
+
+# ---------------------------------------------------------------------------
+# (1c) ADR-0024: always-on Clopper-Pearson CIs, Optional fits, and the
+#      per-branch deliverable flag
+# ---------------------------------------------------------------------------
+
+
+def _count_matrix(fractions: list[float], n: int) -> np.ndarray:
+    """(N, N_h) bool matrix with exact per-level failure fractions (monotone)."""
+    out = np.zeros((n, len(fractions)), dtype=bool)
+    for j, fraction in enumerate(fractions):
+        out[: int(round(fraction * n)), j] = True
+    return out
+
+
+def test_binomial_ci_clopper_pearson_exact_and_persisted(tmp_path) -> None:
+    """Exact binomial CIs on the raw points, for both branches, always (ADR-0024).
+
+    The Clopper-Pearson interval is pinned against its beta-quantile closed
+    form (lower = 0 at k = 0, upper = 1 at k = n), must cover the point
+    estimate at every level, is attached to every result as the additive
+    ``binomial_ci`` field, and round-trips through HDF5.
+    """
+    from bep_reliability_engine.fragility import binomial_ci
+
+    n = 200
+    counts = np.array([0, 1, 20, 200])
+    p_f = counts / n
+    lo, hi = binomial_ci(p_f, n, confidence=0.95)
+
+    alpha = 0.05
+    from scipy.stats import beta
+
+    for j, k in enumerate(counts):
+        expected_lo = 0.0 if k == 0 else float(beta.ppf(alpha / 2, k, n - k + 1))
+        expected_hi = 1.0 if k == n else float(beta.ppf(1 - alpha / 2, k + 1, n - k))
+        assert lo[j] == pytest.approx(expected_lo, abs=1e-12)
+        assert hi[j] == pytest.approx(expected_hi, abs=1e-12)
+    assert np.all(lo <= p_f) and np.all(p_f <= hi)
+    assert lo[0] == 0.0 and hi[-1] == 1.0
+
+    # Attached by the assembler for both branches, shaped like the grid, and
+    # equal to the standalone helper applied to the raw points.
+    grid = np.linspace(4.5, 10.0, 9)
+    n_real = 256
+    fm_stat = _lognormal_failure_matrix(float(np.log(7.0)), 0.30, grid, n_real)
+    fm_tran = _lognormal_failure_matrix(float(np.log(5.0)), 0.45, grid, n_real)
+    theta = np.zeros((n_real, len(PARAM_NAMES)))
+    result = assemble_fragility(
+        theta,
+        list(PARAM_NAMES),
+        grid,
+        fm_stat,
+        fm_tran,
+        _metadata(),
+        n_bootstrap=25,
+        seed=6,
+    )
+    assert set(result.binomial_ci) == {"static", "transient"}
+    for key, p_raw in (
+        ("static", result.P_f_static_raw),
+        ("transient", result.P_f_trans_raw),
+    ):
+        ci_lo, ci_hi = result.binomial_ci[key]
+        assert ci_lo.shape == grid.shape and ci_hi.shape == grid.shape
+        ref_lo, ref_hi = binomial_ci(p_raw, n_real, confidence=0.95)
+        np.testing.assert_allclose(ci_lo, ref_lo, atol=0.0)
+        np.testing.assert_allclose(ci_hi, ref_hi, atol=0.0)
+        assert np.all(ci_lo <= p_raw) and np.all(p_raw <= ci_hi)
+
+    # HDF5 round trip preserves the CIs bit-for-bit.
+    path = tmp_path / "ci.h5"
+    result.save(path)
+    loaded = FragilityResult.load(path)
+    for key in ("static", "transient"):
+        np.testing.assert_array_equal(
+            np.asarray(loaded.binomial_ci[key][0]),
+            np.asarray(result.binomial_ci[key][0]),
+        )
+        np.testing.assert_array_equal(
+            np.asarray(loaded.binomial_ci[key][1]),
+            np.asarray(result.binomial_ci[key][1]),
+        )
+
+
+def test_binomial_ci_recomputed_when_loading_legacy_files(tmp_path) -> None:
+    """Files written before ADR-0024 load with CIs recomputed, not missing.
+
+    The CI is a deterministic function of the retained failure matrices, so a
+    legacy file (no ``binomial_ci`` group) must load with identical values to
+    a fresh assembly — never with an absent field.
+    """
+    grid = np.linspace(4.5, 10.0, 9)
+    n_real = 128
+    fm_stat = _lognormal_failure_matrix(float(np.log(7.0)), 0.30, grid, n_real)
+    fm_tran = _lognormal_failure_matrix(float(np.log(5.0)), 0.45, grid, n_real)
+    theta = np.zeros((n_real, len(PARAM_NAMES)))
+    result = assemble_fragility(
+        theta,
+        list(PARAM_NAMES),
+        grid,
+        fm_stat,
+        fm_tran,
+        _metadata(),
+        n_bootstrap=25,
+        seed=7,
+    )
+    path = tmp_path / "legacy.h5"
+    result.save(path)
+    with h5py.File(path, "a") as handle:
+        del handle["binomial_ci"]  # simulate a pre-ADR-0024 file
+    legacy = FragilityResult.load(path)
+    for key in ("static", "transient"):
+        np.testing.assert_allclose(
+            np.asarray(legacy.binomial_ci[key][0]),
+            np.asarray(result.binomial_ci[key][0]),
+            atol=0.0,
+        )
+        np.testing.assert_allclose(
+            np.asarray(legacy.binomial_ci[key][1]),
+            np.asarray(result.binomial_ci[key][1]),
+            atol=0.0,
+        )
+
+
+def test_fit_none_on_degenerate_branch_never_aborts(tmp_path) -> None:
+    """A branch with < 2 interior points yields ``None``, not an abort (ADR-0024).
+
+    The transient branch here has a single interior level (one failing row at
+    the top level), which used to raise out of ``assemble_fragility`` after
+    the sweep. Now: the fit is ``None``, the deliverable flag says
+    ``raw_tail_binomial`` with ``fit_available: False``, the binomial CIs are
+    still present (they need no fit), the healthy static branch keeps its
+    fitted curve, and the ``None`` survives the HDF5 round trip.
+    """
+    grid = np.array([4.0, 6.0, 8.0, 10.0])
+    n_real = 40
+    fm_stat = _lognormal_failure_matrix(float(np.log(7.0)), 0.30, grid, n_real)
+    fm_tran = np.zeros((n_real, grid.size), dtype=bool)
+    fm_tran[0, 3] = True  # p = [0, 0, 0, 1/40]: one interior point
+    theta = np.zeros((n_real, len(PARAM_NAMES)))
+
+    with pytest.warns(UserWarning, match="degenerate"):
+        result = assemble_fragility(
+            theta,
+            list(PARAM_NAMES),
+            grid,
+            fm_stat,
+            fm_tran,
+            _metadata(),
+            n_bootstrap=50,
+            seed=5,
+        )
+
+    assert result.P_f_trans_fit is None
+    assert isinstance(result.P_f_static_fit, LognormFragility)
+
+    deliverable = result.metadata["fragility_deliverable"]
+    assert deliverable["transient"]["form"] == "raw_tail_binomial"
+    assert deliverable["transient"]["transition_bracketed"] is False
+    assert deliverable["transient"]["fit_available"] is False
+    assert deliverable["transient"]["fit_role"] == "unavailable"
+    assert deliverable["transient"]["max_p_f_raw"] == pytest.approx(1.0 / 40.0)
+
+    ci_lo, ci_hi = result.binomial_ci["transient"]
+    assert np.all(np.isfinite(ci_lo)) and np.all(np.isfinite(ci_hi))
+    assert np.all(ci_lo <= result.P_f_trans_raw)
+    assert np.all(result.P_f_trans_raw <= ci_hi)
+
+    path = tmp_path / "none_fit.h5"
+    result.save(path)
+    loaded = FragilityResult.load(path)
+    assert loaded.P_f_trans_fit is None
+    assert loaded.P_f_static_fit == result.P_f_static_fit
+
+
+def test_deliverable_forms_bracketed_fitted_and_unbracketed_extrapolative() -> None:
+    """The per-branch deliverable flag implements the ADR-0024 criterion.
+
+    Static branch: transition bracketed (max raw P_f >= 0.5) with a healthy
+    fit -> the fitted lognormal IS the deliverable. Transient branch: a
+    fittable but unbracketed tail (max raw P_f = 0.3) -> the deliverable is
+    the raw tail with binomial CIs, and the stored fit is labelled
+    extrapolative — per the accepted reframing this is the intended primary
+    presentation where the transition is unreachable, not a fallback.
+    """
+    grid = np.array([4.0, 6.0, 8.0, 10.0])
+    n_real = 200
+    fm_stat = _count_matrix([0.05, 0.25, 0.60, 0.90], n_real)  # bracketed
+    fm_tran = _count_matrix([0.0, 0.05, 0.15, 0.30], n_real)  # tail-only
+    theta = np.zeros((n_real, len(PARAM_NAMES)))
+
+    result = assemble_fragility(
+        theta,
+        list(PARAM_NAMES),
+        grid,
+        fm_stat,
+        fm_tran,
+        _metadata(),
+        n_bootstrap=25,
+        seed=9,
+    )
+
+    deliverable = result.metadata["fragility_deliverable"]
+    assert deliverable["ci_method"] == "clopper_pearson"
+    assert deliverable["ci_level"] == pytest.approx(0.95)
+
+    static = deliverable["static"]
+    assert static["form"] == "fitted_lognormal"
+    assert static["transition_bracketed"] is True
+    assert static["max_p_f_raw"] == pytest.approx(0.90)
+    assert static["fit_available"] is True
+    assert static["fit_role"] == "deliverable"
+
+    transient = deliverable["transient"]
+    assert transient["form"] == "raw_tail_binomial"
+    assert transient["transition_bracketed"] is False
+    assert transient["max_p_f_raw"] == pytest.approx(0.30)
+    # The fit exists (two+ interior, increasing probit) but is NOT the
+    # deliverable: stored, labelled extrapolative.
+    assert transient["fit_available"] is True
+    assert transient["fit_role"] == "extrapolative_only"
+    assert isinstance(result.P_f_trans_fit, LognormFragility)
 
 
 # ---------------------------------------------------------------------------

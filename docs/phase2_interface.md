@@ -59,9 +59,24 @@ transient rejection genuinely constrains progression.
 /bootstrap_bands/static_hi (N_h,)   float64
 /bootstrap_bands/trans_lo  (N_h,)   float64
 /bootstrap_bands/trans_hi  (N_h,)   float64
+/binomial_ci/static_lo     (N_h,)   float64    # ADR-0024 Clopper-Pearson CIs
+/binomial_ci/static_hi     (N_h,)   float64    #   on the raw points (always on)
+/binomial_ci/trans_lo      (N_h,)   float64
+/binomial_ci/trans_hi      (N_h,)   float64
 /attrs: fit_static_mu, fit_static_sigma, fit_static_datum_m,
         fit_trans_mu, fit_trans_sigma, fit_trans_datum_m
+        # NaN mu/sigma encode an ADR-0024 None fit (branch carried by its
+        # raw points + binomial CIs; see metadata['fragility_deliverable'])
 ```
+
+Per ADR-0024 the fits are Optional: `P_f_static_fit` / `P_f_trans_fit` are
+`None` where a branch's point set could not be fit (fewer than two interior
+levels), and `metadata['fragility_deliverable']` records per branch whether
+the deliverable is the fitted lognormal or the raw tail points with their
+binomial CIs (`form`, `transition_bracketed`, `max_p_f_raw`, `fit_role`).
+Phase 2 filtering is unaffected either way — it consumes the theta matrix and
+the M8 evaluator, never the fitted curves. Legacy files (no `binomial_ci`
+group) load with the CIs recomputed exactly from the retained matrices.
 
 The fitted curves are lognormal in the load excess `h − datum_m` with
 `datum_m = z_toe` (datum-anchored fit, 2026-07-03); files written before the

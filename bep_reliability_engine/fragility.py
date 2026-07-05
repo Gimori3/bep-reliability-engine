@@ -97,6 +97,7 @@ ADR-0002 (shared realizations across both limit states).
 from __future__ import annotations
 
 import json
+import logging
 import warnings
 from dataclasses import dataclass
 from pathlib import Path
@@ -107,10 +108,13 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.stats import norm
 
+logger = logging.getLogger(__name__)
+
 __all__ = [
     "PF_COV_TARGET",
     "LognormFragility",
     "FragilityResult",
+    "binomial_ci",
     "fit_lognormal_fragility",
     "assemble_fragility",
     "mc_cov_of_pf",
@@ -156,6 +160,65 @@ def mc_cov_of_pf(p_f: NDArray[np.float64], n_realizations: int) -> list[float | 
         else:
             covs.append(None)
     return covs
+
+
+def binomial_ci(
+    p_f: NDArray[np.float64],
+    n_realizations: int,
+    confidence: float = 0.95,
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+    """Clopper-Pearson exact binomial CIs on the raw point estimates (ADR-0024).
+
+    For the failure count ``k = round(p * N)`` at each conditioning level
+    (exact, since the point estimates are means of a boolean matrix)::
+
+        lower = 0                                   if k == 0
+              = Beta.ppf(alpha/2,     k,     N-k+1) otherwise
+        upper = 1                                   if k == N
+              = Beta.ppf(1 - alpha/2, k + 1, N-k)   otherwise
+
+    with ``alpha = 1 - confidence``. Exact (conservative) coverage — the
+    standard choice for rare-event counts, where the deep-tail levels are
+    carried by a handful of failing realizations. Computed always, for both
+    branches, at every section: at tail-only branches (ADR-0024) the raw
+    points with these CIs ARE the fragility deliverable, and at bracketed
+    branches they complement the bootstrap bands (which quantify the fitted
+    curve, not the points).
+
+    Parameters
+    ----------
+    p_f : numpy.ndarray, shape (N_h,)
+        Empirical failure probabilities (per-column means of the boolean
+        failure matrix).
+    n_realizations : int
+        Number of realizations N behind each estimate.
+    confidence : float, optional
+        Two-sided confidence level, in ``(0, 1)``. Default 0.95.
+
+    Returns
+    -------
+    tuple of (numpy.ndarray, numpy.ndarray)
+        ``(lower, upper)`` bounds, each shape ``(N_h,)``, satisfying
+        ``lower <= p_f <= upper`` elementwise.
+    """
+    from scipy.stats import beta
+
+    p = np.asarray(p_f, dtype=np.float64)
+    n = int(n_realizations)
+    k = np.rint(p * n).astype(np.int64)
+    alpha = 1.0 - float(confidence)
+
+    lower = np.zeros_like(p)
+    upper = np.ones_like(p)
+    at_floor = k == 0
+    at_ceiling = k == n
+    if np.any(~at_floor):
+        kk = k[~at_floor]
+        lower[~at_floor] = beta.ppf(alpha / 2.0, kk, n - kk + 1)
+    if np.any(~at_ceiling):
+        kk = k[~at_ceiling]
+        upper[~at_ceiling] = beta.ppf(1.0 - alpha / 2.0, kk + 1, n - kk)
+    return lower, upper
 
 
 @dataclass(frozen=True)
@@ -465,9 +528,22 @@ def assemble_fragility(
 
     Computes the per-column failure fractions as the static and transient
     empirical point estimates, fits a separate :class:`LognormFragility` to each
-    (spec §2), attaches bootstrap confidence bands (spec §11), and retains the
+    (spec §2), attaches bootstrap confidence bands (spec §11) and the always-on
+    Clopper-Pearson binomial CIs on the raw points (ADR-0024), and retains the
     ``theta_matrix`` and *both* failure matrices for the Phase 2 / survival-
     discrimination handoff (spec §8).
+
+    **Never aborts after a completed sweep (ADR-0024).** A branch whose point
+    set cannot be fit (fewer than two interior points, or a non-increasing
+    probit slope) yields ``P_f_*_fit = None`` instead of raising. Each branch's
+    deliverable form is decided by the data-driven bracketing criterion
+    ``max(P_f_raw) >= 0.5`` and recorded under
+    ``metadata['fragility_deliverable']``: a bracketed branch with a fit
+    delivers the fitted lognormal; an unbracketed branch delivers the raw tail
+    points with their binomial CIs (per the accepted ADR-0024 reframing, the
+    intended primary presentation where the transition is unreachable — the
+    static-transient bias is then reported as per-level probability ratios),
+    with any existing fit stored but labelled ``extrapolative_only``.
 
     Parameters
     ----------
@@ -510,12 +586,38 @@ def assemble_fragility(
     p_f_static_raw = fm_stat.mean(axis=0)
     p_f_trans_raw = fm_tran.mean(axis=0)
 
-    p_f_static_fit = fit_lognormal_fragility(grid, p_f_static_raw, datum_m)
-    p_f_trans_fit = fit_lognormal_fragility(grid, p_f_trans_raw, datum_m)
+    # Optional fits (ADR-0024): a degenerate point set — fewer than two
+    # interior levels, or a non-increasing probit slope, both raised by the
+    # fitter — yields None instead of aborting a completed sweep. The raw
+    # matrices and the binomial CIs below carry the branch either way.
+    def _fit_or_none(
+        p_raw: NDArray[np.float64], branch: str
+    ) -> LognormFragility | None:
+        try:
+            return fit_lognormal_fragility(grid, p_raw, datum_m)
+        except ValueError as error:
+            logger.warning(
+                "No lognormal fit for the %s branch (%s); the branch is "
+                "carried by its raw points and binomial CIs (ADR-0024).",
+                branch,
+                error,
+            )
+            return None
+
+    p_f_static_fit = _fit_or_none(p_f_static_raw, "static")
+    p_f_trans_fit = _fit_or_none(p_f_trans_raw, "transient")
 
     bands, degenerate = _bootstrap_bands(
         fm_stat, fm_tran, grid, n_bootstrap, confidence, seed, datum_m
     )
+
+    # Always-on exact binomial CIs on the raw points (ADR-0024), both branches.
+    n_realizations = int(fm_stat.shape[0])
+    ci_confidence = 0.95
+    cis = {
+        "static": binomial_ci(p_f_static_raw, n_realizations, ci_confidence),
+        "transient": binomial_ci(p_f_trans_raw, n_realizations, ci_confidence),
+    }
 
     # Annotate a shallow copy of the metadata (never mutate the caller's dict)
     # with the degenerate-replicate counts, so a tail-dominated grid is visible
@@ -530,7 +632,6 @@ def assemble_fragility(
     # Spec §11 convergence monitoring: compute (not assume) the CoV of the
     # Monte Carlo P_f estimator per level and per branch, with the worst
     # interior CoV and the target verdict recorded for the run's provenance.
-    n_realizations = int(fm_stat.shape[0])
     cov_static = mc_cov_of_pf(p_f_static_raw, n_realizations)
     cov_trans = mc_cov_of_pf(p_f_trans_raw, n_realizations)
 
@@ -564,6 +665,38 @@ def assemble_fragility(
         "meets_cov_target_trans": meets_trans,
     }
 
+    # ADR-0024 deliverable flag: the data-driven bracketing criterion decides,
+    # per branch, whether the fitted lognormal is the deliverable or the raw
+    # tail points with their binomial CIs are (the intended primary
+    # presentation where the transition is unreachable — reported against the
+    # other branch as per-level probability ratios, not a fallback). A fit
+    # that exists on an unbracketed branch is stored but labelled
+    # extrapolative: it describes the fit, not the site, beyond the data.
+    def _deliverable(
+        p_raw: NDArray[np.float64], fit: LognormFragility | None
+    ) -> dict[str, Any]:
+        bracketed = bool(np.max(p_raw) >= 0.5)
+        if bracketed and fit is not None:
+            form, fit_role = "fitted_lognormal", "deliverable"
+        elif fit is not None:
+            form, fit_role = "raw_tail_binomial", "extrapolative_only"
+        else:
+            form, fit_role = "raw_tail_binomial", "unavailable"
+        return {
+            "form": form,
+            "transition_bracketed": bracketed,
+            "max_p_f_raw": float(np.max(p_raw)),
+            "fit_available": fit is not None,
+            "fit_role": fit_role,
+        }
+
+    metadata["fragility_deliverable"] = {
+        "static": _deliverable(p_f_static_raw, p_f_static_fit),
+        "transient": _deliverable(p_f_trans_raw, p_f_trans_fit),
+        "ci_method": "clopper_pearson",
+        "ci_level": float(ci_confidence),
+    }
+
     return FragilityResult(
         conditioning_grid=grid,
         P_f_static_raw=p_f_static_raw,
@@ -571,6 +704,7 @@ def assemble_fragility(
         P_f_static_fit=p_f_static_fit,
         P_f_trans_fit=p_f_trans_fit,
         bootstrap_bands=bands,
+        binomial_ci=cis,
         theta_matrix=np.asarray(theta_matrix, dtype=np.float64),
         param_names=list(param_names),
         failure_matrix_stat=fm_stat,
@@ -595,11 +729,23 @@ class FragilityResult:
         Conditioning heads [m above datum].
     P_f_static_raw, P_f_trans_raw : numpy.ndarray, shape (N_h,)
         Monte Carlo point estimates (per-column failure fractions).
-    P_f_static_fit, P_f_trans_fit : LognormFragility
-        The separately fitted lognormal fragility curves.
+    P_f_static_fit, P_f_trans_fit : LognormFragility or None
+        The separately fitted lognormal fragility curves, or ``None`` where
+        the branch's point set could not be fit (ADR-0024: fewer than two
+        interior levels or a non-increasing probit slope — the branch is
+        then carried by its raw points and binomial CIs, and a completed
+        sweep never aborts). ``metadata['fragility_deliverable']`` records,
+        per branch, whether an existing fit is the deliverable or is stored
+        as extrapolative only.
     bootstrap_bands : dict of str to (numpy.ndarray, numpy.ndarray)
         ``{'static': (lo, hi), 'transient': (lo, hi)}``, each band shape
-        ``(N_h,)`` (spec §11).
+        ``(N_h,)`` (spec §11). Uncertainty of the *fitted curve*.
+    binomial_ci : dict of str to (numpy.ndarray, numpy.ndarray)
+        ``{'static': (lo, hi), 'transient': (lo, hi)}``, each shape
+        ``(N_h,)``: always-on Clopper-Pearson exact CIs on the *raw points*
+        (ADR-0024; additive field per the ADR-0017 contract-extension
+        precedent). At unbracketed (tail-only) branches these, with the raw
+        points, ARE the fragility deliverable.
     theta_matrix : numpy.ndarray, shape (N, 7)
         The prior sample matrix, retained for Phase 2 (spec §2, §8).
     param_names : list of str
@@ -613,9 +759,10 @@ class FragilityResult:
     conditioning_grid: NDArray[np.float64]
     P_f_static_raw: NDArray[np.float64]
     P_f_trans_raw: NDArray[np.float64]
-    P_f_static_fit: LognormFragility
-    P_f_trans_fit: LognormFragility
+    P_f_static_fit: LognormFragility | None
+    P_f_trans_fit: LognormFragility | None
     bootstrap_bands: dict[str, tuple[NDArray[np.float64], NDArray[np.float64]]]
+    binomial_ci: dict[str, tuple[NDArray[np.float64], NDArray[np.float64]]]
     theta_matrix: NDArray[np.float64]
     param_names: list[str]
     failure_matrix_stat: NDArray[np.bool_]
@@ -685,12 +832,26 @@ class FragilityResult:
             bands.create_dataset("trans_lo", data=np.asarray(trans_lo))
             bands.create_dataset("trans_hi", data=np.asarray(trans_hi))
 
-            handle.attrs["fit_static_mu"] = float(self.P_f_static_fit.mu)
-            handle.attrs["fit_static_sigma"] = float(self.P_f_static_fit.sigma)
-            handle.attrs["fit_static_datum_m"] = float(self.P_f_static_fit.datum_m)
-            handle.attrs["fit_trans_mu"] = float(self.P_f_trans_fit.mu)
-            handle.attrs["fit_trans_sigma"] = float(self.P_f_trans_fit.sigma)
-            handle.attrs["fit_trans_datum_m"] = float(self.P_f_trans_fit.datum_m)
+            # ADR-0024: always-on Clopper-Pearson CIs on the raw points.
+            cis = handle.create_group("binomial_ci")
+            ci_static_lo, ci_static_hi = self.binomial_ci["static"]
+            ci_trans_lo, ci_trans_hi = self.binomial_ci["transient"]
+            cis.create_dataset("static_lo", data=np.asarray(ci_static_lo))
+            cis.create_dataset("static_hi", data=np.asarray(ci_static_hi))
+            cis.create_dataset("trans_lo", data=np.asarray(ci_trans_lo))
+            cis.create_dataset("trans_hi", data=np.asarray(ci_trans_hi))
+
+            # Optional fits (ADR-0024): a missing fit is encoded as NaN attrs
+            # (HDF5 attrs cannot hold None) and decoded back to None on load.
+            def _fit_attrs(prefix: str, fit: LognormFragility | None) -> None:
+                handle.attrs[f"{prefix}_mu"] = float(fit.mu) if fit else np.nan
+                handle.attrs[f"{prefix}_sigma"] = float(fit.sigma) if fit else np.nan
+                handle.attrs[f"{prefix}_datum_m"] = (
+                    float(fit.datum_m) if fit else np.nan
+                )
+
+            _fit_attrs("fit_static", self.P_f_static_fit)
+            _fit_attrs("fit_trans", self.P_f_trans_fit)
 
         sidecar = self._sidecar_path(path)
         with open(sidecar, "w", encoding="utf-8") as handle:
@@ -738,19 +899,46 @@ class FragilityResult:
                 ),
             }
 
+            # ADR-0024 CIs. Files written before the field existed carry no
+            # group; the CI is a deterministic function of the retained
+            # matrices, so legacy files load with identically recomputed
+            # values rather than a missing field.
+            if "binomial_ci" in handle:
+                ci_group = handle["binomial_ci"]
+                cis = {
+                    "static": (
+                        ci_group["static_lo"][:],
+                        ci_group["static_hi"][:],
+                    ),
+                    "transient": (
+                        ci_group["trans_lo"][:],
+                        ci_group["trans_hi"][:],
+                    ),
+                }
+            else:
+                n_realizations = int(failure_matrix_stat.shape[0])
+                cis = {
+                    "static": binomial_ci(p_f_static_raw, n_realizations),
+                    "transient": binomial_ci(p_f_trans_raw, n_realizations),
+                }
+
             # Files written before the datum-anchored fit carry no datum
             # attrs; they load with the backward-compatible 0.0 (the original
-            # absolute-stage ln(h) parametrization).
-            p_f_static_fit = LognormFragility(
-                mu=float(handle.attrs["fit_static_mu"]),
-                sigma=float(handle.attrs["fit_static_sigma"]),
-                datum_m=float(handle.attrs.get("fit_static_datum_m", 0.0)),
-            )
-            p_f_trans_fit = LognormFragility(
-                mu=float(handle.attrs["fit_trans_mu"]),
-                sigma=float(handle.attrs["fit_trans_sigma"]),
-                datum_m=float(handle.attrs.get("fit_trans_datum_m", 0.0)),
-            )
+            # absolute-stage ln(h) parametrization). NaN mu/sigma encode the
+            # ADR-0024 None fit.
+            def _fit_or_none_from_attrs(prefix: str) -> LognormFragility | None:
+                mu = float(handle.attrs[f"{prefix}_mu"])
+                sigma = float(handle.attrs[f"{prefix}_sigma"])
+                if np.isnan(mu) or np.isnan(sigma):
+                    return None
+                return LognormFragility(
+                    mu=mu,
+                    sigma=sigma,
+                    datum_m=float(handle.attrs.get(f"{prefix}_datum_m", 0.0)),
+                )
+
+            p_f_static_fit = _fit_or_none_from_attrs("fit_static")
+            p_f_trans_fit = _fit_or_none_from_attrs("fit_trans")
 
         with open(cls._sidecar_path(path), encoding="utf-8") as handle:
             metadata = json.load(handle)
@@ -762,6 +950,7 @@ class FragilityResult:
             P_f_static_fit=p_f_static_fit,
             P_f_trans_fit=p_f_trans_fit,
             bootstrap_bands=bootstrap_bands,
+            binomial_ci=cis,
             theta_matrix=theta_matrix,
             param_names=param_names,
             failure_matrix_stat=failure_matrix_stat,

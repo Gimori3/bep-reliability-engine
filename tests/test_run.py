@@ -634,6 +634,16 @@ def test_toy_run_produces_well_formed_fragility_result() -> None:
         curve = fit.probability_of_failure(heads)
         assert np.all(np.diff(curve) > 0.0)
 
+    # ADR-0024: every result carries the always-on binomial CIs and the
+    # per-branch deliverable flag; on this bracketed toy both branches
+    # deliver the fitted lognormal.
+    assert set(result.binomial_ci) == {"static", "transient"}
+    deliverable = result.metadata["fragility_deliverable"]
+    assert deliverable["ci_method"] == "clopper_pearson"
+    for branch in ("static", "transient"):
+        assert deliverable[branch]["form"] == "fitted_lognormal"
+        assert deliverable[branch]["transition_bracketed"] is True
+
 
 def test_serial_parallel_failure_matrices_bit_identical() -> None:
     """Serial and parallel runs give bit-for-bit identical failure matrices.
