@@ -2,19 +2,20 @@
 
 Record of Joost Pol's answers (author of the time-dependent BEP formulation) to
 the questionnaire in `docs/joost_pol_meeting_vragen.md`, classified and
-dispositioned 2026-07-07. The meeting summary is reconstructed from memory; items
-noted below as awaiting written confirmation are flagged. Two answers drove
-engine/config changes (ADR-0026, ADR-0027); the rest are author confirmations
-documented against existing decision records.
+dispositioned 2026-07-07, plus his **follow-up email answers (2026-07-08)** that
+confirm the memory-reconstructed items and resolve the two that were deferred
+(see "Follow-up email" below). Three answers drove engine/config changes
+(ADR-0026, ADR-0027, ADR-0028); the rest are author confirmations documented
+against existing decision records.
 
 ## Classification and disposition (per answer)
 
 | # | Claim | Class | Disposition |
 |---|-------|-------|-------------|
 | 1a | Stochastic r_e (USACE/TAW leakage lengths) is correct/appropriate | RECORD-CONFIRMATION | Endorsed; noted in ADR-0027 / ADR-0007 lineage. |
-| 1b | r_e should not be in the erosion head after heave (blanket ruptured) | **REQUIRES-CHANGE → implemented** | Matches Pol's published Eq. (6). Engine changed: **ADR-0027** (r_e removed from H_erosion, retained on uplift/heave). Closes the OPEN reference anchor #4. |
-| 2a | Use `C_e ~ Lognormal(0.055, 0.043)` for field reliability | **REQUIRES-CHANGE → implemented** | **ADR-0026**; configs regenerated; drift guard re-pinned. |
-| 2b | B25-245 is 0.010 or 0.014 | INSUFFICIENT | Pol acknowledged, deferred ("looking into origin"). Awaiting his email; does not gate ADR-0026. |
+| 1b | r_e should not be in the erosion head after heave (blanket ruptured) | **REQUIRES-CHANGE → implemented; email-confirmed** | Matches Pol's published Eq. (6). Engine changed: **ADR-0027** (r_e removed from H_erosion, retained on uplift/heave). Closes the OPEN reference anchor #4. Pol confirmed in writing 2026-07-08 ("Ja klopt"). |
+| 2a | Use `C_e ~ Lognormal(0.055, 0.043)` for field reliability | **REQUIRES-CHANGE → implemented** | **ADR-0026**; configs regenerated; drift guard re-pinned. Derivation of 0.055 supplied in the 2026-07-08 email (see below). |
+| 2b | B25-245 is 0.010 or 0.014 | **RESOLVED (email 2026-07-08)** | Pol: correct value is **0.010** ("Dit moet inderdaad 0.01 zijn"); Fig. 5 caption's 0.014 is the error. Matches the repo's existing `B25_C_E = 0.010`. No code change. |
 | 2c | C_e absorbing laminar-vs-turbulent uncertainty legitimate? | RECORD-CONFIRMATION (corrective) | Pol: **not** legitimate; Sellmeijer's ~12% model factor nominally covers it (debatable). C_e stays stochastic on intrinsic-uncertainty grounds. Recorded in ADR-0026. |
 | 3 | 0.9·H_c conservatism at field scale | RECORD-CONFIRMATION (qualitative) | ADR-0009 author-confirmation section; no number, no code. Owner to send Pol the L=3m/1.95× calc. |
 | 4 | k_aq–d_70 decoupling is the only viable option | RECORD-CONFIRMATION | ADR-0012 author-confirmation stub. |
@@ -24,7 +25,7 @@ documented against existing decision records.
 | 8 | Omit the flood-fighting clause (safer/conservative) | RECORD-CONFIRMATION | ADR-0008 author-confirmation stub. |
 | 9 | Don't over-emphasize the low-P_f raw-tail framing | RECORD-CONFIRMATION (caution) | ADR-0024 author-caution stub; thesis-framing only, no code. |
 
-## The two implemented changes
+## The three implemented changes
 
 - **ADR-0027 (engine physics).** The transient erosion-driving head uses the raw
   outer level `(h - z_toe) - 0.3·D_bl` (Pol Eq. (6)); r_e retained on the
@@ -45,14 +46,29 @@ documented against existing decision records.
   replacing `(0.014, 0.50)`. C_e stays stochastic on intrinsic-uncertainty
   grounds (not laminar/turbulent absorption — Pol, 2c). Amends ADR-0001's prior.
 
-## Open / awaiting Pol's email
+## Follow-up email (Pol, 2026-07-08)
 
-- **1b wording** (belt-and-suspenders): the resolution rests on Pol's printed
-  Eq. (6) (decisive); a one-line email confirming the verbal "r_e off after the
-  blanket ruptures" statement locks the corroboration. Not blocking.
-- **2b**: correct B25-245 C_e and the source of the 0.010/0.014 inconsistency.
-- **3**: field-scale behaviour of the 0.9·H_c conservatism, after the owner
-  sends Pol the L=3m inversion.
+- **Q1 — C_e derivation and B25-245.** Pol supplied the provenance of 0.055
+  (thesis §5.4.4, end of §5.5.2, Appendix E): C_e ≈ 0.016 reproduces the
+  *detailed time-dependent* pipe development in small-scale tests (Table 5.1;
+  0.010 B25-245 / 0.014 FPH), while matching the *mean post-critical growth
+  rate* across 14+ tests via the regression Eq. 5.15 needs 0.044 → 0.055
+  (Appendix E). The **factor 3–4 between the two is unexplained even by Pol**.
+  Field recommendation stands at 0.055 (safe side, largest validation set).
+  **B25-245 = 0.010** confirmed. All folded into ADR-0026.
+- **Q2 — erosion-head r_e (1b).** Confirmed in writing ("Ja klopt"): once
+  heave/uplift breaches the blanket, progression uses the full un-attenuated
+  outer head (Eq. 6); r_e applies only to uplift/heave (Eq. 10). Locks ADR-0027
+  and the reference-anchor #4 closure (no longer memory-dependent).
+- **Q3 — compound events / r_l = 0 (Answer 7).** Re-confirmed in writing:
+  little is known about recovery, so zero recovery is a realistic assumption,
+  *especially for peaks so close together*. Noted at architecture §13.
+
+## Still open (owner action, not Pol-blocked)
+
+- **3**: field-scale behaviour of the 0.9·H_c conservatism — Pol gave
+  qualitative guidance (ADR-0009) but no number; awaiting the owner sending him
+  the L=3m inversion / 1.95× calc.
 
 ## Not covered by this meeting
 

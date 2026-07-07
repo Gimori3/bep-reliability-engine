@@ -495,8 +495,9 @@ B25_H_C_M = 0.054  # corrected critical head H_c,corr, Table 3.2
 B25_L_C_M = 0.197  # measured critical pipe length l_c, Table 3.2 (l_c/L = 0.56);
 # anchored on the MEASURED value, not the tanh Eq. (13) 0.092 m (l_c/L = 0.26,
 # factor ~2.2 off), to isolate the rate law from the l_c formula (note §4, §6).
-B25_C_E = 0.010  # calibrated C_e, [CG24] Table 1 / [T22] Table 5.1 (note §4: the
-# Fig. 5 / 5.5 caption's 0.014 is an FPH-caption copy-paste). FPH uses 0.014.
+B25_C_E = 0.010  # calibrated C_e, [CG24] Table 1 / [T22] Table 5.1. Pol
+# confirmed 0.010 in writing (email 2026-07-08): the Fig. 5 / 5.5 caption's
+# 0.014 is the error (an FPH-caption copy-paste). FPH itself uses 0.014.
 
 # Breach threshold for THIS box brackets the true transition C_e ~= 0.0215: at
 # the calibrated C_e = 0.010 the box does not breach; it first breaches near

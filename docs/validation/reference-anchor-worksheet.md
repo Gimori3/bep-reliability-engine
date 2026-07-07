@@ -78,11 +78,15 @@ check with printed-number magnitude gates.
 
 ### 2.1 B25-245 (small-scale). Sources: CG24 Table 1 (`pol_compgeo_2024.pdf` PDF pp. 4–5), thesis Table 3.2 + §3.2.1 (`pol_thesis_2022.pdf` PDF pp. 64/68), thesis Table 5.1 (PDF pp. 118–119).
 
+> RESOLVED (Pol email 2026-07-08): the correct B25-245 C_e is **0.010** (Table 1);
+> the Fig. 5 caption's 0.014 is the error. Repo already uses 0.010. See
+> `reference-anchor-status.md` §3 and ADR-0026.
+
 ```yaml
 b25_245:
   # calibration constants (CG24 Table 1 column B25-245; cross-check T22 Tab 5.1)
-  C_e_table:          EXTRACT   # repo: 0.010 (Table 1); Fig. 5 caption prints 0.014 —
-  C_e_caption:        EXTRACT   #   extract BOTH; state which you adopt and why
+  C_e_table:          EXTRACT   # repo: 0.010 (Table 1) — CONFIRMED correct by Pol
+  C_e_caption:        EXTRACT   #   Fig. 5 caption 0.014 = the error (Pol, 2026-07-08)
   kappa_m2:           EXTRACT   # repo: 3.16e-11
   d50_mm:             EXTRACT   # repo: 0.228
   eta:                EXTRACT   # repo: 0.3 (calibrated)

@@ -11,8 +11,8 @@ rendered and read, not OCR-trusted). Reproduced values are live engine output.
 |---|--------|-------------|--------------------------|--------------------|
 | 1 | Sellmeijer IJkdijk H_c | **CLOSED** (real external anchor; repo mis-cites the table) | eng 2.067 / 2.011 / 2.067 m vs obs 2.30 / 1.75 / 2.10 m | −10.1% / +14.9% / −1.6% |
 | 2 | Pol dl/dt constants (89, 0.81, unit basis) | **CLOSED** (print-confirmed) | 89, 0.81, k[m/s]·H[m]/L[m] | exact match to SIE Eq (5) / CG24 Eq (15) |
-| 3 | B25-245 progression magnitude | **OPEN** (target published, check not clean) | eng v_c,avg 2.21e-5 vs obs 6.14e-5 m/s | 0.36× (inside factor-3 band, at edge) |
-| 4 | Head-datum (0.3·D_bl on which head) | **CLOSED 2026-07-07** (Pol confirmed raw head; ADR-0007 → ADR-0027) | engine now = Eq(6) raw head; r_e removed from H_erosion, retained on uplift/heave | — (resolved discrepancy, ADR-0027) |
+| 3 | B25-245 progression magnitude | **OPEN** (magnitude; C_e value now resolved) | eng v_c,avg 2.21e-5 vs obs 6.14e-5 m/s | 0.36× (inside factor-3 band, at edge) |
+| 4 | Head-datum (0.3·D_bl on which head) | **CLOSED 2026-07-07** (Pol confirmed raw head; email-confirmed 2026-07-08; ADR-0007 → ADR-0027/0028) | engine now = Eq(6) raw head; r_e removed from BOTH piping heads (also static, ADR-0028), retained on uplift/heave | — (resolved discrepancy, ADR-0027/0028) |
 | 5 | Mazure / Model-4A r_e | **CLOSED** (closed-form, unchanged) | λ_in 200.0, r_e 0.8 exact | machine precision |
 
 ## 1. Sellmeijer IJkdijk H_c — CLOSED (with a citation correction)
@@ -84,6 +84,12 @@ self-referential: the constants come from the paper, not the engine.
 **Target confirmed published**: thesis **Table 3.2** (printed p.47), row
 `B25_245`: D_r 0.577, Load L1, k 3.1e-4, H_c,corr 5.4 cm, l_c 19.7 cm,
 i_c,tip 0.43, **v_c,avg 6.14e-5 m/s** — a held source, matching the repo.
+
+**C_e value resolved (email 2026-07-08).** The Table-1 (0.010) vs Fig.-5-caption
+(0.014) inconsistency is settled: Pol confirmed **C_e = 0.010** for B25-245
+("Dit moet inderdaad 0.01 zijn"); the caption 0.014 is the error. This matches
+the repo's `B25_C_E = 0.010`. The *magnitude* check below stays OPEN (the
+out-of-domain / unconfirmed-loading reasons are independent of the C_e value).
 
 **Why the CHECK is not clean (three independent reasons):**
 1. **Out of domain.** Eq. (15) is fitted on synthetic S22/S42 sands at

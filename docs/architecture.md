@@ -6,15 +6,17 @@
 
 ## 0. Framing and Architectural Principles
 
-This document is the complete specification for the Phase 1 computational engine. It supersedes prior drafts and incorporates all decisions reached through prior discussion: the seven-dimensional stochastic parameter vector with C_e as a random variable, LHS as the sampling strategy throughout, the shared-sample contract between static and transient limit states, the mandatory Nataf correlation coupling k_aq and d_70, the separation of the erosion-driving head from the uplift and heave head, the lag-capable hydraulic-translation interface gated by the aquifer-response diagnostic, and the explicit handoff design for Phase 2 Bayesian filtering.
+This document is the complete specification for the Phase 1 computational engine. It supersedes prior drafts and incorporates all decisions reached through prior discussion: the seven-dimensional stochastic parameter vector with C_e as a random variable (prior amended by ADR-0026), LHS as the sampling strategy throughout, the shared-sample contract between static and transient limit states, the k_aq–d_70 coupling question (resolved empirically as the two-population decoupling, ADR-0012), the separation of the raw piping heads from the r_e-attenuated uplift/heave head (ADR-0027/ADR-0028), the lag-capable hydraulic-translation interface gated by the aquifer-response diagnostic, and the explicit handoff design for Phase 2 Bayesian filtering.
+
+> **Revision note (2026-07-07).** This text has been reconciled with the accepted ADRs 0001–0029 (`docs/decisions/`): every superseding decision — notably the raw-head reversal (ADR-0027/0028, superseding ADR-0007), the C_e field prior (ADR-0026), the two-population coupling (ADR-0012), the γ' split (ADR-0016), the shape-invariant climate axis (ADR-0023), the per-branch fragility deliverable (ADR-0024) and the M7 acceleration / tail estimator (ADR-0029) — is folded into the prose and pseudocode below. Where a future ADR and this text conflict, the ADR governs and this text must be re-reconciled.
 
 Four structural properties shape every downstream choice and warrant being stated upfront.
 
-**Property 1, asymmetric limit state cost.** The static limit state is scalar-in, scalar-out per realization: sample θ, compute H_c via Sellmeijer, compare against the r_e-translated peak. The transient limit state is scalar-in, trajectory-out: sample θ, integrate the Pol ODE across the full multi-peak h(t), compare final l_e to L. The transient branch is roughly T times more expensive than the static, where T is the number of timesteps per hydrograph (about 500 to 5000). All optimization effort must focus on the transient timestepper; the static branch is essentially free.
+**Property 1, asymmetric limit state cost.** The static limit state is scalar-in, scalar-out per realization: sample θ, compute H_c via Sellmeijer, compare against the raw gross peak head h_peak − z_toe (ADR-0028). The transient limit state is scalar-in, trajectory-out: sample θ, integrate the Pol ODE across the full multi-peak h(t), compare final l_e to L. The transient branch is roughly T times more expensive than the static, where T is the number of timesteps per hydrograph (about 500 to 5000). All optimization effort must focus on the transient timestepper; the static branch is essentially free.
 
-**Property 2, shared-sample contract.** Both limit states must consume the same θ_j and the same r_e within each realization. Independent draws would conflate physical bias with sampling noise and destroy the scientific deliverable of Phase 1, namely static-versus-transient bias quantification. This is non-negotiable and constrains the engine architecture more than any other single requirement.
+**Property 2, shared-sample contract.** Both limit states must consume the same θ_j within each realization, through one M8 call; independent static/transient execution tracks are banned (ADR-0002). Independent draws would conflate physical bias with sampling noise and destroy the scientific deliverable of Phase 1, namely static-versus-transient bias quantification. This is non-negotiable and constrains the engine architecture more than any other single requirement. (The original "and the same r_e" clause is now moot for the static branch: since ADR-0027/0028 r_e drives only the transient uplift/heave gate and neither piping head, so the static branch is r_e-independent. r_e is still computed exactly once per realization and the shared-sample intent is unchanged.)
 
-**Property 3, r_e is stochastic.** Because the Mazure leakage length λ_in depends on k_aq, D_aq, D_bl, and k_bl, which are four of the seven random variables, r_e cannot be precomputed once and reused. It lives inside the per-realization loop. This is a frequent source of confusion in Pol-style implementations.
+**Property 3, r_e is stochastic.** Because the Mazure leakage length λ_in depends on k_aq, D_aq, D_bl, and k_bl, which are four of the seven random variables (plus L when L is sampled stochastically), r_e cannot be precomputed once and reused. It lives inside the per-realization loop. This is a frequent source of confusion in Pol-style implementations. Note that since ADR-0027/0028 its sole consumer is the uplift/heave gate (Pol SIE 2024 Eq. (10)); it remains per-realization all the same.
 
 **Property 4, irreducibly serial inner loop.** The compound event memory model creates a hard sequential dependency along the time axis: l(t+Δt) depends on l(t) via the positive-part operator and the running uplift latch. You can vectorize across realizations and across conditioning water levels, but inside a single realization the timestepper is serial. This determines exactly where numpy broadcasting works and where it fails. If the aquifer-lag option (M4) is activated, the aquifer head h_aq becomes a second serial state alongside l, advanced by one extra line at the top of each timestep; the serial structure is otherwise unchanged.
 
@@ -24,23 +26,23 @@ Four structural properties shape every downstream choice and warrant being state
 
 The architecture decomposes into nine logical modules. Each has one clear responsibility. Whether each becomes a .py file or class is addressed in §9.
 
-**M1, `config`** holds all deterministic inputs for a single run: cross-section geometry (L, foreshore width, HWL, z_toe), the conditioning grid {h_1, ..., h_Nh}, Monte Carlo settings (N = 10^5, RNG seed, LHS scheme), timestepper settings (Δt, integration scheme, aquifer-lag flag and τ_aq if active), and the prior distribution specifications for the seven random variables (family, mean, COV) together with the correlation structure imposed at sampling. This is a pure data object with no logic. Its purpose is reproducibility: one config object fully determines one fragility curve pair. Validate at load time using pydantic or equivalent to catch unit errors (for example COV = 50 versus 0.50) before a multi-hour run begins.
+**M1, `config`** holds all *run-varying* deterministic inputs for a single run (the principled config-vs-model-constant split is ADR-0015): cross-section geometry (L, foreshore width, HWL — sourced from the 2019 bank-height data, ADR-0018 — and z_toe, the ADR-0021 landside-toe MSL elevations), the conditioning grid {h_1, ..., h_Nh}, Monte Carlo settings (N = 10^5, RNG seed, LHS scheme), timestepper settings (resolution *policy* per ADR-0013 — the operative Δt at the M8 boundary is the record's `native_dt`; integration scheme; the aquifer-lag flag and S_s, metadata-only until the §11 diagnostic is built, ADR-0014; the M7 `progression_backend` selector, ADR-0029), the `hydrograph_source` block pinning the canonical d4PDF events (ADR-0020), the deterministic Sellmeijer inputs (θ_repose, `relative_density_insitu`, the α-exponent selectors, ADR-0015/0017), the `foreland_treatment` flag (ADR-0025), the optional seepage-length CoV, and the prior distribution specifications for the seven random variables (family, mean, COV) together with the coupling mode applied at sampling (ADR-0012). This is a pure data object with no logic. Its purpose is reproducibility: one config object fully determines one fragility curve pair. Validate at load time using pydantic or equivalent to catch unit errors (for example COV = 50 versus 0.50) before a multi-hour run begins.
 
-**M2, `prior_sampler`** generates the N by 7 matrix of θ samples via Latin Hypercube Sampling. Single responsibility: converting marginal distribution specifications into a stratified sample matrix in physical units, with the mandatory k_aq–d70 Nataf correlation (and any further empirically identified correlations) imposed on the LHS draws. Returns a structured array or DataFrame keyed by parameter name so that downstream modules never index into raw column numbers. Does not know anything about limit states.
+**M2, `prior_sampler`** generates the N by 7 matrix of θ samples via Latin Hypercube Sampling. Single responsibility: converting marginal distribution specifications into a stratified sample matrix in physical units, with the k_aq–d_70 coupling applied per ADR-0012 — the empirical OYO paired-record analysis selected the **two-population decoupling** (`coupling: two_population`; ρ recorded as 0.0 but never imposed, matrix d_70 and framework k_aq drawn from their own marginals); the Nataf `correlated` mode remains supported for sensitivity runs. M2 also draws the independent stochastic seepage length L (`sample_seepage_length`, lognormal, seeded via SeedSequence from the same config seed) — L is *not* an 8th θ column and is never coupled to the θ vector. Returns a named-column container (`ThetaSample`) keyed by parameter name so that downstream modules never index into raw column numbers. Does not know anything about limit states. The substitutable deep-tail sampler `tail_sampling.sample_theta_tilted` (ADR-0029) wraps this exact pipeline with an upstream Z-space mean shift; the production sweep uses plain LHS only.
 
-**M3, `hydrograph_loader`** ingests the d4PDF hydrograph ensemble and exposes it as a clean object: for each event, a (t, h(t)) array plus metadata (event ID, duration, peak, scenario tag, historical or +4K). Also exposes the conditioning grid extraction logic: for the static comparison you need a representative scalar h_peak per event, but for the transient you need the full h(t). This module isolates all input/output and units handling, and records the native temporal resolution so the timestep and the rising-limb resolution can be checked against the flashy peaks that define the loading regime.
+**M3, `hydrograph_loader`** ingests the d4PDF hydrograph ensemble (band workbooks, the Eq. 4.19 stage rating at the node's own KP, the KP 62.0–62.8 discharge proxy — ADR-0019) and exposes it as a clean object: for each event, a (t, h(t)) array plus metadata (event ID, duration, peak, scenario tag, historical or +4K). Also owns the canonical-shape machinery for the conditioning sweep (ADR-0020): `load_canonical_shape` resolves the band workbook from the pinned event's *own* experiment header (ADR-0023 superseded the ADR-0020 §3 select-by-scenario wording) and `conditioning_record_for_level` rescales the normalized shape per level with the trough pinned at the base-flow stage and `peak = h_i` verbatim. For the static comparison you need a representative scalar h_peak per event, but for the transient you need the full h(t). This module isolates all input/output and units handling, and records the native temporal resolution (1 h = 3600 s, final for this data drop, ADR-0019 §6) so the timestep and the rising-limb resolution can be checked against the flashy peaks that define the loading regime. Per ADR-0023 the climate axis is **shape-invariant**: one canonical HPB shape drives the fragility for all scenarios, and climate differentiation lives on the Phase 3 hazard (peak-stage) side.
 
-**M4, `hydraulic_translator`** computes, given a θ sample and cross-section geometry, the response factor r_e and returns h_aquifer(t). Single responsibility: river stage to landside aquifer piezometric head. This is where λ_in = √(k_aq · D_aq · D_bl / k_bl), the per-realization λ_out = √(k_aq · D_aq · D_fore / k_fore) (sampled transmissivity, deterministic foreshore blanket properties; ADR-0005), the finite-foreshore correction λ_out,eff = λ_out · tanh(B_f / λ_out) (ADR-0006), and the response factor r_e = λ_in / (λ_out,eff + L + λ_in) live. The ratio traces to Pol 2022 thesis Eq. (7.13) and is exact for semi-infinite blankets under quasi-static response; the full in-L hyperbolic form is demoted to a logged L/λ_in validity diagnostic (ADR-0006). The module exposes h_aquifer(t) through a unified interface that can produce it in either of two forms: the algebraic instantaneous translation h_aq(t) = z_toe + r_e · (h_river(t) − z_toe), which is the default, or a first-order linear-reservoir lag state dh_aq/dt = (1/τ_aq)·[z_toe + r_e·(h(t) − z_toe) − h_aq(t)], advanced by the exact exponential update h_aq ← h_aq + (1 − exp(−Δt/τ_aq))·(h_aq,inst − h_aq) and initialized in equilibrium with the initial river stage (ADR-0004). The choice between the two is made by the aquifer-response diagnostic described in §11, which compares τ_aq ~ λ_in² · S_s / k_aq against the flood duration; the downstream limit state and progression modules consume h_aquifer(t) identically in both cases and require no restructuring. The module docstring must state which form is active and why, and must not assume the instantaneous form is permanent.
+**M4, `hydraulic_translator`** computes, given a θ sample and cross-section geometry, the response factor r_e and returns h_aquifer(t). Single responsibility: river stage to landside aquifer piezometric head. This is where λ_in = √(k_aq · D_aq · D_bl / k_bl), the per-realization λ_out = √(k_aq · D_aq · D_fore / k_fore) (sampled transmissivity, deterministic foreshore blanket properties; ADR-0005), the finite-foreshore correction λ_out,eff = λ_out · tanh(B_f / λ_out) (ADR-0006), and the response factor r_e = λ_in / (λ_out,eff + L + λ_in) live. The ratio is the **exact** closed form of USACE (2000) blanket theory Case 7a / TAW (2004) Model 4A — L is the exact *linear* under-levee resistance term and is never inside a tanh; Pol thesis Eq. (7.13) is its no-riverside-blanket special case (ADR-0006 as amended 2026-07-05: the former L/λ_in "validity monitor" was withdrawn as a category error, and the run-level record is the descriptive `metadata['leakage_geometry']` block; hinterland extents resolved semi-infinite = conservative). The ADR-0025 `foreland_treatment: open_entry` sensitivity zeroes the effective entry length (x₁ = 0) at M8; the blanketed tanh form is the adopted baseline. Since ADR-0027/0028 the translated head h_aquifer(t) feeds **only the uplift/heave gate** (Pol SIE 2024 Eq. (10)); both piping heads use the raw outer level. The module exposes h_aquifer(t) through a unified interface that can produce it in either of two forms: the algebraic instantaneous translation h_aq(t) = z_toe + r_e · (h_river(t) − z_toe), which is the default, or a first-order linear-reservoir lag state dh_aq/dt = (1/τ_aq)·[z_toe + r_e·(h(t) − z_toe) − h_aq(t)], advanced by the exact exponential update h_aq ← h_aq + (1 − exp(−Δt/τ_aq))·(h_aq,inst − h_aq) and initialized in equilibrium with the initial river stage (ADR-0004). The choice between the two is made by the aquifer-response diagnostic described in §11, which compares τ_aq ~ λ_in² · S_s / k_aq against the flood duration; the downstream limit state and progression modules consume h_aquifer(t) identically in both cases and require no restructuring. The module docstring must state which form is active and why, and must not assume the instantaneous form is permanent.
 
-**M5, `initiation_evaluator`** evaluates Z_uplift(t) and Z_heave(t) at each timestep given Δh_blanket(t) from M4 and the sampled (D_bl, γ'_s). Both checks use the un-reduced aquifer overpressure Δh_blanket(t), not the erosion-driving head, because uplift and heave respond to the full pore pressure on the blanket base. The module exposes (a) the boolean indicator I_er(t) per Pol's formulation, true once the running minimum of Z_uplift has gone negative AND heave is currently active, OR if l_ini > 0 AND heave is currently active, and (b) the time t_uh of first co-occurrence. Single responsibility: STPH gating logic. Note that Pol's third I_er clause, which suspends progression once organised flood fighting is deployed, is deliberately omitted; this yields an unconditional upper bound on transient failure whose conservatism grows under the elongated +4K hydrographs.
+**M5, `initiation_evaluator`** evaluates Z_uplift(t) and Z_heave(t) at each timestep given Δh_blanket(t) from M4 and the sampled (D_bl, γ'_bl). Both checks use the un-reduced, r_e-attenuated aquifer overpressure Δh_blanket(t) = r_e·(h(t) − z_toe), not the erosion-driving head, because uplift and heave respond to the full pore pressure on the blanket base and r_e models the intact-blanket damping that governs whether/when the blanket ruptures (ADR-0027). The heave threshold is the Terzaghi critical gradient γ'_bl/γ_w, not Pol's independent i_c,h — a deliberate choice that keeps the 7D vector and, under this parameterization, collapses the gate to `I_er(t) ≡ heave_now(t)` (Z_heave ≡ Z_uplift/D_bl; ADR-0008). The full gate structure (uplift latch, `l_current > 0` clause, instantaneous heave) is retained even though it currently collapses, so it becomes load-bearing the instant i_c,h is decoupled in a sensitivity run. The module exposes (a) the boolean indicator I_er(t), true once the running minimum of Z_uplift has gone negative AND heave is currently active, OR if l_current > 0 AND heave is currently active, and (b) the time t_uh of first co-occurrence. Single responsibility: STPH gating logic. Pol's third I_er clause, which suspends progression once organised flood fighting is deployed, is deliberately omitted; this yields an unconditional upper bound on transient failure (Pol-confirmed 2026-07-07 as the safer choice for flashy typhoon rivers where organised flood fighting is infeasible; ADR-0008). The spec's earlier expectation that this conservatism "grows under the elongated +4K hydrographs" is discharged for this data drop: ADR-0023 found +4K shapes are not longer at the normalized-shape level, so no shape-driven conservatism differential is missed.
 
-**M6, `sellmeijer_static`** implements the full revised Sellmeijer 2011 critical head: H_c = L · F_r · F_s · F_g, with the three factors computed per equation (12) of the 2011 paper. Inputs: θ vector plus geometry. Output: scalar H_c. Used in two places, once for the static limit state evaluation and once inside the transient progression model because H_c parameterizes the equilibrium curve H_eq(l). Centralizing it in one place prevents drift between the two uses. Also computes l_c via the Pol SIE 2024 formula l_c/L = 0.5 · tanh(2 · D_aq/L). The module retains an optional scale-exponent argument so that the 3D hole-exit value α = −1/2 can be substituted for the 2D value in a sensitivity decomposition of the static-transient gap (§12, Failure mode 4).
+**M6, `sellmeijer_static`** implements the full revised Sellmeijer 2011 critical head: H_c = L · F_r · F_s · F_g, with the three factors computed per equation (12) of the 2011 paper. Inputs: θ vector plus geometry. Output: scalar H_c. The particle submerged weight in F_r is the **deterministic** basin-wide γ'_p = 16.87 kN/m³ (`GAMMA_P_SUB_DEFAULT`), not a θ column — the sixth θ entry is the *blanket* weight γ'_bl and feeds only the M5 uplift/heave gate (the γ'_s split, ADR-0016); H_c therefore has no exposure to the sixth θ variable. Used in two places, once for the static limit state evaluation and once inside the transient progression model because H_c parameterizes the equilibrium curve H_eq(l). Centralizing it in one place prevents drift between the two uses. Also computes l_c via the Pol SIE 2024 formula l_c/L = 0.5 · tanh(2 · D_aq/L). The module retains an optional scale-exponent argument so that the 3D hole-exit value α = −1/2 can be substituted for the 2D value in a sensitivity decomposition of the static-transient gap (§12, Failure mode 4); the *transient-only* isolation is wired as `alpha_exponent_transient` at M8 (ADR-0017), which recomputes a separate transient H_c while the static comparator keeps α = −1/3 (the Pol-endorsed baseline; ADR-0017).
 
-**M7, `pol_ode_progression`** is the time-dependent ODE integrator. Given θ (including C_e), the aquifer head time series h_aquifer(t), the initiation indicator series I_er(t), and the H_c and l_c from M6, it integrates dl/dt = 89 · C_e · (k_aq · (H_erosion(t) − H_eq(l))/L)^0.81 forward in time using forward Euler. The erosion-driving head is H_erosion(t) = Δh_blanket(t) − 0.3·D_bl, the crack-resistance-reduced head of Pol SIE 2024 Eq. (6); this is distinct from the un-reduced Δh_blanket(t) that drives uplift and heave in M5. The equilibrium curve H_eq(l) is constructed by piecewise linear interpolation between (0, 0), (l_c, H_c), and (L, 0.9·H_c). The positive-part operator is enforced inside the timestepper. Output: full l(t) trajectory and final l_e.
+**M7, `pol_ode_progression`** is the time-dependent ODE integrator. Given θ (including C_e), the raw river stage h(t), the aquifer head time series h_aquifer(t) (for the gate), the H_c and l_c from M6, it integrates dl/dt = 89 · C_e · (k_aq · (H_erosion(t) − H_eq(l))/L)^0.81 forward in time using forward Euler, gated by the M5 erosion indicator I_er(t). The erosion-driving head is H_erosion(t) = (h(t) − z_toe) − 0.3·D_bl, the crack-resistance-reduced head on the **raw outer level** (Pol SIE 2024 Eq. (6); **no r_e** — ADR-0027, superseding ADR-0007): once uplift/heave ruptures the cohesive blanket the exit is unfiltered, so the full outer head drives progression, while r_e models only the intact-blanket damping in the gate. This raw H_erosion is distinct from the un-reduced, r_e-attenuated Δh_blanket(t) that drives uplift and heave in M5; because erosion runs only where heave is active (the ADR-0008 collapse), "raw head always" and "r_e dropped once the blanket ruptures" are numerically identical here. The equilibrium curve H_eq(l) is constructed by piecewise linear interpolation between (0, 0), (l_c, H_c), and (L, 0.9·H_c) — the 0.9·H_c end anchor is Pol's own intentional conservatism (ADR-0009). The positive-part operator is enforced inside the timestepper. Output: full l(t) trajectory and final l_e. The loop is restructured for speed (hoisted time-invariant factors, gate-masked `**0.81`, sub-toe whole-step skip) **bit-identically** to the straightforward kernel loop, with an opt-in Numba backend (ADR-0029) selected by `config.timestepper.progression_backend` that is equivalent to < 1e-10.
 
-**M8, `limit_state_evaluator`** orchestrates both limit states for a single realization. Receives one θ sample, the hydrograph, the geometry, and an optional l_ini, and returns the pair (Z_static, Z_transient). This is the module that enforces the shared-sample contract: the same θ is fed into both branches. Also returns auxiliary diagnostics, namely H_c, l_c, λ_in, peak r_e, and time-to-breach if failure occurred, because Phase 2 Bayesian filtering needs trajectory information, not just binary pass or fail, and because the survival-discrimination decomposition (§8) needs both the static and transient rejection under h_2016. This module must be importable cleanly by Phase 2.
+**M8, `limit_state_evaluator`** orchestrates both limit states for a single realization. Receives one θ sample, the hydrograph, the geometry, and an optional l_ini, and returns the pair (Z_static, Z_transient). This is the module that enforces the shared-sample contract: the same θ is fed into both branches through one call (ADR-0002/ADR-0011). Also returns auxiliary diagnostics, namely H_c, H_c_transient (equal by default; diverges only under the ADR-0017 decomposition), l_c, λ_in, r_e, the latched uplift/heave flags and t_uh, because Phase 2 Bayesian filtering needs trajectory information, not just binary pass or fail, and because the survival-discrimination decomposition (§8) needs both the static and transient rejection under h_2016. Two entry points share one physics: the frozen scalar `evaluate_realization` (the Phase 2 API) and the vectorized `evaluate_batch` (the production sweep, bit-identical to looping the scalar path). This module must be importable cleanly by Phase 2.
 
-**M9, `fragility_assembler`** takes the raw N by N_h indicator matrices (one for static, one for transient) and fits lognormal fragility curves separately for each. Computes confidence bands via bootstrap on the realizations. Output: a FragilityResult object containing both fitted curves, raw point estimates, and, critically, the full θ matrix and failure matrix retained for Phase 2.
+**M9, `fragility_assembler`** takes the raw N by N_h indicator matrices (one for static, one for transient) and fits lognormal fragility curves separately for each. Fits are **anchored to the load excess h − z_toe** with inverse-variance probit weights (`LognormFragility.datum_m`), and are **Optional** per branch (ADR-0024): a branch whose transition the conditioning grid does not bracket (max raw P_f < 0.5) yields `None` and is carried instead by its raw points with always-on Clopper–Pearson binomial CIs — the intended primary transient presentation where the transition is physically unreachable, not a fallback; `metadata['fragility_deliverable']` flags the form per branch. Computes confidence bands via bootstrap on the realizations (degenerate replicates skipped, not raised), and the spec §11 CoV of P_f per level (`metadata['mc_convergence']`). Output: a FragilityResult object containing both fitted curves (or `None`), raw point estimates, binomial CIs, and, critically, the full θ matrix and both failure matrices retained for Phase 2. `upscale_length_effect(p_f, n_eff)` (the weakest-link transform) is implemented but **not wired** into `run.py`, pending the still-undetermined autocorrelation length λ_ac (open decision — see §12).
 
 ---
 
@@ -55,21 +57,24 @@ theta_matrix: ndarray shape (N, 7)
 param_names:  ['k_aq', 'd_70', 'D_aq', 'D_bl', 'k_bl', 'gamma_bl_sub', 'C_e']
 ```
 
-Contract: rows are LHS draws with the mandatory k_aq–d70 Nataf correlation imposed (see §7), and any further empirically identified correlations applied through the same transform; columns are physical-units parameter values; and the RNG seed in config fully determines the matrix. All downstream modules access columns by name via `theta_matrix[:, param_names.index('k_aq')]` or, preferably, via a thin wrapper that exposes named access.
+Contract: rows are LHS draws with the k_aq–d_70 coupling applied per the mode in config — the empirical result is the **two-population decoupling** (ADR-0012; ρ recorded 0.0, never imposed), with the Nataf `correlated` mode available for sensitivity runs (see §7); columns are physical-units parameter values; and the RNG seed in config fully determines the matrix. The independent stochastic seepage length L is drawn alongside (SeedSequence off the same seed) but is *not* a θ column. All downstream modules access columns by name via `theta_matrix[:, param_names.index('k_aq')]` or, preferably, via the named-access wrapper (`ThetaSample`). Note the sixth column is `gamma_bl_sub` (the blanket weight, ADR-0016), not the aquifer particle weight.
 
 `hydrograph_loader` (M3) emits:
 
 ```
 hydrographs: dict[event_id -> HydrographRecord]
 HydrographRecord:
-  t:               ndarray (T,)         # seconds or hours, units in metadata
-  h:               ndarray (T,)         # river stage [m above datum]
-  peak:            float
+  t:               ndarray (T,)         # SECONDS (M3 converts all units at this boundary)
+  h:               ndarray (T,)         # river stage [m above MSL], uniformly sampled at native_dt
+  peak:            float                # = max(h); authoritative static comparator level (ADR-0010)
   duration_hours:  float
   scenario:        str                  # 'historical' or '+4K'
   event_id:        str
-  native_dt:       float                # native temporal resolution, for the rising-limb check
+  native_dt:       float                # AUTHORITATIVE integration timestep [s]; 3600 s native
+                                        # (ADR-0010/0013/0019 §6; Phase 2 replay at 1800 s, ADR-0022)
 ```
+
+M8 consumes exactly three fields structurally by duck typing — `.h`, `.peak`, `.native_dt` (ADR-0010) — so any structural stand-in stays valid alongside the concrete `hydrographs.HydrographRecord`.
 
 The core inner contract, and the one needing the most care, is the signature of `limit_state_evaluator` (M8):
 
@@ -77,27 +82,36 @@ The core inner contract, and the one needing the most care, is the signature of 
 Input:
   theta_row:    ndarray (7,)            # one realization's parameter vector
   hydrograph:   HydrographRecord
-  geometry:     dict                    # L, z_toe, foreshore_width, D_fore, k_fore (ADR-0005);
-                                        # z_toe = polder surface elevation at the landside exit
-                                        # point, ≡ h_e in Pol SIE 2024 Eqs. (6) and (8) (ADR-0007)
+  geometry:     dict                    # flat keys L, z_toe, foreshore_width, D_fore, k_fore
+                                        # (ADR-0010; ADR-0005 foreshore); z_toe = polder surface
+                                        # elevation at the landside exit point, ≡ h_e in Pol SIE
+                                        # 2024 Eqs. (6) and (8) (ADR-0007 datum note; the r_e-on-
+                                        # erosion-head part of 0007 is superseded by ADR-0027)
   l_ini:        float                   # initial pipe length (default 0)
   store_trajectory: bool                # default False to save memory
+  # keyword-only, all defaulting to the pinned M6 constant / baseline (ADR-0015/0017/0025):
+  alpha_exponent, alpha_exponent_transient, theta_repose_rad, relative_density,
+  gamma_p_sub_kn_m3, foreland_open
 
 Output: EvaluationResult dataclass
-  Z_static:        float
+  Z_static:        float                 # H_c − (h_peak − z_toe): RAW gross head (ADR-0028)
   Z_transient:     float
   l_e_final:       float
   l_trajectory:    ndarray (T,) or None
-  H_c:             float
+  H_c:             float                 # static comparator's critical head
+  H_c_transient:   float                 # anchors the transient H_eq; == H_c unless the
+                                         #   ADR-0017 α-decomposition is active
   l_c:             float
   lambda_in:       float
-  r_e:             float
+  r_e:             float                 # drives the uplift/heave gate ONLY (ADR-0027/0028)
   t_uh:            float or NaN          # time of first uplift+heave co-occurrence
   failure_static:  bool
   failure_trans:   bool
   uplift_occurred: bool                  # latched within event
   heave_occurred:  bool                  # latched within event
 ```
+
+The scalar `evaluate_realization` signature and the `EvaluationResult` field set are a **frozen Phase 2 contract** (ADR-0011); the additive `H_c_transient` field and the keyword-only overrides were introduced in the ADR-0017 additive-change style.
 
 The optional `l_trajectory` storage matters for memory: 10^5 realizations times about 1000 timesteps times 8 bytes is about 800 MB per cross-section. For Phase 2 you only need the final l_e under the 2016 hydrograph specifically, so default to off and toggle on for diagnostic runs and for the 2016 calibration sweep.
 
@@ -108,17 +122,23 @@ FragilityResult:
   conditioning_grid:    ndarray (N_h,)
   P_f_static_raw:       ndarray (N_h,)        # MC point estimates
   P_f_trans_raw:        ndarray (N_h,)
-  P_f_static_fit:       LognormFragility       # fitted (mu, sigma)
-  P_f_trans_fit:        LognormFragility
-  bootstrap_bands:      dict[curve -> (lo, hi)]
+  P_f_static_fit:       LognormFragility | None  # fitted (mu, sigma, datum_m); None if the
+  P_f_trans_fit:        LognormFragility | None  #   branch is unbracketed (ADR-0024)
+  bootstrap_bands:      dict[curve -> (lo, hi)]  # uncertainty of the fitted curve (where it exists)
+  binomial_ci:          dict[curve -> (lo, hi)]  # always-on Clopper–Pearson CIs on the RAW
+                                                # points; the deliverable at tail-only branches (ADR-0024)
   theta_matrix:         ndarray (N, 7)         # RETAINED for Phase 2
   param_names:          list[str]
   failure_matrix_stat:  ndarray (N, N_h) bool  # RETAINED for diagnostics and decomposition
   failure_matrix_tran:  ndarray (N, N_h) bool  # RETAINED for Phase 2
   metadata:             dict                    # config snapshot, runtime, version,
                                                 # c_e_stochastic flag, d70_interpretation,
-                                                # remediation_state, segment_id
+                                                # remediation_state, segment_id, fragility_deliverable,
+                                                # fragility_fit, mc_convergence, leakage_geometry,
+                                                # progression_backend, foreland_treatment, hydrograph
 ```
+
+The Optional fits and the additive `binomial_ci` are an ADR-0024 spec §2 contract extension (additive, safe for Phase 2, which reads by attribute and filters via the retained matrices, not the fitted curves). The HDF5 dataset names use `failure_matrix_static`/`failure_matrix_trans` while the object fields are `failure_matrix_stat`/`failure_matrix_tran` — the spec is inconsistent between §2 and §8, and `save`/`load` map between the two namings.
 
 Retaining `theta_matrix` and `failure_matrix_tran` is non-negotiable. Phase 2's Accept-Reject filtering re-runs M8 on the surviving θ rows against h_2016(t); it needs the raw prior matrix, not just the fitted curve. Retaining `failure_matrix_stat` is what makes the survival-discrimination decomposition of §8 possible. Persist via HDF5 (h5py) for the large arrays and a JSON sidecar for metadata. One HDF5 file per cross-section per scenario.
 
@@ -128,7 +148,7 @@ Retaining `theta_matrix` and `failure_matrix_tran` is non-negotiable. Phase 2's 
 
 Three nested levels, with order chosen for both correctness and performance:
 
-**Outermost loop, conditioning water levels h_i.** Fully parallelizable across cores. Each h_i is independent; for each, the static evaluation uses h_i as h_peak, while the transient evaluation uses either an actual d4PDF hydrograph anchored at peak h_i (for ensemble-driven fragility) or a synthetic scaled hydrograph (for fragility curve construction).
+**Outermost loop, conditioning water levels h_i.** Fully parallelizable across cores (joblib, in `run.py`). Each h_i is independent; for each, the static evaluation uses h_i as h_peak, while the transient evaluation uses one of two config-selected loading records (ADR-0020): the **canonical d4PDF shape** rescaled to peak h_i (production — a real pinned event shape normalized in stage domain, trough pinned at the base-flow stage, `peak = h_i` verbatim), or the clearly-marked **synthetic two-peak stub** (plumbing/dev only). The whole sweep is reproducible-by-construction: all stochasticity is front-loaded into the single prior-sampling call, so parallel ≡ serial regardless of `n_jobs`.
 
 **Middle loop, realizations j in {1, ..., N}.** All N realizations at a given h_i share the same hydrograph but use independent θ_j rows. This is the loop where numpy broadcasting yields the largest gains.
 
@@ -143,7 +163,8 @@ SHARED PREAMBLE (computed once per θ_j):
   3. Compute λ_in(θ_j) and r_e(θ_j) via M4
 
 STATIC BRANCH:
-  4. H_load_peak = r_e · (h_i − z_toe)          [gross peak head; no 0.3·D_bl reduction]
+  4. H_load_peak = h_i − z_toe                   [RAW gross head across the structure;
+                                                  NO r_e, NO 0.3·D_bl reduction — ADR-0028]
   5. Z_static = H_c − H_load_peak
   6. failure_static = (Z_static <= 0)
 
@@ -154,26 +175,27 @@ TRANSIENT BRANCH (full timestep loop):
                               [instantaneous default; if the τ_aq/T_flood diagnostic
                                activates the lag, h_aq is advanced as a linear-reservoir
                                state instead, see M4]
-       b. Δh_blanket(t_k)  = h_aq(t_k) − z_toe        [= r_e · (h(t_k) − z_toe)]
-       c. H_erosion(t_k)   = Δh_blanket(t_k) − 0.3 · D_bl     [erosion driver only]
-       d. Z_uplift(t_k)    = (γ'_s · D_bl)/γ_w − Δh_blanket(t_k)   [uses Δh_blanket]
+       b. Δh_blanket(t_k)  = h_aq(t_k) − z_toe        [= r_e · (h(t_k) − z_toe); gate head]
+       c. H_erosion(t_k)   = (h(t_k) − z_toe) − 0.3 · D_bl   [RAW outer level, NO r_e — ADR-0027;
+                                                             erosion rate driver only]
+       d. Z_uplift(t_k)    = (γ'_bl · D_bl)/γ_w − Δh_blanket(t_k)   [uses r_e-attenuated Δh_blanket]
        e. uplift_ever     |= (Z_uplift(t_k) < 0)
        f. i_exit(t_k)      = Δh_blanket(t_k) / D_bl
-       g. Z_heave(t_k)     = γ'_s/γ_w − i_exit(t_k)              [uses Δh_blanket]
+       g. Z_heave(t_k)     = γ'_bl/γ_w − i_exit(t_k)             [uses Δh_blanket; Terzaghi i_c, ADR-0008]
        h. heave_now        = (Z_heave(t_k) < 0)
-       i. I_er(t_k)        = (uplift_ever OR l_current > 0) AND heave_now
+       i. I_er(t_k)        = (uplift_ever OR l_current > 0) AND heave_now   [≡ heave_now, ADR-0008]
        j. If I_er(t_k):
             H_eq = piecewise_linear(l_current, anchors=[(0,0), (l_c, H_c), (L, 0.9·H_c)])
-            overload = max(0, H_erosion(t_k) − H_eq)      [H_erosion, not Δh_blanket]
+            overload = max(0, H_erosion(t_k) − H_eq)      [RAW H_erosion, not Δh_blanket]
             dldt = 89 · C_e · (k_aq · overload / L)^0.81
-            l_current = l_current + dldt · Δt             [positive part enforced by max(0, overload)]
+            l_current = min(L, l_current + dldt · Δt)     [positive part via max(0, overload); breach clip at L]
           Else:
             l_current unchanged                            [positive-part operator]
   9. Z_transient = L − l_current
   10. failure_trans = (Z_transient <= 0)
 ```
 
-Three subtle points worth highlighting. First, in step 4 the static comparator uses r_e · (h_peak − z_toe), the translated aquifer head, not the raw river peak. Both limit states share the hydraulic translation; this is a direct consequence of the shared-sample contract. Second, the transient branch drives the progression rate with H_erosion = Δh_blanket − 0.3·D_bl (step c, used in step j), while the uplift and heave checks (steps d and g) use the un-reduced Δh_blanket; the static comparator (step 4) uses the gross peak head. The difference in head convention between the static and transient branches is intentional and is accounted for in the bias decomposition (§12, Failure mode 4), not silently absorbed. Third, in step 8i the clause `(uplift_ever OR l_current > 0)` is what enables compound-event progression to resume on subsequent peaks without re-triggering uplift, the gateway condition for the memory model.
+Three subtle points worth highlighting, stated in their **current (ADR-0027 + ADR-0028, Pol-confirmed 2026-07-07)** form; these two ADRs superseded the earlier r_e-attenuated head conventions and each model is now used exactly as its author intended. First, **r_e drives only the uplift/heave gate** (steps d–g, via Δh_blanket = r_e·(h − z_toe), Pol SIE 2024 Eq. (10)); it enters *neither* piping head. The static Sellmeijer comparator (step 4) uses the **raw gross head** h_peak − z_toe (Sellmeijer 2011's "critical hydraulic head across structure", no r_e — ADR-0028), so the static branch is entirely r_e-independent. Second, the transient branch drives the progression rate with the **raw** erosion head H_erosion = (h − z_toe) − 0.3·D_bl (step c, used in step j; Pol SIE 2024 Eq. (6), no r_e — ADR-0027: once heave ruptures the blanket the exit is unfiltered), while the uplift and heave checks (steps d and g) keep the un-reduced, r_e-attenuated Δh_blanket. The two piping heads therefore differ by **exactly 0.3·D_bl** — the clean head-convention component of the §12 fm4 decomposition, with r_e dropped out of both, leaving the static–transient gap a clean temporal comparison. The shared-sample contract still holds (the same θ_j feeds both branches through one M8 call). Third, in step 8i the clause `(uplift_ever OR l_current > 0)` is what enables compound-event progression to resume on subsequent peaks without re-triggering uplift, the gateway condition for the memory model; under the Terzaghi collapse (ADR-0008) the gate reduces to `heave_now`, but the full structure is retained for the i_c,h sensitivity.
 
 ---
 
@@ -194,7 +216,7 @@ DIVERGENT EVALUATION:
 
 This pattern makes the cost asymmetry explicit. Implementation must not be tempted to write `run_static()` and `run_transient()` as fully independent functions; they must consume the same θ_j and the same r_e. Implement them as a single function (M8) that returns both Z values, with internal flags controlling which diagnostics get retained.
 
-A consequence worth flagging: the static branch has no exposure to C_e at all. C_e is a transient-branch parameter only. The static limit state depends only on the six geotechnical variables (k_aq, d_70, D_aq, D_bl, k_bl, γ'_s) plus the deterministic θ_repose and D_r. Phase 2 filtering will therefore tighten C_e only through the transient branch, which is exactly the desired behavior: Phase 2 is calibrating laminar-flow conservatism, which lives only in the ODE. A second consequence, introduced by the head separation, is that the static and transient branches do not use an identical driving head: the static uses the gross peak head, the transient applies the 0.3·D_bl crack-resistance reduction. This is a deliberate fidelity choice (the static branch represents conventional deterministic practice, which does not apply Pol's crack term) and is one of the three components of the static-transient gap discussed in §12.
+A consequence worth flagging: the static branch has no exposure to C_e at all. C_e is a transient-branch parameter only. The static limit state H_c depends on the geotechnical variables that enter Sellmeijer F_r/F_s/F_g (k_aq, d_70, D_aq) plus the deterministic θ_repose, D_r and the basin-wide particle weight γ'_p = 16.87 kN/m³ (ADR-0016) — it carries **no** exposure to the sixth θ column γ'_bl (the blanket weight, which feeds only the M5 gate) and, since ADR-0028, **no** exposure to r_e (hence none to D_bl or k_bl through r_e). Phase 2 filtering will therefore tighten C_e only through the transient branch, which is exactly the desired behavior: Phase 2 is calibrating laminar-flow conservatism, which lives only in the ODE. A second consequence, introduced by the head separation, is that the static and transient branches do not use an identical driving head: both now use the **raw** head (no r_e, ADR-0027/0028), and the transient additionally applies the 0.3·D_bl crack-resistance reduction. This is a deliberate fidelity choice (the static branch is conventional Sellmeijer gross-head practice, which does not apply Pol's crack term) and is the head-convention component of the static-transient gap discussed in §12 — now cleanly exactly 0.3·D_bl, with r_e no longer confounding it.
 
 ---
 
@@ -208,10 +230,10 @@ Inside the timestepper, l_current is updated as:
 
 ```
 if I_er(t):
-    H_erosion = delta_h_blanket(t) - 0.3 * D_bl
+    H_erosion = (h(t) - z_toe) - 0.3 * D_bl      # RAW outer level, NO r_e (ADR-0027)
     overload  = max(0, H_erosion - H_eq(l_current))
     dldt      = 89 * C_e * (k_aq * overload / L)**0.81
-    l_current += dldt * dt
+    l_current = min(L, l_current + dldt * dt)    # breach clip: l absorbing at L
 else:
     l_current unchanged
 ```
@@ -226,7 +248,7 @@ The "min{Z_u(τ): τ <= t} < 0" clause in I_er is a running minimum. Implement i
 
 The `l_ini > 0` clause in I_er means a pre-existing pipe makes the uplift gate effectively bypassed for that event. This is correct physics, since an existing pipe means the blanket is already breached, but be aware it changes the gating logic between events with and without prior pipes.
 
-Do not subtract the 0.3·D_bl crack resistance from the uplift or heave heads. That reduction belongs only to the erosion driver H_erosion; the uplift and heave checks act on the full Δh_blanket. Mixing them is a common error that would make initiation appear harder than it is.
+Do not subtract the 0.3·D_bl crack resistance from the uplift or heave heads. That reduction belongs only to the erosion driver H_erosion; the uplift and heave checks act on the full Δh_blanket. Mixing them is a common error that would make initiation appear harder than it is. Note also the head asymmetry introduced by ADR-0027/0028: the erosion driver uses the **raw** outer level (h − z_toe), while the uplift/heave checks use the **r_e-attenuated** Δh_blanket — do not "unify" these onto one head.
 
 For r_l (long-term strength recovery between events): in Phase 1 set r_l = 0 always, per thesis scope. The hook should exist in the API (`l_ini_next_event = (1 − r_l) · l_e_prev`) but it lives outside the timestepper, between event evaluations.
 
@@ -254,9 +276,9 @@ The static limit state is fully vectorizable: a single boolean comparison across
 ```python
 # At time t_k, advance all N realizations one step
 h_t                = h_river[k]                                            # scalar
-delta_h_vec        = r_e_vec * (h_t - z_toe)                              # shape (N,)
-H_erosion_vec      = delta_h_vec - 0.3 * D_bl_vec                         # erosion driver only
-Z_u_vec            = (gamma_bl_sub_vec * D_bl_vec) / gamma_w - delta_h_vec
+delta_h_vec        = r_e_vec * (h_t - z_toe)                              # shape (N,); GATE head only
+H_erosion_vec      = (h_t - z_toe) - 0.3 * D_bl_vec                       # RAW outer level, NO r_e (ADR-0027)
+Z_u_vec            = (gamma_bl_sub_vec * D_bl_vec) / gamma_w - delta_h_vec  # gate uses r_e-attenuated delta_h
 uplift_ever_vec   |= (Z_u_vec < 0)
 i_exit_vec         = delta_h_vec / D_bl_vec
 Z_h_vec            = gamma_bl_sub_vec / gamma_w - i_exit_vec
@@ -269,11 +291,13 @@ H_eq_vec = np.where(
     H_c_vec * l_current_vec / l_c_vec,
     H_c_vec + (0.9 * H_c_vec - H_c_vec) * (l_current_vec - l_c_vec) / (L - l_c_vec)
 )
-overload_vec       = np.maximum(0.0, H_erosion_vec - H_eq_vec)   # H_erosion, not delta_h
+overload_vec       = np.maximum(0.0, H_erosion_vec - H_eq_vec)   # RAW H_erosion, not delta_h
 dldt_vec           = 89.0 * C_e_vec * (k_aq_vec * overload_vec / L)**0.81
 dldt_vec           = np.where(I_er_vec, dldt_vec, 0.0)
-l_current_vec     += dldt_vec * dt
+l_current_vec      = np.minimum(l_current_vec + dldt_vec * dt, L)   # breach clip at L (per-realization when L stochastic)
 ```
+
+The as-built loop restructures this bit-identically (hoisted time-invariant factors, `**0.81` evaluated only where `I_er ∧ overload>0`, whole-step skip when `h_t ≤ z_toe`; ADR-0029) and offers an opt-in Numba backend — see the Numba note below. The static comparison in the preamble is the raw `h_peak − z_toe` (ADR-0028), r_e_vec entering only the gate above.
 
 If the aquifer-lag option is active, insert one line before `delta_h_vec` that advances the lag state with the exact exponential update, `h_aq_vec += (1 - np.exp(-dt / tau_aq_vec)) * (z_toe + r_e_vec * (h_t - z_toe) - h_aq_vec)` (explicit Euler overshoots for Δt > τ_aq and diverges for Δt > 2·τ_aq; ADR-0004), and then set `delta_h_vec = h_aq_vec - z_toe`. The rest of the loop is unchanged, which is the point of the unified M4 interface.
 
@@ -289,7 +313,7 @@ The piecewise linear H_eq interpolation: breakpoints (l_c, H_c) differ per reali
 
 The first-uplift-time bookkeeping requires sequential updates along time but vectorizes across realizations (`uplift_ever_vec |= Z_u_vec < 0`).
 
-**Numba note:** if profiling shows the per-timestep elementwise loop is a bottleneck (it should not be with pure numpy, but might be if you add complexity), `@numba.njit(parallel=True)` on the timestepper gives another factor of 3 to 5 without code changes. Do not pre-optimize; write numpy first, profile, and only reach for Numba if wall-clock demands it.
+**Numba note (now realized — ADR-0029):** the numpy-first advice was followed and then profiled. The restructured numpy timestepper (bit-identical to the kernel loop) already cut a KP58.8 sweep from 46 s to 10 s; an **opt-in** `@njit(parallel=True)` backend (`progression_numba`, the `[accel]` extra, selected by `config.timestepper.progression_backend='numba'`) gives a further ~4× (sweep → 2.7 s). The Numba backend is equivalent to the numpy reference only to < 1e-10 (platform `pow` ulp on `x**0.81`), so it is config-owned and stamped into `metadata['progression_backend']`; it is refused with the aquifer lag and never touches the frozen scalar `evaluate_realization`. After acceleration the next bottleneck is the M9 bootstrap (~19 s Python loop), untouched.
 
 **Budget estimate:** about 5 min per h_i times 30 h_i is about 2.5 hr single-threaded; about 15 to 30 min with 8-core parallelism. Comfortable for iterative thesis development.
 
@@ -302,24 +326,25 @@ Random variables sampled via LHS:
 | Symbol | Description | Distribution | Mean | COV | Source |
 |---|---|---|---|---|---|
 | k_aq | Aquifer hydraulic conductivity [m/s] | Lognormal | (site-specific) | 0.50 | OYO 1999 field tests |
-| d_70 | Representative grain size [m] | Lognormal | (site-specific) | 0.10 | OYO 1999 grain-size curves |
-| D_aq | Aquifer thickness [m] | Lognormal | (site-specific) | 0.20 | OYO 1999 borehole logs |
-| D_bl | Blanket thickness [m] | Lognormal | (site-specific) | 0.20 | OYO 1999 borehole logs |
+| d_70 | Representative grain size [m] | Lognormal | (site-specific) | 0.30 | OYO 1999 grain-size curves (thesis prior; was 0.10) |
+| D_aq | Aquifer thickness [m] | Lognormal | (site-specific) | 0.10 | OYO 1999 borehole logs (thesis prior; was 0.20) |
+| D_bl | Blanket thickness [m] | Lognormal | (site-specific) | 0.167 | OYO 1999 borehole logs (thesis prior; was 0.20) |
 | k_bl | Blanket vertical conductivity [m/s] | Lognormal | (site-specific) | 0.50 | OYO 1999 (or proxy) |
-| γ'_bl | Blanket submerged unit weight [kN/m^3] | Lognormal | 6.9 | 0.056 | OYO 1999 Form 5 (A_c sat. density); see ADR-0016 |
-| C_e | Erosion coefficient [-] | Lognormal | 0.014 | 0.50 | Pol 2024 calibration |
+| γ'_bl | Blanket submerged unit weight [kN/m^3] | Lognormal | 6.9 | 0.056 | OYO 1999 Form 5 (A_c sat. density); the *blanket* weight (γ'_s split, ADR-0016) — feeds only the M5 gate, not F_r |
+| C_e | Erosion coefficient [-] | Lognormal | 0.055 | 0.782 | Pol SIE 2024 Table 2 field prior (ADR-0026; was 0.014 / 0.50) |
 
 Fixed within every realization:
 
-- θ_repose = 37 degrees (angle of repose, enters Sellmeijer F_r)
-- D_r = 0.725 (Pol base case)
+- θ_repose = 37 degrees (angle of repose, enters Sellmeijer F_r; `theta_repose_deg` run input, ADR-0015)
+- D_r,in-situ = 0.725 (Pol base case; config `relative_density_insitu` — distinct from the pinned normalization mean D_r,m = 0.725, ADR-0015)
+- γ'_p = 16.87 kN/m³ (deterministic basin-wide aquifer particle weight in F_r; ADR-0016)
 - C_u, KAS evaluated at experimental mean values per Sellmeijer 2011 convention
 
-The C_e promotion is the substantive update from a six-dimensional formulation. The justification, in brief: Pol's ODE is calibrated against laminar-regime experiments (Re < 2100); prototype-scale pipe flow frequently transitions to turbulent regime (Okamura 2022, 2025), introducing friction that reduces progression rates. Rather than modify the ODE with empirically unvalidated turbulence corrections, the laminar-flow conservative bias is encoded as prior uncertainty on C_e, and Phase 2 Bayesian filtering against 2016 survival empirically constrains it. The COV of 0.50 spans the small-scale calibration range of 0.007 to 0.030 reported by Pol 2024.
+The C_e promotion is the substantive update from a six-dimensional formulation, and the promotion (C_e a random variable) stands. **The prior parameters and the justification are revised by ADR-0026 (Pol, 2026-07-07).** The prior is now `Lognormal(mean 0.055, std 0.043)` (COV ≈ 0.782) — Pol's own SIE 2024 Table 2 field-reliability value, the mean determined by incorporating large-scale experiments, ~4× above the small-scale calibrated 0.010–0.014. The **justification** is corrected: C_e is stochastic on **intrinsic-uncertainty** grounds (Pol: it carries high uncertainty in practice), **not** to absorb laminar-vs-turbulent model uncertainty — that is nominally covered by Sellmeijer's own ~12% model factor, and it is not C_e's to launder. Phase 2 Bayesian filtering against the 2016 survival record still constrains C_e, now framed as reconciling two calibration targets (detailed time-dependent development ≈ 0.016, which this dl/dt-integrating engine most resembles, vs mean post-critical rate ≈ 0.055, the adopted conservative field value) whose factor 3–4 gap Pol leaves open. The earlier "COV 0.50 spans 0.007–0.030" rationale is retired with the old prior.
 
-**Correlation structure (mandatory, not optional).** Sampling proceeds via LHS on all seven marginals, with one mandatory correlation imposed. The aquifer conductivity k_aq and the grain size d_70 are not sampled independently. The baseline parameterization takes d_70 from the sand matrix (to stay near the validated Sellmeijer grain-size range) while k_aq is anchored to the bulk gravel framework, so independent draws would pair a fine-matrix grain size with a coarse-framework conductivity inside a single realization, describing a soil that does not physically exist and inflating the prior progression rate. The two are therefore coupled through a Nataf transformation using the empirical correlation ρ(ln k_aq, ln d_70) estimated from the paired OYO 1999 grain-size and permeability records. If those records show the matrix grain size and bulk conductivity to be statistically decoupled, a two-population soil model, in which the erodible matrix is treated separately from the armouring gravel framework, replaces the single correlated population. Both the matrix and the bulk d_70 interpretations are carried as primary runs, not as a single nominal choice, so the dependence of the fragility curves on the grain-size definition is reported explicitly and recorded in `metadata.d70_interpretation`. Any further significant correlations found in the OYO 1999 dataset are imposed through the same Nataf procedure. Implementation: generate the stratified uniform LHS design on the unit hypercube, then apply the Nataf transform to introduce the correlation while preserving the marginals, then map to physical units.
+**Coupling structure (resolved empirically — ADR-0012).** Sampling proceeds via LHS on all seven marginals. Spec §7 originally mandated a Nataf correlation between aquifer conductivity k_aq and grain size d_70 by default (independent draws would pair a fine-matrix grain size with a coarse-framework conductivity, a soil that does not physically exist, inflating the prior progression rate), with a pre-registered **two-population fallback** if the OYO records showed the matrix grain size and bulk conductivity to be statistically decoupled. The empirical OYO analysis (N = 6 in-scope paired records; r² well below 0.3, pooled correlation indistinguishable from zero) **selected the fallback**: the adopted mode is `two_population` (matrix d_70 governing Sellmeijer resistance and framework k_aq governing seepage/progression are drawn from their own marginals; ρ recorded as 0.0 but never imposed) — Pol-endorsed 2026-07-07. This is *not* the naive independent sampling Failure Mode 7 warns against, because under the two-soil model the two draws are not conflicting descriptions of one soil. The `correlated` Nataf mode remains implemented for sensitivity runs. Both the matrix and the bulk d_70 interpretations are carried as co-primary runs, recorded in `metadata.d70_interpretation`. Implementation: generate the stratified uniform LHS design; under `correlated`, apply the Gaussian-copula/Nataf transform (skipped entirely under `two_population`); then map to physical units.
 
-**A note on the C_e times k_aq product:** both enter multiplicatively in dl/dt and both are Lognormal with COV about 0.50, so their product has COV about 0.71. The high-C_e, high-k_aq corner of the prior produces progression rates several times the deterministic baseline. This is physically defensible (these are realizations that should fail) but means the prior transient fragility curve will sit above what deterministic-C_e analysis would predict. The Phase 2 posterior will pull this tail back in, producing a larger prior-to-posterior shift than a deterministic-C_e analysis would show. Be prepared to explain this in the discussion: the apparent strength of Bayesian calibration partly reflects giving the filter more parameter freedom to act on, not solely the informativeness of the 2016 survival observation. Note also that this product is an interaction, which bears directly on the sampling-variance discussion in §12, Failure mode 5.
+**A note on the C_e times k_aq product:** both enter multiplicatively in dl/dt; with the ADR-0026 C_e COV ≈ 0.782 and k_aq COV 0.50 their product COV is now ≈ 0.93 (was ≈ 0.71 under the old C_e prior). The high-C_e, high-k_aq corner of the prior produces progression rates several times the deterministic baseline — the more so with the raw-head reversal (ADR-0027) and the higher C_e mean, both of which push transient P_f up. This is physically defensible (these are realizations that should fail) but means the prior transient fragility sits well above deterministic-C_e predictions, so the Phase 2 posterior shift looks more dramatic. Be prepared to explain this in the discussion: the apparent strength of Bayesian calibration partly reflects giving the filter more parameter freedom, not solely the informativeness of the 2016 survival observation. This product is also the interaction the deep tail is governed by, which bears directly on §12 Failure modes 5 and 7 and the ADR-0029 tail-estimator study.
 
 ---
 
@@ -355,22 +380,22 @@ theta_posterior = theta_matrix[surviving_mask_trans]
 
 For this to work, M8 must be importable without notebook context, which directly motivates the architecture recommendation in §9.
 
-**Persistence format:** HDF5 via h5py for the large arrays; JSON sidecar for config metadata. Avoid pickle for long-term storage (Python version brittleness); avoid CSV for matrices (slow, lossy for floats). One HDF5 file per cross-section per scenario is a reasonable granularity. Recommended schema:
+**Persistence format:** HDF5 via h5py for the large arrays; JSON sidecar for config metadata. Avoid pickle for long-term storage (Python version brittleness); avoid CSV for matrices (slow, lossy for floats). One HDF5 file per cross-section per scenario is a reasonable granularity. As-built schema (`FragilityResult.save`/`load`):
 
 ```
 /theta_matrix             (N, 7)  float64
 /param_names              (7,)    string
 /conditioning_grid        (N_h,)  float64
-/failure_matrix_static    (N, N_h) bool
-/failure_matrix_trans     (N, N_h) bool
+/failure_matrix_static    (N, N_h) bool     # object field is failure_matrix_stat (naming maps in save/load)
+/failure_matrix_trans     (N, N_h) bool     # object field is failure_matrix_tran
 /P_f_static_raw           (N_h,)  float64
 /P_f_trans_raw            (N_h,)  float64
-/attrs:
-    config_hash, runtime_seconds, c_e_stochastic=True,
-    prior_means, prior_covs, correlation_rho_k_d70, d70_interpretation,
-    remediation_state, lhs_seed, cross_section_id, segment_id,
-    scenario, code_version, hydrograph_source, aquifer_lag_active, tau_aq
+/bootstrap_bands/{static,trans}_{lo,hi}     (N_h,) float64
+/binomial_ci/{static,trans}_{lo,hi}         (N_h,) float64   # ADR-0024, always on
+/attrs:  fit_static_{mu,sigma,datum_m}, fit_trans_{mu,sigma,datum_m}  # NaN encodes a None (unbracketed) fit
 ```
+
+The full provenance block — `config_hash`, the config snapshot, `c_e_stochastic=True`, `correlation_rho_k_d70`/`_status`, `d70_interpretation`, `remediation_state`, `lhs_seed`, `cross_section_id`, `segment_id`, `scenario`, `code_version`, `hydrograph_source`+`hydrograph`, `aquifer_lag_active`, `tau_aq`, `progression_backend`, `foreland_treatment`, `alpha_exponent`(`_transient`), `fragility_deliverable`, `fragility_fit`, `mc_convergence`, `leakage_geometry`, `bootstrap` — lives in the **JSON sidecar**, not in HDF5 attrs (the §8 sketch listed some of these as attrs, but HDF5 attrs cannot hold `None` (e.g. `tau_aq`) or nested dicts). The HDF5 root attrs carry only the fitted `(mu, sigma, datum_m)` per branch.
 
 ---
 
@@ -388,37 +413,37 @@ Reasons against pure-notebook architecture:
 
 **Recommended layout:**
 
+The importable package is **`bep_reliability_engine`** (the spec drafts and some ADRs call it `bep_phase1`; the implemented, importable name is authoritative — ADR-0003). As-built layout (differs from the original sketch in the ways noted):
+
 ```
 bep-reliability-engine/
 ├── bep_reliability_engine/           # importable package
 │   ├── __init__.py
-│   ├── config.py                     # M1: pydantic dataclasses
-│   ├── sampling.py                   # M2: LHS sampler + Nataf correlation
-│   ├── hydrographs.py                # M3: d4PDF loader
-│   ├── hydraulics.py                 # M4: r_e, λ_in, optional lag state
+│   ├── constants.py                  # GAMMA_W, GRAVITY (calibrated-model constants)
+│   ├── config.py                     # M1: pydantic models
+│   ├── sampling.py                   # M2: LHS sampler + coupling (ADR-0012) + independent L
+│   ├── tail_sampling.py             # deep-tail tilted-IS sampler (ADR-0029; not the sweep)
+│   ├── hydrographs.py                # M3: d4PDF loader, rating, canonical-shape scaling
+│   ├── bank_heights.py               # HWL loader from the 2019 tables (ADR-0018)
+│   ├── hydraulics.py                 # M4: r_e, λ_in/λ_out, optional lag state
 │   ├── initiation.py                 # M5: uplift, heave, I_er logic
 │   ├── sellmeijer.py                 # M6: H_c, l_c, optional 3D scale exponent
-│   ├── progression.py                # M7: Pol ODE timestepper, H_erosion
-│   ├── evaluator.py                  # M8: combined limit state evaluator
-│   ├── fragility.py                  # M9: curve fitting, FragilityResult
-│   └── io.py                         # HDF5 persistence
-├── tests/
-│   ├── test_sellmeijer.py            # vs Pol/Sellmeijer published cases
-│   ├── test_progression.py           # vs Pol 2024 small-scale calibration
-│   ├── test_hydraulics.py            # vs Mazure analytical solutions
-│   └── test_evaluator.py             # integration test, deterministic case
-├── notebooks/
-│   ├── 01_prior_distributions.ipynb  # visualize 7D priors and k_aq-d70 correlation
-│   ├── 02_single_realization.ipynb   # trace one θ end-to-end
-│   ├── 03_fragility_run.ipynb         # driver: full N=10^5
-│   ├── 04_static_vs_transient.ipynb   # analysis: bias quantification
-│   └── 05_compound_event_study.ipynb  # 2016 typhoon trace, sanity
-├── data/                             # geotech inputs, hydrographs
-├── results/                          # FragilityResult HDF5 files
-├── configs/                          # YAML config files per cross-section
-├── requirements.txt
+│   ├── progression.py                # M7: Pol ODE timestepper (numpy fast path)
+│   ├── progression_numba.py          # M7 opt-in Numba backend (ADR-0029, [accel] extra)
+│   ├── evaluator.py                  # M8: combined limit-state evaluator (scalar + batch)
+│   └── fragility.py                  # M9: curve fitting, FragilityResult, HDF5+JSON persistence
+├── run.py (in-package)               # run_fragility_analysis orchestrator (no physics)
+├── tests/                            # pytest suite (Pol/Sellmeijer/Mazure reference cases + integration)
+├── notebooks/                        # thin drivers only — no physics
+├── configs/                          # 8 generated YAML configs (historical only, ADR-0023)
+├── data/                             # geotech inputs; raw d4PDF hydrographs (gitignored)
+├── results/                          # FragilityResult HDF5 + JSON sidecar files
+├── scripts/generate_configs.py       # regenerates configs/ from the geotech CSV
+├── pyproject.toml                    # packaging + [accel] extra; requires-python 3.11 only
 └── README.md
 ```
+
+Notes on drift from the original sketch: there is **no `io.py`** — HDF5+JSON persistence lives on `FragilityResult.save`/`load` in `fragility.py`. `run.py` is the concrete `run_fragility_analysis` orchestrator (it contains no physics; everything routes through M8). The added modules — `tail_sampling`, `bank_heights`, `progression_numba`, `constants` — postdate the sketch.
 
 Notebooks become thin drivers: they import from `bep_reliability_engine`, configure a run, execute, and visualize. They do not contain physics. The notebook for a fragility run is essentially:
 
@@ -454,24 +479,24 @@ Everything else, the 10^5-iteration machinery, is in the package.
 **Optional but valuable:**
 
 - **xarray**, labeled multi-dimensional arrays (cross-section by scenario by climate by h_i by static/transient). If you anticipate analysis growing along these dimensions, adopt from the start.
-- **numba**, held in reserve. Only if profiling demands it.
+- **numba**, no longer merely "held in reserve" — profiling justified it (ADR-0029). It is the **opt-in** `[accel]` extra behind `config.timestepper.progression_backend='numba'` (default `numpy`), giving a further ~4× over the already-restructured numpy path, at the cost of < 1e-10 (non-bit-identical) equivalence. Optional; the default `numpy` path needs it not.
 
-**Avoid:** TensorFlow, PyTorch, JAX (overkill, no autodiff benefit here). Also avoid scipy.integrate.solve_ivp for the timestepper, since forward Euler is what Pol uses and adaptive integrators fight the I_er discontinuities.
+**Avoid:** TensorFlow, PyTorch, and **JAX** — the JAX rejection is now empirical (ADR-0029): a `lax.scan` float64 kernel of the same math ran 5.6× slower than Numba on CPU, deviated 5.5e-7 from the numpy path (four orders outside the 1e-10 bound, because XLA fuses/reorders and substitutes its own transcendentals), and current releases need numpy ≥ 2 against the project's `numpy<2.0` pin, with no autodiff/GPU benefit for this workload. Also avoid scipy.integrate.solve_ivp for the timestepper, since forward Euler is what Pol uses and adaptive integrators fight the I_er discontinuities (spec §13, ADR-scope).
 
 ---
 
 ## 11. Convergence and Validation Strategy
 
-**Convergence diagnostic.** Monitor the coefficient of variation of P_f-hat at the lowest failure probability of interest as N increases. Standard practice (Schweckendiek 2014) targets CoV < 5% across the relevant failure range; sample sizes of order 10^5 typically achieve this, and this sufficiency is verified directly for each cross-section once the engine runs rather than assumed. For levels where P_f-hat < 10^-4, monitor CoV explicitly and increase N if needed. Bootstrap resampling of the realization set provides confidence bands on fitted fragility curves.
+**Convergence diagnostic.** Monitor the coefficient of variation of P_f-hat at the lowest failure probability of interest as N increases. Standard practice (Schweckendiek 2014) targets CoV < 5% across the relevant failure range; sample sizes of order 10^5 typically achieve this, and this sufficiency is verified directly for each cross-section once the engine runs rather than assumed. The per-level CoV is now computed on every run and recorded in `metadata['mc_convergence']`. For levels where P_f-hat < 10^-4, monitor CoV explicitly; at tail-only branches this target is structurally unmeetable and the ADR-0024 raw-tail-with-binomial-CI deliverable acknowledges it (and ADR-0029's tilted importance sampler is the tool for sub-decade tail quantification). Bootstrap resampling of the realization set provides confidence bands on fitted fragility curves (degenerate replicates skipped, counted in metadata — not raised).
 
 **Aquifer-response diagnostic (gates the M4 lag option).** For each governing cross-section, estimate τ_aq ~ λ_in² · S_s / k_aq (≡ S_s · D_aq · D_bl / k_bl — k_aq cancels, so τ_aq depends on three of the seven sampled variables; S_s is a deterministic config value, the activation flag is global per run, and τ_aq is a per-realization vector once active, ADR-0004) using a literature specific-storage range for the dense sand-gravel, and compare it against the characteristic flood duration for the 2016 event and representative d4PDF members. Separately, confirm from M3 that the native d4PDF temporal resolution resolves the flashy peaks (on the order of a 1.5 hour plateau). If τ_aq/T_flood is non-negligible at any governing section, or the resolution is insufficient, activate the linear-reservoir lag form in M4; otherwise the diagnostic itself justifies the instantaneous default. Record the outcome and τ_aq in metadata.
 
-**Timestep convergence test.** Because forward-Euler overshoot is most severe on steep rising limbs, run this test on a genuinely flashy d4PDF rising-limb event, not a smooth design hydrograph, with the parameter combination drawn from the high-progression-rate tail that most stresses the scheme: high k_aq, high C_e, and low D_bl. Compare l_e at Δt and Δt/2 and confirm it differs by less than 1%. Pol uses Δt = 10 s for small-scale and 100 s for large-scale. For field-scale typhoons, 600 s (10 min) is likely safe but verify. Native d4PDF resolution is the starting default.
+**Timestep convergence test.** Because forward-Euler overshoot is most severe on steep rising limbs, run this test on a genuinely flashy d4PDF rising-limb event, not a smooth design hydrograph, with the parameter combination drawn from the high-progression-rate tail that most stresses the scheme: high k_aq, high C_e, and low D_bl. Compare l_e at Δt and Δt/2 and confirm it differs by less than 1%. Pol uses Δt = 10 s for small-scale and 100 s for large-scale. The native d4PDF resolution is **3600 s (1 h), final for this data drop** (ADR-0019 §6). ADR-0022 **accepted native 3600 s for the Phase 1 fragility sweep** on measured evidence (halving Δt shifts P_f,trans ~1.3% relative at the most active level and flips ≤ 0.05% of breach flags — sub-Monte-Carlo-noise for the population-level P(fail | h_i) deliverable), while the **Phase 2 per-realization 2016 replay runs at native/2 = 1800 s** (individual-row Accept–Reject decisions are sensitive to the ~1–2% per-realization l_e tail that is sub-noise for Phase 1). The kernel-level Δt/2 test remains at 600↔300 s as a scheme guard.
 
 **Physics validation tests** (pytest):
 
 1. **Sellmeijer reproduction.** Compute H_c for the IJkdijk test cases reported in Sellmeijer 2011 Table 1; require agreement within reported regression scatter.
-2. **Pol small-scale reproduction.** Run progression.py against Pol 2024 B25-245 and FPH calibration cases; require l_e(t) agreement within experimental scatter using Pol's calibrated C_e. As part of this test, verify that the H_c anchoring H_eq and the erosion-driving head H_erosion = Δh_blanket − 0.3·D_bl share the head datum of Pol SIE 2024 Eqs (6) and (8), so the crack-resistance term is applied at the correct point in the balance.
+2. **Pol small-scale reproduction.** Run progression.py against Pol 2024 B25-245 and FPH calibration cases; require l_e(t) agreement within experimental scatter using Pol's calibrated C_e (B25-245 = 0.010, author-confirmed 2026-07-08; the Fig. 5 caption's 0.014 is an error — ADR-0026). These are r_e = 1, D_bl = 0 geometries, so the raw and r_e-attenuated erosion heads coincide and every M7 reference test is bit-identical after ADR-0027. As part of this test, verify that the H_c anchoring H_eq and the erosion-driving head H_erosion = (h − z_toe) − 0.3·D_bl (the **raw** outer level, ADR-0027) share the head datum h_e = z_toe of Pol SIE 2024 Eqs. (6) and (8), so the crack-resistance term is applied at the correct point in the balance. (In-domain progressive-phase rate/shape is additionally gated by the L = 3 m S2-2 DgFlow case; ADR-0009.)
 3. **Mazure analytical check.** For an idealized cross-section (no foreshore, λ_in computable in closed form), require r_e agreement with hand calculation to machine precision. If the lag option is active, also confirm that as τ_aq goes to zero the lag state reproduces the instantaneous translation.
 4. **Conservation and monotonicity.** Assert l_current is monotonically non-decreasing across every timestep in every realization. Assert l_e <= L at termination. Assert I_er never goes from true to false except via heave inactivation.
 5. **Degenerate-case smoke tests.** A toe-drained segment with the exit head forced to z_toe must yield Z_u, Z_h >= 0 for all stages and P_f going to 0. Note that this zero-exit-head idealization represents as-designed drain performance and assumes continued drain functionality; it is optimistic rather than conservative with respect to clogging or degradation, and a degraded-drain sensitivity is a planned run, not part of the baseline. A cross-section with C_e going to 0 must yield Z_trans going to L − l_ini regardless of hydrograph.
@@ -486,19 +511,28 @@ Everything else, the 10^5-iteration machinery, is in the package.
 
 **Failure mode 3, forward Euler timestep too large for steep rising limbs.** For typhoon peak rising limbs in flashy rivers, the effective time constant of the dl/dt response can be short. If Δt is too large, l_e can overshoot. Mitigation: the timestep convergence test in §11, run on a flashy rising limb with a high-progression-rate θ.
 
-**Failure mode 4, static-vs-transient bias conflates three physical effects.** The intended finding "static overestimates because it ignores time" is partly conflated with two non-temporal effects. First, the static Sellmeijer assumes 2D plane-strain and inherits the 2D scale exponent α = −1/3, while the Pol ODE was calibrated against 3D experiments carrying α = −1/2; at field seepage lengths the 3D critical head can be roughly half the 2D value, a magnitude comparable to the temporal effect. Second, the transient branch applies Pol's crack-resistance reduction H_erosion = Δh_blanket − 0.3·D_bl, while the static comparator uses the gross peak head, faithful to conventional deterministic practice; this introduces a smaller non-temporal head-convention offset. The static-transient gap therefore combines a temporal component, a 2D-versus-3D dimensional component, and a head-convention offset. Mitigation: do not claim the entire gap is purely temporal; provide a hook in M6/M7 to substitute the 3D scale exponent α = −1/2 in the equilibrium curve for a sensitivity decomposition, report the head-convention difference explicitly, and acknowledge all three components in the discussion. (The dimensional hook is now implemented as the transient-only `alpha_exponent_transient`, which recomputes a separate transient H_c at α = −1/2 while the static comparator keeps α = −1/3 — ADR-0017; a fourth component, H_eq-conservatism, was added in ADR-0009.)
+**Failure mode 4, static-vs-transient bias conflates several physical effects.** The intended finding "static overestimates because it ignores time" is partly conflated with non-temporal effects, now **four** in total. First, the static Sellmeijer assumes 2D plane-strain and inherits the 2D scale exponent α = −1/3, while the Pol ODE was calibrated against 3D experiments carrying α = −1/2; at field seepage lengths the 3D critical head can be roughly half the 2D value, a magnitude comparable to the temporal effect (the **dimensional** component). Second, the transient branch applies Pol's crack-resistance reduction H_erosion = (h − z_toe) − 0.3·D_bl, while the static comparator uses the raw gross head with no crack term; this is the **head-convention** component. Since ADR-0027/0028 removed r_e from *both* piping heads, this component is cleanly **exactly 0.3·D_bl** — the r_e attenuation that the earlier convention would have added (a large confound that would have masqueraded as a temporal effect, the very FM4 error this section warns against) is gone. Third, Pol's Eq. (11) equilibrium curve rides its intentionally conservative 0.9·H_c end anchor, inflating the progressive-phase rate ≈ 1.95× at the in-domain L = 3 m scale — the **H_eq-conservatism** component (ADR-0009; field-scale magnitude an open verification with Pol). The static-transient gap therefore combines a temporal component plus these three non-temporal ones. Mitigation: do not claim the entire gap is purely temporal. The **dimensional** isolation is wired as the transient-only `alpha_exponent_transient` (recomputes a separate transient H_c at α = −1/2 while the static keeps −1/3 — ADR-0017; the −1/3 baseline is Pol-endorsed for the thin-blanket site, the −1/2 a Discussion-only sensitivity). The head-convention (0.3·D_bl → 0) and H_eq-conservatism (0.9 → ≈1.0) isolations remain unthreaded module constants (`CRACK_RESISTANCE_FACTOR`, `EQUILIBRIUM_END_FACTOR`). Report all four components in the discussion.
 
-**Failure mode 5, LHS variance reduction in the tails.** LHS improves the coverage of each marginal axis, so it is expected to tighten the coefficient of variation of P_f-hat relative to crude Monte Carlo at the same N, which is advantageous for the sensitivity studies and cross-section sweeps that run at reduced N (typically 10^4). This expectation carries a caveat specific to this problem and partly in tension with Failure mode 7: the deepest part of the failure tail is governed not by a single marginal but by the multiplicative interaction C_e times k_aq, and LHS stratifies marginals, not interactions. The realized tail-variance advantage is therefore not assumed; it is verified empirically against crude Monte Carlo at the operating N, evaluated on the failure tail specifically rather than on the bulk. Mitigation: design the engine around LHS from the start and treat crude MC as a debug fallback; if the advantage proves weak in the deep tail, a variance-reduction scheme targeted at the joint tail (importance sampling or subset simulation) is considered for the lowest conditioning levels, so leave the sampler interface open to substitution.
+**Failure mode 5, LHS variance reduction in the tails — the naive claim is now refuted (ADR-0029).** LHS improves the coverage of each marginal axis, so it was *expected* to tighten the CoV of P_f-hat relative to crude Monte Carlo at the same N. This expectation carried a caveat in tension with Failure mode 7: the deepest part of the failure tail is governed by the multiplicative interaction C_e times k_aq, and LHS stratifies marginals, not interactions. The empirical study the spec demanded was run (KP58.8, N = 10⁴, real physics; `scripts/tail_variance_study.py`, ADR-0029) and **refuted the naive claim**: LHS shows a real but modest CoV advantage only in the *bulk* (MC/LHS ≈ 1.13 at P_f ≈ 0.28) and **no detectable advantage anywhere in the failure tail** (P_f ≤ 1.6·10⁻², where its CoV matches the iid binomial formula). Consequently raw sweep tail points carry crude-MC-grade uncertainty — which is exactly why ADR-0024's Clopper–Pearson presentation is the right uncertainty statement for them. Mitigation, as delivered: keep plain LHS for the production sweep (Phase 2 needs unweighted matrices), and for sub-decade tail quantification use the substitutable **Z-space cross-entropy-tilted importance sampler** (`tail_sampling.sample_theta_tilted`, ADR-0029), which cuts deep-tail CoV 3.2–4.1× (~10–17× sample efficiency) and eliminates zero-failure replicates at P_f ~ 10⁻⁴. Its weighted estimates never enter FragilityResult. Subset simulation was considered and rejected (it would break the front-loaded-RNG reproducibility-by-construction).
 
 **Failure mode 6, memory explosion from storing all l(t) trajectories.** 10^5 times 1000 times 8 bytes is about 800 MB per cross-section per scenario. Across 5 cross-sections by 2 scenarios by static/transient you can blow past 16 GB. Mitigation: default `store_trajectories=False`; retain only Z values and scalar diagnostics. Enable trajectory storage only for the 2016 calibration run and for a 100-realization visualization subset.
 
-**Failure mode 7, C_e times k_aq multiplicative tail amplification.** Both Lognormal with COV about 0.50; the product has COV about 0.71. The high-C_e, high-k_aq corner produces progression rates several times the deterministic baseline, dominating the transient failure tail. This is physically correct but means the prior transient fragility sits above deterministic-C_e predictions and the Phase 2 posterior shift looks more dramatic than under deterministic C_e. It is also the interaction that undermines the naive LHS variance claim in Failure mode 5. Mitigation: explain in the discussion that the apparent strength of Bayesian calibration partly reflects giving the filter more parameter freedom, not solely the informativeness of 2016 survival. Plot prior and posterior marginals for all seven parameters, with C_e called out specifically, and report how much of the posterior shift is informativeness versus this tail artifact.
+**Failure mode 7, C_e times k_aq multiplicative tail amplification.** k_aq is Lognormal COV 0.50 and C_e is now Lognormal COV ≈ 0.782 (ADR-0026, up from 0.50), so their product COV is ≈ 0.93 (was ≈ 0.71). The high-C_e, high-k_aq corner produces progression rates several times the deterministic baseline, dominating the transient failure tail — amplified further by the ADR-0026 ~4× higher C_e mean and the ADR-0027 raw-head reversal. This is physically correct but means the prior transient fragility sits well above deterministic-C_e predictions and the Phase 2 posterior shift looks more dramatic. It is also the interaction that the empirical study confirmed undermines the naive LHS variance claim of Failure mode 5. Mitigation: explain in the discussion that the apparent strength of Bayesian calibration partly reflects giving the filter more parameter freedom, not solely the informativeness of 2016 survival. Plot prior and posterior marginals for all seven parameters, with C_e called out specifically, and report how much of the posterior shift is informativeness versus this tail artifact.
 
-**Tradeoff 1, sequential timestepper, numpy versus JIT.** Pure numpy vectorized across realizations is clean and gets to about 30 min runs. Numba-JIT gets to about 5 min but introduces debugging headaches (poor error messages, type-inference regressions). Recommendation: numpy first, ship the thesis with numpy, leave Numba as optimization for any follow-up paper.
+**Tradeoff 1, sequential timestepper, numpy versus JIT — resolved (ADR-0029).** The recommendation held: numpy first. The as-built default is the **restructured numpy** timestepper (bit-identical to the kernel loop, 4.5× faster than the pre-ADR-0029 numpy), which ships the thesis. Numba is realized as the **opt-in** `[accel]` backend (a further ~4×, < 1e-10 equivalence, config-owned and metadata-stamped) for the re-sweep campaigns, not the default — the debugging-headache concern is contained by keeping numpy the reference and pinning cross-backend equivalence in tests.
 
 **Tradeoff 2, storing failure_matrix for Phase 2 versus recomputing.** Storing costs about 3 MB (N by N_h bools); recomputing costs about 30 min. Store it. The recompute path should still exist as a code path for reproducibility but should not be the default.
 
 **Tradeoff 3, coupling to Uemura's discretization.** The thesis is committed to the 200 m segment grid and KP boundaries. Fragility output dimensions are fixed by external data, not computational convenience. Architect the FragilityResult to carry segment_id as a first-class index from day one; do not try to retrofit when integrating with Uemura's curves in Phase 3.
+
+### Genuine open decisions (flagged, not resolved here)
+
+These are live items the accepted ADRs deliberately leave open; they are *not* settled by this document and must not be treated as such:
+
+- **Length-effect autocorrelation length λ_ac (hence n_eff) is undetermined.** `fragility.upscale_length_effect(p_f, n_eff)` implements the weakest-link transform but `run.py` never calls it, because λ_ac — the spatial correlation length that sets the number of effective independent cross-sections per segment — is not yet fixed. Apply the upscaling to the fitted curve once λ_ac is chosen. Until then Phase 1 reports cross-section fragility, not segment fragility.
+- **KP62.0 transient transition not bracketed.** On the pre-ADR-0027 evidence the transient P_f,transient reached 0.5 only ~15 m above any attainable stage, so the transient branch there is reported as raw tail points with binomial CIs, not a fitted curve (ADR-0024). ADR-0027's raw-head reversal and ADR-0026's higher C_e both raise transient P_f and may make the transition reachable — this must be re-checked on the next sweep and the deliverable form re-classified by the data-driven bracketing criterion, not hardcoded.
+- **H_eq-conservatism field-scale magnitude (ADR-0009).** The ≈1.95× progressive-phase rate inflation is anchored only at L = 3 m; whether it persists, grows, or shrinks at the tens-of-metres Tokachi seepage lengths is an open verification with Pol and shifts the field-scale gap attribution.
+- **Re-sweep pending.** No production sweep has run under ADR-0026/0027/0028 (C_e = 0.055, raw heads) or the two-population coupling; the quantitative fragility numbers in the older ADRs predate these and are flagged for re-quantification.
 
 ---
 
@@ -509,23 +543,28 @@ For quick reference during implementation, the architectural decisions that shou
 | Decision | Setting |
 |---|---|
 | Stochastic parameter vector dimensionality | 7 (includes C_e) |
-| C_e prior | Lognormal, mean 0.014, COV 0.50 |
-| Sampling scheme | Latin Hypercube, 7-dimensional |
-| k_aq–d70 correlation | Mandatory Nataf coupling from OYO 1999 pairs; two-population fallback if decoupled |
-| d_70 interpretation | Matrix and bulk both run as primary; recorded in metadata |
+| C_e prior | Lognormal, mean 0.055, COV 0.782 (ADR-0026; was 0.014 / 0.50) |
+| Sampling scheme | Latin Hypercube, 7-dimensional (crude MC as debug fallback only) |
+| k_aq–d70 coupling | **Two-population decoupling** adopted (ADR-0012: empirical OYO result; `two_population` mode, ρ recorded 0.0, never imposed). Nataf `correlated` mode retained for sensitivity runs |
+| d_70 interpretation | Matrix and bulk both run as co-primary; recorded in `metadata.d70_interpretation` |
+| γ'_s split | γ'_p = 16.87 kN/m³ deterministic in F_r; γ'_bl stochastic (6.9, COV 0.056) in the M5 gate only (ADR-0016) |
 | Sample size per cross-section | N = 10^5 |
-| Conditioning grid size | N_h about 30 (refine as needed) |
-| Shared sampling for static/transient | Mandatory, single θ_j feeds both |
-| Hydraulic translation | Instantaneous Mazure r_e by default; linear-reservoir lag hook retained in M4 (exact exponential update, ADR-0004), activated if the τ_aq/T_flood diagnostic requires; per-realization λ_out with finite-foreshore tanh correction (ADR-0005, ADR-0006) |
-| Erosion-driving head | H_erosion = Δh_blanket − 0.3·D_bl in the ODE only; uplift and heave use the un-reduced Δh_blanket; Δh_blanket is the r_e-translated head — intentional deviation from the untranslated head of Pol SIE 2024 Eq. (6) (ADR-0007) |
-| Static comparator hydraulic input | r_e · (h_peak − z_toe), gross peak head, not raw h_peak and not reduced by 0.3·D_bl |
-| ODE integrator | Forward Euler |
-| Timestep | Native d4PDF resolution, validated by Δt/2 test on a flashy rising limb |
+| Conditioning grid size | N_h about 30 (KP62.0: 38 after the static-bracketing extension, ADR-0024) |
+| Shared sampling for static/transient | Mandatory, single θ_j feeds both through one M8 call (ADR-0002) |
+| Hydraulic translation | Instantaneous Mazure r_e by default; linear-reservoir lag hook retained in M4 (exact exponential update, ADR-0004), activated if the τ_aq/T_flood diagnostic requires; per-realization λ_out with finite-foreshore tanh correction (ADR-0005, ADR-0006); `foreland_treatment` blanketed baseline, open-entry on-demand sensitivity (ADR-0025) |
+| r_e scope | Drives the uplift/heave gate ONLY (Pol SIE 2024 Eq. 10); neither piping head uses r_e (ADR-0027/0028) |
+| Erosion-driving head | H_erosion = (h − z_toe) − 0.3·D_bl in the ODE only, on the **raw** outer level, **no r_e** (Pol SIE 2024 Eq. (6); ADR-0027 superseding ADR-0007); uplift/heave use the r_e-attenuated Δh_blanket |
+| Static comparator hydraulic input | **raw gross head** h_peak − z_toe (Sellmeijer 2011 "critical head across structure"; no r_e, no 0.3·D_bl; ADR-0028) |
+| Climate axis | Shape-invariant: one canonical HPB shape drives all scenarios; +4K ≡ historical fragility by shape invariance; climate lives on the Phase 3 hazard side; historical-only 8-config sweep (ADR-0023) |
+| Fragility deliverable | Fitted lognormal where the grid brackets the transition; else raw tail points with Clopper–Pearson binomial CIs (Optional fits; ADR-0024) |
+| ODE integrator | Forward Euler (no solve_ivp) |
+| M7 backend | Restructured numpy default (bit-identical); opt-in Numba backend, < 1e-10, config-owned (ADR-0029) |
+| Timestep | Native d4PDF 3600 s for Phase 1 (accepted, ADR-0022); Phase 2 replay at 1800 s; kernel Δt/2 guard 600↔300 s |
 | Convergence-test worst-case θ | High k_aq, high C_e, low D_bl |
-| Recovery rate r_l (Phase 1) | 0 (zero recovery within events) — author-confirmed by Pol 2026-07-07 as a reasonable, sound assumption between successive typhoon peaks (`docs/validation/pol-meeting-2026-07-07-dispositions.md`, Answer 7) |
+| Recovery rate r_l (Phase 1) | 0 (zero recovery within events) — author-confirmed by Pol (meeting 2026-07-07, re-confirmed in writing 2026-07-08: little is known about recovery, so zero is realistic, *especially for peaks so close together*) (`docs/validation/pol-meeting-2026-07-07-dispositions.md`, Answer 7 / Follow-up email Q3) |
 | Trajectory storage | Off by default; on for 2016 calibration and viz subsets |
 | Persistence format | HDF5 with JSON metadata sidecar |
-| Code organization | .py package with thin notebook drivers |
+| Code organization | `bep_reliability_engine` .py package with thin notebook drivers |
 | Phase 2 handoff payload | theta_matrix, failure_matrix_trans, failure_matrix_static, and metadata, all in FragilityResult |
 | Phase 2 survival decomposition | Record static and transient rejection separately under h_2016; report marginal transient informativeness |
 | Filter dimensionality in Phase 2 | 7 (C_e included; this is the whole point) |

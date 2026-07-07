@@ -1,7 +1,10 @@
 # ADR-0027: Erosion-Driving Head Uses the Raw Outer Level (r_e Removed), Superseding ADR-0007
 
-Date: 2026-07-07
-Status: Accepted (supersedes ADR-0007)
+Date: 2026-07-07 (meeting); email-confirmed 2026-07-08
+Status: Accepted (supersedes ADR-0007). Pol confirmed the convention in writing
+on 2026-07-08 ("Ja klopt" — once heave/uplift breaches the blanket, progression
+uses the full un-attenuated outer head; r_e applies only to uplift/heave), so
+the closure no longer rests on the meeting recollection.
 
 ## Context
 

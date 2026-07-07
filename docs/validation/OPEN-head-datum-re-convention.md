@@ -3,7 +3,8 @@
 Status: **CLOSED (2026-07-07) via closure criterion #2 — resolved as a
 DISCREPANCY; ADR-0007 superseded by ADR-0027.**
 Opened: 2026-07-07 (Stage 6 reference-anchor check).
-Closed: 2026-07-07 (Pol meeting confirmation + his published Eq. (6)).
+Closed: 2026-07-07 (Pol meeting confirmation + his published Eq. (6));
+email-confirmed in writing 2026-07-08 ("Ja klopt").
 
 ## Resolution (closure criterion #2)
 
@@ -18,10 +19,12 @@ ADR-0007, removes r_e from `H_erosion` (retains it on the uplift/heave gate),
 and the affected transient results are to be re-validated on the next sweep.
 The engine change is implemented and the full suite is green.
 
-One residual, non-blocking corroboration: the meeting recollection of the exact
-wording is the owner's ~90%-confident memory; the resolution does **not** depend
-on it (Pol's printed Eq. (6) is decisive), and a one-line email confirmation is
-recommended to lock the verbal corroboration. This does not reopen the item.
+**Email-confirmed 2026-07-08.** Pol confirmed the reading in writing ("Ja
+klopt") in reply to the direct question: *"once heave/uplift breaches the
+blanket, the progression head H = h − h_e − 0.3·D_bl uses the full un-attenuated
+outer level h; r_e applies only to uplift/heave (Eq. 10), not to progression
+(Eq. 6)."* The earlier residual (memory-only corroboration) is now removed — the
+closure rests on Pol's printed Eq. (6) **and** his written confirmation.
 
 NOTE: this item is the r_e-on-erosion-head convention (reference anchor #4). Any
 *separate* head-datum question the owner is resolving by email is not this item
