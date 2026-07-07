@@ -445,6 +445,16 @@ class TimestepperSettings(_StrictModel):
     specific_storage_per_m : float or None
         Specific storage S_s [1/m] for τ_aq (ADR-0004); ``> 0`` when set.
         Required when ``aquifer_lag_active`` is True. Default ``None``.
+    progression_backend : {'numpy', 'numba'}
+        M7 batch-timestepper backend for the production sweep (ADR-0029).
+        ``'numpy'`` (default) is the reference path, bit-identical to looping
+        the scalar M8 evaluator. ``'numba'`` selects the JIT-parallel kernel:
+        numerically equivalent to < 1e-10 but **not bit-identical** (platform
+        ``pow`` may differ in the last ulp), which is why the choice lives in
+        config — one config must fully determine one result — and is recorded
+        in the persisted metadata. Requires the optional ``numba`` dependency
+        (``pip install -e .[accel]``) and the instantaneous head model
+        (refused when ``aquifer_lag_active`` is True).
     """
 
     integration_scheme: Literal["forward_euler"] = Field(
@@ -465,6 +475,14 @@ class TimestepperSettings(_StrictModel):
     specific_storage_per_m: float | None = Field(
         default=None, gt=0.0, description="S_s [1/m] for τ_aq (ADR-0004)."
     )
+    progression_backend: Literal["numpy", "numba"] = Field(
+        default="numpy",
+        description=(
+            "M7 batch-timestepper backend (ADR-0029): 'numpy' (reference, "
+            "bit-identical to the scalar loop) or 'numba' (JIT-parallel, "
+            "< 1e-10 equivalence, requires the optional [accel] extra)."
+        ),
+    )
 
     @model_validator(mode="after")
     def _lag_requires_specific_storage(self) -> TimestepperSettings:
@@ -473,6 +491,22 @@ class TimestepperSettings(_StrictModel):
             raise ValueError(
                 "specific_storage_per_m is required when aquifer_lag_active is "
                 "True (ADR-0014; it is the input from which tau_aq is derived)."
+            )
+        return self
+
+    @model_validator(mode="after")
+    def _numba_backend_requires_instantaneous_head(self) -> TimestepperSettings:
+        """The numba kernel inlines the instantaneous M4 form only (ADR-0029).
+
+        Refusing the combination at load time is the fail-fast alternative to
+        silently dropping the lag: a lagged run must use the numpy backend
+        until the exponential lag update is implemented in the kernel.
+        """
+        if self.aquifer_lag_active and self.progression_backend == "numba":
+            raise ValueError(
+                "progression_backend='numba' supports only the instantaneous "
+                "head model; the aquifer-lag form is numpy-only (ADR-0029). "
+                "Set progression_backend='numpy' or deactivate the lag."
             )
         return self
 

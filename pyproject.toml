@@ -32,6 +32,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+accel = [
+    "numba>=0.59,<1.0",
+]
 dev = [
     "pytest",
     "pytest-cov",

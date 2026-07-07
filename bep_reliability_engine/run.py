@@ -242,6 +242,12 @@ class _EvalSettings:
         ADR-0025 foreland treatment: False = blanketed baseline (the adopted
         production setting), True = the open-entry (x1 = 0) on-demand
         sensitivity, from ``config.foreland_treatment``.
+    progression_backend : str
+        M7 batch-timestepper backend from
+        ``config.timestepper.progression_backend`` (ADR-0029): 'numpy'
+        (reference, bit-identical to the scalar loop) or 'numba'
+        (JIT-parallel, < 1e-10 equivalence, recorded in metadata via the
+        config snapshot).
     """
 
     l_ini_m: float
@@ -251,6 +257,7 @@ class _EvalSettings:
     relative_density: float
     alpha_exponent_transient: float | None
     foreland_open: bool
+    progression_backend: str
 
 
 # ============================================================================
@@ -429,6 +436,7 @@ def _evaluate_level(
         theta_repose_rad=settings.theta_repose_rad,
         relative_density=settings.relative_density,
         foreland_open=settings.foreland_open,
+        progression_backend=settings.progression_backend,
     )
     return level_index, col_static, col_trans
 
@@ -646,6 +654,10 @@ def _build_metadata(
         # was withdrawn as a category error by the amendment.
         "leakage_geometry": dict(leakage_geometry),
         "c_e_stochastic": True,
+        # ADR-0029: which M7 batch backend produced the failure matrices.
+        # 'numpy' is the bit-identical reference; 'numba' is equivalent to
+        # < 1e-10 only, so the marker keeps the two distinguishable forever.
+        "progression_backend": config.timestepper.progression_backend,
         "aquifer_lag_active": bool(config.timestepper.aquifer_lag_active),
         "tau_aq": None,  # lag inactive in Phase 1 (ADR-0014); from S_s when active.
         # Sellmeijer inputs threaded to M6 (review #6); gamma'_p stays the pinned
@@ -820,6 +832,7 @@ def run_fragility_analysis(
         relative_density=config.relative_density_insitu,
         alpha_exponent_transient=config.alpha_exponent_transient,
         foreland_open=config.foreland_treatment == "open_entry",
+        progression_backend=config.timestepper.progression_backend,
     )
     grid = np.asarray(config.mc.conditioning_grid, dtype=np.float64)
     n_levels = int(grid.size)

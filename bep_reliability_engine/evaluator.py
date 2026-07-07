@@ -523,6 +523,7 @@ def evaluate_batch(
     relative_density: float | None = None,
     gamma_p_sub_kn_m3: float | None = None,
     foreland_open: bool = False,
+    progression_backend: str = "numpy",
 ) -> tuple[npt.NDArray[np.bool_], npt.NDArray[np.bool_]]:
     """Evaluate both limit states for all N realizations at one level (M8 batch).
 
@@ -538,7 +539,10 @@ def evaluate_batch(
     array inputs) makes this **bit-identical** to looping
     :func:`evaluate_realization` over the rows — locked by
     ``tests/test_evaluator.py`` and, end to end, by
-    ``tests/test_run.py::test_orchestration_matches_reference_loop``. Only the
+    ``tests/test_run.py::test_orchestration_matches_reference_loop``. (The
+    bit-identity statement holds for the default ``progression_backend=
+    'numpy'``; the opt-in ``'numba'`` backend is equivalent to < 1e-10, not
+    bit-identical — ADR-0029.) Only the
     two boolean failure columns are returned (the bulk sweep keeps neither
     diagnostics nor trajectories, spec §12 fm6); Phase 2's per-row replay and
     survival-discrimination decomposition continue to use the scalar
@@ -579,12 +583,36 @@ float, optional
         ADR-0025 open-entry sensitivity (default False = blanketed baseline,
         unchanged behaviour): zeroes the effective foreland entry length for
         every realization. Same semantics as :func:`evaluate_realization`.
+    progression_backend : {'numpy', 'numba'}, optional
+        M7 timestepper backend (ADR-0029). ``'numpy'`` (default) is the
+        reference path, bit-identical to looping
+        :func:`evaluate_realization`. ``'numba'`` dispatches the transient
+        branch to the JIT-parallel kernel
+        (:func:`~bep_reliability_engine.progression_numba.\
+integrate_progression_numba`) — numerically equivalent to < 1e-10 but NOT
+        bit-identical (the platform ``pow`` may differ in the last ulp), so
+        it is opt-in via ``config.timestepper.progression_backend`` and the
+        choice is recorded in run metadata. Requires the optional ``numba``
+        dependency (``pip install -e .[accel]``). The static branch is
+        backend-independent (no timestepper).
 
     Returns
     -------
     failure_static, failure_trans : numpy.ndarray, shape (N,), dtype bool
         Per-realization static and transient failure indicators (``Z <= 0``).
+
+    Raises
+    ------
+    ValueError
+        If ``progression_backend`` is not ``'numpy'`` or ``'numba'``.
+    RuntimeError
+        If ``progression_backend='numba'`` and numba is not installed.
     """
+    if progression_backend not in ("numpy", "numba"):
+        raise ValueError(
+            f"progression_backend {progression_backend!r} must be 'numpy' or "
+            "'numba' (ADR-0029)."
+        )
     theta = np.asarray(theta_matrix, dtype=np.float64)
 
     # theta columns by canonical position (spec §2). C_e (col 6) enters only the
@@ -665,22 +693,52 @@ float, optional
     # across realizations within each (serial) timestep (spec §6).
     h_river_m = np.asarray(hydrograph.h, dtype=np.float64)
     dt_s = float(hydrograph.native_dt)
-    head_model = InstantaneousHead(r_e, z_toe_m)
-    progression = integrate_progression(
-        h_river_m,
-        dt_s,
-        head_model,
-        z_toe_m,
-        c_e=c_e,
-        k_aq_mps=k_aq_mps,
-        d_bl_m=d_bl_m,
-        gamma_bl_sub_knpm3=gamma_bl_sub_knpm3,
-        h_c_m=h_c_transient,  # transient H_c anchors H_eq (= h_c by default)
-        l_c_m=l_c,
-        seepage_length_m=seepage_length,
-        l_ini_m=l_ini,
-        store_trajectory=False,
-    )
+    if progression_backend == "numba":
+        # ADR-0029 opt-in JIT backend: same physics, realization-parallel,
+        # instantaneous head model inlined (< 1e-10 equivalence, not
+        # bit-identity — see the parameter docs). Imported lazily so the
+        # numba dependency stays optional.
+        try:
+            from bep_reliability_engine.progression_numba import (
+                integrate_progression_numba,
+            )
+        except ImportError as exc:  # pragma: no cover - environment-dependent
+            raise RuntimeError(
+                "progression_backend='numba' requires the optional numba "
+                "dependency; install it with `pip install -e .[accel]` or "
+                "use the default 'numpy' backend."
+            ) from exc
+        progression = integrate_progression_numba(
+            h_river_m,
+            dt_s,
+            r_e,
+            z_toe_m,
+            c_e=c_e,
+            k_aq_mps=k_aq_mps,
+            d_bl_m=d_bl_m,
+            gamma_bl_sub_knpm3=gamma_bl_sub_knpm3,
+            h_c_m=h_c_transient,
+            l_c_m=l_c,
+            seepage_length_m=seepage_length,
+            l_ini_m=l_ini,
+        )
+    else:
+        head_model = InstantaneousHead(r_e, z_toe_m)
+        progression = integrate_progression(
+            h_river_m,
+            dt_s,
+            head_model,
+            z_toe_m,
+            c_e=c_e,
+            k_aq_mps=k_aq_mps,
+            d_bl_m=d_bl_m,
+            gamma_bl_sub_knpm3=gamma_bl_sub_knpm3,
+            h_c_m=h_c_transient,  # transient H_c anchors H_eq (= h_c by default)
+            l_c_m=l_c,
+            seepage_length_m=seepage_length,
+            l_ini_m=l_ini,
+            store_trajectory=False,
+        )
     l_e_final = np.asarray(progression.l_final_m, dtype=np.float64)
     failure_trans = (seepage_length - l_e_final) <= 0.0
 

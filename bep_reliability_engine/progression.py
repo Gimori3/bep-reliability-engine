@@ -93,8 +93,9 @@ from typing import NamedTuple
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
-from bep_reliability_engine.hydraulics import AquiferHeadModel
-from bep_reliability_engine.initiation import erosion_indicator, z_heave, z_uplift
+from bep_reliability_engine.constants import GAMMA_W
+from bep_reliability_engine.hydraulics import AquiferHeadModel, InstantaneousHead
+from bep_reliability_engine.initiation import erosion_indicator
 
 __all__ = [
     "CRACK_RESISTANCE_FACTOR",
@@ -416,6 +417,19 @@ def integrate_progression(
     breach is absorbing. Invariants asserted by the spec §11 validation
     suite: l non-decreasing at every step, l_e <= L at termination, I_er
     never True -> False except via heave inactivation.
+
+    Performance (ADR-0029): the loop body inlines the M5/M6-anchored kernels
+    with their time-invariant factors hoisted, evaluates the fractional power
+    only where the I_er gate is open with positive overload, and skips whole
+    timesteps with h(t) <= z_toe under the instantaneous head model (no state
+    can change there; see the in-loop proof). All three transformations are
+    **bit-identical** to the straightforward loop over the public kernels
+    (``z_uplift``, ``z_heave``, ``equilibrium_head``, ``progression_rate``),
+    which remain the documented single sources; the equivalence is pinned
+    exactly by ``tests/test_progression_fastpath.py``. The opt-in Numba
+    backend (``progression_numba``, config ``timestepper.progression_backend``)
+    is faster still but only equivalent to < 1e-10, not bit-identical
+    (ADR-0029).
     """
     h_river = np.asarray(h_river_m, dtype=np.float64)
     n_steps = h_river.shape[0]
@@ -428,6 +442,7 @@ def integrate_progression(
     gamma_bl_sub = np.asarray(gamma_bl_sub_knpm3, dtype=np.float64)
     h_c = np.asarray(h_c_m, dtype=np.float64)
     l_c = np.asarray(l_c_m, dtype=np.float64)
+    length = np.asarray(seepage_length_m, dtype=np.float64)
 
     # Aquifer-head state is reinitialized per event in equilibrium with the
     # initial river stage (it never carries across events; spec §5).
@@ -442,12 +457,49 @@ def integrate_progression(
     heave_ever = np.asarray(False)
     t_uh = np.asarray(np.nan)
 
+    # --- Hoisted time-invariant subexpressions (ADR-0029 fast path). Each is
+    # the *identical* expression the per-step kernels evaluate -- same
+    # operands, same operation order, hence the same rounding -- computed once
+    # instead of once per timestep. Values are bit-identical to the pre-ADR-
+    # 0029 loop that re-evaluated them every step (pinned by
+    # tests/test_progression_fastpath.py against a reference loop over the
+    # public kernels).
+    crack_term = CRACK_RESISTANCE_FACTOR * d_bl  # 0.3*D_bl of (c)
+    uplift_resistance = (gamma_bl_sub * d_bl) / GAMMA_W  # z_uplift resistance
+    heave_resistance = gamma_bl_sub / GAMMA_W  # z_heave critical gradient
+    rate_coefficient = POL_RATE_COEFFICIENT * c_e_arr  # 89*C_e of (j)
+    falling_slope = (EQUILIBRIUM_END_FACTOR - 1.0) * h_c / (length - l_c)
+
+    # Whole-step skip precondition: only the stateless instantaneous head
+    # model allows skipping (a lagged model must advance its state every
+    # step). `type is` (not isinstance) so a stateful subclass never skips.
+    instantaneous_head = type(head_model) is InstantaneousHead
+
     trajectory: list[NDArray[np.float64]] | None = [] if store_trajectory else None
 
     for k in range(n_steps):
+        h_t = float(h_river[k])
+
+        # Whole-step skip (ADR-0029): when h(t) <= z_toe no state can change,
+        # so the entire vector step is a no-op. Proof: r_e in (0, 1) and IEEE
+        # rounding is monotone, so delta_h_blanket <= 0; the uplift resistance
+        # (gamma'*D_bl/gamma_w >= 0) then keeps Z_u >= 0 (rounding preserves
+        # the sign of a non-negative exact difference), and the exit gradient
+        # delta_h/D_bl is <= 0 (or NaN at D_bl = 0), so Z_h >= 0 or NaN --
+        # neither gate fires, the latches and t_uh are untouched, I_er is
+        # False everywhere and dl = 0. Step 0 always executes so the running
+        # state takes the broadcast realization shape exactly as before (the
+        # skip changes no value, only elides provably no-op work). NaN stages
+        # never skip (NaN <= z_toe is False) and fall through to the full
+        # step, preserving pre-ADR-0029 NaN propagation.
+        if k > 0 and instantaneous_head and h_t <= z_toe_m:
+            if trajectory is not None:
+                trajectory.append(np.array(l_current))
+            continue
+
         # (a) aquifer head at the exit point, then (b) the un-reduced blanket
         # overpressure that drives uplift and heave.
-        h_aq = head_model.step(float(h_river[k]), dt_s)
+        h_aq = head_model.step(h_t, dt_s)
         delta_h_blanket = h_aq - z_toe_m
 
         # (c) erosion driver: the crack-resistance-reduced head on the RAW
@@ -459,19 +511,22 @@ def integrate_progression(
         # Kept as its own variable and never fed to the initiation kernels
         # (spec §5). The raw outer level is h_river[k] by construction; the
         # head model's r_e/lag translation applies to the gate head alone.
-        h_erosion = (float(h_river[k]) - z_toe_m) - CRACK_RESISTANCE_FACTOR * d_bl
+        h_erosion = (h_t - z_toe_m) - crack_term
 
         # (d, e) uplift limit state (un-reduced head) and its running latch.
-        uplift_now = z_uplift(delta_h_blanket, gamma_bl_sub, d_bl) < 0.0
+        # Inlined M5 z_uplift with the resistance term hoisted (identical
+        # expression; initiation.z_uplift stays the single documented source).
+        uplift_now = (uplift_resistance - delta_h_blanket) < 0.0
         uplift_ever = uplift_ever | uplift_now
 
         # (f, g, h) heave limit state (un-reduced head), checked
-        # instantaneously. errstate guards the exit-gradient division for the
+        # instantaneously. Inlined M5 z_heave with the critical gradient
+        # hoisted. errstate guards the exit-gradient division for the
         # no-blanket (D_bl = 0) lab box: there delta_h / 0 -> +/-inf or nan,
         # and Z_heave < 0 still resolves to the intended "heave active iff
         # overpressure > 0" with no warning and no NaN leaking into the gate.
         with np.errstate(divide="ignore", invalid="ignore"):
-            heave_now = z_heave(delta_h_blanket, gamma_bl_sub, d_bl) < 0.0
+            heave_now = (heave_resistance - delta_h_blanket / d_bl) < 0.0
 
         # t_uh diagnostic: first uplift+heave co-occurrence (NOT Pol's
         # three-way sand-boil proxy; module docstring).
@@ -485,15 +540,32 @@ def integrate_progression(
         # uplift latch already carries the memory.
         i_er = erosion_indicator(uplift_ever, l_current > 0.0, heave_now)
 
-        # (j) equilibrium head and progression rate. The positive-part operator
-        # is enforced twice: inside progression_rate via max(0, H_erosion -
-        # H_eq), and again by gating dl on I_er here.
-        h_eq = equilibrium_head(l_current, h_c, l_c, seepage_length_m)
-        rate = progression_rate(h_erosion, h_eq, c_e_arr, k_aq, seepage_length_m)
-        dl = np.where(i_er, rate, 0.0) * dt_s
+        # (j) equilibrium head, inlined from equilibrium_head with the
+        # time-invariant falling slope hoisted (same expression, same
+        # rounding; the public kernel remains the documented source).
+        l_clamped = np.clip(l_current, 0.0, length)
+        h_eq = np.where(
+            l_clamped < l_c,
+            h_c * (l_clamped / l_c),
+            h_c + falling_slope * (l_clamped - l_c),
+        )
+
+        # (j) progression rate, inlined from progression_rate with the
+        # expensive fractional power evaluated ONLY where the gate is open
+        # and the overload is positive. Elsewhere the power is exactly zero
+        # anyway (IEEE pow(+0, 0.81) = +0, and the I_er gate zeroes the rest),
+        # so pre-filling 0 and masking reproduces the ungated
+        # rate-then-np.where chain bit for bit while skipping the pow on the
+        # (typically dominant) inactive fraction of realizations.
+        overload = np.maximum(0.0, h_erosion - h_eq)
+        velocity_group = k_aq * overload / length
+        active = i_er & (velocity_group > 0.0)
+        powered = np.zeros(np.broadcast_shapes(velocity_group.shape, active.shape))
+        np.power(velocity_group, POL_RATE_EXPONENT, out=powered, where=active)
+        dl = rate_coefficient * powered * dt_s
 
         # Forward Euler with the absorbing breach clip at L.
-        l_next = np.minimum(l_current + dl, seepage_length_m)
+        l_next = np.minimum(l_current + dl, length)
 
         # Internal monotonicity invariant (spec §11 validation test 4): dl >= 0
         # and l_current <= L, so the clip can only raise l toward L -- the pipe
