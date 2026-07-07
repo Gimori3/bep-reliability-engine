@@ -43,3 +43,11 @@ ADR-0002 (the shared-sample contract) requires the **same θ_j and the same r_e*
 - `bep_reliability_engine/evaluator.py` (`evaluate_realization`, `evaluate_batch`, `EvaluationResult.H_c_transient`); `config.py` (`alpha_exponent_transient`); `run.py` (`_EvalSettings`, metadata).
 - `tests/test_evaluator.py::test_asymmetric_alpha_decomposition_isolates_transient_Hc`, `::test_asymmetric_alpha_batch_matches_scalar_and_default_is_unchanged`; `tests/test_run.py::test_dimensional_decomposition_run_wiring`.
 - Pol, Noordam & Kanning (2024), Computers and Geotechnics (3D hole-exit DgFlow, α ≈ −1/2); van Beek (2015) (2D/3D scale-exponent divergence); Sellmeijer et al. (2011) (the 2D rule, α = −1/3).
+
+## Author confirmation (Pol, 2026-07-07)
+Pol recommended α = −1/3 as the pragmatic baseline for this 2D Sellmeijer-based
+model, noting the thin (<1 m) site blankets support the 2D assumption and that
+the −1/2 / experimental-band question belongs in the Discussion, not the
+baseline. This confirms the production default (α = −1/3) and the status of the
+`alpha_exponent_transient = −1/2` hook as a Discussion-only sensitivity. No code
+change. See `docs/validation/pol-meeting-2026-07-07-dispositions.md`, Answer 5.

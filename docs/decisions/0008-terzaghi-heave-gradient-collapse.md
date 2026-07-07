@@ -42,3 +42,10 @@ Keep the spec's γ'_s/γ_w substitution and document the collapse:
 - Pol thesis 2022, Eqs. (6.6)–(6.9), Eq. (7.14)
 - Schweckendiek et al. (2014); TAW (1999)
 - ADR-0001 (7D vector, stochastic C_e)
+
+## Author confirmation (Pol, 2026-07-07)
+Pol confirmed that omitting the flood-fighting clause (t_ff/I_ff, SIE 2024
+Eq. (7)) is the better, safer choice: organized flood fighting would be very
+difficult or impossible in flashy rivers during typhoons. This confirms the
+unconditional-upper-bound erosion indicator (the third clause dropped). No code
+change. See `docs/validation/pol-meeting-2026-07-07-dispositions.md`, Answer 8.

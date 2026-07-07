@@ -522,7 +522,7 @@ For quick reference during implementation, the architectural decisions that shou
 | ODE integrator | Forward Euler |
 | Timestep | Native d4PDF resolution, validated by Δt/2 test on a flashy rising limb |
 | Convergence-test worst-case θ | High k_aq, high C_e, low D_bl |
-| Recovery rate r_l (Phase 1) | 0 (zero recovery within events) |
+| Recovery rate r_l (Phase 1) | 0 (zero recovery within events) — author-confirmed by Pol 2026-07-07 as a reasonable, sound assumption between successive typhoon peaks (`docs/validation/pol-meeting-2026-07-07-dispositions.md`, Answer 7) |
 | Trajectory storage | Off by default; on for 2016 calibration and viz subsets |
 | Persistence format | HDF5 with JSON metadata sidecar |
 | Code organization | .py package with thin notebook drivers |

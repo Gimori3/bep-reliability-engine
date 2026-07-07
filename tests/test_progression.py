@@ -230,6 +230,82 @@ def test_head_datum_gate_uses_unreduced_overpressure() -> None:
     assert np.isnan(float(result.t_uh_s))
 
 
+def test_erosion_head_uses_raw_outer_level_not_re_attenuated() -> None:
+    """At r_e < 1 the rate is driven by the RAW outer level, not r_e*head.
+
+    Pol SIE 2024 Eq. (6) defines the erosion-driving head as
+    ``H = h - h_e - 0.3*D_bl`` on the RAW outer water level h, with r_e
+    applied ONLY to the uplift/heave head (Eq. (10)). Physically, once heave
+    ruptures the blanket the exit is unfiltered, so the full head drives
+    progression (ADR-0027, superseding ADR-0007). This is the discriminating
+    case the r_e = 1 head-datum tests cannot see: with r_e = 0.6 the raw and
+    r_e-attenuated erosion heads differ, so one Euler step from l = 0
+    (H_eq = 0) must equal ``dt * rate(raw - 0.3*D_bl)``, strictly larger than
+    the retired ``dt * rate(r_e*head - 0.3*D_bl)``.
+    """
+    r_e = 0.6
+    h_minus_toe = 3.0
+    attenuated = r_e * h_minus_toe
+    # Gate opens on the attenuated head (Eq. 10), so growth is non-zero and
+    # the discriminator is the rate head, not the gate.
+    assert attenuated > DATUM_THRESHOLD_M
+
+    result = integrate_progression(
+        np.array([DATUM_Z_TOE_M + h_minus_toe]),
+        60.0,
+        InstantaneousHead(r_e, DATUM_Z_TOE_M),
+        DATUM_Z_TOE_M,
+        c_e=0.014,
+        k_aq_mps=1e-4,
+        d_bl_m=DATUM_D_BL_M,
+        gamma_bl_sub_knpm3=DATUM_GAMMA_BL_SUB,
+        h_c_m=5.0,
+        l_c_m=10.0,
+        seepage_length_m=50.0,
+    )
+
+    h_erosion_raw = h_minus_toe - CRACK_RESISTANCE_FACTOR * DATUM_D_BL_M
+    expected_raw = 60.0 * float(progression_rate(h_erosion_raw, 0.0, 0.014, 1e-4, 50.0))
+    h_erosion_attenuated = attenuated - CRACK_RESISTANCE_FACTOR * DATUM_D_BL_M
+    retired_attenuated = 60.0 * float(
+        progression_rate(h_erosion_attenuated, 0.0, 0.014, 1e-4, 50.0)
+    )
+    # The two conventions are genuinely distinguishable here.
+    assert expected_raw > retired_attenuated > 0.0
+    assert float(result.l_final_m) == pytest.approx(expected_raw, rel=1e-12)
+    assert bool(result.heave_occurred)
+
+
+def test_gate_still_uses_re_attenuated_head_not_raw() -> None:
+    """The uplift/heave gate keeps r_e (Eq. 10) even after the rate drops it.
+
+    Companion to the test above: with r_e = 0.3 the raw overpressure (3.0 m)
+    clears the heave threshold but the r_e-attenuated head (0.9 m) does not,
+    so the gate must stay closed and no erosion occurs. Pins that ADR-0027
+    removes r_e from the rate head (Eq. 6) ONLY -- the uplift/heave head
+    (Eq. 10) remains r_e-attenuated.
+    """
+    r_e = 0.3
+    h_minus_toe = 3.0
+    assert r_e * h_minus_toe < DATUM_THRESHOLD_M < h_minus_toe
+
+    result = integrate_progression(
+        np.array([DATUM_Z_TOE_M + h_minus_toe]),
+        60.0,
+        InstantaneousHead(r_e, DATUM_Z_TOE_M),
+        DATUM_Z_TOE_M,
+        c_e=0.014,
+        k_aq_mps=1e-4,
+        d_bl_m=DATUM_D_BL_M,
+        gamma_bl_sub_knpm3=DATUM_GAMMA_BL_SUB,
+        h_c_m=5.0,
+        l_c_m=10.0,
+        seepage_length_m=50.0,
+    )
+    assert float(result.l_final_m) == 0.0
+    assert not bool(result.heave_occurred)
+
+
 # ---------------------------------------------------------------------------
 # (4) Synthetic two-peak compound event (spec §3 step 8i, §5; ADR-0008)
 # ---------------------------------------------------------------------------

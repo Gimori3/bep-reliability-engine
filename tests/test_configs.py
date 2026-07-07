@@ -13,7 +13,8 @@ never regenerated after the CSV fix). It pins, for every file in ``configs/``:
    against the old architecture spec-section-7 values; plus the unchanged ones.
 3. **gamma / C_e priors and the per-section seepage-length CoV** (review items
    #3, #10): gamma_bl_sub is the FIXED blanket weight (6.9, 0.056), C_e is FIXED
-   (0.014, 0.50), and ``seepage_length_cov`` is 0.15 at KP 60.0 / 0.20 elsewhere.
+   at the Pol SIE 2024 Table 2 field prior (mean 0.055, std 0.043 => CoV 0.782;
+   ADR-0026), and ``seepage_length_cov`` is 0.15 at KP 60.0 / 0.20 elsewhere.
 4. **geometry.HWL equals the official 2019 bank-height value** for the row's
    river/KP (ADR-0018), re-read here independently of ``bank_heights.load_hwl``
    so a drifted config, a drifted loader, or an edited bank-height CSV all fail.
@@ -68,10 +69,12 @@ _EXPECTED_COVS = {
     "D_bl": 0.167,
     "k_bl": 0.50,
     "gamma_bl_sub": 0.056,
-    "C_e": 0.50,
+    # Pol SIE 2024 Table 2 field prior: mean 0.055, std 0.043 => CoV 0.782
+    # (ADR-0026, superseding the ADR-0001 calibration-anchored 0.014/0.50).
+    "C_e": 0.043 / 0.055,
 }
 _GAMMA_BL_SUB_MEAN = 6.9
-_C_E_MEAN = 0.014
+_C_E_MEAN = 0.055
 
 # ADR-0021 landside-toe elevations [m MSL / T.P.] (OYO 1999 transverse sections,
 # +/-0.3 m). These serve as BOTH the head-translation datum z_toe and the exit

@@ -20,11 +20,15 @@ them (spec §5 lists mixing as a known error):
 * ``Delta_h_blanket(t) = h_aq(t) - z_toe`` -- the un-reduced, r_e-translated
   blanket overpressure (phi_it - h_e of Pol SIE 2024 Eqs. (8)-(10)). Feeds
   the M5 uplift and heave kernels only.
-* ``H_erosion(t) = Delta_h_blanket(t) - 0.3 * D_bl`` -- the crack-resistance-
-  reduced erosion driver of Pol SIE 2024 Eq. (6) (ADR-0007: r_e-translated,
-  deliberate deviation from the paper's untranslated outer level; the two
-  coincide for the r_e = 1 calibration configurations). Feeds the rate
-  kernel only, never the uplift/heave gate.
+* ``H_erosion(t) = (h(t) - z_toe) - 0.3 * D_bl`` -- the crack-resistance-
+  reduced erosion driver of Pol SIE 2024 Eq. (6), on the RAW outer water
+  level h(t), with NO r_e attenuation (ADR-0027, superseding ADR-0007). The
+  physical basis: once uplift/heave ruptures the cohesive blanket the exit
+  is unfiltered (SIE 2024 §2.1), so the full outer head drives progression;
+  r_e models the intact-blanket damping and applies only to the uplift/heave
+  head (Eq. (10)). The two coincide for the r_e = 1 calibration
+  configurations (B25-245, S2-2, FPH). Feeds the rate kernel only, never the
+  uplift/heave gate.
 
 Datum: all heads pivot on z_toe, the polder surface elevation at the
 landside exit point, identical to Pol's h_e (ADR-0007; physics note
@@ -242,9 +246,10 @@ def progression_rate(
     ----------
     h_erosion_m : array_like of float
         Crack-resistance-reduced erosion-driving head [m]:
-        H_erosion = Delta_h_blanket - 0.3 * D_bl (SIE 2024 Eq. (6),
-        ADR-0007). Never the un-reduced blanket overpressure, which belongs
-        to the uplift/heave gate (spec §5).
+        H_erosion = (h - z_toe) - 0.3 * D_bl on the RAW outer level h
+        (SIE 2024 Eq. (6), ADR-0027 -- r_e is NOT applied to the rate head).
+        Never the un-reduced blanket overpressure, which belongs to the
+        uplift/heave gate (spec §5).
     h_eq_m : array_like of float
         Equilibrium head H_eq(l) [m] from :func:`equilibrium_head`, on the
         same datum as ``h_erosion_m``.
@@ -315,7 +320,7 @@ def integrate_progression(
         for k in 0 .. T-1:                       # serial in t (Property 4)
             h_aq        = head_model.step(h_river_m[k], dt_s)     # (a)
             dh_blanket  = h_aq - z_toe_m                          # (b)
-            H_erosion   = dh_blanket - 0.3 * d_bl_m               # (c)
+            H_erosion   = (h_river_m[k] - z_toe_m) - 0.3 * d_bl_m # (c) raw h
             Z_u         = z_uplift(dh_blanket, gamma, d_bl)       # (d) M5
             uplift_ever |= (Z_u < 0)                              # (e)
             Z_h         = z_heave(dh_blanket, gamma, d_bl)        # (f, g) M5
@@ -326,7 +331,8 @@ def integrate_progression(
             rate        = progression_rate(H_erosion, H_eq, ...)  # (j)
             l_current   = min(L, l_current + dt_s * rate * I_er)
 
-    Pol equation map for the loop: (c) H_erosion is [SIE24] Eq. (6); (d) Z_u is
+    Pol equation map for the loop: (c) H_erosion is [SIE24] Eq. (6) on the raw
+    outer level h (ADR-0027; r_e is NOT applied to the rate head); (d) Z_u is
     Eq. (8) and (f,g) Z_h is Eq. (9), both M5 in the resistance-minus-load
     reading (ADR-0008); (i) I_er is Eq. (7) (flood-fighting clause omitted,
     Terzaghi collapse, ADR-0008); H_eq is Eq. (11); (j) the rate is Eq. (5) =
@@ -444,9 +450,16 @@ def integrate_progression(
         h_aq = head_model.step(float(h_river[k]), dt_s)
         delta_h_blanket = h_aq - z_toe_m
 
-        # (c) erosion driver: the crack-resistance-reduced head, kept as its
-        # own variable and never fed to the initiation kernels (spec §5).
-        h_erosion = delta_h_blanket - CRACK_RESISTANCE_FACTOR * d_bl
+        # (c) erosion driver: the crack-resistance-reduced head on the RAW
+        # outer water level (Pol SIE 2024 Eq. (6): H = h - h_e - 0.3*D_bl),
+        # NOT the r_e-attenuated aquifer head. Once heave ruptures the blanket
+        # the exit is unfiltered, so the full head drives progression
+        # (ADR-0027, superseding ADR-0007). r_e is retained ONLY on
+        # delta_h_blanket above, which feeds the uplift/heave gate (Eq. (10)).
+        # Kept as its own variable and never fed to the initiation kernels
+        # (spec §5). The raw outer level is h_river[k] by construction; the
+        # head model's r_e/lag translation applies to the gate head alone.
+        h_erosion = (float(h_river[k]) - z_toe_m) - CRACK_RESISTANCE_FACTOR * d_bl
 
         # (d, e) uplift limit state (un-reduced head) and its running latch.
         uplift_now = z_uplift(delta_h_blanket, gamma_bl_sub, d_bl) < 0.0

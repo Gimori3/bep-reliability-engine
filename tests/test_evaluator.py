@@ -7,15 +7,20 @@ independently of the kernels.
 
 What these tests lock (the M8 invariants, spec §2-§4, §8):
 
-1. **Shared-sample contract (ADR-0002).** The same theta row and the same
-   computed r_e feed both branches, checked on a deterministic single-Euler-step
-   case whose Z_static and Z_transient are reconstructed from the consumed
-   kernels (M6 H_c, M4 r_e, M7 progression_rate).
-2. **Head-convention separation (spec §3, §4; ADR-0007).** On a matched peak the
-   static branch uses the gross head ``r_e*(h_peak - z_toe)`` while the transient
-   drives progression with ``H_erosion = Delta_h_blanket - 0.3*D_bl``; the two
-   driving heads differ by exactly ``0.3*D_bl``, and l_e is shown to follow the
-   reduced head, not the gross one.
+1. **Shared-sample contract (ADR-0002).** The same theta row feeds both branches
+   (r_e feeds only the transient uplift/heave gate; the static branch is
+   r_e-independent, ADR-0028), checked on a deterministic single-Euler-step case
+   whose Z_static and Z_transient are reconstructed from the consumed kernels
+   (M6 H_c, M4 r_e, M7 progression_rate).
+2. **Head-convention separation (spec §3, §4; ADR-0027/ADR-0028).** Each model
+   is used as its author intended: the static Sellmeijer branch compares H_c
+   against the RAW gross head across the structure ``h_peak - z_toe``
+   (Sellmeijer 2011, no r_e; ADR-0028), and the transient Pol branch drives
+   progression with the RAW crack-reduced head ``(h - z_toe) - 0.3*D_bl``
+   (Eq. (6), no r_e; ADR-0027). r_e drops out of BOTH piping heads (it drives
+   only the uplift/heave gate, Eq. (10)), so the two piping heads differ by
+   exactly ``0.3*D_bl``, and l_e is shown to follow the crack-reduced head, not
+   the gross head.
 3. **Failure signs.** Both ``failure_static`` and ``failure_trans`` are returned
    and equal ``Z <= 0`` (the boundary Z = 0 counts as failure).
 4. **Single-source H_c (spec §1, §4).** The static branch reuses the same H_c
@@ -150,9 +155,10 @@ def test_shared_sample_deterministic_single_step() -> None:
     One timestep at a constant over-critical stage, started from l = 0 (so
     H_eq(0) = 0): the transient is exactly one forward-Euler step
     ``l_e = dt * progression_rate(H_erosion, 0, C_e, k_aq, L)`` and the static
-    margin is ``H_c - r_e*(h_peak - z_toe)``. Both reconstructions use the same
-    r_e = 0.5 and the same M6 H_c, so the case fails if M8 draws r_e or H_c
-    independently for the two branches.
+    margin is the RAW ``H_c - (h_peak - z_toe)`` (Sellmeijer 2011, no r_e;
+    ADR-0028). Both reconstructions use the same theta row and the same M6 H_c,
+    so the case fails if M8 draws H_c independently for the two branches; r_e
+    (=0.5 here) still gates the transient uplift/heave.
     """
     H_c, l_c, lambda_in, r_e = _reference_preamble(THETA, GEOMETRY)
     assert r_e == pytest.approx(EXPECTED_R_E, rel=1e-12)
@@ -176,12 +182,19 @@ def test_shared_sample_deterministic_single_step() -> None:
     assert result.l_c == pytest.approx(l_c, rel=1e-12)
     assert result.lambda_in == pytest.approx(lambda_in, rel=1e-12)
 
-    # Static branch: gross translated peak head, no crack reduction.
-    delta_h_blanket_peak = r_e * (h_peak - z_toe)  # = 6.0 m
-    assert result.Z_static == pytest.approx(H_c - delta_h_blanket_peak, rel=1e-12)
+    # Static branch: the RAW gross head across the structure (Sellmeijer 2011's
+    # "critical hydraulic head across structure"; no r_e, no crack term;
+    # ADR-0028) = 14 - 2 = 12.0 m.
+    static_head = h_peak - z_toe  # = 12.0 m
+    assert result.Z_static == pytest.approx(H_c - static_head, rel=1e-12)
+    # The uplift/heave GATE still uses the r_e-attenuated head (Eq. 10); at
+    # r_e = 0.5 that is 6.0 m, which clears the heave threshold so the gate opens.
+    gate_head = r_e * (h_peak - z_toe)  # = 6.0 m
+    assert gate_head > THETA[I_GAMMA] * THETA[I_D_BL] / 9.81  # heave threshold
 
-    # Transient branch: exactly one Euler step with the crack-reduced head.
-    h_erosion = delta_h_blanket_peak - CRACK_RESISTANCE_FACTOR * d_bl  # = 5.1 m
+    # Transient branch: exactly one Euler step with the RAW crack-reduced head
+    # (Pol Eq. (6), no r_e; ADR-0027) = (14 - 2) - 0.3*3 = 11.1 m.
+    h_erosion = (h_peak - z_toe) - CRACK_RESISTANCE_FACTOR * d_bl  # = 11.1 m
     rate = float(progression_rate(h_erosion, 0.0, c_e, k_aq, L))
     l_e_expected = DT_S * rate
     assert l_e_expected > 0.0
@@ -197,21 +210,25 @@ def test_shared_sample_deterministic_single_step() -> None:
 
 
 # ---------------------------------------------------------------------------
-# (2) Head-convention separation: static gross head vs transient H_erosion
+# (2) Head-convention separation: both branches raw, differing by 0.3*D_bl only
 # ---------------------------------------------------------------------------
 
 
-def test_head_convention_separation_by_crack_term() -> None:
-    """Static and transient driving heads differ by exactly 0.3*D_bl (spec §4).
+def test_head_convention_both_raw_differ_by_crack_term() -> None:
+    """Static and transient both use the RAW head, differing by exactly 0.3*D_bl.
 
-    The static comparator uses the gross head ``r_e*(h_peak - z_toe)``; the
-    transient rate uses ``H_erosion = Delta_h_blanket - 0.3*D_bl``. The case
-    pins both: (a) the static head carries no crack reduction, (b) the two
-    heads differ by exactly 0.3*D_bl, and (c) l_e follows the REDUCED head, not
-    the gross head — the decisive guard against the head-mixing error of
-    spec §5 (un-reduced head leaking into the rate).
+    Each model is used exactly as its author intended (ADR-0028): the static
+    Sellmeijer branch compares H_c against the RAW gross head across the
+    structure ``h_peak - z_toe`` (Sellmeijer 2011: "critical hydraulic head
+    across structure"; no r_e, no crack term), and the transient Pol branch
+    drives the rate with the RAW crack-reduced head ``(h - z_toe) - 0.3*D_bl``
+    (Eq. (6); r_e removed, ADR-0027). The two piping heads therefore differ by
+    EXACTLY 0.3*D_bl -- the clean head-convention component of the gap (spec §12
+    fm4), r_e having dropped out of both. The case pins: (a) the static head is
+    the raw gross peak, (b) it differs from the transient rate head by exactly
+    0.3*D_bl, and (c) l_e follows the crack-reduced head, not the gross head.
     """
-    H_c, _l_c, _lambda_in, r_e = _reference_preamble(THETA, GEOMETRY)
+    H_c, _l_c, _lambda_in, _r_e = _reference_preamble(THETA, GEOMETRY)
     h_peak = 14.0
     result = evaluate_realization(
         THETA, _make_hydrograph([h_peak], peak=h_peak), GEOMETRY
@@ -223,24 +240,20 @@ def test_head_convention_separation_by_crack_term() -> None:
     k_aq = THETA[I_K_AQ]
     c_e = THETA[I_C_E]
 
-    # Recover the static driving head from the reported margin; it must be the
-    # gross translated peak with NO crack reduction.
+    # Static driving head: the RAW gross peak (no r_e, no crack term).
     static_head = result.H_c - result.Z_static
-    assert static_head == pytest.approx(r_e * (h_peak - z_toe), rel=1e-12)
+    assert static_head == pytest.approx(h_peak - z_toe, rel=1e-12)
 
-    # The transient driving head is the crack-reduced head, exactly 0.3*D_bl
-    # below the static head.
+    # Transient rate head: the RAW crack-reduced head, exactly 0.3*D_bl below.
     transient_head = static_head - CRACK_RESISTANCE_FACTOR * d_bl
     assert static_head - transient_head == pytest.approx(
         CRACK_RESISTANCE_FACTOR * d_bl, rel=1e-12
     )
 
-    # l_e is driven by the REDUCED head (single Euler step from l = 0).
+    # l_e follows the crack-reduced head (single Euler step from l = 0), NOT the
+    # gross head: had M8 fed the gross head into the rate, l_e would be larger.
     l_e_reduced = DT_S * float(progression_rate(transient_head, 0.0, c_e, k_aq, L))
     assert result.l_e_final == pytest.approx(l_e_reduced, rel=1e-12)
-
-    # ... and NOT by the un-reduced gross head: had M8 fed the gross head into
-    # the rate, l_e would be measurably larger.
     l_e_gross = DT_S * float(progression_rate(static_head, 0.0, c_e, k_aq, L))
     assert l_e_gross > l_e_reduced
     assert abs(result.l_e_final - l_e_gross) > 1e-9
@@ -261,7 +274,7 @@ def test_single_H_c_anchors_static_and_transient() -> None:
     static margin with the same reported H_c means a divergent internal H_c for
     the two uses would break at least one assertion.
     """
-    H_c, l_c, _lambda_in, r_e = _reference_preamble(THETA, GEOMETRY)
+    H_c, l_c, _lambda_in, _r_e = _reference_preamble(THETA, GEOMETRY)
     h_peak = 14.0
     l_ini = l_c / 2.0
     result = evaluate_realization(
@@ -277,17 +290,16 @@ def test_single_H_c_anchors_static_and_transient() -> None:
     assert result.H_c == pytest.approx(H_c, rel=1e-12)
     assert result.l_c == pytest.approx(l_c, rel=1e-12)
 
-    # Static branch consumes the reported H_c.
-    delta_h_blanket_peak = r_e * (h_peak - z_toe)
-    assert result.Z_static == pytest.approx(
-        result.H_c - delta_h_blanket_peak, rel=1e-12
-    )
+    # Static branch consumes the reported H_c against the RAW gross head
+    # (ADR-0028; no r_e).
+    assert result.Z_static == pytest.approx(result.H_c - (h_peak - z_toe), rel=1e-12)
 
     # Transient H_eq anchored on the SAME H_c/l_c (rising-segment midpoint).
     h_eq = float(equilibrium_head(l_ini, result.H_c, result.l_c, L))
     assert h_eq == pytest.approx(0.5 * result.H_c, rel=1e-12)
 
-    h_erosion = delta_h_blanket_peak - CRACK_RESISTANCE_FACTOR * d_bl
+    # RAW crack-reduced erosion head (Eq. 6, no r_e; ADR-0027).
+    h_erosion = (h_peak - z_toe) - CRACK_RESISTANCE_FACTOR * d_bl
     assert h_erosion > h_eq  # growth must actually occur for the test to bite
     rate = float(progression_rate(h_erosion, h_eq, c_e, k_aq, L))
     l_e_expected = l_ini + DT_S * rate
@@ -307,7 +319,7 @@ def test_subcritical_peak_no_failure_no_growth() -> None:
     gamma'_bl*D_bl/gamma_w = 16*3/9.81 = 4.89 m, so the gate never opens: l stays
     at l_ini = 0, Z_transient = L, and uplift/heave never latch.
     """
-    H_c, _l_c, _lambda_in, r_e = _reference_preamble(THETA, GEOMETRY)
+    H_c, _l_c, _lambda_in, _r_e = _reference_preamble(THETA, GEOMETRY)
     h_peak = 4.0
     result = evaluate_realization(
         THETA, _make_hydrograph([h_peak] * 5, peak=h_peak), GEOMETRY
@@ -316,7 +328,8 @@ def test_subcritical_peak_no_failure_no_growth() -> None:
     L = GEOMETRY["L"]
     z_toe = GEOMETRY["z_toe"]
 
-    assert result.Z_static == pytest.approx(H_c - r_e * (h_peak - z_toe), rel=1e-12)
+    # Static uses the RAW gross head (ADR-0028); at h = 4 m it is 2.0 m < H_c.
+    assert result.Z_static == pytest.approx(H_c - (h_peak - z_toe), rel=1e-12)
     assert result.failure_static is False
     assert result.l_e_final == 0.0
     assert result.Z_transient == pytest.approx(L, rel=1e-12)
@@ -471,14 +484,17 @@ CROSS_ROW_PEAK = 20.0
 
 @pytest.mark.parametrize("theta", THETA_ROWS, ids=["rowA", "rowB", "rowC"])
 def test_per_row_single_re_single_Hc_and_crack_offset(theta: np.ndarray) -> None:
-    """Within one row: one r_e and one H_c feed both branches, offset 0.3*D_bl.
+    """Within one row: one r_e and one H_c feed both branches; both heads raw.
 
     Locks, on live distinct inputs (not the constructed r_e = 0.5 fixture):
     the reported r_e/H_c equal the standalone M4/M6 references; the static
-    branch consumes that same r_e and that same H_c (gross head); and the
-    transient drives the rate with exactly ``static_head - 0.3*D_bl`` -- proven
-    by reconstructing l_e from the reduced head and showing it differs from the
-    gross-head result. A single Euler step from l = 0 (H_eq(0) = 0).
+    branch consumes the same H_c against the RAW gross head (Sellmeijer 2011,
+    no r_e; ADR-0028); and the transient drives the rate with the RAW
+    crack-reduced head ``(peak - z_toe) - 0.3*D_bl`` (Eq. (6), no r_e; ADR-0027)
+    -- proven by reconstructing l_e from the crack-reduced head and showing it
+    differs from the gross-head result. A single Euler step from l = 0
+    (H_eq(0) = 0). r_e is still reported per row (a diagnostic), so it is checked
+    against the reference even though it no longer enters either piping head.
     """
     H_c, l_c, lambda_in, r_e = _reference_preamble(theta, GEOMETRY)
     result = evaluate_realization(
@@ -497,14 +513,13 @@ def test_per_row_single_re_single_Hc_and_crack_offset(theta: np.ndarray) -> None
     assert result.l_c == pytest.approx(l_c, rel=1e-12)
     assert result.lambda_in == pytest.approx(lambda_in, rel=1e-12)
 
-    # Static branch uses the SAME r_e and the SAME H_c, gross head (no crack term).
+    # Static branch uses the SAME H_c against the RAW gross head (no r_e).
     static_head = result.H_c - result.Z_static
-    assert static_head == pytest.approx(
-        result.r_e * (CROSS_ROW_PEAK - z_toe), rel=1e-12
-    )
+    assert static_head == pytest.approx(CROSS_ROW_PEAK - z_toe, rel=1e-12)
 
-    # Transient drives the rate with static_head - 0.3*D_bl exactly: l_e matches
-    # the reduced-head reconstruction and is measurably below the gross-head one.
+    # Transient drives the rate with the RAW crack-reduced head
+    # (peak - z_toe) - 0.3*D_bl (Eq. 6; ADR-0027): l_e matches that
+    # reconstruction and differs from the gross-head result (0.3*D_bl apart).
     transient_head = static_head - CRACK_RESISTANCE_FACTOR * d_bl
     l_e_reduced = DT_S * float(progression_rate(transient_head, 0.0, c_e, k_aq, L))
     l_e_gross = DT_S * float(progression_rate(static_head, 0.0, c_e, k_aq, L))
@@ -842,8 +857,12 @@ def test_real_m3_built_record_feeds_both_entry_points() -> None:
     fs_direct, ft_direct = evaluate_batch(theta_matrix, direct, GEOMETRY)
     np.testing.assert_array_equal(fs_built, fs_direct)
     np.testing.assert_array_equal(ft_built, ft_direct)
-    # Non-degenerate: the built record genuinely mixes outcomes across the prior.
-    assert fs_built.any() and not fs_built.all()
+    # Non-degenerate: outcomes genuinely vary across the prior. Under the raw
+    # Sellmeijer head (ADR-0028) the 14 m peak exceeds H_c for the whole prior,
+    # so the static branch fails throughout; the transient branch genuinely
+    # spans (breach and no-breach), which keeps the equivalence non-vacuous.
+    assert fs_built.any()
+    assert ft_built.any() and not ft_built.all()
 
 
 # ---------------------------------------------------------------------------
@@ -863,9 +882,11 @@ def test_foreland_open_zeroes_entry_length_default_unchanged() -> None:
     the open-entry end as a one-flag sensitivity: r_e must become exactly
     lambda_in / (L + lambda_in) (the USACE Case 7a form with x1 = 0 — also
     Pol thesis Eq. 7.13's own no-riverside-blanket case), the shared H_c must
-    be untouched (no foreland dependence), the driving head must rise
-    (smaller Z_static, l_e never smaller), and the measured foreshore_width
-    must never be mutated. Omitting the flag stays bit-identical to before.
+    be untouched (no foreland dependence), and the measured foreshore_width
+    must never be mutated. Under ADR-0028 r_e drives only the transient
+    uplift/heave gate, so the STATIC branch is r_e-independent: Z_static and
+    failure_static must be UNCHANGED by the flag. Omitting the flag stays
+    bit-identical to before.
     """
     theta = THETA_ROWS[0]
     base = evaluate_realization(theta, _DECOMP_HYDRO, _FORELAND_GEOMETRY)
@@ -894,11 +915,12 @@ def test_foreland_open_zeroes_entry_length_default_unchanged() -> None:
     )
     assert opened.r_e > base.r_e
 
-    # The shared H_c has no foreland dependence; the head rises, the margins
-    # shrink monotonically.
+    # The shared H_c has no foreland dependence, and the static branch is
+    # r_e-independent (raw Sellmeijer head, ADR-0028): the flag changes r_e
+    # (and hence the transient gate) but leaves the static margin untouched.
     assert opened.H_c == base.H_c
-    assert opened.Z_static < base.Z_static
-    assert opened.l_e_final >= base.l_e_final
+    assert opened.Z_static == base.Z_static
+    assert opened.failure_static == base.failure_static
 
     # The measured geometry is never mutated by the flag.
     assert _FORELAND_GEOMETRY["foreshore_width"] == 325.0

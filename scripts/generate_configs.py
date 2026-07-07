@@ -128,7 +128,8 @@ FIXED_COVS: dict[str, float] = {
     "D_bl": 0.167,
     "k_bl": 0.50,
     "gamma_bl_sub": 0.056,
-    "C_e": 0.50,
+    # Pol SIE 2024 Table 2 field prior: std 0.043 / mean 0.055 = 0.782 (ADR-0026).
+    "C_e": 0.043 / 0.055,
 }
 
 # Per-section CoV of the stochastic seepage length L (thesis seepage-length prior
@@ -148,8 +149,11 @@ SEEPAGE_LENGTH_COV: dict[str, float] = {
 # F_r via the pinned sellmeijer.GAMMA_P_SUB_DEFAULT = 16.87).
 GAMMA_BL_SUB_MEAN: float = 6.9
 
-# C_e prior is FIXED from Pol 2024 calibration (not OYO site data).
-C_E_MEAN: float = 0.014
+# C_e prior is FIXED at Pol's SIE 2024 Table 2 field-reliability prior
+# (mean 0.055, std 0.043 => CoV 0.782), recommended by Pol (2026-07-07 meeting)
+# for levee reliability calculations, superseding the ADR-0001 calibration-
+# anchored (0.014, 0.50). See ADR-0026. Not OYO site data.
+C_E_MEAN: float = 0.055
 
 # --- Bulk-gravel co-primary d_70 (provenance section 3.3), in mm -------------
 # These live in the provenance prose, NOT the CSV. Matrix configs read the CSV
@@ -470,7 +474,8 @@ def header_comment(
         "#   shape events (first = production compound HPB_m064_1987; second =",
         "#   isolated sensitivity end-member HPB_m067_1978).",
         "# FIXED (spec 7 / ADR-0016 / Pol 2024): all COVs; gamma_bl_sub",
-        "#   (6.9, 0.056); C_e (0.014, 0.50); theta_repose_deg; D_r; alpha.",
+        "#   (6.9, 0.056); C_e (0.055, 0.782) [SIE 2024 Tab 2, ADR-0026];",
+        "#   theta_repose_deg; D_r; alpha.",
         "# ADR-0012: k_aq-d_70 coupling = two_population (empirical OYO result;",
         "#   matrix d_70 and framework k_aq are distinct soils, sampled",
         "#   decoupled). rho_log_kaq_d70 = 0.0 is schema/audit only, never",

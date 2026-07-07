@@ -1,10 +1,39 @@
-# OPEN validation item — head-datum r_e-on-erosion-head convention
+# head-datum r_e-on-erosion-head convention — CLOSED 2026-07-07
 
-Status: **OPEN — pending direct confirmation from Pol.**
+Status: **CLOSED (2026-07-07) via closure criterion #2 — resolved as a
+DISCREPANCY; ADR-0007 superseded by ADR-0027.**
 Opened: 2026-07-07 (Stage 6 reference-anchor check).
-Owner action required: confirm the convention with Pol; then close here.
-Scope: modeling-convention question, **not** a code defect. No engine change
-is authorized by this item; it records an unvalidated assumption.
+Closed: 2026-07-07 (Pol meeting confirmation + his published Eq. (6)).
+
+## Resolution (closure criterion #2)
+
+Pol confirmed (meeting 2026-07-07) that after heave ruptures the blanket the
+exit is unfiltered, so r_e no longer plays a role and must not appear in the
+erosion-driving head — i.e. **Eq. (6)'s raw head is intended for progression**.
+This is corroborated (decisively, independent of the meeting recollection) by
+his **published SIE 2024 Eq. (6)** `H = h - h_e - 0.3·D_bl`, which uses the raw
+outer level, with r_e applied only to the uplift/heave head (Eq. (10)). Per this
+item's own closure criterion #2, this is a DISCREPANCY: **ADR-0027** supersedes
+ADR-0007, removes r_e from `H_erosion` (retains it on the uplift/heave gate),
+and the affected transient results are to be re-validated on the next sweep.
+The engine change is implemented and the full suite is green.
+
+One residual, non-blocking corroboration: the meeting recollection of the exact
+wording is the owner's ~90%-confident memory; the resolution does **not** depend
+on it (Pol's printed Eq. (6) is decisive), and a one-line email confirmation is
+recommended to lock the verbal corroboration. This does not reopen the item.
+
+NOTE: this item is the r_e-on-erosion-head convention (reference anchor #4). Any
+*separate* head-datum question the owner is resolving by email is not this item
+and is not affected by this closure.
+
+---
+
+Historical record (why it was OPEN), retained below.
+
+Scope: modeling-convention question, **not** a code defect. [Was: no engine
+change authorized by this item.] Now resolved; ADR-0027 authorizes and records
+the change.
 
 ## The precise open question
 

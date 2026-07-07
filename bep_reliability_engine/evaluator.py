@@ -2,15 +2,19 @@
 
 Single responsibility (spec §1, M8): orchestrate *both* limit states for one
 realization behind one function, :func:`evaluate_realization`, enforcing the
-shared-sample contract (spec Property 2, ADR-0002) — the same theta row and
-the same computed r_e feed the static Sellmeijer comparison and the transient
-Pol progression ODE. Independent static/transient execution tracks are banned
-(spec §4): there is exactly one call site for l_c, lambda_in and r_e per
-realization, and by default a single H_c feeds both the static comparison and
-the transient equilibrium curve H_eq. The single H_c is relaxed in exactly one
-controlled way — the optional ``alpha_exponent_transient`` recomputes a separate
-transient H_c at the 3D scale exponent for the dimensional-bias decomposition
-(ADR-0017); the shared θ_j and r_e (ADR-0002) are never relaxed.
+shared-sample contract (spec Property 2, ADR-0002) — the same theta row feeds
+the static Sellmeijer comparison and the transient Pol progression ODE, so the
+static-vs-transient gap is a same-sample comparison, not sampling noise.
+Independent static/transient execution tracks are banned (spec §4): there is
+exactly one call site for l_c, lambda_in and r_e per realization, and by default
+a single H_c feeds both the static comparison and the transient equilibrium
+curve H_eq. Note (ADR-0028): r_e now drives ONLY the transient uplift/heave gate
+— the static branch uses the raw Sellmeijer head and is r_e-independent — so the
+ADR-0002 "same r_e feeds both" clause is moot for the static branch; the
+shared-sample intent (same θ_j, one call) is preserved. The single H_c is
+relaxed in exactly one controlled way — the optional ``alpha_exponent_transient``
+recomputes a separate transient H_c at the 3D scale exponent for the
+dimensional-bias decomposition (ADR-0017); the shared θ_j is never relaxed.
 
 Two entry points, one physics
 -----------------------------
@@ -46,7 +50,7 @@ Per realization, O(1) preamble computed once::
 
 Static branch (scalar, O(1); spec §3 steps 4-6)::
 
-    H_load_peak = r_e * (h_peak - z_toe)        # gross head; NO 0.3*D_bl term
+    H_load_peak = h_peak - z_toe        # RAW gross head; NO r_e, NO 0.3*D_bl
     Z_static    = H_c - H_load_peak
     failure_static = (Z_static <= 0)
 
@@ -59,14 +63,17 @@ Transient branch (O(T); spec §3 steps 7-10) delegates the timestep loop to M7
     Z_transient = L - result_m7.l_final_m
     failure_trans = (Z_transient <= 0)
 
-The two branches use intentionally different driving heads (spec §3, §4,
-ADR-0007, ADR-0008): the static comparator takes the gross translated peak
-``r_e * (h_peak - z_toe)``, while inside M7 the rate is driven by
-``H_erosion = Delta_h_blanket - 0.3*D_bl`` and the uplift/heave gate by the
-un-reduced ``Delta_h_blanket``. The 0.3*D_bl head-convention offset between the
-static and transient branches is deliberate and is one of the components of
-the static-transient gap (spec §12, failure mode 4); it is not silently
-absorbed.
+Each model is used exactly as its author intended (ADR-0027, ADR-0028, ADR-0008):
+the static Sellmeijer comparator takes the RAW gross head across the structure
+``h_peak - z_toe`` (Sellmeijer 2011's "critical hydraulic head across structure";
+no r_e, no crack term), and inside M7 the rate is driven by the RAW crack-reduced
+head ``H_erosion = (h - z_toe) - 0.3*D_bl`` (Pol SIE 2024 Eq. (6): after heave
+ruptures the blanket the exit is unfiltered) while the uplift/heave gate uses the
+r_e-attenuated ``Delta_h_blanket`` (Eq. (10)). r_e therefore drives ONLY the
+uplift/heave initiation and does NOT enter either piping head; the static branch
+is entirely r_e-independent. The two piping heads differ by exactly the 0.3*D_bl
+crack loss (transient only) -- the clean head-convention component of the
+static-transient gap (spec §12, failure mode 4), r_e having dropped out of both.
 
 Failure sign convention: failure is ``Z <= 0`` for both limit states (the
 boundary Z = 0 counts as failure), consistent with M5's resistance-minus-load
@@ -183,7 +190,8 @@ class EvaluationResult:
     Attributes
     ----------
     Z_static : float
-        Static limit-state margin ``H_c - r_e*(h_peak - z_toe)`` [m]
+        Static limit-state margin ``H_c - (h_peak - z_toe)`` [m] on the RAW
+        gross head across the structure (Sellmeijer 2011; no r_e, ADR-0028)
         (spec §3 step 5). Failure when ``Z_static <= 0``.
     Z_transient : float
         Transient limit-state margin ``L - l_e_final`` [m] (spec §3 step 9).
@@ -214,9 +222,10 @@ class EvaluationResult:
     lambda_in : float
         Hinterland Mazure leakage length [m] from M4.
     r_e : float
-        Response factor [-] from M4, in (0, 1). The *same* r_e drives both
-        branches (shared-sample contract, ADR-0002); stochastic per
-        realization (spec Property 3).
+        Response factor [-] from M4, in (0, 1). Drives the transient
+        uplift/heave gate only (Eq. (10)); the static branch and both piping
+        heads are r_e-independent (ADR-0027/ADR-0028). Stochastic per
+        realization (spec Property 3); retained as a diagnostic.
     t_uh : float
         Time [s] of first uplift+heave co-occurrence (M7 diagnostic), or NaN
         if it never occurs within the event.
@@ -274,10 +283,11 @@ def evaluate_realization(
 
     Computes the shared preamble (H_c, l_c, lambda_in, r_e) exactly once,
     then evaluates the static Sellmeijer comparison and the transient Pol
-    progression ODE against the *same* theta row and the *same* r_e
-    (shared-sample contract, ADR-0002). The static branch reuses the same H_c
-    that anchors the transient H_eq curve. Returns both Z values and the
-    diagnostics Phase 2 needs (spec §8).
+    progression ODE against the *same* theta row (shared-sample contract,
+    ADR-0002). r_e feeds only the transient uplift/heave gate; the static
+    branch is r_e-independent (raw Sellmeijer head, ADR-0028). The static
+    branch reuses the same H_c that anchors the transient H_eq curve. Returns
+    both Z values and the diagnostics Phase 2 needs (spec §8).
 
     Parameters
     ----------
@@ -354,12 +364,14 @@ float, optional
     response factor under the semi-infinite-blanket schematization, computed
     per realization because r_e is stochastic (M4, spec Property 3); forward
     Euler with the M5 erosion-indicator gate and the monotone (positive-part)
-    pipe-length update (M7). The static comparator uses the gross peak head
-    ``r_e*(h_peak - z_toe)`` with no crack-resistance reduction; the transient
-    rate uses ``H_erosion = Delta_h_blanket - 0.3*D_bl`` and the uplift/heave
-    gate uses the un-reduced ``Delta_h_blanket`` — the 0.3*D_bl head-convention
-    difference between the branches is deliberate (spec §3, §4, §12 failure
-    mode 4; ADR-0007). Failure is ``Z <= 0`` for both limit states.
+    pipe-length update (M7). The static Sellmeijer comparator uses the RAW gross
+    head across the structure ``h_peak - z_toe`` (Sellmeijer 2011; no r_e, no
+    crack term; ADR-0028); the transient rate uses the RAW crack-reduced head
+    ``H_erosion = (h - z_toe) - 0.3*D_bl`` (Pol SIE 2024 Eq. (6), no r_e --
+    ADR-0027); the uplift/heave gate uses the r_e-attenuated ``Delta_h_blanket``
+    (Eq. (10)). r_e drives only initiation, not either piping head, so the two
+    piping heads differ by exactly 0.3*D_bl -- the clean head-convention gap
+    component (spec §3, §4, §12 failure mode 4). Failure is ``Z <= 0`` for both.
 
     The erosion coefficient ``C_e`` enters only the transient branch: it
     appears solely in the M7 progression rate, so ``Z_static`` is independent
@@ -435,18 +447,20 @@ float, optional
         # length used by this evaluation is zeroed.
         lambda_out_eff_m = 0.0
     # r_e is stochastic (four sampled variables) and lives in the per-realization
-    # path -- never precomputed once (spec Property 3). The same r_e feeds both
-    # branches (shared-sample contract, ADR-0002).
+    # path -- never precomputed once (spec Property 3). It drives ONLY the
+    # transient uplift/heave gate (ADR-0027/ADR-0028); the static branch is
+    # r_e-independent. The shared sample (theta row j) still feeds both branches.
     r_e = float(response_factor(lambda_in_m, lambda_out_eff_m, seepage_length_m))
 
     # --- Static branch (spec §3 steps 4-6): scalar gross-head comparison. The
-    # static comparator takes the gross translated peak head -- the un-reduced
-    # Delta_h_blanket at h_peak, with NO 0.3*D_bl crack reduction (spec §3
-    # step 4; §4). delta_h_blanket_peak is kept as its own named variable to
-    # mirror the head separation M7 keeps internally per timestep.
+    # static Sellmeijer comparator takes the RAW gross head across the structure
+    # (Sellmeijer 2011's "critical hydraulic head across structure"; no r_e, no
+    # 0.3*D_bl crack term; ADR-0028). r_e drives only the uplift/heave
+    # initiation (Eq. 10), which Sellmeijer's static model does not include, so
+    # the static branch is r_e-independent.
     h_peak_m = float(hydrograph.peak)
-    delta_h_blanket_peak_m = r_e * (h_peak_m - z_toe_m)
-    z_static = h_c_m - delta_h_blanket_peak_m
+    static_head_m = h_peak_m - z_toe_m
+    z_static = h_c_m - static_head_m
     failure_static = bool(z_static <= 0.0)
 
     # --- Transient branch (spec §3 steps 7-10): delegate the irreducibly serial
@@ -637,13 +651,15 @@ float, optional
         # identical to the scalar path; the measured geometry is untouched.
         lambda_out_eff = np.zeros_like(lambda_out_eff)
     # r_e is stochastic (four sampled variables, plus L when L is sampled) and
-    # feeds both branches (shared-sample contract, ADR-0002).
+    # drives ONLY the transient uplift/heave gate (ADR-0027/ADR-0028); the
+    # static branch is r_e-independent. The shared theta feeds both branches.
     r_e = response_factor(lambda_in, lambda_out_eff, seepage_length)
 
-    # --- Static branch: gross translated peak head, no 0.3*D_bl reduction.
+    # --- Static branch: RAW gross head across the structure (Sellmeijer 2011,
+    # no r_e, no 0.3*D_bl; ADR-0028). r_e-independent.
     h_peak_m = float(hydrograph.peak)
-    delta_h_blanket_peak = r_e * (h_peak_m - z_toe_m)
-    failure_static = (h_c - delta_h_blanket_peak) <= 0.0
+    static_head = h_peak_m - z_toe_m
+    failure_static = (h_c - static_head) <= 0.0
 
     # --- Transient branch: the same r_e drives the M7 timestepper, vectorized
     # across realizations within each (serial) timestep (spec §6).

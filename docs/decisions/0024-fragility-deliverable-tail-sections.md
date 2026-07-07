@@ -144,3 +144,15 @@ temporal mechanism, not a fitting inconvenience.
   acceptance; same health-assessment lineage).
 - `bep_reliability_engine/fragility.py` (`fit_lognormal_fragility`,
   `assemble_fragility`, `_bootstrap_bands`, `mc_cov_of_pf`).
+
+## Author caution (Pol, 2026-07-07)
+Pol advised against over-investing in the low-P_f raw-tail framing: from a
+practical standpoint extremely small failure probabilities carry little
+meaningful information, so presenting them as a major substantive finding may be
+unnecessary. This tempers the "intended primary presentation / substantive
+finding" language of the Decision above; the binomial-CI / raw-tail machinery is
+unaffected. Whether to soften the thesis emphasis is an owner decision. NB: the
+ADR-0027 change (raw erosion head) raises transient P_f and may make the KP 62.0
+transition reachable, which would also bear on this framing — re-check on the
+next sweep. See `docs/validation/pol-meeting-2026-07-07-dispositions.md`,
+Answer 9.

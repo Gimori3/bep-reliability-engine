@@ -33,6 +33,28 @@ The decomposition assumes DgFlow's effective equilibrium head is ≈ 1.0·H_c in
 - B25-245's progressive phase is not gated (out of domain, §4 note), so S2-2's shape gate is the only quantitative progressive-phase validation in M7 and is treated as load-bearing.
 - Cross-reference: M7 reference note §5D (the integration, the Eq.-(15) inversion, and the shape numbers) and §7 (consolidated M7 final state, where this is finding 2 of the two that propagate beyond M7); architecture §12 Failure Mode 4 (extended here from three components to four).
 
+## Author confirmation (Pol, 2026-07-07) — qualitative only
+Pol confirmed the 0.9·H_c anchor is **intentionally conservative**, and that
+deriving the equilibrium curve from the simplified progression relation (rather
+than from direct FEM equilibrium curves) **adds further conservatism**. He
+called the simplified curve "far from perfect" and strictly tied to the specific
+cases he assessed numerically. He gave **no field-scale number**: whether the
+≈1.95×-at-L=3m inflation persists, grows or shrinks at tens-of-metres seepage
+lengths remains the open question above. The owner is to send Pol the L=3m
+inversion / 1.95× calculation for confirmation. This is **qualitative author
+guidance** and feeds the Sub-question 1 gap decomposition (temporal vs
+H_eq-schematization); it is not a number and does not change any code or the
+0.9 constant. (Dispositions record, Answer 3.)
+
+## Note — the sibling head-convention component (ADR-0027/ADR-0028, 2026-07-07)
+This ADR's H_eq-conservatism component is distinct from and unchanged by
+ADR-0027/ADR-0028. The **head-convention** component of Failure Mode 4 stays
+**exactly the 0.3·D_bl crack term**: both piping heads are now raw (ADR-0027
+transient erosion head, ADR-0028 static Sellmeijer head), r_e having dropped out
+of both (it drives only the uplift/heave gate). So the four gap components stay
+cleanly separable, and the static–transient comparison remains a clean temporal
+one — the temporal component must still not absorb the other three. See ADR-0028.
+
 ## References
 - Pol SIE 2024, Eq. (11) and §2.3 ("a conservative estimate"); Eq. (15) rate law.
 - Pol, Noordam & Kanning (CG24) 2024, Fig. 10 and Table A.5 (L = 3 m S2-2; 7.08·10⁻⁵ m/s).

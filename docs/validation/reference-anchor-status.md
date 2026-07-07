@@ -12,7 +12,7 @@ rendered and read, not OCR-trusted). Reproduced values are live engine output.
 | 1 | Sellmeijer IJkdijk H_c | **CLOSED** (real external anchor; repo mis-cites the table) | eng 2.067 / 2.011 / 2.067 m vs obs 2.30 / 1.75 / 2.10 m | −10.1% / +14.9% / −1.6% |
 | 2 | Pol dl/dt constants (89, 0.81, unit basis) | **CLOSED** (print-confirmed) | 89, 0.81, k[m/s]·H[m]/L[m] | exact match to SIE Eq (5) / CG24 Eq (15) |
 | 3 | B25-245 progression magnitude | **OPEN** (target published, check not clean) | eng v_c,avg 2.21e-5 vs obs 6.14e-5 m/s | 0.36× (inside factor-3 band, at edge) |
-| 4 | Head-datum (0.3·D_bl on which head) | **OPEN** (self-reference cannot be removed) | eng = Eq(6) at r_e=1 only; deviates by r_e otherwise | — (modeling choice, ADR-0007) |
+| 4 | Head-datum (0.3·D_bl on which head) | **CLOSED 2026-07-07** (Pol confirmed raw head; ADR-0007 → ADR-0027) | engine now = Eq(6) raw head; r_e removed from H_erosion, retained on uplift/heave | — (resolved discrepancy, ADR-0027) |
 | 5 | Mazure / Model-4A r_e | **CLOSED** (closed-form, unchanged) | λ_in 200.0, r_e 0.8 exact | machine precision |
 
 ## 1. Sellmeijer IJkdijk H_c — CLOSED (with a citation correction)
@@ -108,7 +108,20 @@ rate law's *constants* are validated (anchor 2), but its *absolute magnitude
 against experiment* is not cleanly closable from these papers. The B25-245
 shape check stays shape-only with unconfirmed digitized provenance.
 
-## 4. Head-datum verification — OPEN (self-reference is irremovable here)
+## 4. Head-datum verification — CLOSED 2026-07-07 (Pol confirmed the raw head)
+
+**Resolution.** Pol confirmed (meeting 2026-07-07) that after heave ruptures the
+blanket the exit is unfiltered, so r_e does not belong in the erosion head —
+Eq. (6)'s raw head is intended for progression. This matches his printed SIE 2024
+Eq. (6) `H = h - h_e - 0.3·D_bl` (raw outer level; r_e only on the uplift/heave
+head, Eq. (10)). The self-reference that blocked closure is removed by Pol's
+direct statement (this item's closure criterion #2). The engine is changed
+accordingly: **ADR-0027** supersedes ADR-0007, removing r_e from `H_erosion`
+(retained on the uplift/heave gate). Full suite green; transient results to be
+re-validated on the next sweep. See `OPEN-head-datum-re-convention.md` (now
+marked CLOSED) and ADR-0027. The historical OPEN write-up follows.
+
+### (historical) Why it was OPEN — self-reference was irremovable from the sources
 
 **What IS confirmed against the print** (SIE 2024 Eq. (6), p.4, visual):
 `H = h − h_e − 0.3·D_bl`, *"h outer water level, h_e polder level at the exit
@@ -157,14 +170,14 @@ optional USACE worked-example (x3 = 167 m) remains an available strengthening.
 
 The engine is **physically validated on the static critical-head law and the
 progression rate constants** (anchors 1, 2, 5 CLOSED against real published
-values), and **not yet physically validated on two specific points**:
+values). **Anchor 4** (head-datum r_e-on-erosion-head) is now **CLOSED
+2026-07-07**: Pol confirmed the raw-head convention (his Eq. (6)); it was a
+DISCREPANCY, resolved by ADR-0027 (r_e removed from H_erosion). One point
+remains not-yet-validated:
 - **anchor 3** — no clean experimental validation of the progression rate's
   absolute *magnitude* (the only experiment, B25-245, is out of domain with an
-  unconfirmed loading input; in-domain S2-2 is model-vs-model); and
-- **anchor 4** — the head-datum r_e-on-erosion-head convention (ADR-0007)
-  cannot be validated against Pol's published numbers and needs Pol's direct
-  confirmation.
+  unconfirmed loading input; in-domain S2-2 is model-vs-model).
 
-Neither open anchor is a discrepancy forcing an engine change; both are
-"cannot be closed from the available sources" gaps. The timestep-gate failure
-(P3, prior session) remains separately open.
+Anchor 4's closure **did** force an engine change (ADR-0027), unlike the
+earlier expectation. The timestep-gate failure (P3, prior session) remains
+separately open, as does the C_e prior change (ADR-0026, config-only).

@@ -47,17 +47,19 @@ from bep_reliability_engine.run import (
 from bep_reliability_engine.sampling import sample_theta
 
 # Grid and parameters tuned (see the module docstring) so both branches are
-# comfortably interior: static ~0.20->0.96, transient ~0.02->0.72 across [9, 18].
-_GRID = [9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0]
+# comfortably interior. Under the raw Sellmeijer head (ADR-0028) the static
+# transition sits at ~6.5 and the transient at ~9, so the grid spans both:
+# static ~0.05->1.0, transient ~0.01->0.79 across [5.5, 11].
+_GRID = [5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 10.0, 11.0]
 _N_SAMPLES = 300
 _SEED = 12345
 _STUB_DT_S = 7200.0  # coarse dt (also exercises the target_dt_seconds threading)
 
 # Toy config for the two integration tests below (N=1000, N_h=5). The 5-level grid
-# keeps both branches interior with the two-peak stub: static ~0.34->0.95,
-# transient ~0.07->0.74.
+# keeps both branches interior with the two-peak stub under the raw head
+# (ADR-0028): static ~0.05->1.0, transient ~0.01->0.6.
 _TOY_N = 1000
-_TOY_GRID = [10.0, 12.0, 14.0, 16.0, 18.0]
+_TOY_GRID = [5.5, 6.5, 7.5, 8.5, 9.5]
 
 
 def _make_config(
@@ -477,11 +479,14 @@ def test_foreland_treatment_threaded_and_recorded() -> None:
 
     A wide-foreshore toy geometry gives the blanketed baseline a saturated
     tanh entry length; the ``open_entry`` sensitivity removes it (USACE
-    x1 = 0), so every realization sees a strictly higher driving head at
-    every level: the open run's failure sets must be supersets of the
-    baseline's (strictly larger somewhere), both treatments must be stamped
-    into metadata, and the leakage-geometry record must cohere with the
-    physics actually run (zero foreland entry length under open_entry).
+    x1 = 0), so every realization sees a strictly higher r_e. Under
+    ADR-0027/ADR-0028 r_e drives ONLY the transient uplift/heave gate: the
+    STATIC branch uses the raw Sellmeijer head and is r_e-independent, so its
+    failure matrix must be IDENTICAL between the two treatments; the TRANSIENT
+    branch still responds (the gate timing shifts), so its matrix must differ.
+    Both treatments must be stamped into metadata, and the leakage-geometry
+    record must cohere with the physics actually run (zero foreland entry
+    length under open_entry).
     """
     geometry = {
         "L": 30.0,
@@ -506,11 +511,13 @@ def test_foreland_treatment_threaded_and_recorded() -> None:
     assert base.metadata["foreland_treatment"] == "blanketed_tanh"
     assert opened.metadata["foreland_treatment"] == "open_entry"
 
-    # Monotonicity: a strictly higher r_e per realization can only add
-    # failures, never remove them — on both branches.
-    assert np.all(opened.failure_matrix_stat >= base.failure_matrix_stat)
-    assert opened.failure_matrix_stat.sum() > base.failure_matrix_stat.sum()
-    assert np.all(opened.failure_matrix_tran >= base.failure_matrix_tran)
+    # Static branch is r_e-independent (raw Sellmeijer head, ADR-0028), so the
+    # foreland treatment leaves it bit-identical.
+    assert np.array_equal(opened.failure_matrix_stat, base.failure_matrix_stat)
+    # Transient branch responds via the uplift/heave gate only (ADR-0027), so
+    # its failure matrix differs (no superset relation — forward-Euler overshoot
+    # in the rising-H_eq phase can locally reverse it).
+    assert not np.array_equal(opened.failure_matrix_tran, base.failure_matrix_tran)
 
     # The leakage-geometry record reflects the physics actually run.
     assert base.metadata["leakage_geometry"]["median_lambda_out_eff_m"] > 0.0

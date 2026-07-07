@@ -1,7 +1,14 @@
 # ADR-0007: Response Factor Applied to the Erosion-Driving Head
 
 Date: 2026-06-11
-Status: Accepted
+Status: **Superseded by ADR-0027** (2026-07-07). The convention decided here —
+applying r_e to the erosion-driving head — was the OPEN reference anchor #4 and
+is now overturned: Pol confirmed (meeting 2026-07-07) and his SIE 2024 Eq. (6)
+prints that the erosion head uses the **raw** outer level (r_e retained only on
+the uplift/heave head, Eq. (10)). The datum note below (z_toe = h_e) still
+holds; the r_e-on-erosion-head decision does not. See ADR-0027.
+
+Original status: Accepted
 
 ## Context
 Pol SIE 2024 Eq. (6) defines the erosion head as H = h − h_e − 0.3·D_bl with h the **untranslated** outer water level, whereas the architecture (§3, steps c and j) drives pipe progression with H_erosion = r_e·(h − z_toe) − 0.3·D_bl, the r_e-translated aquifer head. The discrepancy was surfaced during M4 design review and required an explicit decision rather than silent absorption.

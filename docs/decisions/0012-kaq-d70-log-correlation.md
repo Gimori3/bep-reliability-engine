@@ -167,3 +167,11 @@ inference. Verified against the actual source before wiring:
   `scripts/generate_configs.py`, `tests/test_sampling.py`
   (`test_two_population_fallback_decouples_kaq_and_d70`).
 - OYO (1999), 平成10年度 十勝川中流部堤防強化対策検討業務 報告書（調査・解析編）, 様式-4.
+
+## Author confirmation (Pol, 2026-07-07)
+Pol confirmed the two-population decoupling: in practice the k_aq–d_70
+correlation is often very unclear and difficult to establish, so the two are
+frequently decoupled; and with the very limited paired records here (N=6),
+decoupling is the only viable and practical option. Independent author
+endorsement of Outcome 2. No code change. See
+`docs/validation/pol-meeting-2026-07-07-dispositions.md`, Answer 4.
