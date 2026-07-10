@@ -171,6 +171,7 @@ from bep_reliability_engine.hydrographs import (
     HydrographRecord,
     conditioning_record_for_level,
     load_canonical_shape,
+    resample_record,
     validate_datum_consistency,
 )
 from bep_reliability_engine.sampling import (
@@ -311,7 +312,12 @@ def _hydrograph_for_level(
     :func:`~bep_reliability_engine.hydrographs.conditioning_record_for_level`
     — ``h(t) = h_base + (level_m - h_base) * shape(t)``, trough floor pinned
     at the section's base-flow stage h_base (ADR-0021 item 4), ``peak =
-    level_m`` verbatim (ADR-0010), full source window at native resolution.
+    level_m`` verbatim (ADR-0010), full source window. When
+    ``config.timestepper.target_dt_seconds`` is set the built record is then
+    refined onto that grid via
+    :func:`~bep_reliability_engine.hydrographs.resample_record` (the ADR-0013
+    record-construction hook; integration-Δt policy per ADR-0030 — linear
+    interpolation, loading signal unchanged, forward-Euler grid refined).
 
     **Stub path** (``canonical`` None): the legacy synthetic **two-peak
     compound event** — two raised-cosine bumps separated by an inter-peak
@@ -340,9 +346,12 @@ def _hydrograph_for_level(
         The level's loading record, ``peak`` set exactly to ``level_m``.
     """
     if canonical is not None:
-        return conditioning_record_for_level(
+        record = conditioning_record_for_level(
             canonical, level_m, scenario=config.scenario
         )
+        if config.timestepper.target_dt_seconds is not None:
+            record = resample_record(record, config.timestepper.target_dt_seconds)
+        return record
 
     z_toe_m = float(config.geometry.z_toe)
     native_dt_s = (

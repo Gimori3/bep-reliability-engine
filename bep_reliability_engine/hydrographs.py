@@ -71,6 +71,7 @@ conversions only at the M1/M3 boundary).
 from __future__ import annotations
 
 import csv
+import math
 import re
 import unicodedata
 from dataclasses import dataclass, field
@@ -660,6 +661,83 @@ def conditioning_record_for_level(
         event_id=f"{source.event_id}_scaled_h{level:g}",
         native_dt=source.native_dt,
         provenance=provenance,
+    )
+
+
+def resample_record(
+    record: HydrographRecord, target_dt_seconds: float
+) -> HydrographRecord:
+    """Refine a record onto a finer uniform time grid (ADR-0013 resample hook).
+
+    Linear interpolation of the stage series onto ``target_dt_seconds``, the
+    record-construction resampling that ADR-0013 assigns to M3 and ADR-0022
+    anticipated (its decision 3 forward requirement; the Phase 2 native/2
+    replay and the ADR-0030 Phase 1 integration-Δt policy both consume it).
+    Interpolation adds **no information** to the hourly d4PDF source — it only
+    refines the forward-Euler integration grid, which matters because at
+    3600 s a single Euler step can jump the H_eq equilibrium barrier for
+    high-C_e·k_aq realizations (ADR-0030): the loading signal stays the
+    resolved hourly signal.
+
+    The refinement is restricted to **integer subdivisions** of the native
+    grid so every native sample is a node of the new grid: the resampled
+    series passes through all source points exactly, ``max(h)`` (hence
+    ``peak``) is preserved, and the ``native_dt``-halving ladder of the §11
+    convergence test is exactly nested.
+
+    Parameters
+    ----------
+    record : HydrographRecord
+        The source record (any uniform grid).
+    target_dt_seconds : float
+        The target resolution [s]; must satisfy ``record.native_dt =
+        k * target_dt_seconds`` for a positive integer k. ``k == 1`` returns
+        the record unchanged.
+
+    Returns
+    -------
+    HydrographRecord
+        The refined record: ``native_dt = target_dt_seconds``, same span,
+        ``peak``/``duration_hours``/``scenario``/``event_id`` unchanged, and
+        provenance extended with ``resampled_from_native_dt_s`` and
+        ``resample_factor``.
+
+    Raises
+    ------
+    ValueError
+        If ``target_dt_seconds`` is not positive, exceeds ``native_dt``, or
+        does not divide it to an integer refinement factor.
+    """
+    target = float(target_dt_seconds)
+    if target <= 0.0:
+        raise ValueError(f"target_dt_seconds must be > 0 (got {target}).")
+    factor_float = record.native_dt / target
+    factor = int(round(factor_float))
+    if factor < 1 or not math.isclose(factor_float, factor, rel_tol=1e-9):
+        raise ValueError(
+            f"target_dt_seconds={target} must be an integer subdivision of "
+            f"native_dt={record.native_dt} (native_dt / target = "
+            f"{factor_float:.6g}); coarsening or non-nested grids would move "
+            "the loading signal, not just the integration grid (ADR-0013)."
+        )
+    if factor == 1:
+        return record
+    n_refined = (record.t.size - 1) * factor + 1
+    t_refined = record.t[0] + np.arange(n_refined, dtype=np.float64) * target
+    h_refined = np.interp(t_refined, record.t, record.h)
+    return HydrographRecord(
+        t=t_refined,
+        h=h_refined,
+        peak=record.peak,
+        duration_hours=record.duration_hours,
+        scenario=record.scenario,
+        event_id=record.event_id,
+        native_dt=target,
+        provenance={
+            **record.provenance,
+            "resampled_from_native_dt_s": record.native_dt,
+            "resample_factor": factor,
+        },
     )
 
 

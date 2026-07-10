@@ -49,10 +49,12 @@ H_c (a *symmetric* knob: both branches shift together); the transient-only
 decomposition by recomputing a separate transient H_c (None by default ->
 single-source preserved). ``seepage_length_cov`` is consumed by ``run.py``
 (stochastic L draw), and the conditioning grid drives the ``run.py`` sweep.
-``target_dt_seconds`` is honored on the synthetic-stub path only: on the
-canonical d4PDF path records keep their native resolution, and the ADR-0013
-resample-at-record-construction hook remains a forward requirement (it is the
-mechanism for the ADR-0022 Phase 2 native/2 replay).
+``target_dt_seconds`` is honored on both hydrograph paths: the synthetic stub
+builds directly on that grid, and the canonical d4PDF path refines the built
+record via ``hydrographs.resample_record`` (the ADR-0013 record-construction
+hook, realized with ADR-0030 as an *integration-Δt* policy: linear
+interpolation of the resolved hourly signal, integer subdivisions only; also
+the mechanism for the ADR-0022 Phase 2 native/2 replay).
 
 Units and reproducibility (docs/conventions.md)
 -----------------------------------------------
@@ -420,10 +422,13 @@ class TimestepperSettings(_StrictModel):
 
     Per ADR-0013 the operative Δt is the hydrograph ``native_dt`` at the M8
     boundary; config owns only the resolution/convergence *policy*. The
-    ``target_dt_seconds`` coarsening is currently applied on the synthetic-stub
-    path only — the ADR-0013 resample hook at canonical (d4PDF) record
-    construction is a forward requirement, needed for the ADR-0022 Phase 2
-    native/2 replay. Per ADR-0014 the aquifer-lag fields are metadata-only with
+    ``target_dt_seconds`` policy is applied at record construction on both
+    paths: the synthetic stub builds directly on that grid, and the canonical
+    (d4PDF) path refines the built record via ``hydrographs.resample_record``
+    (ADR-0013 hook; ADR-0030 integration-Δt policy — integer subdivisions of
+    the native grid only, so the loading signal is unchanged and only the
+    forward-Euler grid is refined; also the ADR-0022 Phase 2 native/2 replay
+    mechanism). Per ADR-0014 the aquifer-lag fields are metadata-only with
     a deferred consumer (the unbuilt §11 diagnostic); τ_aq is derived from S_s,
     never stored.
 
@@ -432,8 +437,10 @@ class TimestepperSettings(_StrictModel):
     integration_scheme : {'forward_euler'}
         Fixed forward Euler (spec §10, §13); recorded for provenance.
     target_dt_seconds : float or None
-        Optional target/coarsening Δt [s] applied when M3 builds the record
-        (ADR-0013); ``> 0`` when set. Default ``None`` (use native resolution).
+        Optional integration Δt [s] applied when the record is built
+        (ADR-0013/0030); ``> 0`` when set, and on the canonical path an
+        integer subdivision of the native resolution. Default ``None``
+        (integrate at native resolution).
     convergence_test : bool
         Whether to run the §11 Δt/2 convergence test. Default ``False``.
     convergence_threshold : float

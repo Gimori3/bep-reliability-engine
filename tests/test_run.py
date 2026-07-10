@@ -38,6 +38,11 @@ import pytest
 from bep_reliability_engine import FragilityResult, run_fragility_analysis
 from bep_reliability_engine.config import Config
 from bep_reliability_engine.evaluator import evaluate_realization
+from bep_reliability_engine.hydrographs import (
+    CanonicalShape,
+    HydrographRecord,
+    normalize_stage_shape,
+)
 from bep_reliability_engine.run import (
     _L_INI_M,
     _SOURCE_SYNTHETIC,
@@ -1013,3 +1018,55 @@ def test_stub_path_still_available_without_source_block() -> None:
     result = run_fragility_analysis(config, n_jobs=1, progress=False, persist=False)
     assert result.metadata["hydrograph_source"] == _SOURCE_SYNTHETIC
     assert result.metadata["hydrograph"] is None
+
+
+def test_canonical_record_resampled_to_target_dt() -> None:
+    """The ADR-0013 hook on the canonical path (ADR-0030 integration-dt policy).
+
+    With ``timestepper.target_dt_seconds`` set, the per-level canonical record
+    is refined onto the nested finer grid after the G1 scaling: native nodes
+    carry the exactly-scaled stages (the loading signal is unchanged), ``peak``
+    stays the conditioning level verbatim (ADR-0010), and the record's
+    ``native_dt`` — the authoritative M8 timestep — becomes the target.
+    Without the policy the record keeps the source resolution (the pre-ADR-0030
+    behaviour).
+    """
+    t = np.arange(7, dtype=np.float64) * 3600.0
+    h = np.array([3.0, 3.5, 5.0, 9.0, 6.0, 4.0, 3.0])
+    source = HydrographRecord(
+        t=t,
+        h=h,
+        peak=9.0,
+        duration_hours=6.0,
+        scenario="historical",
+        event_id="canon_fixture",
+        native_dt=3600.0,
+    )
+    shape, h_base, _ = normalize_stage_shape(h)
+    canonical = CanonicalShape(source_record=source, shape=shape, h_base_m=h_base)
+
+    timestepper = {
+        "integration_scheme": "forward_euler",
+        "target_dt_seconds": 450.0,
+        "convergence_test": False,
+        "convergence_threshold": 0.01,
+        "aquifer_lag_active": False,
+        "specific_storage_per_m": None,
+    }
+    level = 12.0
+    record = _hydrograph_for_level(
+        level, _make_config(timestepper=timestepper), canonical
+    )
+    assert record.native_dt == 450.0
+    assert record.peak == level
+    expected_native_nodes = h_base + (level - h_base) * shape
+    np.testing.assert_array_equal(record.h[::8], expected_native_nodes)
+    assert record.provenance["resample_factor"] == 8
+    assert record.provenance["resampled_from_native_dt_s"] == 3600.0
+
+    timestepper_native = dict(timestepper, target_dt_seconds=None)
+    record_native = _hydrograph_for_level(
+        level, _make_config(timestepper=timestepper_native), canonical
+    )
+    assert record_native.native_dt == 3600.0
+    assert "resample_factor" not in record_native.provenance

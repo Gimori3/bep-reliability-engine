@@ -91,6 +91,7 @@ from bep_reliability_engine.hydrographs import (
     parse_member_header,
     rating_curve_path,
     read_discharge_ensemble,
+    resample_record,
     resolve_band_workbook,
     validate_datum_consistency,
 )
@@ -1173,3 +1174,67 @@ def test_load_canonical_shape_proxy_node_uses_local_rating(tmp_path: Path) -> No
     )
     assert canonical.source_record.provenance["discharge_proxied_from"] == "KP61.8"
     assert canonical.h_base_m == pytest.approx(41.0)
+
+
+# ---------------------------------------------------------------------------
+# resample_record (ADR-0013 record-construction hook; ADR-0030 integration-dt
+# policy). The refinement must change ONLY the integration grid: every native
+# sample stays a node of the refined grid (bit-exact), interior samples are the
+# linear interpolant, and peak/duration/identity are untouched.
+# ---------------------------------------------------------------------------
+
+
+def _single_peak_record() -> HydrographRecord:
+    """A small uniform hourly record with an interior peak (m MSL)."""
+    t = np.arange(5, dtype=np.float64) * 3600.0
+    h = np.array([40.0, 42.0, 45.0, 41.0, 40.0])
+    return HydrographRecord(
+        t=t,
+        h=h,
+        peak=45.0,
+        duration_hours=4.0,
+        scenario="historical",
+        event_id="resample_fixture",
+        native_dt=3600.0,
+        provenance={"member_id": "m000"},
+    )
+
+
+def test_resample_record_nested_grid_preserves_source_nodes() -> None:
+    """Factor-4 refinement: native nodes bit-exact, interiors linear."""
+    record = _single_peak_record()
+    refined = resample_record(record, 900.0)
+
+    assert refined.native_dt == 900.0
+    assert refined.t.size == (record.t.size - 1) * 4 + 1
+    # Every native sample is a node of the refined grid, bit-exact -- the
+    # loading signal is unchanged, only the integration grid is refined.
+    np.testing.assert_array_equal(refined.h[::4], record.h)
+    np.testing.assert_array_equal(refined.t[::4], record.t)
+    # Interior points are the linear interpolant (no new extremes, no ringing).
+    np.testing.assert_allclose(refined.h[1:4], [40.5, 41.0, 41.5])
+    assert refined.h.max() == record.h.max()
+    # Identity and span untouched; provenance records the refinement.
+    assert refined.peak == record.peak
+    assert refined.duration_hours == record.duration_hours
+    assert refined.event_id == record.event_id
+    assert refined.provenance["resampled_from_native_dt_s"] == 3600.0
+    assert refined.provenance["resample_factor"] == 4
+    assert refined.provenance["member_id"] == "m000"
+
+
+def test_resample_record_factor_one_is_identity() -> None:
+    """target == native returns the record itself (no copy, no markers)."""
+    record = _single_peak_record()
+    assert resample_record(record, 3600.0) is record
+
+
+def test_resample_record_rejects_coarsening_and_non_divisors() -> None:
+    """Only integer subdivisions of the native grid are legal (ADR-0013)."""
+    record = _single_peak_record()
+    with pytest.raises(ValueError, match="integer subdivision"):
+        resample_record(record, 7200.0)  # coarsening
+    with pytest.raises(ValueError, match="integer subdivision"):
+        resample_record(record, 1000.0)  # non-nested grid
+    with pytest.raises(ValueError, match="must be > 0"):
+        resample_record(record, 0.0)
