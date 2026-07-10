@@ -98,6 +98,10 @@ REQUIRED_COLUMNS = {
     "remediation_state",
 }
 EXPECTED_KPS = {"57.4", "58.8", "60.0", "62.0", "63.4"}
+
+# ADR-0030 integration-timestep policy: forward-Euler dt for the fragility
+# sweep, an integer subdivision (native/16) of the hourly d4PDF resolution.
+TARGET_DT_SECONDS = 225.0
 EXCLUDED_KP_DEFAULT = "63.4"
 
 # --- Sweep axes --------------------------------------------------------------
@@ -407,7 +411,13 @@ def build_config_dict(
         },
         "timestepper": {
             "integration_scheme": "forward_euler",
-            "target_dt_seconds": None,
+            # ADR-0030: integrate at native/16 = 225 s. At the native 3600 s a
+            # single forward-Euler step jumps the H_eq equilibrium barrier for
+            # high-C_e*k_aq realizations under the ADR-0026/0027 physics,
+            # inflating the transient transition shoulder up to ~27x; the
+            # halving ladder converges (<1% relative) at 225 s. Linear
+            # interpolation of the hourly signal: loading unchanged (ADR-0013).
+            "target_dt_seconds": TARGET_DT_SECONDS,
             "convergence_test": False,
             "convergence_threshold": 0.01,
             "aquifer_lag_active": False,
@@ -482,6 +492,11 @@ def header_comment(
         "#   imposed; the former provisional 0.6 is retired.",
         "# ADR-0025: foreland_treatment = blanketed_tanh (adopted baseline;",
         "#   open_entry is an on-demand sensitivity, never a sweep member).",
+        "# ADR-0030: timestepper.target_dt_seconds = 225 (native/16): the",
+        "#   forward-Euler integration grid, refined from the hourly d4PDF",
+        "#   signal by linear interpolation at record construction (ADR-0013",
+        "#   hook). Native 3600 s overshoots the H_eq barrier under the",
+        "#   ADR-0026/0027 physics; the dt-halving ladder converges at 225 s.",
         "# PROVISIONAL: seed;",
         "#   D_fore/k_fore = landside D_bl/k_bl proxy (ADR-0005).",
         f"# gamma: CSV gamma_sub_kNm3 = {gamma_p_csv} kN/m^3 is the per-section",

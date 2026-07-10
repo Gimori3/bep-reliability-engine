@@ -25,6 +25,11 @@
 #   imposed; the former provisional 0.6 is retired.
 # ADR-0025: foreland_treatment = blanketed_tanh (adopted baseline;
 #   open_entry is an on-demand sensitivity, never a sweep member).
+# ADR-0030: timestepper.target_dt_seconds = 225 (native/16): the
+#   forward-Euler integration grid, refined from the hourly d4PDF
+#   signal by linear interpolation at record construction (ADR-0013
+#   hook). Native 3600 s overshoots the H_eq barrier under the
+#   ADR-0026/0027 physics; the dt-halving ladder converges at 225 s.
 # PROVISIONAL: seed;
 #   D_fore/k_fore = landside D_bl/k_bl proxy (ADR-0005).
 # gamma: CSV gamma_sub_kNm3 = 16.72 kN/m^3 is the per-section
@@ -123,7 +128,7 @@ mc:
   sampling_scheme: latin_hypercube
 timestepper:
   integration_scheme: forward_euler
-  target_dt_seconds: null
+  target_dt_seconds: 225.0
   convergence_test: false
   convergence_threshold: 0.01
   aquifer_lag_active: false
