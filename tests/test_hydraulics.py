@@ -15,8 +15,13 @@ import numpy as np
 import pytest
 
 from bep_reliability_engine.hydraulics import (
+    AQUIFER_RESPONSE_GOVERNING_SECTIONS,
+    AQUIFER_RESPONSE_PI_THRESHOLD,
+    AQUIFER_RESPONSE_SS_DRIVER_PER_M,
+    AQUIFER_RESPONSE_SS_RANGE_PER_M,
     InstantaneousHead,
     LaggedHead,
+    aquifer_response_diagnostic,
     aquifer_response_time,
     leakage_length_in,
     leakage_length_out,
@@ -426,3 +431,119 @@ def test_instantaneous_step_ignores_dt() -> None:
     model.reset(0.5)
     head_large_dt = np.asarray(model.step(4.0, 1.0e6))
     np.testing.assert_array_equal(head_small_dt, head_large_dt)
+
+
+# ---------------------------------------------------------------------------
+# ADR-0032 aquifer-response diagnostic (the M4 instantaneous-vs-lag gate)
+# ---------------------------------------------------------------------------
+
+# Governing-section priors (generated configs KP58.8 / KP60.0): D_aq mean,
+# D_bl mean, k_bl mean, and the fixed thesis-prior CoVs. tau_aq depends only on
+# these three (k_aq cancels); the values reproduce the Part-2 study numbers.
+_KP588 = dict(d_aq=8.0, d_bl=0.85, k_bl=1.0e-6)
+_KP600 = dict(d_aq=9.0, d_bl=0.85, k_bl=1.0e-6)
+_COVS = dict(d_aq_cov=0.10, d_bl_cov=0.167, k_bl_cov=0.50)
+
+
+def test_aquifer_response_preregistered_constants_are_pinned() -> None:
+    """The ADR-0032 Part-1 pre-registration values, committed before any tau_aq."""
+    assert AQUIFER_RESPONSE_SS_RANGE_PER_M == (1.0e-5, 1.0e-4)
+    assert AQUIFER_RESPONSE_SS_DRIVER_PER_M == 1.0e-4  # range upper bound
+    assert AQUIFER_RESPONSE_PI_THRESHOLD == 0.10
+    assert AQUIFER_RESPONSE_GOVERNING_SECTIONS == ("KP58.8", "KP60.0")
+
+
+def test_aquifer_response_central_tau_matches_hand_value() -> None:
+    """Central tau_aq = S_s * D_aq * D_bl / k_bl at the driver S_s (k_aq cancels)."""
+    block = aquifer_response_diagnostic(
+        segment_id="KP58.8",
+        d_aq_mean_m=8.0,
+        d_bl_mean_m=0.85,
+        k_bl_mean_mps=1.0e-6,
+        **_COVS,
+        t_rise_s=64800.0,
+        t_plateau_s=32400.0,
+        native_dt_s=3600.0,
+    )
+    # 1e-4 * 8 * 0.85 / 1e-6 = 680 s.
+    assert block["tau_aq_central_s"] == pytest.approx(680.0)
+    # The 90th-pct-tau corner (high D_aq, high D_bl, low k_bl) exceeds central.
+    assert block["tau_aq_corner90_s"] > block["tau_aq_central_s"]
+    assert block["governing_section"] is True
+
+
+def test_aquifer_response_verdict_instantaneous_for_broad_flood() -> None:
+    """A broad flood (18 h rise, 9 h plateau) clears both checks at both sections."""
+    for seg, priors in (("KP58.8", _KP588), ("KP60.0", _KP600)):
+        block = aquifer_response_diagnostic(
+            segment_id=seg,
+            d_aq_mean_m=priors["d_aq"],
+            d_bl_mean_m=priors["d_bl"],
+            k_bl_mean_mps=priors["k_bl"],
+            **_COVS,
+            t_rise_s=64800.0,
+            t_plateau_s=32400.0,
+            native_dt_s=3600.0,
+        )
+        assert block["pi_central"] < AQUIFER_RESPONSE_PI_THRESHOLD
+        assert block["pi_corner90"] < AQUIFER_RESPONSE_PI_THRESHOLD
+        assert block["check_a_instantaneous_justified"] is True
+        assert block["check_b_native_resolves"] is True  # 3600 <= 32400/2
+        assert block["verdict"] == "instantaneous"
+
+
+def test_aquifer_response_verdict_lag_for_a_flashy_short_rise() -> None:
+    """A hypothetical very short rise trips Check A -> the lag is indicated."""
+    block = aquifer_response_diagnostic(
+        segment_id="KP58.8",
+        d_aq_mean_m=8.0,
+        d_bl_mean_m=0.85,
+        k_bl_mean_mps=1.0e-6,
+        **_COVS,
+        t_rise_s=3000.0,
+        t_plateau_s=3000.0,
+        native_dt_s=3600.0,
+    )
+    # tau_central 680 s over a 3000 s rise -> Pi ~ 0.23 > 0.10.
+    assert block["pi_central"] > AQUIFER_RESPONSE_PI_THRESHOLD
+    assert block["check_a_instantaneous_justified"] is False
+    # And a 3000 s feature is under-resolved by the 3600 s native grid.
+    assert block["check_b_native_resolves"] is False
+    assert block["verdict"] == "lag_indicated"
+
+
+def test_aquifer_response_degrades_without_timescales() -> None:
+    """No loading timescales (synthetic-stub path): tau recorded, verdict deferred."""
+    block = aquifer_response_diagnostic(
+        segment_id="TEST.000",
+        d_aq_mean_m=3.0,
+        d_bl_mean_m=3.0,
+        k_bl_mean_mps=1.0e-6,
+        **_COVS,
+        t_rise_s=None,
+        t_plateau_s=None,
+        native_dt_s=None,
+    )
+    assert block["tau_aq_central_s"] > 0.0  # still computed
+    assert block["pi_central"] is None
+    assert block["check_a_instantaneous_justified"] is None
+    assert block["check_b_native_resolves"] is None
+    assert block["verdict"] == "timescales_unavailable"
+    assert block["governing_section"] is False
+
+
+def test_aquifer_response_corner_collapses_to_central_at_zero_cov() -> None:
+    """With no parameter spread the corner equals the central estimate."""
+    block = aquifer_response_diagnostic(
+        segment_id="KP60.0",
+        d_aq_mean_m=9.0,
+        d_bl_mean_m=0.85,
+        k_bl_mean_mps=1.0e-6,
+        d_aq_cov=0.0,
+        d_bl_cov=0.0,
+        k_bl_cov=0.0,
+        t_rise_s=64800.0,
+        t_plateau_s=32400.0,
+        native_dt_s=3600.0,
+    )
+    assert block["tau_aq_corner90_s"] == pytest.approx(block["tau_aq_central_s"])

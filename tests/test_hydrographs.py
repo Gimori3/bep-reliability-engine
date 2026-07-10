@@ -84,6 +84,7 @@ from bep_reliability_engine.hydrographs import (
     build_hydrograph_record,
     conditioning_record_for_level,
     experiment_for_scenario,
+    flood_timescales,
     load_canonical_shape,
     load_hydrograph_ensemble,
     load_rating_coefficients,
@@ -1238,3 +1239,42 @@ def test_resample_record_rejects_coarsening_and_non_divisors() -> None:
         resample_record(record, 1000.0)  # non-nested grid
     with pytest.raises(ValueError, match="must be > 0"):
         resample_record(record, 0.0)
+
+
+# ---------------------------------------------------------------------------
+# flood_timescales — dominant-peak shape metrics for the ADR-0032 diagnostic
+# ---------------------------------------------------------------------------
+
+
+def test_flood_timescales_measures_a_known_hydrograph() -> None:
+    """The rise, plateau and FWHM of a hand-built triangular-plateau hydrograph.
+
+    Shape (amplitude 4 m on a 10 m base, dt = 1 h): a linear rise over four
+    steps, a three-sample plateau at the peak, then a fall. The widths are
+    integer multiples of dt by construction (the native-grid quantization the
+    ADR-0032 Check B interrogates).
+    """
+    dt = 3600.0
+    shape = np.array([0.0, 0.25, 0.5, 0.75, 1.0, 1.0, 1.0, 0.5, 0.0])
+    h = 10.0 + 4.0 * shape
+
+    ts = flood_timescales(h, dt)
+
+    assert ts["peak_m"] == pytest.approx(14.0)
+    assert ts["amplitude_m"] == pytest.approx(4.0)
+    # Peak index 4; last sample at/below 10% amplitude before it is index 0.
+    assert ts["rising_limb_s"] == pytest.approx(4 * dt)
+    # 10%->90%: index 0 to index 3 (0.75 is the last <= 0.90 before the peak).
+    assert ts["rise_10_90_s"] == pytest.approx(3 * dt)
+    # Plateau: three samples within 10% of the peak (indices 4, 5, 6).
+    assert ts["plateau_s"] == pytest.approx(3 * dt)
+    # FWHM: six samples at or above half amplitude (indices 2..7).
+    assert ts["fwhm_s"] == pytest.approx(6 * dt)
+
+
+def test_flood_timescales_rejects_degenerate_input() -> None:
+    """A constant series has no peak; a non-positive dt is meaningless."""
+    with pytest.raises(ValueError, match="constant stage series"):
+        flood_timescales(np.full(10, 5.0), 3600.0)
+    with pytest.raises(ValueError, match="dt_seconds must be positive"):
+        flood_timescales(np.array([0.0, 1.0, 0.0]), 0.0)

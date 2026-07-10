@@ -1070,3 +1070,60 @@ def test_canonical_record_resampled_to_target_dt() -> None:
     )
     assert record_native.native_dt == 3600.0
     assert "resample_factor" not in record_native.provenance
+
+
+# ---------------------------------------------------------------------------
+# (7) ADR-0032 aquifer-response diagnostic stamped into run metadata
+# ---------------------------------------------------------------------------
+
+
+def test_aquifer_response_block_on_synthetic_path() -> None:
+    """The stub path records tau_aq but defers the verdict (no loading timescales).
+
+    Without a canonical shape there is no rising-limb time, so Pi and the
+    checks are None and the verdict is 'timescales_unavailable' — while the
+    tau_aq magnitudes and the pre-registered constants are still recorded.
+    """
+    result = run_fragility_analysis(
+        _make_config(), n_jobs=1, progress=False, persist=False
+    )
+    block = result.metadata["aquifer_response"]
+
+    assert block["diagnostic"] == "adr_0032_aquifer_response"
+    assert block["s_s_range_per_m"] == [1.0e-5, 1.0e-4]
+    assert block["s_s_driver_per_m"] == 1.0e-4
+    assert block["pi_threshold"] == 0.10
+    assert block["governing_section"] is False  # segment_id 'TEST.000'
+    assert block["tau_aq_central_s"] > 0.0
+    assert block["tau_aq_corner90_s"] >= block["tau_aq_central_s"]
+    assert block["t_rise_s"] is None
+    assert block["pi_central"] is None
+    assert block["verdict"] == "timescales_unavailable"
+    # Empirical tail over the drawn prior is recorded regardless of the path.
+    pct = block["tau_aq_sample_pctl_s"]
+    assert pct["p50"] <= pct["p90"] <= pct["p99"] <= pct["max"]
+    # The top-level spec §8 fields stay authoritative for the ACTIVE form.
+    assert result.metadata["aquifer_lag_active"] is False
+    assert result.metadata["tau_aq"] is None
+
+
+def test_aquifer_response_block_on_real_path(real_data_root) -> None:
+    """The canonical path yields an evidenced 'instantaneous' verdict.
+
+    The broad fixture flood (multi-hour rise and plateau) gives Pi well below
+    the pre-registered threshold and a native grid that resolves the plateau,
+    so the diagnostic records 'instantaneous' — the evidence behind the M4
+    default carried in every result.
+    """
+    config = _make_real_config(real_data_root)
+    result = run_fragility_analysis(config, n_jobs=1, progress=False, persist=False)
+    block = result.metadata["aquifer_response"]
+
+    assert block["t_rise_s"] is not None
+    assert block["native_dt_s"] == 3600.0
+    assert block["pi_central"] < block["pi_threshold"]
+    assert block["check_a_instantaneous_justified"] is True
+    assert block["check_b_native_resolves"] is True
+    assert block["verdict"] == "instantaneous"
+    # Descriptive verdict agrees with the (separate) global active form.
+    assert result.metadata["aquifer_lag_active"] is False

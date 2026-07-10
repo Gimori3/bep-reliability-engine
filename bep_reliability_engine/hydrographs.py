@@ -88,6 +88,7 @@ __all__ = [
     "build_hydrograph_record",
     "conditioning_record_for_level",
     "experiment_for_scenario",
+    "flood_timescales",
     "load_canonical_shape",
     "load_hydrograph_ensemble",
     "load_rating_coefficients",
@@ -591,6 +592,78 @@ def normalize_stage_shape(
             f"shape (got constant {h_base!r})."
         )
     return (h - h_base) / (h_peak - h_base), h_base, h_peak
+
+
+def flood_timescales(stage_m: ArrayLike, dt_seconds: float) -> dict[str, float]:
+    """Characteristic timescales of a stage hydrograph's dominant peak [s].
+
+    Descriptive shape analysis used by the ADR-0032 aquifer-response diagnostic
+    (spec §11): the rising-limb time is the denominator of the τ_aq/T_flood
+    ratio, and the plateau width is what the native-resolution (Check B)
+    Nyquist test interrogates. All widths are **integer multiples of
+    ``dt_seconds``** — the native cadence itself — because they are counted on
+    the record's own grid; that quantization is exactly the resolution the
+    diagnostic asks about.
+
+    Parameters
+    ----------
+    stage_m : array_like, shape (T,)
+        Stage series h(t) [m above datum], uniformly sampled at ``dt_seconds``.
+    dt_seconds : float
+        Sampling interval [s] (the record's ``native_dt``).
+
+    Returns
+    -------
+    dict of str to float
+        ``rising_limb_s`` (10%-of-amplitude to the peak, on the final rising
+        limb — the primary T_rise), ``rise_10_90_s`` (10%→90% rise time, a
+        flashiness measure), ``plateau_s`` (time within 10% of the peak),
+        ``fwhm_s`` (time above half amplitude), ``peak_m`` and ``amplitude_m``.
+
+    Raises
+    ------
+    ValueError
+        If the series is constant (no peak to characterize) or ``dt_seconds``
+        is not positive.
+
+    Notes
+    -----
+    Widths are measured on the **stage** record (post-rating), which is what
+    the downstream initiation/progression modules consume; the Eq. 4.19 rating
+    compresses the discharge peak, so the stage plateau is if anything broader
+    than the discharge plateau. The rising-limb onset is the last crossing of
+    the 10%-amplitude level before the peak, so a compound multi-peak record is
+    characterized by the final approach to its global maximum.
+    """
+    if not dt_seconds > 0.0:
+        raise ValueError(f"dt_seconds must be positive, got {dt_seconds!r}.")
+    h = np.asarray(stage_m, dtype=np.float64)
+    base = float(h.min())
+    peak = float(h.max())
+    amplitude = peak - base
+    if not amplitude > 0.0:
+        raise ValueError(
+            "constant stage series has no dominant peak to characterize "
+            f"(min == max == {base!r})."
+        )
+    shape = (h - base) / amplitude
+    k_peak = int(np.argmax(h))
+    pre = shape[: k_peak + 1]
+
+    def _last_at_or_below(level: float, default: int) -> int:
+        idx = np.where(pre <= level)[0]
+        return int(idx[-1]) if idx.size else default
+
+    k10 = _last_at_or_below(0.10, 0)
+    k90 = _last_at_or_below(0.90, k_peak)
+    return {
+        "rising_limb_s": float((k_peak - k10) * dt_seconds),
+        "rise_10_90_s": float(max(0, k90 - k10) * dt_seconds),
+        "plateau_s": float(np.count_nonzero(shape >= 0.90) * dt_seconds),
+        "fwhm_s": float(np.count_nonzero(shape >= 0.50) * dt_seconds),
+        "peak_m": peak,
+        "amplitude_m": amplitude,
+    }
 
 
 def conditioning_record_for_level(

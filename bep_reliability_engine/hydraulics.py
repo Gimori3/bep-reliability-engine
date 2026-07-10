@@ -83,16 +83,21 @@ USACE EM 1110-2-1913 (2000). ADR-0004 through ADR-0007.
 
 from __future__ import annotations
 
-from typing import Protocol
+from typing import Any, Protocol
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
 __all__ = [
+    "AQUIFER_RESPONSE_GOVERNING_SECTIONS",
+    "AQUIFER_RESPONSE_PI_THRESHOLD",
+    "AQUIFER_RESPONSE_SS_DRIVER_PER_M",
+    "AQUIFER_RESPONSE_SS_RANGE_PER_M",
     "AquiferHeadModel",
     "InstantaneousHead",
     "LaggedHead",
     "advance_lag_state",
+    "aquifer_response_diagnostic",
     "aquifer_response_time",
     "leakage_length_in",
     "leakage_length_out",
@@ -100,6 +105,32 @@ __all__ = [
     "response_factor",
     "translate_instantaneous",
 ]
+
+# --- ADR-0032 pre-registered aquifer-response diagnostic (spec §11) ----------
+# These four values are the Part-1 pre-registration, committed BEFORE any τ_aq
+# was computed and applied unchanged in Part 2. They are the single source of
+# truth for both the production-run metadata block and the offline study script
+# (scripts/aquifer_response_diagnostic.py), so the two can never drift.
+AQUIFER_RESPONSE_SS_RANGE_PER_M: tuple[float, float] = (1.0e-5, 1.0e-4)
+"""Specific-storage range S_s [1/m] for the dense Tokachi sand-gravel (ADR-0032 D4)."""
+AQUIFER_RESPONSE_SS_DRIVER_PER_M: float = 1.0e-4
+"""Decision-driver S_s [1/m] — the range upper bound (worst case, τ_aq ∝ S_s)."""
+AQUIFER_RESPONSE_PI_THRESHOLD: float = 0.10
+"""Activate the lag if τ_aq / T_rise exceeds this (ADR-0032 D3)."""
+AQUIFER_RESPONSE_GOVERNING_SECTIONS: tuple[str, ...] = ("KP58.8", "KP60.0")
+"""Sections that govern the global gate (ADR-0032 D5): longest τ_aq AND reachable."""
+
+# 90th-percentile standard-normal deviate for the pre-registered τ_aq corner
+# (ADR-0032 D3: high D_aq, high D_bl, low k_bl). Hard-coded so this module
+# needs no scipy import for the one fixed quantile.
+_Z_P90: float = 1.2815515594457412
+
+
+def _lognormal_quantile(mean: float, cov: float, z: float) -> float:
+    """Quantile of a lognormal (arithmetic mean, CoV) at standard-normal deviate z."""
+    sigma = np.sqrt(np.log1p(cov * cov))
+    mu = np.log(mean) - 0.5 * sigma * sigma
+    return float(np.exp(mu + sigma * z))
 
 
 def leakage_length_in(
@@ -300,6 +331,125 @@ def aquifer_response_time(
     d_bl = np.asarray(d_bl_m, dtype=np.float64)
     k_bl = np.asarray(k_bl_mps, dtype=np.float64)
     return specific_storage_per_m * d_aq * d_bl / k_bl
+
+
+def aquifer_response_diagnostic(
+    *,
+    segment_id: str,
+    d_aq_mean_m: float,
+    d_bl_mean_m: float,
+    k_bl_mean_mps: float,
+    d_aq_cov: float,
+    d_bl_cov: float,
+    k_bl_cov: float,
+    t_rise_s: float | None,
+    t_plateau_s: float | None,
+    native_dt_s: float | None,
+    s_s_per_m: float = AQUIFER_RESPONSE_SS_DRIVER_PER_M,
+) -> dict[str, Any]:
+    """Evaluate the pre-registered ADR-0032 aquifer-response gate for one section.
+
+    Applies the Part-1 pre-registration (spec §11) unchanged: forms τ_aq at the
+    section's central (prior-mean) parameters and at the 90th-percentile-τ_aq
+    corner (high D_aq, high D_bl, low k_bl), both at the decision-driver
+    specific storage; forms Π = τ_aq / T_rise (Check A) against the threshold
+    :data:`AQUIFER_RESPONSE_PI_THRESHOLD`; and forms the Nyquist native-
+    resolution test (Check B). Assembles the descriptive record stamped into
+    run metadata as ``metadata['aquifer_response']``.
+
+    This is the pure **analytic** core (means, CoVs, timescales in → verdict
+    out); the orchestrator additionally enriches the block with empirical τ_aq
+    percentiles from the drawn prior sample.
+
+    Parameters
+    ----------
+    segment_id : str
+        Section identifier (e.g. ``'KP58.8'``); flags whether this section is
+        one of the pre-registered governing pair.
+    d_aq_mean_m, d_bl_mean_m, k_bl_mean_mps : float
+        Prior means of aquifer thickness, blanket thickness and blanket
+        conductivity — the three variables τ_aq depends on (k_aq cancels).
+    d_aq_cov, d_bl_cov, k_bl_cov : float
+        Their coefficients of variation, for the lognormal corner quantiles.
+    t_rise_s : float or None
+        Characteristic rising-limb time [s] (the Π denominator). ``None`` when
+        the loading timescales are unavailable (e.g. the synthetic-stub path);
+        Π and the verdict then degrade gracefully.
+    t_plateau_s : float or None
+        Peak-plateau width [s], for the Check-B feature size.
+    native_dt_s : float or None
+        Native sampling interval [s] of the loading record.
+    s_s_per_m : float, optional
+        Specific storage [1/m] used for τ_aq. Defaults to the pre-registered
+        decision-driver (range upper bound); pass a different value only for an
+        explicit S_s sensitivity.
+
+    Returns
+    -------
+    dict
+        The ADR-0032 record: S_s range/driver, threshold, the central and
+        corner τ_aq [s], the timescales, Π central/corner, the Check-A and
+        Check-B booleans, the governing-section flag and the per-section
+        ``verdict`` (``'instantaneous'`` / ``'lag_indicated'`` /
+        ``'timescales_unavailable'``). All values are JSON-native.
+
+    Notes
+    -----
+    The verdict is *descriptive* — the run's actual translation form is the
+    global ``config.timestepper.aquifer_lag_active`` flag, stamped separately as
+    ``metadata['aquifer_lag_active']``. For a production run under the ADR-0032
+    verdict the two agree (instantaneous); a deliberate S_s/lag sensitivity run
+    would show them diverge, which is the intended, legible signal.
+    """
+    tau_central = float(
+        aquifer_response_time(d_aq_mean_m, d_bl_mean_m, k_bl_mean_mps, s_s_per_m)
+    )
+    tau_corner = float(
+        aquifer_response_time(
+            _lognormal_quantile(d_aq_mean_m, d_aq_cov, _Z_P90),
+            _lognormal_quantile(d_bl_mean_m, d_bl_cov, _Z_P90),
+            _lognormal_quantile(k_bl_mean_mps, k_bl_cov, -_Z_P90),
+            s_s_per_m,
+        )
+    )
+    block: dict[str, Any] = {
+        "diagnostic": "adr_0032_aquifer_response",
+        "s_s_range_per_m": list(AQUIFER_RESPONSE_SS_RANGE_PER_M),
+        "s_s_driver_per_m": float(s_s_per_m),
+        "pi_threshold": AQUIFER_RESPONSE_PI_THRESHOLD,
+        "governing_section": segment_id in AQUIFER_RESPONSE_GOVERNING_SECTIONS,
+        "tau_aq_central_s": tau_central,
+        "tau_aq_corner90_s": tau_corner,
+        "t_rise_s": None if t_rise_s is None else float(t_rise_s),
+        "t_plateau_s": None if t_plateau_s is None else float(t_plateau_s),
+        "native_dt_s": None if native_dt_s is None else float(native_dt_s),
+    }
+
+    if t_rise_s is not None and t_rise_s > 0.0:
+        pi_central = tau_central / t_rise_s
+        block["pi_central"] = float(pi_central)
+        block["pi_corner90"] = float(tau_corner / t_rise_s)
+        check_a: bool | None = bool(pi_central <= AQUIFER_RESPONSE_PI_THRESHOLD)
+    else:
+        block["pi_central"] = None
+        block["pi_corner90"] = None
+        check_a = None
+    block["check_a_instantaneous_justified"] = check_a
+
+    if t_plateau_s is not None and t_rise_s is not None and native_dt_s is not None:
+        t_feature = min(t_plateau_s, t_rise_s)
+        check_b: bool | None = bool(native_dt_s <= t_feature / 2.0)
+    else:
+        check_b = None
+    block["check_b_native_resolves"] = check_b
+
+    if check_a is None:
+        block["verdict"] = "timescales_unavailable"
+    elif check_a and (check_b is None or check_b):
+        block["verdict"] = "instantaneous"
+    else:
+        block["verdict"] = "lag_indicated"
+    return block
 
 
 def translate_instantaneous(

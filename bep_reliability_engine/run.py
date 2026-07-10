@@ -163,6 +163,8 @@ from bep_reliability_engine.fragility import (
     save_raw_failure_payload,
 )
 from bep_reliability_engine.hydraulics import (
+    aquifer_response_diagnostic,
+    aquifer_response_time,
     leakage_length_in,
     leakage_length_out,
 )
@@ -170,6 +172,7 @@ from bep_reliability_engine.hydrographs import (
     CanonicalShape,
     HydrographRecord,
     conditioning_record_for_level,
+    flood_timescales,
     load_canonical_shape,
     resample_record,
     validate_datum_consistency,
@@ -573,6 +576,84 @@ def _leakage_geometry_block(
     return block
 
 
+def _aquifer_response_block(
+    config: Config,
+    theta_sample: ThetaSample,
+    canonical: CanonicalShape | None,
+) -> dict[str, Any]:
+    """ADR-0032 aquifer-response diagnostic record — descriptive; gates nothing.
+
+    Records, per run, the evidence behind the M4 instantaneous-vs-lag choice
+    (spec §11): the pre-registered analytic verdict from
+    :func:`hydraulics.aquifer_response_diagnostic` at this section's prior means
+    and the driver S_s, enriched with empirical τ_aq percentiles over the drawn
+    prior (τ_aq = S_s·D_aq·D_bl/k_bl per realization) and the rising-limb /
+    plateau timescales measured on the canonical loading shape. It makes the
+    instantaneous default an *evidenced* decision carried in every result,
+    rather than an inherited assumption. The actual translation form the run
+    used is the separate global ``metadata['aquifer_lag_active']`` flag.
+
+    On the synthetic-stub path (``canonical is None``) the loading timescales
+    are unavailable, so Π and the verdict degrade to ``timescales_unavailable``
+    while the τ_aq magnitudes are still recorded.
+    """
+    specs = {m.name: m for m in config.priors.to_marginal_specs()}
+    if canonical is not None:
+        record = canonical.source_record
+        ts = flood_timescales(record.h, record.native_dt)
+        t_rise_s: float | None = ts["rising_limb_s"]
+        t_plateau_s: float | None = ts["plateau_s"]
+        native_dt_s: float | None = float(record.native_dt)
+    else:
+        ts = {}
+        t_rise_s = t_plateau_s = native_dt_s = None
+
+    block = aquifer_response_diagnostic(
+        segment_id=config.segment_id,
+        d_aq_mean_m=specs["D_aq"].mean,
+        d_bl_mean_m=specs["D_bl"].mean,
+        k_bl_mean_mps=specs["k_bl"].mean,
+        d_aq_cov=specs["D_aq"].cov,
+        d_bl_cov=specs["D_bl"].cov,
+        k_bl_cov=specs["k_bl"].cov,
+        t_rise_s=t_rise_s,
+        t_plateau_s=t_plateau_s,
+        native_dt_s=native_dt_s,
+    )
+
+    # Empirical τ_aq over the actual production sample at the driver S_s: the
+    # tail the analytic central/corner points summarize (τ_aq depends only on
+    # D_aq, D_bl, k_bl; k_aq cancels).
+    tau_sample = aquifer_response_time(
+        theta_sample.column("D_aq"),
+        theta_sample.column("D_bl"),
+        theta_sample.column("k_bl"),
+        block["s_s_driver_per_m"],
+    )
+    block["tau_aq_sample_pctl_s"] = {
+        "p50": float(np.percentile(tau_sample, 50)),
+        "p90": float(np.percentile(tau_sample, 90)),
+        "p99": float(np.percentile(tau_sample, 99)),
+        "max": float(np.max(tau_sample)),
+    }
+    if ts:
+        block["rise_10_90_s"] = ts["rise_10_90_s"]
+        block["fwhm_s"] = ts["fwhm_s"]
+
+    logger.info(
+        "Aquifer response (ADR-0032): tau_aq central %.0f s / corner90 %.0f s "
+        "@ S_s=%.0e; T_rise %s; Pi_central %s; verdict '%s' (lag_active=%s).",
+        block["tau_aq_central_s"],
+        block["tau_aq_corner90_s"],
+        block["s_s_driver_per_m"],
+        "n/a" if t_rise_s is None else f"{t_rise_s:.0f} s",
+        "n/a" if block["pi_central"] is None else f"{block['pi_central']:.3f}",
+        block["verdict"],
+        config.timestepper.aquifer_lag_active,
+    )
+    return block
+
+
 def _code_version() -> str:
     """Return the installed package version, or ``'unknown'`` if not installed."""
     try:
@@ -617,6 +698,7 @@ def _build_metadata(
     seepage_length_stochastic: bool,
     canonical: CanonicalShape | None,
     leakage_geometry: dict[str, float | str],
+    aquifer_response: dict[str, Any],
 ) -> dict[str, Any]:
     """Assemble the spec §8 provenance block for the FragilityResult sidecar.
 
@@ -669,6 +751,11 @@ def _build_metadata(
         "progression_backend": config.timestepper.progression_backend,
         "aquifer_lag_active": bool(config.timestepper.aquifer_lag_active),
         "tau_aq": None,  # lag inactive in Phase 1 (ADR-0014); from S_s when active.
+        # ADR-0032: the spec §11 aquifer-response diagnostic that justifies the
+        # instantaneous default. tau_aq magnitudes, the flood timescales, Pi vs
+        # the pre-registered threshold, and the per-section verdict — descriptive
+        # evidence, distinct from the global aquifer_lag_active flag above.
+        "aquifer_response": dict(aquifer_response),
         # Sellmeijer inputs threaded to M6 (review #6); gamma'_p stays the pinned
         # basin-wide M6 constant 16.87 (review #10), not run-varying.
         "alpha_exponent": float(config.alpha_exponent),
@@ -830,6 +917,12 @@ def run_fragility_analysis(
         theta_sample, seepage_length_samples, config
     )
 
+    # 2c. ADR-0032 aquifer-response diagnostic: the spec §11 evidence behind the
+    #     M4 instantaneous-vs-lag choice (tau_aq vs the flood rising-limb time),
+    #     computed once per run and recorded. Descriptive; the active form is the
+    #     global config.timestepper.aquifer_lag_active flag.
+    aquifer_response = _aquifer_response_block(config, theta_sample, canonical)
+
     # 3. Shared, read-only per-level inputs and the run-constant eval settings
     #    (l_ini, stochastic-L samples, threaded Sellmeijer inputs; review #3/#6).
     geometry = config.geometry.as_evaluator_dict()
@@ -900,6 +993,7 @@ def run_fragility_analysis(
         seepage_length_stochastic=seepage_length_samples is not None,
         canonical=canonical,
         leakage_geometry=leakage_geometry,
+        aquifer_response=aquifer_response,
     )
     raw_path: Path | None = None
     if resolved_path is not None:
