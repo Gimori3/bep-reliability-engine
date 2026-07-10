@@ -1,0 +1,633 @@
+{
+  "study": "Phase 1 statistical convergence study (ADR-0031)",
+  "objectives": [
+    "estimator convergence: empirical CoV(P_f) vs N vs 5% target (spec \u00a711)",
+    "tail variance: LHS vs crude MC CoV ratio, bulk->tail (spec \u00a712 fm5)"
+  ],
+  "config": "kp58_8_historical_matrix.yaml",
+  "config_hash": "7f2a571004ed38ef9d81a4d46b5bd5ec3804df65b40b94d967c408eff94618bc",
+  "cross_section_id": "tokachi_kp58.8",
+  "d70_interpretation": "matrix",
+  "governing_justification": "KP58.8: BEP reachable (transient P_f ~ 0.27 at HWL 41.03 m, both branches bracket the transition); not foreshore-suppressed like KP62.0; ADR-0029 fm5 baseline.",
+  "branch_focus": "transient",
+  "hydrograph_source": "d4pdf_scaled_canonical",
+  "progression_backend": "numba",
+  "base_seed": 20260626,
+  "cov_target": 0.05,
+  "n_replicates": 50,
+  "n_ladder": [
+    1000,
+    3000,
+    10000,
+    30000,
+    100000,
+    300000
+  ],
+  "levels": [
+    {
+      "level_m": 41.0,
+      "p_f_ref": {
+        "static": 0.7224128000000001,
+        "transient": 0.26301700000000006
+      },
+      "n_for_cov_target": {
+        "static": 153.7000451819236,
+        "transient": 1120.8142439462083
+      },
+      "rungs": [
+        {
+          "n_samples": 1000,
+          "lhs": {
+            "mean_p_f_static": 0.7208200000000001,
+            "empirical_cov_static": 0.0142272582783155,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.26452000000000003,
+            "empirical_cov_transient": 0.03122323189744037,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "crude_mc": {
+            "mean_p_f_static": 0.7225199999999999,
+            "empirical_cov_static": 0.01627624307672739,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.26352,
+            "empirical_cov_transient": 0.050635855735367954,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "binomial_cov_static": 0.019680165095833743,
+          "cov_ratio_mc_over_lhs_static": 1.1440182471091322,
+          "binomial_cov_transient": 0.052729806385723436,
+          "cov_ratio_mc_over_lhs_transient": 1.6217365294436097
+        },
+        {
+          "n_samples": 3000,
+          "lhs": {
+            "mean_p_f_static": 0.7224600000000001,
+            "empirical_cov_static": 0.006545526017314455,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.2636533333333333,
+            "empirical_cov_transient": 0.018160228067018582,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "crude_mc": {
+            "mean_p_f_static": 0.72308,
+            "empirical_cov_static": 0.009713039026760415,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.26360000000000006,
+            "empirical_cov_transient": 0.028705557811385757,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "binomial_cov_static": 0.011316060513864051,
+          "cov_ratio_mc_over_lhs_static": 1.4839203145884905,
+          "binomial_cov_transient": 0.030511524108142705,
+          "cov_ratio_mc_over_lhs_transient": 1.5806826712445816
+        },
+        {
+          "n_samples": 10000,
+          "lhs": {
+            "mean_p_f_static": 0.7217680000000002,
+            "empirical_cov_static": 0.0034235525814426443,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.26326,
+            "empirical_cov_transient": 0.010793894187293762,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "crude_mc": {
+            "mean_p_f_static": 0.72285,
+            "empirical_cov_static": 0.004560533178395414,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.26322,
+            "empirical_cov_transient": 0.015462730924210565,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "binomial_cov_static": 0.006208757920910834,
+          "cov_ratio_mc_over_lhs_static": 1.3321054868897793,
+          "binomial_cov_transient": 0.01672879604707202,
+          "cov_ratio_mc_over_lhs_transient": 1.4325442380575504
+        },
+        {
+          "n_samples": 30000,
+          "lhs": {
+            "mean_p_f_static": 0.7226333333333333,
+            "empirical_cov_static": 0.0019085672076807941,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.26271533333333336,
+            "empirical_cov_transient": 0.007229877640256948,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "crude_mc": {
+            "mean_p_f_static": 0.7223166666666667,
+            "empirical_cov_static": 0.0028108564154790323,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.26259133333333334,
+            "empirical_cov_transient": 0.0076760849943286495,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "binomial_cov_static": 0.0035769058664709493,
+          "cov_ratio_mc_over_lhs_static": 1.4727573669751246,
+          "binomial_cov_transient": 0.009671954907590225,
+          "cov_ratio_mc_over_lhs_transient": 1.061717137726807
+        },
+        {
+          "n_samples": 100000,
+          "lhs": {
+            "mean_p_f_static": 0.7223253999999999,
+            "empirical_cov_static": 0.0014176328388842445,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.262858,
+            "empirical_cov_transient": 0.003787730915454912,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "crude_mc": {
+            "mean_p_f_static": 0.7223335999999999,
+            "empirical_cov_static": 0.0015743540490847632,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.2629512,
+            "empirical_cov_transient": 0.004771824169845479,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "binomial_cov_static": 0.001960657044428016,
+          "cov_ratio_mc_over_lhs_static": 1.110551340164966,
+          "binomial_cov_transient": 0.005295597625051744,
+          "cov_ratio_mc_over_lhs_transient": 1.2598107617347405
+        },
+        {
+          "n_samples": 300000,
+          "lhs": {
+            "mean_p_f_static": 0.7224128000000001,
+            "empirical_cov_static": 0.000627623895895556,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.26301700000000006,
+            "empirical_cov_transient": 0.0017369589509863735,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "crude_mc": {
+            "mean_p_f_static": 0.7223241333333335,
+            "empirical_cov_static": 0.0009431834317880832,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.26291813333333336,
+            "empirical_cov_transient": 0.002526054857495106,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "binomial_cov_static": 0.001131739241101661,
+          "cov_ratio_mc_over_lhs_static": 1.5027844509365844,
+          "binomial_cov_transient": 0.0030561607777654203,
+          "cov_ratio_mc_over_lhs_transient": 1.45429738340139
+        }
+      ]
+    },
+    {
+      "level_m": 40.25,
+      "p_f_ref": {
+        "static": 0.22427033333333335,
+        "transient": 0.02503446666666667
+      },
+      "n_for_cov_target": {
+        "static": 1383.5618026459135,
+        "transient": 15577.971703012108
+      },
+      "rungs": [
+        {
+          "n_samples": 1000,
+          "lhs": {
+            "mean_p_f_static": 0.22464000000000003,
+            "empirical_cov_static": 0.03983389781183224,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.025159999999999995,
+            "empirical_cov_transient": 0.17340713695458917,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "crude_mc": {
+            "mean_p_f_static": 0.22354,
+            "empirical_cov_static": 0.04508221302244251,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.024879999999999996,
+            "empirical_cov_transient": 0.20488659391974476,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "binomial_cov_static": 0.058750037885663964,
+          "cov_ratio_mc_over_lhs_static": 1.1317550001107677,
+          "binomial_cov_transient": 0.1968390915974825,
+          "cov_ratio_mc_over_lhs_transient": 1.181534955930904
+        },
+        {
+          "n_samples": 3000,
+          "lhs": {
+            "mean_p_f_static": 0.22380666666666665,
+            "empirical_cov_static": 0.026970626225707152,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.024806666666666664,
+            "empirical_cov_transient": 0.10461734133370715,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "crude_mc": {
+            "mean_p_f_static": 0.2231466666666667,
+            "empirical_cov_static": 0.030071947452429,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.024826666666666667,
+            "empirical_cov_transient": 0.09822417378180387,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "binomial_cov_static": 0.03400069678940657,
+          "cov_ratio_mc_over_lhs_static": 1.114988847525009,
+          "binomial_cov_transient": 0.11447233167130694,
+          "cov_ratio_mc_over_lhs_transient": 0.9388899825745864
+        },
+        {
+          "n_samples": 10000,
+          "lhs": {
+            "mean_p_f_static": 0.223964,
+            "empirical_cov_static": 0.012729298540557115,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.024751999999999996,
+            "empirical_cov_transient": 0.054846267965846546,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "crude_mc": {
+            "mean_p_f_static": 0.22454600000000002,
+            "empirical_cov_static": 0.01657045749695548,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.025405999999999998,
+            "empirical_cov_transient": 0.053947747530421385,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "binomial_cov_static": 0.018614519344056255,
+          "cov_ratio_mc_over_lhs_static": 1.3017573155472755,
+          "binomial_cov_transient": 0.06277003719522026,
+          "cov_ratio_mc_over_lhs_transient": 0.9836174735538126
+        },
+        {
+          "n_samples": 30000,
+          "lhs": {
+            "mean_p_f_static": 0.224296,
+            "empirical_cov_static": 0.006870774191955614,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.024979333333333336,
+            "empirical_cov_transient": 0.033149334446131606,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "crude_mc": {
+            "mean_p_f_static": 0.22407333333333335,
+            "empirical_cov_static": 0.009350148958243527,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.025346666666666663,
+            "empirical_cov_transient": 0.03693565774032711,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "binomial_cov_static": 0.010736843522379094,
+          "cov_ratio_mc_over_lhs_static": 1.3608581357819611,
+          "binomial_cov_transient": 0.03607080722892752,
+          "cov_ratio_mc_over_lhs_transient": 1.114220190464106
+        },
+        {
+          "n_samples": 100000,
+          "lhs": {
+            "mean_p_f_static": 0.224106,
+            "empirical_cov_static": 0.0033565177840601383,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.025030399999999998,
+            "empirical_cov_transient": 0.015321211621751957,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "crude_mc": {
+            "mean_p_f_static": 0.2238712,
+            "empirical_cov_static": 0.0059922521550460645,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.025034200000000003,
+            "empirical_cov_transient": 0.01824076605729713,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "binomial_cov_static": 0.00588402426042986,
+          "cov_ratio_mc_over_lhs_static": 1.7852585746760643,
+          "binomial_cov_transient": 0.019736113871379423,
+          "cov_ratio_mc_over_lhs_transient": 1.190556367709209
+        },
+        {
+          "n_samples": 300000,
+          "lhs": {
+            "mean_p_f_static": 0.22427033333333335,
+            "empirical_cov_static": 0.0023362443795805557,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.02503446666666667,
+            "empirical_cov_transient": 0.010017924566674268,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "crude_mc": {
+            "mean_p_f_static": 0.2239872,
+            "empirical_cov_static": 0.0028206901282917924,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.024992399999999998,
+            "empirical_cov_transient": 0.010063738408481631,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "binomial_cov_static": 0.0033955384976047534,
+          "cov_ratio_mc_over_lhs_static": 1.2073609049401814,
+          "binomial_cov_transient": 0.011393701367792393,
+          "cov_ratio_mc_over_lhs_transient": 1.0045731869413121
+        }
+      ]
+    },
+    {
+      "level_m": 40.0,
+      "p_f_ref": {
+        "static": 0.08992346666666666,
+        "transient": 0.004697733333333333
+      },
+      "n_for_cov_target": {
+        "static": 4048.2270849581714,
+        "transient": 84747.44699571423
+      },
+      "rungs": [
+        {
+          "n_samples": 1000,
+          "lhs": {
+            "mean_p_f_static": 0.08895999999999998,
+            "empirical_cov_static": 0.07400759017369885,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.004940000000000001,
+            "empirical_cov_transient": 0.3480080440896027,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "crude_mc": {
+            "mean_p_f_static": 0.08924,
+            "empirical_cov_static": 0.09442284953077437,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.004240000000000001,
+            "empirical_cov_transient": 0.5188241659008128,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "binomial_cov_static": 0.10119786160905085,
+          "cov_ratio_mc_over_lhs_static": 1.2758535889245965,
+          "binomial_cov_transient": 0.44880858926447786,
+          "cov_ratio_mc_over_lhs_transient": 1.490839578889819
+        },
+        {
+          "n_samples": 3000,
+          "lhs": {
+            "mean_p_f_static": 0.09016,
+            "empirical_cov_static": 0.04855778615071189,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.00462,
+            "empirical_cov_transient": 0.20972460746884627,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "crude_mc": {
+            "mean_p_f_static": 0.08848,
+            "empirical_cov_static": 0.055650819654185425,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.004433333333333333,
+            "empirical_cov_transient": 0.26408788084090756,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "binomial_cov_static": 0.05799825594783208,
+          "cov_ratio_mc_over_lhs_static": 1.1460740710348374,
+          "binomial_cov_transient": 0.267986452673897,
+          "cov_ratio_mc_over_lhs_transient": 1.2592126600124247
+        },
+        {
+          "n_samples": 10000,
+          "lhs": {
+            "mean_p_f_static": 0.09024599999999999,
+            "empirical_cov_static": 0.025841994350719093,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.004719999999999999,
+            "empirical_cov_transient": 0.13192793412653372,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "crude_mc": {
+            "mean_p_f_static": 0.09003599999999999,
+            "empirical_cov_static": 0.026588636903659923,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.004652,
+            "empirical_cov_transient": 0.13597011410734097,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "binomial_cov_static": 0.031750312639097764,
+          "cov_ratio_mc_over_lhs_static": 1.0288926056869931,
+          "binomial_cov_transient": 0.1452117098513963,
+          "cov_ratio_mc_over_lhs_transient": 1.0306393032496843
+        },
+        {
+          "n_samples": 30000,
+          "lhs": {
+            "mean_p_f_static": 0.08952666666666667,
+            "empirical_cov_static": 0.011744469840785256,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.004615333333333333,
+            "empirical_cov_transient": 0.07424654832428842,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "crude_mc": {
+            "mean_p_f_static": 0.08971066666666667,
+            "empirical_cov_static": 0.01651149988789025,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.004662,
+            "empirical_cov_transient": 0.0867194325885014,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "binomial_cov_static": 0.018411822543484134,
+          "cov_ratio_mc_over_lhs_static": 1.4058957204309412,
+          "binomial_cov_transient": 0.0847877888418734,
+          "cov_ratio_mc_over_lhs_transient": 1.1679927827719998
+        },
+        {
+          "n_samples": 100000,
+          "lhs": {
+            "mean_p_f_static": 0.08978380000000001,
+            "empirical_cov_static": 0.006498407202189118,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.0046774,
+            "empirical_cov_transient": 0.04139947309402695,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "crude_mc": {
+            "mean_p_f_static": 0.08980039999999997,
+            "empirical_cov_static": 0.009290825679115506,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.004712,
+            "empirical_cov_transient": 0.048135542777078204,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "binomial_cov_static": 0.010068697404385112,
+          "cov_ratio_mc_over_lhs_static": 1.4297081407865155,
+          "binomial_cov_transient": 0.04612959875319254,
+          "cov_ratio_mc_over_lhs_transient": 1.162709068005581
+        },
+        {
+          "n_samples": 300000,
+          "lhs": {
+            "mean_p_f_static": 0.08992346666666666,
+            "empirical_cov_static": 0.004715899033220212,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.004697733333333333,
+            "empirical_cov_transient": 0.025892394744132633,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "crude_mc": {
+            "mean_p_f_static": 0.08988346666666669,
+            "empirical_cov_static": 0.005411451910717558,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.0046982000000000005,
+            "empirical_cov_transient": 0.022487870472635788,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "binomial_cov_static": 0.00580820331152283,
+          "cov_ratio_mc_over_lhs_static": 1.1474910452063674,
+          "binomial_cov_transient": 0.026574964251420648,
+          "cov_ratio_mc_over_lhs_transient": 0.8685125765638835
+        }
+      ]
+    },
+    {
+      "level_m": 39.75,
+      "p_f_ref": {
+        "static": 0.020961733333333333,
+        "transient": 0.0003002666666666667
+      },
+      "n_for_cov_target": {
+        "static": 18682.39140529091,
+        "transient": 1331749.2007104792
+      },
+      "rungs": [
+        {
+          "n_samples": 1000,
+          "lhs": {
+            "mean_p_f_static": 0.020959999999999996,
+            "empirical_cov_static": 0.17241439540010411,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.00021999999999999998,
+            "empirical_cov_transient": 1.9020543527112743,
+            "zero_failure_fraction_transient": 0.78
+          },
+          "crude_mc": {
+            "mean_p_f_static": 0.02046,
+            "empirical_cov_static": 0.1775226298788959,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.0003800000000000001,
+            "empirical_cov_transient": 1.6719816509727126,
+            "zero_failure_fraction_transient": 0.68
+          },
+          "binomial_cov_static": 0.21612478725061166,
+          "cov_ratio_mc_over_lhs_static": 1.0296276564780895,
+          "binomial_cov_transient": 2.131772629868051,
+          "cov_ratio_mc_over_lhs_transient": 0.8790398910469589
+        },
+        {
+          "n_samples": 3000,
+          "lhs": {
+            "mean_p_f_static": 0.021186666666666666,
+            "empirical_cov_static": 0.10167281451677228,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.0003533333333333333,
+            "empirical_cov_transient": 1.0158900563365365,
+            "zero_failure_fraction_transient": 0.38
+          },
+          "crude_mc": {
+            "mean_p_f_static": 0.020573333333333332,
+            "empirical_cov_static": 0.11724953755692306,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.0002866666666666667,
+            "empirical_cov_transient": 1.1980879016782033,
+            "zero_failure_fraction_transient": 0.42
+          },
+          "binomial_cov_static": 0.12409606029027619,
+          "cov_ratio_mc_over_lhs_static": 1.1532044048764007,
+          "binomial_cov_transient": 0.9711142533614472,
+          "cov_ratio_mc_over_lhs_transient": 1.1793479955879298
+        },
+        {
+          "n_samples": 10000,
+          "lhs": {
+            "mean_p_f_static": 0.02086,
+            "empirical_cov_static": 0.05497502325815498,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.00029400000000000004,
+            "empirical_cov_transient": 0.5472030432086409,
+            "zero_failure_fraction_transient": 0.02
+          },
+          "crude_mc": {
+            "mean_p_f_static": 0.020966,
+            "empirical_cov_static": 0.05821361982427122,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.0003179999999999999,
+            "empirical_cov_transient": 0.5812013598590454,
+            "zero_failure_fraction_transient": 0.02
+          },
+          "binomial_cov_static": 0.06851177894542324,
+          "cov_ratio_mc_over_lhs_static": 1.0589103264387583,
+          "binomial_cov_transient": 0.583126105076568,
+          "cov_ratio_mc_over_lhs_transient": 1.0621310810902078
+        },
+        {
+          "n_samples": 30000,
+          "lhs": {
+            "mean_p_f_static": 0.02106066666666667,
+            "empirical_cov_static": 0.031205145641271394,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.000312,
+            "empirical_cov_transient": 0.3363021729943029,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "crude_mc": {
+            "mean_p_f_static": 0.020930666666666663,
+            "empirical_cov_static": 0.0410573632437767,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.00029600000000000004,
+            "empirical_cov_transient": 0.36800698528784337,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "binomial_cov_static": 0.03936236686226752,
+          "cov_ratio_mc_over_lhs_static": 1.315724134595127,
+          "binomial_cov_transient": 0.326809231057315,
+          "cov_ratio_mc_over_lhs_transient": 1.0942747767915184
+        },
+        {
+          "n_samples": 100000,
+          "lhs": {
+            "mean_p_f_static": 0.021006200000000003,
+            "empirical_cov_static": 0.018420241248823147,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.00032,
+            "empirical_cov_transient": 0.16523888860108701,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "crude_mc": {
+            "mean_p_f_static": 0.0210132,
+            "empirical_cov_static": 0.019952590641336483,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.0003198,
+            "empirical_cov_transient": 0.15467832837338566,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "binomial_cov_static": 0.02158818955161504,
+          "cov_ratio_mc_over_lhs_static": 1.0831883454626978,
+          "binomial_cov_transient": 0.17674840876228562,
+          "cov_ratio_mc_over_lhs_transient": 0.9360891354504555
+        },
+        {
+          "n_samples": 300000,
+          "lhs": {
+            "mean_p_f_static": 0.020961733333333333,
+            "empirical_cov_static": 0.009312818628088476,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.0003002666666666667,
+            "empirical_cov_transient": 0.11797245118724119,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "crude_mc": {
+            "mean_p_f_static": 0.021004666666666668,
+            "empirical_cov_static": 0.0108962841830987,
+            "zero_failure_fraction_static": 0.0,
+            "mean_p_f_transient": 0.0003026,
+            "empirical_cov_transient": 0.09906056557146044,
+            "zero_failure_fraction_transient": 0.0
+          },
+          "binomial_cov_static": 0.012477443449845443,
+          "cov_ratio_mc_over_lhs_static": 1.1700307520468958,
+          "binomial_cov_transient": 0.10534661838863486,
+          "cov_ratio_mc_over_lhs_transient": 0.8396923567709502
+        }
+      ]
+    }
+  ],
+  "runtime_seconds": 1010.1108334999881
+}

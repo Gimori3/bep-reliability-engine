@@ -1,8 +1,8 @@
 # ADR-0030: Phase 1 Integration Timestep = Native/16 (225 s) via the ADR-0013 Resample Hook — Superseding the ADR-0022 Native-3600 s Acceptance
 
 Date: 2026-07-10
-Status: Proposed (implemented and used for the first end-to-end sweep;
-awaiting owner ratification — supersedes ADR-0022 decision 1 if accepted)
+Status: Accepted (implemented and used for the first end-to-end sweep;
+supersedes ADR-0022 decision 1)
 
 ## Context
 
