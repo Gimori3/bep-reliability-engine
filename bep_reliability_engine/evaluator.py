@@ -465,10 +465,10 @@ float, optional
 
     # --- Transient branch (spec §3 steps 7-10): delegate the irreducibly serial
     # timestep loop to the M7 timestepper, built on the SAME r_e via the M4 head
-    # model. Inside integrate_progression the per-timestep un-reduced
-    # Delta_h_blanket(t) drives the M5 uplift/heave gate while the reduced
-    # H_erosion(t) = Delta_h_blanket(t) - 0.3*D_bl drives the rate -- the two
-    # heads kept separate exactly as the M7 tests verify. Phase 1 uses the
+    # model. Inside integrate_progression the un-reduced, r_e-attenuated
+    # Delta_h_blanket(t) drives the M5 uplift/heave gate while the RAW-outer-level
+    # H_erosion(t) = (h(t) - z_toe) - 0.3*D_bl drives the rate (ADR-0027) -- the
+    # two heads kept separate exactly as the M7 tests verify. Phase 1 uses the
     # instantaneous (quasi-static) M4 form (module docstring ambiguity 5).
     h_river_m = np.asarray(hydrograph.h, dtype=np.float64)
     dt_s = float(hydrograph.native_dt)
