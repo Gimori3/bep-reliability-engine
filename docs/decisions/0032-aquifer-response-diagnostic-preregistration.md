@@ -371,6 +371,42 @@ diagnostic evidence is recorded per run in `metadata['aquifer_response']`.
 - **Status Accepted.** Part 1's committed inputs and thresholds were reviewed;
   Part 2 executed against them unchanged and reached the instantaneous verdict.
 
+## Scope amendment (2026-07-11): what the Π screen does and does not detect
+
+The Japanese case-validation campaign (Yabe 2012 and Shikaga 28.75k, where the
+engine's instantaneous M4 translation could be compared against calibrated 2D
+saturated–unsaturated FEMs at four sites) exposed a scope limit of this
+diagnostic. Document-only amendment; no constant, threshold, rule, or wiring
+changes:
+
+- **The screen detects elastic leaky-confined response only.** Π is built on
+  τ_aq = S_s·D_aq·D_bl/k_bl with a literature elastic S_s. At the Japanese
+  sites the FEM damping was governed instead by **unsaturated/finite-fill
+  storage** (dead-ended lenses, floodplain-mediated entry, low initial heads):
+  matching the observed FEM response requires an effective storativity of
+  order 1e-2–1e-1, roughly 100× the elastic S_s·D_aq. The Π screen passed the
+  two worst over-translating sites (Yabe 7.3k, 16.10k; engine/FEM 2.0–2.7×)
+  and flagged the best-matched one (11.86k; 1.13×) — it does not rank this
+  regime. See `docs/validation/yabe-case.md` §3 and
+  `docs/validation/shikaga-case.md` §2–3.
+- **Per-section applicability check (added to D3's scope).** The instantaneous
+  verdict from this diagnostic is valid where the section's aquifer is
+  **channel-connected and saturated at base flow**, so that the flood imposes
+  no large storage-deficit fill the elastic τ_aq cannot represent. Confirmed
+  for all four production sections: the OYO confined-section classification, a
+  perennial gravel-bed river in direct contact with the aquifer, and the
+  ADR-0020 conditioning records initialized at the base-flow trough. Any
+  future section (or replay event) featuring dead-ended permeable lenses,
+  entry mediated through an elevated dry foreland, or initial heads well below
+  the exit datum falls outside this diagnostic's scope and needs a
+  transient-fill assessment, not a larger S_s.
+- **Direction if violated.** Where the scope check fails, the instantaneous
+  form over-translates the toe head (measured 1.15–2.7× across the four FEM
+  points). Post-ADR-0027/0028 this is gate-only and therefore conservative for
+  transient P_f, concentrated at the fragility shoulder — see the production
+  judgment in `docs/validation/shikaga-case.md` §3, including the registered
+  KP58.8 r_e-halved QA member (`scripts/run_sweep.py`).
+
 ---
 
 ## References

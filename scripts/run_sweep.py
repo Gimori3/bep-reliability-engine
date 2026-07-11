@@ -15,6 +15,21 @@ Usage (from the repo root, venv active)::
 Output: ``results/<cross_section_id>_<scenario>_<d70_interpretation>.h5`` plus
 the JSON metadata sidecar (spec §8). Existing results are refused unless
 ``--overwrite`` is passed (the run.py guard).
+
+PLANNED QA MEMBER (registered 2026-07-11; not yet run)
+------------------------------------------------------
+The next production re-sweep must include one extra KP58.8 sensitivity member
+with the M4 response factor halved (r_e -> r_e/2), converting the Japanese
+case-validation shoulder bound into a measured delta-P_f per conditioning
+level (``docs/validation/shikaga-case.md`` sec. 3; ADR-0032 scope amendment).
+r_e is derived per realization, not a config field, so realize the member as
+a harness-level run in the style of ``scripts/validate_*.py``: sample the
+KP58.8 matrix config's theta, build the M7 head model from ``0.5 * r_e`` via
+the public M4 kernels, and drive ``integrate_progression`` on the standard
+conditioning records; compare P_f,trans per level against the unmodified
+KP58.8 matrix member (shoulder levels are where the effect concentrates).
+Expected direction: standard r_e is the conservative side; the halved member
+bounds how much of the shoulder is M4-translation-sensitive.
 """
 
 from __future__ import annotations
