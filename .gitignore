@@ -235,3 +235,6 @@ docs/references/
 
 # project workflow
 project-notes.md
+
+# Waseda DEM workbook exceeds the 500 KB pre-commit limit (see README there)
+data/digitized/Gounokawa_River_Levee_Okamura/Fig13*.xlsx
