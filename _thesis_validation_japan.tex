@@ -5,16 +5,16 @@
 % that condition how the Phase 1 results should be read; the per-case
 % audit records remain in the repository under docs/validation/).
 %
-% New BibLaTeX keys required (entries to add to the thesis .bib):
-%   okamura_gounokawa_2025   Okamura et al. (2025), Soils Found. 65:101656
-%   sako_gounokawa_2019      Sako et al. (2019), JSCE J. B1 75(1):279-290
-%   yabe_levee_committee_2013   Yabe River Levee Investigation Committee (2013)
-%   tokoro_levee_committee_2017 Tokoro River Levee Investigation Committee (2017)
-%   waseda_gounokawa_dataset_2025  companion dataset doi:10.20556/0002006234
+% New BibLaTeX keys (entries PROVIDED in _thesis_validation_japan.bib;
+% merge into the thesis .bib or \addbibresource that file):
+%   okamura_gounokawa_2025, sako_gounokawa_2019, yabe_levee_committee_2013,
+%   tokoro_levee_committee_2017, waseda_gounokawa_dataset_2025
 % Existing keys reused: sellmeijer_2011, pol_sie_2024, pol_compgeo_2024,
-%   pol_thesis_2022, van_beek_2015, terzaghi1943, schweckendiek_2014.
-% Figure paths assume the two campaign figures are copied into the thesis
-% figures directory; adjust \includegraphics paths as needed.
+%   terzaghi1943.
+% Figures: figures/validation_shikaga_m4_pattern.png and
+% figures/validation_yabe_timeline.png are provided at the repository root
+% under figures/ (canonical copies regenerate from scripts/plot_validation_*
+% into docs/figures/).
 % =========================================================================
 
 \section{Validation Against Japanese Field Cases}
@@ -47,8 +47,9 @@ figure-digitized value, and full results are recorded in the repository
 
 Three findings from this campaign change how the Phase~1 results should be
 read, and the remainder of this section is organized around them: the
-initiation criterion is unbiased when the driving heads are correct
-(Section~\ref{subsec: Initiation Is Unbiased When the Heads Are Right}); the
+initiation criterion shows no bias conditional on the investigators'
+calibrated FEM heads
+(Section~\ref{subsec: Initiation Unbiased Conditional on FEM Heads}); the
 hydraulic translation over-predicts landside heads in a bounded, conservative,
 and now characterized way
 (Section~\ref{subsec: Hydraulic Translation Overprediction}); and the
@@ -92,15 +93,19 @@ engine run) \\
 \end{tabular}
 \end{table}
 
-\subsection{Initiation Is Unbiased When the Heads Are Right}
-\label{subsec: Initiation Is Unbiased When the Heads Are Right}
+\subsection{Initiation Is Unbiased Conditional on the Investigators'
+Calibrated FEM Heads}
+\label{subsec: Initiation Unbiased Conditional on FEM Heads}
 
 The M5 gate tests the Terzaghi weight-only balance
 \parencite{terzaghi1943, pol_sie_2024}: uplift and heave activate when the
 blanket overpressure exceeds $\gamma'_{bl} D_{bl}/\gamma_w$, with no cohesion
 or model factor. The campaign provides five instances in which this criterion
 can be checked against heads computed by the investigators' own calibrated
-FEMs rather than by the engine, and the criterion passes all five. At Shikaga
+FEMs rather than by the engine, and the criterion passes all five. No
+piezometer record exists anywhere in the case set, so every one of these
+checks is conditional on the calibrated seepage models; that conditionality
+is carried in this subsection's title deliberately. At Shikaga
 the FEM exit gradient at the moment boils were observed was $i_v = 0.91$
 against the weight-only critical value of $0.876$, a ratio of $1.04$
 \parencite{sako_gounokawa_2019}. At the three Yabe sites the committee FEM
@@ -164,7 +169,9 @@ aquifer is channel-connected and saturated at base flow.
 \caption{Engine instantaneous Mazure translation versus calibrated
 two-dimensional FEM peak toe overpressure at the four FEM-anchored Japanese
 sites. The pattern tracks aquifer connectedness and storage state; the
-shaded band marks the expected position of the Tokachi production sections.}
+expected position of the Tokachi production sections is an engineering
+judgment along this four-point pattern and is argued in the text, not
+marked on the figure.}
 \label{fig: m4 overtranslation pattern}
 \end{figure}
 
@@ -220,15 +227,17 @@ hinterland wells surging from 07:00) and the breach (13:15--13:30, by CCTV
 and firefighters), giving the only field-measured initiation-to-breach
 interval in the campaign, approximately $6.3$~h. With the progression clock
 forced to the committee initiation anchors, so that the known initiation
-conservatism cannot contaminate the test, the Pol rate law under the
-\textcite{pol_sie_2024} field prior for $C_e$ brackets this interval across
-the committee's own permeability ladder: the probability of a full breach
-within the observed interval rises from $0.04$ at the central permeability
-(an upper-tail event overall, although the realizations that do breach do so
-on the observed clock, with a median time of $6.1$~h against the observed
-$6.3$~h) through $0.41$ at an intermediate value to $0.90$ at the coarse,
-trench-confirmed permeability of the pathway actually connected to the
-river, where the model is typically faster than observed
+conservatism cannot contaminate the test, the honest summary is twofold:
+realizations that breach do so on the observed clock, while whether a breach
+occurs at all within the observed interval depends strongly on the assigned
+permeability and is an upper-tail event at the committee's central value.
+Quantitatively, under the \textcite{pol_sie_2024} field prior for $C_e$ the
+probability of a full breach within the observed interval rises from $0.04$
+at the central permeability (where the breaching realizations nevertheless
+show a median time of $6.1$~h against the observed $6.3$~h) through $0.41$
+at an intermediate value to $0.90$ at the coarse, trench-confirmed
+permeability of the pathway actually connected to the river, where the model
+is typically faster than observed
 (Figure~\ref{fig: yabe timeline test}). The single
 observed breach therefore sits on the fast side of the
 $C_e$ prior. No recalibration is drawn from one event, but the direction is
@@ -246,7 +255,8 @@ the observed $6.3$~h initiation-to-breach interval.}
 \label{fig: yabe timeline test}
 \end{figure}
 
-\subsection{The Static Comparator Is Conservative at Every Surviving Site}
+\subsection{A Directional Pattern of Static Conservatism at the Surviving
+Sites}
 \label{subsec: Static Comparator Conservative at Surviving Sites}
 
 Across the campaign, wherever the static and transient branches disagree
@@ -312,8 +322,8 @@ sand-over-gravel stacking that forces it.
 \subsection{Transfer to the Tokachi Sections}
 \label{subsec: Transfer to the Tokachi Sections}
 
-What transfers. The initiation criterion arrives at Tokachi with its
-strongest possible endorsement short of local piezometry: five FEM-anchored
+What transfers. The initiation criterion arrives at Tokachi with
+substantial field support, short of local piezometry: five FEM-anchored
 instances, including boiling thresholds in thin covers over coarse
 foundations, and a Hokkaido instance (Tokoro) on paleochannel and
 confluence deposits that are the closest geological analog to the Tokachi
@@ -325,7 +335,8 @@ bounded error, and the Tokachi sections sit in the regime where that error
 is smallest. The progression rate law transfers with one in-domain field
 anchor: the Yabe aquifer's matrix grain size ($d_{70} \approx 0.35$~mm) and
 seepage length ($\approx 30$~m) are close to the Tokachi matrix values, and
-the rate law reproduced the one observed breach clock within its prior.
+the rate law reproduced the observed breach clock within its prior range,
+with breach occurrence itself hinging on the in-layer permeability.
 
 What does not transfer, or transfers with caveats. The critical heads
 computed for the coarse Japanese survivor foundations ($d_{70}$ of
@@ -337,20 +348,35 @@ rests on a single event conditioned on committee model anchors, and on a
 permeability whose in-layer heterogeneity spans the verdict; it supports
 the prior's range, not any particular value. The morphology finding implies
 that Phase~2 posterior statements about $l$ under the 2016 record inherit
-the effective-rate reading, not a literal-conduit one. Finally, the
-campaign contains no case combining Tokachi's aquifer thickness with its
-flashy multi-peak loading; the compound-event memory model was exercised
-(the Yabe record spans two precursor peaks) but its cross-event form was
-tested only qualitatively, where the observed re-ejection of Gounokawa
-boils at declining heads across three years reflects blanket-pathway
-memory, a state the engine deliberately does not carry, and the engine's
-prediction of an unchanged virgin threshold is the documented, expected
-disagreement.
+the effective-rate reading, not a literal-conduit one.
+
+\paragraph{The principal limitation: the memory model remains untested.}
+The compound-event memory model, the mechanism by which pipe damage
+persists across peaks and events with zero recovery, is the one core
+component of the transient formulation this campaign did not validate. Its
+within-event form was merely exercised, not tested: the Yabe record spans
+two precursor peaks, but no observable in the set isolates carried-over
+damage. Its cross-event form produced the campaign's one documented
+disagreement: the Gounokawa boils re-activated at head differences
+declining from $6.4$ to approximately $5.8$ and $5.0$~m across the 2018,
+2020, and 2021 floods, despite an intervening cutoff wall built to lower
+the heads, whereas the engine predicts an unchanged virgin threshold. The
+field mechanism is memory held in the blanket's damaged pathways, a state
+variable the engine deliberately does not carry; the engine's memory lives
+in the pipe length alone. This gap points forward rather than sitting
+open: Phase~2 conditions the transient model on the 2016 consecutive-typhoon
+survival record, a multi-peak loading whose information content flows
+precisely through the within-event memory mechanism, and is therefore the
+first quantitative exercise of the component this campaign could not reach.
+The Phase~2 results should be read with that dependency explicit.
 
 Taken together, the campaign establishes that the engine's initiation
-criterion and progression race condition are sound in the high-gradient
-Japanese setting on the evidence available, that its known conservatisms
-are localized (head translation) and bounded (gate-only, shoulder-
-concentrated), and that the static comparator's conservatism, the premise
-of this thesis's central bias question, is visible in the field wherever
-the record permits a check.
+criterion (conditional on the investigators' calibrated heads) and its
+progression race condition are sound in the high-gradient Japanese setting
+on the evidence available, that its known conservatisms are localized (head
+translation) and bounded (gate-only, shoulder-concentrated), and that the
+static comparator's conservatism, the premise of this thesis's central bias
+question, is visible in the field wherever the record permits a check. Its
+principal limitation is equally explicit: the memory model enters Phase~2
+unvalidated by field observation, and Phase~2 is the exercise that gap
+calls for.

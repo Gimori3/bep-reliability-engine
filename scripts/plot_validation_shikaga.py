@@ -62,9 +62,12 @@ def main() -> None:
         ("Yabe L16.10k\nDg under fan levee", (2.67, 2.67), "z_toe read-off uncertain"),
     ]
 
+    # The expected-Tokachi-position band was removed 2026-07-12 (user
+    # adjudication of overclaim flag 2): a shaded band reads as a
+    # measurement, and the Tokachi position is engineering judgment along a
+    # four-point pattern; it is argued in the notes/thesis text instead.
     fig, ax = plt.subplots(figsize=(7.4, 3.0), dpi=160)
     ax.axvline(1.0, color=INK, lw=1.2, ls=(0, (6, 3)))
-    ax.axvspan(1.0, 1.15, color="#008300", alpha=0.10, lw=0)
     for i, (label, (lo, hi), conf) in enumerate(rows):
         y = len(rows) - 1 - i
         open_marker = "uncertain" in conf
@@ -85,15 +88,6 @@ def main() -> None:
     ax.grid(axis="y", visible=False)
     ax.set_xlabel(
         "M4 factor: engine instantaneous Mazure / 2D-FEM peak toe " "overpressure  [-]"
-    )
-    ax.annotate(
-        "expected Tokachi position\n(saturated, channel-connected,\n"
-        "10x the 11.86k transmissivity)",
-        xy=(1.08, 3.28),
-        xytext=(1.35, 3.05),
-        color="#006300",
-        fontsize=8,
-        arrowprops={"arrowstyle": "-", "color": BASELINE, "lw": 0.8},
     )
     ax.set_title(
         "M4 over-translation vs calibrated FEMs across the Japanese cases",
