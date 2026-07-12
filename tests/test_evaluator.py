@@ -404,11 +404,17 @@ def test_public_interface() -> None:
     Field order follows the spec §2 output listing; the call signature is the
     stable API Phase 2 imports (spec §8). Field names, the parameter tuple, and
     the defaults (l_ini = 0.0, store_trajectory = False) are pinned here.
+    BatchDiagnostics / evaluate_batch_diagnostics are the ADR-0034 additive
+    extension (the batch twin with diagnostics retained, for the Phase 2
+    survival replay); their row-wise bit identity with the scalar path is
+    pinned by ``tests/test_evaluator_batch_diagnostics.py``.
     """
     assert set(evaluator.__all__) == {
+        "BatchDiagnostics",
         "EvaluationResult",
         "evaluate_realization",
         "evaluate_batch",
+        "evaluate_batch_diagnostics",
     }
 
     assert is_dataclass(EvaluationResult)

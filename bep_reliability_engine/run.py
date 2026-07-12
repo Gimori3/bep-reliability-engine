@@ -185,7 +185,11 @@ from bep_reliability_engine.sampling import (
 
 logger = logging.getLogger(__name__)
 
-__all__ = ["run_fragility_analysis"]
+__all__ = [
+    "conditioning_hydrographs_for_config",
+    "run_fragility_analysis",
+    "seepage_length_samples_for_config",
+]
 
 # Provenance markers stamped into metadata['hydrograph_source'] so a
 # synthetic-stub run is never mistaken for a real d4PDF-driven result and
@@ -489,6 +493,70 @@ def _sample_seepage_length_or_none(config: Config) -> NDArray[np.float64] | None
         seed=l_seed,
         n_samples=config.mc.n_samples,
     )
+
+
+def seepage_length_samples_for_config(config: Config) -> NDArray[np.float64] | None:
+    """Regenerate the run's stochastic seepage-length draw from its config.
+
+    Public re-entry point for the exact per-realization L vector a
+    :func:`run_fragility_analysis` run paired with theta row j (ADR-0034):
+    the draw is fully determined by ``config.mc.seed`` (via the same
+    ``SeedSequence`` salt), ``config.geometry.L``, ``config.seepage_length_cov``
+    and ``config.mc.n_samples``, and the L samples are deliberately **not**
+    persisted in the FragilityResult, so downstream consumers (the Phase 2
+    survival replay, which must re-run M8 under identical assumptions)
+    regenerate them through this function rather than re-deriving the seed
+    recipe. Returns None when L is deterministic
+    (``config.seepage_length_cov`` unset), exactly like the run itself.
+
+    Parameters
+    ----------
+    config : Config
+        The run configuration; for a persisted run, reconstruct it from the
+        metadata snapshot via ``Config.model_validate(metadata['config'])``.
+
+    Returns
+    -------
+    numpy.ndarray of shape (N,) or None
+        The identical L vector the run used, or None for deterministic L.
+    """
+    return _sample_seepage_length_or_none(config)
+
+
+def conditioning_hydrographs_for_config(config: Config) -> list[HydrographRecord]:
+    """Build the run's per-level loading records, exactly as the sweep did.
+
+    Public re-entry point for the conditioning-grid hydrographs of a
+    :func:`run_fragility_analysis` run (ADR-0034): the canonical shape is
+    loaded once (datum-guarded) and each grid level's record is built by the
+    same :func:`_hydrograph_for_level` path the sweep used, including the
+    ADR-0030 ``target_dt_seconds`` refinement. Exists for the Phase 2
+    posterior-fragility **verification** mode, which re-evaluates accepted
+    rows on the identical grid records and must reproduce the retained
+    failure matrices bit for bit.
+
+    Parameters
+    ----------
+    config : Config
+        The run configuration (reconstructable from the metadata snapshot).
+
+    Returns
+    -------
+    list of HydrographRecord
+        One record per conditioning level, in grid order; ``record.peak``
+        equals the level verbatim.
+
+    Raises
+    ------
+    ValueError
+        Propagated from the canonical-shape loading or the MSL datum guard,
+        exactly as in :func:`run_fragility_analysis`.
+    """
+    canonical = _load_canonical_or_none(config)
+    return [
+        _hydrograph_for_level(float(level_m), config, canonical)
+        for level_m in config.mc.conditioning_grid
+    ]
 
 
 def _leakage_geometry_block(

@@ -172,9 +172,11 @@ if TYPE_CHECKING:  # pragma: no cover
     from bep_reliability_engine.hydrographs import HydrographRecord
 
 __all__ = [
+    "BatchDiagnostics",
     "EvaluationResult",
     "evaluate_realization",
     "evaluate_batch",
+    "evaluate_batch_diagnostics",
 ]
 
 
@@ -254,6 +256,65 @@ class EvaluationResult:
     failure_trans: bool
     uplift_occurred: bool
     heave_occurred: bool
+
+
+@dataclass(frozen=True)
+class BatchDiagnostics:
+    """Per-realization M8 batch outputs with the diagnostics retained (ADR-0034).
+
+    The array twin of :class:`EvaluationResult` for one
+    :func:`evaluate_batch_diagnostics` call: every field is the ``(N,)``
+    vector of the corresponding scalar-path quantity, computed by the *same*
+    kernels in the same order, so ``BatchDiagnostics`` row j equals the
+    :func:`evaluate_realization` result for theta row j bit for bit (numpy
+    backend; pinned by ``tests/test_evaluator.py``). Built for the Phase 2
+    survival replay, which needs the continuous margins and the
+    initiation/progression diagnostics for *all* rows, not only the two
+    failure flags the production sweep keeps (spec §12 fm6).
+
+    Attributes
+    ----------
+    Z_static : numpy.ndarray, shape (N,)
+        Static margin ``H_c - (h_peak - z_toe)`` [m] (raw gross head,
+        ADR-0028). Failure where ``<= 0``.
+    Z_transient : numpy.ndarray, shape (N,)
+        Transient margin ``L - l_e_final`` [m] (per-realization L when L is
+        stochastic). Failure where ``<= 0``.
+    l_e_final : numpy.ndarray, shape (N,)
+        Final pipe length after the full hydrograph [m] (clipped at L).
+    H_c : numpy.ndarray, shape (N,)
+        Static critical head [m] (M6, at the static scale exponent).
+    H_c_transient : numpy.ndarray, shape (N,)
+        Transient H_eq anchor head [m]; equals ``H_c`` unless the ADR-0017
+        transient-only scale exponent is active.
+    l_c : numpy.ndarray, shape (N,)
+        Critical pipe length [m] (scale-exponent independent).
+    lambda_in : numpy.ndarray, shape (N,)
+        Hinterland Mazure leakage length [m] (M4).
+    r_e : numpy.ndarray, shape (N,)
+        Response factor [-] in (0, 1); drives only the uplift/heave gate
+        (ADR-0027/ADR-0028).
+    t_uh : numpy.ndarray, shape (N,)
+        Time [s] of first uplift+heave co-occurrence, NaN where never.
+    failure_static, failure_trans : numpy.ndarray, shape (N,), bool
+        The ``Z <= 0`` flags; identical to the :func:`evaluate_batch` return.
+    uplift_occurred, heave_occurred : numpy.ndarray, shape (N,), bool
+        Per-event M5 latches at termination.
+    """
+
+    Z_static: npt.NDArray[float64]
+    Z_transient: npt.NDArray[float64]
+    l_e_final: npt.NDArray[float64]
+    H_c: npt.NDArray[float64]
+    H_c_transient: npt.NDArray[float64]
+    l_c: npt.NDArray[float64]
+    lambda_in: npt.NDArray[float64]
+    r_e: npt.NDArray[float64]
+    t_uh: npt.NDArray[float64]
+    failure_static: npt.NDArray[np.bool_]
+    failure_trans: npt.NDArray[np.bool_]
+    uplift_occurred: npt.NDArray[np.bool_]
+    heave_occurred: npt.NDArray[np.bool_]
 
 
 def evaluate_realization(
@@ -608,6 +669,69 @@ integrate_progression_numba`) — numerically equivalent to < 1e-10 but NOT
     RuntimeError
         If ``progression_backend='numba'`` and numba is not installed.
     """
+    diagnostics = evaluate_batch_diagnostics(
+        theta_matrix,
+        hydrograph,
+        geometry,
+        l_ini=l_ini,
+        seepage_length_samples=seepage_length_samples,
+        alpha_exponent=alpha_exponent,
+        alpha_exponent_transient=alpha_exponent_transient,
+        theta_repose_rad=theta_repose_rad,
+        relative_density=relative_density,
+        gamma_p_sub_kn_m3=gamma_p_sub_kn_m3,
+        foreland_open=foreland_open,
+        progression_backend=progression_backend,
+    )
+    return diagnostics.failure_static, diagnostics.failure_trans
+
+
+def evaluate_batch_diagnostics(
+    theta_matrix: npt.NDArray[float64],
+    hydrograph: HydrographRecord,
+    geometry: dict,
+    *,
+    l_ini: float = 0.0,
+    seepage_length_samples: npt.NDArray[float64] | None = None,
+    alpha_exponent: float | None = None,
+    alpha_exponent_transient: float | None = None,
+    theta_repose_rad: float | None = None,
+    relative_density: float | None = None,
+    gamma_p_sub_kn_m3: float | None = None,
+    foreland_open: bool = False,
+    progression_backend: str = "numpy",
+) -> BatchDiagnostics:
+    """Evaluate all N realizations at one level, retaining diagnostics (ADR-0034).
+
+    The single batch implementation of M8: :func:`evaluate_batch` delegates
+    here and returns only the two failure columns (its frozen contract), so
+    there is exactly one batch code path and the two entry points can never
+    drift apart. Same parameters and semantics as :func:`evaluate_batch`;
+    see its docstring for the full contract. The only difference is the
+    return type: the continuous margins and the M5/M7 diagnostics behind the
+    flags are retained per realization.
+
+    Added (additively, ADR-0034) for the Phase 2 survival replay against the
+    observed 2016 hydrograph: the Accept-Reject filter needs the failure
+    flags for all N rows at production speed, and the analysis needs the
+    margins, terminal pipe lengths and initiation latches row by row. The
+    production Phase 1 sweep continues to call :func:`evaluate_batch`.
+
+    Returns
+    -------
+    BatchDiagnostics
+        Per-realization margins, diagnostics and both failure flags; row j
+        is bit-identical to ``evaluate_realization(theta_matrix[j], ...)``
+        on the numpy backend (< 1e-10 on the opt-in numba backend,
+        ADR-0029).
+
+    Raises
+    ------
+    ValueError
+        If ``progression_backend`` is not ``'numpy'`` or ``'numba'``.
+    RuntimeError
+        If ``progression_backend='numba'`` and numba is not installed.
+    """
     if progression_backend not in ("numpy", "numba"):
         raise ValueError(
             f"progression_backend {progression_backend!r} must be 'numpy' or "
@@ -687,7 +811,8 @@ integrate_progression_numba`) — numerically equivalent to < 1e-10 but NOT
     # no r_e, no 0.3*D_bl; ADR-0028). r_e-independent.
     h_peak_m = float(hydrograph.peak)
     static_head = h_peak_m - z_toe_m
-    failure_static = (h_c - static_head) <= 0.0
+    z_static = h_c - static_head
+    failure_static = z_static <= 0.0
 
     # --- Transient branch: the same r_e drives the M7 timestepper, vectorized
     # across realizations within each (serial) timestep (spec §6).
@@ -740,9 +865,21 @@ integrate_progression_numba`) — numerically equivalent to < 1e-10 but NOT
             store_trajectory=False,
         )
     l_e_final = np.asarray(progression.l_final_m, dtype=np.float64)
-    failure_trans = (seepage_length - l_e_final) <= 0.0
+    z_transient = seepage_length - l_e_final
+    failure_trans = z_transient <= 0.0
 
-    return (
-        np.asarray(failure_static, dtype=bool),
-        np.asarray(failure_trans, dtype=bool),
+    return BatchDiagnostics(
+        Z_static=np.asarray(z_static, dtype=np.float64),
+        Z_transient=np.asarray(z_transient, dtype=np.float64),
+        l_e_final=l_e_final,
+        H_c=h_c,
+        H_c_transient=h_c_transient,
+        l_c=l_c,
+        lambda_in=np.asarray(lambda_in, dtype=np.float64),
+        r_e=np.asarray(r_e, dtype=np.float64),
+        t_uh=np.asarray(progression.t_uh_s, dtype=np.float64),
+        failure_static=np.asarray(failure_static, dtype=bool),
+        failure_trans=np.asarray(failure_trans, dtype=bool),
+        uplift_occurred=np.asarray(progression.uplift_occurred, dtype=bool),
+        heave_occurred=np.asarray(progression.heave_occurred, dtype=bool),
     )

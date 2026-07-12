@@ -238,3 +238,7 @@ project-notes.md
 
 # Waseda DEM workbook exceeds the 500 KB pre-commit limit (see README there)
 data/digitized/Gounokawa_River_Levee_Okamura/Fig13*.xlsx
+
+# Raw 2016 event agency drop (188 MB incl. hydraulic-model binaries); the
+# committed extract lives in data/processed/2016_event/ (see README there)
+data/digitized/2016_event_data/
