@@ -1,0 +1,434 @@
+"""The Phase 2 pipeline: one Phase 1 result in, one PosteriorResult out.
+
+Composes the package end to end for one segment stratum (one Phase 1 file =
+one segment, scenario and d70 interpretation): load and verify the Phase 1
+run, build the observed-event record at the run's own section, replay M8
+over every prior row, filter, decompose, regenerate the posterior fragility
+from the retained matrices, optionally verify by re-evaluation, analyse the
+prior-to-posterior shift, persist and plot. ``run_survival_update`` is the
+function behind the CLI (``python -m bayesian_reliability_updating``).
+"""
+
+from __future__ import annotations
+
+import json
+import logging
+import time
+from pathlib import Path
+from typing import Any, Literal
+
+import numpy as np
+from pydantic import BaseModel, ConfigDict, Field
+
+from bayesian_reliability_updating import __version__ as _phase2_version
+from bayesian_reliability_updating.analysis import (
+    c_e_headline,
+    correlation_shift,
+    prior_posterior_summary,
+)
+from bayesian_reliability_updating.events import (
+    default_2016_source,
+    observed_event_record,
+    read_flood_traces,
+)
+from bayesian_reliability_updating.fragility_update import (
+    posterior_fragility_from_matrices,
+    verify_posterior_fragility_by_reevaluation,
+)
+from bayesian_reliability_updating.posterior import EventArrays, PosteriorResult
+from bayesian_reliability_updating.replay import (
+    Phase1Run,
+    breach_times_for_rows,
+    load_phase1_run,
+)
+from bayesian_reliability_updating.sequential import apply_event, initial_state
+from bep_reliability_engine.hydrographs import HydrographRecord
+
+logger = logging.getLogger(__name__)
+
+__all__ = ["Phase2Settings", "run_survival_update"]
+
+
+class Phase2Settings(BaseModel):
+    """Validated Phase 2 run settings (the CLI constructs one per run).
+
+    Attributes
+    ----------
+    anchor : str
+        Observed-record peak anchoring (ADR-0035): ``'trace_right'``
+        (default; the study levees' bank), ``'trace_left'`` or
+        ``'rating'``.
+    criterion : str
+        Acceptance criterion (ADR-0036): ``'no_breach'`` (baseline) or the
+        stricter optional ``'no_breach_no_initiation'``.
+    data_root : str
+        Root of the raw data drop (rating curves; ADR-0020 layout).
+    processed_dir : str
+        Directory of the processed observed-event extracts.
+    output_dir : str
+        Where PosteriorResult files (and ``figures/``) are written.
+    verify_by_reevaluation : bool
+        Run the exact re-evaluation verification of the posterior
+        fragility (mission invariant 7; slower).
+    trace_breach_times : bool
+        Trace per-row breach times for the transient-rejected set through
+        the scalar M8 with trajectories (the sanctioned trajectory run).
+    figures : bool
+        Render the figure set.
+    n_bootstrap : int
+        Posterior bootstrap replicates.
+    confidence : float
+        Two-sided band coverage.
+    progression_backend : str or None
+        Optional M7 backend override for the replay (None uses the Phase 1
+        config's own backend).
+    overwrite : bool
+        Allow replacing an existing PosteriorResult pair.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    anchor: Literal["trace_right", "trace_left", "rating"] = "trace_right"
+    criterion: Literal["no_breach", "no_breach_no_initiation"] = "no_breach"
+    data_root: str = "data/raw"
+    processed_dir: str = "data/processed/2016_event"
+    output_dir: str = "results/phase2"
+    verify_by_reevaluation: bool = False
+    trace_breach_times: bool = True
+    figures: bool = True
+    n_bootstrap: int = Field(default=1000, ge=10)
+    confidence: float = Field(default=0.95, gt=0.0, lt=1.0)
+    progression_backend: Literal["numpy", "numba"] | None = None
+    overwrite: bool = False
+
+
+def _output_paths(phase1_path: Path, settings: Phase2Settings) -> dict[str, Path]:
+    stem = phase1_path.stem
+    out_dir = Path(settings.output_dir)
+    return {
+        "h5": out_dir / f"{stem}_posterior.h5",
+        "sidecar": out_dir / f"{stem}_posterior.json",
+        "figures": out_dir / "figures",
+        "stem": Path(stem),
+    }
+
+
+def _guard_no_overwrite(paths: dict[str, Path], overwrite: bool) -> None:
+    existing = [str(p) for p in (paths["h5"], paths["sidecar"]) if p.exists()]
+    if existing and not overwrite:
+        raise FileExistsError(
+            f"Refusing to overwrite existing Phase 2 result(s) {existing}; "
+            "pass overwrite=True (CLI: --overwrite) to replace them."
+        )
+
+
+def _default_event_record(run: Phase1Run, settings: Phase2Settings) -> HydrographRecord:
+    """The built-in 2016 record at the run's own section (ADR-0035)."""
+    source_block = run.config.hydrograph_source
+    if source_block is None:
+        raise ValueError(
+            "the Phase 1 config carries no hydrograph_source block, so the "
+            "run's river and KP are unknown; pass an explicit event record."
+        )
+    source = default_2016_source(settings.processed_dir)
+    if source.river != source_block.river:
+        raise ValueError(
+            f"built-in 2016 source covers the {source.river}, but the run's "
+            f"section is on the {source_block.river}; pass an explicit "
+            "event record."
+        )
+    return observed_event_record(
+        source,
+        section_kp=float(source_block.kp),
+        data_root=settings.data_root,
+        anchor=settings.anchor,
+    )
+
+
+def _figures(
+    run: Phase1Run,
+    result: PosteriorResult,
+    chain_summary: list[dict[str, Any]],
+    replays: list,
+    paths: dict[str, Path],
+) -> list[str]:
+    from bayesian_reliability_updating import plots
+
+    stem = paths["stem"].name
+    fig_dir = paths["figures"]
+    z_toe = float(run.config.geometry.z_toe)
+    written: list[str] = []
+
+    written.append(
+        str(
+            plots.plot_prior_posterior_marginals(
+                result.theta_matrix,
+                result.param_names,
+                result.accept,
+                fig_dir / f"{stem}_marginals.png",
+                title=f"{stem}: prior vs posterior marginals",
+            )
+        )
+    )
+    last_event = chain_summary[-1]
+    written.append(
+        str(
+            plots.plot_fragility_update(
+                result.fragility.conditioning_grid,
+                result.P_f_trans_prior_raw,
+                result.P_f_static_prior_raw,
+                result.fragility,
+                fig_dir / f"{stem}_fragility_update.png",
+                z_toe_m=z_toe,
+                event_peak_m=float(last_event["record"]["peak_m_msl"]),
+                title=f"{stem}: fragility update",
+            )
+        )
+    )
+    written.append(
+        str(
+            plots.plot_decomposition(
+                last_event["decomposition"],
+                fig_dir / f"{stem}_decomposition.png",
+                title=f"{stem}: survival-discrimination decomposition "
+                f"({last_event['event_id']})",
+            )
+        )
+    )
+    written.append(
+        str(
+            plots.plot_rejection_scatter(
+                result.theta_matrix,
+                result.param_names,
+                result.accept,
+                fig_dir / f"{stem}_rejection_scatter.png",
+                title=f"{stem}: accept/reject in the k_aq x C_e plane",
+            )
+        )
+    )
+    for _, _, replay in replays:
+        trace = replay.record.provenance.get("trace_anchor_m_msl")
+        written.append(
+            str(
+                plots.plot_observed_record(
+                    replay.record,
+                    fig_dir / f"{stem}_{replay.record.event_id}_record.png",
+                    z_toe_m=z_toe,
+                    trace_level_m=trace,
+                    title=f"{stem}: observed record {replay.record.event_id}",
+                )
+            )
+        )
+    for event_id, arrays in result.events.items():
+        if arrays.t_breach is not None and np.isfinite(arrays.t_breach).any():
+            replay = next(r for _, _, r in replays if r.record.event_id == event_id)
+            written.append(
+                str(
+                    plots.plot_breach_times(
+                        arrays.t_breach,
+                        replay.record,
+                        fig_dir / f"{stem}_{event_id}_breach_times.png",
+                        title=f"{stem}: rejected-realization breach times "
+                        f"({event_id})",
+                    )
+                )
+            )
+    return written
+
+
+def run_survival_update(
+    phase1_path: str | Path,
+    *,
+    settings: Phase2Settings | None = None,
+    event_records: list[HydrographRecord] | None = None,
+    persist: bool = True,
+) -> PosteriorResult:
+    """Run the full Phase 2 update for one Phase 1 result file.
+
+    Parameters
+    ----------
+    phase1_path : str or pathlib.Path
+        A Phase 1 FragilityResult HDF5 (JSON sidecar next to it).
+    settings : Phase2Settings, optional
+        Run settings; defaults throughout when omitted.
+    event_records : list of HydrographRecord, optional
+        The survival events to apply, in order. None (default) applies the
+        built-in 2016 record at the run's own section. Passing more than
+        one record composes them sequentially (posterior-in,
+        posterior-out).
+    persist : bool, optional
+        Write the PosteriorResult pair (and figures when enabled). The
+        in-memory result is returned either way.
+
+    Returns
+    -------
+    PosteriorResult
+        The persisted (or in-memory) Phase 2 artifact.
+
+    Raises
+    ------
+    FileExistsError
+        If the output pair exists and overwrite is not set.
+    ValueError
+        Propagated from loading, construction, replay or filtering.
+    """
+    settings = settings or Phase2Settings()
+    phase1_path = Path(phase1_path)
+    paths = _output_paths(phase1_path, settings)
+    if persist:
+        _guard_no_overwrite(paths, settings.overwrite)
+
+    start = time.perf_counter()
+    run = load_phase1_run(phase1_path)
+    if event_records is None:
+        event_records = [_default_event_record(run, settings)]
+
+    # Sequential Accept-Reject chain (masks over original prior rows).
+    state = initial_state(run)
+    for record in event_records:
+        state, outcome, replay = apply_event(
+            state,
+            record,
+            criterion=settings.criterion,
+            progression_backend=settings.progression_backend,
+        )
+
+    # Per-event arrays for persistence; breach times for the rejected rows.
+    events: dict[str, EventArrays] = {}
+    for event_id, outcome, replay in state.chain:
+        diag = replay.diagnostics
+        t_breach = None
+        if settings.trace_breach_times:
+            rejected_rows = np.nonzero(~outcome.accept_trans)[0]
+            t_breach = np.full(run.n_samples, np.nan, dtype=np.float64)
+            if rejected_rows.size:
+                logger.info(
+                    "Tracing breach times for %d rejected rows (%s)...",
+                    rejected_rows.size,
+                    event_id,
+                )
+                t_breach[rejected_rows] = breach_times_for_rows(
+                    run, replay, rejected_rows
+                )
+        events[event_id] = EventArrays(
+            accept_trans=outcome.accept_trans,
+            accept_static=outcome.accept_static,
+            initiation=outcome.initiation_occurred,
+            Z_static=diag.Z_static,
+            Z_transient=diag.Z_transient,
+            l_e_final=diag.l_e_final,
+            t_uh=diag.t_uh,
+            r_e=diag.r_e,
+            t_breach=t_breach,
+        )
+
+    posterior_fragility = posterior_fragility_from_matrices(
+        run,
+        state.alive,
+        n_bootstrap=settings.n_bootstrap,
+        confidence=settings.confidence,
+    )
+    verification: dict[str, Any] | None = None
+    if settings.verify_by_reevaluation:
+        verification = verify_posterior_fragility_by_reevaluation(
+            run, state.alive, posterior_fragility
+        )
+
+    chain_summary = state.chain_summary()
+    marginals = prior_posterior_summary(run.theta, run.param_names, state.alive)
+    headline = c_e_headline(run.theta, run.param_names, state.alive)
+    correlations = correlation_shift(run.theta, run.param_names, state.alive)
+
+    phase1_meta = run.result.metadata
+    trace_context = _trace_context(run, settings)
+    metadata: dict[str, Any] = {
+        "phase1": {
+            "path": str(phase1_path),
+            "h5_sha256": run.h5_sha256,
+            "sidecar_sha256": run.sidecar_sha256,
+            "config_hash": phase1_meta.get("config_hash"),
+            "code_version": phase1_meta.get("code_version"),
+            "cross_section_id": phase1_meta.get("cross_section_id"),
+            "segment_id": phase1_meta.get("segment_id"),
+            "scenario": phase1_meta.get("scenario"),
+            "remediation_state": phase1_meta.get("remediation_state"),
+            "d70_interpretation": phase1_meta.get("d70_interpretation"),
+            "lhs_seed": phase1_meta.get("lhs_seed"),
+            "n_samples": run.n_samples,
+            "theta_verified": run.theta_verified,
+            "hydrograph_source": phase1_meta.get("hydrograph_source"),
+        },
+        "phase2": {
+            "package_version": _phase2_version,
+            "settings": settings.model_dump(),
+            "l_ini_m": 0.0,
+            "recovery_r_l": 0.0,
+            "event_chain": chain_summary,
+            "posterior": {
+                "n_prior": run.n_samples,
+                "n_accepted": state.n_alive,
+                "rejection_fraction": 1.0 - state.n_alive / run.n_samples,
+                "criterion": settings.criterion,
+                "warnings": [w for _, o, _ in state.chain for w in o.warnings],
+            },
+            "posterior_fragility": posterior_fragility.settings,
+            "verification": verification,
+            "trace_context": trace_context,
+            "runtime_seconds": time.perf_counter() - start,
+        },
+        "analysis": {
+            "marginals": marginals,
+            "c_e_headline": headline,
+            "correlation_shift": correlations,
+        },
+    }
+    metadata = json.loads(json.dumps(metadata))
+
+    result = PosteriorResult(
+        theta_matrix=run.theta,
+        param_names=run.param_names,
+        seepage_length_samples=run.seepage_length_samples,
+        accept=state.alive,
+        events=events,
+        fragility=posterior_fragility,
+        P_f_trans_prior_raw=np.asarray(run.result.P_f_trans_raw, dtype=np.float64),
+        P_f_static_prior_raw=np.asarray(run.result.P_f_static_raw, dtype=np.float64),
+        metadata=metadata,
+    )
+
+    if persist:
+        result.save(paths["h5"])
+        logger.info(
+            "Wrote Phase 2 result to %s (+ sidecar); posterior keeps %d of "
+            "%d rows (rejection %.2f%%).",
+            paths["h5"],
+            state.n_alive,
+            run.n_samples,
+            100.0 * (1.0 - state.n_alive / run.n_samples),
+        )
+        if settings.figures:
+            written = _figures(run, result, chain_summary, state.chain, paths)
+            logger.info("Wrote %d figures under %s.", len(written), paths["figures"])
+    return result
+
+
+def _trace_context(run: Phase1Run, settings: Phase2Settings) -> dict[str, Any] | None:
+    """Record the surveyed trace and design HWL at the section (provenance)."""
+    source_block = run.config.hydrograph_source
+    if source_block is None:
+        return None
+    source = default_2016_source(settings.processed_dir)
+    if source.trace_csv is None or not Path(source.trace_csv).exists():
+        return None
+    if source.river != source_block.river:
+        return None
+    traces = read_flood_traces(source.trace_csv, source.river)
+    trace = traces.get(round(float(source_block.kp), 1))
+    if trace is None:
+        return None
+    return {
+        "kp": trace.kp,
+        "design_hwl_m_msl": trace.design_hwl_m,
+        "trace_left_m_msl": trace.trace_left_m,
+        "trace_right_m_msl": trace.trace_right_m,
+    }
