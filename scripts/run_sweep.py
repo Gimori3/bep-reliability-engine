@@ -16,20 +16,20 @@ Output: ``results/<cross_section_id>_<scenario>_<d70_interpretation>.h5`` plus
 the JSON metadata sidecar (spec §8). Existing results are refused unless
 ``--overwrite`` is passed (the run.py guard).
 
-PLANNED QA MEMBER (registered 2026-07-11; not yet run)
+QA MEMBER (registered 2026-07-11; EXECUTED 2026-07-13)
 ------------------------------------------------------
-The next production re-sweep must include one extra KP58.8 sensitivity member
-with the M4 response factor halved (r_e -> r_e/2), converting the Japanese
-case-validation shoulder bound into a measured delta-P_f per conditioning
-level (``docs/validation/shikaga-case.md`` sec. 3; ADR-0032 scope amendment).
-r_e is derived per realization, not a config field, so realize the member as
-a harness-level run in the style of ``scripts/validate_*.py``: sample the
-KP58.8 matrix config's theta, build the M7 head model from ``0.5 * r_e`` via
-the public M4 kernels, and drive ``integrate_progression`` on the standard
-conditioning records; compare P_f,trans per level against the unmodified
-KP58.8 matrix member (shoulder levels are where the effect concentrates).
-Expected direction: standard r_e is the conservative side; the halved member
-bounds how much of the shoulder is M4-translation-sensitive.
+The KP58.8 r_e-halved sensitivity member (r_e -> r_e/2; ADR-0032 scope
+amendment; ``docs/validation/shikaga-case.md`` sec. 3) is realized as the
+harness-level run ``scripts/qa_re_halved_member.py`` (r_e is derived per
+realization, never a config field). Measured on the production
+``tokachi_kp58.8_historical_matrix`` member (N = 1e5, baseline drift guard
+bit-identical at all 29 levels): the effect is shoulder-concentrated exactly
+as predicted — max |delta P_f| = 0.181 at 41.25 m MSL, deep-shoulder
+suppression down to ratios 0.002-0.09 (40.0-40.5 m), converging to parity
+(>= 0.99) above 43.5 m; halving r_e produced zero new failures, confirming
+standard r_e as the conservative side. Full per-level table:
+``results/qa_re_halved_kp58_8.json``. Re-run the harness after any re-sweep
+that changes the KP58.8 matrix member.
 """
 
 from __future__ import annotations

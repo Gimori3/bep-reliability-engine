@@ -119,9 +119,17 @@ with one recommended QA run.** Grounds:
    response only; does not detect unsaturated/finite-fill damping; verify
    channel-connected saturated initial state per section — all four confirmed
    by the OYO logs' confined-section classification). Document-only.
-4. **Recommended QA run:** one r_e-halved sensitivity sweep member on the
-   governing section (KP58.8) at the next production re-sweep, to convert
-   point 2's bound into a measured ΔP_f on the shoulder. Not blocking.
+4. **Recommended QA run — EXECUTED 2026-07-13:** the r_e-halved sensitivity
+   member on KP58.8 ran as `scripts/qa_re_halved_member.py` against the
+   production matrix member (N = 1e5; the scale-1.0 drift guard reproduced
+   the persisted sweep bit-identically at all 29 levels). Measured
+   ΔP_f,trans per level (`results/qa_re_halved_kp58_8.json`):
+   shoulder-concentrated exactly as point 2 predicted — max |ΔP_f| = 0.181
+   at 41.25 m MSL (P_f 0.378 → 0.197), deep-shoulder ratios 0.002–0.09 at
+   40.0–40.5 m, parity (ratio ≥ 0.99) above 43.5 m, and zero new failures
+   under halving (standard r_e is the conservative side, confirmed). The §3
+   production judgment (conservative, shoulder-concentrated, not a Tokachi
+   blocker) stands, now with a measured magnitude.
 
 ## 4. Cross-case threads (synthesis inputs)
 
