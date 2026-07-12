@@ -257,6 +257,27 @@ def test_config_matches_csv_and_thesis_priors(path: Path) -> None:
         "'blanketed_tanh' (ADR-0025 baseline)"
     )
 
+    # --- (11) Length effect carried but OFF (ADR-0037) ------------------------
+    # The generated sweep documents the ADR-0037 lambda_ac primary value but
+    # never applies the transform silently: enabled must stay False, and the
+    # values must match the ADR (Kanning 2012 blanket-thickness midpoint;
+    # Uemura 200 m segment grid). A config with enabled=True in the production
+    # set, or a drifted lambda_ac without a superseding ADR, is a regression.
+    assert cfg.length_effect is not None, (
+        f"{path.name}: generated configs must carry the ADR-0037 " "length_effect block"
+    )
+    assert cfg.length_effect.enabled is False, (
+        f"{path.name}: length_effect.enabled must be False in the generated "
+        "sweep (ADR-0037: the Phase 1 deliverable is the cross-section curve)"
+    )
+    assert cfg.length_effect.lambda_ac_m == 250.0, (
+        f"{path.name}: lambda_ac_m {cfg.length_effect.lambda_ac_m!r} != 250.0 "
+        "(ADR-0037 primary value)"
+    )
+    assert (
+        cfg.length_effect.segment_length_m == 200.0
+    ), f"{path.name}: segment_length_m != 200.0 (Uemura segment grid)"
+
 
 @pytest.mark.parametrize("path", _CONFIG_PATHS, ids=lambda p: p.name)
 def test_datum_guard_passes_with_real_z_toe(path: Path) -> None:

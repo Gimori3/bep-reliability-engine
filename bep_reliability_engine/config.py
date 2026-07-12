@@ -543,6 +543,48 @@ class OutputSettings(_StrictModel):
     results_dir: str = Field(default="results", description="Result output directory.")
 
 
+class LengthEffectSettings(_StrictModel):
+    """ADR-0037 weakest-link segment upscaling — config-gated, OFF by default.
+
+    Carries the spatial autocorrelation length lambda_ac of the governing
+    parameters (D_bl, k_aquifer; Kanning 2012 Table 4-7, Schweckendiek 2014
+    Table 7.1) and the Uemura 200 m segment length. When ``enabled``,
+    ``run.py`` records the segment-level raw curves in
+    ``metadata['length_effect']`` via
+    :func:`~bep_reliability_engine.fragility.upscale_length_effect`; the
+    persisted cross-section FragilityResult curves are **never** modified.
+    When absent or ``enabled=False`` (the generated default) behaviour is
+    bit-identical to pre-ADR-0037 runs.
+
+    Attributes
+    ----------
+    enabled : bool
+        Apply the upscaling and record the segment block; default ``False``.
+    lambda_ac_m : float
+        Autocorrelation length lambda_ac [m], > 0. ADR-0037 primary value
+        250 m (Kanning 2012 blanket-thickness 200-300 m, midpoint);
+        conservative sensitivity bracket 100 m (n_eff = 2) / 40 m (n_eff = 5).
+    segment_length_m : float
+        Segment length L_seg [m], > 0; 200 m per Uemura's discretization
+        (architecture.md Tradeoff 3).
+    """
+
+    enabled: bool = Field(
+        default=False, description="Apply ADR-0037 segment upscaling; default off."
+    )
+    lambda_ac_m: float = Field(
+        default=250.0, gt=0.0, description="Autocorrelation length [m] (ADR-0037)."
+    )
+    segment_length_m: float = Field(
+        default=200.0, gt=0.0, description="Uemura segment length [m]."
+    )
+
+    @property
+    def n_eff(self) -> float:
+        """Effective independent cross-sections, clamped at 1 (ADR-0037 §3)."""
+        return max(1.0, self.segment_length_m / self.lambda_ac_m)
+
+
 class HydrographSource(_StrictModel):
     """Where the d4PDF hydrograph data lives + the canonical shape events.
 
@@ -766,6 +808,16 @@ class Config(_StrictModel):
         ),
     )
 
+    length_effect: LengthEffectSettings | None = Field(
+        default=None,
+        description=(
+            "ADR-0037 weakest-link segment upscaling. None (pre-ADR-0037 "
+            "configs) and enabled=False are both bit-identical to prior "
+            "behaviour; the None case is dropped from to_metadata() so "
+            "config_hash of pre-ADR-0037 snapshots is preserved."
+        ),
+    )
+
     # Run identity / provenance (spec §8 metadata attrs; no engine consumer).
     cross_section_id: str = Field(description="Cross-section identifier (provenance).")
     segment_id: str = Field(description="200 m segment identifier (provenance).")
@@ -844,8 +896,17 @@ class Config(_StrictModel):
             HDF5 JSON metadata sidecar (spec §2, §8). The derived
             ``theta_repose_rad`` is *not* included; consumers convert from
             ``theta_repose_deg`` as needed.
+
+            ``length_effect`` is dropped when None (ADR-0037): pre-ADR-0037
+            snapshots reconstruct to ``length_effect=None``, and dropping the
+            key keeps their :meth:`config_hash` byte-identical to what their
+            persisted runs recorded — the Phase 2 replay refuses hash drift,
+            so this compatibility is load-bearing, not cosmetic.
         """
-        return self.model_dump(mode="json")
+        snapshot = self.model_dump(mode="json")
+        if snapshot.get("length_effect") is None:
+            snapshot.pop("length_effect", None)
+        return snapshot
 
     def config_hash(self) -> str:
         """Return a stable SHA-256 over the canonical metadata snapshot.

@@ -30,6 +30,9 @@
 #   signal by linear interpolation at record construction (ADR-0013
 #   hook). Native 3600 s overshoots the H_eq barrier under the
 #   ADR-0026/0027 physics; the dt-halving ladder converges at 225 s.
+# ADR-0037: length_effect block emitted with enabled: false (the
+#   Phase 1 deliverable stays cross-section); lambda_ac = 250 m
+#   (Kanning 2012 blanket-thickness 200-300 m midpoint), L_seg = 200 m.
 # PROVISIONAL: seed;
 #   D_fore/k_fore = landside D_bl/k_bl proxy (ADR-0005).
 # gamma: CSV gamma_sub_kNm3 = 16.80 kN/m^3 is the per-section
@@ -157,3 +160,7 @@ relative_density_insitu: 0.725
 alpha_exponent: -0.3333333333333333
 seepage_length_cov: 0.2
 foreland_treatment: blanketed_tanh
+length_effect:
+  enabled: false
+  lambda_ac_m: 250.0
+  segment_length_m: 200.0

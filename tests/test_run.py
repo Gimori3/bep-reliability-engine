@@ -1127,3 +1127,77 @@ def test_aquifer_response_block_on_real_path(real_data_root) -> None:
     assert block["verdict"] == "instantaneous"
     # Descriptive verdict agrees with the (separate) global active form.
     assert result.metadata["aquifer_lag_active"] is False
+
+
+# ============================================================================
+# ADR-0037: config-gated length-effect wiring
+# ============================================================================
+def test_length_effect_disabled_is_bit_identical_and_unrecorded() -> None:
+    """enabled=False (and absent) leave results bit-identical with no block."""
+    base = _make_config()
+    gated = _make_config(
+        length_effect={
+            "enabled": False,
+            "lambda_ac_m": 250.0,
+            "segment_length_m": 200.0,
+        }
+    )
+    result_base = run_fragility_analysis(base, n_jobs=1, progress=False, persist=False)
+    result_gated = run_fragility_analysis(
+        gated, n_jobs=1, progress=False, persist=False
+    )
+    assert "length_effect" not in result_base.metadata
+    assert "length_effect" not in result_gated.metadata
+    np.testing.assert_array_equal(
+        result_base.failure_matrix_tran, result_gated.failure_matrix_tran
+    )
+    np.testing.assert_array_equal(
+        result_base.failure_matrix_stat, result_gated.failure_matrix_stat
+    )
+    np.testing.assert_array_equal(result_base.P_f_trans_raw, result_gated.P_f_trans_raw)
+
+
+def test_length_effect_enabled_records_upscaled_segment_curves() -> None:
+    """The metadata block carries 1-(1-p)^n_eff of raw curves and CI bounds,
+    and the persisted cross-section curves are untouched."""
+    from bep_reliability_engine.fragility import upscale_length_effect
+
+    config = _make_config(
+        length_effect={
+            "enabled": True,
+            "lambda_ac_m": 100.0,  # n_eff = 2: a non-trivial transform
+            "segment_length_m": 200.0,
+        }
+    )
+    reference = run_fragility_analysis(
+        _make_config(), n_jobs=1, progress=False, persist=False
+    )
+    result = run_fragility_analysis(config, n_jobs=1, progress=False, persist=False)
+
+    # Cross-section deliverable unchanged by the gate (ADR-0037).
+    np.testing.assert_array_equal(result.P_f_trans_raw, reference.P_f_trans_raw)
+    np.testing.assert_array_equal(result.P_f_static_raw, reference.P_f_static_raw)
+
+    block = result.metadata["length_effect"]
+    assert block["enabled"] is True
+    assert block["adr"] == "ADR-0037"
+    assert block["n_eff"] == 2.0
+    for branch, p_raw in (
+        ("static", result.P_f_static_raw),
+        ("transient", result.P_f_trans_raw),
+    ):
+        expected = upscale_length_effect(p_raw, 2.0)
+        np.testing.assert_allclose(
+            np.asarray(block[f"segment_p_f_{branch}_raw"]), expected, rtol=0, atol=0
+        )
+        lower, upper = result.binomial_ci[branch]
+        np.testing.assert_allclose(
+            np.asarray(block[f"segment_binomial_ci_{branch}"]["lower"]),
+            upscale_length_effect(lower, 2.0),
+        )
+        np.testing.assert_allclose(
+            np.asarray(block[f"segment_binomial_ci_{branch}"]["upper"]),
+            upscale_length_effect(upper, 2.0),
+        )
+        # Weakest-link direction: segment P_f never below cross-section P_f.
+        assert np.all(np.asarray(block[f"segment_p_f_{branch}_raw"]) >= p_raw - 1e-15)

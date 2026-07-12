@@ -102,6 +102,14 @@ EXPECTED_KPS = {"57.4", "58.8", "60.0", "62.0", "63.4"}
 # ADR-0030 integration-timestep policy: forward-Euler dt for the fragility
 # sweep, an integer subdivision (native/16) of the hourly d4PDF resolution.
 TARGET_DT_SECONDS = 225.0
+
+# ADR-0037 length-effect settings: lambda_ac primary value (Kanning 2012
+# Table 4-7 / sec. 4.7.3 blanket-thickness correlation distance 200-300 m,
+# midpoint; Schweckendiek 2014 Table 7.1 adopts 200 m from the same source)
+# and Uemura's 200 m segment grid. Emitted with enabled: false — the
+# generated sweep never applies the transform silently.
+LENGTH_EFFECT_LAMBDA_AC_M = 250.0
+LENGTH_EFFECT_SEGMENT_LENGTH_M = 200.0
 EXCLUDED_KP_DEFAULT = "63.4"
 
 # --- Sweep axes --------------------------------------------------------------
@@ -449,6 +457,18 @@ def build_config_dict(
         # hand-derived config with foreland_treatment: open_entry — never a
         # generated sweep member.
         "foreland_treatment": "blanketed_tanh",
+        # ADR-0037: weakest-link segment upscaling, OFF by default (the Phase 1
+        # deliverable stays the cross-section curve). lambda_ac = 250 m is the
+        # ADR-0037 primary value (Kanning 2012 blanket-thickness correlation
+        # distance 200-300 m, midpoint; Schweckendiek 2014 adopts 200 m from
+        # the same source); n_eff = max(1, 200/250) = 1. The conservative
+        # bracket (100 m / 40 m) is applied post hoc by
+        # scripts/segment_fragility.py, never by the generated sweep.
+        "length_effect": {
+            "enabled": False,
+            "lambda_ac_m": LENGTH_EFFECT_LAMBDA_AC_M,
+            "segment_length_m": LENGTH_EFFECT_SEGMENT_LENGTH_M,
+        },
     }
 
 
@@ -497,6 +517,9 @@ def header_comment(
         "#   signal by linear interpolation at record construction (ADR-0013",
         "#   hook). Native 3600 s overshoots the H_eq barrier under the",
         "#   ADR-0026/0027 physics; the dt-halving ladder converges at 225 s.",
+        "# ADR-0037: length_effect block emitted with enabled: false (the",
+        "#   Phase 1 deliverable stays cross-section); lambda_ac = 250 m",
+        "#   (Kanning 2012 blanket-thickness 200-300 m midpoint), L_seg = 200 m.",
         "# PROVISIONAL: seed;",
         "#   D_fore/k_fore = landside D_bl/k_bl proxy (ADR-0005).",
         f"# gamma: CSV gamma_sub_kNm3 = {gamma_p_csv} kN/m^3 is the per-section",

@@ -497,3 +497,57 @@ def test_hydrograph_source_rejects_non_positive_kp() -> None:
     data["hydrograph_source"] = {**_valid_hydrograph_source(), "kp": 0.0}
     with pytest.raises(ValidationError):
         Config.model_validate(data)
+
+
+# ============================================================================
+# ADR-0037: length_effect block — validation and hash compatibility
+# ============================================================================
+def test_length_effect_defaults_off_and_n_eff_clamps() -> None:
+    """Defaults are OFF/250 m/200 m; n_eff clamps at 1 from below (ADR-0037 §3)."""
+    from bep_reliability_engine.config import LengthEffectSettings
+
+    settings = LengthEffectSettings()
+    assert settings.enabled is False
+    assert settings.lambda_ac_m == 250.0
+    assert settings.segment_length_m == 200.0
+    assert settings.n_eff == 1.0  # 200/250 = 0.8 -> clamped
+    assert LengthEffectSettings(lambda_ac_m=100.0).n_eff == 2.0
+    assert LengthEffectSettings(lambda_ac_m=40.0).n_eff == 5.0
+    with pytest.raises(ValidationError):
+        LengthEffectSettings(lambda_ac_m=0.0)
+    with pytest.raises(ValidationError):
+        LengthEffectSettings(segment_length_m=-1.0)
+
+
+def test_length_effect_none_is_dropped_from_metadata_and_hash_stable() -> None:
+    """A config without the block hashes as if the field did not exist.
+
+    Load-bearing compatibility (ADR-0037): pre-ADR-0037 result snapshots
+    reconstruct to ``length_effect=None``; ``to_metadata`` must drop the key
+    so their recomputed ``config_hash`` still matches what the persisted run
+    recorded (the Phase 2 replay refuses hash drift).
+    """
+    config = Config.model_validate(_valid_config_dict())
+    snapshot = config.to_metadata()
+    assert "length_effect" not in snapshot
+    # Round-trip through the snapshot (the Phase 2 replay path) is stable.
+    rebuilt = Config.model_validate(snapshot)
+    assert rebuilt.length_effect is None
+    assert rebuilt.config_hash() == config.config_hash()
+
+
+def test_length_effect_block_present_when_set() -> None:
+    """A set block survives the snapshot round trip and changes the hash."""
+    data = _valid_config_dict()
+    data["length_effect"] = {
+        "enabled": False,
+        "lambda_ac_m": 250.0,
+        "segment_length_m": 200.0,
+    }
+    config = Config.model_validate(data)
+    snapshot = config.to_metadata()
+    assert snapshot["length_effect"] == data["length_effect"]
+    rebuilt = Config.model_validate(snapshot)
+    assert rebuilt.config_hash() == config.config_hash()
+    without = Config.model_validate(_valid_config_dict())
+    assert config.config_hash() != without.config_hash()

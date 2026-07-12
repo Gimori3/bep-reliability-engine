@@ -161,6 +161,7 @@ from bep_reliability_engine.fragility import (
     FragilityResult,
     assemble_fragility,
     save_raw_failure_payload,
+    upscale_length_effect,
 )
 from bep_reliability_engine.hydraulics import (
     aquifer_response_diagnostic,
@@ -888,6 +889,64 @@ def _build_metadata(
     return json.loads(json.dumps(metadata))
 
 
+def _length_effect_block(config: Config, result: FragilityResult) -> dict[str, Any]:
+    """ADR-0037 segment-upscaling metadata block (derived, additive).
+
+    Applies :func:`~bep_reliability_engine.fragility.upscale_length_effect`
+    at ``n_eff = max(1, L_seg / lambda_ac)`` to the per-level raw curves and
+    to both Clopper-Pearson CI bounds of each branch (valid by monotonicity
+    of the weakest-link transform). The FragilityResult's persisted
+    cross-section curves are never modified; the segment curves live only in
+    ``metadata['length_effect']``.
+
+    Parameters
+    ----------
+    config : Config
+        The run configuration; ``config.length_effect`` must be set and
+        enabled (the caller gates on that).
+    result : FragilityResult
+        The assembled cross-section result whose raw curves are upscaled.
+
+    Returns
+    -------
+    dict
+        JSON-native block: lambda_ac, L_seg, n_eff, and per-branch segment
+        raw curves with transformed CI bounds.
+    """
+    settings = config.length_effect
+    assert settings is not None  # caller gates on config.length_effect.enabled
+    n_eff = settings.n_eff
+    block: dict[str, Any] = {
+        "enabled": True,
+        "adr": "ADR-0037",
+        "lambda_ac_m": float(settings.lambda_ac_m),
+        "segment_length_m": float(settings.segment_length_m),
+        "n_eff": float(n_eff),
+        "note": (
+            "Segment-level weakest-link curves (P_seg = 1 - (1 - P_cs)^n_eff); "
+            "the persisted cross-section curves are unchanged (ADR-0037)."
+        ),
+    }
+    raw_curves = {
+        "static": result.P_f_static_raw,
+        "transient": result.P_f_trans_raw,
+    }
+    for branch, p_raw in raw_curves.items():
+        lower, upper = result.binomial_ci[branch]
+        block[f"segment_p_f_{branch}_raw"] = np.asarray(
+            upscale_length_effect(p_raw, n_eff), dtype=float
+        ).tolist()
+        block[f"segment_binomial_ci_{branch}"] = {
+            "lower": np.asarray(
+                upscale_length_effect(lower, n_eff), dtype=float
+            ).tolist(),
+            "upper": np.asarray(
+                upscale_length_effect(upper, n_eff), dtype=float
+            ).tolist(),
+        }
+    return json.loads(json.dumps(block))
+
+
 def run_fragility_analysis(
     config: Config,
     *,
@@ -1105,6 +1164,12 @@ def run_fragility_analysis(
                 raw_path,
             )
         raise
+
+    # 7b. ADR-0037 config-gated segment upscaling: derived, additive, metadata
+    #     only. The persisted cross-section curves are untouched; absent or
+    #     enabled=False is bit-identical to pre-ADR-0037 behaviour.
+    if config.length_effect is not None and config.length_effect.enabled:
+        result.metadata["length_effect"] = _length_effect_block(config, result)
 
     # 8. Persist the full result (HDF5 + JSON sidecar) if requested; the raw
     #    recovery pair is then superseded and removed.
