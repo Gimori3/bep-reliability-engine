@@ -117,6 +117,13 @@ class NodeHazard:
         return (self.n_years + 1.0) / ranks, peaks
 
 
+def _datum_matches(cached: float | None, requested: float | None) -> bool:
+    """True when the cache was built with the requested exposure datum."""
+    if cached is None or requested is None:
+        return cached is None and requested is None
+    return abs(cached - requested) <= 1e-9
+
+
 def _above_datum_measures(
     h: NDArray[np.float64], dt_hours: float, datum_m: float | None
 ) -> tuple[float, int]:
@@ -167,7 +174,12 @@ def load_node_hazard(
         The per-event table plus the empirical exceedance accessors.
     """
     if cache_csv is not None and Path(cache_csv).exists():
-        return _read_cache(Path(cache_csv), river=river, kp=kp, scenario=scenario)
+        cached = _read_cache(Path(cache_csv), river=river, kp=kp, scenario=scenario)
+        if _datum_matches(cached.datum_m_msl, datum_m_msl):
+            return cached
+        # Stale cache parameters (different datum): recompute and rewrite.
+        # A wrong node raises inside _read_cache; a wrong datum is a
+        # legitimate re-parameterization, not a data error.
 
     workbook = resolve_band_workbook(data_root, river=river, kp=kp, scenario=scenario)
     coefficients = load_rating_coefficients(rating_curve_path(data_root, river))

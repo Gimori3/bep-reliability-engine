@@ -72,6 +72,7 @@ class FragilityCurve:
     branch: str
     source: str
     source_path: str
+    datum_m: float | None = None
 
     def evaluate(
         self, stage_m: NDArray[np.float64] | float
@@ -169,6 +170,11 @@ def load_bep_curve(
             p_raw = frag.P_f_static_post_raw
             fit = frag.P_f_static_post_fit
         lower, upper = frag.binomial_ci[branch]
+        datum = (
+            posterior.metadata.get("phase2", {})
+            .get("posterior_fragility", {})
+            .get("datum_m")
+        )
         return FragilityCurve(
             grid_m_msl=np.asarray(frag.conditioning_grid, dtype=np.float64),
             p_raw=np.asarray(p_raw, dtype=np.float64),
@@ -179,6 +185,7 @@ def load_bep_curve(
             branch=branch,
             source="phase2_posterior",
             source_path=str(path),
+            datum_m=None if datum is None else float(datum),
         )
 
     result = FragilityResult.load(path)
@@ -189,6 +196,7 @@ def load_bep_curve(
         p_raw = result.P_f_static_raw
         fit = result.P_f_static_fit
     lower, upper = result.binomial_ci[branch]
+    datum = result.metadata.get("fragility_fit", {}).get("datum_m")
     return FragilityCurve(
         grid_m_msl=np.asarray(result.conditioning_grid, dtype=np.float64),
         p_raw=np.asarray(p_raw, dtype=np.float64),
@@ -199,4 +207,5 @@ def load_bep_curve(
         branch=branch,
         source="phase1_prior",
         source_path=str(path),
+        datum_m=None if datum is None else float(datum),
     )

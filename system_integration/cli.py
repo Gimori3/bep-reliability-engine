@@ -212,6 +212,9 @@ def main(argv: list[str] | None = None) -> int:
                     river=river,
                     kp=kp,
                     scenario=scenario,
+                    # Section toe (the fragility fit datum) as the exposure
+                    # reference, so the RQ4 above-toe stratifiers are live.
+                    datum_m_msl=bep.datum_m,
                     cache_csv=out_dir / f"hazard_{river.lower()}_kp{kp:.1f}_"
                     f"{scenario.replace('+', 'plus')}.csv",
                 )

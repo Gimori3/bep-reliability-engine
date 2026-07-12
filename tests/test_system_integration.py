@@ -344,6 +344,18 @@ def test_hazard_cache_round_trip(tmp_path: Path) -> None:
         _read_cache(cache, river="Tokachi", kp=60.0, scenario="historical")
 
 
+def test_hazard_cache_datum_mismatch_is_stale_not_fatal() -> None:
+    """A cache built with a different exposure datum must be recomputed, not
+    served (wrong node still raises; wrong datum is re-parameterization)."""
+    from system_integration.hazard import _datum_matches
+
+    assert _datum_matches(None, None)
+    assert _datum_matches(38.5, 38.5)
+    assert not _datum_matches(None, 38.5)
+    assert not _datum_matches(38.5, None)
+    assert not _datum_matches(38.5, 39.0)
+
+
 # ============================================================================
 # Segment registry + section-table seam
 # ============================================================================
