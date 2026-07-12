@@ -1,14 +1,15 @@
 # Phase 2 Report: Bayesian Reliability Updating Against the 2016 Survival
 
-Status: written 2026-07-12, at the close of the one-shot Phase 2 build.
+Status: written 2026-07-12, at the close of the one-shot Phase 2 build;
+**production addendum added 2026-07-13 (section 11)** — the full N = 1e5
+campaign across all 8 strata has now run, every verification exact.
+Sections 1-10 are preserved as the build-time record; where the self-test
+numbers (N = 4000) and production numbers differ, **section 11 is
+authoritative**.
 Companions: ADR-0034 (Phase 1 surface extensions), ADR-0035 (observed-event
 ingestion), ADR-0036 (updating architecture), the package README
 (`bayesian_reliability_updating/README.md`), and the operational Phase 1
 contract (`docs/phase2_interface.md`).
-
-Everything below was produced and verified against genuine small-N Phase 1
-runs (the production sweep does not exist yet); section 9 lists exactly
-what remains once it does.
 
 ---
 
@@ -463,3 +464,97 @@ Recommendation: request items 1 and 2 now; run 2011 as a sequential
 second event when they arrive; do not delay the production Phase 2
 campaign for it. The 2016-only posterior is complete and defensible on
 its own.
+
+---
+
+## 11. PRODUCTION CAMPAIGN ADDENDUM (2026-07-13; authoritative where it differs from sections 1 to 10)
+
+The section 9 checklist has been executed in full: the 8 production
+sweeps exist (4 sections x matrix/bulk, N = 1e5, 225 s grid), the Phase 2
+update ran on all 8 with `--verify`, and both documented sensitivities
+ran on the 4 matrix members. **Every masked-vs-reevaluation verification
+was EXACT** (zero flag mismatches over 1e5 rows x 23 to 38 levels per
+file). Artifacts: `results/phase2/` (baseline),
+`results/phase2_anchor_rating/`, `results/phase2_no_initiation/`.
+
+### 11.1 Baseline (trace-anchored, no-breach), all 8 strata
+
+| Stratum | Transient rej. | Static rej. | Marginal transient | Static-only | Top C_e x k_aq decile rej. | Concentration |
+|---|---|---|---|---|---|---|
+| KP57.4 matrix | 0.07% | 6.26% | **0.000** | 6.19% | 0.58% | 8.9 |
+| KP58.8 matrix | 5.67% | 57.63% | **0.000** | 51.96% | 30.19% | 5.3 |
+| KP60.0 matrix | 3.36% | 73.31% | **0.000** | 69.95% | 25.97% | 7.7 |
+| KP62.0 matrix | 0.00% | 0.00% | **0.000** | 0.00% | 0.00% | n/a |
+| KP57.4 bulk | 0.00% | 0.00% | 0.000 | 0.00% | — | n/a |
+| KP58.8 bulk | 0.00% | 0.00% | 0.000 | 0.00% | — | n/a |
+| KP60.0 bulk | 0.02% | 1.84% | 0.000 | 1.82% | 0.22% | 9.6 |
+| KP62.0 bulk | 0.00% | 0.00% | 0.000 | 0.00% | — | n/a |
+
+Posterior marginal shifts at the informative sections: C_e mean -4.1%
+(KP58.8) / -3.7% (KP60.0), k_aq -4.2% / -3.0%, every other parameter
+under 1%, induced Spearman(k_aq, C_e) -0.052 / -0.047. C_e headline at
+KP58.8: prior mean 0.0550 -> posterior 0.0528 (ratio 0.959).
+
+**The section 9.7 question is answered: the marginal transient rejection
+is EXACTLY ZERO at N = 1e5 in every stratum.** The transient failure set
+is nested inside the static one under the real 2016 loading at
+production resolution; the self-test finding was not a small-N artifact.
+
+**Shape effect at production N** (prior transient curve at the observed
+peak vs the replay rejection): KP58.8 15.6% vs 5.67% (factor 2.75),
+KP60.0 13.1% vs 3.36% (factor 3.90), KP57.4 0.48% vs 0.07% (factor
+7.5, small-number regime). The WBI+ peak shortcut remains biased unsafe
+by a factor of roughly 3 to 4 where the update is informative.
+
+### 11.2 Where the information landed (and the tiering caveat)
+
+The bulk-d70 strata are essentially uninformative (the bulk
+interpretation is the resistant reading; nothing approaches failure under
+the 2016 loading), and the matrix updates land at **KP58.8 and KP60.0 —
+the drained sections — while KP62.0 (unreinforced, the thesis's
+governing live-BEP section) and KP57.4 receive (near-)vacuous updates.**
+KP62.0's transition sits ~4 m above any attainable stage (ADR-0031), so
+2016 could not reject anything there; that is a *finding about where the
+2016 evidence has power*, not a defect. The caveat to carry into the
+thesis text: the engine evaluates the **unremediated foundation**
+everywhere — `remediation_state` is a provenance label, drains are not
+modeled — so the thesis's statement that the drained sections' "exit head
+is set to zero and the prior BEP probability is already near zero"
+describes an intended presentation-layer tiering, not the computed
+posterior in these files. The engine posteriors at KP58.8/60.0 are the
+as-if-undrained constraint; the drain credit is a separate argument.
+
+### 11.3 Sensitivities (matrix members)
+
+**Anchor (`--anchor rating`, construction sensitivity):** KP57.4
+0.07% -> 0.00%, KP58.8 5.67% -> 10.81% (rating peak 40.99 m vs trace
+40.75 m), KP60.0 3.36% -> 0.34%, KP62.0 0.00% -> 0.01%. The
+h_2016 construction is a first-order term in the rejection rate
+(factor ~2 up at KP58.8, ~10 down at KP60.0, direction section-specific)
+— the trace-anchored baseline (ADR-0035) and this bracket must be
+reported together.
+
+**Criterion (`--criterion no_breach_no_initiation`, evidence-strength
+sensitivity):** rejects 66.4% at KP57.4 (below the 50% headroom floor,
+warned), 99.57% at KP58.8 and 99.30% at KP60.0 (posteriors collapsed to
+432 and 696 rows, auto-flagged statistically meaningless), and 30.46% at
+KP62.0 — the one usable-size strict posterior, and an interesting reading
+on its own: the uplift/heave gate latches for ~30% of the KP62.0 prior
+under the 2016 loading even though breach rejection there is exactly
+zero, i.e. the initiation margin and the progression margin separate
+cleanly at the governing section. As documented in ADR-0036 and
+section 5, the strict no-initiation reading of the reach-scale no-boil
+survey is far too strong for these gate priors; it stays a qualitative
+sensitivity and is not a deliverable posterior.
+
+### 11.4 Downstream artifacts produced with these posteriors
+
+* ADR-0037 segment-level fragility tables (primary lambda_ac = 250 m,
+  n_eff = 1; bracket 100/40 m): `results/segment_fragility_adr0037.json`.
+* Phase 3 first composition + hazard run (ADR-0038, BEP-only, posterior
+  transient curves): `results/system_integration/` — annualized BEP
+  P_f rises historical -> +4K by factors 5.5 (KP58.8) to 12.5
+  (KP57.4/62.0), entirely through the d4PDF stage-frequency (ADR-0023).
+
+Sections 6.1 to 6.4 (self-test) remain as the build-time record; the
+production numbers above supersede them wherever they differ.

@@ -281,6 +281,8 @@ Single-place summary of the finished module; detailed derivations are in the sec
 
 The two reproduction gates run at fixed 0.010 and 0.08; the stochastic 0.014-mean prior is what the real N = 10⁵ runs draw. (The FPH calibrated 0.014 of §4 is *not* used as an M7 gate — S2-2 was chosen over FPH, §5D.)
 
+> **Errata (2026-07-13):** the production-sampling row above is superseded — ADR-0026 (2026-07-07) replaced the ADR-0001 C_e prior with Pol's SIE 2024 field prior, Lognormal(mean 0.055, COV 0.782). The two fixed reproduction-gate values (0.010, 0.08) are unaffected. This note's §7 is otherwise a faithful 2026-06-14 record and is deliberately not rewritten.
+
 **B25-245 — qualitative gate (out of domain).** L = 0.352 m is below the Eq. (15) fitted range (0.9–90 m), so M7 under-predicts (0.36× the measured rate, non-breaching). A quantitative rate band is impossible without self-reference: the caption-error C_e = 0.014 would pass a factor-2 band while the correct 0.010 fails, so any passing band is drawn around our own output, not Pol's data (§4). The gate asserts the out-of-domain-robust behaviours instead — progressive-phase entry, monotone staircase, regressive-phase shape tracking (≤ 0.18·L) with no overshoot (≤ 0.15·L), the two-sided breach-threshold pin (no breach at C_e = 0.020, breach at 0.022; true ≈ 0.0215), and C_e-rate monotonicity (`test_b25_245_qualitative_shape_and_behavior`).
 
 **S2-2 — quantitative gate (in domain).** L = 3 m is a regression base case (D/L = 1/3), so this carries M7's *only* quantitative progressive-phase check (`test_s2_2_in_domain_shape_and_rate`):

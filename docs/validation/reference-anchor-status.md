@@ -124,8 +124,9 @@ head, Eq. (10)). The self-reference that blocked closure is removed by Pol's
 direct statement (this item's closure criterion #2). The engine is changed
 accordingly: **ADR-0027** supersedes ADR-0007, removing r_e from `H_erosion`
 (retained on the uplift/heave gate). Full suite green; transient results to be
-re-validated on the next sweep. See `OPEN-head-datum-re-convention.md` (now
-marked CLOSED) and ADR-0027. The historical OPEN write-up follows.
+re-validated on the next sweep. See `head-datum-re-convention-CLOSED.md`
+(renamed from `OPEN-*` 2026-07-13; closed 2026-07-07) and ADR-0027. The
+historical OPEN write-up follows.
 
 ### (historical) Why it was OPEN — self-reference was irremovable from the sources
 
