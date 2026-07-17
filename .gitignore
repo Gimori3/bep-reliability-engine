@@ -242,3 +242,8 @@ data/digitized/Gounokawa_River_Levee_Okamura/Fig13*.xlsx
 # Raw 2016 event agency drop (188 MB incl. hydraulic-model binaries); the
 # committed extract lives in data/processed/2016_event/ (see README there)
 data/digitized/2016_event_data/
+
+# Raw Uemura WP2 workproduct drop (~140 MB incl. a 97 MB workbook and PDFs);
+# the committed extracts live in data/processed/uemura_segments/ and
+# data/processed/uemura_surface_curves/ (ADR-0042/0043)
+data/digitized/uemura_fragility_curves/
