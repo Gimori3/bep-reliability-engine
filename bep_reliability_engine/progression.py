@@ -163,6 +163,8 @@ def equilibrium_head(
     h_c_m: ArrayLike,
     l_c_m: ArrayLike,
     seepage_length_m: ArrayLike,
+    *,
+    equilibrium_end_factor: float | None = None,
 ) -> NDArray[np.float64]:
     """Piecewise-linear equilibrium head H_eq(l) of Pol SIE 2024 Eq. (11).
 
@@ -189,6 +191,14 @@ def equilibrium_head(
         0 < l_c < L.
     seepage_length_m : array_like of float
         Seepage length L [m]. Geometry input.
+    equilibrium_end_factor : float, optional
+        Keyword-only override of the H_eq(L)/H_c end anchor for the spec §12
+        fm4 H_eq-conservatism isolation (ADR-0041, following the ADR-0017
+        opt-in pattern). ``None`` (default) resolves to the published
+        ``EQUILIBRIUM_END_FACTOR`` = 0.9 through the identical expression --
+        bit-identical to prior behavior. ``1.0`` flattens the descending
+        branch at H_c (the DgFlow-faithful ~1.0 bound of ADR-0009); the
+        rising branch is unaffected. Analysis-only; production keeps 0.9.
 
     Returns
     -------
@@ -208,6 +218,11 @@ def equilibrium_head(
     implementation must use ``numpy.where`` over the two segments rather
     than ``scipy.interpolate`` (spec §6, "where broadcasting breaks down").
     """
+    end_factor = (
+        EQUILIBRIUM_END_FACTOR
+        if equilibrium_end_factor is None
+        else float(equilibrium_end_factor)
+    )
     pipe_length = np.asarray(pipe_length_m, dtype=np.float64)
     h_c = np.asarray(h_c_m, dtype=np.float64)
     l_c = np.asarray(l_c_m, dtype=np.float64)
@@ -221,7 +236,7 @@ def equilibrium_head(
     # [l_c, L]. np.where (not scipy.interpolate) so per-realization breakpoints
     # broadcast (spec §6).
     rising = h_c * (l_clamped / l_c)
-    falling_slope = (EQUILIBRIUM_END_FACTOR - 1.0) * h_c / (length - l_c)
+    falling_slope = (end_factor - 1.0) * h_c / (length - l_c)
     falling = h_c + falling_slope * (l_clamped - l_c)
     return np.where(l_clamped < l_c, rising, falling)
 
@@ -311,6 +326,7 @@ def integrate_progression(
     *,
     l_ini_m: ArrayLike = 0.0,
     store_trajectory: bool = False,
+    equilibrium_end_factor: float | None = None,
 ) -> ProgressionResult:
     """Forward-Euler timestepper for the pipe length over one event.
 
@@ -397,6 +413,13 @@ def integrate_progression(
         Store the full l(t); default False to save memory (spec §12
         failure mode 6). Enable for the 2016 calibration run,
         visualization subsets, and reference tests.
+    equilibrium_end_factor : float, optional
+        Keyword-only H_eq(L)/H_c end-anchor override forwarded to the
+        (inlined) equilibrium curve for the spec §12 fm4 H_eq-conservatism
+        isolation (ADR-0041). ``None`` (default) resolves to the published
+        ``EQUILIBRIUM_END_FACTOR`` = 0.9 through the identical expression,
+        bit-identical to prior behavior. Analysis-only; never a production
+        setting.
 
     Returns
     -------
@@ -468,7 +491,12 @@ def integrate_progression(
     uplift_resistance = (gamma_bl_sub * d_bl) / GAMMA_W  # z_uplift resistance
     heave_resistance = gamma_bl_sub / GAMMA_W  # z_heave critical gradient
     rate_coefficient = POL_RATE_COEFFICIENT * c_e_arr  # 89*C_e of (j)
-    falling_slope = (EQUILIBRIUM_END_FACTOR - 1.0) * h_c / (length - l_c)
+    end_factor = (
+        EQUILIBRIUM_END_FACTOR
+        if equilibrium_end_factor is None
+        else float(equilibrium_end_factor)
+    )
+    falling_slope = (end_factor - 1.0) * h_c / (length - l_c)
 
     # Whole-step skip precondition: only the stateless instantaneous head
     # model allows skipping (a lagged model must advance its state every

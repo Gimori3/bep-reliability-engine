@@ -585,6 +585,7 @@ def evaluate_batch(
     gamma_p_sub_kn_m3: float | None = None,
     foreland_open: bool = False,
     progression_backend: str = "numpy",
+    equilibrium_end_factor: float | None = None,
 ) -> tuple[npt.NDArray[np.bool_], npt.NDArray[np.bool_]]:
     """Evaluate both limit states for all N realizations at one level (M8 batch).
 
@@ -656,6 +657,12 @@ integrate_progression_numba`) — numerically equivalent to < 1e-10 but NOT
         choice is recorded in run metadata. Requires the optional ``numba``
         dependency (``pip install -e .[accel]``). The static branch is
         backend-independent (no timestepper).
+    equilibrium_end_factor : float, optional
+        Keyword-only H_eq(L)/H_c end-anchor override forwarded to M7 for the
+        spec §12 fm4 H_eq-conservatism isolation (ADR-0041). ``None``
+        (default) keeps the published 0.9 anchor, bit-identical to prior
+        behavior. Refused on the numba backend (the JIT kernel hard-codes
+        the constant). Analysis-only; the static branch is unaffected.
 
     Returns
     -------
@@ -682,6 +689,7 @@ integrate_progression_numba`) — numerically equivalent to < 1e-10 but NOT
         gamma_p_sub_kn_m3=gamma_p_sub_kn_m3,
         foreland_open=foreland_open,
         progression_backend=progression_backend,
+        equilibrium_end_factor=equilibrium_end_factor,
     )
     return diagnostics.failure_static, diagnostics.failure_trans
 
@@ -700,6 +708,7 @@ def evaluate_batch_diagnostics(
     gamma_p_sub_kn_m3: float | None = None,
     foreland_open: bool = False,
     progression_backend: str = "numpy",
+    equilibrium_end_factor: float | None = None,
 ) -> BatchDiagnostics:
     """Evaluate all N realizations at one level, retaining diagnostics (ADR-0034).
 
@@ -736,6 +745,11 @@ def evaluate_batch_diagnostics(
         raise ValueError(
             f"progression_backend {progression_backend!r} must be 'numpy' or "
             "'numba' (ADR-0029)."
+        )
+    if equilibrium_end_factor is not None and progression_backend == "numba":
+        raise ValueError(
+            "equilibrium_end_factor override is numpy-backend only (ADR-0041): "
+            "the numba kernel hard-codes the published 0.9 anchor."
         )
     theta = np.asarray(theta_matrix, dtype=np.float64)
 
@@ -863,6 +877,7 @@ def evaluate_batch_diagnostics(
             seepage_length_m=seepage_length,
             l_ini_m=l_ini,
             store_trajectory=False,
+            equilibrium_end_factor=equilibrium_end_factor,
         )
     l_e_final = np.asarray(progression.l_final_m, dtype=np.float64)
     z_transient = seepage_length - l_e_final

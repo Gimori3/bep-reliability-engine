@@ -986,7 +986,16 @@ def test_public_interface_and_pinned_constants() -> None:
     )
 
     expected_signatures = {
-        "equilibrium_head": ("pipe_length_m", "h_c_m", "l_c_m", "seepage_length_m"),
+        # equilibrium_end_factor is the keyword-only ADR-0041 opt-in override
+        # (default None -> the pinned EQUILIBRIUM_END_FACTOR, bit-identical),
+        # added in the ADR-0017 additive style.
+        "equilibrium_head": (
+            "pipe_length_m",
+            "h_c_m",
+            "l_c_m",
+            "seepage_length_m",
+            "equilibrium_end_factor",
+        ),
         "progression_rate": (
             "h_erosion_m",
             "h_eq_m",
@@ -1008,6 +1017,7 @@ def test_public_interface_and_pinned_constants() -> None:
             "seepage_length_m",
             "l_ini_m",
             "store_trajectory",
+            "equilibrium_end_factor",
         ),
     }
     for name, expected_params in expected_signatures.items():
