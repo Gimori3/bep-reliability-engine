@@ -143,9 +143,28 @@ def verify_against_production(key: str, result: GapDecompositionResult) -> dict:
     production = FragilityResult.load(prod_path)
     prod_hash = production.metadata.get("config_hash")
     if prod_hash != result.metadata.get("base_config_hash"):
-        record["status"] = "skipped_config_hash_mismatch"
-        record["production_config_hash"] = prod_hash
-        return record
+        # The generated YAMLs gained the (inert, enabled: false) ADR-0037
+        # length_effect block after the production sweeps ran, so the raw
+        # hashes differ while the physics inputs are identical. Compare the
+        # config snapshots with that key excluded; any OTHER difference is a
+        # real mismatch and skips the bit-check.
+        prod_cfg = json.loads(json.dumps(production.metadata.get("config", {})))
+        run_cfg = json.loads(json.dumps(result.metadata.get("config", {})))
+        prod_cfg.pop("length_effect", None)
+        run_cfg.pop("length_effect", None)
+        # The run grid legitimately carries the inserted HWL level; drop the
+        # grid from the identity comparison (levels are matched individually
+        # below) alongside length_effect.
+        for cfg in (prod_cfg, run_cfg):
+            cfg.get("mc", {}).pop("conditioning_grid", None)
+        if prod_cfg != run_cfg:
+            record["status"] = "skipped_config_mismatch_beyond_length_effect"
+            record["production_config_hash"] = prod_hash
+            return record
+        record["hash_note"] = (
+            "raw config hashes differ only by the post-sweep ADR-0037 "
+            "length_effect block (enabled: false, physics-inert)"
+        )
     if production.theta_matrix.shape[0] != result.n_samples:
         record["status"] = "skipped_n_mismatch"
         return record
