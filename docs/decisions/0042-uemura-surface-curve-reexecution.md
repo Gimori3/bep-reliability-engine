@@ -109,9 +109,11 @@ received" with consistent hydraulic boundary conditions across mechanisms.
 4. **Scenario labeling: identical curves for `historical` and `+4K`.** The
    canonical-shape conditioning is scenario-invariant by construction (the
    same HPB shape drives both, exactly as in Phase 1 — ADR-0020/0023);
-   climate enters Phase 3 only through the hazard side. The contract CSV
-   carries both scenario labels explicitly (duplicated rows) so the
-   ADR-0038 loader semantics are unchanged. If the event-based companion
+   climate enters Phase 3 only through the hazard side. Both scenario
+   labels are carried explicitly with identical curve values so the
+   ADR-0038 loader semantics are unchanged (committed as one contract CSV
+   per scenario label to respect the repo's 500 KB hygiene guard; each
+   file validates independently and the campaign merges them). If the event-based companion
    shows a material scenario-shape effect, that is the revision trigger for
    scenario-specific curves.
 
