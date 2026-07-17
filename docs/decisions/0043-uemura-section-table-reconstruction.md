@@ -68,13 +68,20 @@ nodes. But the polyline geometry itself pins the KP spans:
    False, preserving the strict tiling check): segments outside every range
    in a touched reach keep `section_id=None` instead of raising. The
    Satsunai table legitimately covers only KP 3.2–7.0.
-3. **Section-level composition follows Uemura's own rule**: the section
-   conditional fragility is the max over member-segment system curves at
-   each stage (full dependence within a section), stamped
-   `section_rule='max_within_section'`. His between-section ordered
-   scenario correction (upstream-failure discounting) is *not* reproduced —
-   it serves his basin-total flood probability, not the thesis's per-section
-   RQ3/RQ4 questions; noted as out of scope.
+3. **Section-level composition follows Uemura's own rule, aligned by
+   discharge**: his Eq. 14 max is conditional on the discharge q, and the
+   member curves live on their own nodes' stage datums (the water surface
+   falls metres across a multi-kilometre section), so the max is taken by
+   inverting the representative node's Eq. 4.19 rating exactly
+   (`q = a(h+b)^2`), mapping q to each member's own local stage, and
+   evaluating the member curves there
+   (`composition.max_within_section_rated`; execution amendment — a naive
+   absolute-stage max was measured to overstate the KP56.4 section
+   probability by ~50x by evaluating downstream low-crest curves at
+   upstream stages). His between-section ordered scenario correction
+   (upstream-failure discounting) is *not* reproduced — it serves his
+   basin-total flood probability, not the thesis's per-section RQ3/RQ4
+   questions; noted as out of scope.
 4. **Naming**: section IDs keep his KP names (`KP56.4` … `KP7.0`). The
    thesis's "Tokachi Sections 1–5 / Satsunai 1–4" map to these in
    upstream-to-downstream order (Tokachi 1 = KP62.4 … 5 = KP56.4;

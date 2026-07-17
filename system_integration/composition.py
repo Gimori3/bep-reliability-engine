@@ -18,7 +18,13 @@ from dataclasses import dataclass
 import numpy as np
 from numpy.typing import NDArray
 
-__all__ = ["MechanismCurve", "SystemFragility", "compose", "max_within_section"]
+__all__ = [
+    "MechanismCurve",
+    "SystemFragility",
+    "compose",
+    "max_within_section",
+    "max_within_section_rated",
+]
 
 
 @dataclass(frozen=True)
@@ -172,3 +178,58 @@ def max_within_section(
     idx = np.argmax(stack, axis=0)
     kps = np.asarray([kp for kp, _ in members], dtype=np.float64)
     return grid, stack[idx, np.arange(grid.size)], kps[idx]
+
+
+def max_within_section_rated(
+    members: list[tuple[float, SystemFragility, tuple[float, float]]],
+    rep_rating: tuple[float, float],
+    stage_grid_m_msl: NDArray[np.float64],
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+    """Uemura's section max, aligned by discharge across local stage datums.
+
+    His Eq. 14 is conditional on the discharge q: ``P_section|q = max_i
+    P_i|q``. Member curves live on their own nodes' stage axes, and the
+    water surface falls metres across a multi-kilometre section, so a
+    pointwise maximum in *absolute* stage (:func:`max_within_section`)
+    mixes local datums — a downstream member's low-stage curve would be
+    evaluated at an upstream node's higher stages and grossly overstate
+    the section probability. This variant expresses the section curve on
+    the representative node's stage axis by routing through the shared
+    discharge: for each representative stage h, the Eq. 4.19 rating is
+    inverted exactly (``q = a_rep (h + b_rep)^2``), each member's own
+    local stage ``h_i = sqrt(q / a_i) - b_i`` is computed, and the member
+    curves are evaluated there before taking the maximum.
+
+    Parameters
+    ----------
+    members : list of (kp, SystemFragility, (a_kp, b_kp))
+        Member segments, their composed curves, and their own Eq. 4.19
+        rating coefficients.
+    rep_rating : tuple of (float, float)
+        The representative node's ``(a_kp, b_kp)``.
+    stage_grid_m_msl : numpy.ndarray
+        Representative-node stage grid to express the section curve on.
+
+    Returns
+    -------
+    tuple of (numpy.ndarray, numpy.ndarray)
+        ``(section p_sys on the grid, argmax member kp per stage)``.
+
+    Raises
+    ------
+    ValueError
+        On an empty member list.
+    """
+    if not members:
+        raise ValueError("max_within_section_rated() needs at least one member.")
+    grid = np.asarray(stage_grid_m_msl, dtype=np.float64)
+    a_rep, b_rep = rep_rating
+    discharge = a_rep * np.maximum(grid + b_rep, 0.0) ** 2
+
+    stack = np.empty((len(members), grid.size), dtype=np.float64)
+    for i, (_kp, frag, (a_i, b_i)) in enumerate(members):
+        local_stage = np.sqrt(discharge / a_i) - b_i
+        stack[i] = np.interp(local_stage, frag.stage_m_msl, frag.p_sys)
+    idx = np.argmax(stack, axis=0)
+    kps = np.asarray([kp for kp, _, _ in members], dtype=np.float64)
+    return stack[idx, np.arange(grid.size)], kps[idx]

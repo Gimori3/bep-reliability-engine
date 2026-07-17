@@ -15,6 +15,7 @@ from system_integration.composition import (
     MechanismCurve,
     compose,
     max_within_section,
+    max_within_section_rated,
 )
 from system_integration.hazard import load_node_hazard, load_reach_hazard
 from system_integration.segments import (
@@ -57,6 +58,53 @@ class TestMaxWithinSection:
     def test_empty_raises(self):
         with pytest.raises(ValueError, match="at least one member"):
             max_within_section([])
+
+
+class TestMaxWithinSectionRated:
+    """The discharge-aligned Uemura Eq. 14 rule (ADR-0043 decision 3)."""
+
+    def test_identical_ratings_reduce_to_plain_max(self):
+        rating = (100.0, -30.0)
+        a = _frag([31.0, 33.0], [0.0, 0.6])
+        b = _frag([31.0, 33.0], [0.2, 0.4])
+        grid = np.array([31.0, 32.0, 33.0])
+        p, argmax_kp = max_within_section_rated(
+            [(1.0, a, rating), (2.0, b, rating)], rating, grid
+        )
+        assert np.allclose(p, [0.2, 0.3, 0.6])
+        assert np.array_equal(argmax_kp, [2.0, 1.0, 1.0])
+
+    def test_datum_offset_is_respected(self):
+        """A member 2 m lower in datum contributes at ITS OWN local stage:
+        with identical curves-relative-to-datum, the rated max equals the
+        representative curve — never the naive absolute-stage max."""
+        rep_rating = (100.0, -30.0)  # h = sqrt(q/100) + 30
+        low_rating = (100.0, -28.0)  # identical shape, 2 m lower datum
+        rep = _frag([31.0, 33.0], [0.0, 0.5])
+        low = _frag([29.0, 31.0], [0.0, 0.5])  # same curve, own datum
+        grid = np.array([31.0, 32.0, 33.0])
+        p, _ = max_within_section_rated(
+            [(10.0, rep, rep_rating), (9.0, low, low_rating)], rep_rating, grid
+        )
+        # Same discharge -> same relative stage -> same P at both members.
+        assert np.allclose(p, [0.0, 0.25, 0.5])
+        # The naive absolute-stage max would wrongly read the low member's
+        # saturated tail at the representative stages.
+        _, p_naive, _ = max_within_section([(10.0, rep), (9.0, low)])
+        assert p_naive[-1] == 0.5  # naive: low member clamped at 0.5 at 33 m
+
+    def test_below_rating_datum_stage_maps_to_zero_discharge(self):
+        rating = (100.0, -30.0)
+        a = _frag([28.0, 33.0], [0.1, 0.9])
+        grid = np.array([29.0, 30.0])  # h + b <= 0 -> q = 0
+        p, _ = max_within_section_rated([(1.0, a, rating)], rating, grid)
+        # q=0 -> local stage = 30.0 -> interpolated on [28, 33]
+        expected = np.interp(30.0, [28.0, 33.0], [0.1, 0.9])
+        assert np.allclose(p, [expected, expected])
+
+    def test_empty_raises(self):
+        with pytest.raises(ValueError, match="at least one member"):
+            max_within_section_rated([], (100.0, -30.0), np.array([31.0]))
 
 
 class TestAllowGaps:
