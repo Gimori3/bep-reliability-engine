@@ -1,0 +1,50 @@
+{
+  "sections": {
+    "kp62_0": {
+      "production_verification": {
+        "production_file": "results/tokachi_kp62.0_historical_matrix.h5",
+        "hash_note": "raw config hashes differ only by the post-sweep ADR-0037 length_effect block (enabled: false, physics-inert)",
+        "status": "bit_identical",
+        "levels_checked": 38,
+        "theta_identical": true
+      },
+      "flip_totals": {
+        "c4a_not_c3a": 0,
+        "c4b_not_c0": 0,
+        "c4b_not_c3b": 0,
+        "c4c_not_c4b": 0,
+        "c4d_not_c4a": 0
+      },
+      "figures": [
+        "results\\stage6_6\\figures\\stage6_6_ladder_kp62_0.png",
+        "results\\stage6_6\\figures\\stage6_6_waterfall_kp62_0.png",
+        "results\\stage6_6\\figures\\stage6_6_fractions_kp62_0.png",
+        "results\\stage6_6\\figures\\stage6_6_c2c3_kp62_0.png",
+        "results\\stage6_6\\figures\\stage6_6_heq_kp62_0.png"
+      ]
+    },
+    "kp57_4": {
+      "production_verification": {
+        "production_file": "results/tokachi_kp57.4_historical_matrix.h5",
+        "hash_note": "raw config hashes differ only by the post-sweep ADR-0037 length_effect block (enabled: false, physics-inert)",
+        "status": "bit_identical",
+        "levels_checked": 23,
+        "theta_identical": true
+      },
+      "flip_totals": {
+        "c4a_not_c3a": 0,
+        "c4b_not_c0": 0,
+        "c4b_not_c3b": 0,
+        "c4c_not_c4b": 0,
+        "c4d_not_c4a": 0
+      },
+      "figures": [
+        "results\\stage6_6\\figures\\stage6_6_ladder_kp57_4.png",
+        "results\\stage6_6\\figures\\stage6_6_waterfall_kp57_4.png",
+        "results\\stage6_6\\figures\\stage6_6_fractions_kp57_4.png",
+        "results\\stage6_6\\figures\\stage6_6_c2c3_kp57_4.png",
+        "results\\stage6_6\\figures\\stage6_6_heq_kp57_4.png"
+      ]
+    }
+  }
+}

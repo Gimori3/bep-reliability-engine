@@ -1,0 +1,169 @@
+{
+  "levels_m": [
+    39.25,
+    39.5,
+    39.75
+  ],
+  "alpha_minus_half": {
+    "n_samples": 10000,
+    "dt_s": 225.0,
+    "alpha_exponent_transient": -0.5,
+    "durations_hours": [
+      24.0,
+      96.0,
+      384.0,
+      1536.0
+    ],
+    "levels_m": [
+      39.25,
+      39.5,
+      39.75
+    ],
+    "rows": [
+      {
+        "level_m": 39.25,
+        "hours": 24.0,
+        "analytic_failures": 188,
+        "ode_failures": 154,
+        "analytic_not_ode": 34,
+        "ode_not_analytic": 0
+      },
+      {
+        "level_m": 39.25,
+        "hours": 96.0,
+        "analytic_failures": 188,
+        "ode_failures": 187,
+        "analytic_not_ode": 1,
+        "ode_not_analytic": 0
+      },
+      {
+        "level_m": 39.25,
+        "hours": 384.0,
+        "analytic_failures": 188,
+        "ode_failures": 188,
+        "analytic_not_ode": 0,
+        "ode_not_analytic": 0
+      },
+      {
+        "level_m": 39.25,
+        "hours": 1536.0,
+        "analytic_failures": 188,
+        "ode_failures": 188,
+        "analytic_not_ode": 0,
+        "ode_not_analytic": 0
+      },
+      {
+        "level_m": 39.5,
+        "hours": 24.0,
+        "analytic_failures": 1927,
+        "ode_failures": 1583,
+        "analytic_not_ode": 344,
+        "ode_not_analytic": 0
+      },
+      {
+        "level_m": 39.5,
+        "hours": 96.0,
+        "analytic_failures": 1927,
+        "ode_failures": 1896,
+        "analytic_not_ode": 31,
+        "ode_not_analytic": 0
+      },
+      {
+        "level_m": 39.5,
+        "hours": 384.0,
+        "analytic_failures": 1927,
+        "ode_failures": 1927,
+        "analytic_not_ode": 0,
+        "ode_not_analytic": 0
+      },
+      {
+        "level_m": 39.5,
+        "hours": 1536.0,
+        "analytic_failures": 1927,
+        "ode_failures": 1927,
+        "analytic_not_ode": 0,
+        "ode_not_analytic": 0
+      },
+      {
+        "level_m": 39.75,
+        "hours": 24.0,
+        "analytic_failures": 4901,
+        "ode_failures": 4117,
+        "analytic_not_ode": 784,
+        "ode_not_analytic": 0
+      },
+      {
+        "level_m": 39.75,
+        "hours": 96.0,
+        "analytic_failures": 4901,
+        "ode_failures": 4835,
+        "analytic_not_ode": 66,
+        "ode_not_analytic": 0
+      },
+      {
+        "level_m": 39.75,
+        "hours": 384.0,
+        "analytic_failures": 4901,
+        "ode_failures": 4901,
+        "analytic_not_ode": 0,
+        "ode_not_analytic": 0
+      },
+      {
+        "level_m": 39.75,
+        "hours": 1536.0,
+        "analytic_failures": 4901,
+        "ode_failures": 4901,
+        "analytic_not_ode": 0,
+        "ode_not_analytic": 0
+      }
+    ]
+  },
+  "alpha_baseline": {
+    "n_samples": 10000,
+    "dt_s": 225.0,
+    "alpha_exponent_transient": null,
+    "durations_hours": [
+      24.0,
+      96.0,
+      384.0,
+      1536.0
+    ],
+    "levels_m": [
+      39.75
+    ],
+    "rows": [
+      {
+        "level_m": 39.75,
+        "hours": 24.0,
+        "analytic_failures": 214,
+        "ode_failures": 194,
+        "analytic_not_ode": 20,
+        "ode_not_analytic": 0
+      },
+      {
+        "level_m": 39.75,
+        "hours": 96.0,
+        "analytic_failures": 214,
+        "ode_failures": 214,
+        "analytic_not_ode": 0,
+        "ode_not_analytic": 0
+      },
+      {
+        "level_m": 39.75,
+        "hours": 384.0,
+        "analytic_failures": 214,
+        "ode_failures": 214,
+        "analytic_not_ode": 0,
+        "ode_not_analytic": 0
+      },
+      {
+        "level_m": 39.75,
+        "hours": 1536.0,
+        "analytic_failures": 214,
+        "ode_failures": 214,
+        "analytic_not_ode": 0,
+        "ode_not_analytic": 0
+      }
+    ]
+  }
+}
