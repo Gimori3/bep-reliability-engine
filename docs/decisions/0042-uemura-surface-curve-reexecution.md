@@ -169,6 +169,24 @@ received" with consistent hydraulic boundary conditions across mechanisms.
    confirmation item in the Phase 3 blocker manifest. Every RQ3/RQ4
    product states which conversion its scour input used.
 
+10. **Scour erosion-onset depth floor: 0.05 m** (regularization, found in
+    execution). The USACE friction factor `f_c = 2 (2.5 ln(30 d / k_b))^-2`
+    **diverges** at floodplain depth d = k_b/30 ≈ 1.6 mm (log-law
+    breakdown), so an hour of cm-scale sheet flow can contribute an
+    unbounded shear impulse; his script computes the same expression and
+    inherits the singularity (rarely sampled in event-based runs; on the
+    conditioning ladder it produced a +0.35 single-level artifact at
+    Satsunai KP 3.2, caught by the contract loader's monotonicity check).
+    The re-execution therefore zeroes the erosion contribution of any time
+    step with floodplain depth < 0.05 m: physically, centimetre sheet flow
+    does not drive lateral levee erosion (tau(0.05 m) ≈ 1 Pa versus
+    tau_c ≈ 50 Pa — the floor changes nothing outside the singular
+    sliver); numerically, tau(d) is on its monotone branch for
+    d > 7.2 mm, so the common-random-numbers curves are exactly
+    non-decreasing again. Pinned by a dedicated test; the only deliberate
+    behavioural deviation from his script, and it is a strict
+    regularization of an unphysical divergence.
+
 ---
 
 ## Alternatives Considered
