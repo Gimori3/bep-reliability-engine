@@ -18,7 +18,7 @@ from dataclasses import dataclass
 import numpy as np
 from numpy.typing import NDArray
 
-__all__ = ["MechanismCurve", "SystemFragility", "compose"]
+__all__ = ["MechanismCurve", "SystemFragility", "compose", "max_within_section"]
 
 
 @dataclass(frozen=True)
@@ -134,3 +134,41 @@ def compose(
         per_mechanism=per_mechanism,
         sources=sources,
     )
+
+
+def max_within_section(
+    members: list[tuple[float, SystemFragility]],
+) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
+    """Uemura's within-section rule: P_section(h) = max over member segments.
+
+    Full dependence within a consequence section (Uemura et al. 2024
+    Eq. 14; ADR-0043 decision 3): at every stage the section fails iff its
+    weakest member fails, so the section conditional fragility is the
+    pointwise maximum of the member system curves on their union grid
+    (members interpolated linearly, clamped at their grid ends).
+
+    Parameters
+    ----------
+    members : list of (kp, SystemFragility)
+        The section's member segments and their composed curves.
+
+    Returns
+    -------
+    tuple of (numpy.ndarray, numpy.ndarray, numpy.ndarray)
+        ``(stage grid, section p_sys, argmax member kp per stage)`` — the
+        third array names the governing segment at each stage.
+
+    Raises
+    ------
+    ValueError
+        On an empty member list.
+    """
+    if not members:
+        raise ValueError("max_within_section() needs at least one member.")
+    grid = np.unique(np.concatenate([frag.stage_m_msl for _, frag in members]))
+    stack = np.vstack(
+        [np.interp(grid, frag.stage_m_msl, frag.p_sys) for _, frag in members]
+    )
+    idx = np.argmax(stack, axis=0)
+    kps = np.asarray([kp for kp, _ in members], dtype=np.float64)
+    return grid, stack[idx, np.arange(grid.size)], kps[idx]

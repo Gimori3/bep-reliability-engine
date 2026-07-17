@@ -34,7 +34,7 @@ from bep_reliability_engine.hydrographs import (
     resolve_band_workbook,
 )
 
-__all__ = ["EventSummary", "NodeHazard", "load_node_hazard"]
+__all__ = ["EventSummary", "NodeHazard", "load_node_hazard", "load_reach_hazard"]
 
 
 @dataclass(frozen=True)
@@ -219,6 +219,137 @@ def load_node_hazard(
     if cache_csv is not None:
         _write_cache(Path(cache_csv), hazard)
     return hazard
+
+
+def _events_from_records(
+    records, datum_m_msl: float | None
+) -> tuple[EventSummary, ...]:
+    """Per-event characteristic table from M3 records (shared summarizer)."""
+    events: list[EventSummary] = []
+    for event_id, record in records.items():
+        h = np.asarray(record.h, dtype=np.float64)
+        dt_hours = float(record.native_dt) / 3600.0
+        timescales = flood_timescales(h, float(record.native_dt))
+        hours_above, n_excursions = _above_datum_measures(h, dt_hours, datum_m_msl)
+        events.append(
+            EventSummary(
+                event_id=event_id,
+                peak_stage_m_msl=float(record.peak),
+                hours_above_datum=hours_above,
+                t_rise_h=float(timescales["rising_limb_s"]) / 3600.0,
+                plateau_h=float(timescales["plateau_s"]) / 3600.0,
+                n_peaks_above_datum=n_excursions,
+            )
+        )
+    return tuple(events)
+
+
+def load_reach_hazard(
+    data_root: str | Path,
+    *,
+    nodes: list[tuple[str, float, float | None]],
+    scenario: str,
+    cache_dir: str | Path | None = None,
+) -> dict[tuple[str, float], NodeHazard]:
+    """Hazard for many nodes, streaming each band workbook exactly once.
+
+    The single-node :func:`load_node_hazard` re-reads its workbook per call
+    (minutes each); a full-reach campaign over ~114 nodes would re-stream
+    the same three workbooks dozens of times. This loader groups the nodes
+    by resolved workbook, reads each workbook once, and emits one
+    :class:`NodeHazard` per node — identical to what ``load_node_hazard``
+    would have produced (same M3 chain, same cache format).
+
+    Parameters
+    ----------
+    data_root : str or pathlib.Path
+        Raw data root (M3 conventions).
+    nodes : list of (river, kp, datum_m_msl)
+        Study nodes with their per-node exposure datum (or None).
+    scenario : str
+        ``'historical'`` or ``'+4K'``.
+    cache_dir : str or pathlib.Path, optional
+        Directory of per-node cache CSVs (``load_node_hazard`` format).
+        Cached nodes are served from disk; only workbooks needed by
+        uncached nodes are streamed.
+
+    Returns
+    -------
+    dict of (river, kp) -> NodeHazard
+    """
+    from bep_reliability_engine.hydrographs import (
+        build_hydrograph_record,
+        parse_member_header,
+        read_discharge_ensemble,
+        resolve_discharge_source_kp,
+    )
+
+    out: dict[tuple[str, float], NodeHazard] = {}
+    pending: dict[Path, list[tuple[str, float, float | None]]] = {}
+    scenario_token = scenario.replace("+", "plus")
+
+    def _cache_path(river: str, kp: float) -> Path | None:
+        if cache_dir is None:
+            return None
+        return Path(cache_dir) / (
+            f"hazard_{river.lower()}_kp{kp:.1f}_{scenario_token}.csv"
+        )
+
+    for river, kp, datum in nodes:
+        cache = _cache_path(river, kp)
+        if cache is not None and cache.exists():
+            cached = _read_cache(cache, river=river, kp=kp, scenario=scenario)
+            if _datum_matches(cached.datum_m_msl, datum):
+                out[(river, round(kp, 3))] = cached
+                continue
+        workbook = resolve_band_workbook(
+            data_root, river=river, kp=kp, scenario=scenario
+        )
+        pending.setdefault(workbook, []).append((river, kp, datum))
+
+    for workbook, node_list in pending.items():
+        time_hours, members = read_discharge_ensemble(workbook)  # ONE read
+        member_info = {h: parse_member_header(h) for h in members}
+        rating_cache: dict[str, dict[float, tuple[float, float]]] = {}
+        for river, kp, datum in node_list:
+            if river not in rating_cache:
+                rating_cache[river] = load_rating_coefficients(
+                    rating_curve_path(data_root, river)
+                )
+            a_kp, b_kp = rating_cache[river][kp]
+            _, proxied = resolve_discharge_source_kp(kp)
+            records = {}
+            for header, discharge in members.items():
+                provenance = {**member_info[header], "kp": kp}
+                if proxied is not None:
+                    provenance["discharge_proxied_from"] = proxied
+                records[header] = build_hydrograph_record(
+                    time_hours,
+                    discharge,
+                    a_kp=a_kp,
+                    b_kp=b_kp,
+                    scenario=str(member_info[header]["scenario"]),
+                    event_id=header,
+                    provenance=provenance,
+                )
+            events = _events_from_records(records, datum)
+            hazard = NodeHazard(
+                river=river,
+                kp=float(kp),
+                scenario=scenario,
+                n_years=len(events),
+                events=events,
+                datum_m_msl=datum,
+                provenance={
+                    "band_workbook": workbook.name,
+                    "rating_csv": rating_curve_path(data_root, river).name,
+                },
+            )
+            cache = _cache_path(river, kp)
+            if cache is not None:
+                _write_cache(cache, hazard)
+            out[(river, round(kp, 3))] = hazard
+    return out
 
 
 _CACHE_FIELDS = (

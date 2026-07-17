@@ -169,8 +169,14 @@ def build_registry(
     segments: list[Segment] = []
     for (river, bank), (kp_lo, kp_hi) in STUDY_REACHES.items():
         coefficients = load_rating_coefficients(rating_curve_path(data_root, river))
+        # The rating files carry a handful of off-grid gauge nodes (e.g.
+        # Tokachi KP 56.73, the Obihiro gauge) alongside the 0.2 km survey
+        # grid; the evaluation segments are the grid nodes only.
         kps = sorted(
-            kp for kp in coefficients if kp_lo - _KP_TOL <= kp <= kp_hi + _KP_TOL
+            kp
+            for kp in coefficients
+            if kp_lo - _KP_TOL <= kp <= kp_hi + _KP_TOL
+            and abs(kp / 0.2 - round(kp / 0.2)) <= 1e-6
         )
         if not kps:
             raise ValueError(
@@ -203,13 +209,19 @@ def build_registry(
     )
 
 
-def load_section_table(path: str | Path, registry: SegmentRegistry) -> SegmentRegistry:
-    """Apply the owner-supplied Uemura section-aggregation table (seam).
+def load_section_table(
+    path: str | Path,
+    registry: SegmentRegistry,
+    *,
+    allow_gaps: bool = False,
+) -> SegmentRegistry:
+    """Apply the Uemura section-aggregation table (seam).
 
     Expected CSV columns (exact names): ``river``, ``bank``, ``kp_from``,
     ``kp_to``, ``section_id`` — inclusive KP ranges per Uemura Section
-    (Tokachi 1-5, Satsunai 1-4). Class-D input (ADR-0038 decision 2): this
-    loader is the arrival contract.
+    (Tokachi 1-5, Satsunai 1-4). This loader is the arrival contract
+    (ADR-0038 decision 2); the committed reconstruction from Uemura's own
+    SECTIONS.shp geometry is ADR-0043.
 
     Parameters
     ----------
@@ -217,6 +229,12 @@ def load_section_table(path: str | Path, registry: SegmentRegistry) -> SegmentRe
         The section table CSV.
     registry : SegmentRegistry
         The registry to annotate.
+    allow_gaps : bool
+        When False (default) every segment of a touched river/bank must be
+        covered by some range (the strict anti-typo tiling check). When True
+        (ADR-0043: Uemura's scheme legitimately covers only Satsunai KP
+        3.2–7.0), uncovered segments keep ``section_id=None`` — an honest,
+        visible gap.
 
     Returns
     -------
@@ -226,8 +244,9 @@ def load_section_table(path: str | Path, registry: SegmentRegistry) -> SegmentRe
     Raises
     ------
     ValueError
-        On unknown rivers/banks, malformed or overlapping ranges, or
-        segments left uncovered inside a river/bank that the table touches.
+        On unknown rivers/banks, malformed or overlapping ranges, or (with
+        ``allow_gaps=False``) segments left uncovered inside a touched
+        river/bank.
     """
     path = Path(path)
     with open(path, encoding="utf-8") as handle:
@@ -277,11 +296,12 @@ def load_section_table(path: str | Path, registry: SegmentRegistry) -> SegmentRe
                 section_id = sid
                 break
         else:
-            if (segment.river, segment.bank) in touched:
+            if (segment.river, segment.bank) in touched and not allow_gaps:
                 raise ValueError(
                     f"{path.name}: segment {segment.river} KP {segment.kp:g} "
                     "is not covered by any section range — the table must "
-                    "tile every reach it touches."
+                    "tile every reach it touches (pass allow_gaps=True for "
+                    "a deliberately partial scheme, ADR-0043)."
                 )
         annotated.append(
             Segment(
