@@ -330,6 +330,7 @@ def evaluate_realization(
     relative_density: float | None = None,
     gamma_p_sub_kn_m3: float | None = None,
     foreland_open: bool = False,
+    model_factor_mp: float | None = None,
 ) -> EvaluationResult:
     """Evaluate both limit states for one realization (M8, spec §2-§4).
 
@@ -409,6 +410,18 @@ float, optional
         no-riverside-blanket form). The measured ``geometry`` is never
         mutated. On-demand only (the KP 62.0 foreland-confinement
         sensitivity); production configs stay blanketed.
+    model_factor_mp : float, optional
+        Keyword-only ADR-0045 Sellmeijer model factor m_p for this
+        realization. ``None`` (default) applies no factor — bit-identical to
+        pre-ADR-0045 behaviour. When set, the **single-source** critical head
+        is multiplied by m_p in both places it appears — the static
+        comparator H_c and the transient H_eq anchor H_c_transient — so one
+        physical draw of Sellmeijer model-form error moves the critical head
+        consistently everywhere within the realization (the reported ``H_c``
+        and ``H_c_transient`` diagnostics carry the factored values actually
+        used). l_c is geometric (Pol Eq. (13)) and is not scaled. Companion
+        sensitivity runs only; the caller draws m_p per realization via
+        ``sampling.sample_model_factor``.
 
     Returns
     -------
@@ -490,6 +503,13 @@ float, optional
                 **{**sell_kwargs, "alpha_exponent": alpha_exponent_transient},
             ).H_c
         )
+
+    # ADR-0045: one per-realization Sellmeijer model factor scales the
+    # single-source critical head in BOTH its uses (static comparator and
+    # transient H_eq anchor) — never one branch alone. l_c stays geometric.
+    if model_factor_mp is not None:
+        h_c_m = h_c_m * float(model_factor_mp)
+        h_c_transient_m = h_c_transient_m * float(model_factor_mp)
 
     lambda_in_m = float(leakage_length_in(k_aq_mps, d_aq_m, d_bl_m, k_bl_mps))
     lambda_out_eff_m = float(
@@ -586,6 +606,7 @@ def evaluate_batch(
     foreland_open: bool = False,
     progression_backend: str = "numpy",
     equilibrium_end_factor: float | None = None,
+    model_factor_samples: npt.NDArray[float64] | None = None,
 ) -> tuple[npt.NDArray[np.bool_], npt.NDArray[np.bool_]]:
     """Evaluate both limit states for all N realizations at one level (M8 batch).
 
@@ -663,6 +684,15 @@ integrate_progression_numba`) — numerically equivalent to < 1e-10 but NOT
         (default) keeps the published 0.9 anchor, bit-identical to prior
         behavior. Refused on the numba backend (the JIT kernel hard-codes
         the constant). Analysis-only; the static branch is unaffected.
+    model_factor_samples : numpy.ndarray, shape (N,), optional
+        Keyword-only per-realization Sellmeijer model factor m_p (ADR-0045),
+        drawn via :func:`~bep_reliability_engine.sampling.sample_model_factor`
+        and pairing with theta row j row-for-row. ``None`` (default) applies
+        no factor — bit-identical to pre-ADR-0045 behaviour. When provided,
+        the single-source H_c is multiplied by m_p,j in both its uses (static
+        comparator and transient H_eq anchor) before the branches evaluate;
+        the reported diagnostics carry the factored values. Works on both
+        backends (the factor is applied upstream of the M7 kernel).
 
     Returns
     -------
@@ -690,6 +720,7 @@ integrate_progression_numba`) — numerically equivalent to < 1e-10 but NOT
         foreland_open=foreland_open,
         progression_backend=progression_backend,
         equilibrium_end_factor=equilibrium_end_factor,
+        model_factor_samples=model_factor_samples,
     )
     return diagnostics.failure_static, diagnostics.failure_trans
 
@@ -709,6 +740,7 @@ def evaluate_batch_diagnostics(
     foreland_open: bool = False,
     progression_backend: str = "numpy",
     equilibrium_end_factor: float | None = None,
+    model_factor_samples: npt.NDArray[float64] | None = None,
 ) -> BatchDiagnostics:
     """Evaluate all N realizations at one level, retaining diagnostics (ADR-0034).
 
@@ -803,6 +835,22 @@ def evaluate_batch_diagnostics(
             ).H_c,
             dtype=np.float64,
         )
+
+    # ADR-0045: one per-realization Sellmeijer model factor m_p,j scales the
+    # single-source critical head in BOTH its uses (static comparator and
+    # transient H_eq anchor) — never one branch alone. Applied upstream of the
+    # branches (and of the M7 kernel, so both backends see it identically);
+    # l_c stays geometric and unscaled.
+    if model_factor_samples is not None:
+        model_factor = np.asarray(model_factor_samples, dtype=np.float64)
+        if model_factor.shape != (theta.shape[0],):
+            raise ValueError(
+                f"model_factor_samples has shape {model_factor.shape} for "
+                f"{theta.shape[0]} theta rows; the ADR-0045 m_p draw must "
+                "pair with theta row-for-row."
+            )
+        h_c = h_c * model_factor
+        h_c_transient = h_c_transient * model_factor
 
     lambda_in = leakage_length_in(k_aq_mps, d_aq_m, d_bl_m, k_bl_mps)
     lambda_out_eff = leakage_length_out(

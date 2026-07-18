@@ -145,6 +145,7 @@ __all__ = [
     "ThetaSample",
     "sample_theta",
     "sample_seepage_length",
+    "sample_model_factor",
 ]
 
 # Canonical theta-vector column order (spec §2, the M2 data-flow contract).
@@ -588,4 +589,72 @@ def sample_seepage_length(
     z = norm.ppf(design)
     sigma_ln = np.sqrt(np.log(1.0 + cov**2))
     mu_ln = np.log(mean_m) - 0.5 * sigma_ln**2
+    return np.exp(mu_ln + sigma_ln * z)
+
+
+def sample_model_factor(
+    mean: float,
+    cov: float,
+    *,
+    seed: int,
+    n_samples: int = 100_000,
+) -> NDArray[np.float64]:
+    """Draw the ``(N,)`` stochastic Sellmeijer model factor m_p (ADR-0045).
+
+    The optional critical-head model factor m_p ~ Lognormal(mean, cov) of Pol
+    SIE 2024 Table 2 (mean 1.0, CoV 0.12 — Sellmeijer's ~12% regression
+    scatter), drawn **independently of the theta vector and of the L draw**
+    through its own standalone 1-D Latin Hypercube, exactly the
+    :func:`sample_seepage_length` pattern: the 7-D theta LHS and its seed are
+    untouched, so enabling m_p never shifts the existing draws. The caller
+    (``run.py``) derives ``seed`` from the run seed via ``SeedSequence`` with
+    a dedicated salt so the draw is reproducible and regenerable (the Phase 2
+    replay regenerates it through
+    ``run.model_factor_samples_for_config``, never persists it).
+
+    m_p multiplies the single-source H_c in M8, so within each realization
+    the static comparator and the transient H_eq anchor carry the *same*
+    model-form-error belief (ADR-0045); it is not an eighth theta column.
+
+    Parameters
+    ----------
+    mean : float
+        Mean of the lognormal model factor [-]. Must be > 0; 1.0 is the
+        unbiased Pol SIE 2024 Table 2 value.
+    cov : float
+        Coefficient of variation (std / mean) [-], a fraction. Must be > 0
+        (a deterministic factor is not this function's job).
+    seed : int
+        RNG seed for the 1-D LHS. Deterministic: the same seed yields the
+        bit-identical draw.
+    n_samples : int, optional
+        Number of realizations N. Default ``100_000`` (spec §13); must match
+        the theta-matrix row count so m_p,j pairs with theta_j row-for-row.
+
+    Returns
+    -------
+    numpy.ndarray, shape (N,)
+        Stratified lognormal m_p draws [-]; empirical mean and CoV recover
+        ``mean`` and ``cov`` via the standard moment matching
+        (``sigma_ln**2 = ln(1+cov**2)``, ``mu_ln = ln(mean) - sigma_ln**2/2``).
+
+    Raises
+    ------
+    ValueError
+        If ``mean <= 0``, ``cov <= 0`` or ``n_samples < 1``.
+    """
+    if not mean > 0.0:
+        raise ValueError(f"mean must be > 0, got {mean!r}.")
+    if not cov > 0.0:
+        raise ValueError(
+            f"cov must be > 0 for a stochastic model factor, got {cov!r}; "
+            "leave the ADR-0045 block disabled for the deterministic baseline."
+        )
+    if n_samples < 1:
+        raise ValueError(f"n_samples must be a positive integer, got {n_samples}.")
+
+    design = LatinHypercube(d=1, seed=seed).random(n_samples)[:, 0]
+    z = norm.ppf(design)
+    sigma_ln = np.sqrt(np.log(1.0 + cov**2))
+    mu_ln = np.log(mean) - 0.5 * sigma_ln**2
     return np.exp(mu_ln + sigma_ln * z)

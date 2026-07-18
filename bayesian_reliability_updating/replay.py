@@ -44,7 +44,10 @@ from bep_reliability_engine.hydrographs import (
     resample_record,
     validate_datum_consistency,
 )
-from bep_reliability_engine.run import seepage_length_samples_for_config
+from bep_reliability_engine.run import (
+    model_factor_samples_for_config,
+    seepage_length_samples_for_config,
+)
 from bep_reliability_engine.sampling import sample_theta
 
 logger = logging.getLogger(__name__)
@@ -88,6 +91,13 @@ class Phase1Run:
         The loaded HDF5 path.
     h5_sha256, sidecar_sha256 : str
         Provenance hashes of the HDF5 file and its JSON sidecar.
+    model_factor_samples : numpy.ndarray or None
+        The regenerated per-realization ADR-0045 Sellmeijer model factor
+        m_p, pairing with theta row j exactly as in the sweep, or None for
+        baseline runs (the block absent or disabled). Regenerated through
+        the same public seam as L
+        (:func:`bep_reliability_engine.run.model_factor_samples_for_config`)
+        so an m_p-enabled Phase 1 run replays under identical assumptions.
     """
 
     result: FragilityResult
@@ -98,6 +108,7 @@ class Phase1Run:
     source_path: Path
     h5_sha256: str
     sidecar_sha256: str
+    model_factor_samples: NDArray[np.float64] | None = None
 
     @property
     def theta(self) -> NDArray[np.float64]:
@@ -227,6 +238,17 @@ def load_phase1_run(path: str | Path, *, verify_theta: bool = True) -> Phase1Run
             f"{result.theta_matrix.shape[0]} theta rows."
         )
 
+    # ADR-0045: regenerate the m_p draw exactly like L. None on baseline runs
+    # (the block absent or disabled), so nothing changes for existing files.
+    model_factor = model_factor_samples_for_config(config)
+    if model_factor is not None and (
+        model_factor.shape[0] != result.theta_matrix.shape[0]
+    ):
+        raise ValueError(
+            f"{path.name}: regenerated m_p draw has {model_factor.shape[0]} "
+            f"rows for {result.theta_matrix.shape[0]} theta rows."
+        )
+
     sidecar = path.with_suffix(".json")
     return Phase1Run(
         result=result,
@@ -237,6 +259,7 @@ def load_phase1_run(path: str | Path, *, verify_theta: bool = True) -> Phase1Run
         source_path=path,
         h5_sha256=_sha256(path),
         sidecar_sha256=_sha256(sidecar),
+        model_factor_samples=model_factor,
     )
 
 
@@ -308,6 +331,7 @@ def replay_event(
         "foreland_treatment": config.foreland_treatment,
         "progression_backend": backend,
         "seepage_length_stochastic": run.seepage_length_samples is not None,
+        "model_factor_stochastic": run.model_factor_samples is not None,
         "event_id": replay_rec.event_id,
         "peak_m_msl": float(replay_rec.peak),
     }
@@ -335,6 +359,7 @@ def replay_event(
         relative_density=config.relative_density_insitu,
         foreland_open=config.foreland_treatment == "open_entry",
         progression_backend=backend,
+        model_factor_samples=run.model_factor_samples,
     )
     return EventReplay(
         record=replay_rec,
@@ -390,6 +415,11 @@ def breach_times_for_rows(
             theta_repose_rad=config.theta_repose_rad,
             relative_density=config.relative_density_insitu,
             foreland_open=config.foreland_treatment == "open_entry",
+            model_factor_mp=(
+                None
+                if run.model_factor_samples is None
+                else float(run.model_factor_samples[j])
+            ),
         )
         trajectory = result.l_trajectory
         if trajectory is None:

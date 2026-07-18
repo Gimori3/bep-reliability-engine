@@ -585,6 +585,47 @@ class LengthEffectSettings(_StrictModel):
         return max(1.0, self.segment_length_m / self.lambda_ac_m)
 
 
+class SellmeijerModelFactorSettings(_StrictModel):
+    """ADR-0045 Sellmeijer model factor m_p — config-gated, OFF by default.
+
+    Carries the stochastic critical-head model factor m_p ~ Lognormal(mean,
+    cov) of Pol SIE 2024 Table 2 (~12%; also HKV's WBI-practice ``m_p``).
+    When ``enabled``, ``run.py`` draws one per-realization m_p vector
+    (independent 1-D LHS, seed derived from ``mc.seed`` via ``SeedSequence``
+    — the ``sample_seepage_length`` pattern, so the 7-D theta draw and the L
+    draw are untouched) and M8 multiplies the **single-source** H_c by it, so
+    the static comparator and the transient H_eq anchor move consistently
+    within each realization (a single physical belief about model-form error
+    per row; ADR-0045). When absent or ``enabled=False`` behaviour is
+    bit-identical to pre-ADR-0045 runs: no draw occurs and H_c is untouched.
+
+    Attributes
+    ----------
+    enabled : bool
+        Draw and apply the m_p factor; default ``False`` (companion
+        sensitivity runs only — never a production-sweep member).
+    mean : float
+        Mean of the lognormal model factor [-], > 0. Default 1.0 (unbiased;
+        Pol SIE 2024 Table 2).
+    cov : float
+        Coefficient of variation of m_p [-], > 0. Default 0.12 (Pol SIE 2024
+        Table 2 / Sellmeijer's ~12% regression scatter).
+    """
+
+    enabled: bool = Field(
+        default=False, description="Apply the ADR-0045 m_p factor; default off."
+    )
+    mean: float = Field(
+        default=1.0, gt=0.0, description="Lognormal mean of m_p [-] (ADR-0045)."
+    )
+    cov: float = Field(
+        default=0.12,
+        gt=0.0,
+        le=MAX_COV,
+        description="CoV of m_p [-]; 0.12 per Pol SIE 2024 Table 2.",
+    )
+
+
 class HydrographSource(_StrictModel):
     """Where the d4PDF hydrograph data lives + the canonical shape events.
 
@@ -818,6 +859,19 @@ class Config(_StrictModel):
         ),
     )
 
+    sellmeijer_model_factor: SellmeijerModelFactorSettings | None = Field(
+        default=None,
+        description=(
+            "ADR-0045 stochastic Sellmeijer model factor m_p on the "
+            "single-source H_c (static comparator AND transient H_eq anchor). "
+            "None (pre-ADR-0045 configs) and enabled=False are both "
+            "bit-identical to prior behaviour; the None case is dropped from "
+            "to_metadata() so config_hash of pre-ADR-0045 snapshots is "
+            "preserved. Companion sensitivity runs only — production configs "
+            "never carry it enabled."
+        ),
+    )
+
     # Run identity / provenance (spec §8 metadata attrs; no engine consumer).
     cross_section_id: str = Field(description="Cross-section identifier (provenance).")
     segment_id: str = Field(description="200 m segment identifier (provenance).")
@@ -897,15 +951,18 @@ class Config(_StrictModel):
             ``theta_repose_rad`` is *not* included; consumers convert from
             ``theta_repose_deg`` as needed.
 
-            ``length_effect`` is dropped when None (ADR-0037): pre-ADR-0037
-            snapshots reconstruct to ``length_effect=None``, and dropping the
-            key keeps their :meth:`config_hash` byte-identical to what their
-            persisted runs recorded — the Phase 2 replay refuses hash drift,
-            so this compatibility is load-bearing, not cosmetic.
+            ``length_effect`` is dropped when None (ADR-0037), and
+            ``sellmeijer_model_factor`` is dropped when None (ADR-0045):
+            pre-ADR snapshots reconstruct to the None defaults, and dropping
+            the keys keeps their :meth:`config_hash` byte-identical to what
+            their persisted runs recorded — the Phase 2 replay refuses hash
+            drift, so this compatibility is load-bearing, not cosmetic.
         """
         snapshot = self.model_dump(mode="json")
         if snapshot.get("length_effect") is None:
             snapshot.pop("length_effect", None)
+        if snapshot.get("sellmeijer_model_factor") is None:
+            snapshot.pop("sellmeijer_model_factor", None)
         return snapshot
 
     def config_hash(self) -> str:

@@ -466,6 +466,12 @@ def test_public_interface() -> None:
     assert foreland.kind is inspect.Parameter.KEYWORD_ONLY
     assert foreland.default is False
 
+    # ADR-0045: the Sellmeijer model factor m_p is keyword-only and None by
+    # default (no factor — baseline), so an un-flagged call is unchanged.
+    model_factor = signature.parameters["model_factor_mp"]
+    assert model_factor.kind is inspect.Parameter.KEYWORD_ONLY
+    assert model_factor.default is None
+
 
 # ---------------------------------------------------------------------------
 # (7) Cross-row shared-sample properties on distinct live inputs

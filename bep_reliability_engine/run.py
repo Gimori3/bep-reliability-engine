@@ -180,6 +180,7 @@ from bep_reliability_engine.hydrographs import (
 )
 from bep_reliability_engine.sampling import (
     ThetaSample,
+    sample_model_factor,
     sample_seepage_length,
     sample_theta,
 )
@@ -188,6 +189,7 @@ logger = logging.getLogger(__name__)
 
 __all__ = [
     "conditioning_hydrographs_for_config",
+    "model_factor_samples_for_config",
     "run_fragility_analysis",
     "seepage_length_samples_for_config",
 ]
@@ -224,6 +226,12 @@ _L_INI_M: float = 0.0
 # parallel == serial guarantee.
 _SEEPAGE_LENGTH_SEED_SALT: int = 0x5EE_1E9
 
+# Salt for the ADR-0045 Sellmeijer model-factor seed: same SeedSequence recipe
+# as the L draw but with its own salt, so m_p is reproducible AND independent of
+# both the 7-D theta LHS and the L draw. Distinct from _SEEPAGE_LENGTH_SEED_SALT
+# by construction; enabling m_p never shifts the existing draws.
+_MODEL_FACTOR_SEED_SALT: int = 0x40DE1FAC
+
 
 @dataclass(frozen=True)
 class _EvalSettings:
@@ -257,6 +265,11 @@ class _EvalSettings:
         (reference, bit-identical to the scalar loop) or 'numba'
         (JIT-parallel, < 1e-10 equivalence, recorded in metadata via the
         config snapshot).
+    model_factor_samples : numpy.ndarray or None
+        Per-realization ADR-0045 Sellmeijer model factor m_p [-], or None
+        (baseline: no factor, bit-identical to pre-ADR-0045 behaviour).
+        Drawn once in the main process from ``config.sellmeijer_model_factor``
+        when that block is present and enabled.
     """
 
     l_ini_m: float
@@ -267,6 +280,7 @@ class _EvalSettings:
     alpha_exponent_transient: float | None
     foreland_open: bool
     progression_backend: str
+    model_factor_samples: NDArray[np.float64] | None = None
 
 
 # ============================================================================
@@ -454,6 +468,7 @@ def _evaluate_level(
         relative_density=settings.relative_density,
         foreland_open=settings.foreland_open,
         progression_backend=settings.progression_backend,
+        model_factor_samples=settings.model_factor_samples,
     )
     return level_index, col_static, col_trans
 
@@ -522,6 +537,61 @@ def seepage_length_samples_for_config(config: Config) -> NDArray[np.float64] | N
         The identical L vector the run used, or None for deterministic L.
     """
     return _sample_seepage_length_or_none(config)
+
+
+def _sample_model_factor_or_none(config: Config) -> NDArray[np.float64] | None:
+    """Draw the ADR-0045 Sellmeijer model factor m_p, or None when disabled.
+
+    Returns None when ``config.sellmeijer_model_factor`` is absent or carries
+    ``enabled=False`` (the baseline: no draw occurs at all, so behaviour and
+    RNG consumption are bit-identical to pre-ADR-0045 runs). Otherwise draws
+    the ``(N,)`` lognormal m_p with a seed derived from ``config.mc.seed`` via
+    ``SeedSequence`` under its own salt — reproducible, and independent of
+    both the theta LHS and the stochastic-L draw. Front-loaded in the main
+    process, like the theta and L draws, so the parallel sweep stays
+    bit-reproducible.
+    """
+    settings = config.sellmeijer_model_factor
+    if settings is None or not settings.enabled:
+        return None
+    mp_seed = int(
+        np.random.SeedSequence(
+            [config.mc.seed, _MODEL_FACTOR_SEED_SALT]
+        ).generate_state(1)[0]
+    )
+    return sample_model_factor(
+        settings.mean,
+        settings.cov,
+        seed=mp_seed,
+        n_samples=config.mc.n_samples,
+    )
+
+
+def model_factor_samples_for_config(config: Config) -> NDArray[np.float64] | None:
+    """Regenerate the run's ADR-0045 m_p draw from its config.
+
+    Public re-entry point mirroring :func:`seepage_length_samples_for_config`:
+    the m_p vector a :func:`run_fragility_analysis` run paired with theta row
+    j is fully determined by ``config.mc.seed`` (via the dedicated
+    ``SeedSequence`` salt), the ``sellmeijer_model_factor`` block and
+    ``config.mc.n_samples``, and is deliberately **not** persisted in the
+    FragilityResult — downstream consumers (the Phase 2 survival replay,
+    which must re-run M8 under identical assumptions) regenerate it through
+    this function. Returns None when the factor is absent or disabled,
+    exactly like the run itself.
+
+    Parameters
+    ----------
+    config : Config
+        The run configuration; for a persisted run, reconstruct it from the
+        metadata snapshot via ``Config.model_validate(metadata['config'])``.
+
+    Returns
+    -------
+    numpy.ndarray of shape (N,) or None
+        The identical m_p vector the run used, or None for the baseline.
+    """
+    return _sample_model_factor_or_none(config)
 
 
 def conditioning_hydrographs_for_config(config: Config) -> list[HydrographRecord]:
@@ -886,6 +956,16 @@ def _build_metadata(
             ),
         },
     }
+    # ADR-0045 m_p provenance: stamped ONLY when the config carries the block,
+    # so baseline metadata stays byte-identical to pre-ADR-0045 runs (the key
+    # is simply absent, like the config snapshot's own dropped-None field).
+    if config.sellmeijer_model_factor is not None:
+        mp = config.sellmeijer_model_factor
+        metadata["sellmeijer_model_factor"] = {
+            "stochastic": bool(mp.enabled),
+            "mean": float(mp.mean),
+            "cov": float(mp.cov),
+        }
     return json.loads(json.dumps(metadata))
 
 
@@ -1035,6 +1115,9 @@ def run_fragility_analysis(
     theta_matrix = theta_sample.theta_matrix
     n_samples = theta_sample.n_samples
     seepage_length_samples = _sample_seepage_length_or_none(config)
+    # ADR-0045 m_p (companion runs only): None on the baseline — no draw at
+    # all, so RNG consumption and results stay bit-identical to pre-ADR-0045.
+    model_factor_samples = _sample_model_factor_or_none(config)
 
     # 2b. ADR-0006 (amended) leakage-geometry record: the descriptive geometry
     #     behind r_e over the sampled prior, computed once for the whole run
@@ -1062,6 +1145,7 @@ def run_fragility_analysis(
         alpha_exponent_transient=config.alpha_exponent_transient,
         foreland_open=config.foreland_treatment == "open_entry",
         progression_backend=config.timestepper.progression_backend,
+        model_factor_samples=model_factor_samples,
     )
     grid = np.asarray(config.mc.conditioning_grid, dtype=np.float64)
     n_levels = int(grid.size)

@@ -102,7 +102,13 @@ validation set, so Pol would use it. Which value truly belongs at field scale
 - **Thesis defensibility (Sub-question on model uncertainty).** The Discussion
   must state Pol's position: laminar-vs-turbulent uncertainty is (nominally)
   in Sellmeijer's model factor, not in C_e; C_e is stochastic because it is
-  genuinely uncertain. It should also record the **two calibration targets**
+  genuinely uncertain. **[ADR-0045, 2026-07-18: the "nominally" is now
+  concrete — the engine carries m_p ~ Ln(1.0, CoV 0.12) as an opt-in factor
+  on the single-source H_c (default off; the production baseline and its
+  deliverables exclude it, and the companion run quantifies what it adds:
+  ≈2.2× on the static shoulder P_f at KP58.8). The Discussion should cite
+  the companion numbers rather than implying the factor is inside the
+  baseline curves.]** It should also record the **two calibration targets**
   (detailed time-dependent development → 0.016 vs mean post-critical rate →
   0.055) and that the **factor 3–4 between them is unexplained even by Pol** —
   a genuine open point. Because this engine integrates dl/dt over time (the
