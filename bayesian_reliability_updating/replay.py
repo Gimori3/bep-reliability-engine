@@ -98,6 +98,15 @@ class Phase1Run:
         the same public seam as L
         (:func:`bep_reliability_engine.run.model_factor_samples_for_config`)
         so an m_p-enabled Phase 1 run replays under identical assumptions.
+    z_toe_delta_m : float
+        ADR-0046 epistemic datum scenario: the offset [m] applied to
+        ``geometry['z_toe']`` for this load (0.0 = baseline, geometry
+        identical to the config snapshot). Nonzero only for the surveyed
+        ±0.3 m exit-datum sensitivity; the config snapshot and its hash
+        check are untouched (the shift is applied downstream and never
+        persisted as a config). It shifts the **evidence replay** datum
+        only — the retained Phase 1 failure matrices, and hence the
+        posterior-fragility fit datum, remain the baseline toe.
     """
 
     result: FragilityResult
@@ -109,6 +118,7 @@ class Phase1Run:
     h5_sha256: str
     sidecar_sha256: str
     model_factor_samples: NDArray[np.float64] | None = None
+    z_toe_delta_m: float = 0.0
 
     @property
     def theta(self) -> NDArray[np.float64]:
@@ -159,7 +169,12 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def load_phase1_run(path: str | Path, *, verify_theta: bool = True) -> Phase1Run:
+def load_phase1_run(
+    path: str | Path,
+    *,
+    verify_theta: bool = True,
+    z_toe_delta_m: float = 0.0,
+) -> Phase1Run:
     """Load a Phase 1 FragilityResult and reconstruct its evaluation context.
 
     Parameters
@@ -171,6 +186,13 @@ def load_phase1_run(path: str | Path, *, verify_theta: bool = True) -> Phase1Run
         and require bit identity with the retained theta matrix (an
         integrity check that the snapshot really regenerates the run;
         default True, costs well under a second at N = 1e5).
+    z_toe_delta_m : float, optional
+        ADR-0046 epistemic datum scenario: offset [m] added to
+        ``geometry['z_toe']`` after loading. Default 0.0 — baseline,
+        bit-identical to pre-ADR-0046 behaviour. Nonzero values run the
+        surveyed exit-datum sensitivity (ADR-0021 ±0.3 m): the replayed
+        evidence heads all shift by −delta while the config snapshot, its
+        hash check and the retained Phase 1 matrices stay untouched.
 
     Returns
     -------
@@ -211,6 +233,16 @@ def load_phase1_run(path: str | Path, *, verify_theta: bool = True) -> Phase1Run
         raise ValueError(
             f"{path.name}: geometry snapshot is missing keys "
             f"{sorted(required - geometry.keys())}."
+        )
+    if z_toe_delta_m != 0.0:
+        # ADR-0046: the epistemic datum scenario shifts only this load's
+        # evaluation geometry; the config snapshot is never mutated.
+        geometry["z_toe"] = float(geometry["z_toe"]) + float(z_toe_delta_m)
+        logger.info(
+            "ADR-0046 z_toe scenario: exit datum shifted by %+.2f m to "
+            "%.2f m MSL for this replay (config snapshot untouched).",
+            float(z_toe_delta_m),
+            geometry["z_toe"],
         )
 
     theta_verified = False
@@ -260,6 +292,7 @@ def load_phase1_run(path: str | Path, *, verify_theta: bool = True) -> Phase1Run
         h5_sha256=_sha256(path),
         sidecar_sha256=_sha256(sidecar),
         model_factor_samples=model_factor,
+        z_toe_delta_m=float(z_toe_delta_m),
     )
 
 

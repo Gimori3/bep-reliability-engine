@@ -107,6 +107,16 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Replace existing PosteriorResult pairs.",
     )
+    parser.add_argument(
+        "--ztoe-delta",
+        type=float,
+        default=0.0,
+        metavar="METERS",
+        help="ADR-0046 epistemic exit-datum scenario: shift the replay's "
+        "z_toe by this offset [m] (surveyed uncertainty +/-0.3). Default "
+        "0.0 (baseline). Scenario outputs are name-suffixed and can never "
+        "overwrite the baseline posterior.",
+    )
     return parser
 
 
@@ -139,6 +149,7 @@ def main(argv: list[str] | None = None) -> int:
         n_bootstrap=args.n_bootstrap,
         progression_backend=args.backend,
         overwrite=args.overwrite,
+        z_toe_delta_m=args.ztoe_delta,
     )
 
     failures = 0

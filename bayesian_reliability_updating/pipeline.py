@@ -84,6 +84,13 @@ class Phase2Settings(BaseModel):
         config's own backend).
     overwrite : bool
         Allow replacing an existing PosteriorResult pair.
+    z_toe_delta_m : float
+        ADR-0046 epistemic exit-datum scenario: offset [m] applied to the
+        replay's ``z_toe`` (the surveyed ±0.3 m sensitivity). Default 0.0
+        (baseline, bit-identical). Nonzero deltas suffix the output stem
+        (``_ztoe_plus0.30m`` / ``_ztoe_minus0.30m``) so a scenario run can
+        never masquerade as the baseline posterior, and are stamped into
+        ``metadata['phase2']['z_toe_scenario']``.
     """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
@@ -100,10 +107,16 @@ class Phase2Settings(BaseModel):
     confidence: float = Field(default=0.95, gt=0.0, lt=1.0)
     progression_backend: Literal["numpy", "numba"] | None = None
     overwrite: bool = False
+    z_toe_delta_m: float = 0.0
 
 
 def _output_paths(phase1_path: Path, settings: Phase2Settings) -> dict[str, Path]:
     stem = phase1_path.stem
+    if settings.z_toe_delta_m != 0.0:
+        # ADR-0046: scenario outputs are name-segregated from the baseline
+        # posterior ('+' is spelled out, matching the '+4K' -> 'plus' rule).
+        sign = "plus" if settings.z_toe_delta_m > 0.0 else "minus"
+        stem = f"{stem}_ztoe_{sign}{abs(settings.z_toe_delta_m):.2f}m"
     out_dir = Path(settings.output_dir)
     return {
         "h5": out_dir / f"{stem}_posterior.h5",
@@ -156,7 +169,9 @@ def _figures(
 
     stem = paths["stem"].name
     fig_dir = paths["figures"]
-    z_toe = float(run.config.geometry.z_toe)
+    # The replay datum (equals the config toe except under the ADR-0046
+    # scenario, where figures must draw the shifted toe actually used).
+    z_toe = float(run.geometry["z_toe"])
     written: list[str] = []
 
     written.append(
@@ -279,7 +294,7 @@ def run_survival_update(
         _guard_no_overwrite(paths, settings.overwrite)
 
     start = time.perf_counter()
-    run = load_phase1_run(phase1_path)
+    run = load_phase1_run(phase1_path, z_toe_delta_m=settings.z_toe_delta_m)
     if event_records is None:
         event_records = [_default_event_record(run, settings)]
 
@@ -374,6 +389,14 @@ def run_survival_update(
             "posterior_fragility": posterior_fragility.settings,
             "verification": verification,
             "trace_context": trace_context,
+            # ADR-0046 epistemic exit-datum scenario (0.0 = baseline): the
+            # replay datum actually used, so a scenario posterior is
+            # self-describing beyond its filename suffix.
+            "z_toe_scenario": {
+                "delta_m": float(settings.z_toe_delta_m),
+                "z_toe_config_m_msl": float(run.config.geometry.z_toe),
+                "z_toe_replay_m_msl": float(run.geometry["z_toe"]),
+            },
             "runtime_seconds": time.perf_counter() - start,
         },
         "analysis": {

@@ -607,3 +607,62 @@ event drops in as one `ObservedEventSource` with zero framework changes
 if its stage workbook ever surfaces. Section 10's three-item request
 list stays valid as the reopening condition; nothing else in this report
 changes.
+
+## 13. EXIT-DATUM EPISTEMIC SENSITIVITY (2026-07-18; ADR-0046, HKV-audit item 3)
+
+The ADR-0021 surveyed landside-toe elevations carry ±0.3 m of survey
+uncertainty, and every head in both phases references `h − z_toe`. Per
+ADR-0046 this is a **systematic per-section epistemic scenario** (HKV's
+i.i.d.-column `h_exit` treatment examined and rejected — a datum error is
+common to all realizations at a section). The baseline z_toe stays the
+surveyed deterministic value everywhere; the scenario band below is a
+companion deliverable (`scripts/ztoe_sensitivity_study.py` →
+`docs/decisions/adr0046-ztoe-companion.json`; artifacts under gitignored
+`results/sensitivity/adr0046_ztoe/`, baselines untouched).
+
+**Phase 1 curve shift.** Full companion sweeps at z_toe ± 0.3 m (config
+otherwise identical, theta/L/hydrographs unchanged) confirm the first-order
+reading: the fragility curves translate horizontally by the datum offset,
+with max residual against the pure translation of ≤ 0.008 absolute P_f
+(static) and ≤ 0.018 (transient) at both informative sections — the small
+transient residual is the expected hydrograph-shape anchoring asymmetry
+(the canonical shape pins at base-flow stage, not at the toe).
+
+**Phase 2 posterior movement** (full N = 1e5, 2016 event, `no_breach`):
+
+| Stratum | Quantity | z_toe −0.3 m | baseline | z_toe +0.3 m |
+|---|---|---|---|---|
+| KP58.8 matrix | transient rejection | 12.99% | 5.67% | 1.68% |
+| KP58.8 matrix | static rejection | 74.66% | 57.63% | 36.41% |
+| KP58.8 matrix | posterior C_e mean shift | −7.96% | −4.07% | −1.48% |
+| KP58.8 matrix | posterior k_aq mean shift | −7.77% | −4.15% | −1.58% |
+| KP60.0 matrix | transient rejection | 8.99% | 3.36% | 0.81% |
+| KP60.0 matrix | static rejection | 87.25% | 73.31% | 51.41% |
+| KP60.0 matrix | posterior C_e mean shift | −8.18% | −3.71% | −1.18% |
+| KP60.0 matrix | posterior k_aq mean shift | −6.32% | −3.00% | −0.97% |
+
+Reading:
+
+1. **The informativeness of the 2016 survival evidence is
+   datum-sensitive by roughly ×2 per 0.3 m**: the transient rejection
+   spans ×0.30–×2.29 of baseline at KP58.8 (×0.24–×2.68 at KP60.0)
+   across the surveyed band, and the posterior C_e/k_aq tightening scales
+   almost proportionally. Quote the posterior with this band, not as a
+   point estimate.
+2. **The marginal transient rejection is exactly 0 in every scenario**
+   (both sections, both signs, full N): the transient-rejected set stays
+   nested inside the static-rejected set under ±0.3 m — the §11 nesting
+   headline (and with it the WBI+-shortcut over-rejection argument) is
+   robust to the exit-datum uncertainty.
+3. **Replay-only ≡ end-to-end for the acceptance outcome.** The scenario
+   was run in both ADR-0046 forms — the `z_toe_delta_m` replay-only knob
+   on the baseline files and the fully consistent Phase 2 on the shifted
+   Phase 1 companions — and the acceptance masks coincide exactly (all
+   rejection and posterior-θ numbers identical). This is structural, not
+   coincidence: the Accept-Reject outcome depends only on (θ, L, observed
+   record, replay geometry), which the two forms share; they differ only
+   in which prior fragility matrices the posterior masks (baseline-datum
+   vs shifted-datum curves). The fully consistent form is therefore the
+   one to use when quoting posterior *fragility curves* under the
+   scenario; for posterior *θ* statistics the cheap replay-only knob is
+   exact.
