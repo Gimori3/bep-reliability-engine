@@ -243,6 +243,12 @@ data/digitized/Gounokawa_River_Levee_Okamura/Fig13*.xlsx
 # committed extract lives in data/processed/2016_event/ (see README there)
 data/digitized/2016_event_data/
 
+# Raw 2011/2006 event drops (ADR-0044: gauge stage dirs empty in both, so
+# neither event is a survival constraint). Only the 2011 folder's root files
+# (README + the committed trace extract flood_trace_2011.csv) are tracked.
+data/processed/2006_event/
+data/processed/2011_event/*/
+
 # Raw Uemura WP2 workproduct drop (~140 MB incl. a 97 MB workbook and PDFs);
 # the committed extracts live in data/processed/uemura_segments/ and
 # data/processed/uemura_surface_curves/ (ADR-0042/0043)

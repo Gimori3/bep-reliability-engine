@@ -427,6 +427,12 @@ the stage record).
 
 ## 10. THE 2011 FLAG: a second sequential survival constraint
 
+> **Resolved 2026-07-18: closed. See section 12 and ADR-0044** (the drops
+> arrived without stage records; the sustained-peak bound proved the
+> obtainable information immaterial; the posterior conditions on 2016
+> alone). This section stays as the build-time assessment and as the
+> reopening condition.
+
 **Assessment: moderately valuable, worth requesting, not blocking.**
 
 The architecture is sequential-ready today (section 5, decision 5): a
@@ -558,3 +564,46 @@ sensitivity and is not a deliverable posterior.
 
 Sections 6.1 to 6.4 (self-test) remain as the build-time record; the
 production numbers above supersede them wherever they differ.
+
+---
+
+## 12. EVENT-SET CLOSURE (2026-07-18; resolves section 10)
+
+The section 10 flag is resolved: **the Phase 2 posterior conditions on
+the 2016 event alone**, by project-owner decision of 2026-07-18, grounded
+in ADR-0044. The 2011 and 2006 agency drops arrived
+(`data/processed/2011_event/`, `data/processed/2006_event/`) but their
+gauge stage/discharge directories are empty in both, the missing
+workbooks are not easily obtainable, and the assessment below shows the
+obtainable information is immaterial.
+
+**What arrived and what it shows.** The 2011 drop carries the complete
+H23.9 post-flood trace survey (committed extract:
+`data/processed/2011_event/flood_trace_2011.csv`). The surveyed
+right-bank 2011 peaks sit BELOW the landside toe at KP 57.4 (-0.97 m) and
+KP 62.0 (-1.17 m), and 0.73 m / 1.40 m above it at KP 58.8 / KP 60.0,
+i.e. 1.4 to 2.0 m below the 2016 peaks everywhere. The 2006 drop carries
+hourly rainfall only: no stage record, no trace survey, nothing a
+constraint can be built from.
+
+**The sustained-peak bound** (`scripts/assess_2011_2006_closure.py`,
+evidence `docs/decisions/adr0044-event-closure-bound.json`): holding the
+surveyed 2011 peak for 64 days (the ADR-0040 convention at which the ODE
+provably reaches its analytic sustained-peak limit) and replaying through
+M8 at production N = 1e5 bounds the rejection of ANY faithful 2011 time
+series from above. Result: **exactly zero at seven of eight strata**,
+including KP 58.8 (the basin's governing segment), and 0.908 percent at
+KP 60.0 matrix, of which 0.316 percent of the prior lies beyond the 2016
+rejection. That 0.316 percent is the most any conceivable 2011
+hydrograph could add, under a hold incomparably more erosive than any
+real flood (compare the section 6.3 shape factor of 3 to 4 for a mere
+compound-versus-real shape difference at fixed peak); the true marginal
+would be a small fraction of it.
+
+**Consequences applied.** The thesis methodology paragraph that promised
+the 2011 sequential step now records the assessment and the bound; the
+sequential machinery remains built, tested and documented, so either
+event drops in as one `ObservedEventSource` with zero framework changes
+if its stage workbook ever surfaces. Section 10's three-item request
+list stays valid as the reopening condition; nothing else in this report
+changes.
