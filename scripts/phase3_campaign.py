@@ -244,6 +244,15 @@ def main() -> None:
                     "n_years": annual.n_years,
                     "p_annual_system": annual.p_f_annual_system,
                     "bep_clamped_above_grid": clamped,
+                    # HKV-audit item 2: system-curve coverage flags — True
+                    # marks an annualized number that is a genuine lower
+                    # bound (peaks above a non-saturated grid top).
+                    "system_lower_bound_clamp": annual.coverage["__system__"][
+                        "lower_bound_clamp"
+                    ],
+                    "system_frac_peaks_above_grid": annual.coverage["__system__"][
+                        "frac_peaks_above_grid"
+                    ],
                 }
                 for mech in ("bep", "overflow", "fluvial_scour"):
                     row[f"p_annual_{mech}"] = annual.p_f_annual_per_mechanism.get(

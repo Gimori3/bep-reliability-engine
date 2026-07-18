@@ -16,12 +16,32 @@ Stratified variants for the RQ4 attribution group the events by a boolean
 predicate over :class:`~system_integration.hazard.EventSummary` (duration
 classes, compound-event flags) and report the conditional mean within each
 stratum, so peak-matched comparisons are one predicate away.
+
+Hazard-coverage diagnostics (HKV-audit item 2, 2026-07-18)
+----------------------------------------------------------
+The curve interpolators clamp at the grid ends, so ensemble peaks outside a
+mechanism's stage grid are silently evaluated at the end values. Mirroring
+the four truncation guards of the HKV Fragility Curve Creator
+(``class_probpiping.py`` lines 446-468), :func:`annualize` now records, per
+mechanism and for the composed system curve, the fraction of ensemble peaks
+above/below the grid together with the clamp end-values, and **warns** when
+
+* peaks land above a grid whose top P_f is below
+  :data:`P_TOP_SATURATION_THRESHOLD` — the clamp is then a genuine **lower
+  bound** on the annual probability (the documented KP62.0 BEP situation),
+  not saturation; or
+* peaks land below a grid whose bottom P_f is above
+  :data:`P_BOTTOM_NEGLIGIBLE_THRESHOLD` — the curve has not decayed to ~0 at
+  its lowest level, so the below-grid mass is unresolved.
+
+Diagnostics only: the annualized numbers themselves are untouched.
 """
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import numpy as np
 from scipy.interpolate import interp1d
@@ -29,7 +49,22 @@ from scipy.interpolate import interp1d
 from system_integration.composition import SystemFragility
 from system_integration.hazard import EventSummary, NodeHazard
 
-__all__ = ["AnnualizedResult", "annualize", "stratified_annual_p_f"]
+logger = logging.getLogger(__name__)
+
+__all__ = [
+    "AnnualizedResult",
+    "P_BOTTOM_NEGLIGIBLE_THRESHOLD",
+    "P_TOP_SATURATION_THRESHOLD",
+    "annualize",
+    "stratified_annual_p_f",
+]
+
+# Coverage-guard thresholds, after HKV's warnings: a curve whose top sits
+# below 0.99 has not saturated (an above-grid clamp is then a lower bound);
+# a curve whose bottom sits above 0.01 has not decayed (a below-grid clamp
+# leaves the low-stage mass unresolved).
+P_TOP_SATURATION_THRESHOLD: float = 0.99
+P_BOTTOM_NEGLIGIBLE_THRESHOLD: float = 0.01
 
 
 @dataclass(frozen=True)
@@ -52,6 +87,16 @@ class AnnualizedResult:
     sources : dict of str to str
         Provenance stamp per mechanism (stub results can never pass as
         Uemura's).
+    coverage : dict of str to dict
+        Per-curve hazard-coverage diagnostics (HKV-audit item 2): one entry
+        per mechanism plus ``'__system__'``, each carrying
+        ``grid_bottom_m_msl`` / ``grid_top_m_msl``, the clamp end-values
+        ``p_bottom`` / ``p_top``, the ensemble fractions
+        ``frac_peaks_below_grid`` / ``frac_peaks_above_grid``, and the two
+        boolean flags ``lower_bound_clamp`` (peaks above a non-saturated
+        grid top — the annualized number is a lower bound) and
+        ``below_grid_unresolved`` (peaks below a non-decayed grid bottom).
+        Purely diagnostic; empty only on legacy constructions.
     """
 
     scenario: str
@@ -60,6 +105,7 @@ class AnnualizedResult:
     p_f_annual_per_mechanism: dict[str, float]
     mechanisms: tuple[str, ...]
     sources: dict[str, str]
+    coverage: dict[str, dict[str, float | bool]] = field(default_factory=dict)
 
     def dominance_share(self, mechanism: str) -> float:
         """Mechanism share of the summed annual contributions."""
@@ -85,6 +131,70 @@ def _curve_interpolators(
     return interpolators
 
 
+def _coverage_diagnostics(
+    fragility: SystemFragility, hazard: NodeHazard
+) -> dict[str, dict[str, float | bool]]:
+    """Per-curve hazard-coverage record + clamp warnings (HKV-audit item 2).
+
+    Mirrors HKV's four truncation guards for the ensemble-mean formulation:
+    every peak is a real event, so the two failure modes are peaks landing
+    *outside* the curve grid where the interpolator clamps. Emits one
+    ``logger.warning`` per tripped curve; returns the full record either way.
+    """
+    peaks = hazard.peak_stages()
+    grid = np.asarray(fragility.stage_m_msl, dtype=np.float64)
+    coverage: dict[str, dict[str, float | bool]] = {}
+    curves = {"__system__": fragility.p_sys, **fragility.per_mechanism}
+    for name, p in curves.items():
+        p_bottom = float(p[0])
+        p_top = float(p[-1])
+        frac_above = float(np.mean(peaks > grid[-1]))
+        frac_below = float(np.mean(peaks < grid[0]))
+        lower_bound_clamp = frac_above > 0.0 and p_top < P_TOP_SATURATION_THRESHOLD
+        below_grid_unresolved = (
+            frac_below > 0.0 and p_bottom > P_BOTTOM_NEGLIGIBLE_THRESHOLD
+        )
+        coverage[name] = {
+            "grid_bottom_m_msl": float(grid[0]),
+            "grid_top_m_msl": float(grid[-1]),
+            "p_bottom": p_bottom,
+            "p_top": p_top,
+            "frac_peaks_below_grid": frac_below,
+            "frac_peaks_above_grid": frac_above,
+            "lower_bound_clamp": bool(lower_bound_clamp),
+            "below_grid_unresolved": bool(below_grid_unresolved),
+        }
+        label = "system curve" if name == "__system__" else f"mechanism '{name}'"
+        where = f"{hazard.river} KP{hazard.kp:g} {hazard.scenario}"
+        if lower_bound_clamp:
+            logger.warning(
+                "Hazard-coverage: %s at %s — %.1f%% of ensemble peaks exceed "
+                "the curve grid top (%.2f m MSL) where P_f is only %.3g "
+                "(< %.2f): the annualized probability is a LOWER BOUND "
+                "(clamped above the grid).",
+                label,
+                where,
+                100.0 * frac_above,
+                float(grid[-1]),
+                p_top,
+                P_TOP_SATURATION_THRESHOLD,
+            )
+        if below_grid_unresolved:
+            logger.warning(
+                "Hazard-coverage: %s at %s — %.1f%% of ensemble peaks fall "
+                "below the curve grid bottom (%.2f m MSL) where P_f is still "
+                "%.3g (> %.2g): the curve has not decayed at its lowest "
+                "level, so the below-grid contribution is unresolved.",
+                label,
+                where,
+                100.0 * frac_below,
+                float(grid[0]),
+                p_bottom,
+                P_BOTTOM_NEGLIGIBLE_THRESHOLD,
+            )
+    return coverage
+
+
 def annualize(fragility: SystemFragility, hazard: NodeHazard) -> AnnualizedResult:
     """Annual failure probability from the composed curve and node hazard.
 
@@ -99,7 +209,8 @@ def annualize(fragility: SystemFragility, hazard: NodeHazard) -> AnnualizedResul
     -------
     AnnualizedResult
         System and per-mechanism annual probabilities for the hazard's
-        scenario.
+        scenario, with the per-curve hazard-coverage diagnostics attached
+        (and clamp warnings emitted; numbers unchanged — HKV-audit item 2).
     """
     peaks = hazard.peak_stages()
     interpolators = _curve_interpolators(fragility)
@@ -114,6 +225,7 @@ def annualize(fragility: SystemFragility, hazard: NodeHazard) -> AnnualizedResul
         p_f_annual_per_mechanism=per_mechanism,
         mechanisms=fragility.mechanisms,
         sources=dict(fragility.sources),
+        coverage=_coverage_diagnostics(fragility, hazard),
     )
 
 

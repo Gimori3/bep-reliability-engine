@@ -415,3 +415,79 @@ def test_build_registry_on_the_committed_grid() -> None:
     )
     with pytest.raises(ValueError, match="policy"):
         build_registry(DATA_ROOT, bep_source_policy="interpolate")
+
+
+# ============================================================================
+# Hazard-coverage diagnostics (HKV-audit item 2): clamp records + warnings
+# ============================================================================
+def test_coverage_lower_bound_clamp_warns_and_numbers_unchanged(caplog) -> None:
+    import logging
+
+    grid = np.array([40.0, 41.0, 42.0])
+    system = compose(grid, [MechanismCurve("bep", np.array([0.0, 0.1, 0.4]), "s")])
+    # Two of four peaks exceed the grid top (42.0) where P_f is only 0.4.
+    hazard = _synthetic_hazard([41.0, 42.0, 43.0, 44.0])
+    with caplog.at_level(logging.WARNING, logger="system_integration.annualize"):
+        annual = annualize(system, hazard)
+
+    cov = annual.coverage["bep"]
+    assert cov["grid_top_m_msl"] == 42.0
+    assert cov["p_top"] == pytest.approx(0.4)
+    assert cov["frac_peaks_above_grid"] == pytest.approx(0.5)
+    assert cov["frac_peaks_below_grid"] == 0.0
+    assert cov["lower_bound_clamp"] is True
+    assert cov["below_grid_unresolved"] is False
+    assert annual.coverage["__system__"]["lower_bound_clamp"] is True
+    assert any("LOWER BOUND" in rec.message for rec in caplog.records)
+
+    # Diagnostics only: the annualized number is the clamped ensemble mean,
+    # exactly as before (peaks at 41, 42, 43->clamp 0.4, 44->clamp 0.4).
+    assert annual.p_f_annual_per_mechanism["bep"] == pytest.approx(
+        np.mean([0.1, 0.4, 0.4, 0.4])
+    )
+
+
+def test_coverage_below_grid_unresolved_warns(caplog) -> None:
+    import logging
+
+    grid = np.array([40.0, 41.0, 42.0])
+    # The curve has NOT decayed at its bottom level (p_bottom = 0.05 > 0.01).
+    system = compose(grid, [MechanismCurve("bep", np.array([0.05, 0.5, 0.99]), "s")])
+    hazard = _synthetic_hazard([39.0, 39.5, 41.0, 42.0])
+    with caplog.at_level(logging.WARNING, logger="system_integration.annualize"):
+        annual = annualize(system, hazard)
+
+    cov = annual.coverage["bep"]
+    assert cov["frac_peaks_below_grid"] == pytest.approx(0.5)
+    assert cov["below_grid_unresolved"] is True
+    assert cov["lower_bound_clamp"] is False  # p_top = 0.99 saturated
+    assert any("below the curve grid bottom" in rec.message for rec in caplog.records)
+
+
+def test_coverage_silent_when_grid_covers_hazard(caplog) -> None:
+    import logging
+
+    grid = np.array([40.0, 41.0, 42.0, 43.0])
+    system = compose(
+        grid, [MechanismCurve("bep", np.array([0.0, 0.1, 0.6, 0.995]), "s")]
+    )
+    # All peaks inside the grid: fractions zero, no flags, no warnings.
+    hazard = _synthetic_hazard([40.5, 41.5, 42.5])
+    with caplog.at_level(logging.WARNING, logger="system_integration.annualize"):
+        annual = annualize(system, hazard)
+    for name in ("bep", "__system__"):
+        cov = annual.coverage[name]
+        assert cov["frac_peaks_above_grid"] == 0.0
+        assert cov["frac_peaks_below_grid"] == 0.0
+        assert cov["lower_bound_clamp"] is False
+        assert cov["below_grid_unresolved"] is False
+    assert not caplog.records
+
+    # Saturated top: peaks above the grid do NOT trip the lower-bound flag
+    # when the curve top has genuinely saturated (>= 0.99).
+    hazard_above = _synthetic_hazard([44.0, 45.0])
+    with caplog.at_level(logging.WARNING, logger="system_integration.annualize"):
+        annual_above = annualize(system, hazard_above)
+    assert annual_above.coverage["bep"]["frac_peaks_above_grid"] == 1.0
+    assert annual_above.coverage["bep"]["lower_bound_clamp"] is False
+    assert not caplog.records

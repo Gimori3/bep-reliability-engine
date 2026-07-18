@@ -224,6 +224,9 @@ def main(argv: list[str] | None = None) -> int:
                     "p_f_annual_system": annual.p_f_annual_system,
                     "p_f_annual_per_mechanism": annual.p_f_annual_per_mechanism,
                     "hazard_provenance": hazard.provenance,
+                    # HKV-audit item 2: per-curve hazard-coverage diagnostics
+                    # (clamp fractions, end values, lower-bound flags).
+                    "coverage": annual.coverage,
                 }
 
             scenario_token = scenario.replace("+", "plus")
