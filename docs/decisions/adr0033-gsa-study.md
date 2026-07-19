@@ -143,7 +143,15 @@ every number above is reproducible from the configs.
 - Indices are joint properties of model *and* prior: conditional on the
   ADR-0026 C_e prior (CoV 0.78, the widest), CoV(L) = 0.20, and the
   two-population coupling. Revisiting any of these re-weights the
-  decomposition; the L finding in particular motivates scrutiny of the 0.20.
+  decomposition; the L finding in particular motivated scrutiny of the 0.20 —
+  **now discharged** (seepage-length L study, 2026-07-19,
+  `seepage-length-L-study.md`): CoV 0.20/0.15 lognormal kept unchanged (the
+  transient shoulder P_f is ~3–4× sensitive to CoV(L), the design level
+  robust; the symmetric prior is conservative vs the one-sided physical
+  upside), and the ST_L ≈ 0.49–0.78 total-effect share was confirmed
+  irreducible by the θ-only Phase 2 filter (posterior L ≈ prior L).
 - Indicator indices lose meaning as P_f → 0/1; use Y3/Y4 there.
-- Per-cross-section only; segment-scale importance awaits the length-effect
-  λ_ac decision (spec §12 open item).
+- Per-cross-section only; the **segment-scale restatement** of the L
+  importance is addressed by the seepage-length L study (the reach-scale
+  length effect: independence over-counts by λ_ac/spacing = 1.25 at the
+  ADR-0037 primary), not by these per-cross-section indices.

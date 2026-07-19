@@ -141,6 +141,17 @@ is OFF so no existing result changes silently.
 * The borehole-free reaches (KP53.8–56.0, Satsunai) would need their own
   literature-assigned lambda_ac with inflated uncertainty (thesis §3); that
   remains Phase 3 scope, out of this ADR.
+* **Reach-scale companion (seepage-length L study, 2026-07-19).** The within-
+  segment n_eff = max(1, L_seg/lambda_ac) clamp at 1 hides the *between*-segment
+  correlation the same lambda_ac implies: composing 200 m segments as
+  independent over-counts the independent failure opportunities by exactly
+  lambda_ac/spacing (= 1.25 at the 250 m primary; 0.5 / 0.2 at the 100 / 40 m
+  bracket). The production `exact` deliverable is unaffected (four OYO sections
+  1.2–2.0 km apart), but the borehole-free reaches above must be composed
+  through the reach-scale length effect, never naive independence — pure
+  helpers `system_integration.composition.length_effect_effective_count` /
+  `reach_union` (opt-in, default = independence = current behaviour). See
+  `docs/decisions/seepage-length-L-study.md` §2.
 * Supersession path: OYO longitudinal profile arrival triggers an empirical
   re-estimate (Alternative 1).
 

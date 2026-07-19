@@ -1,7 +1,10 @@
 # ADR-0026: C_e Prior = Lognormal(mean 0.055, std 0.043), Pol's SIE 2024 Field Value — Amends ADR-0001
 
-Date: 2026-07-07 (meeting); 2026-07-08 (follow-up email — derivation + B25-245 resolved)
-Status: Accepted (amends the C_e prior of ADR-0001; C_e remains a stochastic RV)
+Date: 2026-07-07 (meeting); 2026-07-08 (follow-up email — derivation + B25-245 resolved);
+2026-07-19 (follow-up study — forensic reconciliation + propagation, quantifying the deferred item)
+Status: Accepted (amends the C_e prior of ADR-0001; C_e remains a stochastic RV). The
+0.055 default is **confirmed retained** by the 2026-07-19 study
+(`adr0026-ce-prior-study.md`); no parameter change.
 
 ## Context
 
@@ -89,12 +92,18 @@ validation set, so Pol would use it. Which value truly belongs at field scale
   `FIXED_COVS["C_e"] = 0.043/0.055`; all 8 configs regenerated. The drift guard
   `tests/test_configs.py` pins the new mean (0.055) and CoV (0.782), so the
   decision cannot silently regress.
-- **Transient fragility shifts up.** The rate is exactly linear in C_e, so a ~4×
-  higher mean scales progression rates ~4× (before the tail/COV change). The
-  transient branch becomes markedly more aggressive; combined with ADR-0027
-  (raw erosion head) the transient P_f rises substantially versus the prior
-  engine. Both are corrections toward Pol's own model. Quantify on the next
-  sweep (none run with these changes yet).
+- **Transient fragility shifts up — now quantified (2026-07-19).** The rate is
+  exactly linear in C_e, so a ~4× higher mean scales progression rates ~4×
+  (before the tail/COV change). The transient branch becomes markedly more
+  aggressive; combined with ADR-0027 (raw erosion head) the transient P_f rises
+  substantially versus the prior engine. Both are corrections toward Pol's own
+  model. The deferred "quantify on the next sweep" is **closed** by the
+  companion study `adr0026-ce-prior-study.md`: relative to the retired lab prior
+  (0.014–0.016) the field prior *raises* transient P_f **3–6× at the shoulder,
+  2–3× at the transition, 3–6× at design/HWL** at KP58.8/KP60.0; the effect is a
+  **mean** effect (holding the mean at 0.055 and only tightening the CoV
+  0.782→0.50 moves P_f ≤ ±10%), and the **static branch is byte-identical**
+  across all C_e priors (structural zero, ADR-0033).
 - **ADR-0001 amended, not withdrawn.** The promotion of C_e to a stochastic RV
   (the substantive ADR-0001 decision) stands; only its prior *parameters* and
   the *justification* for stochasticity are updated here. ADR-0001 is marked
@@ -118,6 +127,37 @@ validation set, so Pol would use it. Which value truly belongs at field scale
   the actual field record, and should be framed as such (not as evidence for
   either calibration being "wrong").
 
+## Follow-up study (2026-07-19): forensic reconciliation + propagation (`adr0026-ce-prior-study.md`)
+
+The lab-vs-field tension was propagated end to end (script
+`scripts/ce_prior_study.py`, figures `docs/figures/ce_prior_*.png`). Findings
+that lock down this decision:
+
+1. **Not a spread contradiction, a mean difference.** The CompGeo "0.007–0.030"
+   is a *value range* of seven per-test calibrations, whose empirical CoV is
+   ≈0.48–0.52 — the *same order* as the field 0.78. The two priors differ ≈4× in
+   **mean**, which is Pol's two calibration targets (time-dependent
+   pipe-development ≈0.016 vs mean post-critical rate ≈0.055; the factor 3–4 is
+   the open point recorded above).
+2. **The 0.055 default is retained** — Pol-endorsed field value, largest
+   validation set, conservative side; the fragility cost is a bounded, quantified
+   mean effect (Consequences, above). The lab prior `Ln(0.016, 0.48)` and a
+   two-target `0.5·Ln(0.016) + 0.5·Ln(0.055)` mixture are carried as **documented
+   sensitivities**, not defaults (the script reruns them; no config change, drift
+   guard unchanged).
+3. **Two Phase 2 reporting corrections** (fold into the thesis / `phase2_report`):
+   - the "posterior C_e mean pull ≈ −4%" is **conditional on this field prior**;
+     under the lab prior it is only −0.3% (survival informs C_e only where the
+     prior places mass in a failing region);
+   - the "transient failure nested in static under 2016 (marginal-transient
+     rejection = 0)" is **prior-robust** — it holds byte-for-byte under every
+     C_e prior tested.
+4. **The "not a laminar/turbulent absorber" claim (decision 2, above) is
+   defensible** now that `m_p ~ Ln(1, 0.12)` carries that model-form uncertainty
+   explicitly (ADR-0045, same SIE Table 2). The honest caveat: part of the 0.78
+   CoV is epistemic-about-which-target, which the Phase 2 update is meant to
+   reduce — not a model-form uncertainty smuggled into C_e.
+
 ## Alternatives considered
 
 - **Keep 0.014 as the Phase-1 prior, carry 0.055 as a sensitivity.** Rejected:
@@ -140,3 +180,5 @@ validation set, so Pol would use it. Which value truly belongs at field scale
 - `scripts/generate_configs.py`, `tests/test_configs.py`,
   `tests/test_progression.py` (`B25_C_E = 0.010`).
 - `docs/validation/pol-meeting-2026-07-07-dispositions.md` (Answers 2a, 2b, 2c).
+- `docs/decisions/adr0026-ce-prior-study.md` (2026-07-19 forensic reconciliation +
+  propagation study; `scripts/ce_prior_study.py`, `docs/figures/ce_prior_*.png`).

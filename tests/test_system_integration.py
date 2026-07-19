@@ -17,7 +17,12 @@ import pytest
 from bep_reliability_engine.fragility import LognormFragility
 from system_integration.annualize import annualize, stratified_annual_p_f
 from system_integration.bep_input import FragilityCurve, load_bep_curve
-from system_integration.composition import MechanismCurve, compose
+from system_integration.composition import (
+    MechanismCurve,
+    compose,
+    length_effect_effective_count,
+    reach_union,
+)
 from system_integration.hazard import EventSummary, NodeHazard
 from system_integration.segments import (
     OYO_BEP_SECTIONS,
@@ -53,6 +58,45 @@ def test_compose_series_system_algebra() -> None:
     solo = compose(grid, [a])
     np.testing.assert_allclose(solo.p_sys, a.p_f)
     assert solo.mechanisms == ("bep",)
+
+
+def test_reach_union_bounds_and_defaults() -> None:
+    """Independent default = series product; comonotone = worst segment (seepage-L)."""
+    # (n_seg, n_grid) stack of per-segment conditional P_f.
+    p = np.array([[0.0, 0.1, 0.5], [0.0, 0.2, 0.4], [0.0, 0.05, 0.6]])
+    indep = reach_union(p)  # default 'independent'
+    np.testing.assert_allclose(indep, 1.0 - np.prod(1.0 - p, axis=0))
+    # The default reproduces exactly what compose() would give segment-by-segment
+    # (the current Phase 3 across-segment independence framing), so it is a no-op
+    # relative to baseline behaviour.
+    comon = reach_union(p, correlation="comonotone")
+    np.testing.assert_allclose(comon, np.max(p, axis=0))
+    # Positive dependence can only lower a series union: comonotone <= independent.
+    assert np.all(comon <= indep + 1e-12)
+    # 1-D input (single stage) reduces to a scalar.
+    assert np.ndim(reach_union(np.array([0.1, 0.2, 0.05]))) == 0
+    with pytest.raises(ValueError):
+        reach_union(np.array([[0.1, 1.5]]))  # out of [0, 1]
+    with pytest.raises(ValueError):
+        reach_union(p, correlation="gaussian")  # unknown model
+    with pytest.raises(ValueError):
+        reach_union(np.empty((0, 3)))  # no segments
+
+
+def test_length_effect_effective_count_reach_scale() -> None:
+    """Reach-scale length effect: over-count ratio = lambda_ac / spacing (ADR-0037)."""
+    # Primary lambda_ac = 250 m, 200 m spacing: independence over-counts by 1.25.
+    r = length_effect_effective_count(6800.0, 250.0, segment_spacing_m=200.0)
+    assert r["n_segments"] == 34.0
+    np.testing.assert_allclose(r["n_independent"], 6800.0 / 250.0)
+    np.testing.assert_allclose(r["independence_overcount_ratio"], 1.25)
+    # The 40 m bracket flips it: independence UNDER-counts (ratio 0.2 < 1).
+    r40 = length_effect_effective_count(6800.0, 40.0)
+    np.testing.assert_allclose(r40["independence_overcount_ratio"], 0.2)
+    with pytest.raises(ValueError):
+        length_effect_effective_count(-1.0, 250.0)
+    with pytest.raises(ValueError):
+        length_effect_effective_count(6800.0, 0.0)
 
 
 def test_compose_dominance_shares_sum_to_one_where_loaded() -> None:

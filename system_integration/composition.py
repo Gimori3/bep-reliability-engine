@@ -22,8 +22,10 @@ __all__ = [
     "MechanismCurve",
     "SystemFragility",
     "compose",
+    "length_effect_effective_count",
     "max_within_section",
     "max_within_section_rated",
+    "reach_union",
 ]
 
 
@@ -233,3 +235,127 @@ def max_within_section_rated(
     idx = np.argmax(stack, axis=0)
     kps = np.asarray([kp for kp, _, _ in members], dtype=np.float64)
     return stack[idx, np.arange(grid.size)], kps[idx]
+
+
+def length_effect_effective_count(
+    reach_length_m: float,
+    lambda_ac_m: float,
+    *,
+    segment_spacing_m: float = 200.0,
+) -> dict[str, float]:
+    """The length effect restated at reach scale (seepage-length L study).
+
+    ADR-0037 fixes the *within*-segment weakest-link count
+    ``n_eff = max(1, L_seg / lambda_ac)`` and clamps it at 1, so at the primary
+    ``lambda_ac = 250 m`` a 200 m segment is the identity. The *between*-segment
+    treatment is the same autocorrelation story one scale up: a reach of length
+    ``reach_length_m`` populated at ``segment_spacing_m`` holds
+    ``n_segments = reach_length / spacing`` nodes, but only
+    ``n_independent = reach_length / lambda_ac`` *effectively independent*
+    cross-sections. Treating the segments as independent in a series-system
+    union therefore over-counts the independent failure opportunities by
+    exactly ``lambda_ac / segment_spacing`` (independent of the reach length).
+
+    A ratio ``> 1`` (e.g. 1.25 at ``lambda_ac = 250``, spacing 200) means
+    segment-independence is **conservative** (over-states the reach union); a
+    ratio ``< 1`` (e.g. 0.20 at ``lambda_ac = 40``) means it **under-counts**
+    the sub-segment weak spots and under-states the reach union. This is the
+    reach-scale companion of ``fragility.upscale_length_effect`` and is a pure
+    diagnostic — nothing in the pipeline calls it, and the production BEP
+    deliverable (four OYO sections 1.2-2.0 km apart, far beyond any
+    ``lambda_ac``) is independent by construction, so the correction is latent
+    until the borehole-free reaches are populated.
+
+    Parameters
+    ----------
+    reach_length_m : float
+        Reach length R [m], > 0.
+    lambda_ac_m : float
+        Autocorrelation length lambda_ac [m], > 0 (ADR-0037: 250 primary,
+        100/40 bracket).
+    segment_spacing_m : float, optional
+        Node spacing [m], > 0; 200 m per Uemura's grid (default).
+
+    Returns
+    -------
+    dict
+        ``n_segments`` (R / spacing), ``n_independent`` (R / lambda_ac), and
+        ``independence_overcount_ratio`` (lambda_ac / spacing).
+
+    Raises
+    ------
+    ValueError
+        If any length is not strictly positive.
+    """
+    if not (reach_length_m > 0.0 and lambda_ac_m > 0.0 and segment_spacing_m > 0.0):
+        raise ValueError("reach_length_m, lambda_ac_m, segment_spacing_m must be > 0.")
+    return {
+        "n_segments": reach_length_m / segment_spacing_m,
+        "n_independent": reach_length_m / lambda_ac_m,
+        "independence_overcount_ratio": lambda_ac_m / segment_spacing_m,
+    }
+
+
+def reach_union(
+    p_per_segment: NDArray[np.float64],
+    *,
+    correlation: str = "independent",
+) -> NDArray[np.float64]:
+    """Series-system union over segment conditional P_f under a correlation model.
+
+    The reach-level counterpart of :func:`compose` (which unions *mechanisms*
+    at one segment): this unions *segments* along a reach. Two bounds bracket
+    the true reach failure probability under spatial correlation of the
+    governing parameters (the seepage-length L study; the length effect at the
+    system scale):
+
+    * ``'independent'`` (default) — ``1 - prod_i (1 - p_i)``. This is the
+      assumption the Phase 3 thesis framing already makes across cross-sections
+      (the declared upper bound), so the default reproduces current behaviour
+      exactly; it is the correct treatment for the production four OYO sections,
+      which are 1.2-2.0 km apart (>> lambda_ac).
+    * ``'comonotone'`` — ``max_i p_i``. Full positive dependence: when the
+      governing parameters are perfectly correlated along the reach the whole
+      reach fails together, so the union collapses to the single worst segment
+      (the ``lambda_ac -> reach length`` limit). This is the lower bound.
+
+    The physically-indicated intermediate at ``lambda_ac = 250 m`` sits close to
+    the independent bound for the widely-spaced production sections (see
+    :func:`length_effect_effective_count`); the two bounds only diverge on a
+    densely-populated reach. Pure and unwired — an analysis tool, never called
+    by the default campaign.
+
+    Parameters
+    ----------
+    p_per_segment : numpy.ndarray
+        Per-segment conditional failure probabilities, shape ``(n_seg,)`` at
+        one stage or ``(n_seg, n_grid)`` for a curve stack on a shared grid.
+        Values in ``[0, 1]``.
+    correlation : {'independent', 'comonotone'}, optional
+        The spatial-correlation model (see above). Default ``'independent'``.
+
+    Returns
+    -------
+    numpy.ndarray
+        The reach union, shape ``()`` or ``(n_grid,)`` (the leading segment
+        axis is reduced).
+
+    Raises
+    ------
+    ValueError
+        On an unknown ``correlation``, an empty segment axis, or probabilities
+        outside ``[0, 1]``.
+    """
+    p = np.asarray(p_per_segment, dtype=np.float64)
+    if p.size == 0 or p.shape[0] == 0:
+        raise ValueError("reach_union needs at least one segment.")
+    if np.any((p < 0.0) | (p > 1.0)):
+        raise ValueError("p_per_segment must lie in [0, 1].")
+    if correlation == "independent":
+        return 1.0 - np.prod(1.0 - p, axis=0)
+    if correlation == "comonotone":
+        return np.max(p, axis=0)
+    raise ValueError(
+        f"unknown correlation {correlation!r}; expected 'independent' or "
+        "'comonotone'."
+    )

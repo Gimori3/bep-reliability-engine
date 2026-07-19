@@ -553,6 +553,25 @@ section 5, the strict no-initiation reading of the reach-scale no-boil
 survey is far too strong for these gate priors; it stays a qualitative
 sensitivity and is not a deliverable posterior.
 
+**C_e prior (evidence-conditionality sensitivity; 2026-07-19,
+`docs/decisions/adr0026-ce-prior-study.md`).** The two headline numbers of
+this section are conditional on the ADR-0026 field prior in different ways,
+and the study made that explicit by replaying the 2016 survival under five
+C_e priors (common random numbers on the C_e column only). **The posterior
+C_e mean pull is field-prior-specific:** −4.1% / −3.7% (field
+`Ln(0.055, 0.782)`) collapses to **−0.3% / −0.1%** under the retired lab
+prior `Ln(0.014–0.016)`, because the survival informs C_e only where the
+prior places mass in a failing region (transient rejection there is only
+0.4% / 0.1%). Report the "−4% pull" as *conditional on the field prior*,
+not as an unconditional property of the 2016 evidence. **The nesting is
+prior-robust:** the marginal transient rejection is exactly 0.0000% under
+*every* C_e prior at both sections — the "transient failure set nested in
+static under 2016" conclusion (11.1) does not depend on where C_e sits.
+The CoV width sets the pull magnitude, not the rejection count (at fixed
+mean 0.055, widening 0.50→0.782 barely changes rejection but doubles the
+pull — the wide upper tail is what the survival filters, the GSA fm7
+picture from the posterior side).
+
 ### 11.4 Downstream artifacts produced with these posteriors
 
 * ADR-0037 segment-level fragility tables (primary lambda_ac = 250 m,

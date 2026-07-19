@@ -13,6 +13,18 @@ extrapolation" territory. ``'nearest'`` (each segment inherits the nearest
 OYO section within the same river/bank) exists for stamped sensitivity
 exploration only.
 
+.. warning::
+   Under ``'nearest'`` a whole zone of segments shares one OYO section's BEP
+   curve, so those segments are perfectly BEP-correlated by construction.
+   Composing such a densely-populated reach as a series union of *independent*
+   segments over-counts the independent failure opportunities by
+   ``lambda_ac / segment_spacing`` (1.25 at the ADR-0037 primary; the length
+   effect at reach scale). Route it through
+   :func:`~system_integration.composition.length_effect_effective_count` /
+   :func:`~system_integration.composition.reach_union` instead — never a naive
+   independent product (seepage-length L study,
+   ``docs/decisions/seepage-length-L-study.md`` §2).
+
 Uemura's aggregation into Sections (Tokachi 1-5, Satsunai 1-4) is an
 owner-supplied table (ADR-0038 seam): ``load_section_table`` validates it;
 until it arrives every result is reported per segment.

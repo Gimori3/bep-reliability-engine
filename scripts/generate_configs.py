@@ -165,6 +165,12 @@ GAMMA_BL_SUB_MEAN: float = 6.9
 # (mean 0.055, std 0.043 => CoV 0.782), recommended by Pol (2026-07-07 meeting)
 # for levee reliability calculations, superseding the ADR-0001 calibration-
 # anchored (0.014, 0.50). See ADR-0026. Not OYO site data.
+# CONFIRMED RETAINED by the 2026-07-19 propagation study
+# (docs/decisions/adr0026-ce-prior-study.md, scripts/ce_prior_study.py): the
+# lab-vs-field gap is a ~4x MEAN difference (two Pol calibration targets), not a
+# spread difference; the field value is the Pol-endorsed conservative side. The
+# lab prior Ln(0.016, 0.48) is a documented on-demand sensitivity, never a sweep
+# member. Do not lower this without a superseding ADR.
 C_E_MEAN: float = 0.055
 
 # --- Bulk-gravel co-primary d_70 (provenance section 3.3), in mm -------------

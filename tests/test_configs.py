@@ -70,7 +70,11 @@ _EXPECTED_COVS = {
     "k_bl": 0.50,
     "gamma_bl_sub": 0.056,
     # Pol SIE 2024 Table 2 field prior: mean 0.055, std 0.043 => CoV 0.782
-    # (ADR-0026, superseding the ADR-0001 calibration-anchored 0.014/0.50).
+    # (ADR-0026, superseding the ADR-0001 calibration-anchored 0.014/0.50;
+    # retention CONFIRMED by the 2026-07-19 study docs/decisions/
+    # adr0026-ce-prior-study.md — the lab-vs-field gap is a MEAN difference, the
+    # field value is Pol's conservative field-scale recommendation). Lowering
+    # this pin requires a superseding ADR, not a config edit.
     "C_e": 0.043 / 0.055,
 }
 _GAMMA_BL_SUB_MEAN = 6.9
