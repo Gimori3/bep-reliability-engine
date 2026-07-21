@@ -266,3 +266,25 @@ def test_load_segment_inputs_committed_csv():
     # ADR-0042 decision 6: Satsunai carries the adopted Obihiro pair.
     assert sat.wl_err_mu_m == 0.6
     assert sat.wl_err_sigma_m == 0.38
+
+
+def test_primary_surface_curves_use_corrected_scour_conversion():
+    """Drift guard for the ADR-0042 decision-9 amendment (2026-07-21): the
+    committed *primary* surface curves carry the dimensionally-correct USACE
+    scour conversion, under which fluvial scour is zero at every node; the
+    as-received script conversion lives only in the labeled ``scour_script_k``
+    companion. Regenerating with the script factor as primary regresses this."""
+    from system_integration.surface_curves import load_surface_curves
+
+    root = "data/processed/uemura_surface_curves"
+    primary = load_surface_curves(f"{root}/uemura_surface_curves_historical.csv")
+    scour = [c for c in primary.curves if c.mechanism == "fluvial_scour"]
+    assert scour, "primary set must carry a fluvial_scour mechanism"
+    assert all(
+        np.all(c.p_f == 0.0) for c in scour
+    ), "primary fluvial scour must be zero under the corrected USACE conversion"
+    companion = load_surface_curves(f"{root}/uemura_surface_curves_scour_script_k.csv")
+    csc = [c for c in companion.curves if c.mechanism == "fluvial_scour"]
+    assert any(
+        np.any(c.p_f > 0.0) for c in csc
+    ), "the as-received script companion must carry nonzero scour"

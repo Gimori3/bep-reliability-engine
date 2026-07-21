@@ -18,11 +18,14 @@ engine module imports them. Sources, equation for equation:
   while-loops). Two deliberate script-over-report readings, documented in
   ADR-0042: Manning's velocity uses the SI form ``(1/n) R^(2/3) S^(1/2)``
   (the report prints the imperial 1.49/n factor; the script computes in
-  SI), and the k unit conversion reproduces the script's
-  ``0.3048/0.45359237`` factor verbatim (ADR-0042 decision 9 — ~106x the
-  dimensionally-correct stress-based conversion, carried as a flagged
-  finding with :data:`SCOUR_K_CONVERSION_USACE` as the corrected
-  companion).
+  SI). The ``draw_scour`` default reproduces the script's
+  ``0.3048/0.45359237`` k conversion verbatim — this module stays a faithful
+  reproduction of his model. ADR-0042 decision 9 (amended 2026-07-21) found
+  that factor is ~106x the dimensionally-correct stress-based conversion
+  :data:`SCOUR_K_CONVERSION_USACE`; the generated surface-curve **products**
+  now adopt the USACE-corrected factor as primary (passed explicitly at the
+  generation layer, not baked into the default here), under which fluvial
+  scour is negligible, and retain the script factor as a labeled companion.
 
 Both models are pointwise monotone in the driving stage series for fixed MC
 draws, which is what makes the ADR-0042 common-random-numbers fragility
@@ -87,10 +90,13 @@ PSF_TO_PA = 47.8803
 # ~1 Pa (vs tau_c ~50 Pa), so the floor only removes the unphysical sliver.
 SCOUR_MIN_DEPTH_M = 0.05
 
-# k conversion factors (per hour, applied to tau in Pa). The script's factor
-# is reproduced verbatim as primary (ADR-0042 decision 9); the USACE factor
-# is the dimensionally correct ft/hr-per-psf -> m/hr-per-Pa conversion,
-# used only by the flagged sensitivity companion.
+# k conversion factors (per hour, applied to tau in Pa). SCRIPT is Uemura's
+# as-received factor and remains this module's ``draw_scour`` default (the
+# quarantined reproduction stays faithful to his code). USACE is the
+# dimensionally correct ft/hr-per-psf -> m/hr-per-Pa conversion; ADR-0042
+# decision 9 (amended 2026-07-21) makes it the primary in the generated
+# surface-curve products, with SCRIPT demoted to a labeled sensitivity
+# companion. The generator/validation pass the factor explicitly.
 SCOUR_K_CONVERSION_SCRIPT = 0.3048 / 0.45359237
 SCOUR_K_CONVERSION_USACE = 0.3048 / PSF_TO_PA
 

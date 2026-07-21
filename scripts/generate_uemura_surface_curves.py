@@ -13,8 +13,13 @@ Outputs under ``data/processed/uemura_surface_curves/``:
   split per scenario for the repo's 500 KB hygiene guard),
 * ``uemura_surface_curves_overflow_sine30h.csv`` — overflow companion under
   Uemura's published sine T=30 h shape (thesis Eq. 4.11 positive lobe),
-* ``uemura_surface_curves_scour_usace_k.csv``    — scour companion under the
-  dimensionally-correct USACE k conversion (ADR-0042 decision 9),
+* ``uemura_surface_curves_scour_script_k.csv``   — scour companion under
+  Uemura's as-received script k conversion (ADR-0042 decision 9, **amended
+  2026-07-21**: the primary set now carries the dimensionally-correct USACE
+  stress-based conversion ``0.3048/47.8803``, under which fluvial scour is
+  negligible at every node; the as-received script factor
+  ``0.3048/0.45359237`` — ~105.6x larger — is retained here as a bounded
+  sensitivity companion),
 * ``generation_metadata.json`` + ``provenance.md``.
 
 Every output is validated through ``load_surface_curves`` (the loader IS the
@@ -67,7 +72,20 @@ LEVEL_MARGIN_ABOVE_CREST_M = 3.0
 SEED_ROOT = 20260717
 SINE_PERIOD_H = 30.0  # thesis Eq. 4.11
 SCENARIO_LABELS = ("historical", "plus4K")  # identical curves (ADR-0042 dec. 4)
-MECH_INDEX = {"overflow": 0, "fluvial_scour": 1, "overflow_sine": 2, "scour_usace": 3}
+# Per-(node, mechanism) seed salts. ADR-0042 amendment (2026-07-21): the
+# USACE-corrected conversion is now the PRIMARY scour product and the
+# as-received script conversion the labeled companion. The integer salts are
+# unchanged from the pre-amendment generation, so the corrected primary curve
+# is byte-identical to the previously committed ``scour_usace_k`` set (seed 3)
+# and the script companion is byte-identical to the previously committed
+# primary scour rows (seed 1): this flip re-labels validated numbers, it does
+# not recompute them.
+MECH_INDEX = {
+    "overflow": 0,
+    "fluvial_scour_script": 1,  # as-received companion (was the primary seed)
+    "overflow_sine": 2,
+    "fluvial_scour_usace": 3,  # dimensionally-correct primary (was companion)
+}
 
 
 def _canonical_discharges() -> dict[tuple[str, float], np.ndarray]:
@@ -106,7 +124,7 @@ def main() -> None:
 
     rows_primary: list[tuple] = []
     rows_sine: list[tuple] = []
-    rows_usace: list[tuple] = []
+    rows_script: list[tuple] = []
     node_meta: dict[str, dict] = {}
 
     for node_index, ((river, kp), seg) in enumerate(sorted(inputs.items())):
@@ -142,24 +160,35 @@ def main() -> None:
         rng_of = np.random.default_rng(
             np.random.SeedSequence((SEED_ROOT, node_index, MECH_INDEX["overflow"]))
         )
-        rng_sc = np.random.default_rng(
-            np.random.SeedSequence((SEED_ROOT, node_index, MECH_INDEX["fluvial_scour"]))
-        )
         of_draws = draw_overflow(rng_of, seg, N_MC)
-        sc_draws = draw_scour(rng_sc, N_MC, k_conversion=SCOUR_K_CONVERSION_SCRIPT)
-        seed_usace = np.random.SeedSequence(
-            (SEED_ROOT, node_index, MECH_INDEX["scour_usace"])
-        )
-        sc_draws_usace = draw_scour(
-            np.random.default_rng(seed_usace),
+        # Primary scour uses the dimensionally-correct USACE stress-based
+        # conversion (ADR-0042 amendment 2026-07-21); the as-received script
+        # conversion is drawn alongside for the labeled sensitivity companion.
+        # Seed salts are unchanged, so both curves are byte-identical to the
+        # pre-amendment products with the primary<->companion roles swapped.
+        sc_draws = draw_scour(
+            np.random.default_rng(
+                np.random.SeedSequence(
+                    (SEED_ROOT, node_index, MECH_INDEX["fluvial_scour_usace"])
+                )
+            ),
             N_MC,
             k_conversion=SCOUR_K_CONVERSION_USACE,
+        )
+        sc_draws_script = draw_scour(
+            np.random.default_rng(
+                np.random.SeedSequence(
+                    (SEED_ROOT, node_index, MECH_INDEX["fluvial_scour_script"])
+                )
+            ),
+            N_MC,
+            k_conversion=SCOUR_K_CONVERSION_SCRIPT,
         )
 
         # Cheap exact-zero guards (common draws make these provable zeros).
         of_zero_below = float(np.min(of_draws.crest_m_msl) - np.max(of_draws.wl_err_m))
 
-        p_of, p_sc, p_sc_u = [], [], []
+        p_of, p_sc, p_sc_script = [], [], []
         for level in levels:
             h = scaled(float(level))
             if float(np.max(h)) <= of_zero_below:
@@ -168,10 +197,13 @@ def main() -> None:
                 p_of.append(overflow_failure_fraction(h, dt_s, seg, of_draws))
             if level <= seg.floodplain_m_msl or crest_mean_never_loads(seg, h):
                 p_sc.append(0.0)
-                p_sc_u.append(0.0)
+                p_sc_script.append(0.0)
             else:
+                # p_sc = primary (USACE-corrected); p_sc_script = companion.
                 p_sc.append(scour_failure_fraction(h, dt_s, seg, sc_draws))
-                p_sc_u.append(scour_failure_fraction(h, dt_s, seg, sc_draws_usace))
+                p_sc_script.append(
+                    scour_failure_fraction(h, dt_s, seg, sc_draws_script)
+                )
 
         if p_of[0] != 0.0 or p_sc[0] != 0.0:
             raise SystemExit(
@@ -199,8 +231,8 @@ def main() -> None:
                 )
             for level, p in zip(levels, p_of_sine):
                 rows_sine.append((river, seg.bank, kp, "overflow", scen, level, p))
-            for level, p in zip(levels, p_sc_u):
-                rows_usace.append(
+            for level, p in zip(levels, p_sc_script):
+                rows_script.append(
                     (river, seg.bank, kp, "fluvial_scour", scen, level, p)
                 )
 
@@ -209,8 +241,8 @@ def main() -> None:
             "n_levels": int(levels.size),
             "level_range_m_msl": [float(levels[0]), float(levels[-1])],
             "max_p_overflow": max(p_of),
-            "max_p_scour": max(p_sc),
-            "max_p_scour_usace_k": max(p_sc_u),
+            "max_p_scour": max(p_sc),  # USACE-corrected primary
+            "max_p_scour_script_k": max(p_sc_script),  # as-received companion
             "discharge_proxied_from": proxied,
         }
         if node_index % 10 == 0:
@@ -236,7 +268,7 @@ def main() -> None:
             [r for r in rows_primary if r[4] == "plus4K"],
         ),
         ("uemura_surface_curves_overflow_sine30h.csv", rows_sine),
-        ("uemura_surface_curves_scour_usace_k.csv", rows_usace),
+        ("uemura_surface_curves_scour_script_k.csv", rows_script),
     ):
         path = OUT_DIR / name
         with open(path, "w", encoding="utf-8", newline="") as handle:
@@ -256,8 +288,8 @@ def main() -> None:
         "seed_root": SEED_ROOT,
         "level_step_m": LEVEL_STEP_M,
         "scenario_labels_identical_curves": True,
-        "scour_k_conversion_primary": "script (0.3048/0.45359237)",
-        "scour_k_conversion_companion": "usace (0.3048/47.8803)",
+        "scour_k_conversion_primary": "usace (0.3048/47.8803)",
+        "scour_k_conversion_companion": "script (0.3048/0.45359237)",
         "nodes": node_meta,
         "runtime_s": round(time.time() - t0, 1),
     }
@@ -295,9 +327,12 @@ and the committed d4PDF HPB band workbooks via the verbatim M3 chain.
   curve values (ADR-0042 dec. 4) and each validates independently.
 * `uemura_surface_curves_overflow_sine30h.csv` — overflow companion under
   the published sine T=30 h construction (thesis Eq. 4.11).
-* `uemura_surface_curves_scour_usace_k.csv` — scour companion under the
-  dimensionally-correct USACE k conversion (ADR-0042 decision 9 finding;
-  the primary reproduces Uemura's script conversion verbatim).
+* `uemura_surface_curves_scour_script_k.csv` — scour companion under
+  Uemura's as-received script k conversion (ADR-0042 decision 9, amended
+  2026-07-21). The PRIMARY set now carries the dimensionally-correct USACE
+  stress-based conversion (0.3048/47.8803), under which fluvial scour is
+  negligible at every node; this companion carries the as-received script
+  factor (0.3048/0.45359237, ~105.6x larger) as a bounded sensitivity.
 
 Raw drop files were read-only inputs. Regeneration:
 `python scripts/generate_uemura_surface_curves.py`.

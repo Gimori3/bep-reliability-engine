@@ -8,6 +8,12 @@ conditioning) and (b) the WP2 final-report Tables 3/4 magnitudes (their
 hydrology differs: WFLOW/RRI runs with system behaviour; order-of-magnitude
 agreement is the bar).
 
+Scour uses the dimensionally-correct USACE k conversion — the ADR-0042
+amendment (2026-07-21) primary — so this run validates the same scour
+physics the primary curves carry (under which scour is negligible; the WP2
+Table 3 erosion magnitudes reflect the as-received script conversion and
+are not expected to be reproduced — see the report §7 and ADR-0042 dec. 9).
+
 Output: ``results/system_integration/phase3/event_based_validation.json``.
 Runtime ~5-10 min (4 workbook reads + pruned per-event MC, N_MC = 1,000).
 """
@@ -33,6 +39,7 @@ from bep_reliability_engine.hydrographs import (  # noqa: E402
 )
 from system_integration.uemura_models import (  # noqa: E402
     SCOUR_BED_ROUGHNESS_KB_M,
+    SCOUR_K_CONVERSION_USACE,
     SCOUR_MANNING_N,
     SCOUR_MIN_DEPTH_M,
     draw_overflow,
@@ -130,7 +137,9 @@ def main() -> None:
                 np.random.SeedSequence((SEED_ROOT, node_index, 1))
             )
             of_draws = draw_overflow(rng_of, seg, N_MC)
-            sc_draws = draw_scour(rng_sc, N_MC)
+            # Primary scour physics = USACE-corrected conversion (ADR-0042
+            # amendment 2026-07-21).
+            sc_draws = draw_scour(rng_sc, N_MC, k_conversion=SCOUR_K_CONVERSION_USACE)
             of_gate = float(np.min(of_draws.crest_m_msl) - np.max(of_draws.wl_err_m))
             k_max = float(np.max(sc_draws.k_si_per_hr_pa))
             tau_c_min = float(np.min(sc_draws.tau_c_pa))

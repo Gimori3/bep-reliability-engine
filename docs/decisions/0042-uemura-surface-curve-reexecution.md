@@ -1,11 +1,17 @@
 # ADR-0042: Uemura Surface-Fragility Curves by Faithful Re-Execution of His Own Models on His Own Inputs
 
-Date: 2026-07-17
+Date: 2026-07-17 (amended 2026-07-21)
 
 ## Status
-Accepted (reversible: every interpretive choice below is one constant or one
-regeneration flag; the contract CSVs regenerate from committed raw inputs
-with one command)
+Accepted. **Decision 9 amended 2026-07-21** — the primary fluvial-scour
+curves now use the dimensionally-correct USACE stress-based k conversion
+(`0.3048/47.8803`); Uemura's as-received script conversion
+(`0.3048/0.45359237`, ~105.6x larger) is demoted to a labeled sensitivity
+companion. Under the corrected primary, fluvial scour is negligible at every
+node. All other decisions (1–8, 10) stand unchanged. Rationale and the
+superseded original reading are recorded in Decision 9 below. (Reversible:
+every interpretive choice is one constant or one regeneration flag; the
+contract CSVs regenerate from committed raw inputs with one command.)
 
 ---
 
@@ -152,24 +158,63 @@ received" with consistent hydraulic boundary conditions across mechanisms.
    outside the study reaches). N_MC = 10,000 per (node, mechanism), his
    published count.
 
-9. **The scour k unit conversion follows Uemura's script verbatim, and the
-   discrepancy is flagged as a finding.** `ErosionModel_231019.py` converts
-   k = 0.021 ft^3/(lb·hr) to SI via `0.3048/0.45359237` (one linear
-   ft->m factor and a pound-*mass*->kg factor). The dimensionally correct
-   conversion of an erosion rate per unit *stress* (ft/hr per lbf/ft^2 ->
-   m/hr per Pa) is `0.3048/47.8803`, a factor **105.6 smaller** — his
-   script's erosion rate is ~106x the USACE-intended value. His published
-   WP2 results (scour probabilities 1e-3–1e-2/yr, scour dominating
-   overtopping) are consistent with the script's conversion having been
-   used throughout; under the corrected conversion scour becomes
-   negligible at these stresses and could not dominate. Because the thesis
-   commits to "used as received" and this repo's discipline forbids
-   overriding the source's own workproduct, the **primary curves reproduce
-   the script's conversion**, a **labeled companion set**
-   (`uemura_surface_curves_scour_usace_k.csv`) carries the corrected
-   conversion, and the discrepancy is a top-priority owner/Uemura
-   confirmation item in the Phase 3 blocker manifest. Every RQ3/RQ4
-   product states which conversion its scour input used.
+9. **(Amended 2026-07-21; replaces the original Decision 9.)** The scour k
+   unit conversion — the finding, and why the primary now uses the
+   dimensionally-correct factor.
+
+   **The finding (unchanged).** `ErosionModel_231019.py` converts
+   k = 0.021 ft^3/(lb·hr) to SI via `0.3048/0.45359237` (a linear ft->m
+   factor times a pound-*mass*->kg factor). k is an erosion rate per unit
+   *stress* (ft/hr per lbf/ft^2), so the dimensionally correct conversion to
+   m/hr per Pa is `0.3048/47.8803` — a factor **105.6 smaller**. The script
+   factor is indefensible under any reading: it mixes a length and a mass
+   conversion, and even under the script's own stated target unit (the
+   comment `# [m3/kg-hr]`) it omits the ft^3 cube (that target would need
+   `0.3048**3/0.45359237`). A closer read also shows the converted
+   `mean_k_SI` is **unused** — the Monte-Carlo loop draws k from the
+   imperial `mean_k` — so the wrong factor is dead code that never fed his
+   own run, reinforcing that it is a slip, not a deliberate calibration. His
+   published WP2 results (scour probabilities 1e-3–1e-2/yr, scour dominating
+   overtopping) rest on a large, dimensionally-wrong erosion rate; under the
+   corrected conversion fluvial scour is negligible at these stresses
+   (0 failures / 10,000 draws at every one of the 114 nodes) and cannot
+   dominate.
+
+   **Original decision (2026-07-17, now superseded).** On "used as received"
+   grounds — the thesis commits to Uemura's workproduct and this repo's
+   discipline forbids silently overriding a source — the primary curves
+   reproduced the script's conversion, with the corrected conversion carried
+   only as a labeled companion (`uemura_surface_curves_scour_usace_k.csv`),
+   pending Uemura's confirmation.
+
+   **Amended decision (2026-07-21).** The primary curves now use the
+   **dimensionally-correct USACE stress-based conversion** `0.3048/47.8803`;
+   the as-received script conversion is demoted to a labeled sensitivity
+   companion (`uemura_surface_curves_scour_script_k.csv`, and the campaign's
+   `scour_script_k` variant). Grounds for the reversal: (a) the conversion is
+   dimensionally settled — the USACE factor is correct under the standard
+   erosion-model unit convention (Dean et al. 2010 / USACE Erosion Toolbox),
+   which the thesis cites as the model basis; (b) the author disclaimed
+   hydraulic-engineering expertise in direct discussion and deferred the unit
+   question to the student, so "used as received" no longer outweighs
+   dimensional correctness for the student's own model; (c) an
+   owner-confirmation email was judged unlikely to resolve it (slow,
+   limited-English channel; prior unreliable answers). The thesis therefore
+   implements the models **as cited** (Dean 2010; USACE) with
+   dimensionally-consistent SI units, presents the corrected result as
+   primary, and does **not** claim to reproduce WP2's erosion-dominance
+   headline (which it demonstrably does not — a documented, not hidden,
+   divergence, see the report §7). The quarantined reproduction module
+   `system_integration/uemura_models.py` keeps the script factor as its
+   `draw_scour` default (it stays a faithful copy of his code); the
+   correction is applied explicitly at the generation/validation layer, not
+   baked into the reproduction. Byte provenance: because corrected scour is
+   0 at every node and the generator preserves the per-mechanism seed salts,
+   the new primary scour is byte-identical to the previously committed
+   `scour_usace_k` set and the new script companion is byte-identical to the
+   previously committed primary scour rows — the flip re-labels validated
+   numbers rather than recomputing them. Every RQ3/RQ4 product continues to
+   state which conversion its scour input used.
 
 10. **Scour erosion-onset depth floor: 0.05 m** (regularization, found in
     execution). The USACE friction factor `f_c = 2 (2.5 ln(30 d / k_b))^-2`

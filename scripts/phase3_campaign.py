@@ -8,8 +8,11 @@ stage-frequency. Variant axes:
 * d70 interpretation: matrix (primary) / bulk (co-primary bound),
 * BEP source: phase2 posterior (default) / phase1 prior (companion),
 * lambda_ac: 250 m primary / 100 / 40 m ADR-0037 bracket (posterior only),
-* surface variant: primary / scour_usace_k / overflow_sine30h
-  (posterior-matrix only; ADR-0042 companions).
+* surface variant: primary / scour_script_k / overflow_sine30h
+  (posterior-matrix only; ADR-0042 companions). Since the ADR-0042
+  amendment (2026-07-21) the primary scour uses the dimensionally-correct
+  USACE conversion; ``scour_script_k`` overlays Uemura's as-received script
+  conversion as a bounded sensitivity.
 
 Outputs under ``results/system_integration/phase3/``:
 
@@ -75,7 +78,7 @@ PRIMARY_FILES = (
     CURVE_DIR / "uemura_surface_curves_plus4K.csv",
 )
 SURFACE_FILES = {
-    "scour_usace_k": CURVE_DIR / "uemura_surface_curves_scour_usace_k.csv",
+    "scour_script_k": CURVE_DIR / "uemura_surface_curves_scour_script_k.csv",
     "overflow_sine30h": CURVE_DIR / "uemura_surface_curves_overflow_sine30h.csv",
 }
 SEGMENT_LENGTH_M = 200.0
@@ -161,7 +164,7 @@ def main() -> None:
     # other surface mechanism).
     surface_sets = {"primary": raw_sets["primary"]}
     for name, varied in (
-        ("scour_usace_k", "fluvial_scour"),
+        ("scour_script_k", "fluvial_scour"),
         ("overflow_sine30h", "overflow"),
     ):
         kept = [c for c in raw_sets["primary"].curves if c.mechanism != varied]
@@ -202,7 +205,7 @@ def main() -> None:
     for lam in (100.0, 40.0):
         for d70 in ("matrix", "bulk"):
             variants.append((d70, "posterior", lam, "primary"))
-    variants.append(("matrix", "posterior", 250.0, "scour_usace_k"))
+    variants.append(("matrix", "posterior", 250.0, "scour_script_k"))
     variants.append(("matrix", "posterior", 250.0, "overflow_sine30h"))
 
     annual_rows = []

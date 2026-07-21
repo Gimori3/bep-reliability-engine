@@ -12,13 +12,18 @@ and the committed d4PDF HPB band workbooks via the verbatim M3 chain.
 * Conditioning: canonical event HPB_m064_1987 scaled per level by the G1
   rule (ADR-0020) at each node's own rating; common random numbers across
   levels (curves exactly monotone); N_MC = 10,000.
-* `uemura_surface_curves.csv` — PRIMARY (contract format, ADR-0038 dec. 5).
-  Scenario rows historical/plus4K carry identical curves (ADR-0042 dec. 4).
+* `uemura_surface_curves_historical.csv` + `uemura_surface_curves_plus4K.csv`
+  — PRIMARY (contract format, ADR-0038 dec. 5), split per scenario label to
+  respect the repo's 500 KB hygiene guard; the two files carry identical
+  curve values (ADR-0042 dec. 4) and each validates independently.
 * `uemura_surface_curves_overflow_sine30h.csv` — overflow companion under
   the published sine T=30 h construction (thesis Eq. 4.11).
-* `uemura_surface_curves_scour_usace_k.csv` — scour companion under the
-  dimensionally-correct USACE k conversion (ADR-0042 decision 9 finding;
-  the primary reproduces Uemura's script conversion verbatim).
+* `uemura_surface_curves_scour_script_k.csv` — scour companion under
+  Uemura's as-received script k conversion (ADR-0042 decision 9, amended
+  2026-07-21). The PRIMARY set now carries the dimensionally-correct USACE
+  stress-based conversion (0.3048/47.8803), under which fluvial scour is
+  negligible at every node; this companion carries the as-received script
+  factor (0.3048/0.45359237, ~105.6x larger) as a bounded sensitivity.
 
 Raw drop files were read-only inputs. Regeneration:
 `python scripts/generate_uemura_surface_curves.py`.
