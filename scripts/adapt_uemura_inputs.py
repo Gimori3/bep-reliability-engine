@@ -42,12 +42,24 @@ RAW_DROP = REPO / "data" / "digitized" / "uemura_fragility_curves"
 DF_RIVER = RAW_DROP / "data" / "df_river.csv"
 OUT_DIR = REPO / "data" / "processed" / "uemura_segments"
 
-# ADR-0042 decision 6: measured at Tokachi/Obihiro (paper Eq. 10; prototype
-# notebook; KP56.73 workbook Summary); adopted for the Satsunai pending the
-# absent Uncertainty_HQrelation.xlsx (class-D residual).
-WL_ERR_MU_M = 0.6
-WL_ERR_SIGMA_M = 0.38
-_SATSUNAI_WL_ERR_ASSUMED = True
+# ADR-0042 decision 6 (amended 2026-07-22): the source workbook
+# ``Uncertainty_HQrelation.xlsx`` arrived (now committed under
+# ``data/raw/``). It is the direct implementation of paper Eqs. (9)/(10):
+# per gauge, ``Ave`` = mean(observed - rating) and ``Sig`` = STDEV.S of the
+# same stage residual [m], which his final ``count_failures``
+# (``2021-11-19 Description WP2 Work week 3.ipynb``) consumes verbatim as
+# ``wl = h + N(WlevUncMu, WlevUncSigma)`` — the same form as
+# ``uemura_models.draw_overflow``. Both gauges' measured Eq. 10 pair is now
+# adopted (values rounded to mm), replacing the interim 0.6/0.38 constant
+# (which traced to the toy ``frajilty curve ver2.ipynb`` demo, not Eq. 10):
+#   Tokachi  <- Obihiro gauge KP56.73, sheet ``TokachiRiv._Obihiro`` K2/L2
+#   Satsunai <- Nantai  gauge KP15,    sheet ``SatsunaiRiv._Nantai``  M2/N2
+# The residual sign is pinned three ways (paper Eq. 9, workbook formula
+# ``=E-I``, his notebook), so ``Ave`` is used with its native sign.
+WL_ERR_BY_RIVER: dict[str, tuple[float, float]] = {
+    "Tokachi": (-0.160, 0.294),  # Obihiro: Ave -0.16013, Sig 0.29373 (n=238)
+    "Satsunai": (-0.051, 0.283),  # Nantai:  Ave -0.05110, Sig 0.28314 (n=236)
+}
 
 _RIVER_NAME = {"tokachi": "Tokachi", "satsunai": "Satsunai"}
 _BANK = {"Tokachi": "right", "Satsunai": "left"}
@@ -143,12 +155,10 @@ def main() -> None:
             "water_surface_gradient_inv": df["Gradient_WaterSurface"],
             "hq_a": df["HQ_a"],
             "hq_b": df["HQ_b"],
-            "wl_err_mu_m": WL_ERR_MU_M,
-            "wl_err_sigma_m": WL_ERR_SIGMA_M,
-            "wl_err_assumed": [
-                river == "Satsunai" and _SATSUNAI_WL_ERR_ASSUMED
-                for river in df["river"]
-            ],
+            "wl_err_mu_m": [WL_ERR_BY_RIVER[river][0] for river in df["river"]],
+            "wl_err_sigma_m": [WL_ERR_BY_RIVER[river][1] for river in df["river"]],
+            # Both gauges are now measured from the workbook (no assumption).
+            "wl_err_assumed": [False for _ in df["river"]],
         }
     ).sort_values(["river", "kp"], ignore_index=True)
 
@@ -225,10 +235,12 @@ _PROVENANCE_ROWS: list[tuple[str, str, str]] = [
     ),
     (
         "wl_err_mu_m, wl_err_sigma_m",
-        "Uemura et al. (2024) Eq. 10 at Obihiro",
-        "0.6 / 0.38 m; Satsunai rows flagged `wl_err_assumed=True` (source "
-        "workbook `Uncertainty_HQrelation.xlsx` absent from the drop - "
-        "ADR-0042 decision 6, class-D residual)",
+        "`Uncertainty_HQrelation.xlsx` (Uemura et al. 2024 Eqs. 9-10)",
+        "per-gauge water-level rating error N(mu, sigma) [m], mean/STDEV.S of "
+        "observed-minus-rating stage: Tokachi <- Obihiro sheet K2/L2 "
+        "(-0.160, 0.294); Satsunai <- Nantai sheet M2/N2 (-0.051, 0.283); "
+        "both measured (`wl_err_assumed=False`) per ADR-0042 decision 6 "
+        "(amended 2026-07-22)",
     ),
 ]
 

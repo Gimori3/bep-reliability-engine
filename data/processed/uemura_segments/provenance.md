@@ -19,7 +19,7 @@ verbatim by his `ErosionModel_231019.py`), mirrored here byte-exactly as
 | slope_h_per_v | df_river `BankGradient` | levee slope n in n(H):1(V); 3.0 everywhere (WP2 Table 2) |
 | water_surface_gradient_inv | df_river `Gradient_WaterSurface` | S = 1/value (his script line `S = 1/ Gradient_WaterSurface`) |
 | hq_a, hq_b | df_river `HQ_a`, `HQ_b` | validated IDENTICAL to the local M3 rating files `data/raw/rating_curves/HQrelation_*Riv_2017.csv` (Eq. 4.19; ADR-0021 datum) |
-| wl_err_mu_m, wl_err_sigma_m | Uemura et al. (2024) Eq. 10 at Obihiro | 0.6 / 0.38 m; Satsunai rows flagged `wl_err_assumed=True` (source workbook `Uncertainty_HQrelation.xlsx` absent from the drop - ADR-0042 decision 6, class-D residual) |
+| wl_err_mu_m, wl_err_sigma_m | `Uncertainty_HQrelation.xlsx` (Uemura et al. 2024 Eqs. 9-10) | per-gauge water-level rating error N(mu, sigma) [m], mean/STDEV.S of observed-minus-rating stage: Tokachi <- Obihiro sheet K2/L2 (-0.160, 0.294); Satsunai <- Nantai sheet M2/N2 (-0.051, 0.283); both measured (`wl_err_assumed=False`) per ADR-0042 decision 6 (amended 2026-07-22) |
 
 Raw files were not modified. Regeneration:
 `python scripts/adapt_uemura_inputs.py`.

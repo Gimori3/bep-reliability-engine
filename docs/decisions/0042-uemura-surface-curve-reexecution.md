@@ -42,9 +42,11 @@ contain, censused file by file:
   already the ADR-0021 T.P. m MSL datum — no datum conversion exists to get
   wrong. Its bank-height statistics (`Average_bh`, `Sig_bh`) match the
   committed `data/raw/bank_heights/BankHeight_AveSig_*.csv` files.
-* **The published parameterization.** Overflow: rating-error
-  N(mu=0.6, sigma=0.38) m at Obihiro (paper Eq. 10; workbook
-  `Uncertainty_HQrelation.xlsx` is absent from the drop — see decision 6);
+* **The published parameterization.** Overflow: per-gauge water-level
+  rating error N(mu_WL, sigma_WL) m from paper Eqs. (9)/(10) (values in
+  `Uncertainty_HQrelation.xlsx`, absent from the drop at census time — an
+  interim 0.6/0.38 was used pending it; the workbook later arrived and the
+  measured per-gauge pairs are adopted, see the decision-6 amendment);
   per-KP crest error N(`Average_bh`, `Sig_bh`) (paper Eqs. 11–12); turf
   critical velocity N(1.80, 0.38) m/s "good" cover (paper Table 1); Dean
   threshold 0.492e6; friction f = 0.08; N_MC = 10,000. Scour: k = 0.021
@@ -142,6 +144,31 @@ received" with consistent hydraulic boundary conditions across mechanisms.
    (two cells) replaces this assumption; the generator takes it as a
    parameter. Applies to the overflow curve only (his scour model carries
    no rating-error term).
+
+   > **Amended 2026-07-22 (D7 closed).** `Uncertainty_HQrelation.xlsx`
+   > arrived (gitignored, machine-local under `data/raw/`, like the raw
+   > d4PDF drop — absent on fresh clones). It is the direct
+   > implementation of paper Eqs. (9)/(10): two sheets, `TokachiRiv._Obihiro`
+   > and `SatsunaiRiv._Nantai`, each computing the per-gauge water-level
+   > rating error as `Ave` = mean(observed − rating stage) and `Sig` =
+   > `STDEV.S` of the same residual [m] (cells K2/L2 and M2/N2). His final
+   > `count_failures` (`2021-11-19 Description WP2 Work week 3.ipynb`)
+   > consumes these directly as `wl = h + N(WlevUncMu, WlevUncSigma)` — the
+   > same additive form as `uemura_models.draw_overflow`. **Both gauges'
+   > measured Eq. 10 pair is therefore adopted** (rounded to mm): Tokachi
+   > (Obihiro) `(-0.160, 0.294)`, Satsunai (Nantai) `(-0.051, 0.283)`,
+   > replacing the interim `0.6 / 0.38` for both rivers. The interim pair did
+   > not trace to Eq. 10; it is the placeholder from the demonstration
+   > notebook `frajilty curve ver2.ipynb` (fake rating `a=1, b=0`, 10 m
+   > bank), so retaining it for Tokachi while measuring Satsunai would have
+   > mixed two bases. The residual **sign** is fixed independently three
+   > ways — paper Eq. (9) (`obs − rating`), the workbook formula (`=E−I`),
+   > and his notebook — so `Ave` is used with its native (negative) sign; the
+   > sheet's `"HQ_H-H"` column header is a cosmetic mislabel of its own
+   > formula. Values are wired per-river in `scripts/adapt_uemura_inputs.py`
+   > (`WL_ERR_BY_RIVER`); every row now carries `wl_err_assumed = False`.
+   > Overflow-only, as above. No engine, config-hash, or Phase 2 replay gate
+   > is touched (`wl_err` feeds only the Phase 3 surface curves).
 
 7. **`Sig_bh` is used as the per-node crest standard deviation, verbatim.**
    That is what both of his implementations do (`randn * Sig + Average +

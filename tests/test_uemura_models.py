@@ -261,11 +261,15 @@ def test_load_segment_inputs_committed_csv():
     assert kp588.bank == "right"
     assert kp588.crest_width_m == 8.0
     assert kp588.slope_h_per_v == 3.0
+    # ADR-0042 decision 6 (amended 2026-07-22): both gauges carry their own
+    # measured Eq. 10 rating error from Uncertainty_HQrelation.xlsx (Tokachi
+    # <- Obihiro, Satsunai <- Nantai), replacing the interim 0.6/0.38.
+    assert kp588.wl_err_mu_m == -0.160
+    assert kp588.wl_err_sigma_m == 0.294
     sat = inputs[("Satsunai", 3.2)]
     assert sat.bank == "left"
-    # ADR-0042 decision 6: Satsunai carries the adopted Obihiro pair.
-    assert sat.wl_err_mu_m == 0.6
-    assert sat.wl_err_sigma_m == 0.38
+    assert sat.wl_err_mu_m == -0.051
+    assert sat.wl_err_sigma_m == 0.283
 
 
 def test_primary_surface_curves_use_corrected_scour_conversion():

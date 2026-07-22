@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-22T00:09:44",
+  "generated": "2026-07-22T14:46:32",
   "adr": "ADR-0042",
   "canonical_event": "HPB_m064_1987",
   "n_mc": 10000,
@@ -388,7 +388,7 @@
         54.2,
         62.0
       ],
-      "max_p_overflow": 1.0,
+      "max_p_overflow": 0.9996,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.5723,
       "discharge_proxied_from": null
@@ -1000,7 +1000,7 @@
         35.2,
         44.2
       ],
-      "max_p_overflow": 0.9999,
+      "max_p_overflow": 0.9998,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.0916,
       "discharge_proxied_from": null
@@ -1132,7 +1132,7 @@
         37.4,
         47.4
       ],
-      "max_p_overflow": 0.9942,
+      "max_p_overflow": 0.9776,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.1357,
       "discharge_proxied_from": null
@@ -1378,5 +1378,5 @@
       "discharge_proxied_from": "KP61.8"
     }
   },
-  "runtime_s": 880.0
+  "runtime_s": 897.3
 }

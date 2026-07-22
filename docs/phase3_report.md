@@ -89,10 +89,11 @@ recoverable from `SECTIONS.shp` + the notebook anchors.
   grid; the rating files also carry off-grid gauge nodes (e.g. Tokachi
   KP 56.73 = the Obihiro gauge) that are not evaluation segments. The
   registry is exactly the 114 thesis segments (46 Tokachi + 68 Satsunai).
-* **Satsunai rating-error values (ADR-0042 decision 6).** The Nantai-gauge
-  mu/sigma pair lives in `Uncertainty_HQrelation.xlsx`, absent from the
-  drop; the Obihiro pair (0.6/0.38 m) is adopted for the Satsunai and
-  flagged `wl_err_assumed` in the committed inputs. Class-D residual (§9).
+* **Rating-error values (ADR-0042 decision 6, amended 2026-07-22).** The
+  source workbook `Uncertainty_HQrelation.xlsx` arrived (gitignored,
+  machine-local under `data/raw/`) and supplies both gauges' rating error:
+  Obihiro (Tokachi) N(-0.16, 0.29) m, Nantai (Satsunai) N(-0.05, 0.28) m —
+  replacing the interim 0.6/0.38 m for both rivers. D7 closed (§9).
 
 ## 3. Data products (committed, regenerable)
 
@@ -143,32 +144,35 @@ Annualized per-mechanism failure probabilities and dominance shares
 
 | Section | Scenario | P_sys [1/yr] | BEP | share | Overflow | share | Scour |
 |---|---|---|---|---|---|---|---|
-| KP57.4 | historical | 7.55e-4 | 7.53e-4 | **99.6%** | 3.1e-6 | 0.4% | 0 |
-| KP57.4 | +4K | 9.90e-3 | 9.48e-3 | **78%** | 2.60e-3 | 22% | 0 |
-| KP58.8 | historical | 7.79e-3 | 7.34e-3 | **90%** | 8.3e-4 | 10% | 0 |
-| KP58.8 | +4K | 4.24e-2 | 4.04e-2 | **86%** | 6.66e-3 | 14% | 0 |
+| KP57.4 | historical | 7.53e-4 | 7.53e-4 | **100%** | 0 (exact) | 0% | 0 |
+| KP57.4 | +4K | 9.53e-3 | 9.48e-3 | **91%** | 9.11e-4 | 9% | 0 |
+| KP58.8 | historical | 7.42e-3 | 7.34e-3 | **97%** | 1.95e-4 | 3% | 0 |
+| KP58.8 | +4K | 4.09e-2 | 4.04e-2 | **94%** | 2.53e-3 | 6% | 0 |
 | KP60.0 | historical | 1.80e-3 | 1.80e-3 | **100%** | 0 (exact) | 0% | 0 |
-| KP60.0 | +4K | 1.43e-2 | 1.42e-2 | **95%** | 7.2e-4 | 5% | 0 |
-| KP62.0 | historical | 2.40e-3 | 3.5e-4 | 14% | 2.23e-3 | **86%** | 0 |
-| KP62.0 | +4K | 2.02e-2 | 4.40e-3 | 18% | 1.94e-2 | **82%** | 0 |
+| KP60.0 | +4K | 1.42e-2 | 1.42e-2 | **100%** | 2.3e-5 | 0% | 0 |
+| KP62.0 | historical | 5.24e-4 | 3.5e-4 | **64%** | 1.99e-4 | 36% | 0 |
+| KP62.0 | +4K | 1.02e-2 | 4.40e-3 | 34% | 8.39e-3 | **66%** | 0 |
 
-**BEP is the dominant mechanism at three of the four sections where it is
-quantified** (78–100% of the summed annual contributions), in both
-climates. Overflow dominates only at KP62.0 (82–86%) — exactly the section
-whose transient BEP transition sits above attainable stages (ADR-0024
-raw-tail clamp; its BEP number is a grid-clamped lower bound, flagged
-`bep_clamped_above_grid` in every output row). **Fluvial scour is exactly
-zero at every section under the dimensionally-correct USACE conversion**
-(ADR-0042 decision 9, amended); the `scour_script_k` companion quantifies
-what the as-received conversion would have added — at these BEP sections at
-most ~8% (KP57.4 historical system 7.55e-4 → 8.15e-4), because here the
-system is BEP/overflow-governed (§6.2).
+**BEP is the dominant mechanism at all four quantified sections
+historically** (64–100% of the summed annual contributions) and at three of
+the four under +4K. Overflow leads only at KP62.0 under +4K (66%) — the
+section whose transient BEP transition sits above attainable stages
+(ADR-0024 raw-tail clamp; its BEP number is a grid-clamped lower bound,
+flagged `bep_clamped_above_grid` in every output row, so its true BEP share
+is if anything higher). **Fluvial scour is exactly zero at every section
+under the dimensionally-correct USACE conversion** (ADR-0042 decision 9,
+amended); the `scour_script_k` companion quantifies what the as-received
+conversion would have added — at the three BEP-dominant sections at most ~8%
+(KP57.4 historical system 7.53e-4 → 8.13e-4; ≤2% at KP58.8/60.0), rising to
+~45% at the overflow-reduced KP62.0 (5.24e-4 → 7.59e-4) because the surface
+number there is now small (§6.2).
 
 The conditional-curve picture (`phase3_system_fragility_bep_sections.png`)
 explains the shares: at KP57.4/58.8/60.0 the posterior BEP transition
 rises 1–2 m below the overflow onset (which needs crest exceedance within
 the rating-error scatter), so the subsurface mechanism strikes first in
-stage; at KP62.0 the order reverses.
+stage; at KP62.0 the order reverses only once the +4K hazard lifts peaks
+into the overflow band.
 
 ### 5.2 Along the full reach (110 surface-only segments)
 
@@ -177,27 +181,29 @@ posterior-matrix primary):
 
 | Scenario | overflow | fluvial_scour | bep | none loaded |
 |---|---|---|---|---|
-| historical | 95 | 0 | 3 | 16 |
-| +4K | 111 | 0 | 3 | 0 |
+| historical | 31 | 0 | 4 | 79 |
+| +4K | 110 | 0 | 3 | 1 |
 
 Two readings, both load-bearing:
 
 * Under the dimensionally-correct conversion **overflow is the only surface
-  mechanism that produces failures**, and it dominates the reach in both
-  climates (95/114 historical, 111/114 +4K). The historical "none loaded"
-  count is 16: segments whose peaks never reach the crest under the
-  historical hazard, so with scour removed no surface mechanism fires.
-  (Under the as-received `scour_script_k` companion scour would instead be
-  the historical dominant at ~70 of the surface-only segments — the
-  reach-wide *surface* dominance is entirely conditional on the
-  k-conversion; the overflow-vs-BEP comparison is not.)
-* The +4K hazard makes overflow near-universal (111/114) because peaks
-  reach the crests far more often.
+  mechanism that produces failures**. Historically it dominates just 31 of
+  114 segments, with 79 "none loaded" — segments whose peaks never reach the
+  crest under the historical hazard, so with scour removed no surface
+  mechanism fires. (Under the as-received `scour_script_k` companion scour
+  would instead be the historical dominant at ~70 of the surface-only
+  segments — the reach-wide *surface* dominance is entirely conditional on
+  the k-conversion; the overflow-vs-BEP comparison is not.)
+* The +4K hazard makes overflow near-universal (110/114) because peaks
+  reach the crests far more often. This sparse-historical / pervasive-+4K
+  overflow split is the corrected reading; it replaces the earlier picture
+  of near-universal historical overflow, which was inflated by the +0.6 m
+  rating-error mean now corrected to −0.16/−0.05 m (§8, D7).
 * The 110 segments without BEP curves are **surface-only lower bounds** —
   the borehole-free reaches carry unquantified BEP risk (the thesis's
   bounded-extrapolation tier; close-out manifest item 24 remains future
   work). The single riskiest segment of the whole basin in both scenarios
-  is BEP-driven KP58.8 (7.8e-3 historical, 4.2e-2 +4K), so this gap is
+  is BEP-driven KP58.8 (7.4e-3 historical, 4.1e-2 +4K), so this gap is
   material, not cosmetic.
 
 ### 5.3 Uemura sections (Tokachi 1–5, Satsunai 1–4)
@@ -207,62 +213,69 @@ Discharge-aligned max-within-section (ADR-0043 decision 3;
 
 | Section | Members | Historical [1/yr] | +4K [1/yr] | Ratio |
 |---|---|---|---|---|
-| KP62.4 (Tokachi 1) | 5 | 3.2e-3 | 2.4e-2 | 7.5 |
-| KP61.4 (Tokachi 2) | 7 | 2.6e-4 | 7.8e-3 | 30 |
-| KP59.6 (Tokachi 3) | 8 | 1.8e-3 | 1.5e-2 | 8.0 |
-| KP58.0 (Tokachi 4) | 8 | **7.9e-3** | **4.3e-2** | 5.4 |
-| KP56.4 (Tokachi 5) | 18 | 5.4e-4 | 1.0e-2 | 19 |
-| KP7.0 (Satsunai 1) | 3 | 5.1e-5 | 3.9e-3 | 77 |
-| KP6.4 (Satsunai 2) | 3 | 1.5e-4 | 6.4e-3 | 43 |
-| KP5.2 (Satsunai 3) | 6 | 7.5e-6 | 1.5e-3 | 203 |
-| KP4.2 (Satsunai 4) | 8 | 1.9e-6 | 5.4e-4 | 277 |
+| KP62.4 (Tokachi 1) | 5 | 6.9e-4 | 1.2e-2 | 17 |
+| KP61.4 (Tokachi 2) | 7 | 3.7e-7 | 2.4e-3 | ≫ |
+| KP59.6 (Tokachi 3) | 8 | 1.8e-3 | 1.4e-2 | 8.0 |
+| KP58.0 (Tokachi 4) | 8 | **7.5e-3** | **4.1e-2** | 5.5 |
+| KP56.4 (Tokachi 5) | 18 | 1.7e-5 | 3.8e-3 | 225 |
+| KP7.0 (Satsunai 1) | 3 | 1.1e-8 | 9.0e-4 | ≫ |
+| KP6.4 (Satsunai 2) | 3 | 1.9e-7 | 1.5e-3 | ≫ |
+| KP5.2 (Satsunai 3) | 6 | ~0 | 2.2e-4 | ≫ |
+| KP4.2 (Satsunai 4) | 8 | ~0 | 1.1e-5 | ≫ |
+
+(`≫` = historical annual at/near the display floor after the rating-error
+correction, so the ratio is not meaningful.)
 
 Section Tokachi 4 (KP58.0) governs the basin in both climates, and its
 governing member is the BEP-dominant segment KP58.8 — the subsurface
-mechanism controls the worst consequence section. The four Satsunai
-sections fall sharply from the pre-amendment (script-conversion) numbers —
-their historical values were scour-driven (Satsunai 1 and 4 drop ~12x and
-~400x, to 5.1e-5 and 1.9e-6) — while the BEP/overflow-governed Tokachi
-sections barely move. (Execution note: a naive
-absolute-stage section max was caught overstating KP56.4 by ~200x through
-datum mixing; the committed rule inverts the Eq. 4.19 rating exactly and
-takes Uemura's Eq. 14 max conditional on discharge.)
+mechanism controls the worst-consequence section, and it is essentially
+unmoved by the rating-error correction (7.9e-3 → 7.5e-3 historical). The
+BEP-driven Tokachi 3/4 barely move; the overflow-influenced sections
+(Tokachi 1/2/5 and all four Satsunai) fall sharply, their historical annuals
+now at or near the display floor, so their historical→+4K ratios are not
+meaningful (marked ≫). (Execution note: a naive absolute-stage section max
+was caught overstating KP56.4 by ~200x through datum mixing; the committed
+rule inverts the Eq. 4.19 rating exactly and takes Uemura's Eq. 14 max
+conditional on discharge.)
 
 ## 6. RQ4 — climate sensitivity and attribution
 
 ### 6.1 Annualized shift (posterior matrix, lambda 250)
 
 Across all 114 segments (figure `phase3_climate_shift.png`): the median
-annual system failure probability rises **4.8e-6 → 1.5e-3 (~310x)**, the
-mean 3.2e-4 → 4.4e-3 (14x); segments above 1e-3/yr go from **14 to 66 of
-114**, above 1e-2/yr from 0 to 17. The very low historical median reflects
-that, with fluvial scour corrected to zero, most surface-only segments carry
-no historical failure at all (their peaks stay below the crest); the +4K
-hazard lifts them over the crest, so the median ratio is large while the
-mean ratio (carried by the already-loaded segments) is ~14. At the BEP
-sections the system ratio is 5.4–13.1x (KP57.4 13.1, KP58.8 5.4, KP60.0 7.9,
-KP62.0 8.4). Per-segment ratios above ~100 occur only where the historical
+annual system failure probability rises from **0 historically to 3.7e-4** —
+more than half the segments carry no historical failure at all, because with
+the corrected rating error historical peaks rarely reach the crest and scour
+is zero — while the mean rises 1.0e-4 → 1.9e-3 (~18x). Segments above
+1e-3/yr go from **2 to 45 of 114**, above 1e-2/yr from 0 to 4. The
+historical→+4K contrast is carried by the many surface-only segments that
+switch from exactly zero to loaded once +4K lifts their peaks over the
+crest. At the BEP sections the system ratio is 5.5–19.5x (KP57.4 12.7,
+KP58.8 5.5, KP60.0 7.9, KP62.0 19.5 — the last raised because its overflow
+floor fell). Per-segment ratios above ~100 occur only where the historical
 probability is near-floor (display floor 1e-7 marks exact zeros).
 
 ### 6.2 Sensitivity brackets
 
 * **ADR-0037 lambda bracket** (system P_f at lambda 40 m vs 250 m):
-  x3.2/x2.0 (KP57.4 hist/+4K), x2.4/x2.0 (KP58.8), x3.4/x2.6 (KP60.0),
-  x1.2/x1.1 (KP62.0 — overflow-dominated, BEP upscaling barely matters).
+  x3.4/x2.2 (KP57.4 hist/+4K), x2.5/x2.1 (KP58.8), x3.4/x2.7 (KP60.0),
+  x3.1/x1.6 (KP62.0 — now BEP-dominant historically, so BEP upscaling
+  matters here too, unlike under the pre-correction overflow dominance).
 * **d70 interpretation**: the bulk co-primary cuts the BEP-driven system
-  numbers 4–25x (KP58.8 +4K: 4.3e-2 → 8.0e-3; KP57.4 historical:
-  8.1e-4 → 7.5e-5); KP62.0 is nearly indifferent (overflow-driven).
+  numbers (KP58.8 +4K: 4.1e-2 → 2.7e-3, x15; KP57.4 historical:
+  7.5e-4 → 2.1e-6 as the historical number drops to the floor); KP62.0 now
+  also gets cut (historical x2.6, +4K x1.2) since it is BEP-dominant.
 * **Prior vs posterior BEP**: the 2016 constraint lowers the system number
-  ~11% at KP58.8 historical (8.93e-3 → 7.90e-3) and <2% elsewhere — the
+  ~12% at KP58.8 historical (8.47e-3 → 7.42e-3) and <2% elsewhere — the
   Phase 2 result that the survival evidence is modestly informative
   propagates to the system level.
 * **Surface companions**: `scour_script_k` (the as-received conversion)
-  raises the BEP-section system numbers by at most ~8% (KP57.4 historical
-  7.55e-4 → 8.15e-4; ≤4% at the other three sections), because these
-  sections are BEP/overflow-governed — the as-received scour would matter to
-  the surface-only reach (§5.2), not to the BEP sections. `overflow_sine30h`
-  (his published sine pulse) lowers the overflow-dominated KP62.0 system
-  ~23–40% (KP62.0 +4K 2.02e-2 → 1.56e-2, historical 2.40e-3 → 1.44e-3) —
+  raises the three BEP-dominant sections' system numbers by at most ~8%
+  (KP57.4 historical 7.53e-4 → 8.13e-4; ≤2% at KP58.8/60.0), and the now
+  overflow-reduced KP62.0 by ~45% (5.24e-4 → 7.59e-4) — the as-received
+  scour matters most where the corrected surface number is small.
+  `overflow_sine30h` (his published sine pulse) lowers the KP62.0 system
+  ~19–27% (KP62.0 +4K 1.02e-2 → 8.25e-3, historical 5.24e-4 → 3.81e-4) —
   the duration sensitivity of the Dean integral.
 
 ### 6.3 Attribution (duration / compound; `rq4_attribution.json`)
@@ -291,15 +304,19 @@ duration strata everywhere (figure `phase3_rq4_attribution.png`).
   conversion **fluvial scour is zero both curve-based and event-based at
   every node**, so the earlier curve-vs-event scour discrepancy is moot; the
   composed system numbers are overflow/BEP-driven.
-* **External (WP2 report Tables 3/4)**: overflow annuals agree within
-  ~2–4x at most sections (KP56.4 historical: event-based overflow 3.7e-4 vs
-  their 4.5e-4 *total*). Their headline "erosion dominates overtopping" does
-  **not** reproduce here — the more so under the corrected conversion, which
-  zeroes fluvial scour at every node; overflow is the only surface mechanism
-  producing failures, and it leads at all five Tokachi sections. The
-  scour-magnitude comparison to their Tables 3/4 is now moot on our side
-  (our scour is zero); the WP1-hydrograph-provenance question (D8) is
-  retained only for completeness.
+* **External (WP2 report Table 4 overtopping, +4K)**: with the corrected
+  rating error the event-based +4K overflow annuals now sit close to
+  Uemura's own overtopping numbers at the mid-reach Tokachi sections
+  (KP56.4 3.2e-3 vs his 3.9e-3; KP58.0 1.6e-3 vs his 1.3e-3; within ~20%) —
+  a genuine tightening, since he computed those with these same workbook
+  rating-error values. Historical overflow is now sparse (§5.2), so the
+  historical comparison is floor-limited rather than informative. Their
+  headline "erosion dominates overtopping" still does **not** reproduce here
+  — the more so under the corrected scour conversion, which zeroes fluvial
+  scour at every node; overflow is the only surface mechanism producing
+  failures. The scour-magnitude comparison to their Tables 3/4 is moot on
+  our side (our scour is zero); the WP1-hydrograph-provenance question (D8)
+  is retained only for completeness.
 * **WP2 Fig. 13 features**: the Satsunai high-internal-ground behaviour
   (his KP7.0/12.8/16.4 remark) is reproduced mechanically (the ground gate
   is test-pinned). With fluvial scour corrected to zero the surface-mechanism
@@ -343,8 +360,11 @@ duration strata everywhere (figure `phase3_rq4_attribution.png`).
 6. **Surface-only segments** (110 of 114) are lower bounds missing the
    BEP mechanism entirely; the borehole-free-reach prior extension
    (manifest item 24) remains future work with its own ADR.
-7. **Satsunai rating-error values assumed** equal to Obihiro's
-   (ADR-0042 decision 6, flagged per row in the committed inputs).
+7. **Rating-error values now measured for both gauges** (ADR-0042
+   decision 6, amended 2026-07-22) from `Uncertainty_HQrelation.xlsx` —
+   Obihiro N(-0.16, 0.29) m, Nantai N(-0.05, 0.28) m — replacing the interim
+   0.6/0.38 m; both rivers now carry `wl_err_assumed=False`. No longer a
+   limitation; retained here for traceability of the correction (D7 closed).
 
 ## 9. Blocker manifest (updated; supersedes close-out items D1/D2)
 
@@ -360,9 +380,14 @@ duration strata everywhere (figure `phase3_rq4_attribution.png`).
 * **D2 — CLOSED** by ADR-0043 reconstruction (validated against his own
   geometry and assignments). Residual: an owner-supplied authoritative
   table replaces one committed CSV verbatim.
-* **NEW D7 — `Uncertainty_HQrelation.xlsx`** (two cells: the Satsunai/
-  Nantai rating-error mu and sigma). Replaces the ADR-0042 decision-6
-  assumption; consumed by `scripts/adapt_uemura_inputs.py` constants.
+* **D7 — CLOSED 2026-07-22.** `Uncertainty_HQrelation.xlsx` arrived
+  (gitignored, machine-local under `data/raw/`) and is the direct
+  implementation of paper Eqs. (9)/(10). Both gauges' measured rating error is now wired
+  (`scripts/adapt_uemura_inputs.py`; ADR-0042 decision 6 amended): Obihiro
+  (Tokachi) (-0.160, 0.294) m, Nantai (Satsunai) (-0.051, 0.283) m — the
+  interim 0.6/0.38 traced to his demo notebook, not Eq. 10. Overflow curves
+  regenerated; the KP62.0 dominance flip and the reduced reach-wide overflow
+  are reflected in §5–§7.
 * **NEW D8 — WP2 WP1-hydrograph provenance question** (not blocking):
   which discharge ensembles (duration, member count) fed their Tables
   3/4 — was needed to close the residual scour-magnitude gap in §7, now
