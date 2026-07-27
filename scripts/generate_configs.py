@@ -10,13 +10,14 @@ Sweep (provenance + spec section 7)
 * cross-section -- one CSV row each; KP 63.4 is excluded by default
   (unconfined, A_c blanket absent; provenance 3.1/3.5) and admitted only with
   ``--include-kp634``.
-* scenario -- ``historical`` and ``+4K``. The CSV carries no scenario-specific
-  geotechnics, so the two configs of a pair are identical apart from the
-  ``scenario`` tag; the climate difference lives in the downstream hydrograph.
+* scenario -- ``historical`` only. Per ADR-0023 (shape-invariant climate axis)
+  the +4K fragility equals the historical fragility by construction, so the
+  former +4K configs are dropped and climate differentiation lives on the
+  Phase 3 hazard side; the ``scenario`` tag remains the run identity.
 * d70_interpretation -- ``matrix`` (the CSV ``d70_m`` column) and ``bulk`` (the
   bulk-gravel co-primary of provenance 3.3), both carried as primary runs.
 
-Default = 4 x 2 x 2 = 16 configs; with ``--include-kp634`` = 5 x 2 x 2 = 20.
+Default = 4 x 1 x 2 = 8 configs; with ``--include-kp634`` = 5 x 1 x 2 = 10.
 
 Value provenance (three categories, never conflated)
 ----------------------------------------------------
@@ -644,7 +645,7 @@ def main(argv: list[str] | None = None) -> None:
         "Config.from_yaml."
     )
     print(f"Wrote {len(planned)} configs to {args.out_dir}")
-    print("\nPer-cross-section count (expect 4 = 2 scenarios x 2 interpretations):")
+    print("\nPer-cross-section count (expect 2 = 1 scenario x 2 interpretations):")
     for segment_id in sorted(per_section):
         print(f"  {segment_id}: {per_section[segment_id]}")
     print(

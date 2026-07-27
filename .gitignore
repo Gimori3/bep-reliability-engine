@@ -233,8 +233,11 @@ __pycache__/
 # Reference papers and documentation
 docs/references/
 
-# project workflow
+# project workflow — reviewer tooling and machine-local state, never part of the
+# thesis reproduction: project-notes.md, the hand-written guide library, and the
+# per-machine settings/lock files under .local-project/.
 project-notes.md
+.local-project/
 
 # Waseda DEM workbook exceeds the 500 KB pre-commit limit (see README there)
 data/digitized/Gounokawa_River_Levee_Okamura/Fig13*.xlsx
