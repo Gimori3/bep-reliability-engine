@@ -131,17 +131,33 @@ revetted, 高水護岸, KP 56.8 to 62.0). KP allocation anchored to posts and br
 | 57.4 | KP 56.0 to 58.0, type ⑥ (側帯盛土 only) | berm-only | toe-bounded 1998 L is a conservative lower bound; current L larger (3.1) |
 | 58.8 | KP 58.0 to 61.0, types ④ + ⑤ (berm + ドレン材 toe-drain) | drained | exit head set to zero in model; BEP near-zero; L moot |
 | 60.0 | KP 58.0 to 61.0, types ④ + ⑤ | drained | same as 58.8 |
-| 62.0 | KP 61.0 to 62.8, revetment, no mapped 側帯 | unreinforced | OPEN: memo marks this reach "berm-uncertain"; see below |
+| 62.0 | KP 61.0 to 62.8, revetment, no mapped 側帯 | unreinforced | CLOSED 2026-07-22 on three independent lines; see below |
 | 63.4 | beyond urban works | unreinforced | anomalous, unconfined; section may be excluded |
 
-Open sub-item, KP 62.0. The memo labels the KP 61.0 to 62.8 reach "unreinforced /
-berm-uncertain": revetment is present but no side-berm (側帯) is mapped, so the landside
-state cannot be pinned to berm-only vs unreinforced from the available sheets. The CSV
-carries `unreinforced` as the best estimate because it is the value the memo lists first
-and because it is the conservative choice for BEP (a credited berm would add seepage
-length and lower the failure probability). Confirm from the current-state cross-section
-before relying on it. This matters because KP 62.0 is the governing piping section
-(narrowest foreshore, 1998 i_v = 0.97).
+CLOSED sub-item, KP 62.0 (2026-07-22). The memo had labelled the KP 61.0 to 62.8 reach
+"unreinforced / berm-uncertain": revetment is present but no side-berm (側帯) is mapped, so
+the landside state could not be pinned to berm-only vs unreinforced from the type map
+alone. `unreinforced` was carried as the conservative best estimate. It is now positively
+confirmed on three independent lines, and the CSV value is unchanged:
+
+1. The 1998 OYO evaluation section for KP 62.0 (様式-5, 十勝川右岸 62.0 km) models a plain
+   trapezoidal levee and leaves the 浸透対策工 row blank: no landside berm was credited
+   even at the time of the deficiency rating.
+2. GSI DEM5A (5 m airborne lidar) cross-section profiles at about ten chainages within the
+   segment show a consistent unbermed geometry at every station: crest about 3 to 4 m above
+   landside ground, uniform landside slope about 1:3, a toe channel about 1 m below the
+   adjacent surface, level ground beyond, no intermediate bench. Ground-level imagery along
+   the crest agrees.
+3. The 側帯 annotated near KP 62 on the 1996 様式-2 plan sheet (built 平成 3 to 4) is a
+   第二種側帯. Under 河川管理施設等構造令施行規則 第14条 that class is for stockpiling
+   emergency earth, with length limited to roughly the volume of a 10 m length of levee;
+   it is the 第一種側帯 that is sited at 漏水箇所 (leakage locations) for embankment
+   stability. So the annotated feature is a short local stockpile pad, not a seepage
+   countermeasure — reconciling the plan-sheet marking with items 1 and 2.
+
+Residual: a buried landside toe drain cannot be excluded from remote elevation data; a
+functioning drain would only lower the computed failure probability. This mattered because
+KP 62.0 is the governing piping section (narrowest foreshore, 1998 i_v = 0.97).
 
 Consequence worth noting for interpretation: the drained treatment at KP 58.8 and KP 60.0
 drives their modelled BEP probability to near zero, so two of the five OYO sections are
@@ -346,8 +362,8 @@ CSV STATUS: all four confined-section rows are now corrected to the mapped A_c t
 - `d70_m` 7.0e-4: assigned by analogy (no clean matrix sample; shallow specimens gravelly).
   Bulk co-primary 13.5 mm.
 - `gamma_sub_kNm3` 16.80; pumiceous-matrix caveat strongest here and at 63.4.
-- `foreshore_width_m` 44 (narrowest). `remediation_state` unreinforced (OPEN: memo marks
-  the reach berm-uncertain; 3.2).
+- `foreshore_width_m` 44 (narrowest). `remediation_state` unreinforced (CONFIRMED
+  2026-07-22 on three independent lines; 3.2).
 
 ### KP 63.40 (structurally anomalous, unconfined; engineer may exclude)
 - `L_m` 26.9: FORCED PROXY only (11.0 m foreshore + 15.9 m base). The L memo recommends
@@ -388,8 +404,6 @@ Resolved in this revision:
 
 Open items requiring the engineer's action:
 
-- KP 62.0 `remediation_state`: berm-uncertain; confirm berm-only vs unreinforced from the
-  current-state cross-section. Governing section (3.2).
 - `L_m` post-remediation adjustment: berm-only KP 57.4 needs the larger current under-levee
   path (order +10 to +30 m) once current cross-sections are obtained; 1998 value is a
   conservative lower bound (3.1).
@@ -407,3 +421,275 @@ Standing data gap (does not block the analysis):
 Thesis-document corrections (outside this table):
 
 - Appendix field-permeability table (3.6) and appendix KP 63.4 HWL (3.7).
+
+---
+
+## 6. External corroboration added 2026-07-27 (Tokachi basin document review)
+
+*(Numbered 6 to resolve a duplicate-heading collision with section 4,
+"Per-cross-section detail"; cross-references elsewhere to "section 4.x" that
+mean an item below should be read as 6.x.)*
+
+Sources: `docs/tokachi_basin_document_review_2026-07-27.md`. The reference PDFs
+live in gitignored `docs/references/tokachi_river_basin/`.
+
+### 6.1 `remediation_state` — provenance chain now dated
+
+The column was previously sourced only to the Fukuda landside-type map (3.2)
+with no institutional chronology. The following is now on record:
+
+| Date | Event |
+|---|---|
+| 2002-07 | 河川堤防設計指針 (River Levee Design Guidelines) issued |
+| 2002-02 | 河川堤防の構造検討の手引き (JICE structural examination manual) |
+| 2004 | 河川堤防質的整備技術ガイドライン（案） (quality-improvement guideline) |
+| FY2003–2007 | Tokachi seepage countermeasures **initiated** on the basis of the seepage-resistance verification results |
+| 2004 | Earthquake review finds large-section + drain effective for *both* seismic and seepage; Obihiro implements drain works |
+| 2008-03 | Levee detailed-inspection maps published |
+
+Source: 続十勝川治水史 (2023), PDF pp. 122, 241, 279.
+Also relevant: side-berm fill at 北帯広築堤 (Tokachi right bank, Obihiro) was
+executed 1999–2003 (ibid., PDF pp. 272–273) — reconcile against the
+`remediation_state` label for the Obihiro-adjacent sections if it is ever
+revisited.
+
+### 6.2 Official 2008 seepage-safety classification of the study reaches
+
+The Obihiro Development and Construction Department's levee detailed-inspection
+result information maps (March 2008 status) classify managed reaches into three
+seepage-safety classes. **All reaches containing the five cross-sections in this
+CSV are classified 浸透による堤防の安全性が確保されている区間 — "seepage
+safety secured"** (confirmed by the user reading the maps directly, 2026-07-27).
+
+This is **not** in conflict with the 1998 OYO deficiency ratings: 1998
+unremediated deficiency → 1999–2003 works → 2008 secured. The engine evaluates
+the **unremediated** foundation, so the computed fragility and the 2008
+classification describe different configurations of the same sections. Do not
+present engine fragility at the drained sections as present-day reliability.
+
+Programme context (ibid.): of the 398.2 km of levee in the Obihiro jurisdiction
+targeted for detailed inspection, 359.8 km (90%) had been inspected by end
+FY2007, of which **66.7 km (19%) fell below the seepage safety standard**.
+
+### 6.3 Countermeasure → engine-quantity mapping
+
+Japanese design guidance (河川堤防の浸透に対する照査・設計のポイント, PWRI
+2014, printed p. 33 Table 7.1.1) states which physical quantity each
+countermeasure acts upon. This makes the `remediation_state`-is-a-label caveat
+tractable rather than merely acknowledged:
+
+| Countermeasure | Physical effect | Engine handle |
+|---|---|---|
+| 断面拡大 section enlargement | lengthen seepage path | `geometry.L` |
+| ドレーン工 landside-toe drain | reduce exit gradient at the toe | M5 uplift/heave gate |
+| ブランケット工 foreland blanket | reduce foundation inflow + toe pressure | foreland credit → `r_e` (ADR-0025 `blanketed_tanh`) |
+| 川表遮水工 riverside cutoff | lengthen path; reduce toe pressure | `geometry.L`, but **only if penetration ≥ 90% of `D_aq`** |
+| 堤内基盤排水工 landside drainage | reduce uplift on blanket base | `Z_uplift` term |
+
+Any remediation sensitivity built on this must be **opt-in, default-OFF and
+bit-identical at baseline**, with `None` dropped from `Config.to_metadata()` so
+the Phase 2 replay hash gate keeps passing (see `bep-change-control`).
+
+**Construction-record note supporting the ADR-0025 baseline.** The FY1977–79
+foundation-leakage works on the Otofuke–Kino levees installed sheet walls into
+the sand-gravel foundation as a cutoff; the method was judged **inappropriate
+for continuous cutoff in sand-gravel** and was replaced in FY1980 by a **soil
+blanket on the high-water bed** (続十勝川治水史, PDF p. 280). Consistent with
+PWRI 2014 printed pp. 47–48 (cutoff needs ≥90% penetration; coarse gravel
+deforms sheet piles). The remediation actually adopted in this reach is
+therefore a foreland blanket — the ADR-0025 `blanketed_tanh` baseline is
+supported by the construction record, not only by evidence weighting.
+
+### 6.4 Regional corroboration of `D_aq` and `k_aq` — and a prior-tail concern
+
+The Chiyoda new-channel groundwater investigation (続十勝川治水史, PDF p. 359)
+characterises the floodplain aquifer at **KP 37.6** as sand-gravel of
+**15–20 m thickness** with **k = 10⁻¹ to 10⁰ cm/s = 1e-3 to 1e-2 m/s**, and a
+hinterland water table 2–4 m below ground surface.
+
+Comparison with this CSV (a different geomorphic setting ~20 km downstream, so
+corroboration only — **no prior in the engine is derived from it**):
+
+| | CSV | Chiyoda |
+|---|---|---|
+| `D_aq_m` | 7–11 | 15–20 |
+| `k_aq_mps` | 6e-5 – 3.0e-3 | 1e-3 – 1e-2 |
+
+**Open concern.** With mean `k_aq` = 3.0e-3 and CoV 0.50, the lognormal 95th
+percentile is ≈ 5.8e-3 m/s, so the upper end of the measured band lies **beyond
+the prior's upper tail**. Because H_c ∝ k_aq^(-1/3) and the progression rate
+rises with k_aq, a prior that under-represents the upper tail is unconservative
+in the adverse direction. PWRI 2014 (printed p. 20) separately characterises
+ordinary measured permeability scatter as a factor of several to ~10, against
+the factor ≈2.9 that CoV 0.50 spans. Recommended follow-up: a **bounding
+scenario** at the upper measured conductivity in the ADR-0046 companion pattern
+— a scenario, **not** a change of prior, and not a CSV edit (the
+`tests/test_configs.py` drift guard pins the CSV to ADR-0012/0023).
+
+The same source records that the Chiyoda weir drives a **bypass seepage
+circulation** (river recharges hinterland upstream of the weir, hinterland
+drains to river downstream). The hinterland head is therefore not necessarily a
+passive far-field constant — a qualification on the M4 semi-infinite Mazure
+schematisation (ADR-0006).
+
+### 6.5 Corroboration of `gamma_sub_kNm3` dispersion
+
+PWRI 2014 (printed p. 20) characterises ordinary measured soil density scatter
+as ≈ ±0.1 g/cm³, which on a total unit weight near 2.0 g/cm³ is ≈5% and so
+corroborates the thesis prior CoV(γ'_bl) = 0.056 closely.
+
+---
+
+## 7. External corroboration added 2026-07-28 (full-volume 続十勝川治水史 review)
+
+Source: `docs/tokachi_chisuishi_full_review_2026-07-27.md`, the exhaustive
+816-page pass over 続十勝川治水史 (2023) that supersedes the partial reading
+recorded in section 4. Page citations are **PDF pages** of
+`docs/references/tokachi_river_basin/inr9av000000b2i3.pdf` with the printed page
+in parentheses. The PDF is gitignored and machine-local.
+
+**No value in `tokachi_bep_inputs.csv` was changed by this review.** Section 5.1
+verifies existing engine data against the official source; 5.2–5.4 add facts the
+audit trail did not previously carry.
+
+### 7.1 VERIFIED: the design HWL profile, the T.P. ↔ m MSL datum, and the crest rule
+
+`geometry.HWL` in every generated config is the official 2019 design
+high-water-level table (`data/raw/geometry/BankHeight_*Riv_2019.csv`, ADR-0018),
+read by `bep_reliability_engine.bank_heights.load_hwl` in **m MSL**. The Japanese
+sources state elevations in **T.P. (Tokyo Peil)**. The equivalence is now
+established numerically rather than assumed:
+
+| Check | Engine value | 続十勝川治水史 | Agreement |
+|---|---|---|---|
+| Design HWL at 基準地点帯広, KP 56.6 | 38.140 m MSL | **38.14 m T.P.** (p199 printed 179; p171 printed 151) | exact |
+| Design HWL at 河口, KP 2.4 | 5.10 m MSL | **5.10 m T.P.** (p199) | exact |
+| `DesignBankHeight` − `HWL`, upper Tokachi | **+1.50 m** at KP 56.6/57.4/58.8/60.0/62.0 | 堤防高 = 計画高水位 + **1.5 m** for the upper Tokachi (p150 printed 130) | exact |
+| `DesignBankHeight` − `HWL`, lower Tokachi | **+2.00 m** at KP 2.4 | + **2.0 m** for the reach mouth → Sarubetsu confluence (p150) | exact |
+
+Consequences worth recording:
+
+1. **The datum question is closed.** T.P. and the engine's `m MSL` are the same
+   datum at this reach, verified at two independent chainages plus two
+   independent freeboard constants. Given this project's history with external
+   data (the ≈105.6× scour-model conversion, the rating-error placeholder), this
+   is checked rather than asserted.
+2. **The engine is pinned to the in-force plan revision.** 38.14 m first appears
+   in the 河川整備基本方針 of 2007-03 (p171) and is **retained unchanged** by the
+   2022-09 revision (p199), which states explicitly that raising 計画高水位 would
+   increase disaster potential and is to be avoided. The 2019 bank-height table
+   reproduces that profile.
+3. **The apparent 0.42 m spread across revisions is not a spread.** The four
+   values in circulation are two revisions × two chainages:
+
+   | | 基準地点, KP 56.6 | 帯広 gauge, KP 56.7 |
+   |---|---|---|
+   | 工事実施基本計画 (1966, 1983; 1988 changed crest width only) | 38.44 (p150, p158) | 38.56 (p73, 1981 chapter) |
+   | 河川整備基本方針 (2007, retained 2022) | **38.14** (p171, p199) | **38.26** (p87, 2016 chapter) |
+
+   Interpolating the engine's own profile between KP 56.6 (38.140) and KP 56.8
+   (38.390) gives **38.265 m at the gauge chainage KP 56.7** — the 38.26 m the
+   2016 flood chapter tabulates, to 5 mm. *(That the difference is a chainage
+   offset is an inference; the values and the profile reproducing them are
+   measured.)*
+4. **The KP 62.0 design crest of 47.89 m MSL** used in the thesis is
+   46.39 + 1.50, i.e. the official upper-Tokachi freeboard rule applied to the
+   official design HWL.
+
+### 7.2 NEW: buried sluice conduits at two of the four study cross-sections
+
+The 樋門・樋管一覧表 (指定区間外区間, 帯広河川事務所, 令和4年3月末現在), p642
+(printed 614), read from a rendered page image at 8× to confirm the 左右岸
+column:
+
+| 築堤 | 距離標 | Bank | 樋門 | 断面 W×H×L ~ barrels |
+|---|---|---|---|---|
+| 北帯広築堤 | **57.3** | **right** | 木賊原樋門 | 6.0 × 3.0 × 27.0 ~ 2 |
+| 然別築堤 | 60.1 | left | 然別樋門 | 2.5 × 1.8 × 37.0 ~ 1 |
+| 北帯広築堤 | **61.7** | **right** | 伏古樋門 | 2.0 × 2.0 × 28.0 ~ 1 |
+| 西士狩築堤 | **62.0** | **right** | 西士狩樋門 | 1.5 × 2.0 × 28.0 ~ 1 |
+| 西帯広築堤 | 64.7 | right | 西帯広樋門 | 1.5 × 1.5 × 22.0 ~ 1 |
+| 西帯広築堤 | 65.3 | right | 西帯広第2樋門 | 1.5 × 2.0 × 26.0 ~ 1 |
+
+All five study cross-sections are Tokachi **right bank**. Two coincide with a
+sluice:
+
+- **KP 62.0** — the governing piping section (narrowest foreshore 44 m, 1998 OYO
+  exit gradient i_v = 0.97, `remediation_state: unreinforced`, failure mode
+  named in OYO 表6-3-1 as 基盤漏水によるパイピング) — has a sluice at **exactly
+  that chainage**, 28 m conduit.
+- **KP 57.4** has a sluice 0.1 km away at KP 57.3 — a 27 m **two-barrel**
+  6.0 × 3.0 m conduit, much the largest in the reach.
+
+Conduit lengths (27–28 m) are the same order as the modelled under-levee seepage
+lengths (`L_m` = 33 at KP 57.4, 47 at KP 62.0).
+
+**Status: a documented scope limitation, not a data conflict and not a value
+change.** The engine models foundation BEP beneath a plain trapezoidal levee
+(M4–M7). A buried culvert is a separate, separately-recognised pathway
+(preferential flow along the conduit, a discontinuity in the blanket, void
+formation around the barrel); Japanese doctrine treats 樋門周辺の空洞化 as its
+own inspection and design item. Nothing computed is invalidated; the model set
+simply does not contain the feature, at two of four sections, one of which
+governs.
+
+Note that section 3.2 above already cites 伏古樋門 — but only as a **KP landmark**
+for allocating `remediation_state` from the Fukuda longitudinal sheet, never as a
+physical feature of the cross-section. That gap is closed here.
+
+### 7.3 QUALIFIED: `remediation_state` — the toe drains have three documented drivers
+
+Section 4.1 dated the institutional chronology behind this column. The
+full-volume pass adds a qualification the `drained` label does not carry: the
+toe-drain programme in this basin has **three distinct documented rationales**,
+deployed in different reaches.
+
+| Driver | Evidence | Reach |
+|---|---|---|
+| **Seepage** | p279 (printed 257): after the 2002 手引き and 2004 質的整備 guideline, 浸透に対する安全性の照査 was performed and 裏のり尻ドレーン工法 etc. implemented where required | the verification-driven works; Fukuda types ④+⑤ at KP 58.0–61.0, i.e. the CSV's `drained` rows |
+| **Seismic (L2)** | p122 (printed 102), 2004 review: 大断面化（丘陵堤）＋ドレーン工 is effective "地震対策としてのみならず、浸透対策としても有効"; Obihiro deployed drains **in the liquefaction-prone lower Tokachi**. p423 (printed 401): 法尻ドレーン basin-wide under the 2007/2012 耐震性能照査指針. Round-table p709: the engineer who ordered them describes the rationale as purely seismic (perched lens liquefaction in enlarged sections) | lower Tokachi |
+| **Construction-stage** | pp128/130 (printed 108/110), 2003 earthquake restoration: 裏のり尻ドレーン工 for 湧水処理, toe protection and trafficability during rapid refill | earthquake-damaged sites |
+
+The current allocation is undisturbed — the study sections' drains are the
+seepage-driven works. What changes is the confidence statement: **a `drained`
+label identifies a physical feature, not a design intent.** That matters if the
+label is ever converted into physics (the standing opt-in remediation
+sensitivity, section 4.3 above), because a seismically-motivated drain need not
+have been sized against the seepage exit gradient.
+
+Related, same source: p122 records that 1993-damaged sites repaired with 基盤処理
+and full re-excavation (統内, 東稲穂) took almost no 2003 earthquake damage,
+whereas the partially re-excavated 幌岡 was damaged over nearly its full length —
+sourced evidence that remediation *depth* governs recurrence.
+
+### 7.4 NEW: gauge geometry around the study reach
+
+From the 水位観測所一覧表 (p613 printed 585, 令和4年4月現在) and its location map
+(p614), both read from rendered images:
+
+- **There is no water-level gauge on the Tokachi main stem between 帯広
+  (KP 56.7) and 芽室太 (KP 71.1).** The study sections KP 57.4–63.4 contain none;
+  the nearest is Obihiro, 0.7–6.7 km downstream. This is the sourced
+  justification for the structure of the M3 rating chain and quantifies its
+  extrapolation distance.
+- 帯広: KP 56.7, catchment 2,677.8 km², continuous record from 明40.1 =
+  **January 1907**.
+- **国見橋 is on the 然別川 at KP 0.6**, not on the Tokachi — relevant to the
+  KP 63.4 row, whose section 4 notes record "Shikaribetsu-referenced loading
+  (not Obihiro)".
+- Satsunai: 竜潭上流 56.4, 上札内 41.8, 第2大川橋 20.7, 南帯橋 15.0, **札内 4.0**.
+  Confirms from the official inventory the standing engine-side item that the
+  札内 gauge sits *inside* the Phase 3 Satsunai reach while the rating chain uses
+  Nantai, 8–11 km upstream.
+
+Two further items supporting existing decisions:
+
+- **p581 (printed 553)** lists 洪水痕跡調査 (flood-trace survey) among the
+  standard, required 河川カルテ data items. The ADR-0035 anchoring of the 2016
+  peak to a surveyed flood trace therefore rests on a routine statutory survey
+  product, not an ad hoc measurement.
+- **The Phase 2 loading is verified at its head.** The replay's Obihiro-datum
+  2016 input peak is **38.07 m MSL**, identical to the official published T10
+  peak at p87 (printed 67); the same committed record reproduces Memurobuto
+  64.79, Chiyoda 18.74 and Moiwa 12.68 exactly. This verifies the *input* stage
+  only, not the section-rating and trace-anchoring steps downstream of it.
