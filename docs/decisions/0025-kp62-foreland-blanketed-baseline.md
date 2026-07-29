@@ -1,7 +1,15 @@
 # ADR-0025: KP 62.0 Foreland Confinement — Blanketed Baseline Adopted; Open-Entry Recorded as an Evidence-Disfavored, On-Demand Sensitivity
 
-Date: 2026-07-05
-Status: Accepted (owner decision 2026-07-05, option iii: blanketed baseline with logged sensitivity; the B-7/様式-5 read below is the converging evidence)
+Date: 2026-07-05 (amended 2026-07-28)
+Status: Accepted (owner decision 2026-07-05, option iii: blanketed baseline with logged
+sensitivity; the B-7/様式-5 read below is the converging evidence). **Amended 2026-07-28:
+the logged on-demand sensitivity has been EXECUTED — it is no longer pending, and it no
+longer depends on foreshore ground truth arriving.** The decision below (blanketed
+baseline adopted, open entry evidence-disfavored) stands unchanged; what changes is that
+the open-entry end is now *measured* rather than only bounded on r_e, at
+max |ΔP_f,trans| = 2.3e-4 (KP 62.0, matrix, N = 1e5) with the static branch exactly
+invariant. See "Sensitivity executed" below and the companion note
+`adr0025-foreshore-width-and-sensitivity.md`.
 
 ## Context
 
@@ -98,14 +106,59 @@ KP 62.0's boundary conditions in those terms.
   `cross_section_id`/output path, and its metadata stamp keeps its results
   from masquerading as baseline.
 
+## Sensitivity executed (amendment, 2026-07-28)
+
+The sensitivity logged above as "to be run only if foreshore ground truth is
+later obtained" **was run without waiting for that data**, because the cost of
+running it turned out to be minutes rather than a field campaign. Driver
+`scripts/foreshore_width_study.py`, evidence
+`docs/decisions/adr0025-foreshore-sensitivity.json`, narrative companion
+`adr0025-foreshore-width-and-sensitivity.md`. Production matrix configs,
+N = 1e5, Δt = 225 s; **every baseline arm asserted bit-identical to its
+persisted production sweep** before comparison.
+
+| Section | B_f [m] | tanh credit | max abs ΔP_f,trans at B_f → 0 | max abs ΔP_f,static |
+|---|---|---|---|---|
+| KP 57.4 | 200 | 0.969 | 0.00111 | **0.00000** |
+| KP 58.8 | 325 | 0.995 | 0.00170 | **0.00000** |
+| KP 60.0 | 600 | 1.000 | 0.00440 | **0.00000** |
+| **KP 62.0** | **44** | 0.835 | **0.00023** | **0.00000** |
+
+Three findings that change how this ADR should be read:
+
+1. **The +37% r_e figure in the Context above does not propagate.** At KP 62.0
+   the full open-entry end moves transient P_f by ≤ 2.3e-4 and static P_f by
+   exactly 0. r_e drives only the uplift/heave gate (ADR-0028), and at this
+   section the gate is open with margin across the whole failure-relevant stage
+   range: heave threshold D_bl·γ'_bl/γ_w ≈ 0.32 m against a transmitted head
+   r_e·(h − z_toe) ≈ 0.45 m already at the lowest failing level (46.25 m MSL).
+   r_e is effectively **inert at KP 62.0** — which is *not* a general result
+   (the r_e-halved QA member at KP 58.8 moved P_f by 0.181, because −50% pushes
+   that section onto its 0.60 m threshold).
+2. **The tanh has saturated at every section.** At KP 62.0 (λ_out ≈ 38.7 m) any
+   B_f ≳ 100 m gives r_e = 0.3112 identically; 250 m, 600 m and infinity are
+   numerically the same answer. The adopted 44 m is the *conservative* end of
+   its own uncertainty range.
+3. **KP 62.0 is not the section where the foreland matters most.** Its measured
+   B_f effect is the *smallest* of the four, and its r_e (0.330) is the *lowest*
+   of the four — i.e. it transmits the least head, not the most. The narrative
+   consequence is recorded in the companion note §8.
+
 ## Data that would re-open this item
 
-A foreshore boring, test pit, or GPR line across the 44 m terrace, or HDB
-GIS/CAD cross-sections, showing the Ac absent or pinched out over most of
-the foreshore — in which case the logged sensitivity is run and this ADR is
-superseded. The 様式-5 / B-7 in-repo read is **done** (2026-07-05): it
-bounded the question in the blanketed direction and no further in-repo data
-can move it.
+Superseded by the amendment above. The original trigger — a foreshore boring,
+test pit, or GPR line across the 44 m terrace, or HDB GIS/CAD cross-sections,
+showing the Ac absent or pinched out — would still resolve the *stratigraphic*
+question, but it can no longer change a decision: the open end of that bracket
+is measured at ΔP_f ≤ 2.3e-4. Such data is therefore **no longer a blocker for
+anything**, and this ADR does not need to be superseded when it arrives. The
+様式-5 / B-7 in-repo read is **done** (2026-07-05): it bounded the question in
+the blanketed direction and no further in-repo data can move it.
+
+The `foreshore_width_m` column itself was independently verified on 2026-07-28
+(all four 様式-3 高水敷幅 annotations re-read verbatim; MLIT 2008 堤防現況縦断図
+row 4)② corroborates); the OYO 1998 source is retained over the later MLIT
+values for the reasons in the companion note §7.
 
 ## References
 
@@ -114,6 +167,9 @@ can move it.
   ADR-0021 (KP 62.0 governing-section context).
 - Companion notes: `adr0025-kp62-foreland-read.md` (the OYO sheet read:
   owner's read §§1–4 + repo reconciliation §5),
+  `adr0025-foreshore-width-and-sensitivity.md` (2026-07-28: B_f source
+  verification, the 高水敷幅 definition, and the executed sensitivity;
+  evidence `adr0025-foreshore-sensitivity.json`),
   `adr0006-leakage-boundary-ratios.md` §5.3,
   `adr0006-hinterland-l3-resolution.md` (the opposing conservative
   hinterland item at the same section).

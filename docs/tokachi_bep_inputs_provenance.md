@@ -14,12 +14,24 @@ Dataset appendix; Fukuda current-state and remediation documentation
 Reference convention: `Form 5` is the OYO 様式-5 specified soil constants (thesis Table
 `tab:form5` / appendix `tab:app_form5`); `grain-size table` is Table `tab:grainsize` /
 `tab:app_grainsize`; `thickness table` is Table `tab:strat_thickness`; `inventory` is
-Table `tab:oyo_inventory`; `L memo` is the seepage-length determination file.
+Table `tab:oyo_inventory`, itself transcribed from the OYO 様式-3 transverse sheets
+(`docs/references/R0*/…_03堤防横断方向土質調査結果図.pdf`); `L memo` is the seepage-length
+determination file. Independent corroborating source added 2026-07-28: the MLIT
+堤防現況縦断図 `docs/references/81_十勝川水系十勝川_R_02堤防現況縦断図_007.pdf` (levee
+detailed inspection, vintage 2008-03), whose row 4)② tabulates `高水敷幅 Bfp(m)`
+longitudinally — used for cross-checking only, never as a CSV source (see 3.9).
 
 Revision note: this version incorporates the engineer's resolutions to the field-
 permeability and HWL inconsistencies, the seepage-length determination, the remediation-
 state allocation, the confirmation of the gamma definition, and the NaN convention for
 k_bl at KP 63.4. It also raises one new open inconsistency (section 3.8).
+
+Revision note (2026-07-28): `foreshore_width_m` resolved end-to-end — its source
+annotation identified and re-read verbatim at all four confined sections, its meaning
+pinned (高水敷幅, not the levee-to-water distance), an independent MLIT 2008 source added
+as corroboration, the OYO-vs-MLIT source question decided in favour of OYO, and the
+ADR-0025 open-entry sensitivity executed and found immaterial. New section 3.9; sections
+2 (table), 3.5 and 4 amended. **No CSV value changed.**
 
 ---
 
@@ -59,7 +71,7 @@ methodology, which is a modeling step, not data transcription.
 | `D_bl_m` | thickness table, corrected against OYO 図4-1-X legends | none | A_c thickness at landside toe; all four confined sections corrected to the mapped competent A_c (57.4 = 0.80, 58.8 = 0.85, 60.0 = 0.85, 62.0 = 0.45 m), see 3.8 |
 | `k_bl_mps` | Form 5, A_c layer | cm/s to m/s, divide by 100 | NaN at KP 63.4 (A_c absent); see 3.4 note and 4 |
 | `gamma_sub_kNm3` | grain-size table rho_s | (G_s - 1) x 9.81 | per-section particle submerged weight; confirmed; see 3.4 |
-| `foreshore_width_m` | inventory | none | KP 63.4 "river-tight" encoded 0; see 3.5 |
+| `foreshore_width_m` | OYO 様式-3 `高水敷幅` dimension annotation, read verbatim per section (via `inventory` Table `tab:oyo_inventory`) | none | **This is the 高水敷幅 (high-water-bed width), NOT the levee-to-water distance — see 3.9 before using or re-measuring it.** All four confined values re-verified against the source sheets 2026-07-28 and corroborated by the MLIT 2008 堤防現況縦断図 row 4)②; KP 63.4 "river-tight" encoded 0; see 3.5, 3.9 |
 | `remediation_state` | Fukuda landside-type map | none | KP allocation; see 3.2 |
 
 Unit conversions applied silently in the CSV values:
@@ -233,9 +245,20 @@ Python pipeline distinguishes "undefined / not applicable" from an empty missing
 
 The inventory records the KP 63.4 foreshore as "river-tight" (levee fronts the river
 directly, effective width about 0 m), documented rather than missing, so it is encoded as
-a best estimate of 0. A zero foreshore transmits near-full river head to the foundation.
-Adjust to a small nominal positive value if your convention requires one. Note this is
-consistent with the memo's treatment of KP 63.4 as unconfined.
+a best estimate of 0. Note this is consistent with the memo's treatment of KP 63.4 as
+unconfined.
+
+Two corrections logged 2026-07-28 (3.9):
+
+1. **Contradicted by the second source.** The MLIT 2008 堤防現況縦断図 row 4)② reads
+   `高水敷幅` ≈ 28 m at KP 63.4, not 0. KP 63.4 is excluded from the confined-BEP
+   production population by default, so the cell is inert and is left as-is; but the
+   "river-tight" justification should not be relied on if KP 63.4 is ever admitted.
+2. **The stated consequence was wrong.** "A zero foreshore transmits near-full river head
+   to the foundation" overstates it: B_f = 0 removes only the entry term from
+   `r_e = λ_in / (λ_out,eff + L + λ_in)`, leaving the under-levee L and the hinterland
+   λ_in. At KP 62.0 the measured effect of B_f → 0 is r_e 0.330 → 0.452 (+37%) and
+   transient P_f + ≤ 2.3e-4 — not "near-full head". Sentence removed.
 
 ### 3.6 RESOLVED: field-permeability factor-of-100 discrepancy
 
@@ -303,6 +326,73 @@ RESOLUTION (KP 57.4, 58.8, 60.0). The three remaining confined sections are now 
 
 CSV STATUS: all four confined-section rows are now corrected to the mapped A_c thickness: D_bl_m = 0.80 (57.4), 0.85 (58.8), 0.85 (60.0), 0.45 (62.0). KP 63.4 remains at the nominal 1.0 m (A_c absent, excluded from the confined population). The CSV is fully aligned with the corrected chapter; no confined section remains provisional.
 
+### 3.9 RESOLVED (2026-07-28): what `foreshore_width_m` means, why it is not the levee-to-water distance, and why OYO 1998 is retained
+
+Raised because a satellite-imagery check at KP 62.0 appeared to contradict the CSV: aerial
+imagery shows roughly 200 to 300 m between the levee and the water, against a recorded 44 m.
+Full write-up and measured evidence: `docs/decisions/adr0025-foreshore-width-and-sensitivity.md`.
+
+**Definition (read this before re-measuring the column).** The source annotation is
+`高水敷幅` (kosuishiki-haba) = the width of the **high-water bed**: in a compound-section
+(複断面) river, the terrace one step ABOVE the 低水路 (low-water channel). It is dry in
+normal flow and inundates only during events. It is NOT the distance from the levee to the
+waterline. The Tokachi here is a braided gravel-bed reach (河道分類 セグメント 1), so the
+低水路 is hundreds of metres wide and mostly dry gravel bar at low flow; at KP 62.0 the
+terrace (高水敷高 = 45.00 m) stands 3.4 m above base flow (41.60 m) and about 6.6 m above
+mean bed (平均河床高 = 38.4 m). Imagery therefore shows 44 m of vegetated berm plus a few
+hundred metres of braid plain, and a levee-to-water measurement over-reads by 5 to 10 times.
+
+**It is also the physically correct quantity.** `foreshore_width_m` feeds exactly one
+kernel, `hydraulics.leakage_length_out` (`lambda_out_eff = lambda_out * tanh(B_f /
+lambda_out)`, ADR-0006), and thence r_e, which since ADR-0028 drives only the uplift/heave
+gate. USACE (2000) EM 1110-2-1913 App. B defines that length as the distance from the levee
+toe to the effective seepage entry, i.e. where "a hypothetical open seepage entry face fully
+penetrating the pervious substratum, with an impervious top stratum between this line and
+the levee" sits. At KP 62.0 the low-water channel bed (38.4 m) is about 6 m below the A_c
+base (about 44 m), so the channel fully penetrates the aquifer and IS the entry face; the
+braid-plain gravel riverward of the terrace is scoured aquifer at outcrop and adds zero
+entry resistance. B_f is a geometric/stratigraphic property and is stage-independent: at
+high water the foreland is submerged and the head acts on top of the blanket across its
+full width, which is exactly the configuration blanket theory assumes. B_f = 0 means "no
+blanket riverward of the toe" (the ADR-0025 open_entry case), not "water touches the levee".
+
+**Verification (all four confined sections, 2026-07-28).** The 様式-3 sheets were
+re-rendered and the annotations read verbatim: 200 (57.4), 325 (58.8), 600 (60.0), 44
+(62.0) — four of four matching the CSV exactly. No extraction or transcription error.
+
+**Independent second source.** MLIT 堤防現況縦断図
+(`81_十勝川水系十勝川_R_02堤防現況縦断図_007.pdf`, 整理番号 8/13) carries row 4)②
+`高水敷幅 Bfp(m)` as a longitudinal plot; its detailed-inspection row reproduces the same
+per-section 局所動水勾配 values as OYO, and the inspection vintage is 2008-03. Digitized
+(+/-5 m; the row clips at about 150 m): KP 57.4/58.8/60.0 all ">=148 (clipped)", KP 62.0
+about 34, KP 63.4 about 28, and the whole KP 60.3 to 63.9 reach 17 to 35 m. This confirms
+both the narrow-foreshore character of KP 62.0 and that the wide sections exceed the
+readable range — and, over 1998 to 2008, shows no widening (no evidence of the channel
+migration / 樹林化 hypothesis at this location).
+
+**Source decision: OYO 1998 retained; MLIT recorded as corroboration only.** Switching the
+column to the more recent, more authoritative MLIT values was considered and rejected:
+(1) the MLIT row clips at about 150 m and so cannot supply three of the four values;
+(2) it is a raster digitization (+/-5 m) against OYO's stated numerals, so precision is
+worse not better; (3) every other column in the row is OYO 1998/1999, and B_f pairs with
+`D_fore`/`k_fore`, themselves ADR-0005 proxies of the 1998 `D_bl`/`k_bl`; (4) the reach's
+remediation is landside (berms, toe drains) and extends `L`, not 高水敷幅, so
+"post-remediation" does not apply to this column; (5) the measured effect is nil (below);
+and (6) `geometry.foreshore_width` sits inside `Config.to_metadata()` and therefore inside
+`config_hash()`, so editing the CSV invalidates all 8 persisted Phase 1 sweeps, the Phase 2
+production posterior, and the Phase 3 campaign, because
+`bayesian_reliability_updating/replay.py` refuses hash drift.
+
+**Measured consequence (ADR-0025 sensitivity, executed 2026-07-28).** Production matrix
+configs, N = 1e5, baseline arms asserted bit-identical to the persisted sweeps. Removing
+the ENTIRE foreshore (B_f -> 0) gives max |dP_f,trans| = 0.00111 (57.4), 0.00170 (58.8),
+0.00440 (60.0), 0.00023 (62.0), with max |dP_f,static| exactly 0.00000 everywhere (the
+static branch is r_e-independent since ADR-0028). At KP 62.0 the tanh is saturated above
+B_f about 100 m, so 44 versus 250 m is worth 5e-5 in P_f, in the conservative direction.
+**Conclusion: this column is verified, doubly sourced, correctly defined, and inert. Do not
+re-measure it from imagery.** The high-value, poorly-constrained geometric input is `L`
+(3.1), which ADR-0033 ranks top by total-effect Sobol' index.
+
 ---
 
 ## 4. Per-cross-section detail
@@ -318,7 +408,9 @@ CSV STATUS: all four confined-section rows are now corrected to the mapped A_c t
   the 様式-5 lumped cohesive layer (about 0.6 to 1.0 m); resolved (3.8).- `k_aq_mps` 3.0e-3, `k_bl_mps` 1.6e-6: Form 5, cm/s divided by 100.
 - `d70_m` 7.0e-4: matrix, from B-2-1 (d_60 = 0.635 mm). Bulk co-primary 5.5 mm.
 - `gamma_sub_kNm3` 16.84: from B-2-1/2/3 G_s.
-- `foreshore_width_m` 200. `remediation_state` berm-only (Fukuda type ⑥).
+- `foreshore_width_m` 200: 様式-3 `高水敷幅` annotation, verified verbatim 2026-07-28;
+  MLIT 2008 profile reads ">=148 (clipped)", consistent. See 3.9.
+  `remediation_state` berm-only (Fukuda type ⑥).
 
 ### KP 58.80
 - `L_m` 35: L memo, 様式-5/7 base. State `drained`, so the model sets exit head to zero and
@@ -331,7 +423,9 @@ CSV STATUS: all four confined-section rows are now corrected to the mapped A_c t
 - `k_aq_mps` 2.0e-3, `k_bl_mps` 1.0e-6: Form 5.
 - `d70_m` 5.3e-4: matrix, from B-4-1 (d_60 = 0.459 mm). Bulk co-primary 13 mm.
 - `gamma_sub_kNm3` 16.49 (lowest, B-4-1 G_s = 2.645).
-- `foreshore_width_m` 325. `remediation_state` drained (Fukuda types ④ + ⑤).
+- `foreshore_width_m` 325: 様式-3 `高水敷幅`, verified verbatim 2026-07-28; MLIT 2008
+  ">=148 (clipped)", consistent. See 3.9.
+  `remediation_state` drained (Fukuda types ④ + ⑤).
 - Note: L memo flags B-4 landside lab data showing 53 percent gravel where A_c should sit,
   i.e. the landside blanket may be thin or breached. Relevant to both the D_bl conflict
   (3.8) and the no-hinterland-credit L convention.
@@ -348,7 +442,9 @@ CSV STATUS: all four confined-section rows are now corrected to the mapped A_c t
 - `k_aq_mps` 1.0e-3, `k_bl_mps` 1.0e-6: Form 5.
 - `d70_m` 2.6e-4: matrix, from B-6-1 (d_60 = 0.228 mm), only section squarely inside the
   Sellmeijer validated range. Bulk co-primary 1.3 mm.
-- `gamma_sub_kNm3` 16.72. `foreshore_width_m` 600. `remediation_state` drained.
+- `gamma_sub_kNm3` 16.72. `remediation_state` drained.
+- `foreshore_width_m` 600: 様式-3 `高水敷幅`, verified verbatim 2026-07-28; MLIT 2008
+  ">=148 (clipped)", consistent. See 3.9.
 
 ### KP 62.00 (governing piping section)
 - `L_m` 47: L memo, toe-to-toe including landside berm (range 40 to 55). Failure mode in
@@ -362,8 +458,12 @@ CSV STATUS: all four confined-section rows are now corrected to the mapped A_c t
 - `d70_m` 7.0e-4: assigned by analogy (no clean matrix sample; shallow specimens gravelly).
   Bulk co-primary 13.5 mm.
 - `gamma_sub_kNm3` 16.80; pumiceous-matrix caveat strongest here and at 63.4.
-- `foreshore_width_m` 44 (narrowest). `remediation_state` unreinforced (CONFIRMED
-  2026-07-22 on three independent lines; 3.2).
+- `foreshore_width_m` 44: 様式-3 `高水敷幅` annotation, verified verbatim 2026-07-28;
+  MLIT 2008 profile reads ~34 m, corroborating (no widening 1998->2008). Narrowest of the
+  four, but note this is the smallest *tanh credit* (0.835 vs 0.969-1.000), NOT the least
+  foreland attenuation: KP 62.0 has the LOWEST r_e of the four sections (0.330). Measured
+  effect of removing the foreshore entirely: dP_f,trans <= 2.3e-4. See 3.9.
+  `remediation_state` unreinforced (CONFIRMED 2026-07-22 on three independent lines; 3.2).
 
 ### KP 63.40 (structurally anomalous, unconfined; engineer may exclude)
 - `L_m` 26.9: FORCED PROXY only (11.0 m foreshore + 15.9 m base). The L memo recommends
@@ -375,7 +475,8 @@ CSV STATUS: all four confined-section rows are now corrected to the mapped A_c t
 - `k_bl_mps` NaN: undefined, no A_c (engineer convention).
 - `k_aq_mps` 6.0e-5: Form 5, single unit, about 1.5 orders below the others.
 - `d70_m` 7.0e-4: by analogy. Bulk co-primary 9.5 mm.
-- `gamma_sub_kNm3` 16.85; pumiceous caveat applies. `foreshore_width_m` 0 (river-tight).
+- `gamma_sub_kNm3` 16.85; pumiceous caveat applies. `foreshore_width_m` 0 (river-tight;
+  contradicted by the MLIT 2008 profile at ~28 m — inert, section excluded; see 3.5, 3.9).
   `remediation_state` unreinforced (beyond urban works).
 - Additional anomalies on file: Shikaribetsu-referenced loading (not Obihiro), shorter
   design event, distinct borehole naming, recovery-method field permeability flagged as an

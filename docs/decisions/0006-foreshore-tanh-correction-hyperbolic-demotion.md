@@ -3,6 +3,21 @@
 Date: 2026-06-11 (amended 2026-07-05)
 Status: Accepted (amended: Decision 2's L/λ_in diagnostic was a category error — corrected below with the citation trail re-anchored to the primary sources. The amendment did NOT itself close all r_e questions: the KP 62.0 foreland confinement was left open — see the Open Item section — and was resolved the same day by ADR-0025: blanketed baseline adopted, open-entry logged as an evidence-disfavored on-demand sensitivity.)
 
+> **Note (2026-07-28), Decision 1 unchanged.** The tanh correction retained here
+> was measured for the first time on 2026-07-28 (ADR-0025 amendment; companion
+> `adr0025-foreshore-width-and-sensitivity.md`). Two facts a reader of this ADR
+> should carry: (i) the correction is **saturated at every production section** —
+> tanh credits are 0.835 (KP 62.0) and 0.969–1.000 elsewhere, and above
+> B_f ≈ 2.5·λ_out the term is numerically indistinguishable from the
+> semi-infinite limit; (ii) removing the foreland entirely (B_f → 0) moves
+> transient P_f by ≤ 0.0044 at every section and static P_f by **exactly zero**
+> (the latter is the expected ADR-0028 consequence and is asserted by the
+> driver). Decision 1 stands — the term is correct, cheap, and the conservative
+> choice — but it is not a load-bearing driver of the fragility deliverable, and
+> should not be presented as one. The `foreshore_width_m` inputs it consumes
+> were verified verbatim against the OYO 様式-3 高水敷幅 annotations on the same
+> date.
+
 ## Context (amended)
 
 The engine's response factor is the three-term ratio

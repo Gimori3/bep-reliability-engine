@@ -1,0 +1,124 @@
+{
+  "study": "ADR-0025 foreshore-width (B_f) fragility sensitivity",
+  "generated_by": "scripts/foreshore_width_study.py",
+  "d70_interpretation": "matrix",
+  "note": "B_f enters only hydraulics.leakage_length_out -> r_e, and since ADR-0028 r_e drives only the uplift/heave gate. B_f = 0 is the ADR-0025 open_entry bound (x1 = 0). Every baseline arm is asserted bit-identical to its persisted production sweep before comparison.",
+  "sections": [
+    {
+      "section": "KP57.4",
+      "config": "configs/kp57_4_historical_matrix.yaml",
+      "production_sweep": "results/tokachi_kp57.4_historical_matrix.h5",
+      "baseline_foreshore_width_m": 200.0,
+      "baseline_bit_identical_to_production": true,
+      "n_samples": 100000,
+      "median_lambda_in_m": 101.62101224057334,
+      "median_lambda_out_eff_m": 93.61414689336044,
+      "median_foreland_tanh_credit": 0.9686149766910555,
+      "arms": {
+        "B_f=0m": {
+          "foreshore_width_m": 0.0,
+          "median_lambda_out_eff_m": 0.0,
+          "median_foreland_tanh_credit": 0.0,
+          "max_abs_delta_P_f_trans": 0.0011099999999999999,
+          "max_abs_delta_P_f_trans_at_stage_m_msl": 40.0,
+          "P_f_trans_baseline_at_that_stage": 0.03616,
+          "P_f_trans_arm_at_that_stage": 0.03727,
+          "max_abs_delta_P_f_static": 0.0
+        }
+      },
+      "elapsed_s": 146.7
+    },
+    {
+      "section": "KP58.8",
+      "config": "configs/kp58_8_historical_matrix.yaml",
+      "production_sweep": "results/tokachi_kp58.8_historical_matrix.h5",
+      "baseline_foreshore_width_m": 325.0,
+      "baseline_bit_identical_to_production": true,
+      "n_samples": 100000,
+      "median_lambda_in_m": 115.65337775384111,
+      "median_lambda_out_eff_m": 109.39766926197623,
+      "median_foreland_tanh_credit": 0.9945874173192529,
+      "arms": {
+        "B_f=0m": {
+          "foreshore_width_m": 0.0,
+          "median_lambda_out_eff_m": 0.0,
+          "median_foreland_tanh_credit": 0.0,
+          "max_abs_delta_P_f_trans": 0.0016999999999999932,
+          "max_abs_delta_P_f_trans_at_stage_m_msl": 40.5,
+          "P_f_trans_baseline_at_that_stage": 0.0747,
+          "P_f_trans_arm_at_that_stage": 0.0764,
+          "max_abs_delta_P_f_static": 0.0
+        }
+      },
+      "elapsed_s": 254.7
+    },
+    {
+      "section": "KP60.0",
+      "config": "configs/kp60_0_historical_matrix.yaml",
+      "production_sweep": "results/tokachi_kp60.0_historical_matrix.h5",
+      "baseline_foreshore_width_m": 600.0,
+      "baseline_bit_identical_to_production": true,
+      "n_samples": 100000,
+      "median_lambda_in_m": 86.74003331538086,
+      "median_lambda_out_eff_m": 82.49468222378047,
+      "median_foreland_tanh_credit": 0.9999990370183383,
+      "arms": {
+        "B_f=0m": {
+          "foreshore_width_m": 0.0,
+          "median_lambda_out_eff_m": 0.0,
+          "median_foreland_tanh_credit": 0.0,
+          "max_abs_delta_P_f_trans": 0.004400000000000015,
+          "max_abs_delta_P_f_trans_at_stage_m_msl": 42.75,
+          "P_f_trans_baseline_at_that_stage": 0.31427,
+          "P_f_trans_arm_at_that_stage": 0.31867,
+          "max_abs_delta_P_f_static": 0.0
+        }
+      },
+      "elapsed_s": 317.1
+    },
+    {
+      "section": "KP62.0",
+      "config": "configs/kp62_0_historical_matrix.yaml",
+      "production_sweep": "results/tokachi_kp62.0_historical_matrix.h5",
+      "baseline_foreshore_width_m": 44.0,
+      "baseline_bit_identical_to_production": true,
+      "n_samples": 100000,
+      "median_lambda_in_m": 38.40913233817254,
+      "median_lambda_out_eff_m": 30.502907347327614,
+      "median_foreland_tanh_credit": 0.8350259101002142,
+      "arms": {
+        "B_f=0m": {
+          "foreshore_width_m": 0.0,
+          "median_lambda_out_eff_m": 0.0,
+          "median_foreland_tanh_credit": 0.0,
+          "max_abs_delta_P_f_trans": 0.00023999999999990695,
+          "max_abs_delta_P_f_trans_at_stage_m_msl": 51.0,
+          "P_f_trans_baseline_at_that_stage": 0.76809,
+          "P_f_trans_arm_at_that_stage": 0.76833,
+          "max_abs_delta_P_f_static": 0.0
+        },
+        "B_f=100m": {
+          "foreshore_width_m": 100.0,
+          "median_lambda_out_eff_m": 36.224457239555726,
+          "median_foreland_tanh_credit": 0.9916549930768104,
+          "max_abs_delta_P_f_trans": 9.999999999998899e-05,
+          "max_abs_delta_P_f_trans_at_stage_m_msl": 49.25,
+          "P_f_trans_baseline_at_that_stage": 0.40958,
+          "P_f_trans_arm_at_that_stage": 0.40948,
+          "max_abs_delta_P_f_static": 0.0
+        },
+        "B_f=300m": {
+          "foreshore_width_m": 300.0,
+          "median_lambda_out_eff_m": 36.529289080540025,
+          "median_foreland_tanh_credit": 0.9999998528813471,
+          "max_abs_delta_P_f_trans": 9.999999999998899e-05,
+          "max_abs_delta_P_f_trans_at_stage_m_msl": 49.25,
+          "P_f_trans_baseline_at_that_stage": 0.40958,
+          "P_f_trans_arm_at_that_stage": 0.40948,
+          "max_abs_delta_P_f_static": 0.0
+        }
+      },
+      "elapsed_s": 703.4
+    }
+  ]
+}
