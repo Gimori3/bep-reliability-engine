@@ -843,6 +843,61 @@ Two further items supporting existing decisions:
   64.79, Chiyoda 18.74 and Moiwa 12.68 exactly. This verifies the *input* stage
   only, not the section-rating and trace-anchoring steps downstream of it.
 
+### 4.6 Kasumi-tei (霞堤) coincidence audit — CLOSED 2026-07-28
+
+**Question.** A kasumi-tei is a deliberately discontinuous levee: the embankment
+is interrupted and left open at its downstream end, with the next embankment
+overlapping it inland. Floodwater enters the hinterland through the opening by
+design and interior water drains out through it. An opening is therefore not a
+continuous barrier whose overtopping constitutes failure in the sense the Phase 3
+series composition assumes. Do any of the 114 production segments sit at one?
+
+**Source.** 霞堤一覧表, 続十勝川治水史 (2023) PDF p. 268 (printed p. 246),
+transcribed in full to `data/processed/kasumi_tei_locations.csv` (34 rows:
+Tokachi 13, Satsunai 13, Otofuke 8 — matching the counts stated at PDF p. 266).
+
+**Result: exactly one coincidence, and it is immaterial to the BEP composition.**
+
+| Reach | Registry extent | Openings on that river/bank | Verdict |
+|---|---|---|---|
+| Tokachi right | KP 53.8–62.8 | 63.8, 69.4, 74.6, 76.6, 80.4, 85.0, 89.0, 96.4 | **clear** — nearest (KP 63.8, 西帯広築堤) is 1.0 km above the reach top |
+| Satsunai left | KP 3.2–16.6 | 9.2, 24.2, 32.0, 34.2, 40.8, 43.0 | **one hit: KP 9.2 (愛国築堤)** |
+
+Satsunai *right*-bank openings at KP 7.0 and 14.6 fall inside the KP range but the
+registry models the **left** bank only, so they do not apply. Otofuke is not in
+the registry at all.
+
+**Why the single hit does not require a numbers change.**
+
+1. Under the production `exact` BEP-source policy the KP 9.2 segment carries
+   `bep_source_kp=None` — all four OYO sections are on the Tokachi. **The BEP
+   branch of the composition is untouched**, so no BEP result changes.
+2. The official 2019 bank-height table supplies a **continuous** planned
+   high-water level (55.71 m) and a design crest exactly 1.50 m above it
+   (57.21 m) through KP 9.2, identical in form to its neighbours. The design
+   profile is not interrupted there; the register records the location of the
+   kasumi-tei *structure*, not a gap in the design crest. Only the surface
+   (overflow) terms at that one segment are affected, and only conceptually.
+3. Scale: 1 of 114 segments, on the river that carries no BEP curve.
+
+**What was added** (all additive, no behaviour change to `build_registry`, no
+persisted result altered):
+
+- `data/processed/kasumi_tei_locations.csv` — the transcribed register.
+- `system_integration.segments.load_kasumi_tei` and
+  `kasumi_tei_coincidences` — pure, informational; **not consulted by
+  `build_registry`**.
+- `tests/test_system_integration.py::test_kasumi_tei_register_and_the_single_production_coincidence`
+  — pins the register counts and the single-coincidence conclusion, so it fails
+  if the study reaches, the grid or the register ever change that verdict.
+
+**Live for future work.** If the reach is ever extended, or the `nearest`
+BEP-source policy is adopted, re-run `kasumi_tei_coincidences` first — the
+Tokachi right bank acquires eight openings from KP 63.8 upward, and a densely
+populated Satsunai reach acquires five more. In that regime the coincidences stop
+being immaterial and the affected nodes need either exclusion or an explicit
+treatment.
+
 ---
 
 ## 8. Independent cross-validation added 2026-07-28 (Kunijiban borehole drop)

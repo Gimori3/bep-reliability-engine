@@ -44,9 +44,12 @@ from bep_reliability_engine.hydrographs import (
 __all__ = [
     "STUDY_REACHES",
     "OYO_BEP_SECTIONS",
+    "KASUMI_TEI_CSV",
     "Segment",
     "SegmentRegistry",
     "build_registry",
+    "load_kasumi_tei",
+    "kasumi_tei_coincidences",
     "load_section_table",
 ]
 
@@ -327,3 +330,105 @@ def load_section_table(
     return SegmentRegistry(
         segments=tuple(annotated), bep_source_policy=registry.bep_source_policy
     )
+
+
+# Kasumi-tei (霞堤) registry: the open, discontinuous levees of the upper
+# Tokachi system. Transcribed from the 霞堤一覧表 of 続十勝川治水史 (2023),
+# PDF p. 268 (printed p. 246); see docs/tokachi_basin_document_review_2026-07-27.md
+# and docs/tokachi_bep_inputs_provenance.md section 4.6.
+KASUMI_TEI_CSV = Path("data/processed/kasumi_tei_locations.csv")
+
+
+def load_kasumi_tei(
+    csv_path: str | Path = KASUMI_TEI_CSV,
+) -> tuple[tuple[str, str, str, float], ...]:
+    """Load the kasumi-tei (open-levee) location register.
+
+    A kasumi-tei is a deliberately discontinuous levee: the embankment is
+    interrupted and the downstream end left open, with the next embankment
+    overlapping it further inland. Floodwater enters the hinterland through
+    the opening by design, and interior water drains out through it, so an
+    opening is not a continuous barrier whose overtopping constitutes
+    failure in the same sense as a continuous reach.
+
+    This loader is informational and is *not* consulted by
+    :func:`build_registry`; the production segment set and every persisted
+    Phase 3 result are unchanged by its presence. It exists so that the
+    coincidence check of :func:`kasumi_tei_coincidences` can be run, and
+    re-run, whenever the study reaches are extended.
+
+    Parameters
+    ----------
+    csv_path : str or pathlib.Path
+        Register CSV with columns ``river``, ``bank``, ``name_ja``, ``kp_km``.
+
+    Returns
+    -------
+    tuple of (str, str, str, float)
+        ``(river, bank, name_ja, kp_km)`` rows, in file order.
+
+    Notes
+    -----
+    The register covers the Tokachi, Satsunai and Otofuke rivers. Counts as
+    of the 2023 source: 13 on the Tokachi, 13 on the Satsunai, 8 on the
+    Otofuke. Only the Tokachi right bank and Satsunai left bank fall within
+    the modelled study reaches (:data:`STUDY_REACHES`).
+    """
+    rows: list[tuple[str, str, str, float]] = []
+    with Path(csv_path).open(newline="", encoding="utf-8") as handle:
+        for record in csv.DictReader(handle):
+            rows.append(
+                (
+                    record["river"],
+                    record["bank"],
+                    record["name_ja"],
+                    float(record["kp_km"]),
+                )
+            )
+    return tuple(rows)
+
+
+def kasumi_tei_coincidences(
+    registry: SegmentRegistry,
+    csv_path: str | Path = KASUMI_TEI_CSV,
+) -> tuple[tuple[Segment, str], ...]:
+    """Report registry segments that coincide with a kasumi-tei opening.
+
+    Parameters
+    ----------
+    registry : SegmentRegistry
+        The segment set to test, typically from :func:`build_registry`.
+    csv_path : str or pathlib.Path
+        Kasumi-tei register, see :func:`load_kasumi_tei`.
+
+    Returns
+    -------
+    tuple of (Segment, str)
+        Each coinciding segment paired with the Japanese embankment name.
+        Empty when no segment sits at an opening.
+
+    Notes
+    -----
+    As of the 2026-07-28 check, exactly one of the 114 production segments
+    coincides with an opening: Satsunai left bank KP 9.2 (愛国築堤). Under
+    the production ``'exact'`` BEP-source policy that segment carries
+    ``bep_source_kp=None``, so the BEP branch of the composition is
+    unaffected; the coincidence bears only on its surface-mechanism terms.
+    The Tokachi right-bank reach is clear, the nearest opening (KP 63.8,
+    西帯広築堤) lying 1.0 km above the reach top at KP 62.8.
+
+    The official 2019 bank-height table supplies a continuous planned
+    high-water level and a design crest exactly 1.50 m above it through
+    KP 9.2, so the design profile itself is not interrupted there; the
+    register records the location of the kasumi-tei structure rather than a
+    gap in the design crest. The two facts are recorded together because
+    only the second is visible in the engine's own inputs.
+    """
+    openings = load_kasumi_tei(csv_path)
+    index = {(river, bank, round(kp, 1)): name for river, bank, name, kp in openings}
+    hits: list[tuple[Segment, str]] = []
+    for segment in registry.segments:
+        key = (segment.river, segment.bank, round(segment.kp, 1))
+        if key in index:
+            hits.append((segment, index[key]))
+    return tuple(hits)

@@ -29,6 +29,8 @@ from system_integration.segments import (
     Segment,
     SegmentRegistry,
     build_registry,
+    kasumi_tei_coincidences,
+    load_kasumi_tei,
     load_section_table,
 )
 from system_integration.surface_curves import load_surface_curves, synthetic_stub
@@ -535,3 +537,40 @@ def test_coverage_silent_when_grid_covers_hazard(caplog) -> None:
     assert annual_above.coverage["bep"]["frac_peaks_above_grid"] == 1.0
     assert annual_above.coverage["bep"]["lower_bound_clamp"] is False
     assert not caplog.records
+
+
+def test_kasumi_tei_register_and_the_single_production_coincidence() -> None:
+    """Pin the kasumi-tei coincidence audit (2026-07-28 document review).
+
+    A kasumi-tei is a deliberately discontinuous levee, so a segment sitting
+    at an opening is not a continuous barrier. Exactly one of the 114
+    production segments coincides with one, and it carries no BEP source, so
+    the BEP composition is untouched. This test fails if the study reaches,
+    the grid, or the register change in a way that alters that conclusion.
+    """
+    register = load_kasumi_tei()
+    assert len(register) == 34
+    per_river = {
+        r: sum(1 for row in register if row[0] == r)
+        for r in ("Tokachi", "Satsunai", "Otofuke")
+    }
+    assert per_river == {"Tokachi": 13, "Satsunai": 13, "Otofuke": 8}
+
+    registry = build_registry()
+    hits = kasumi_tei_coincidences(registry)
+    assert len(hits) == 1
+    segment, name = hits[0]
+    assert (segment.river, segment.bank, segment.kp) == ("Satsunai", "left", 9.2)
+    assert name == "愛国築堤"  # 愛国築堤
+    # No BEP curve there under the production policy, so the BEP branch of the
+    # composition cannot be affected by the coincidence.
+    assert segment.bep_source_kp is None
+    assert segment not in registry.bep_segments()
+
+    # The Tokachi right-bank reach is clear; nearest opening is above the top.
+    tokachi_openings = [
+        kp for river, bank, _, kp in register if (river, bank) == ("Tokachi", "right")
+    ]
+    assert min(tokachi_openings) > max(
+        s.kp for s in registry.segments if s.river == "Tokachi"
+    )
