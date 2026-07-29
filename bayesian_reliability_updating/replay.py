@@ -247,8 +247,12 @@ def load_phase1_run(
 
     theta_verified = False
     if verify_theta:
+        # effective_marginal_specs(), not priors.to_marginal_specs(): with no
+        # ADR-0048 scenario the two are identical (every production run), but a
+        # scenario run must regenerate its own shifted population rather than
+        # the baseline one, or this verification would false-fail on it.
         redraw = sample_theta(
-            config.priors.to_marginal_specs(),
+            config.effective_marginal_specs(),
             seed=config.mc.seed,
             rho_log_kaq_d70=config.correlation.rho_log_kaq_d70,
             d70_interpretation=config.priors.d70_interpretation,

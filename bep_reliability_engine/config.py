@@ -626,6 +626,83 @@ class SellmeijerModelFactorSettings(_StrictModel):
     )
 
 
+class PriorMeanScenario(_StrictModel):
+    """ADR-0048 prior-mean epistemic scenario — config-gated, OFF by default.
+
+    Carries **multiplicative factors on the prior means** of named theta
+    parameters, for the class of epistemic question where two defensible
+    measurement populations disagree about a *mean* (not a spread), so the
+    disagreement cannot be absorbed by the marginal's CoV.
+
+    The motivating case (ADR-0048) is ``k_aq``: the OYO 様式-5 "analysis
+    constants" the production table is anchored to sit 17-51x above the
+    geometric mean of the **six** single-borehole field permeability tests now
+    available for the reach (four OYO 1999, recorded but set aside in
+    ``docs/tokachi_bep_inputs_provenance.md`` §3.6; two more from the 2005/06
+    Kunijiban levee-inspection campaign, independent contractor). Under the
+    production Lognormal(mean, CoV 0.50) the lower field value sits 5.0-7.3
+    sigma below the prior median, i.e. effectively outside its support. The
+    secondary case is ``gamma_bl_sub``, bounded below by three in-situ
+    sand-replacement densities on cover material.
+
+    Only the **means** move; families, CoVs, bounds, the coupling and the seed
+    are untouched, so the draw stays the same LHS design. When absent or
+    ``enabled=False`` the effective specs are element-wise equal to
+    ``priors.to_marginal_specs()`` and behaviour is bit-identical to
+    pre-ADR-0048 runs.
+
+    Attributes
+    ----------
+    enabled : bool
+        Apply the factors; default ``False`` (companion sensitivity runs only
+        — never a production-sweep member).
+    label : str
+        Short scenario name, stamped into run metadata and used by companion
+        drivers to segregate output filenames so a scenario run can never be
+        mistaken for the baseline. Non-empty.
+    factors : dict of str to float
+        Multiplicative factor per parameter name; keys must be
+        :data:`~bep_reliability_engine.sampling.PARAM_NAMES` members and every
+        factor must be ``> 0``. Parameters absent from the mapping keep their
+        config mean. An empty mapping is rejected when ``enabled`` — an
+        enabled scenario that changes nothing is a config error, not a no-op.
+    """
+
+    enabled: bool = Field(
+        default=False, description="Apply the ADR-0048 prior-mean factors; default off."
+    )
+    label: str = Field(
+        default="unnamed",
+        min_length=1,
+        description="Scenario name; stamped in metadata and used for filenames.",
+    )
+    factors: dict[str, float] = Field(
+        default_factory=dict,
+        description="Per-parameter multiplicative factor on the prior mean (> 0).",
+    )
+
+    @model_validator(mode="after")
+    def _validate_factors(self) -> PriorMeanScenario:
+        """Reject unknown parameter names, non-positive factors, and empty-on."""
+        unknown = [k for k in self.factors if k not in PARAM_NAMES]
+        if unknown:
+            raise ValueError(
+                f"prior_mean_scenario.factors keys {unknown} are not parameters; "
+                f"expected names from {PARAM_NAMES}."
+            )
+        bad = {k: v for k, v in self.factors.items() if not v > 0.0}
+        if bad:
+            raise ValueError(
+                f"prior_mean_scenario.factors must all be > 0, got {bad!r}."
+            )
+        if self.enabled and not self.factors:
+            raise ValueError(
+                "prior_mean_scenario.enabled=True with an empty factors mapping "
+                "would be a silent no-op; supply at least one factor or disable."
+            )
+        return self
+
+
 class HydrographSource(_StrictModel):
     """Where the d4PDF hydrograph data lives + the canonical shape events.
 
@@ -872,6 +949,19 @@ class Config(_StrictModel):
         ),
     )
 
+    prior_mean_scenario: PriorMeanScenario | None = Field(
+        default=None,
+        description=(
+            "ADR-0048 epistemic prior-mean scenario (multiplicative factors on "
+            "named theta prior means; the k_aq field-test-vs-Form-5 population "
+            "disagreement is the motivating case). None (pre-ADR-0048 configs) "
+            "and enabled=False are both bit-identical to prior behaviour; the "
+            "None case is dropped from to_metadata() so config_hash of "
+            "pre-ADR-0048 snapshots is preserved. Companion sensitivity runs "
+            "only — production configs never carry it enabled."
+        ),
+    )
+
     # Run identity / provenance (spec §8 metadata attrs; no engine consumer).
     cross_section_id: str = Field(description="Cross-section identifier (provenance).")
     segment_id: str = Field(description="200 m segment identifier (provenance).")
@@ -893,6 +983,44 @@ class Config(_StrictModel):
             (docs/conventions.md: conversions only at the config boundary).
         """
         return math.radians(self.theta_repose_deg)
+
+    def effective_marginal_specs(self) -> list[MarginalSpec]:
+        """Return the seven marginals with any ADR-0048 scenario applied.
+
+        The **single** source of the marginal specs actually sampled. Both the
+        Phase 1 orchestrator (``run._sample_prior``) and the Phase 2 replay's
+        bit-for-bit theta regeneration call this rather than
+        ``priors.to_marginal_specs()`` directly, so a scenario run replays as
+        itself instead of silently regenerating the baseline population.
+
+        Returns
+        -------
+        list of MarginalSpec
+            ``priors.to_marginal_specs()`` unchanged when
+            ``prior_mean_scenario`` is ``None`` or disabled (the returned specs
+            are then element-wise equal to the baseline, so the LHS draw is
+            bit-identical). Otherwise each named parameter's ``mean`` is
+            multiplied by its factor; family, cov, name and ordering are never
+            touched.
+        """
+        specs = self.priors.to_marginal_specs()
+        scenario = self.prior_mean_scenario
+        if scenario is None or not scenario.enabled:
+            return specs
+        factors = scenario.factors
+        return [
+            (
+                MarginalSpec(
+                    name=spec.name,
+                    family=spec.family,
+                    mean=spec.mean * factors[spec.name],
+                    cov=spec.cov,
+                )
+                if spec.name in factors
+                else spec
+            )
+            for spec in specs
+        ]
 
     @classmethod
     def from_yaml(cls, path: str | Path) -> Config:
@@ -951,8 +1079,9 @@ class Config(_StrictModel):
             ``theta_repose_rad`` is *not* included; consumers convert from
             ``theta_repose_deg`` as needed.
 
-            ``length_effect`` is dropped when None (ADR-0037), and
-            ``sellmeijer_model_factor`` is dropped when None (ADR-0045):
+            ``length_effect`` is dropped when None (ADR-0037),
+            ``sellmeijer_model_factor`` is dropped when None (ADR-0045), and
+            ``prior_mean_scenario`` is dropped when None (ADR-0048):
             pre-ADR snapshots reconstruct to the None defaults, and dropping
             the keys keeps their :meth:`config_hash` byte-identical to what
             their persisted runs recorded — the Phase 2 replay refuses hash
@@ -963,6 +1092,8 @@ class Config(_StrictModel):
             snapshot.pop("length_effect", None)
         if snapshot.get("sellmeijer_model_factor") is None:
             snapshot.pop("sellmeijer_model_factor", None)
+        if snapshot.get("prior_mean_scenario") is None:
+            snapshot.pop("prior_mean_scenario", None)
         return snapshot
 
     def config_hash(self) -> str:

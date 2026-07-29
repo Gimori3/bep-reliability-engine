@@ -474,9 +474,16 @@ def _evaluate_level(
 
 
 def _sample_prior(config: Config) -> ThetaSample:
-    """Draw the (N, 7) prior once from the config (the M2 boundary, spec §2)."""
+    """Draw the (N, 7) prior once from the config (the M2 boundary, spec §2).
+
+    Goes through :meth:`Config.effective_marginal_specs` rather than
+    ``priors.to_marginal_specs()`` so an ADR-0048 prior-mean scenario is
+    honoured here and in the Phase 2 replay from one shared definition. With
+    no scenario (the production default) the specs are unchanged and the draw
+    is bit-identical to pre-ADR-0048 runs.
+    """
     return sample_theta(
-        config.priors.to_marginal_specs(),
+        config.effective_marginal_specs(),
         seed=config.mc.seed,
         rho_log_kaq_d70=config.correlation.rho_log_kaq_d70,
         d70_interpretation=config.priors.d70_interpretation,
@@ -965,6 +972,27 @@ def _build_metadata(
             "stochastic": bool(mp.enabled),
             "mean": float(mp.mean),
             "cov": float(mp.cov),
+        }
+
+    # ADR-0048 prior-mean epistemic scenario. Same absent-when-None discipline
+    # as the m_p block above: a baseline run carries no key at all, so a
+    # scenario run is unmissable in the sidecar. Both the config means and the
+    # effective (scaled) means are recorded, so a reader never has to re-derive
+    # which population the run was actually drawn from.
+    if config.prior_mean_scenario is not None:
+        scenario = config.prior_mean_scenario
+        baseline_means = {
+            spec.name: float(spec.mean) for spec in config.priors.to_marginal_specs()
+        }
+        effective_means = {
+            spec.name: float(spec.mean) for spec in config.effective_marginal_specs()
+        }
+        metadata["prior_mean_scenario"] = {
+            "enabled": bool(scenario.enabled),
+            "label": scenario.label,
+            "factors": {k: float(v) for k, v in scenario.factors.items()},
+            "baseline_means": baseline_means,
+            "effective_means": effective_means,
         }
     return json.loads(json.dumps(metadata))
 

@@ -11,6 +11,13 @@ Dataset appendix; Fukuda current-state and remediation documentation
 (`fukuda_2025_internal`); and the engineer's seepage-length determination memo
 (`Seepage_Length_L_Final_Determination.md`).
 
+**Independent cross-validation source added 2026-07-28:** six Kunijiban (PWRI 国土地盤情報
+検索サイト) borehole logs from **two campaigns independent of OYO 1999** — the 2013/14
+十勝川上流地質調査業務 (大地コンサルタント) and the 2005/06 十勝川上流堤防点検業務 / 帯広築堤
+(北開水工コンサルタント). Raw PDFs, machine-readable transcription and a full survey census
+live in `data/raw/borehole_and_soil_survey/` (gitignored). These do **not** re-derive any
+CSV cell; they corroborate and bound. See section 6.
+
 Reference convention: `Form 5` is the OYO 様式-5 specified soil constants (thesis Table
 `tab:form5` / appendix `tab:app_form5`); `grain-size table` is Table `tab:grainsize` /
 `tab:app_grainsize`; `thickness table` is Table `tab:strat_thickness`; `inventory` is
@@ -279,6 +286,47 @@ recovery rows in the appendix). Correct field permeabilities (m/s):
 Action item outside this table: correct the appendix field-permeability table in the
 thesis. No impact on the CSV, since `k_aq_mps` is anchored to the Form 5 analysis
 constants, not the field tests.
+
+#### AMENDMENT (2026-07-28, ADR-0048): the set-aside is no longer neutral
+
+The factor-of-100 question above stays resolved exactly as written. What is **not**
+settled by it is the sentence that follows the table — "no impact on the CSV, since
+`k_aq_mps` is anchored to the Form 5 analysis constants, not the field tests." That
+disposition was defensible while the field tests were a single-campaign minority
+observation. Two independent 2005/06 field permeability tests have since landed
+(section 8.3) and fall squarely inside the OYO field-test range, making the field
+population **six members across two contractors and two decades**:
+
+| Source | Campaign | k_s (m/s) |
+|---|---|---|
+| B-2 / B-4 / B-6 / B-9 / B-3 (KP 63.4) | OYO 1999 | 5.09e-5, 2.23e-6, 1.24e-4, 7.04e-5, 6.25e-5 |
+| KP1.8R-2 (landside toe) | 2005/06 Kunijiban | 5.15e-4 |
+| KP2.1L-2 (riverside) | 2005/06 Kunijiban | 8.61e-5 |
+
+Geometric mean 5.94e-5 m/s (excluding the flagged 4.22e-3 recovery outlier), against
+Form-5 analysis constants of 1.0e-3 to 3.0e-3 m/s — a **17x to 51x** systematic offset
+that now reproduces across independent campaigns. Under the production
+Lognormal(mean, CoV 0.50) the lower field value sits **5.0 to 7.3 sigma** below the prior
+median, i.e. effectively outside the prior's support; the CoV is carrying aleatory
+scatter, not this epistemic mean offset.
+
+**The CSV is still unchanged, and deliberately so.** Single-borehole tests (JGS 1314)
+sample a small radius around the screen and are biased *low* relative to the bulk
+horizontal conductivity of a heterogeneous gravel aquifer, while Form-5 constants for a
+seepage FEM are chosen to represent bulk horizontal k, i.e. deliberately high. Neither
+population is the "true" `k_aq`; the honest statement is that they **bracket** it. The
+bracket is therefore carried as an opt-in, default-OFF prior-mean scenario
+(`config.prior_mean_scenario`, ADR-0048) with a measured companion, not as a new mean.
+See section 8.3 and `docs/decisions/0048-prior-mean-epistemic-scenarios.md`.
+
+**And the bracket is two-sided — do not read only this half.** The thesis Chapter 3 §3.2
+already records an independent *regional* band of 1e-3 to 1e-2 m/s from the Chiyoda
+new-channel investigation, whose **upper** end sits above the prior's 95th percentile,
+and the thesis Discussion had flagged it as the unconservative direction. ADR-0048's
+companion measures that end too (`k_aq_regional_upper`, 1.0e-2 m/s). The result is that
+the production means sit **inside** the bracket, roughly mid-range on a log scale — *not*
+at its conservative end. Anyone quoting the field-test finding alone would conclude the
+production numbers are upper bounds; they are not.
 
 ### 3.7 RESOLVED: KP 63.4 HWL inconsistency
 
@@ -794,3 +842,182 @@ Two further items supporting existing decisions:
   peak at p87 (printed 67); the same committed record reproduces Memurobuto
   64.79, Chiyoda 18.74 and Moiwa 12.68 exactly. This verifies the *input* stage
   only, not the section-rating and trace-anchoring steps downstream of it.
+
+---
+
+## 8. Independent cross-validation added 2026-07-28 (Kunijiban borehole drop)
+
+Six borehole logs from **two campaigns entirely independent of OYO 1999** were obtained
+from the PWRI Kunijiban national geotechnical database. Raw PDFs, the machine-readable
+transcription (`TRANSCRIPTION_layers.csv`, `TRANSCRIPTION_tests.csv`) and the full survey
+census (`SOURCE_METADATA.md`) live in `data/raw/borehole_and_soil_survey/` (gitignored).
+
+Until this drop, every cell of `tokachi_bep_inputs.csv` traced to a single 1999 source.
+Five of these six holes are the first independent geotechnical measurements in the study
+reach. **No CSV cell is changed by them** — see 8.6 for why that restraint is required.
+
+### 8.1 The holes, and where they sit in the cross-section
+
+Cross-section position is decisive for how each log may be read, and is **not** recorded
+on the logs themselves (`調査位置` is blank on all six). The positions below were
+confirmed by the project owner (2026-07-28) and are the load-bearing premise of
+everything in this section.
+
+| Borehole | Campaign | Collar (m T.P.) | Depth (m) | Position (owner-confirmed) |
+|---|---|---|---|---|
+| H25TK-B4 | 2013/14 | 38.85 | 16.00 | **Floodplain, ~300 m riverward of the levee**, KP 58.80 |
+| H25TK-B5 | 2013/14 | 40.55 | 50.00 | **Floodplain, ~300 m riverward of the levee**, KP 61.00 |
+| KP1.8R-1 | 2005/06 | 36.85 | 19.42 | **Levee crest** (Satsunai, confluence site) |
+| KP1.8R-2 | 2005/06 | 36.13 | 6.00 | **Landside toe**, 12 m from KP1.8R-1 |
+| KP2.1L-1 | 2005/06 | 37.18 | 17.33 | Satsunai KP 2.1 left bank, paired site |
+| KP2.1L-2 | 2005/06 | 36.25 | 6.00 | **Riverside**, directly in front of the levee |
+
+Survey census (both ID blocks enumerated in full, 2026-07-28): the 2013/14 survey holds
+~29 holes (viewer ids 239320-239359) of which **only B4 and B5 lie inside the Tokachi
+KP 53.8-66.2 study reach** — B6 onward march upstream (collars 56.8 to 111.9 m). The
+2005/06 survey holds 20 holes (ids 134610-134629) spread across the whole Obihiro
+Development Bureau jurisdiction, of which only the four Satsunai-confluence holes above
+are in scope. **There is no unretrieved Kunijiban borehole in the study reach from either
+campaign**, so the hoped-for independent coverage of KP 57.4 / 60.0 / 62.0 does not exist
+in this database. The `室内試験` (laboratory) column is blank on all six logs although
+10 + 6 + 3 + 3 samples were taken, so the laboratory grain-size data that would bear on
+`d70_m` (3.3) sits in the parent reports, not in Kunijiban.
+
+### 8.2 CONFIRMED: `D_aq_m` and the aquifer base — the first independent check
+
+H25TK-B4 at KP 58.80 logs river gravel from 2.80 m to 10.60 m over **凝灰質砂岩
+(tuffaceous sandstone, 流山層 / Nagareyama Formation)**, i.e. an aquifer thickness of
+**7.80 m against the tabulated `D_aq_m` = 8** — agreement to **-2.5%**, from an
+independent contractor 14 years later. This is the only direct independent confirmation
+any `D_aq_m` cell has.
+
+The same unit is the aquifer base in all three deep holes, which upgrades the confined-
+aquifer schematization from an inherited assumption to an evidenced one:
+
+| Borehole | KP | Base depth (m) | Base elevation (m T.P.) | Base unit |
+|---|---|---|---|---|
+| KP1.8R-1 | Satsunai ~conf. | 15.80 | 21.05 | 凝灰岩 (Tf) |
+| H25TK-B4 | 58.80 | 10.60 | 28.25 | 凝灰質砂岩 (流山層) |
+| H25TK-B5 | 61.00 | 9.95 | 30.60 | 凝灰質砂岩 |
+
+The base rises upstream at +3.13 m/km (KP 56.5 to 58.8) and +1.07 m/km (58.8 to 61.0),
+the right order for this valley floor, so the three holes are mutually consistent rather
+than three isolated readings. **M4's Mazure leaky-aquifer schematization assumes exactly
+this impermeable base**; it can now be named (Nagareyama Fm.) and its elevation quoted.
+
+`D_aq_m` at KP 61.0 would be 9.95 m from B5, which interpolates cleanly between the
+tabulated 9 (KP 60.0) and 10 (KP 62.0). No row exists at KP 61.0 and none is added.
+
+### 8.3 REOPENED: `k_aq_mps` — two independent field permeability tests
+
+Both 2005/06 tests sit in the natural aquifer at 5.50-6.00 m depth, and their positions
+make them unusually relevant:
+
+| Borehole | Position | As printed | Reading (m/s) |
+|---|---|---|---|
+| KP1.8R-2 | **landside toe** | `5.15E-02` | 5.15e-4 |
+| KP2.1L-2 | **riverside** | `8.61E-03` | 8.61e-5 |
+
+**Units are not printed on either log.** cm/s is adopted, confirmed by the project owner
+(2026-07-28) on the same grounds used to propose it: Japanese practice reports 透水係数 in
+cm/s, and read as m/s the values would be 5 cm/s and 0.9 cm/s — clean open-framework
+gravel, flatly inconsistent with logs describing a fine-sand matrix with ~30% gravel and
+N = 8-16 at the test depth. Read as cm/s they are textbook-central for that material.
+
+Consequence for the CSV: see the ADR-0048 amendment to 3.6. The tabulated `k_aq_mps`
+values are unchanged; the field-vs-Form-5 bracket is carried as an opt-in scenario.
+
+### 8.4 CORROBORATED: `relative_density_insitu` (a Config field, not a CSV column)
+
+Every generated config carries `relative_density_insitu: 0.725`, which is the **Sellmeijer
+IJkdijk experimental mean** — a borrowed laboratory calibration constant, with no site
+measurement behind it until now.
+
+KP1.8R-1 gives 12 SPT blows inside the aquifer (4.10-15.80 m). Meyerhof
+`D_r = 21*sqrt(N/(sigma_v'/98 + 0.7))` on those, with the water table at its measured
+5.12 m and gamma_t/gamma_sat = 18/20 kN/m3, gives mean **D_r ~ 77.6%** (range 51.8-98.3%).
+Three refusals are censored at N = 50, so that mean is a **lower bound**.
+
+So `0.725` is corroborated at this site and is mildly **conservative**: D_r enters the
+Sellmeijer resistance ratio as `(D_r / D_r,m)^0.35`, so a lower D_r gives a lower H_c.
+This converts a borrowed constant into a measured, conservative one. **The default is
+unchanged** — 0.725 remains, now cited rather than inherited.
+
+### 8.5 BOUNDED: `gamma_bl_sub` — three in-situ densities that bracket the prior
+
+Three sand-replacement (砂置換法) in-situ density tests, all on **cover / embankment-fill
+material**, not on the natural A_c blanket:
+
+| Borehole | Depth (m) | Layer | rho_t (g/cm3) | gamma_t (kN/m3) | gamma_t - gamma_w |
+|---|---|---|---|---|---|
+| KP1.8R-1 | 0.20-1.00 | 盛土シルト質砂 (fill) | 1.61 | 15.79 | 5.98 |
+| KP1.8R-2 | 2.20-2.70 | 盛土シルト質砂 (fill) | 1.64 | 16.09 | 6.28 |
+| KP2.1L-1 | 0.20-1.00 | 盛土礫混じり砂 (fill) | 1.86 | 18.25 | 8.44 |
+
+These **bracket** the stochastic prior mean gamma'_bl = 6.90 kN/m3 (CoV 0.056) rather
+than contradicting it. Two caveats keep this a bounding exercise and not a re-derivation:
+rho_t is a *moist* bulk density on unsaturated fill (so gamma_t - gamma_w understates
+gamma'), and none of the three tests is in the mapped natural A_c that `D_bl_m` and
+gamma'_bl actually describe. The lower end is carried as an ADR-0048 bounding scenario
+(target 6.0 kN/m3); the prior is unchanged.
+
+### 8.6 NOT a re-derivation of `D_bl_m`, and NOT a check on `z_toe`
+
+Two readings that would have been material are ruled out by the confirmed positions, and
+are recorded here so a later reader does not re-derive them:
+
+- **H25TK-B4's 2.80 m of homogeneous silt is a *foreland* cover, not the landside A_c.**
+  Taken at face value it sits +7.3 sigma above the KP 58.8 `D_bl_m` = 0.85 prior and
+  would have looked like a refutation of the 3.8 correction. It is not: the hole is
+  ~300 m riverward of the levee, so it measures the entry side. The 3.8 resolution —
+  0.85 m of competent A_c at the **landside toe**, read from 図4-1-2 and corroborated by
+  landside-toe borehole B-4 — stands untouched.
+- **H25TK-B4's 38.85 m collar is not an independent `z_toe` check.** It is a floodplain
+  elevation ~300 m from the levee, so its 0.35 m offset from the ADR-0021 surveyed toe
+  (38.5 m) carries no information about the toe datum or about ADR-0046's +/-0.30 m band.
+  This is a retraction of an earlier reading of the same number.
+
+What the two floodplain holes *do* bear on is the **foreland**, which is a real gap: the
+configs set `D_fore`/`k_fore` to the landside `D_bl`/`k_bl` as an explicit proxy
+(ADR-0005). Measured foreland cover is **2.80 m of silt at KP 58.80** (against a 0.85 m
+proxy, i.e. the proxy is conservative there — a thicker foreland blanket means more entry
+resistance and a lower r_e) and **0.00 m at KP 61.00**, where B5 logs river gravel from
+0.10 m depth with no cover at all. The KP 61.0 observation is the more consequential:
+ADR-0025 adopted the blanketed-tanh foreland baseline and classified the `open_entry`
+bound as "evidence-disfavored". A zero-cover foreland 1 km downstream of KP 62.0 is
+direct evidence that the foreland blanket is **discontinuous in this reach**, which
+weakens "evidence-disfavored" for the governing section. Neither hole is at the entry
+point itself and neither is at KP 62.0, so this is not grounds to change the default;
+it is grounds to stop calling the alternative evidence-free. Recorded as an amendment on
+ADR-0025.
+
+### 8.7 Groundwater: three mutually consistent phreatic elevations
+
+| Borehole | Date | Depth (m) | Elevation (m T.P.) |
+|---|---|---|---|
+| KP1.8R-1 | 10/26 | 5.12 | 31.73 |
+| KP1.8R-2 | 11/10 | 4.40 | 31.73 |
+| KP2.1L-1 | 10/21 | 5.47 | 31.71 |
+
+Three holes at the Satsunai confluence site, spanning 12-330 m and three weeks, agree to
+**0.02 m**. That is a genuine base-flow phreatic surface and the first field anchor for
+the M4 dormant/base-flow initial condition, which currently has none. The 2013/14
+all-core holes are *not* usable this way — B4 scatters 0.40 to 3.15 m over four days,
+the classic drilling-fluid signature — and are excluded.
+
+### 8.8 Texture: qualitative support for the matrix `d70` interpretation
+
+The core descriptions do not yield a d70 number, but they do bear on 3.3's open judgment
+call. B4's upper aquifer unit at KP 58.80 is **40-50% gravel**, i.e. 50-60% sand matrix —
+a *matrix-supported* fabric in which the gravel framework floats in sand, which is the
+physical situation the matrix-controlled `d70` interpretation assumes. (The deeper
+8.00-10.60 m unit at 70-80% gravel is grain-supported, and B5 at KP 61.0 is ~70% gravel.)
+This supports the adopted matrix interpretation over the bulk-gravel co-primary at KP
+58.8 specifically, without supplying a value.
+
+A second, weaker observation runs the other way and is recorded for honesty: the
+Satsunai-confluence logs repeatedly describe the matrix as 細砂 (fine sand, 0.075-0.25 mm)
+while B5 at KP 61.0 describes 中～粗粒砂 (medium to coarse). If that coarsening-upstream
+pattern holds on the Tokachi right bank, the tabulated matrix `d70` ordering — which puts
+KP 60.0 lowest at 2.6e-4 m — deserves a look. Grade names are not grain sizes and these
+are not the production sections, so this is a flag, not a finding.

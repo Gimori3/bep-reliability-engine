@@ -11,6 +11,35 @@ max |ΔP_f,trans| = 2.3e-4 (KP 62.0, matrix, N = 1e5) with the static branch exa
 invariant. See "Sensitivity executed" below and the companion note
 `adr0025-foreshore-width-and-sensitivity.md`.
 
+**Second amendment 2026-07-28 (borehole evidence; ADR-0048 drop).** New independent
+evidence bears directly on the phrase "evidence-disfavored", and the honest position is
+that it **weakens that phrase while leaving the decision untouched**. Kunijiban borehole
+H25TK-B5 sits in the floodplain ~300 m riverward of the levee at **KP 61.00** — one
+kilometre downstream of the governing section — and logs river gravel from 0.10 m depth
+with **no cover layer whatsoever** (9.95 m of 砂礫 straight to the Nagareyama tuffaceous
+sandstone). Its companion H25TK-B4, same campaign and same riverward position at KP 58.80,
+logs 2.80 m of homogeneous silt. So the foreland blanket in this reach is demonstrably
+**discontinuous**, present at one station and wholly absent 2.2 km upstream, rather than
+the continuous sheet the blanketed-tanh baseline schematizes.
+
+What this does and does not change:
+
+- It **does** remove the basis for calling open entry evidence-*free*. A zero-cover
+  foreland is now an observed condition in this reach, not a hypothetical.
+- It **does not** change the adopted baseline, for two independent reasons. First,
+  neither hole is at KP 62.0 and neither is at the entry point x₁ itself (both are
+  mid-floodplain), so they do not establish the condition *at the governing section*.
+  Second, and decisively, the open-entry sensitivity has since been **executed**: it moves
+  KP 62.0 transient P_f by at most 2.3e-4, so even if the KP 62.0 foreland were fully
+  unblanketed the consequence for the deliverable is immaterial.
+- The `D_fore`/`k_fore` = landside-`D_bl`/`k_bl` proxy (ADR-0005) is separately shown
+  **conservative at KP 58.8**, where measured foreland cover is 2.80 m against the 0.85 m
+  proxy — a thicker entry blanket means more entry resistance and a lower r_e.
+
+Net: the wording "evidence-disfavored" is downgraded to "not established at KP 62.0"; the
+baseline, the default, and every persisted number stand. See
+`docs/tokachi_bep_inputs_provenance.md` §8.6 and ADR-0048.
+
 ## Context
 
 The 2026-07-04 r_e source analysis (ADR-0006 amendment) closed the ratio-form
