@@ -3,6 +3,229 @@
   "description": "Epistemic exit-datum sensitivity (ADR-0021 surveyed z_toe +/-0.3 m): Phase 1 curve shift, Phase 2 posterior movement with the datum consistent end to end, and the replay-only evidence-channel isolation. Baselines untouched.",
   "sections": [
     {
+      "baseline_file": "tokachi_kp57.4_historical_matrix.h5",
+      "cross_section_id": "tokachi_kp57.4",
+      "d70_interpretation": "matrix",
+      "z_toe_baseline_m_msl": 38.3,
+      "delta_m": 0.3,
+      "grid_m_msl": [
+        34.75,
+        36.5,
+        38.0,
+        38.5,
+        38.75,
+        39.0,
+        39.25,
+        39.5,
+        39.75,
+        40.0,
+        40.25,
+        40.5,
+        40.75,
+        41.0,
+        41.25,
+        41.5,
+        41.75,
+        42.0,
+        42.25,
+        42.5,
+        42.75,
+        43.0,
+        43.25
+      ],
+      "phase1": {
+        "ztoe_minus0.30m": {
+          "companion_file": "results/sensitivity/adr0046_ztoe/tokachi_kp57.4_historical_matrix_ztoe_minus0.30m.h5",
+          "p_f_static": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            4e-05,
+            0.00351,
+            0.0319,
+            0.12307,
+            0.28189,
+            0.47278,
+            0.64793,
+            0.78378,
+            0.87625,
+            0.93309,
+            0.9646,
+            0.98217,
+            0.99122,
+            0.99584,
+            0.99797,
+            0.99891,
+            0.99941,
+            0.99976,
+            0.99988
+          ],
+          "p_f_trans": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1e-05,
+            0.00112,
+            0.01079,
+            0.0475,
+            0.12214,
+            0.23422,
+            0.36436,
+            0.49378,
+            0.61042,
+            0.70628,
+            0.78222,
+            0.84033,
+            0.88441,
+            0.91536,
+            0.9389,
+            0.95553,
+            0.96789,
+            0.97678
+          ],
+          "max_dev_from_horizontal_shift_static": 0.0057119999999991344,
+          "max_dev_from_horizontal_shift_trans": 0.007366000000001094
+        },
+        "ztoe_plus0.30m": {
+          "companion_file": "results/sensitivity/adr0046_ztoe/tokachi_kp57.4_historical_matrix_ztoe_plus0.30m.h5",
+          "p_f_static": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1e-05,
+            0.00105,
+            0.0151,
+            0.07811,
+            0.21064,
+            0.39678,
+            0.58292,
+            0.73551,
+            0.84342,
+            0.91383,
+            0.95436,
+            0.97639,
+            0.98839,
+            0.99435,
+            0.99732,
+            0.99858,
+            0.99928
+          ],
+          "p_f_trans": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.00025,
+            0.00456,
+            0.02676,
+            0.08394,
+            0.17906,
+            0.30209,
+            0.43115,
+            0.55419,
+            0.6592,
+            0.74389,
+            0.81063,
+            0.86009,
+            0.89849,
+            0.92509,
+            0.9453
+          ],
+          "max_dev_from_horizontal_shift_static": 0.005438000000000873,
+          "max_dev_from_horizontal_shift_trans": 0.005882000000001164
+        }
+      },
+      "phase2_end_to_end": {
+        "ztoe_minus0.30m": {
+          "rejection_fraction_trans": 0.007279999999999953,
+          "f_static_reject": 0.21609,
+          "f_marginal_transient": 0.0,
+          "C_e": {
+            "prior_mean": 0.054999224876698824,
+            "posterior_mean": 0.05463146363279787,
+            "shift_percent": -0.6686662307067603
+          },
+          "k_aq": {
+            "prior_mean": 0.0029999904027658165,
+            "posterior_mean": 0.0029754218407631807,
+            "shift_percent": -0.8189546866544939
+          }
+        },
+        "ztoe_plus0.30m": {
+          "rejection_fraction_trans": 0.0,
+          "f_static_reject": 0.00658,
+          "f_marginal_transient": 0.0,
+          "C_e": {
+            "prior_mean": 0.054999224876698824,
+            "posterior_mean": 0.054999224876698824,
+            "shift_percent": 0.0
+          },
+          "k_aq": {
+            "prior_mean": 0.0029999904027658165,
+            "posterior_mean": 0.0029999904027658165,
+            "shift_percent": 0.0
+          }
+        }
+      },
+      "phase2_replay_only": {
+        "ztoe_minus0.30m": {
+          "rejection_fraction_trans": 0.007279999999999953,
+          "f_static_reject": 0.21609,
+          "f_marginal_transient": 0.0,
+          "C_e": {
+            "prior_mean": 0.054999224876698824,
+            "posterior_mean": 0.05463146363279787,
+            "shift_percent": -0.6686662307067603
+          },
+          "k_aq": {
+            "prior_mean": 0.0029999904027658165,
+            "posterior_mean": 0.0029754218407631807,
+            "shift_percent": -0.8189546866544939
+          }
+        },
+        "ztoe_plus0.30m": {
+          "rejection_fraction_trans": 0.0,
+          "f_static_reject": 0.00658,
+          "f_marginal_transient": 0.0,
+          "C_e": {
+            "prior_mean": 0.054999224876698824,
+            "posterior_mean": 0.054999224876698824,
+            "shift_percent": 0.0
+          },
+          "k_aq": {
+            "prior_mean": 0.0029999904027658165,
+            "posterior_mean": 0.0029999904027658165,
+            "shift_percent": 0.0
+          }
+        }
+      },
+      "phase2_baseline": {
+        "rejection_fraction_trans": 0.0006500000000000394,
+        "f_static_reject": 0.06258,
+        "f_marginal_transient": 0.0,
+        "C_e": {
+          "prior_mean": 0.054999224876698824,
+          "posterior_mean": 0.05494968100948311,
+          "shift_percent": -0.09008102809955343
+        },
+        "k_aq": {
+          "prior_mean": 0.0029999904027658165,
+          "posterior_mean": 0.002997131171486884,
+          "shift_percent": -0.09530801419552759
+        }
+      }
+    },
+    {
       "baseline_file": "tokachi_kp58.8_historical_matrix.h5",
       "cross_section_id": "tokachi_kp58.8",
       "d70_interpretation": "matrix",
@@ -510,6 +733,304 @@
           "prior_mean": 0.0009999968009219392,
           "posterior_mean": 0.0009700055288238106,
           "shift_percent": -2.999136804285607
+        }
+      }
+    },
+    {
+      "baseline_file": "tokachi_kp62.0_historical_matrix.h5",
+      "cross_section_id": "tokachi_kp62.0",
+      "d70_interpretation": "matrix",
+      "z_toe_baseline_m_msl": 44.9,
+      "delta_m": 0.3,
+      "grid_m_msl": [
+        41.75,
+        43.25,
+        44.5,
+        45.0,
+        45.25,
+        45.5,
+        45.75,
+        46.0,
+        46.25,
+        46.5,
+        46.75,
+        47.0,
+        47.25,
+        47.5,
+        47.75,
+        48.0,
+        48.25,
+        48.5,
+        48.75,
+        49.0,
+        49.25,
+        49.5,
+        49.75,
+        50.0,
+        50.25,
+        50.5,
+        51.0,
+        51.5,
+        52.0,
+        52.5,
+        53.0,
+        53.5,
+        54.0,
+        54.5,
+        55.0,
+        55.5,
+        56.0,
+        56.5
+      ],
+      "phase1": {
+        "ztoe_minus0.30m": {
+          "companion_file": "results/sensitivity/adr0046_ztoe/tokachi_kp62.0_historical_matrix_ztoe_minus0.30m.h5",
+          "p_f_static": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            3e-05,
+            0.00081,
+            0.00564,
+            0.02238,
+            0.0628,
+            0.13177,
+            0.22869,
+            0.34651,
+            0.4673,
+            0.58398,
+            0.68525,
+            0.76956,
+            0.83562,
+            0.88635,
+            0.92341,
+            0.94832,
+            0.96584,
+            0.97768,
+            0.98575,
+            0.99096,
+            0.99647,
+            0.99845,
+            0.9993,
+            0.99976,
+            0.99993,
+            0.99997,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "p_f_trans": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1e-05,
+            0.00028,
+            0.00184,
+            0.00669,
+            0.01806,
+            0.03908,
+            0.07114,
+            0.11345,
+            0.1671,
+            0.22905,
+            0.29489,
+            0.36207,
+            0.42964,
+            0.49342,
+            0.55515,
+            0.61093,
+            0.66098,
+            0.70572,
+            0.74651,
+            0.81197,
+            0.86166,
+            0.89863,
+            0.92476,
+            0.94386,
+            0.95808,
+            0.96909,
+            0.97673,
+            0.98255,
+            0.98662,
+            0.98971,
+            0.99214
+          ],
+          "max_dev_from_horizontal_shift_static": 0.002111999999999281,
+          "max_dev_from_horizontal_shift_trans": 0.009808000000000372
+        },
+        "ztoe_plus0.30m": {
+          "companion_file": "results/sensitivity/adr0046_ztoe/tokachi_kp62.0_historical_matrix_ztoe_plus0.30m.h5",
+          "p_f_static": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1e-05,
+            0.00023,
+            0.00276,
+            0.01355,
+            0.04285,
+            0.10075,
+            0.18668,
+            0.29738,
+            0.41895,
+            0.54012,
+            0.64568,
+            0.73848,
+            0.81158,
+            0.86792,
+            0.90997,
+            0.93943,
+            0.95953,
+            0.97331,
+            0.9891,
+            0.99575,
+            0.99824,
+            0.99923,
+            0.99969,
+            0.99989,
+            0.99996,
+            0.99999,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "p_f_trans": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1e-05,
+            0.0001,
+            0.00098,
+            0.00393,
+            0.01158,
+            0.02746,
+            0.05399,
+            0.09052,
+            0.1372,
+            0.19492,
+            0.25793,
+            0.32286,
+            0.38919,
+            0.45308,
+            0.51551,
+            0.57295,
+            0.62642,
+            0.71619,
+            0.78749,
+            0.84214,
+            0.88341,
+            0.91345,
+            0.9349,
+            0.95113,
+            0.96329,
+            0.9726,
+            0.97927,
+            0.98422,
+            0.98777
+          ],
+          "max_dev_from_horizontal_shift_static": 0.0023740000000003966,
+          "max_dev_from_horizontal_shift_trans": 0.007124000000000685
+        }
+      },
+      "phase2_end_to_end": {
+        "ztoe_minus0.30m": {
+          "rejection_fraction_trans": 0.0,
+          "f_static_reject": 3e-05,
+          "f_marginal_transient": 0.0,
+          "C_e": {
+            "prior_mean": 0.054999224876698824,
+            "posterior_mean": 0.054999224876698824,
+            "shift_percent": 0.0
+          },
+          "k_aq": {
+            "prior_mean": 0.0009999968009219392,
+            "posterior_mean": 0.0009999968009219392,
+            "shift_percent": 0.0
+          }
+        },
+        "ztoe_plus0.30m": {
+          "rejection_fraction_trans": 0.0,
+          "f_static_reject": 0.0,
+          "f_marginal_transient": 0.0,
+          "C_e": {
+            "prior_mean": 0.054999224876698824,
+            "posterior_mean": 0.054999224876698824,
+            "shift_percent": 0.0
+          },
+          "k_aq": {
+            "prior_mean": 0.0009999968009219392,
+            "posterior_mean": 0.0009999968009219392,
+            "shift_percent": 0.0
+          }
+        }
+      },
+      "phase2_replay_only": {
+        "ztoe_minus0.30m": {
+          "rejection_fraction_trans": 0.0,
+          "f_static_reject": 3e-05,
+          "f_marginal_transient": 0.0,
+          "C_e": {
+            "prior_mean": 0.054999224876698824,
+            "posterior_mean": 0.054999224876698824,
+            "shift_percent": 0.0
+          },
+          "k_aq": {
+            "prior_mean": 0.0009999968009219392,
+            "posterior_mean": 0.0009999968009219392,
+            "shift_percent": 0.0
+          }
+        },
+        "ztoe_plus0.30m": {
+          "rejection_fraction_trans": 0.0,
+          "f_static_reject": 0.0,
+          "f_marginal_transient": 0.0,
+          "C_e": {
+            "prior_mean": 0.054999224876698824,
+            "posterior_mean": 0.054999224876698824,
+            "shift_percent": 0.0
+          },
+          "k_aq": {
+            "prior_mean": 0.0009999968009219392,
+            "posterior_mean": 0.0009999968009219392,
+            "shift_percent": 0.0
+          }
+        }
+      },
+      "phase2_baseline": {
+        "rejection_fraction_trans": 0.0,
+        "f_static_reject": 0.0,
+        "f_marginal_transient": 0.0,
+        "C_e": {
+          "prior_mean": 0.054999224876698824,
+          "posterior_mean": 0.054999224876698824,
+          "shift_percent": 0.0
+        },
+        "k_aq": {
+          "prior_mean": 0.0009999968009219392,
+          "posterior_mean": 0.0009999968009219392,
+          "shift_percent": 0.0
         }
       }
     }
