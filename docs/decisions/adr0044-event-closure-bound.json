@@ -18,7 +18,7 @@
       "reject_2016_count": 65,
       "marginal_beyond_2016_count": 0,
       "marginal_beyond_2016_fraction": 0.0,
-      "runtime_seconds": 0.1
+      "runtime_seconds": 0.0
     },
     {
       "stratum": "tokachi_kp57.4_historical_bulk",
@@ -50,7 +50,7 @@
       "reject_2016_count": 5673,
       "marginal_beyond_2016_count": 0,
       "marginal_beyond_2016_fraction": 0.0,
-      "runtime_seconds": 115.5
+      "runtime_seconds": 96.9
     },
     {
       "stratum": "tokachi_kp58.8_historical_bulk",
@@ -66,7 +66,7 @@
       "reject_2016_count": 0,
       "marginal_beyond_2016_count": 0,
       "marginal_beyond_2016_fraction": 0.0,
-      "runtime_seconds": 83.0
+      "runtime_seconds": 99.1
     },
     {
       "stratum": "tokachi_kp60.0_historical_matrix",
@@ -82,7 +82,7 @@
       "reject_2016_count": 3363,
       "marginal_beyond_2016_count": 316,
       "marginal_beyond_2016_fraction": 0.00316,
-      "runtime_seconds": 84.0
+      "runtime_seconds": 98.2
     },
     {
       "stratum": "tokachi_kp60.0_historical_bulk",
@@ -98,7 +98,7 @@
       "reject_2016_count": 23,
       "marginal_beyond_2016_count": 0,
       "marginal_beyond_2016_fraction": 0.0,
-      "runtime_seconds": 81.0
+      "runtime_seconds": 104.3
     },
     {
       "stratum": "tokachi_kp62.0_historical_matrix",
@@ -114,7 +114,7 @@
       "reject_2016_count": 0,
       "marginal_beyond_2016_count": 0,
       "marginal_beyond_2016_fraction": 0.0,
-      "runtime_seconds": 0.1
+      "runtime_seconds": 0.0
     },
     {
       "stratum": "tokachi_kp62.0_historical_bulk",

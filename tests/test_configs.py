@@ -80,6 +80,22 @@ _EXPECTED_COVS = {
 _GAMMA_BL_SUB_MEAN = 6.9
 _C_E_MEAN = 0.055
 
+# Seepage lengths [m] pinned in absolute terms, so a CSV edit cannot silently
+# move one and still satisfy the config-vs-CSV check above. KP 62.0 is the
+# ADR-0047 adopted DEM-surveyed value (2026-07-29): the 1998 47.0 m credited a
+# landside berm that the 1998 OYO 様式-5 sheet did not model, that the
+# `unreinforced` classification denies, and that 28 of 28 clean stations on the
+# 2025 GSI DEM5A surface do not show (stable under a 40->120 m outer-toe cap
+# sweep). The other three keep their 1998 values: their DEM differences are
+# vintage (post-1998 works), not defects, and are carried as an unadopted
+# epistemic bracket in ADR-0047.
+_SEEPAGE_LENGTH_M = {
+    "57.4": 33.0,
+    "58.8": 35.0,
+    "60.0": 34.8,
+    "62.0": 40.0,  # ADR-0047: adopted; was 47.0 (withdrawn, berm never present)
+}
+
 # ADR-0021 landside-toe elevations [m MSL / T.P.] (OYO 1999 transverse sections,
 # +/-0.3 m). These serve as BOTH the head-translation datum z_toe and the exit
 # reference h_e (ADR-0007 z_toe == h_e); the PROVISIONAL 0.0 is retired.
@@ -172,6 +188,9 @@ def test_config_matches_csv_and_thesis_priors(path: Path) -> None:
 
     # --- (1) Data-derived means equal the CSV cell (the staleness guard) ------
     assert cfg.geometry.L == pytest.approx(float(row["L_m"]))
+    # ...and L is additionally pinned absolutely (ADR-0047), so that editing the
+    # CSV alone cannot move a seepage length without this test being updated.
+    assert cfg.geometry.L == pytest.approx(_SEEPAGE_LENGTH_M[kp])
     assert cfg.geometry.foreshore_width == pytest.approx(
         float(row["foreshore_width_m"])
     )

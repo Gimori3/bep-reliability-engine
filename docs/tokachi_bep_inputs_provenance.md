@@ -97,6 +97,15 @@ metres).
 
 ### 3.1 RESOLVED: seepage length `L_m`
 
+**Revision note (2026-07-29, ADR-0047).** The **KP 62.0** value was changed from
+**47.0 m to 40.0 m** — the only cell of this CSV altered by that decision, and the
+first change to a seepage length since the table was created. The 47.0 m credited a
+landside berm that never existed; see the KP 62.0 row and item 1b below. KP 57.4,
+KP 58.8 and KP 60.0 keep their 1998 values, with their DEM measurements carried as an
+unadopted epistemic bracket, and `seepage_length_cov` is unchanged everywhere. The
+2026-07-28 amendment further down records the survey that produced these numbers; it
+is retained as written, with the adoption outcome folded into item 1b.
+
 Source: the seepage-length determination memo. L is defined as the under-levee confined
 seepage path from riverside toe to landside toe. The foreland (foreshore) and hinterland
 are carried separately as leakage zones through the response factor r_e, not inside L;
@@ -110,18 +119,37 @@ conservative).
 | 57.4 | 33 | 様式-5 dimension chain 11.09 + 7.50 + 2.82 + 4.50 + 7.01 = 32.92 m | medium-high |
 | 58.8 | 35 | 様式-5 model span and 様式-7 base, 31 to 40 m, adopt 35 | medium |
 | 60.0 | 34.8 | 様式-6 footprint 10.0 + 9.5 + 4.0 + 2.5 + 8.8 = 34.8 m; gradient cross-check | medium-high |
-| 62.0 | 47 | toe-to-toe incl. landside berm, 18 + 29.1 m; range 40 to 55 | medium |
+| 62.0 | **40** | **ADOPTED 2026-07-29 (ADR-0047): DEM-surveyed, clean-station median of 28 stations over +/-300 m on the 2025 GSI DEM5A surface.** Supersedes the withdrawn 1998 reading "toe-to-toe incl. landside berm, 18 + 29.1 m; range 40 to 55" — see item 1b | surveyed |
 | 63.4 | 26.9 | FORCED PROXY only; unconfined, mechanism mismatch; see below and 4 | mechanism N/A |
 
 Caveats carried with these values:
 
-- All values are 1998 pre-remediation geometry. They interact with `remediation_state`
+- **KP 62.0 is the exception to everything that follows: it is a 2025 surveyed
+  value, not a 1998 estimate.** Its adoption rests on the 1998 figure being *wrong*
+  rather than merely *old* (item 1b). The adopted 40 m is the **conservative end of
+  the measurement** — the extraction rule carries a known ~-2 m window bias, so the
+  true 2025 footprint is nearer 42 m — and it is deliberately **not bias-corrected**,
+  because that would layer an unmeasured adjustment on a measured quantity in the
+  unsafe direction. Its `seepage_length_cov` stays **0.20** despite a measured
+  along-levee spread of 0.102, because the prior's padding covers the unverified
+  landside blanket boundary and exit position, which a bare-earth surface cannot see.
+- All *other* values are 1998 pre-remediation geometry. They interact with `remediation_state`
   (3.2): for `berm-only` nodes the current under-levee path is longer (memo estimates
   order +10 to +30 m, to be confirmed from current cross-sections), so the tabulated L
-  for KP 57.4 is a conservative lower bound, not the current geometry. For `drained`
-  nodes (KP 58.8, 60.0) the model sets the exit head to zero and BEP probability is near
-  zero regardless of L, so the tabulated L there is effectively a placeholder. For the
+  for KP 57.4 is a conservative lower bound, not the current geometry. For the
   `unreinforced` node KP 62.0 the 1998 value stands.
+
+  **CORRECTION (2026-07-28).** This bullet previously continued: "For `drained` nodes
+  (KP 58.8, 60.0) the model sets the exit head to zero and BEP probability is near zero
+  regardless of L, so the tabulated L there is effectively a placeholder." **That is not
+  what the as-built engine does.** `remediation_state` is carried as a label in the config
+  and is stamped into run metadata, but **no drain physics is implemented**: the engine
+  evaluates the *unremediated* foundation at every section, exit head included. The
+  consequence is documented in the 2026-07-13 close-out and `docs/phase2_report.md` §11 —
+  the informative Phase 2 updates land at KP 58.8 and KP 60.0 precisely *because* they are
+  modelled unremediated, which is the inverse of the tiering the label implies. L at
+  KP 58.8 and KP 60.0 is therefore **load-bearing, not a placeholder**, and those two
+  sections are exactly where a re-measured L would move production numbers most.
 - KP 63.4 L = 26.9 m is the memo's "if a single number is unavoidable" geometric proxy
   (11.0 m foreshore + 15.9 m base, cross-checked by H/D back-calc), carried only so the
   row parses. The memo recommends excluding KP 63.4 from the confined-BEP population
@@ -130,13 +158,100 @@ Caveats carried with these values:
 - These are explicit engineering-judgement estimates, not surveyed values of L. The memo
   recommends a modest per-section lognormal (CoV 0.15 at KP 60.0, 0.20 elsewhere) and a
   one-sided upward sensitivity case; those belong to the CoV and sensitivity layers of
-  the model, not to this mean-value table.
+  the model, not to this mean-value table. **(Partly superseded 2026-07-28 by the
+  ADR-0047 DEM survey — see the amendment below. The CSV values themselves are
+  unchanged.)**
 
 Standing data gap that would refine L: the along-levee soil profile (土層縦断図, OYO
 appendix, about report p.247) directly maps the lateral blanket boundaries and was not
 available. Obtaining it plus the post-remediation cross-sections (via Obihiro Kaiken /
 Fukuda-san) would let the landside boundary be verified and the priors tightened. The
 analysis does not depend on it: the under-levee convention is a conservative lower bound.
+The ADR-0047 amendment below closes the *post-remediation cross-section* half of this
+gap from an independent 2025 lidar surface; the 土層縦断図 (blanket-boundary) half
+remains open, and is the term that actually dominates the L uncertainty.
+
+#### AMENDMENT (2026-07-28, ADR-0047): L re-measured from the 2025 GSI DEM5A surface
+
+**No CSV value changed.** ADR-0047 (`docs/decisions/0047-dem-surveyed-seepage-length.md`,
+companion `adr0047-dem-seepage-length.md` + `.json`, driver
+`scripts/dem_cross_section_study.py`) re-measured the toe-to-toe under-levee path
+from GSI 基盤地図情報 DEM5A airborne lidar (secondary mesh 644331, `devDate`
+**2025-06-20**), placing each profile perpendicular to the `SECTIONS.shp` levee
+alignment and picking toes by a stated slope-break rule at 31 stations per section
+over a ±300 m chainage window. Adoption is deferred: `geometry.L` is inside
+`config_hash()`, so editing this table would invalidate all 8 Phase 1 sweeps, the
+Phase 2 posterior and the Phase 3 campaign through the replay hash gate.
+
+| KP | CSV 1998 | DEM 2025 (clean-station median) | Δ | `remediation_state` | along-levee CoV |
+|------|----------|-------------------------------|------|---------------------|-----------------|
+| 57.4 | 33.0 | *no resolvable change* (6/31 clean) | — | berm-only | 0.60 (n=6) |
+| 58.8 | 35.0 | 42 (31/31 clean) | +7 | drained | 0.073 |
+| 60.0 | 34.8 | 43 (31/31 clean) | +8 | drained | 0.184 |
+| 62.0 | 47.0 | 40 (28/31 clean) | −7 | unreinforced | 0.102 |
+
+Findings that bear on this table:
+
+1. **The differences track 3.2's remediation states.** The two `drained` sections
+   (post-1998 berm + toe drain) measure +7 and +8 m longer in 2025; the
+   `unreinforced` KP 62.0 does not lengthen. That is this section's own prediction,
+   reproduced from an independent surface.
+1b. **RESOLVED 2026-07-29 by adopting 40 m (ADR-0047): this section's former KP 62.0
+   entry was internally inconsistent with 3.2, and the DEM resolved it against this
+   section.** The withdrawn 47 m was recorded as "toe-to-toe **incl. landside
+   berm**", while 3.2 records KP 62.0 as `unreinforced`, confirmed on three
+   independent lines — **all three of which bear on berm presence**, not on the toe
+   drain (3.2's own residual, and a buried drain would only lower P_f). The 2025
+   surface shows **no berm**: at all 28 clean stations the outer toe equals the
+   embankment toe, the landside shape is crest → ~1:3 face → toe → level ground with
+   no bench, and the 40 m survives raising the outer-toe cap from 40 m to 60/80/120 m
+   (median 40/40/40/41 m). So the L memo credited a berm that the 1998 様式-5 did not
+   model and that has never been present — **the berm was not there in 1998 either**,
+   which is what makes this a defect rather than a vintage difference — and the
+   production model was **under-conservative at the governing section**: the adopted
+   40 m raises transient P_f ×8.7 at HWL and ×3.2 at design crest. **This outcome
+   confirms 3.2's `unreinforced` classification as a fourth independent line**
+   (see 3.2). Executed: CSV cell, both KP 62.0 configs, both Phase 1 sweeps, the
+   Phase 2 posterior, the Phase 3 campaign, Stage 6.6, and every bit-identity
+   consumer. See ADR-0047 §4.1b and its close-out.
+2. **The KP 57.4 "+10 to +30 m" prediction is NOT confirmed for the levee proper.**
+   Its nominal station sits on a road interchange embankment (crest +1.6 m above the
+   2019 design crest over ~200 m; a second embankment 40–100 m landward downstream).
+   Taking every station gives 67 m — road fill, not levee. Under the structure and
+   raised-crest screens only 6 of 31 stations survive, with along-levee CoV 0.60 and
+   an apparent difference (+3.5 m) smaller than the extraction rule's own ≈ −2 m
+   bias: **no change is resolvable at this section**, and no DEM value is offered
+   for it. Both readings were driven through the engine as labelled arms.
+3. **Datum verified**, three independent series over 551 stations, KP 57.3–62.9: DEM
+   crest vs 2019 `DesignBankHeight_R` +0.30 ± 0.55 m; landside ground vs Uemura
+   `ground_m_msl` −0.65 ± 0.68 m; riverside terrace vs Uemura `floodplain_m_msl`
+   −0.24 ± 0.73 m.
+4. **Extraction cross-checked against ADR-0021** `z_toe` (±0.3 m): residuals −0.15
+   (KP 58.8), −0.38 (KP 60.0), +0.36 (KP 62.0), −0.85 (KP 57.4, the contaminated
+   one). Profile obliquity is ≤ 0.6 % (1/cos θ), so no apparent widening is a
+   projection artefact.
+5. **The CoV(L) prior is confirmed, not narrowed.** The measured along-levee spread
+   (0.073–0.184) brackets the 0.08–0.16 that `seepage-length-L-study.md` §1.2
+   derived from base-width scatter alone. It does not license narrowing 0.20/0.15:
+   the padding covers the *unverified landside blanket boundary* and the possibility
+   that the effective exit lies beyond the toe, and a bare-earth surface cannot see
+   either.
+5b. **The static-vs-transient bias ratio does NOT survive the L change** (ADR-0047
+   §4.5): at design HWL it moves ×2.25 / ×1.64 / ×2.23 / **×0.475** at KP 57.4 /
+   58.8 / 60.0 / 62.0, every one of 87 evaluated levels resolved at 95 % by a paired
+   bootstrap. Unlike ADR-0048's k_aq bracket, the L bracket does **not** cancel in
+   the ratio, because L enters the transient branch through `Z = L − l_e` and the
+   rate denominator in addition to the shared `H_c`. Stage 6.6's bias figures are
+   therefore L-conditional whether or not these values are adopted.
+6. **A rule bias of ≈ −2 m** (1 m per side, finite slope window on 1:3 faces) makes
+   every DEM value slightly short — conservative for piping, reported rather than
+   corrected.
+
+Recorded as a by-product, not an input question: the DEM 高水敷幅 reads 102 / 288 /
+546 / **236** m against the §3.9 verified 200 / 325 / 600 / **44** m. KP 62.0's 2025
+terrace is 5.4× the 1998 annotation, but the ADR-0025 sensitivity already measured
+that region of the foreland tanh as saturated (B_f ≳ 100 m numerically identical;
+44 vs 250 m worth 5e-5), so this does not reopen §3.9.
 
 ### 3.2 RESOLVED: `remediation_state`
 
@@ -173,6 +288,19 @@ confirmed on three independent lines, and the CSV value is unchanged:
    it is the 第一種側帯 that is sited at 漏水箇所 (leakage locations) for embankment
    stability. So the annotated feature is a short local stockpile pad, not a seepage
    countermeasure — reconciling the plan-sheet marking with items 1 and 2.
+
+4. **(Added 2026-07-29, ADR-0047.)** An independent DEM re-survey for a different
+   purpose — re-measuring the seepage length — supplies a **fourth** line, and it
+   agrees. Under a stated slope-break rule at 28 clean stations over +/-300 m on the
+   2025 GSI DEM5A surface, the picked outer toe **equals** the embankment toe at
+   every station (there is no berm to walk past), the landside shape is uniformly
+   crest → ~1:3 face → toe → level ground with no bench, and the result is stable
+   under an outer-toe search cap swept from 40 m to 120 m. This is a stronger
+   statement than item 2, which inspected about ten chainages qualitatively: it is
+   rule-based, reproducible, and quantified. Its consequence was to withdraw 3.1's
+   KP 62.0 seepage length, which had credited a landside berm this classification
+   denies — i.e. the DEM confirmed `unreinforced` and corrected `L_m`, not the
+   reverse.
 
 Residual: a buried landside toe drain cannot be excluded from remote elevation data; a
 functioning drain would only lower the computed failure probability. This mattered because

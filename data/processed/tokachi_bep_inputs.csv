@@ -2,5 +2,5 @@ kp,river,bank,L_m,D_aq_m,k_aq_mps,d70_m,D_bl_m,k_bl_mps,gamma_sub_kNm3,foreshore
 57.4,Tokachi,right,33,7,3.0e-3,7.0e-4,0.80,1.6e-6,16.84,200,berm-only
 58.8,Tokachi,right,35,8,2.0e-3,5.3e-4,0.85,1.0e-6,16.49,325,drained
 60.0,Tokachi,right,34.8,9,1.0e-3,2.6e-4,0.85,1.0e-6,16.72,600,drained
-62.0,Tokachi,right,47,10,1.0e-3,7.0e-4,0.45,3.0e-6,16.80,44,unreinforced
+62.0,Tokachi,right,40,10,1.0e-3,7.0e-4,0.45,3.0e-6,16.80,44,unreinforced
 63.4,Tokachi,right,26.9,11,6.0e-5,7.0e-4,1.0,NaN,16.85,0,unreinforced

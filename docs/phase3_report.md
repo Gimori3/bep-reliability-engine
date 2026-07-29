@@ -347,6 +347,11 @@ duration strata everywhere (figure `phase3_rq4_attribution.png`).
 3. **KP62.0 raw-tail clamp**: its BEP contribution is a lower bound above
    the conditioning grid (never extrapolated, ADR-0024); its true BEP
    share may be higher than 12–17%.
+   [**Withdrawn — see §11.3.** Neither clamp flag is set at KP62.0:
+   `bep_clamped_above_grid` is False in all 20 rows, and the HKV-audit
+   `lower_bound_clamp` is False for every curve because no ensemble peak
+   leaves the grid. The BEP share there is 81% historically / 50% at +4K
+   under the ADR-0047 adopted geometry, not 12–17%.]
 4. **Canonical-shape conditioning**: shared by all three mechanisms
    (deliberately — clean conditional independence given h); quantified
    against event-based re-execution in §7 (exact for overflow, 2–15x
@@ -410,3 +415,68 @@ python scripts/phase3_figures.py
 
 Full gates at close: `pytest` (all tests), `ruff check .`, `black
 --check .` — green. Raw drop files were never modified.
+
+---
+
+## 11. KP 62.0 SEEPAGE-LENGTH ADOPTION ADDENDUM (2026-07-29; ADR-0047; authoritative where it differs from sections 1 to 10)
+
+**What changed.** KP 62.0's `geometry.L` was adopted from the ADR-0047 DEM survey,
+47.0 → **40.0 m** (the 1998 value credited a landside berm that never existed). Both
+KP 62.0 Phase 1 sweeps and the KP 62.0 Phase 2 posterior were regenerated and the
+campaign re-run. **Containment verified: 20 of 2280 RQ4 rows changed, all at KP 62.0**
+— every other segment, section and mechanism number in sections 1 to 10 stands.
+
+### 11.1 RQ3 — dominance at KP 62.0
+
+| scenario | BEP share | overflow share | fluvial scour |
+|---|---|---|---|
+| historical, L = 47.0 | 0.637 | 0.363 | 0.000 |
+| **historical, L = 40.0** | **0.812** | 0.188 | 0.000 |
+| +4K, L = 47.0 | 0.344 | **0.656** | 0.000 |
+| **+4K, L = 40.0** | **0.500** | **0.500** | 0.000 |
+
+Matrix d70, posterior BEP, primary surface variant, λ_ac = 250 m.
+
+**Section 5's statement that "overflow leads only at KP 62.0 under +4K (66 %)" no
+longer holds.** Under the adopted geometry the two mechanisms are level at +4K
+(0.500 / 0.500) and BEP's historical lead strengthens from 64 % to 81 %. The
+qualitative RQ3 headline — BEP dominant at all four quantified sections historically —
+is unchanged and strengthened; what changes is that **BEP no longer cedes the +4K
+lead at KP 62.0**. Fluvial scour remains exactly zero (ADR-0042 decision 9).
+
+### 11.2 RQ4 — annual system probability at KP 62.0
+
+| scenario | L = 47.0 | L = 40.0 | factor |
+|---|---|---|---|
+| historical | 5.240e-4 | **1.006e-3** | ×1.92 |
+| +4K | 1.023e-2 | **1.278e-2** | ×1.25 |
+| **+4K / historical system ratio** | **19.5** | **12.7** | — |
+
+The section's climate ratio falls from 19.5 to **12.7**, because the adoption raises
+the historical number nearly twice as much as the +4K one — the +4K loading already
+sits high on the fragility curve, where a longer or shorter `L` matters less. The
+duration attribution is unchanged in structure (`frac_years_gt24h` 0.0063 historical
+→ 0.0344 under +4K, identical to before, since the hazard side is untouched), but the
+conditional probabilities rise: `p_f_long_loading` 0.0579 → 0.0930 historical and
+0.1771 → 0.2072 under +4K. Bulk d70 at KP 62.0 is essentially unmoved (×1.000): its
+BEP contribution there is negligible either way.
+
+### 11.3 Coverage clamp — a correction to section 5
+
+Section 5 states that KP 62.0's BEP number is *"a grid-clamped lower bound, flagged
+`bep_clamped_above_grid` in every output row"*. **That is not what the artifacts
+say, and was not true before this change either.** In both the superseded and the
+current `rq4_annual.csv`, **all 20 KP 62.0 rows carry `bep_clamped_above_grid = False`,
+`system_lower_bound_clamp = False` and `system_frac_peaks_above_grid = 0.0`.** The
+flag fires on **16 rows, all at KP 57.4 and KP 58.8 under bulk d70**, unchanged by
+this work. So there was no clamp at KP 62.0 to lift, and its BEP share was never a
+grid-clamped lower bound in this campaign; section 5's parenthetical is withdrawn.
+
+(The underlying observation section 5 was reaching for remains true and is recorded
+in ADR-0047 §4.5: KP 62.0's *transient fragility transition* is bracketed only inside
+the ADR-0024 hypothetical above-crest grid extension, which must never be plotted as
+attainable. The adoption moves probability mass down into the attainable range —
+transient P_f at HWL 1.5e-4 → 1.3e-3 — so more of that curve is now defensibly
+plottable. That is a presentational gain, not a lifted coverage clamp.)
+
+Superseded artifacts under `results/superseded_adr0047_L47/phase3/`.

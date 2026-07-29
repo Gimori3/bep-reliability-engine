@@ -51,7 +51,7 @@ segment_id: KP62.0
 scenario: historical
 remediation_state: unreinforced
 geometry:
-  L: 47.0
+  L: 40.0
   z_toe: 44.9
   foreshore_width: 44.0
   D_fore: 0.45

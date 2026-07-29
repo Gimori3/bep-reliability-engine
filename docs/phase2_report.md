@@ -685,3 +685,49 @@ Reading:
    one to use when quoting posterior *fragility curves* under the
    scenario; for posterior *θ* statistics the cheap replay-only knob is
    exact.
+
+---
+
+## 14. KP 62.0 SEEPAGE-LENGTH ADOPTION (2026-07-29; ADR-0047; authoritative where it differs from sections 1 to 13)
+
+**What changed.** `data/processed/tokachi_bep_inputs.csv` KP 62.0 `L_m` was changed
+47.0 → **40.0 m** on the evidence of ADR-0047 (a 2025 GSI DEM5A survey showing the
+1998 value credited a landside berm that never existed). One cell; KP 57.4, KP 58.8
+and KP 60.0 are unchanged, so **only the two KP 62.0 strata are affected** and every
+number in sections 1 to 13 for the other six strata stands as written.
+
+Both KP 62.0 Phase 1 sweeps were re-run and the Phase 2 posterior regenerated with
+`--verify`. The replay's config-hash gate accepted the new sweeps without
+modification, which is itself the check that the hash mechanism works as designed
+when an input legitimately changes.
+
+**The headline claim survives, and it is no longer a formality.** Section 11 records
+*"marginal transient rejection exactly 0 at production N in every stratum"*. At
+KP 62.0 the adoption raises transient P_f by **×8.7 at design HWL** (1.5e-4 → 1.3e-3)
+and ×3.2 at design crest, so the nesting result had to be re-established rather than
+assumed. Re-measured at production N:
+
+| Stratum | rejection, L = 47.0 (superseded) | rejection, L = 40.0 (current) |
+|---|---|---|
+| KP 62.0 matrix | 0.00 % (0 / 100 000) | **0.00 % (0 / 100 000)** |
+| KP 62.0 bulk | 0.00 % (0 / 100 000) | **0.00 % (0 / 100 000)** |
+
+Masked-vs-re-evaluation verification passed exactly at both strata (100 000 accepted
+rows × 38 levels, zero flag mismatches, exact curve agreement). **The
+marginal-transient-rejection = 0 result therefore holds across all eight strata
+under the adopted geometry**, and the section 11 statement stands unamended.
+
+The mechanism is unchanged and worth restating so the result is not read as luck:
+KP 62.0 remains near-vacuous for the 2016 update because the observed 2016 stage
+there never approached the levels at which the section's realizations fail — not
+because its fragility is low. Raising the fragility by an order of magnitude at HWL
+does not move the update, because the evidence is applied at the observed stage, not
+at HWL.
+
+**Carried forward unchanged.** The KP 62.0 posterior remains near-vacuous, so the
+section 11 tiering caveat is untouched: the informative updates still land at
+KP 58.8 and KP 60.0, and those two sections were **not** adopted, so their posterior
+numbers are bit-for-bit the section 11 values.
+
+Superseded artifacts are retained under `results/superseded_adr0047_L47/` (Phase 1
+sweeps, Phase 2 posteriors, Stage 6.6) for as long as they are useful for comparison.

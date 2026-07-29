@@ -27,6 +27,9 @@ Headline result, per event at the design flood level (HWL):
   (95 percent Clopper-Pearson interval 1.3e-4 to 3.2e-4) against a production
   transient P_f = 1.0e-5 (2.5e-7 to 5.6e-5): the static criterion
   overestimates the per-event failure probability by a factor of about 21.
+  [**Superseded — see section 8.** This figure belongs to the withdrawn L = 47.0 m
+  geometry and rests on 1 failing row; it is not statistically resolved. Quote a
+  resolved level instead: 10.5 at 47.0 m MSL under the adopted L = 40.0 m.]
 - KP57.4 (HWL 39.21 m MSL): conventional static P_f = 1.18e-3
   (9.8e-4 to 1.4e-3) against a transient P_f of exactly zero failures in
   100 000 realizations (upper bound 3.7e-5): an overestimation factor of at
@@ -328,7 +331,8 @@ Sub-question 1 asks how large the bias of conventional static assessment is
 against time-resolved physics and where it comes from. The answer for the
 Tokachi sections: at design flood levels conventional practice overestimates
 per-event BEP failure probability by one to one-and-a-half orders of
-magnitude (a factor of about 21 at KP62.0 and at least 32 at KP57.4), but
+magnitude (a factor of about 21 at KP62.0 and at least 32 at KP57.4 — the KP62.0
+figure is **superseded and was never resolved; see section 8**), but
 the label "temporal" belongs to only part of it. Through the fragility
 shoulder the time constraint is the dominant mechanism (58 to 76 percent of
 the production gap, pure temporal ratios of 2 to 8); in the deep tail at
@@ -345,3 +349,54 @@ only with the qualifier "at these sections, in this loading regime, and
 after netting a head-convention term that has nothing to do with time"; the
 decomposition supplies the numbers for each clause, with confidence
 intervals, at every conditioning level.
+
+---
+
+## 8. KP 62.0 SEEPAGE-LENGTH ADOPTION ADDENDUM (2026-07-29; ADR-0047; authoritative where it differs from sections 1 to 7)
+
+**What changed.** KP 62.0's `geometry.L` was adopted from the ADR-0047 DEM survey,
+47.0 → **40.0 m**, because the 1998 value credited a landside berm that never
+existed. KP 57.4 was **not** adopted, so **every KP 57.4 number in sections 1 to 7
+stands unchanged**. The KP 62.0 ladder was re-run in full at N = 1e5.
+
+**Gates re-passed.** The production drift guard is **bit-identical at all 38 common
+levels** against the re-run KP 62.0 sweep, and **every Euler-flip count is exactly 0**
+across all five diagnostics at all 39 levels — the same gates section 3 defines.
+
+**The headline number, and a correction to how it should be quoted.** Section 1
+reports the KP 62.0 conventional-practice bias at HWL as *"a factor of about 21"*.
+Under the adopted geometry the same cell reads **44.7** (C0 static 1.79e-3 against
+C4b transient 4.0e-5). **Neither figure is statistically resolved, and the
+apparent doubling is an artefact of counting noise**: at HWL the transient
+comparator rests on **1 failing row out of 100 000** before adoption and **4** after,
+with Clopper-Pearson intervals (2.5e-7 to 5.6e-5, and 1.1e-5 to 1.0e-4) that overlap
+heavily. Section 6 already warned that the HWL decomposition rests on 0 to 21 failing
+rows per level; this re-run demonstrates the consequence concretely.
+
+**What *is* resolved is the opposite of the nominal HWL move.** At every level where
+the transient comparator carries adequate counts, the bias factor **falls** by
+roughly a third:
+
+| level [m MSL] | C4b rows, L = 47.0 | C4b rows, L = 40.0 | bias, L = 47.0 | bias, L = 40.0 |
+|---|---|---|---|---|
+| 46.39 (HWL) | 1 | 4 | 21.0 | 44.7 | *(not resolved)* |
+| 46.75 | 15 | 130 | 27.9 | 13.2 | *(marginal)* |
+| 47.00 | 101 | 499 | 15.0 | **10.5** |
+| 47.50 | 886 | 3 286 | 9.9 | **6.3** |
+| 48.00 | 3 627 | 10 127 | 6.7 | **4.4** |
+| 48.50 | 9 252 | 21 141 | 4.9 | **3.1** |
+| 49.00 | 17 684 | 34 172 | 3.7 | **2.4** |
+| 49.50 | 28 144 | 47 270 | 2.8 | **1.9** |
+
+That is a consistent factor of ≈ 0.65, and it agrees with the independent
+paired-bootstrap measurement in ADR-0047 §4.5, which puts the ratio-of-ratios at
+0.64–0.70 across the reachable range (0.475 at the nearest production level to HWL,
+95 % CI [0.263, 0.724], resolved).
+
+**How to quote the KP 62.0 bias from now on.** Quote it at a level where it is
+resolved, with its level stated — e.g. *"a factor of 10.5 at 47.0 m MSL"* — or quote
+the HWL figure explicitly as unresolved with its row count. Do **not** quote "about
+21" as a current number: it belongs to the superseded L = 47.0 m geometry, and it was
+never resolved even there.
+
+Superseded artifacts under `results/superseded_adr0047_L47/stage6_6/`.
