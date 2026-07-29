@@ -9,8 +9,10 @@ semantics:
 * otherwise the raw points are interpolated **linearly in probit space**
   between grid neighbours (monotone and tail-respecting), never
   extrapolated above the highest grid level — evaluation there returns the
-  last raw value and sets the ``clamped_above_grid`` flag (KP62.0's
-  transient branch lives in this regime by design);
+  last raw value and sets the ``clamped_above_grid`` flag (in the production
+  campaign this fires only at KP57.4 and KP58.8 under bulk d_70; the KP62.0
+  attribution once given here is withdrawn — see ``docs/phase3_report.md``
+  §11.3, which records the flag as False in every KP62.0 row);
 * stages at or below the leading zero-failure grid levels evaluate to
   exactly 0; the nonzero Clopper-Pearson upper bounds stay available on the
   curve for uncertainty presentation.

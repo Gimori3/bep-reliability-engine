@@ -105,6 +105,12 @@ and datum. Evaluation at arbitrary h follows ADR-0024 semantics:
   highest grid level** — evaluation above it returns the last raw value and
   raises a recorded `clamped_above_grid` flag (KP62.0's transient branch
   lives here by design).
+  **[Correction 2026-07-29: the KP62.0 parenthetical is wrong and was wrong
+  when written. KP62.0's matrix transient is delivered as `fitted_lognormal`,
+  and `bep_clamped_above_grid` is False in all 20 of its campaign rows; the
+  flag fires on 16 KP57.4/KP58.8 rows under bulk d_70. The mechanism decided
+  here is unchanged — only its example was misattributed. See
+  `docs/phase3_report.md` §11.3.]**
 * zero-failure grid points interpolate as 0 with their nonzero CP upper
   bounds carried alongside for uncertainty presentation.
 

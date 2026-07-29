@@ -83,6 +83,19 @@ KP~58.8.
 \section{Relative Dominance of Failure Mechanisms under Historical Loading}
 \label{sec: Relative Dominance of Failure Mechanisms under Historical Loading}
 
+% STALE NUMBERS (flagged 2026-07-29, not yet reconciled). Everything from here
+% to the end of the +4K section below - Table tab:phase3-dominance-hist, the
+% dominance shares in the next paragraph, and the reach-wide / +4K figures -
+% predates the 2026-07-22 H-Q rating-error correction (D7, commit b1d2b20) and
+% the 2026-07-29 ADR-0047 L adoption. Two passages HAVE been updated (the
+% conditional-fragility paragraph above and the annualized four-section list);
+% these have not. Current values: docs/phase3_report.md section 5 (per-mechanism
+% dominance, post-D7) and section 11 (KP 62.0, post-ADR-0047). In particular
+% fluvial scour is now exactly zero everywhere, BEP is dominant at all four
+% sections historically (KP 62.0 81 %, not overflow at 79 %), and the +4K/
+% historical system ratios are 5.5-12.7. Reconciling this fragment is a
+% thesis-writeup task, not a numbers-edit: do not hand-patch the table.
+
 Table~\ref{tab:phase3-dominance-hist} gives the annualized per-mechanism
 contributions and dominance shares at the BEP sections. Backward erosion
 piping is the dominant mechanism at three of the four sections where it is
@@ -213,8 +226,10 @@ The composition inherits, and states, the limitations of its inputs: the
 conditional-independence-given-$h$ assumption of \textcite{pol_ress_2023}
 excludes dynamic mechanism coupling (non-conservative, as discussed in
 Chapter~\ref{chap: Discussion}); the drained sections are evaluated as
-unremediated foundations; KP~62.0's BEP share is a grid-clamped lower
-bound; and the canonical-shape conditioning shared by all three mechanisms
+unremediated foundations; KP~62.0's transient BEP transition is bracketed
+only within the hypothetical above-crest extension of its conditioning
+grid, so that part of its fragility curve must never be read as
+attainable; and the canonical-shape conditioning shared by all three mechanisms
 was quantified against a full event-based re-execution of the surface
 models over both ensembles at the nine section-representative nodes ---
 essentially exact for overflow (agreement within tens of percent) and

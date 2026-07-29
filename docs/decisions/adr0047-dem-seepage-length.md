@@ -4,7 +4,9 @@ Date: 2026-07-28. Status: **evidence for ADR-0047**
 (`docs/decisions/0047-dem-surveyed-seepage-length.md`). **No input value changed in
 this pass** — `data/processed/tokachi_bep_inputs.csv` and `configs/*.yaml` are
 read-only to this study, and adoption is deferred to an explicit project-owner
-decision (ADR-0047 Decision 5).
+decision (ADR-0047 Decision 5). **That decision has since been taken (2026-07-29):
+KP 62.0 was adopted, `L_m` 47.0 → 40.0 m, and KP 57.4 / 58.8 / 60.0 were held —
+see §7 Close-out, which governs where it differs from §§1–6.**
 
 Driver: `scripts/dem_cross_section_study.py`
 (`datum | profiles | fragility | ratio | figure | all`).

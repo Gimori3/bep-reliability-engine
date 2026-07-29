@@ -74,6 +74,13 @@ Interpreting the memo's own base-width *ranges* as spread:
 | KP57.4 | dimension chain 32.92 (point) | — |
 | KP60.0 | footprint 34.8 (point) | — (CoV 0.15 assigned) |
 
+**[Note added 2026-07-29 (ADR-0047).** The KP 62.0 row's adopted value is no longer
+47 m: the DEM re-survey showed the 47 m credited a landside berm that never existed,
+and the CSV now carries **40 m** — the bottom of that very range. The row is left as
+written because it records what the memo's ranges imply about *spread*, and the
+conclusion below is unaffected: the measured along-levee spread (0.073–0.184) brackets
+the 0.08–0.16 derived here, and `seepage_length_cov` stays 0.20 / 0.15 everywhere.]
+
 So **base-width reading scatter alone implies CoV ≈ 0.08–0.16** — *below* the assigned
 0.20. The extra padding to 0.20 is the "exit lies a short distance beyond the toe"
 epistemic term. The production value is therefore a **defensible, mildly conservative

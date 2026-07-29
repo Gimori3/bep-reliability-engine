@@ -234,7 +234,10 @@ KP 57.4, 58.8, 60.0, 62.0. Two of them coincide with a sluice:
 
 The conduit lengths (27–28 m) are the same order as the modelled under-levee
 seepage lengths ($L$ = 33 m at KP 57.4, 47 m at KP 62.0), i.e. a conduit spans a
-comparable fraction of the levee footprint.
+comparable fraction of the levee footprint. *(Update 2026-07-29: KP 62.0's `L`
+has since been adopted at **40 m** under ADR-0047, so the conduit spans an even
+larger fraction there. The 47 m quoted above was current when this review was
+written and is superseded; the finding is unaffected and strengthened.)*
 
 **What is and is not claimed.** The engine models foundation BEP through the
 blanket–aquifer system beneath a plain trapezoidal levee. A buried culvert is a
