@@ -2,6 +2,21 @@
 
 This is a full refresher on `bep_reliability_engine`: what each of its nine modules does mechanically, how they hand data to one another, and how every equation traces back to a specific numbered equation in `pol_sie_2024.pdf` (SIE24), `pol_compgeo_2024.pdf` (CG24), or `pol_thesis_2022.pdf` (T22). The last two sections are the actual meeting agenda: where the implementation makes a call Pol's own papers leave open, and concrete questions worth asking him directly.
 
+> **SUPERSEDED (header added 2026-07-31; content unchanged).** Meeting-preparation
+> material for the 2026-07-06/07 meeting with Joost Pol, retained as the record
+> of what was asked and why. The meeting was held and its outcomes are recorded
+> in:
+>
+> * [`docs/validation/pol-meeting-2026-07-07-dispositions.md`](validation/pol-meeting-2026-07-07-dispositions.md)
+>   -- the author-feedback dispositions;
+> * **ADR-0026** (C_e field prior), **ADR-0027** (raw erosion head, superseding
+>   ADR-0007) and **ADR-0028** (raw static Sellmeijer head).
+>
+> The model description below therefore predates the raw-head reversal: where it
+> describes an r_e-attenuated erosion head, or r_e around 0.6 feeding a piping
+> head, that convention was **overturned** by ADR-0027/0028. r_e now drives only
+> the uplift/heave gate. Current description: [`docs/architecture.md`](architecture.md).
+
 ## 1. What the model computes, in one paragraph
 
 A Monte Carlo fragility engine for the Tokachi/Satsunai levees (Obihiro, Hokkaido): for each of five real cross-sections, it draws N=100,000 stochastic realizations of 7 soil/erosion parameters, runs **every single realization through both** Sellmeijer's static critical-head check (2011) and Pol's time-dependent progression ODE (2024), against d4PDF-derived flood hydrographs at a grid of conditioning river stages, and fits a lognormal fragility curve (P_f vs. stage) to each of the two resulting failure-probability curves. The gap between the static and transient curves — quantified per cross-section — is the thesis's core deliverable, and the retained sample matrix + failure matrices are the handoff to a Phase 2 that Bayesian-filters the transient branch against the fact these levees survived the 2016 typhoon.

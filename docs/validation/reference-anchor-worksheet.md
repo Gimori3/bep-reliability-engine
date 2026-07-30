@@ -1,5 +1,19 @@
 # Stage 6 Reference-Anchor Extraction Worksheet
 
+> **SUPERSEDED -- COMPLETED (header added 2026-07-31; content unchanged).** This
+> is the blank extraction form: the `EXTRACT:` fields the owner was asked to fill
+> by reading the PDFs in `docs/references/`. It is retained as the record of the
+> method (what was to be read, from where, against which pass bars).
+>
+> The extractions were performed and dispositioned; the filled record is
+> [`docs/validation/reference-anchor-status.md`](reference-anchor-status.md),
+> which carries the per-anchor CLOSED/OPEN verdicts and the reproduced-versus-
+> published margins. **Read the status document for outcomes; this one only for
+> method.**
+>
+> One anchor's disposition changed the engine: anchor 4 (the head datum) closed
+> as a *discrepancy*, superseding ADR-0007 with ADR-0027/0028.
+
 Purpose: supply **owner-extracted published values** so the physics reference
 check runs against real anchors instead of repo transcriptions. Fill every
 `EXTRACT:` field by reading the named source in `docs/references/` (page

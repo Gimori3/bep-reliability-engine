@@ -1,5 +1,20 @@
 # Questionnaire for Joost Pol: Piping Model Validation
 
+> **SUPERSEDED -- ANSWERED (header added 2026-07-31; content unchanged).** The
+> questions below were put to Joost Pol at the 2026-07-06/07 meeting and are
+> retained as the record of what was asked. They were answered; the answers are
+> in [`docs/validation/pol-meeting-2026-07-07-dispositions.md`](validation/pol-meeting-2026-07-07-dispositions.md)
+> and were landed as **ADR-0026**, **ADR-0027** and **ADR-0028**.
+>
+> Note in particular that Tier 1 question 1 describes the implementation as
+> computing `H_erosion = r_e(h - h_e) - 0.3 D_bl`. Pol's answer was that this is
+> **wrong**: after heave ruptures the blanket the exit is unfiltered, so r_e must
+> not appear in the erosion head (confirmed in writing 2026-07-08, "Ja klopt";
+> see [`docs/validation/head-datum-re-convention-CLOSED.md`](validation/head-datum-re-convention-CLOSED.md)).
+> The engine was changed accordingly by ADR-0027, and ADR-0028 removed r_e from
+> the static comparator too. **Do not read the premises below as descriptions of
+> the current engine.**
+
 ## Tier 1: Essential questions on reference frames and calibration
 
 ### 1. The head datum for the erosion-driving head and the $0.3D_{bl}$ crack-resistance

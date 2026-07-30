@@ -1,5 +1,25 @@
 # Phase 2 Interface: Loading Phase 1 Fragility Output and Replaying M8 on the 2016 Hydrograph
 
+> **SUPERSEDED (header added 2026-07-31; content unchanged).** This is the
+> *design-time* interface contract, drafted 2026-06-18 and last updated
+> 2026-07-03 -- that is, **before** Phase 2 was built (2026-07-12,
+> ADR-0034/0035/0036). It is retained as the record of what was specified in
+> advance. For the as-built interface use:
+>
+> * [`bayesian_reliability_updating/README.md`](../bayesian_reliability_updating/README.md)
+>   -- the package's own usage contract;
+> * [`docs/phase2_report.md`](phase2_report.md) -- the report of record
+>   (sections 11 to 14 are dated addenda, authoritative where they differ).
+>
+> Two specifics here are known stale and are **not** corrected in the body, so
+> that this stays a faithful record of the design:
+>
+> * the replay timestep cites ADR-0022 decision 2 (1800 s); the as-built replay
+>   runs on the run's own 225 s grid (**ADR-0036 supersedes it**);
+> * example artifact paths of the form `results/tokachi_kp58_historical.h5`
+>   never existed under that name -- the production files are
+>   `results/tokachi_kp58.8_historical_matrix.h5` and siblings.
+
 Status: drafted 2026-06-18, against the completed M8 (`evaluator.py`) and M9
 (`fragility.py`); updated 2026-07-03 for the built M3 (`hydrographs.py`,
 ADR-0019/0020), the built run driver (`run.py`), the datum-anchored fragility
