@@ -422,7 +422,7 @@ for every level of every branch.
 
 ### 9.2 ADR-0032 aquifer response (Π against the pre-registered Π\* = 0.10)
 
-| Stratum | verdict | Π central | Π corner90 | margin | check A | check B |
+| Stratum | verdict | Π central | Π corner90 | margin = Π\*/Π corner90 | check A | check B |
 |---|---|---|---|---|---|---|
 | KP 57.4 (both) | instantaneous | 0.0042 | 0.0119 | 8.4 × | true | true |
 | KP 58.8 (both) | instantaneous | 0.0082 | 0.0232 | 4.3 × | true | true |
@@ -432,7 +432,18 @@ for every level of every branch.
 **All eight strata now carry the block** — the three matrix sidecars that
 predated ADR-0032 gained it in this re-run (§3.1), closing a documented
 local-artifact staleness gap. Every section clears the threshold with 3.8 to
-19.5 × margin at the conservative `S_s` corner.
+19.5 × margin **against the 90th-percentile τ_aq corner** (high D_aq, high D_bl,
+low k_bl — the pre-registered ADR-0032 D3 grey-zone instrument). `S_s` is at its
+upper bound in *both* Π columns, so it is not what distinguishes them; the
+earlier wording here, "at the conservative `S_s` corner", named the wrong corner
+and is corrected (2026-07-31).
+
+Read against Check A itself — Π\*/Π **central** — the margins are 23.7 / 12.2 /
+10.8 / 55.2. Neither set is the published **~10×**, which is Π\*/Π_central over
+the *ensemble-median* T_rise of 18 h rather than this run's canonical-event
+23 h; τ_aq is identical (680 s / 765 s at the governing pair) and both readings
+clear Π\* everywhere. The three margins are reconciled in
+`docs/decisions/adr0032-aquifer-response-diagnostic.md`, section "Two margins".
 
 ### 9.3 Bootstrap and deliverable
 

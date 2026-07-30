@@ -7,6 +7,10 @@
 `project-notes.md`, and every msc-thesis chapter and appendix, verified against the
 artifact it should trace to.
 
+> **Addendum 2026-07-31.** The original pass had a blind spot: it contained no
+> ADR-0032 row at all — grepping it for "aquifer" returned nothing — so the
+> aquifer-response claims were never checked. **Section M** closes that gap.
+
 **Method.** Headline and quotable claims were verified *programmatically* against
 the current artifacts (`results/production_campaign_manifest.json`,
 `results/system_integration/phase3/rq4_annual.csv`,
@@ -25,21 +29,22 @@ reported below as a "current value" it was recomputed in this session.
 
 ## Row counts
 
-Counted mechanically over the ID'd rows of sections A to H (`python`-parsed from
-this file, so the audit's own arithmetic is checkable):
+Counted mechanically over the ID'd rows of sections A to H and M (`python`-parsed
+from this file, so the audit's own arithmetic is checkable). Section M was added
+2026-07-31; the A-to-H figures below are unchanged by it:
 
-| verdict | rows | which |
-|---|---|---|
-| current | 39 | — |
-| superseded-and-labelled | 8 | A1 A2 A5 A7 A13 D1 D2 D3 |
-| **superseded-and-unlabelled** | **26** (all fixed) | A3 A4 A10 A11 A12 · B1–B8 · C2 · D6 D7 D8 · E1–E6 · F4 F5 · G4 |
-| **untraceable** | **4** (all fixed) | C1 E15 G1 H1 |
-| flagged, not fixed | 1 | H11 (msc-thesis em dashes, a house rule rather than a number) |
-| **total claim rows** | **78** | |
+| verdict | rows | of which section M | which |
+|---|---|---|---|
+| current | 45 | 6 | — (includes G3, whose cell records an outcome rather than one of the four verdicts) |
+| superseded-and-labelled | 8 | 0 | A1 A2 A5 A7 A13 D1 D2 D3 |
+| **superseded-and-unlabelled** | **26** (all fixed) | 0 | A3 A4 A10 A11 A12 · B1–B8 · C2 · D6 D7 D8 · E1–E6 · F4 F5 · G4 |
+| **untraceable** | **7** (all fixed) | 3 | C1 E15 G1 H1 · M1 M2 M4 |
+| flagged, not fixed | 1 | 0 | H11 (msc-thesis em dashes, a house rule rather than a number) |
+| **total claim rows** | **87** | **9** | |
 
 Section J adds **8** figure-compliance rows (all compliant), section K adds **10**
 driver rows for the hardening sweep, and section I records three documents with
-nothing to correct. **86 verified rows in total**, of which **30 needed fixing**.
+nothing to correct. **95 verified rows in total**, of which **33 needed fixing**.
 
 ---
 
@@ -204,6 +209,45 @@ stale copies there**, which is a gap and not a clean bill of health; see
 | H10 | Ch. 6 and Ch. 7 bodies | both stub files | no quantitative claim exists to be stale | current (gap, see the thesis inventory) |
 | H11 | **house-rule finding, not a number:** typeset em dashes, which msc-thesis `project-notes.md` forbids unconditionally | `3. Study Area...tex:23`; `5. Verification...tex:1127,1129`; `7. Discussion.tex:58,62,93,95,133,134`; `8. Conclusions...tex:24` | 10 typeset lines (comment-line rules in `appendix-a.tex` are not typeset and are not violations) | **flagged, not fixed** — prose I was not asked to touch; the owner's contract says flag rather than silently smooth |
 
+## M. ADR-0032 aquifer response (added 2026-07-31)
+
+**Why this section exists.** The 2026-07-30 pass never touched ADR-0032: the
+word "aquifer" did not appear anywhere in this file. The claims below were
+therefore unchecked, and one of them — the margin — had quietly acquired two
+different published values that nothing distinguished.
+
+Two Π quantities and two T_rise denominators are in circulation. Verified
+against `results/production_campaign_manifest.json`
+→ `stages.diagnostics.per_run.*.aquifer_response` (all eight strata) and the run
+sidecars:
+
+| quantity | KP 57.4 | KP 58.8 | KP 60.0 | KP 62.0 |
+|---|---|---|---|---|
+| τ_aq central (S_s = 1e-4) | 350.0 s | 680.0 s | 765.0 s | 150.0 s |
+| τ_aq corner90 | 988.8 s | 1921.2 s | 2161.3 s | 423.8 s |
+| `t_rise_s` (canonical event) | 82 800 s | 82 800 s | 82 800 s | 82 800 s |
+| `pi_central` | 0.004227 | 0.008213 | 0.009239 | 0.001812 |
+| `pi_corner90` | 0.011943 | 0.023203 | 0.026103 | 0.005118 |
+| Π\*/Π_central | 23.66 | 12.18 | 10.82 | 55.20 |
+| **`margin_vs_threshold` = Π\*/Π_corner90** | **8.37** | **4.31** | **3.83** | **19.54** |
+
+| ID | claim | where | artifact / current value | verdict |
+|---|---|---|---|---|
+| M1 | "Π = τ_aq/T_rise ≈ 0.010–0.012" | `architecture.md:35,516`, `decisions/0032-...-preregistration.md:294`, `decisions/adr0032-...md:67`, `project-notes.md:54` | **reproduces exactly** at the denominator the study used: 680/64 800 = 0.0105 and 765/64 800 = 0.0118, T_rise = the **ensemble-median** rising limb (18 h). The per-run stamp divides the *same* τ_aq by the run's own canonical-event rise (23 h) and reads 0.00821 / 0.00924. Not a discrepancy; a denominator that was never stated | **untraceable as written → FIXED** (every occurrence now names its denominator; reconciled in the companion note's "Two margins" section) |
+| M2 | "~10× margin" | `architecture.md:582`, `decisions/0032-...:298,314,359`, `decisions/adr0032-...:93`, `project-notes.md:54` | = Π\*/Π_**central** at the 18 h denominator: **9.53** (KP 58.8) / **8.47** (KP 60.0). Three different margins are computable from the same gate and all three appear in the repo | **untraceable as written → FIXED** (each occurrence now says which Π and which T_rise) |
+| M3 | per-stratum margins "3.8 to 19.5 ×" | `production_campaign_2026-07-29.md:434`, `project-notes.md:78` (G5) | **current**: 8.37 / 4.31 / 3.83 / 19.54 = `pi_threshold / pi_corner90`, reproduced from the manifest for all eight strata | current |
+| M4 | those margins are "at the conservative `S_s` corner" | `production_campaign_2026-07-29.md:435` | **wrong corner.** `S_s` is at its upper bound in *both* Π columns, so it cannot be what separates them; the corner is the pre-registered **90th-percentile τ_aq** corner (high D_aq, high D_bl, low k_bl — ADR-0032 D3) | **untraceable → FIXED** (renamed; the mislabel is recorded in place) |
+| M5 | threshold "Π\* = 0.10" | `architecture.md:516,582`, `decisions/0032-...:119`, `project-notes.md:54` | **current**: `hydraulics.AQUIFER_RESPONSE_PI_THRESHOLD` = 0.1, and `pi_threshold` = 0.1 in all eight sidecars — one source of truth, never redefined in the driver | current |
+| M6 | "the τ_aq-bounding governing pair KP 58.8 / KP 60.0" | `architecture.md:516,582`, `decisions/0032-...:194` (D5), `project-notes.md:54` | **current, and now confirmed on data it was pre-registered against.** τ_aq central 765 s (KP 60.0) and 680 s (KP 58.8) are the two largest of the four, ahead of 350 s (KP 57.4) and 150 s (KP 62.0); the pair carries the smallest margins (3.83, 4.31 vs 8.37, 19.54). D5 argued this from the priors *before* any τ_aq existed | current (**positive result** — recorded as a dated confirmation in ADR-0032 D5 and the companion note) |
+| M7 | "median T_rise 18 h, plateau 9 h", retiring spec §11's "~1.5 h plateau" | `architecture.md:516`, `decisions/adr0032-...:81`, `project-notes.md:54` | **current**, and these are ensemble medians over ~140 HPB members, matching M1's denominator. The run stamps the canonical event's own values, `t_rise_s` 82 800 s (23 h) and `t_plateau_s` 36 000 s (10 h); `rise_10_90_s` is 64 800 s and `fwhm_s` 198 000 s (55 h) | current (the 18 h / 9 h pair is the *population* characterisation; do not read it off a sidecar) |
+| M8 | "Check B passes: the 3600 s cadence carries ~9 samples across the peak" | `architecture.md:516`, `decisions/adr0032-...:83` | **current**: `native_dt_s` 3600 s ≤ T_feature/2 (16 200 s on the 9 h median, 18 000 s on the run's 10 h), and `check_b_native_resolves` is true in 8 of 8 strata | current |
+| M9 | verdict "`instantaneous`, retained everywhere on evidence" | `architecture.md:35,516,582`, `project-notes.md:54`, `production_campaign_2026-07-29.md:427-430` | **current**: `verdict` = `instantaneous` and `check_a_instantaneous_justified` true in **8 of 8** strata, at **both** Π definitions | current |
+
+**Net:** no aquifer-response number changed. Three rows were ambiguous or
+mislabelled as written and are fixed by naming the quantity; six are current,
+one of them a pre-registered prediction that held when extended to all eight
+strata.
+
 ## I. Documents with nothing to correct
 
 | document | finding |
@@ -277,6 +321,23 @@ reproduced byte-identically.
 11. `project-notes.md` — Euler-flip qualifiers and the new dated bullet (B8).
 12. msc-thesis `5. Verification, Validation, and Sensitivity.tex` — `tab:kaq_scenarios`
     column header and caption (H1).
+
+Added 2026-07-31, closing the ADR-0032 gap this audit had entirely omitted:
+
+13. `decisions/adr0032-aquifer-response-diagnostic.md` — the table's denominator
+    stated, a "Two margins, both correct" section reconciling Π\*/Π_central at the
+    ensemble-median T_rise against the per-run Π\*/Π_corner90, and a dated
+    confirmation that the pre-registered τ_aq-bounding pair holds at all eight
+    strata (M1, M2, M6).
+14. `decisions/0032-aquifer-response-diagnostic-preregistration.md` — Check A and
+    the S_s-does-not-bind bullet now name Π_central and their denominator (M1, M2);
+    D5 gained the dated confirmation (M6).
+15. `architecture.md` — §M4 prose, the §11 diagnostic paragraph, the §13 decisions
+    row and the pseudocode comment now distinguish the two margins (M1, M2).
+16. `production_campaign_2026-07-29.md` — §9.2 margin column labelled
+    Π\*/Π_corner90, the "conservative `S_s` corner" mislabel corrected in place,
+    and the ~10× figure related to it (M2, M3, M4).
+17. `project-notes.md` — the ADR-0032 bullet and the campaign bullet's G5 clause (M1–M4).
 
 ## K. Hardening sweep of the long-running drivers
 

@@ -300,7 +300,10 @@ def test_every_figure_driver_declares_requires_produces_and_sources() -> None:
     """The staleness gate needs all three fields to mean anything.
 
     ``sources`` is what the figure depicts; without it the gate silently checks
-    nothing, which is how a stale figure passes.
+    nothing, which is how a stale figure passes. A declaration-only entry
+    (``command is None``, added 2026-07-31 for the eight studies with no
+    plot-only path) may drop ``sources`` only by recording *why* in
+    ``staleness`` -- explicitly out of scope, never silently.
     """
     from production_campaign import FIGURE_DRIVERS
 
@@ -309,8 +312,79 @@ def test_every_figure_driver_declares_requires_produces_and_sources() -> None:
         for field in ("label", "command", "requires", "produces", "sources"):
             assert field in driver, f"{driver.get('label')} missing {field!r}"
         assert driver["produces"], f"{driver['label']} produces nothing"
-        assert driver["sources"], f"{driver['label']} declares no sources"
-        assert driver["command"][1].startswith("scripts/"), driver["command"]
+        if driver["command"] is None:
+            assert driver["redraw"], f"{driver['label']} must say why it is not run"
+            if not driver["sources"]:
+                assert driver[
+                    "staleness"
+                ], f"{driver['label']} drops sources without a recorded reason"
+        else:
+            assert driver["sources"], f"{driver['label']} declares no sources"
+            assert driver["command"][1].startswith("scripts/"), driver["command"]
+
+
+def test_every_tracked_publication_figure_is_declared() -> None:
+    """Coverage is the point: 52 of 52, no figure without a declared source.
+
+    The 2026-07-30 pass reached 44 of 52 and *listed* the remainder. A listed
+    figure is an unchecked figure, so the eight were declared on 2026-07-31 and
+    the coverage note became gate G7's hard check.
+    """
+    from production_campaign import FIGURE_DRIVERS
+
+    tracked = {p.name for p in FIGURES.glob("*.png")}
+    declared = {
+        p.name
+        for driver in FIGURE_DRIVERS
+        for pattern in driver["produces"]
+        for p in FIGURES.glob(pattern)
+    }
+    assert not tracked - declared, sorted(tracked - declared)
+
+
+def test_declared_figure_sources_resolve_to_real_paths() -> None:
+    """A ``sources`` pattern that matches nothing turns a gate into a no-op.
+
+    Sibling of the ``requires`` guard below: the GSA entry pointed ``requires``
+    at a per-section evidence file that does not exist, and the driver silently
+    skipped. The same mistake in ``sources`` is worse -- the driver runs and the
+    staleness comparison is simply skipped, so a stale figure passes.
+    """
+    from production_campaign import FIGURE_DRIVERS
+
+    unresolved = []
+    for driver in FIGURE_DRIVERS:
+        for pattern in driver["sources"]:
+            # results/ and data/raw/ are gitignored: absence is a fresh clone,
+            # not a typo. A docs/ source must really match something.
+            if pattern.startswith("docs/") and not list(REPO.glob(pattern)):
+                unresolved.append((driver["label"], pattern))
+    assert not unresolved, unresolved
+
+
+def test_the_adr0039_pair_is_gated_on_its_recorded_generation_time() -> None:
+    """Why that entry needs ``source_epoch``, pinned so it is not "simplified".
+
+    Figure and evidence are both tracked and were added by one commit (780eb0d,
+    2026-07-17) whose write left the JSON with a 2026-07-17 mtime and the figure
+    with its 2026-07-13 one. On mtime the figure looks four days stale; on the
+    JSON's own ``generated`` stamp it is 3.6 min newer, which is the truth.
+    """
+    from production_campaign import FIGURE_DRIVERS
+
+    (entry,) = [
+        d for d in FIGURE_DRIVERS if d["produces"] == ["adr0039-timestep-stress.png"]
+    ]
+    assert entry.get("source_epoch") == "json_generated"
+
+    evidence = DECISIONS / "adr0039-timestep-stress.json"
+    figure = FIGURES / "adr0039-timestep-stress.png"
+    if not (evidence.is_file() and figure.is_file()):
+        pytest.skip("evidence or figure absent")
+    from datetime import datetime
+
+    generated = datetime.fromisoformat(_read(evidence)["generated"]).timestamp()
+    assert generated <= figure.stat().st_mtime + 1.0
 
 
 def test_figure_driver_requires_paths_exist_or_are_gitignored_data() -> None:

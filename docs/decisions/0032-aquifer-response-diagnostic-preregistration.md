@@ -217,6 +217,18 @@ Selected on two criteria that **coincide** at these two sections:
 KP63.4 is excluded by default and has no blanket conductivity (k_bl = NaN in the
 CSV), so τ_aq is undefined there — consistent with its exclusion.
 
+> **D5 confirmed at all eight strata (2026-07-31).** Criterion 1 above was an
+> argument from the priors, made before any τ_aq was computed. The 2026-07-29
+> production campaign stamped `metadata['aquifer_response']` into all eight
+> strata for the first time, so the claim can now be checked against the
+> sections it was only ever *predicted* for. It holds: τ_aq central is 765 s
+> (KP60.0) and 680 s (KP58.8) — the two largest — against 350 s (KP57.4) and
+> 150 s (KP62.0), factors of 2.2 and 5.1. The pair accordingly carries the
+> smallest margins (Π\*/Π_corner90 = 3.83 and 4.31 versus 8.37 and 19.54), so it
+> bounds in the direction claimed, and the verdict is `instantaneous` in 8 of 8
+> strata at **both** Π definitions. The bounding pair was not chosen after
+> seeing the numbers, and the numbers agree with the choice.
+
 ---
 
 ## Alternatives Considered
@@ -295,9 +307,14 @@ below the pre-registered threshold; no grey zone, no S_s uncertainty introduced.
 | Π corner90 | 0.030 | 0.033 |
 | Π stress (sample p99 / flashiest T_rise) | 0.068 | 0.077 |
 
-- **Check A (central Π ≤ Π\*): PASS** at both sections, by ~10×. The 90th-pct-τ
-  corner (0.030 / 0.033) also clears, so the D3 **secondary grey-zone rule is
-  not triggered**. Even the deliberately adverse conjunction — the sample p99
+- **Check A (central Π ≤ Π\*): PASS** at both sections, by ~10× (Π\*/Π_central =
+  9.5 / 8.5). Every Π in the table above divides τ_aq by the **ensemble-median
+  T_rise, 18 h**; `run.py` stamps the same τ_aq over the *run's own* canonical
+  event (23 h), so the per-run `margin_vs_threshold` — which is additionally
+  taken against Π_corner90, not Π_central — reads 3.83–19.54. Both definitions
+  clear Π\* everywhere; see the companion note's "Two margins" section. The
+  90th-pct-τ corner (0.030 / 0.033) also clears, so the D3 **secondary
+  grey-zone rule is not triggered**. Even the deliberately adverse conjunction — the sample p99
   τ_aq over the flashiest 10th-percentile rising limb, at the upper-bound S_s —
   stays at 0.068 / 0.077, below Π\*. Only a triple-tail coincidence (≳p99.9 τ_aq
   × the flashiest events × the upper-bound S_s) reaches ~0.18–0.21 for a
@@ -311,7 +328,7 @@ below the pre-registered threshold; no grey zone, no S_s uncertainty introduced.
   native samples. The "~1.5 h" concern is not borne out at these governing
   (mainstem) nodes; if flashy loading matters anywhere it would be on the
   smaller Satsunai tributary, which carries no BEP governing section here.
-- **S_s did not bind.** Because Π clears at the *upper-bound* S_s by ~10×, the
+- **S_s did not bind.** Because Π_central clears at the *upper-bound* S_s by ~10×, the
   verdict is insensitive to S_s across (and well beyond) the pre-registered
   range: S_s would have to be ~10× the upper bound (~10⁻³ m⁻¹, outside the
   dense-gravel class) before the central Π approached Π\*. The D4

@@ -52,7 +52,10 @@ long sweep buys nothing. Instead the dedicated ``figures`` stage (added
 and then **gates on staleness** -- gate G7 fails if any figure under
 ``docs/figures/`` is older than the artifact it depicts. That gate is the
 structural fix for the manual copy step that let the Stage 6.6 KP 62.0 figures
-go stale twice; figures with no redraw path are listed, not silently ignored.
+go stale twice. Since 2026-07-31 every tracked figure is *declared*, and G7
+fails on an undeclared one: the eight with no plot-only path carry
+declaration-only entries binding them to their evidence, so they are staleness-
+gated without being re-run.
 """
 
 from __future__ import annotations
@@ -1328,11 +1331,36 @@ def _git_tracked_evidence_verdict(rel: str) -> dict[str, Any]:
 # Stage -- publication figures (regenerate, then assert freshness)              #
 # --------------------------------------------------------------------------- #
 
-#: Every publication-figure driver that has a *cheap redraw path*: it reads
-#: persisted evidence and re-renders, running no physics. ``requires`` lists the
+#: Every publication figure, with the artifact it depicts. ``requires`` lists the
 #: inputs that must exist for the driver to work at all (several live under the
 #: gitignored ``results/`` or ``data/raw/``, so a fresh clone skips them rather
 #: than failing). ``produces`` are glob patterns under ``docs/figures/``.
+#: ``sources`` is what the figure depicts -- the staleness gate compares every
+#: produced figure against the newest source.
+#:
+#: Two kinds of entry (2026-07-31, closing the 44-of-52 coverage gap):
+#:
+#: * ``command`` is a driver with a *cheap redraw path*: it reads persisted
+#:   evidence and re-renders, running no physics. The stage runs it, so its
+#:   figures are always fresh.
+#: * ``command`` is ``None`` -- **declaration only**. The study has no plot-only
+#:   path, so nothing is executed; the entry exists to bind the figure to its
+#:   source for the staleness gate and to record, in ``redraw``, what re-running
+#:   would cost. All eight were verified content-current on 2026-07-31 before
+#:   being declared.
+#:
+#: Two optional keys, both used only by declaration-only entries:
+#:
+#: * ``source_epoch: "json_generated"`` reads the evidence JSON's own
+#:   ``generated`` stamp instead of its filesystem mtime. Needed where both the
+#:   figure and its evidence are *tracked* files: git writes them at checkout or
+#:   commit time independently, so mtime is not a content signal (ADR-0039 --
+#:   its JSON records ``generated: 2026-07-13T07:53:42``, 3.6 min before the
+#:   figure, yet carries a 2026-07-17 mtime from the single commit, 780eb0d,
+#:   that added both).
+#: * ``staleness`` records why an entry declares ``sources: []`` -- i.e. is
+#:   explicitly outside the staleness gate because no artifact with a meaningful
+#:   mtime exists to bind to. Never a silent omission.
 #:
 #: Note on gate ordering: every driver here WRITES its figures before this stage
 #: gates on their timestamps, so an alarm can never destroy the artifact it is
@@ -1428,19 +1456,157 @@ FIGURE_DRIVERS: list[dict[str, Any]] = [
         "produces": ["validation_shikaga_*.png"],
         "sources": ["results/validation_shikaga/validation_results.json"],
     },
+    # ---- declaration only (no plot-only path); see the module note above ---- #
+    {
+        "label": "ADR-0012 k_aq-d70 scatter (declaration only)",
+        "command": None,
+        "redraw": (
+            "no producing script exists in this repository. The scatter was "
+            "drawn externally on 2026-07-02 by the analysis that became "
+            "docs/decisions/adr0012-kaq-d70-analysis.md, performed without repo "
+            "access (its own provenance note, section 0, says so). A trip here "
+            "means the paired-specimen table changed and the figure has to be "
+            "redrawn by hand."
+        ),
+        "requires": ["docs/decisions/adr0012-kaq-d70-analysis.md"],
+        "produces": ["adr0012-kaq-d70-scatter.png"],
+        # The figure depicts the 8 OYO paired records, which exist nowhere as
+        # data: they are transcribed into section 1 of the note, from the
+        # gitignored 1999 OYO form-4 soil-test PDFs. The note IS the artifact.
+        "sources": ["docs/decisions/adr0012-kaq-d70-analysis.md"],
+    },
+    {
+        "label": "ADR-0029 tail-variance study (declaration only)",
+        "command": None,
+        "redraw": (
+            "scripts/tail_variance_study.py has no plot-only path; re-running "
+            "it is a full KP 58.8 replicate sweep with tilted-IS estimation."
+        ),
+        "requires": ["docs/decisions/adr0029-tail-cov-study.json"],
+        "produces": ["adr0029-tail-cov.png"],
+        "sources": ["docs/decisions/adr0029-tail-cov-study.json"],
+    },
+    {
+        "label": "ADR-0032 aquifer response (declaration only)",
+        "command": None,
+        "redraw": (
+            "scripts/aquifer_response_diagnostic.py has no plot-only path and "
+            "needs the gitignored d4PDF band workbooks."
+        ),
+        "requires": ["docs/decisions/adr0032-aquifer-response-diagnostic.md"],
+        "produces": ["adr0032_aquifer_response.png"],
+        "sources": [],
+        "staleness": (
+            "outside the staleness gate: the study writes no evidence artifact "
+            "-- only the figure. Its inputs are the two governing configs and "
+            "the immutable gitignored d4PDF workbooks, and configs/ is rewritten "
+            "unconditionally by this campaign's own configs stage, so a config "
+            "mtime carries no content signal. Currency is pinned instead by "
+            "identity of tau_aq_central_s (680 s at KP 58.8, 765 s at KP 60.0) "
+            "between the figure's companion note and every run-stamped "
+            "metadata['aquifer_response'] block."
+        ),
+    },
+    {
+        "label": "ADR-0039 worst-case timestep stress (declaration only)",
+        "command": None,
+        "redraw": (
+            "scripts/timestep_convergence_stress.py has no plot-only path; a "
+            "full run is ~4 min and would rewrite the production record (its "
+            "--quick smoke payload must never be merged into it)."
+        ),
+        "requires": ["docs/decisions/adr0039-timestep-stress.json"],
+        "produces": ["adr0039-timestep-stress.png"],
+        "sources": ["docs/decisions/adr0039-timestep-stress.json"],
+        # Both files are tracked and were added by one commit (780eb0d) whose
+        # write left the JSON with a 2026-07-17 mtime and the figure with its
+        # 2026-07-13 one. The JSON's own generated stamp (2026-07-13T07:53:42)
+        # is the content date, and it precedes the figure by 3.6 min.
+        "source_epoch": "json_generated",
+    },
+    {
+        "label": "ADR-0026 C_e prior reconciliation (declaration only)",
+        "command": None,
+        "redraw": "scripts/ce_prior_study.py has no plot-only path.",
+        "requires": ["results/sensitivity/ce_prior/prior_reconciliation.json"],
+        "produces": ["ce_prior_reconciliation.png"],
+        "sources": ["results/sensitivity/ce_prior/prior_reconciliation.json"],
+    },
+    {
+        "label": "ADR-0026 C_e fragility propagation (declaration only)",
+        "command": None,
+        "redraw": (
+            "scripts/ce_prior_study.py has no plot-only path; this stage is a "
+            "CRN column-swap sweep at both informative matrix sections."
+        ),
+        "requires": ["results/sensitivity/ce_prior/fragility_propagation.json"],
+        "produces": ["ce_prior_fragility_propagation.png"],
+        # Deliberately one entry per C_e figure: the three stages ran on
+        # different dates, so a shared results/sensitivity/ce_prior/*.json glob
+        # would measure each figure against the newest of the three.
+        "sources": ["results/sensitivity/ce_prior/fragility_propagation.json"],
+    },
+    {
+        "label": "ADR-0026 C_e Phase 2 sensitivity (declaration only)",
+        "command": None,
+        "redraw": (
+            "scripts/ce_prior_study.py has no plot-only path; this stage "
+            "replays the Phase 2 survival update under each candidate prior."
+        ),
+        "requires": ["results/sensitivity/ce_prior/phase2_survival_sensitivity.json"],
+        "produces": ["ce_prior_phase2_sensitivity.png"],
+        "sources": ["results/sensitivity/ce_prior/phase2_survival_sensitivity.json"],
+    },
+    {
+        "label": "R10 foreshore-exhaustion screening (declaration only)",
+        "command": None,
+        "redraw": (
+            "scripts/foreshore_exhaustion_study.py renders only as a side "
+            "effect of a full run (--no-figure suppresses it); the campaign "
+            "runs it that way as a bit-identity companion."
+        ),
+        "requires": ["docs/decisions/r10-foreshore-exhaustion-screening.json"],
+        "produces": ["r10_foreshore_exhaustion.png"],
+        "sources": ["docs/decisions/r10-foreshore-exhaustion-screening.json"],
+    },
 ]
 
 
-def _newest(patterns: list[str]) -> tuple[float, str | None]:
-    """Newest mtime among the files matching any pattern, and which file."""
+def _json_generated_epoch(path: Path) -> float | None:
+    """Epoch of an evidence JSON's own ``generated`` stamp, or ``None``.
+
+    The content date of an artifact that records when it was produced. Immune
+    to the git write that resets a *tracked* file's mtime at checkout or commit
+    time, which is why ADR-0039's figure/evidence pair needs it.
+    """
+    try:
+        stamp = json.loads(path.read_text(encoding="utf-8")).get("generated")
+    except (OSError, ValueError):
+        return None
+    if not isinstance(stamp, str):
+        return None
+    try:
+        return datetime.fromisoformat(stamp).timestamp()
+    except ValueError:
+        return None
+
+
+def _newest(patterns: list[str], *, epoch: str = "mtime") -> tuple[float, str | None]:
+    """Newest timestamp among the files matching any pattern, and which file.
+
+    ``epoch='json_generated'`` prefers each file's own recorded ``generated``
+    stamp, falling back to mtime where it has none.
+    """
     newest, which = 0.0, None
     for pattern in patterns:
         for path in REPO.glob(pattern):
             if not path.is_file():
                 continue
-            mtime = path.stat().st_mtime
-            if mtime > newest:
-                newest, which = mtime, str(path.relative_to(REPO)).replace("\\", "/")
+            stamp = _json_generated_epoch(path) if epoch == "json_generated" else None
+            if stamp is None:
+                stamp = path.stat().st_mtime
+            if stamp > newest:
+                newest, which = stamp, str(path.relative_to(REPO)).replace("\\", "/")
     return newest, which
 
 
@@ -1451,13 +1617,31 @@ def stage_figures(ctx: "Context") -> dict[str, Any]:
     than the artifact it depicts fails the campaign, so the 2026-07-29 and
     2026-07-30 cases (Stage 6.6 KP 62.0 rendered before its own ladder re-run)
     cannot recur silently.
+
+    Declaration-only entries (``command`` is ``None``) are not executed: they
+    contribute their ``sources`` binding to the staleness gate and their
+    ``produces`` names to the coverage check, which is how the eight figures
+    whose studies have no plot-only path became gated without being re-run.
     """
     gates = Gates("figures")
     before = _tracked_figure_state()
     commands: list[dict[str, Any]] = []
     skipped: list[dict[str, str]] = []
+    declaration_only: list[dict[str, Any]] = []
 
     for driver in FIGURE_DRIVERS:
+        if driver["command"] is None:
+            declaration_only.append(
+                {
+                    "label": driver["label"],
+                    "figures": driver["produces"],
+                    "evidence_present": all(
+                        (REPO / r).exists() for r in driver["requires"]
+                    ),
+                    "redraw": driver["redraw"],
+                }
+            )
+            continue
         missing = [r for r in driver["requires"] if not (REPO / r).exists()]
         if missing:
             skipped.append({"label": driver["label"], "missing": ", ".join(missing)})
@@ -1480,8 +1664,20 @@ def stage_figures(ctx: "Context") -> dict[str, Any]:
     # newest artifact it depicts.
     stale: list[dict[str, Any]] = []
     checked = 0
+    waived: list[dict[str, Any]] = []
     for driver in FIGURE_DRIVERS:
-        source_mtime, source_file = _newest(driver["sources"])
+        if not driver["sources"]:
+            waived.append(
+                {
+                    "label": driver["label"],
+                    "figures": driver["produces"],
+                    "reason": driver["staleness"],
+                }
+            )
+            continue
+        source_mtime, source_file = _newest(
+            driver["sources"], epoch=driver.get("source_epoch", "mtime")
+        )
         if source_mtime == 0.0:
             continue
         for pattern in driver["produces"]:
@@ -1512,10 +1708,21 @@ def stage_figures(ctx: "Context") -> dict[str, Any]:
         for p in (REPO / "docs" / "figures").glob(pattern)
     }
     unmapped = sorted(set(before) - mapped)
+    gates.check(
+        "G7",
+        "every tracked publication figure is declared in FIGURE_DRIVERS",
+        not unmapped,
+        {"count": len(unmapped), "figures": unmapped, "declared": len(mapped)},
+    )
     gates.note(
         "G7",
-        "figures with no redraw path in FIGURE_DRIVERS (re-run their study)",
-        {"count": len(unmapped), "figures": unmapped},
+        "declared but not redrawn (no plot-only path; re-run their study)",
+        {"count": len(declaration_only), "drivers": declaration_only},
+    )
+    gates.note(
+        "G7",
+        "declared but outside the staleness gate (no artifact to bind to)",
+        {"count": len(waived), "drivers": waived},
     )
     after = _tracked_figure_state()
     return {
@@ -1525,7 +1732,10 @@ def stage_figures(ctx: "Context") -> dict[str, Any]:
         "figures_changed": sorted(
             rel for rel, digest in after.items() if before.get(rel) != digest
         ),
+        "figures_declared": len(mapped),
         "figures_unmapped": unmapped,
+        "figures_declaration_only": declaration_only,
+        "figures_staleness_waived": waived,
         "gates": gates.records,
     }
 
