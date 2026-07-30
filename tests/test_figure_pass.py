@@ -24,6 +24,16 @@ practice and the violation was invisible until someone went looking.
 
 No physics runs here: every check is against committed evidence JSON or file
 layout.
+
+**Hardening pass, 2026-07-31.** Eight of these guards opened with ``pytest.skip``
+or ``skipif`` on a path that is *committed*. That made them vanish silently
+rather than fail whenever a document moved, was renamed or was deleted -- and the
+worst case was strictly worse than a move: the Euler-flip guard skipped when the
+claim was *absent from the text*, so deleting the claim made its own guard pass.
+Every target here is tracked, so every one now asserts existence (``_require``),
+the claim set names its exemptions explicitly (``EULER_CLAIM_EXEMPT``), and
+``test_no_guard_in_this_file_skips_on_a_tracked_path`` keeps the pattern out.
+``skipif`` remains correct elsewhere in ``tests/`` for gitignored data drops.
 """
 
 from __future__ import annotations
@@ -47,6 +57,25 @@ SYNTHESIS_EVIDENCE = DECISIONS / "epistemic-bracket-synthesis.json"
 
 def _read(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _require(path: Path) -> Path:
+    """Assert a *committed* artifact a guard depends on is still where it was.
+
+    Every guard in this file used to open with ``pytest.skip`` on a missing
+    path. That is correct for a gitignored machine-local artifact and wrong for
+    a tracked one: moving, renaming or deleting a tracked document silently
+    disabled its guard and the suite still reported green. Since the claims
+    pinned here were each added *because* they had already gone unnoticed once,
+    a vanished target must fail loudly (2026-07-31 hardening pass).
+    """
+    assert path.is_file(), (
+        f"{path.relative_to(REPO).as_posix()} is a committed artifact this guard "
+        "depends on, and it is missing. If it moved or was renamed, update this "
+        "test in the same change; if it was deleted, the claim it pins is now "
+        "unguarded."
+    )
+    return path
 
 
 # --------------------------------------------------------------------------- #
@@ -148,14 +177,15 @@ def test_figstyle_marks_the_hypothetical_extension_only_above_the_attainable_max
 # --------------------------------------------------------------------------- #
 
 
-@pytest.mark.skipif(not HWL_EVIDENCE.is_file(), reason="HWL evidence JSON absent")
 def test_the_two_hwl_anchors_are_distinct_and_carry_different_row_counts() -> None:
     """A1 (inserted design HWL) is not A2 (nearest grid level).
 
     They differ by 0.11 m at KP 62.0 and by a resolved 25 % in the bias factor,
     so a document that quotes one as the other is wrong.
     """
-    anchors = _read(HWL_EVIDENCE)["stages"]["A_anchors_F2"]["sections"]["kp62_0"]
+    anchors = _read(_require(HWL_EVIDENCE))["stages"]["A_anchors_F2"]["sections"][
+        "kp62_0"
+    ]
     a1 = anchors["n1000000"]["A1"]
     a2 = anchors["n1000000"]["A2"]
     assert a1["level_m"] == pytest.approx(46.39)
@@ -169,7 +199,6 @@ def test_the_two_hwl_anchors_are_distinct_and_carry_different_row_counts() -> No
     assert anchors["n1000000"]["stage_separation_m"] == pytest.approx(0.11)
 
 
-@pytest.mark.skipif(not HWL_EVIDENCE.is_file(), reason="HWL evidence JSON absent")
 def test_the_n1e5_figure_is_recorded_as_superseded_not_as_a_second_estimate() -> None:
     """44.7 on 4 rows and 26.9 on 63 rows are the same quantity at two N.
 
@@ -177,7 +206,9 @@ def test_the_n1e5_figure_is_recorded_as_superseded_not_as_a_second_estimate() ->
     must fail its own resolution criteria, so nothing can present it as an
     independent estimate.
     """
-    anchors = _read(HWL_EVIDENCE)["stages"]["A_anchors_F2"]["sections"]["kp62_0"]
+    anchors = _read(_require(HWL_EVIDENCE))["stages"]["A_anchors_F2"]["sections"][
+        "kp62_0"
+    ]
     small = anchors["n100000"]["A1"]
     assert small["k_transient"] == 4
     assert small["ratio"] == pytest.approx(44.75, abs=0.01)
@@ -185,10 +216,9 @@ def test_the_n1e5_figure_is_recorded_as_superseded_not_as_a_second_estimate() ->
     assert not small["resolved"]
 
 
-@pytest.mark.skipif(not HWL_EVIDENCE.is_file(), reason="HWL evidence JSON absent")
 def test_kp57_4_is_a_bound_not_a_point_estimate() -> None:
     """Two failing rows at N = 1e6: report B >= 148, lead with 42.7 at 39.50 m."""
-    brute = _read(HWL_EVIDENCE)["stages"]["A_brute_kp57_4"]
+    brute = _read(_require(HWL_EVIDENCE))["stages"]["A_brute_kp57_4"]
     assert brute["anchor_A1"]["k_transient"] == 2
     assert not brute["anchor_A1"]["R1_rows"]
     resolved = [
@@ -202,7 +232,6 @@ def test_kp57_4_is_a_bound_not_a_point_estimate() -> None:
     assert lowest["k_transient"] == 521
 
 
-@pytest.mark.skipif(not HWL_EVIDENCE.is_file(), reason="HWL evidence JSON absent")
 def test_the_kp57_4_quotable_anchor_is_itself_a_flip_level() -> None:
     """The uncomfortable detail must survive propagation.
 
@@ -210,7 +239,7 @@ def test_the_kp57_4_quotable_anchor_is_itself_a_flip_level() -> None:
     levels. Dropping that quietly would misrepresent the number, so the record
     is pinned and the documents of record are checked for it below.
     """
-    flips = _read(HWL_EVIDENCE)["stages"]["A_brute_kp57_4"]["euler_flips"]
+    flips = _read(_require(HWL_EVIDENCE))["stages"]["A_brute_kp57_4"]["euler_flips"]
     text = json.dumps(flips)
     assert "39.5" in text, "the flip levels must be recorded, not just a total"
     assert flips["per_diagnostic_totals"]["c4b_not_c3b"] == 4
@@ -220,7 +249,10 @@ def test_the_kp57_4_quotable_anchor_is_itself_a_flip_level() -> None:
 # 3. Claims that acquired a scope                                               #
 # --------------------------------------------------------------------------- #
 
-#: Documents that state the Euler-flip result. Each must carry its N.
+#: Documents that state the Euler-flip result. Each must exist, must still carry
+#: the claim, and must carry the N at which the claim holds. Every entry was added
+#: *because* it states the result, so all three are required facts, not
+#: preconditions to be inferred from the file.
 EULER_CLAIM_FILES = [
     DOCS / "production_campaign_2026-07-29.md",
     DOCS / "stage6_6_report.md",
@@ -228,6 +260,14 @@ EULER_CLAIM_FILES = [
     DECISIONS / "adr0047-dem-seepage-length.md",
     DECISIONS / "0047-dem-surveyed-seepage-length.md",
 ]
+
+#: Entries of the list above that are permitted NOT to carry the claim.
+#: **Deliberately empty**, and deliberately explicit. The previous form inferred
+#: the exempt set from the text (``if "euler" not in lowered: skip``), which meant
+#: *deleting* the claim from a document made its own guard pass. Removing a
+#: document from the claim set is now an edit someone has to make on purpose,
+#: here, with a reason.
+EULER_CLAIM_EXEMPT: frozenset[str] = frozenset()
 
 
 @pytest.mark.parametrize("path", EULER_CLAIM_FILES, ids=lambda p: p.name)
@@ -239,12 +279,15 @@ def test_every_euler_flip_claim_carries_the_N_at_which_it_holds(path: Path) -> N
     a statement about the discretisation when it is a statement about the
     sample size.
     """
-    if not path.is_file():
-        pytest.skip(f"{path.name} absent")
-    text = path.read_text(encoding="utf-8")
-    lowered = text.lower()
-    if "euler" not in lowered:
-        pytest.skip("no Euler-flip claim in this file")
+    _require(path)
+    lowered = path.read_text(encoding="utf-8").lower()
+    if path.name in EULER_CLAIM_EXEMPT:
+        pytest.skip(f"{path.name} is a declared exemption from the claim set")
+    assert "euler" in lowered, (
+        f"{path.name} no longer states the Euler-flip result. If that is "
+        "intended, remove it from EULER_CLAIM_FILES explicitly; do not let the "
+        "guard lapse by deletion."
+    )
     # Every paragraph asserting zero flips must mention an N nearby.
     assert "n = 1e5" in lowered or "n = 1e6" in lowered or "n=1e5" in lowered, (
         f"{path.name} states an Euler-flip result without naming the sample "
@@ -377,10 +420,8 @@ def test_the_adr0039_pair_is_gated_on_its_recorded_generation_time() -> None:
     ]
     assert entry.get("source_epoch") == "json_generated"
 
-    evidence = DECISIONS / "adr0039-timestep-stress.json"
-    figure = FIGURES / "adr0039-timestep-stress.png"
-    if not (evidence.is_file() and figure.is_file()):
-        pytest.skip("evidence or figure absent")
+    evidence = _require(DECISIONS / "adr0039-timestep-stress.json")
+    figure = _require(FIGURES / "adr0039-timestep-stress.png")
     from datetime import datetime
 
     generated = datetime.fromisoformat(_read(evidence)["generated"]).timestamp()
@@ -505,16 +546,62 @@ def test_the_reach_distribution_figure_is_captioned_as_context_not_the_answer() 
     assert "110 of 114" in source
 
 
-@pytest.mark.skipif(
-    not SYNTHESIS_EVIDENCE.is_file(), reason="synthesis evidence JSON absent"
-)
+def test_no_guard_in_this_file_skips_on_a_tracked_path() -> None:
+    """The anti-pattern must not come back, and it is invisible when it does.
+
+    Eight guards here once opened with ``pytest.skip`` on a committed document
+    or evidence JSON. A move, rename or deletion then disabled the guard and the
+    suite still reported green -- which is how the unqualified Euler-flip claim
+    survived in five documents. ``skipif`` remains correct for gitignored
+    machine-local artifacts; this file references none, so it should contain no
+    existence-conditional skip at all.
+
+    The single permitted ``pytest.skip`` is the declared ``EULER_CLAIM_EXEMPT``
+    branch, which gates on a named set rather than on whether a file happens to
+    be present.
+    """
+    # Parsed, not grepped: the prose above names both forms deliberately, and
+    # this assertion would otherwise match itself.
+    import ast
+
+    source = (REPO / "tests" / "test_figure_pass.py").read_text(encoding="utf-8")
+    tree = ast.parse(source)
+
+    def _dotted(node: ast.AST) -> str:
+        if isinstance(node, ast.Attribute):
+            return f"{_dotted(node.value)}.{node.attr}"
+        if isinstance(node, ast.Name):
+            return node.id
+        return ""
+
+    skipifs = [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call) and _dotted(node.func) == "pytest.mark.skipif"
+    ]
+    assert not skipifs, (
+        "a skipif reappeared in test_figure_pass.py; every path it references is "
+        "tracked, so absence must fail loudly (use _require)"
+    )
+
+    skips = [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call) and _dotted(node.func) == "pytest.skip"
+    ]
+    assert (
+        len(skips) == 1
+    ), "the only permitted skip is the declared EULER_CLAIM_EXEMPT branch"
+    assert "EULER_CLAIM_EXEMPT" in source
+
+
 def test_the_epistemic_ranking_covers_all_four_matrix_sections() -> None:
     """ADR-0047's log left KP 62.0, the governing section, unmeasured.
 
     The figure and the thesis inventory both assume four sections; if the
     evidence ever narrows again the figure would silently plot fewer bars.
     """
-    sections = _read(SYNTHESIS_EVIDENCE)["sections"]
+    sections = _read(_require(SYNTHESIS_EVIDENCE))["sections"]
     assert {s["section"] for s in sections} == {
         "KP57.4",
         "KP58.8",

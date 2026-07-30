@@ -47,6 +47,23 @@ def _load_study_module():
 
 dem = _load_study_module()
 
+
+def _require_tracked(path: Path) -> Path:
+    """Assert a *tracked* artifact is still where the test expects it.
+
+    Distinct from the ``requires_*`` marks below, which gate on genuinely
+    optional gitignored data drops. A tracked evidence JSON that has moved or
+    been deleted must fail loudly: skipping on it let a rename disable the guard
+    while the suite stayed green (2026-07-31 hardening pass).
+    """
+    assert path.is_file(), (
+        f"{path.relative_to(REPO).as_posix()} is a tracked evidence artifact "
+        "this guard depends on, and it is missing. If it moved, update this "
+        "test in the same change."
+    )
+    return path
+
+
 requires_dem = pytest.mark.skipif(
     not dem.TILE_DIR.exists(),
     reason="GSI DEM5A tile drop absent (untracked data/raw/)",
@@ -446,9 +463,13 @@ def test_build_alignment_is_contiguous_and_anchored() -> None:
 @requires_shapefile
 def test_measured_sections_reproduce_the_committed_evidence() -> None:
     """Re-measuring must reproduce the numbers the ADR quotes."""
-    path = REPO / "docs" / "decisions" / "adr0047-dem-seepage-length.json"
-    if not path.exists():
-        pytest.skip("evidence JSON not generated yet")
+    # The evidence JSON is TRACKED, so absence means moved/renamed/deleted, not
+    # "not generated yet" -- assert rather than skip (2026-07-31 hardening pass).
+    # The outer requires_dem/requires_shapefile marks still cover the genuinely
+    # optional part: the gitignored data/raw/ tile drop.
+    path = _require_tracked(
+        REPO / "docs" / "decisions" / "adr0047-dem-seepage-length.json"
+    )
     evidence = json.loads(path.read_text(encoding="utf-8"))
     mosaic = dem.load_dem_mosaic()
     alignment = dem.build_alignment()
@@ -465,9 +486,9 @@ def test_measured_sections_reproduce_the_committed_evidence() -> None:
 
 def test_evidence_json_carries_the_vintage_and_the_no_change_statement() -> None:
     """The record must say which surface it measured and that nothing changed."""
-    path = REPO / "docs" / "decisions" / "adr0047-dem-seepage-length.json"
-    if not path.exists():
-        pytest.skip("evidence JSON not generated yet")
+    path = _require_tracked(
+        REPO / "docs" / "decisions" / "adr0047-dem-seepage-length.json"
+    )
     evidence = json.loads(path.read_text(encoding="utf-8"))
     assert dem.DEM_DEV_DATE in evidence["dem_source"]
     assert evidence["csv_geometry_vintage"] == "1998"
@@ -540,9 +561,9 @@ def test_ratio_of_ratios_resolves_a_transient_only_change() -> None:
 
 def test_ratio_evidence_reports_every_level_with_an_interval() -> None:
     """Every reported level must carry a resolvable/unresolvable verdict."""
-    path = REPO / "docs" / "decisions" / "adr0047-dem-seepage-length-ratio.json"
-    if not path.exists():
-        pytest.skip("ratio evidence JSON not generated yet")
+    path = _require_tracked(
+        REPO / "docs" / "decisions" / "adr0047-dem-seepage-length-ratio.json"
+    )
     payload = json.loads(path.read_text(encoding="utf-8"))
     for section in payload["ratio"]:
         # The baseline must have matched the persisted sweep on the whole

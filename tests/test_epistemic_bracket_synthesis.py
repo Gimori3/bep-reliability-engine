@@ -34,6 +34,22 @@ def _load(name: str, path: Path):
 ebs = _load("epistemic_bracket_synthesis", _SCRIPT)
 
 
+def _require_tracked(path: Path) -> Path:
+    """Assert a *tracked* evidence artifact is still where the test expects it.
+
+    ``ADR0047_EVIDENCE`` is committed under ``docs/decisions/``, so absence means
+    it moved, was renamed or was deleted -- not that it is optional. Skipping on
+    it silently disabled the guard while the suite stayed green (2026-07-31
+    hardening pass).
+    """
+    assert path.is_file(), (
+        f"{path.relative_to(REPO).as_posix()} is a tracked evidence artifact "
+        "this guard depends on, and it is missing. If it moved, update this "
+        "test in the same change."
+    )
+    return path
+
+
 # --------------------------------------------------------------------------- #
 # Structural pins                                                              #
 # --------------------------------------------------------------------------- #
@@ -192,8 +208,7 @@ def test_seepage_length_arms_drop_the_no_op_arm_and_carry_the_withdrawn_value() 
     L instead -- otherwise it asks for a no-op 40 m arm alongside the withdrawn
     one and burns a sweep to measure a ratio of exactly 1.
     """
-    if not ebs.ADR0047_EVIDENCE.exists():
-        pytest.skip("ADR-0047 evidence JSON absent")
+    _require_tracked(ebs.ADR0047_EVIDENCE)
     arms = ebs.seepage_length_arms("KP62.0", current_L=40.0)
     assert arms == [("withdrawn_1998", 47.0)]
     lengths = [length for _, length in arms]
@@ -201,8 +216,7 @@ def test_seepage_length_arms_drop_the_no_op_arm_and_carry_the_withdrawn_value() 
 
 
 def test_seepage_length_arms_at_a_held_section_drive_the_unadopted_dem_value() -> None:
-    if not ebs.ADR0047_EVIDENCE.exists():
-        pytest.skip("ADR-0047 evidence JSON absent")
+    _require_tracked(ebs.ADR0047_EVIDENCE)
     arms = dict(ebs.seepage_length_arms("KP58.8", current_L=35.0))
     assert arms["dem_clean_median"] == pytest.approx(42.0)
 
