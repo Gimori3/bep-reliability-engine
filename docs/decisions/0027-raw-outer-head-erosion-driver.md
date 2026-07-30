@@ -6,6 +6,12 @@ on 2026-07-08 ("Ja klopt" — once heave/uplift breaches the blanket, progressio
 uses the full un-attenuated outer head; r_e applies only to uplift/heave), so
 the closure no longer rests on the meeting recollection.
 
+Pointer correction 2026-07-31: the two references to the validation note were
+updated from its pre-closure filename (`OPEN-head-datum-re-convention.md`) to
+its current one (`head-datum-re-convention-CLOSED.md`), renamed in commit
+`08267ee`; both had been dangling since. Pointer strings only -- no decision,
+status, rationale or consequence is changed by this edit.
+
 ## Context
 
 ADR-0007 applied the Mazure response factor r_e to the **erosion-driving**
@@ -24,7 +30,7 @@ rationale was that Eq. (6) is written for Pol's r_e = 1 validation geometry and
 that field application should compose r_e onto the erosion head. That reasoning
 was flagged as the **one unvalidated physics convention in the engine** and
 tracked as the OPEN reference anchor #4
-(`docs/validation/OPEN-head-datum-re-convention.md`), because it could not be
+(`docs/validation/head-datum-re-convention-CLOSED.md`), because it could not be
 closed from the papers alone: the 0.3·D_bl crack term appears only in the SIE
 field model (r_e = 0.6), while every r_e = 1 calibration case (B25-245, FPH)
 has D_bl = 0, so no published configuration combines an active crack term with
@@ -150,6 +156,6 @@ gate and the static comparator are unchanged.
   equals "raw after heave"); ADR-0002 (shared sample, untouched); ADR-0009 (the
   head-convention gap component, extended here); ADR-0017 (the opt-in-override
   precedent); ADR-0024 (KP 62.0 raw-tail finding, may shift).
-- `docs/validation/OPEN-head-datum-re-convention.md` (closed by this ADR via
+- `docs/validation/head-datum-re-convention-CLOSED.md` (closed by this ADR via
   criterion #2); `docs/validation/reference-anchor-status.md` §4.
 - `docs/validation/pol-meeting-2026-07-07-dispositions.md` (Answer 1).
