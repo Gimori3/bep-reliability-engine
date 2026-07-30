@@ -775,7 +775,7 @@
     {
       "section": "KP62.0",
       "kp": 62.0,
-      "csv_L_m": 47.0,
+      "csv_L_m": 40.0,
       "csv_geometry_vintage": "1998",
       "remediation_state": "unreinforced",
       "oyo_1998_basis": "toe-to-toe incl. landside berm, 18 + 29.1; range 40 to 55",
@@ -1059,7 +1059,7 @@
           }
         }
       },
-      "elapsed_s": 610.7
+      "elapsed_s": 329.6
     },
     {
       "section": "KP58.8",
@@ -1091,7 +1091,7 @@
           }
         }
       },
-      "elapsed_s": 631.4
+      "elapsed_s": 431.7
     },
     {
       "section": "KP60.0",
@@ -1123,39 +1123,39 @@
           }
         }
       },
-      "elapsed_s": 650.1
+      "elapsed_s": 469.4
     },
     {
       "section": "KP62.0",
       "config": "configs/kp62_0_historical_matrix.yaml",
       "production_sweep": "results/tokachi_kp62.0_historical_matrix.h5",
-      "baseline_L_m": 47.0,
+      "baseline_L_m": 40.0,
       "baseline_bit_identical_to_production": true,
       "n_samples": 100000,
       "seepage_length_cov": 0.2,
       "arms": {
-        "dem_clean_median": {
-          "L_m": 40.0,
-          "delta_L_m": -7.0,
+        "withdrawn_1998": {
+          "L_m": 47.0,
+          "delta_L_m": 7.0,
           "trans": {
             "max_abs_delta_P_f": 0.20105999999999996,
             "max_abs_delta_at_stage_m_msl": 50.0,
-            "P_f_baseline_at_that_stage": 0.39048,
-            "P_f_arm_at_that_stage": 0.59154,
-            "min_ratio_where_baseline_positive": 1.0209845735027223,
-            "max_ratio_where_baseline_positive": 14.999999999999998
+            "P_f_baseline_at_that_stage": 0.59154,
+            "P_f_arm_at_that_stage": 0.39048,
+            "min_ratio_where_baseline_positive": 0.0,
+            "max_ratio_where_baseline_positive": 0.9794467281413175
           },
           "static": {
             "max_abs_delta_P_f": 0.21423000000000003,
             "max_abs_delta_at_stage_m_msl": 48.25,
-            "P_f_baseline_at_that_stage": 0.3479,
-            "P_f_arm_at_that_stage": 0.56213,
-            "min_ratio_where_baseline_positive": 1.0,
-            "max_ratio_where_baseline_positive": 10.5
+            "P_f_baseline_at_that_stage": 0.56213,
+            "P_f_arm_at_that_stage": 0.3479,
+            "min_ratio_where_baseline_positive": 0.0,
+            "max_ratio_where_baseline_positive": 1.0
           }
         }
       },
-      "elapsed_s": 577.0
+      "elapsed_s": 597.1
     }
   ]
 }

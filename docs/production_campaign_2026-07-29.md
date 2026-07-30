@@ -106,7 +106,7 @@ Every gate below is recorded in the manifest with its full evidence payload.
 | **G2** | marginal transient rejection exactly 0 in all eight strata | **pass** |
 | **G3** | both sections present in the Stage 6.6 summary | **pass** |
 | **G3** | production drift guard bit-identical at all common levels | **pass** (38 + 23 levels) |
-| **G3** | every Euler-flip count exactly 0 | **pass** (5 diagnostics × 2 sections) |
+| **G3** | every Euler-flip count exactly 0 **at N = 1e5** | **pass** (5 diagnostics × 2 sections). The N qualifier is load-bearing: at N = 1e6 KP 57.4 shows 4 `c4b_not_c3b` rows (§12), where the expected count at N = 1e5 is 0.4. |
 | **G4** | `rq4_annual.csv` changed-row count vs the superseded campaign | **0 rows changed** |
 | **G5** | ADR-0032 verdict `instantaneous` wherever present | **pass** (8/8) |
 | **G5** | every re-run sweep carries the `aquifer_response` block | **pass** (8/8) |
@@ -242,7 +242,10 @@ sensitivity, not a deliverable posterior.
 Ten-comparator ladder on one shared sample at KP 62.0 and KP 57.4, matrix and
 bulk, N = 100 000. Drift guard **bit-identical at all 38 (KP 62.0) and 23
 (KP 57.4) common levels**; `theta_matrix` identical; **every Euler-flip count
-exactly 0** across all five diagnostics at both sections.
+exactly 0 at this N (= 1e5)** across all five diagnostics at both sections.
+The qualifier matters: at N = 1e6 KP 57.4 carries 4 `c4b_not_c3b` barrier-jump
+rows (levels 39.50 / 40.25 / 40.75 m), a rate of 4e-6 whose expected count at
+N = 1e5 is 0.4 — see §12. No production result runs at N = 1e6.
 
 ### 6.1 Bias factor per level, with the row count that carries it
 

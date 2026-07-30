@@ -103,6 +103,12 @@ class Phase2Settings(BaseModel):
     verify_by_reevaluation: bool = False
     trace_breach_times: bool = True
     figures: bool = True
+    #: Redraw the figures from a recomputed-in-memory posterior WITHOUT writing
+    #: (or overwriting) the PosteriorResult pair. Added 2026-07-30 so a stale
+    #: figure can be refreshed against its current Phase 1 parent without
+    #: touching a persisted artifact whose SHA-256 the production campaign
+    #: manifest records. Default False is bit-identical to previous behaviour.
+    figures_only: bool = False
     n_bootstrap: int = Field(default=1000, ge=10)
     confidence: float = Field(default=0.95, gt=0.0, lt=1.0)
     progression_backend: Literal["numpy", "numba"] | None = None
@@ -290,7 +296,9 @@ def run_survival_update(
     settings = settings or Phase2Settings()
     phase1_path = Path(phase1_path)
     paths = _output_paths(phase1_path, settings)
-    if persist:
+    if persist and not settings.figures_only:
+        # figures_only never writes the PosteriorResult pair, so the guard that
+        # protects it does not apply.
         _guard_no_overwrite(paths, settings.overwrite)
 
     start = time.perf_counter()
@@ -419,7 +427,7 @@ def run_survival_update(
         metadata=metadata,
     )
 
-    if persist:
+    if persist and not settings.figures_only:
         result.save(paths["h5"])
         logger.info(
             "Wrote Phase 2 result to %s (+ sidecar); posterior keeps %d of "
@@ -429,9 +437,18 @@ def run_survival_update(
             run.n_samples,
             100.0 * (1.0 - state.n_alive / run.n_samples),
         )
-        if settings.figures:
-            written = _figures(run, result, chain_summary, state.chain, paths)
-            logger.info("Wrote %d figures under %s.", len(written), paths["figures"])
+    elif persist:
+        logger.info(
+            "figures_only: NOT writing %s; posterior keeps %d of %d rows "
+            "(rejection %.2f%%).",
+            paths["h5"].name,
+            state.n_alive,
+            run.n_samples,
+            100.0 * (1.0 - state.n_alive / run.n_samples),
+        )
+    if persist and settings.figures:
+        written = _figures(run, result, chain_summary, state.chain, paths)
+        logger.info("Wrote %d figures under %s.", len(written), paths["figures"])
     return result
 
 

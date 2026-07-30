@@ -22,6 +22,9 @@ option C) is executed here:
 * ``epistemic`` -- Stage D: the epistemic band on the bias *ratio* at the resolved
                    anchor, ``m_p`` first as a negative control.
 * ``report``    -- assemble the evidence JSON from the stage artifacts.
+* ``figures``   -- draw the three study figures from the committed evidence JSON
+                   (draw-only: no compute, no dependency on gitignored
+                   ``results/``, so it regenerates on a fresh clone).
 
 This module is physics-free in the ``convergence.py`` / ``sensitivity.py`` sense:
 every failure indicator comes from the production machinery (M8 ``evaluate_batch``
@@ -36,6 +39,7 @@ Usage (repo root, venv active)::
     python scripts/hwl_bias_resolution.py kp57
     python scripts/hwl_bias_resolution.py epistemic
     python scripts/hwl_bias_resolution.py report
+    python scripts/hwl_bias_resolution.py figures
 """
 
 from __future__ import annotations
@@ -51,6 +55,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Callable, Sequence
 
+import matplotlib.pyplot as plt
 import numpy as np
 import yaml
 from joblib import Parallel, delayed
@@ -59,6 +64,8 @@ from numpy.typing import NDArray
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
+
+import _figstyle as figstyle  # noqa: E402
 
 from bep_reliability_engine.config import (  # noqa: E402
     Config,
@@ -843,6 +850,13 @@ def cmd_verify(args: argparse.Namespace) -> dict:
     from stage6_6_gap_decomposition import verify_against_production
 
     payload: dict[str, Any] = {"stage": "G-A1 drift guard", "sections": {}}
+    # Persist first, gate afterwards, and merge rather than replace. Both are
+    # the 2026-07-30 lessons from `cmd_brute` and `cmd_epistemic`, applied here
+    # too: a gate that raises before the write destroys the ~15 min ladder it is
+    # complaining about *and* the diagnostics that would explain it, and a
+    # per-section run that rebuilds the payload silently drops the other
+    # section's verified record.
+    failures: list[str] = []
     for key in args.sections:
         config, hwl, a2 = load_section(key)
         print(f"[{key}] N=1e5 drift-guard re-run (A1 {hwl}, A2 {a2}) ...")
@@ -852,6 +866,8 @@ def cmd_verify(args: argparse.Namespace) -> dict:
         result.metadata["base_config_hash"] = config.config_hash()
         record = verify_against_production(key, result)
         flips = flip_summary(result)
+        out = OUT_DIR / f"ladder_{key}_n{result.n_samples}.h5"
+        result.save(out)
         payload["sections"][key] = {
             "hwl_a1": hwl,
             "a2": a2,
@@ -862,16 +878,25 @@ def cmd_verify(args: argparse.Namespace) -> dict:
             "euler_flips": flips,
             "convergence": convergence_block(result),
             "bias_table": ladder_bias_table(result),
+            "artifact": str(out.relative_to(REPO_ROOT)),
         }
         if record.get("status") != "bit_identical":
-            raise SystemExit(f"GATE G-A1 FAILED at {key}: {record}")
+            failures.append(f"GATE G-A1 FAILED at {key}: {record}")
         if not flips["all_zero"]:
-            raise SystemExit(f"GATE G-A2 FAILED at {key}: {flips}")
-        out = OUT_DIR / f"ladder_{key}_n{result.n_samples}.h5"
-        result.save(out)
-        payload["sections"][key]["artifact"] = str(out.relative_to(REPO_ROOT))
-        print(f"  wall {wall:.0f}s  peak {peak:.2f} GB  flips all-zero")
-    _write(OUT_DIR / "stage_a_verify.json", payload)
+            failures.append(f"GATE G-A2 FAILED at {key}: {flips}")
+        print(
+            f"  wall {wall:.0f}s  peak {peak:.2f} GB  "
+            f"flips {'all-zero' if flips['all_zero'] else 'NONZERO'}"
+        )
+    out_path = OUT_DIR / "stage_a_verify.json"
+    if out_path.exists():
+        merged = _read(out_path)
+        merged.setdefault("sections", {}).update(payload["sections"])
+        merged.update({k: v for k, v in payload.items() if k != "sections"})
+        payload = merged
+    _write(out_path, payload)
+    if failures:
+        raise SystemExit("; ".join(failures))
     return payload
 
 
@@ -1562,6 +1587,642 @@ def cmd_anchors(args: argparse.Namespace) -> dict:
     return payload
 
 
+# ==========================================================================
+# Figures -- draw-only, from the committed evidence JSON. No compute, no
+# dependency on gitignored results/, so they regenerate on a fresh clone.
+# ==========================================================================
+
+SYNTHESIS_EVIDENCE = (
+    REPO_ROOT / "docs" / "decisions" / "epistemic-bracket-synthesis.json"
+)
+
+#: Stage D arm -> (display label, bracket group). The group drives the colour so
+#: an arm keeps its hue across every panel and figure.
+ARM_DISPLAY: dict[str, tuple[str, str]] = {
+    "m_p": ("$m_p$ (control)", "m_p"),
+    "k_aq_field_toe": ("$k_{aq}$ field toe", "k_aq"),
+    "k_aq_field_geomean": ("$k_{aq}$ field geomean", "k_aq"),
+    "k_aq_regional_upper": ("$k_{aq}$ regional upper", "k_aq"),
+    "gamma_bl_sub_lower": (r"$\gamma'_{bl}$ lower", "gamma_bl_sub"),
+    "z_toe_plus0.30m": ("$z_{toe}$ +0.30 m", "z_toe"),
+    "z_toe_minus0.30m": ("$z_{toe}$ -0.30 m", "z_toe"),
+    "L_withdrawn_1998": ("$L$ withdrawn 1998", "L"),
+    "L_dem_clean_median": ("$L$ DEM clean median", "L"),
+    "L_dem_all_stations_median": ("$L$ DEM all stations", "L"),
+}
+
+
+def _bracket_colors() -> dict[str, str]:
+    """One fixed hue per epistemic knob, shared by every figure."""
+    return {
+        "k_aq": figstyle.BLUE,
+        "z_toe": figstyle.ORANGE,
+        "L": figstyle.AQUA,
+        "m_p": figstyle.MUTED,
+        "gamma_bl_sub": figstyle.VIOLET,
+        "cov_L": figstyle.MAGENTA,
+        "statistical": figstyle.INK_2,
+    }
+
+
+def _finite(rows: list[dict], key: str) -> list[tuple[float, float]]:
+    """(level, value) pairs where ``value`` reads back finite and positive."""
+    out = []
+    for row in rows:
+        value = _num(row.get(key))
+        if np.isfinite(value) and value > 0.0:
+            out.append((float(row["level_m"]), value))
+    return out
+
+
+def figure_hwl_bias(evidence: dict) -> Path:
+    """The resolved design-HWL bias at KP 62.0: N = 1e5 against N = 1e6.
+
+    Left: the whole curve, with the ADR-0024 hypothetical extension shaded so it
+    is never read as attainable. Right: the anchor neighbourhood at both sample
+    sizes, so the refinement from 44.7 on 4 rows to 26.9 on 63 is *visible* --
+    the N = 1e5 interval is drawn at its true width, which is what makes 44.7
+    obviously uninformative rather than merely labelled so.
+    """
+    brute = evidence["stages"]["A_brute_kp62_0"]
+    anchors = evidence["stages"]["A_anchors_F2"]["sections"]["kp62_0"]
+    spec = SECTIONS["kp62_0"]
+    a1, a2 = spec["hwl_expected"], spec["a2_expected"]
+
+    fig = plt.figure(figsize=(13.4, 6.2))
+    gs = fig.add_gridspec(
+        2,
+        2,
+        width_ratios=[1.55, 1.0],
+        height_ratios=[2.5, 1.0],
+        hspace=0.14,
+        wspace=0.22,
+    )
+    ax = fig.add_subplot(gs[0, 0])
+    axk = fig.add_subplot(gs[1, 0], sharex=ax)
+    axz = fig.add_subplot(gs[:, 1])
+
+    rows = brute["bias_table"]
+    lo = {float(r["level_m"]): _num(r["ci_lo"]) for r in rows}
+    hi = {float(r["level_m"]): _num(r["ci_hi"]) for r in rows}
+    res = {float(r["level_m"]): bool(r["resolved"]) for r in rows}
+    pts = _finite(rows, "ratio")
+
+    def draw_truth(axis: plt.Axes, legend: bool) -> None:
+        xs = [x for x, _ in pts]
+        band = [x for x in xs if np.isfinite(lo[x]) and np.isfinite(hi[x])]
+        axis.fill_between(
+            band,
+            [lo[x] for x in band],
+            [hi[x] for x in band],
+            color=figstyle.BLUE,
+            alpha=0.20,
+            lw=0,
+            label="95 % CI, $N = 10^6$" if legend else None,
+        )
+        axis.plot(xs, [y for _, y in pts], "-", color=figstyle.BLUE, lw=2.0, zorder=3)
+        for marker, keep, text in (
+            ("o", True, "$N = 10^6$, resolved (R1 and R2 met)"),
+            ("x", False, "$N = 10^6$, not resolved"),
+        ):
+            sub = [(x, y) for x, y in pts if res[x] is keep]
+            if not sub:
+                continue
+            axis.plot(
+                [x for x, _ in sub],
+                [y for _, y in sub],
+                marker,
+                color=figstyle.BLUE,
+                ms=6.5,
+                mew=1.6,
+                mfc=figstyle.SURFACE if keep else figstyle.BLUE,
+                ls="none",
+                zorder=4,
+                label=text if legend else None,
+            )
+
+    draw_truth(ax, True)
+    draw_truth(axz, False)
+    for axis in (ax, axz):
+        axis.axhline(1.0, color=figstyle.BASELINE, lw=1.0)
+
+    # The N = 1e5 record: only the two anchors were tabulated at that N, which
+    # is itself the point -- 4 and 15 rows carry intervals this wide.
+    for i, (key, level) in enumerate((("A1", a1), ("A2", a2))):
+        row = anchors["n100000"][key]
+        ratio, clo, chi = (_num(row[k]) for k in ("ratio", "ci_lo", "ci_hi"))
+        if not np.isfinite(ratio):
+            continue
+        for axis in (ax, axz):
+            axis.errorbar(
+                [level],
+                [ratio],
+                yerr=[[ratio - clo], [chi - ratio]],
+                fmt="s",
+                color=figstyle.RED,
+                ms=6.0,
+                lw=1.6,
+                capsize=4,
+                zorder=5,
+                label=(
+                    "$N = 10^5$ record (superseded)"
+                    if (axis is ax and i == 0)
+                    else None
+                ),
+            )
+        axz.annotate(
+            f"{ratio:.1f} on {int(row['k_transient'])} rows",
+            (level, clo),
+            textcoords="offset points",
+            xytext=(-6 if key == "A1" else 8, -14),
+            fontsize=8.5,
+            color=figstyle.RED,
+            ha="right" if key == "A1" else "left",
+            va="top",
+        )
+
+    # Anchor callouts live only in the zoom panel, staggered, so the two labels
+    # 0.11 m apart cannot collide.
+    for key, level, note, dy in (
+        ("A1", a1, "A1  design HWL", 0.97),
+        ("A2", a2, "A2  nearest grid level", 0.76),
+    ):
+        row = brute[f"anchor_{key}"]
+        for axis in (ax, axz):
+            axis.axvline(level, color=figstyle.BASELINE, lw=1.0, zorder=1)
+        axz.annotate(
+            f"{note}\n{level:.2f} m MSL\n"
+            f"$B$ = {_num(row['ratio']):.1f} "
+            f"[{_num(row['ci_lo']):.1f}, {_num(row['ci_hi']):.1f}]\n"
+            f"{int(row['k_transient'])} transient rows, resolved",
+            (0.03, dy),
+            xycoords="axes fraction",
+            fontsize=8.5,
+            color=figstyle.INK,
+            ha="left",
+            va="top",
+        )
+
+    ax.set_yscale("log")
+    ax.set_ylabel(r"bias factor  $B = P_{f,\mathrm{static}}/P_{f,\mathrm{transient}}$")
+    ax.set_title(
+        "KP 62.0 conventional-practice bias against conditioning level\n"
+        "matrix $d_{70}$, adopted $L$ = 40 m (ADR-0047), 225 s grid",
+        loc="left",
+    )
+    ax.legend(loc="upper right")
+    ax.tick_params(labelbottom=False)
+
+    # Row counts carry the credibility of every point above, so they are drawn
+    # rather than described.
+    kx = [float(r["level_m"]) for r in rows]
+    kt = [int(r["k_transient"]) for r in rows]
+    axk.bar(kx, np.maximum(kt, 0.4), width=0.18, color=figstyle.MUTED, lw=0)
+    axk.axhline(
+        R1_MIN_ROWS,
+        color=figstyle.CRITICAL,
+        lw=1.2,
+        label=f"R1 floor = {R1_MIN_ROWS} rows",
+    )
+    axk.set_yscale("log")
+    axk.set_ylabel("transient\nfailing rows")
+    axk.set_xlabel("conditioning water level [m MSL]")
+    axk.legend(loc="upper left")
+
+    ax.set_xlim(min(kx) - 0.4, max(kx) + 0.4)
+    axz.set_xlim(a1 - 0.30, 47.35)
+    axz.set_yscale("log")
+    axz.set_ylim(5.5, 400.0)
+    axz.set_xlabel("conditioning water level [m MSL]")
+    axz.set_ylabel("bias factor  $B$")
+    axz.set_title(
+        "The anchor neighbourhood: what 4 rows buy, and what $10^6$ buys",
+        loc="left",
+    )
+    figstyle.mark_hypothetical(ax, spec["attainable_max_m"], label=False)
+    figstyle.mark_hypothetical(axk, spec["attainable_max_m"], label_y=0.97)
+    return figstyle.save(
+        fig, "adr0040_hwl_bias_resolved.png", mirror=OUT_DIR / "figures"
+    )
+
+
+def figure_tilted_validation(evidence: dict) -> Path:
+    """Why a transient-optimised tilt is the wrong instrument for a *ratio*.
+
+    Left: the transient side gets the ADR-0029 gain (4.66x CoV at the anchor).
+    Right: the static side pays for it, 1.50x at the anchor rising to 940x at
+    saturation. The message is structural, not a tuning miss -- so both panels
+    share one axis convention and the anchor is marked on both.
+    """
+    tilt = evidence["stages"]["B_tilt_kp62_0"]
+    val = tilt["validation"]
+    cost = val["static_branch_cost_under_transient_tilt"]
+    anchor = _num(val["V4_detail"]["anchor_m"])
+    spec = SECTIONS["kp62_0"]
+
+    fig, axes = plt.subplots(1, 2, figsize=(12.2, 5.4), gridspec_kw={"wspace": 0.24})
+
+    # --- panel 1: the CoV of each branch, tilted vs plain LHS ------------------
+    ax = axes[0]
+    lv = [float(r["level_m"]) for r in cost]
+    ax.plot(
+        lv,
+        [_num(r["cov_static_plain_lhs"]) for r in cost],
+        "-",
+        color=figstyle.STATIC,
+        lw=2.0,
+        label="static, plain LHS",
+    )
+    ax.plot(
+        lv,
+        [_num(r["cov_static_tilted"]) for r in cost],
+        "--",
+        color=figstyle.STATIC,
+        lw=2.0,
+        label="static, tilted",
+    )
+    tilted_t = [
+        (float(r["level_m"]), _num(r["transient"]["cov"]))
+        for r in tilt["levels"]
+        if np.isfinite(_num(r["transient"]["cov"])) and _num(r["transient"]["cov"]) > 0
+    ]
+    ax.plot(
+        [x for x, _ in tilted_t],
+        [y for _, y in tilted_t],
+        "--",
+        color=figstyle.TRANSIENT,
+        lw=2.0,
+        label="transient, tilted",
+    )
+    # The plain-LHS reference is the iid binomial CoV at the same N from the
+    # brute-force truth, exactly as the V4 criterion computes it.
+    plain_t = [
+        (float(r["level_m"]), float(np.sqrt((1.0 - p) / (tilt["n_samples"] * p))))
+        for r in val["levels"]
+        if (p := _num(r.get("p_truth"))) > 0.0
+    ]
+    ax.plot(
+        [x for x, _ in plain_t],
+        [y for _, y in plain_t],
+        "-",
+        color=figstyle.TRANSIENT,
+        lw=2.0,
+        label="transient, plain LHS",
+    )
+    ax.axvline(anchor, color=figstyle.BASELINE, lw=1.0)
+    ax.set_yscale("log")
+    ax.set_xlabel("conditioning water level [m MSL]")
+    ax.set_ylabel("coefficient of variation of $\\hat P_f$")
+    shift = tilt["ce_shift"]
+    ax.set_title(
+        "The tilt helps one branch and hurts the other\n"
+        f"KP 62.0, N = {tilt['n_samples']:,}, CE shift "
+        f"$k_{{aq}}$ {_num(shift['k_aq']):.2f} / $C_e$ {_num(shift['C_e']):.2f}",
+        loc="left",
+    )
+    ax.legend(loc="lower left", ncol=2)
+
+    # --- panel 2: the same tilt, expressed as what it does to each branch ------
+    # One axis, one reference at 1.0: above it the tilt costs precision, below
+    # it the tilt buys precision. The two branches go opposite ways, which is
+    # the structural point.
+    ax2 = axes[1]
+    infl = _finite(cost, "inflation_factor")
+    ax2.plot(
+        [x for x, _ in infl],
+        [y for _, y in infl],
+        "-o",
+        color=figstyle.STATIC,
+        lw=2.0,
+        ms=5.0,
+        mfc=figstyle.SURFACE,
+        label="static branch, per level: the tilt COSTS precision",
+    )
+    ax2.axhline(1.0, color=figstyle.BASELINE, lw=1.2)
+    ax2.axvline(anchor, color=figstyle.BASELINE, lw=1.0)
+
+    # The transient side is shown as the single pre-registered V4 measurement
+    # rather than as a curve. Its reference is the N = 1e5 sample's own p (that
+    # is how V4 is defined), while the static series' reference comes from the
+    # same sample -- mixing a per-level N = 1e6 reference into one panel would
+    # quietly compare two different denominators.
+    gain = _num(val["V4_detail"]["cov_plain_lhs_same_N"]) / _num(
+        val["V4_detail"]["cov_tilted"]
+    )
+    ax2.plot(
+        [anchor],
+        [1.0 / gain],
+        "o",
+        color=figstyle.TRANSIENT,
+        ms=10,
+        mew=2.0,
+        mfc=figstyle.SURFACE,
+        ls="none",
+        label=f"transient branch at the anchor: {gain:.2f}x BETTER (criterion V4)",
+    )
+    ax2.annotate(
+        f"{gain:.2f}x better",
+        (anchor, 1.0 / gain),
+        textcoords="offset points",
+        xytext=(10, -4),
+        fontsize=9,
+        color=figstyle.TRANSIENT,
+        va="top",
+    )
+    for level in (anchor, 52.0):
+        hit = [y for x, y in infl if abs(x - level) < 1e-9]
+        if not hit:
+            continue
+        ax2.annotate(
+            f"{hit[0]:,.0f}x worse" if hit[0] >= 10 else f"{hit[0]:.2f}x worse",
+            (level, hit[0]),
+            textcoords="offset points",
+            xytext=(8, 8),
+            fontsize=9,
+            color=figstyle.STATIC,
+        )
+    ax2.set_yscale("log")
+    ax2.set_xlabel("conditioning water level [m MSL]")
+    ax2.set_ylabel("CoV under the tilt / CoV under plain LHS")
+    ax2.set_title(
+        "V2 and V4 fail: NOT VALIDATED for a ratio between branches\n"
+        f"Kish $n_{{eff}}$ = {_num(val['V4_detail']['n_eff']):.0f} against the "
+        f"pre-registered floor of {_num(val['V4_detail']['n_eff_floor']):.0f}"
+        f"; transient gain {gain:.2f}x",
+        loc="left",
+    )
+    ax2.legend(loc="upper left")
+    ax2.set_ylim(top=max(y for _, y in infl) * 30.0)
+    xlo = min(min(x for x, _ in infl), min(x for x, _ in plain_t)) - 0.3
+    xhi = max(max(x for x, _ in infl), max(x for x, _ in plain_t)) + 0.3
+    for axis in (ax, ax2):
+        axis.set_xlim(xlo, xhi)
+        figstyle.mark_hypothetical(
+            axis, spec["attainable_max_m"], label=axis is ax2, label_y=0.06
+        )
+    fig.text(
+        0.5,
+        -0.02,
+        "ADR-0029 is not contradicted: the transient-side gain reproduces its "
+        "measured 3.2 to 4.1x. What fails is a new application to a different "
+        "estimand -- a proposal optimised for one branch cannot serve a ratio "
+        "between two.\nPlain-LHS references: static from the N = 1e5 sample's own "
+        "p per level (as criterion V4 defines it); transient plain-LHS curve in "
+        "the left panel from the N = 1e6 ground-truth p, where an N = 1e5 count "
+        "of 0 to 4 rows makes a binomial CoV meaningless.",
+        ha="center",
+        va="top",
+        fontsize=9,
+        color=figstyle.INK_2,
+    )
+    return figstyle.save(
+        fig, "adr0040_tilted_is_validation.png", mirror=OUT_DIR / "figures"
+    )
+
+
+def figure_epistemic_vs_statistical(evidence: dict) -> Path:
+    """Epistemic band against statistical interval, per knob, at the design HWL.
+
+    Left: the Stage D bands on the *bias ratio* B at each anchor where the
+    negative control passes, at N = 1e6, against the statistical 95 % interval
+    -- the 6 to 9x statement of criterion F3. Right: the four-section per-knob
+    ratio-of-ratios departure at design HWL from the 2026-07-30 synthesis, with
+    the Clopper-Pearson width on the same multiplicative axis. ``m_p`` is the
+    visible control near unity in both panels.
+    """
+    stage_d = evidence["stages"]["D_epistemic"]["sections"]
+    colors = _bracket_colors()
+    fig, axes = plt.subplots(1, 2, figsize=(14.2, 6.0), gridspec_kw={"wspace": 0.34})
+
+    # --- panel 1: the band on B itself, at the anchor --------------------------
+    # Only anchors whose m_p control passed are drawn: the control is monotone in
+    # row count and fails exactly where R1 had already declared the anchor
+    # unresolved, so an arm result there is counting noise, not a finding.
+    ax = axes[0]
+    wanted: list[tuple[str, str, str]] = [
+        ("kp62_0", "A1", "KP 62.0\n46.39 m (design HWL)"),
+        ("kp62_0", "A2", "KP 62.0\n46.50 m (nearest grid)"),
+        ("kp57_4", "A3_lowest_resolved", "KP 57.4\n39.50 m (lowest resolved)"),
+    ]
+    ticks: list[str] = []
+    for key, anchor_key, title in wanted:
+        section = stage_d[key]
+        base = section["baseline_bias"].get(anchor_key)
+        control = {c["anchor"]: c for c in section["mp_control"]}.get(anchor_key)
+        if base is None or control is None or not control["pass"]:
+            continue
+        y = float(len(ticks))
+        b0, blo, bhi = (_num(base[k]) for k in ("ratio", "ci_lo", "ci_hi"))
+        ax.plot(
+            [blo, bhi],
+            [y - 0.15, y - 0.15],
+            "-",
+            color=figstyle.INK,
+            lw=7.0,
+            solid_capstyle="butt",
+            zorder=3,
+            label="statistical 95 % CI on $B$" if not ticks else None,
+        )
+        ax.plot([b0], [y - 0.15], "|", color=figstyle.SURFACE, ms=13, mew=2.0, zorder=4)
+        adequate: list[float] = []
+        for arm in section["arms"]:
+            cell = arm["anchors"].get(anchor_key)
+            if cell is None:
+                continue
+            b = _num(cell["bias_arm"]["ratio"])
+            k = int(cell["bias_arm"]["k_transient"])
+            if not np.isfinite(b) or b <= 0.0:
+                continue  # zero on one or both branches: unbounded/indeterminate
+            group = ARM_DISPLAY.get(arm["arm"], (arm["arm"], "statistical"))[1]
+            ax.plot(
+                [b],
+                [y + 0.17],
+                MARKER_BY_BRACKET.get(group, "o"),
+                color=colors.get(group, figstyle.MUTED),
+                ms=9,
+                mfc="none" if group == "m_p" else colors.get(group, figstyle.MUTED),
+                mew=2.0,
+                ls="none",
+                zorder=5,
+            )
+            if k >= R1_MIN_ROWS:
+                adequate.append(b)
+        if adequate:
+            ax.plot(
+                [min(adequate), max(adequate)],
+                [y + 0.17, y + 0.17],
+                "-",
+                color=figstyle.MUTED,
+                lw=1.6,
+                zorder=2,
+                label=(r"epistemic band, arms with $k \geq 30$" if not ticks else None),
+            )
+            factor = (max(adequate) / min(adequate)) / (bhi / blo)
+            ax.annotate(
+                f"{factor:.1f}x wider",
+                (max(adequate), y + 0.17),
+                textcoords="offset points",
+                xytext=(20, 0),
+                fontsize=9,
+                color=figstyle.INK,
+                va="center",
+                zorder=8,
+            )
+        ticks.append(title)
+    ax.set_yticks(range(len(ticks)), ticks, fontsize=9)
+    ax.set_xscale("log")
+    ax.set_ylim(len(ticks) - 0.5, -0.65)
+    ax.set_xlim(1.7, 340.0)
+    ax.set_xlabel("bias factor $B$ under each epistemic arm")
+    ax.set_title(
+        "The epistemic band is 6 to 9x the statistical interval\n"
+        "$N = 10^6$ unweighted; criterion F3 fires at KP 57.4, not at KP 62.0",
+        loc="left",
+    )
+    ax.grid(axis="y", visible=False)
+    marker_handles = [
+        plt.Line2D(
+            [],
+            [],
+            marker=MARKER_BY_BRACKET.get(group, "o"),
+            color=colors.get(group, figstyle.MUTED),
+            mfc="none" if group == "m_p" else colors.get(group, figstyle.MUTED),
+            mew=2.0,
+            ls="none",
+            ms=9,
+            label=label,
+        )
+        for group, label in (
+            ("k_aq", "$k_{aq}$ prior mean"),
+            ("z_toe", r"$z_{toe}$ $\pm$0.30 m"),
+            ("L", "$L$ measurement"),
+            ("m_p", "$m_p$ (control)"),
+            ("gamma_bl_sub", r"$\gamma'_{bl}$ lower"),
+        )
+    ]
+    existing = ax.get_legend_handles_labels()[0]
+    ax.legend(
+        handles=marker_handles + list(existing),
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.14),
+        ncol=4,
+        fontsize=8.5,
+    )
+
+    # --- panel 2: per-knob ratio-of-ratios departure, four sections ------------
+    ax2 = axes[1]
+    synth = json.loads(SYNTHESIS_EVIDENCE.read_text(encoding="utf-8"))
+    knobs = ["k_aq_prior_mean", "z_toe", "L_measurement", "m_p", "clopper_pearson"]
+    knob_label = {
+        "k_aq_prior_mean": "$k_{aq}$\nprior mean",
+        "z_toe": "$z_{toe}$\n" + r"$\pm$0.30 m",
+        "L_measurement": "$L$\nmeasurement",
+        "m_p": "$m_p$\n(control)",
+        "clopper_pearson": "Clopper-Pearson\n(statistical)",
+    }
+    width = 0.19
+    for si, section in enumerate(synth["sections"]):
+        label = section["section"]
+        for ki, knob in enumerate(knobs):
+            value = _knob_departure(section, knob)
+            x = ki + (si - 1.5) * width
+            if value is None:
+                ax2.annotate(
+                    "n/d",
+                    (x, 1.04),
+                    fontsize=7.5,
+                    color=figstyle.MUTED,
+                    ha="center",
+                    va="bottom",
+                    rotation=90,
+                )
+                continue
+            ax2.bar(
+                x,
+                value - 1.0,
+                width=width * 0.88,
+                bottom=1.0,
+                color=figstyle.SECTION_COLORS.get(label, figstyle.MUTED),
+                lw=0,
+                label=label if ki == 0 else None,
+            )
+    ax2.axhline(1.0, color=figstyle.BASELINE, lw=1.2)
+    ax2.set_yscale("log")
+    ax2.set_xticks(range(len(knobs)), [knob_label[k] for k in knobs], fontsize=9)
+    ax2.set_ylabel(r"max resolved $\rho$ departure factor   (1.0 = cancels exactly)")
+    ax2.set_title(
+        "Only $m_p$ cancels in the static-vs-transient ratio\n"
+        "paired-bootstrap ratio-of-ratios, four matrix sections, $N = 10^5$",
+        loc="left",
+    )
+    ax2.legend(loc="upper right", ncol=2, title="section", fontsize=9)
+    ax2.grid(axis="x", visible=False)
+    fig.text(
+        0.5,
+        -0.14,
+        "A resolved confidence interval on $B$ alone would be false precision: the "
+        "epistemic band is the wider statement and must be quoted with it.\n"
+        "Right-panel bars are drawn from 1.0; 'n/d' marks a section where the "
+        "quantity is undefined at design HWL (no transient failures, so no ratio). "
+        "Arms driving a branch to exactly zero are omitted, not plotted as a "
+        "convenient finite number.",
+        ha="center",
+        va="top",
+        fontsize=9,
+        color=figstyle.INK_2,
+    )
+    return figstyle.save(
+        fig, "epistemic_vs_statistical.png", mirror=OUT_DIR / "figures"
+    )
+
+
+#: Marker per bracket group, so a panel never relies on hue alone.
+MARKER_BY_BRACKET = {
+    "k_aq": "o",
+    "z_toe": "s",
+    "L": "^",
+    "m_p": "D",
+    "gamma_bl_sub": "v",
+}
+
+
+def _knob_departure(section: dict, knob: str) -> float | None:
+    """Max resolved ratio-of-ratios departure for ``knob`` at a section.
+
+    The statistical entries carry a ``span`` rather than a rho, so they are read
+    at the ``design_hwl`` anchor and reported as their multiplicative width --
+    the quantity that makes them comparable with an epistemic departure.
+    """
+    if knob in {"clopper_pearson", "mc_cov"}:
+        span = section["brackets"].get(knob, {}).get("span", {})
+        value = span.get("design_hwl", {}).get("span_trans")
+        return float(value) if isinstance(value, (int, float)) else None
+    arms = section["brackets"].get(knob, {}).get("arms", [])
+    best = None
+    for arm in arms:
+        record = section["arms"].get(arm)
+        if record is None:
+            continue
+        value = record.get("max_resolved_departure_factor")
+        if isinstance(value, (int, float)) and (best is None or value > best):
+            best = float(value)
+    return best
+
+
+def cmd_figures(args: argparse.Namespace) -> dict:
+    """Draw the three study figures from the committed evidence JSON."""
+    figstyle.style()
+    evidence = json.loads(EVIDENCE.read_text(encoding="utf-8"))
+    written = [
+        figure_hwl_bias(evidence),
+        figure_tilted_validation(evidence),
+        figure_epistemic_vs_statistical(evidence),
+    ]
+    for path in written:
+        print(f"wrote {path.relative_to(REPO_ROOT)}")
+    return {"figures": [str(p.relative_to(REPO_ROOT)) for p in written]}
+
+
 def cmd_report(args: argparse.Namespace) -> dict:
     """Assemble the evidence JSON from every stage artifact on disk."""
     payload: dict[str, Any] = {
@@ -1609,6 +2270,7 @@ COMMANDS: dict[str, Callable[[argparse.Namespace], dict]] = {
     "epistemic": cmd_epistemic,
     "anchors": cmd_anchors,
     "report": cmd_report,
+    "figures": cmd_figures,
 }
 
 

@@ -242,29 +242,43 @@ conditional on discharge.)
 
 ### 6.1 Annualized shift (posterior matrix, lambda 250)
 
-Across all 114 segments (figure `phase3_climate_shift.png`): the median
+> **KP 62.0 figures below superseded (2026-07-30) — see section 11.2, which is
+> authoritative.** The ADR-0047 adoption corrected the section-11 headlines but
+> not this derived table; the corrections are applied inline in square brackets
+> and re-verified against `results/system_integration/phase3/rq4_annual.csv`.
+> Every KP 57.4 / KP 58.8 / KP 60.0 number here reproduces exactly.
+
+Across all 114 segments (figure `phase3_climate_shift.png`, captioned **reach
+context, not the RQ4 answer** — 110 of 114 segments carry no BEP source and are
+surface-only lower bounds; the RQ4 answer is
+`phase3_rq4_four_sections.png`): the median
 annual system failure probability rises from **0 historically to 3.7e-4** —
 more than half the segments carry no historical failure at all, because with
 the corrected rating error historical peaks rarely reach the crest and scour
 is zero — while the mean rises 1.0e-4 → 1.9e-3 (~18x). Segments above
-1e-3/yr go from **2 to 45 of 114**, above 1e-2/yr from 0 to 4. The
+1e-3/yr go from **2 [**3**] to 45 of 114**, above 1e-2/yr from 0 to 4 —
+KP 62.0 crossed 1e-3 when the L adoption raised its historical annual
+probability from 5.24e-4 to 1.006e-3. The
 historical→+4K contrast is carried by the many surface-only segments that
 switch from exactly zero to loaded once +4K lifts their peaks over the
-crest. At the BEP sections the system ratio is 5.5–19.5x (KP57.4 12.7,
-KP58.8 5.5, KP60.0 7.9, KP62.0 19.5 — the last raised because its overflow
-floor fell). Per-segment ratios above ~100 occur only where the historical
-probability is near-floor (display floor 1e-7 marks exact zeros).
+crest. At the BEP sections the system ratio is 5.5–19.5x [**5.5–12.7x**]
+(KP57.4 12.7, KP58.8 5.5, KP60.0 7.9, KP62.0 19.5 [**12.7**] — the last
+figure belongs to the withdrawn L = 47 m geometry). Per-segment ratios above
+~100 occur only where the historical probability is near-floor (display floor
+1e-7 marks exact zeros).
 
 ### 6.2 Sensitivity brackets
 
 * **ADR-0037 lambda bracket** (system P_f at lambda 40 m vs 250 m):
   x3.4/x2.2 (KP57.4 hist/+4K), x2.5/x2.1 (KP58.8), x3.4/x2.7 (KP60.0),
-  x3.1/x1.6 (KP62.0 — now BEP-dominant historically, so BEP upscaling
-  matters here too, unlike under the pre-correction overflow dominance).
+  x3.1/x1.6 [**x3.3/x1.9**] (KP62.0 — now BEP-dominant historically, so BEP
+  upscaling matters here too, unlike under the pre-correction overflow
+  dominance).
 * **d70 interpretation**: the bulk co-primary cuts the BEP-driven system
   numbers (KP58.8 +4K: 4.1e-2 → 2.7e-3, x15; KP57.4 historical:
   7.5e-4 → 2.1e-6 as the historical number drops to the floor); KP62.0 now
-  also gets cut (historical x2.6, +4K x1.2) since it is BEP-dominant.
+  also gets cut (historical x2.6 [**x5.0**], +4K x1.2 [**x1.5**]) since it is
+  BEP-dominant.
 * **Prior vs posterior BEP**: the 2016 constraint lowers the system number
   ~12% at KP58.8 historical (8.47e-3 → 7.42e-3) and <2% elsewhere — the
   Phase 2 result that the survival evidence is modestly informative
@@ -272,11 +286,14 @@ probability is near-floor (display floor 1e-7 marks exact zeros).
 * **Surface companions**: `scour_script_k` (the as-received conversion)
   raises the three BEP-dominant sections' system numbers by at most ~8%
   (KP57.4 historical 7.53e-4 → 8.13e-4; ≤2% at KP58.8/60.0), and the now
-  overflow-reduced KP62.0 by ~45% (5.24e-4 → 7.59e-4) — the as-received
+  overflow-reduced KP62.0 by ~45% [**~22%**, historical 1.006e-3 → 1.23e-3;
+  +4K +9%] — the as-received
   scour matters most where the corrected surface number is small.
   `overflow_sine30h` (his published sine pulse) lowers the KP62.0 system
-  ~19–27% (KP62.0 +4K 1.02e-2 → 8.25e-3, historical 5.24e-4 → 3.81e-4) —
-  the duration sensitivity of the Dean integral.
+  ~19–27% [**~12–13%**: historical 1.006e-3 → 8.83e-4, +4K 1.28e-2 →
+  1.11e-2] — the duration sensitivity of the Dean integral. (The pre-adoption
+  KP 62.0 anchors 5.24e-4 and 1.02e-2 belong to the withdrawn L = 47 m
+  geometry.)
 
 ### 6.3 Attribution (duration / compound; `rq4_attribution.json`)
 

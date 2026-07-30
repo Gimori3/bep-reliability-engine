@@ -1,18 +1,22 @@
 """Publication figures for the Phase 3 RQ3+RQ4 campaign (thin driver).
 
 Reads the ``results/system_integration/phase3/`` campaign outputs and the
-committed surface curves and renders five figures to ``docs/figures/``:
+committed surface curves and renders six figures to ``docs/figures/``:
 
 1. ``phase3_dominance_profile.png`` — longitudinal annualized per-mechanism
    failure probability along both rivers, both scenarios (the RQ3 headline).
 2. ``phase3_system_fragility_bep_sections.png`` — the composed conditional
    three-mechanism fragility at the four BEP sections.
-3. ``phase3_climate_shift.png`` — annual system P_f historical vs +4K per
-   segment with the +4K/historical ratio and the ADR-0037 lambda bracket at
-   the BEP sections.
-4. ``phase3_rq4_attribution.png`` — duration/compound stratified conditional
+3. ``phase3_rq4_four_sections.png`` — **the RQ4 headline**: annual system P_f
+   historical vs +4K and the climate ratio at the four geotechnically
+   characterised sections (campaign decision 5 scopes RQ3/RQ4 to these).
+4. ``phase3_climate_shift.png`` — the same quantity across all 114 segments.
+   Captioned **reach context, not the RQ4 answer**: 110 of 114 segments carry
+   no BEP source under the production ``exact`` policy and are surface-only
+   lower bounds.
+5. ``phase3_rq4_attribution.png`` — duration/compound stratified conditional
    P_f at the BEP sections (RQ4 attribution).
-5. ``phase3_event_based_validation.png`` — curve-based vs event-based annual
+6. ``phase3_event_based_validation.png`` — curve-based vs event-based annual
    surface-mechanism probabilities at the 9 section-representative nodes.
 
 Usage: ``python scripts/phase3_figures.py`` (after ``phase3_campaign.py``
@@ -278,13 +282,124 @@ def fig_climate_shift(df: pd.DataFrame) -> None:
         axr.set_yscale("log")
         axr.set_ylabel("+4K / historical" if j == 0 else "")
         axr.set_xlabel("KP [km]")
+    # Caption, not decoration: 110 of the 114 segments carry bep_source None
+    # under the production `exact` policy, so this distribution is reach context
+    # and its surface-only segments are lower bounds. The quantified answer to
+    # RQ4 is the four-section figure (fig_rq4_four_sections), not this one.
     fig.suptitle(
-        "Climate shift of the annualized system failure probability "
-        "(posterior BEP, matrix d70)",
-        fontsize=11,
+        "REACH CONTEXT (not the RQ4 answer): climate shift of the annualized "
+        "system failure probability over all 114 segments\n"
+        "posterior BEP, matrix d70. 110 of 114 segments have no BEP source under "
+        "the production 'exact' policy and are surface-only LOWER BOUNDS;\n"
+        "the quantified RQ4 answer is the four geotechnically characterised "
+        "sections (see phase3_rq4_four_sections.png).",
+        fontsize=9.5,
         color=INK_2,
     )
     fig.savefig(FIGS / "phase3_climate_shift.png", dpi=160, bbox_inches="tight")
+    plt.close(fig)
+
+
+def fig_rq4_four_sections(df: pd.DataFrame) -> None:
+    """RQ4 headline: the four characterised sections, historical vs +4K.
+
+    Owner decision 5 of the 2026-07-29 campaign scopes RQ3/RQ4 to the four
+    geotechnically characterised sections, because the other 110 segments carry
+    no BEP source and are surface-only lower bounds. This is therefore the
+    figure that answers RQ4; ``phase3_climate_shift.png`` is reach context.
+    """
+    base = _primary(df)
+    bep = base[base.p_annual_bep.notna()].copy()
+    bep["kp"] = bep.kp.astype(float)
+    sections = sorted(bep.kp.unique())
+    labels = [f"KP {kp:.1f}" for kp in sections]
+
+    fig, axes = plt.subplots(
+        1,
+        2,
+        figsize=(12.4, 5.4),
+        gridspec_kw={"width_ratios": [1.35, 1.0], "wspace": 0.28},
+    )
+
+    # --- panel 1: the two annual probabilities, and the BEP share of each ------
+    ax = axes[0]
+    x = np.arange(len(sections), dtype=float)
+    width = 0.34
+    for offset, scenario, color in (
+        (-width / 2, "historical", "#2a78d6"),
+        (+width / 2, "+4K", "#e34948"),
+    ):
+        rows = bep[bep.scenario == scenario].set_index("kp").loc[sections]
+        total = rows.p_annual_system.to_numpy(float)
+        bep_part = rows.p_annual_bep.to_numpy(float)
+        ax.bar(
+            x + offset,
+            np.maximum(total, FLOOR),
+            width=width * 0.9,
+            color=color,
+            alpha=0.30,
+            lw=0,
+            label=f"{scenario}: system (all mechanisms)",
+        )
+        ax.bar(
+            x + offset,
+            np.maximum(bep_part, FLOOR),
+            width=width * 0.9,
+            color=color,
+            lw=0,
+            label=f"{scenario}: BEP contribution",
+        )
+        for xi, value, share in zip(x + offset, total, rows.share_bep.to_numpy(float)):
+            ax.annotate(
+                f"{value:.1e}\nBEP {share:.0%}",
+                (xi, value),
+                textcoords="offset points",
+                xytext=(0, 4),
+                ha="center",
+                fontsize=8,
+                color=INK_2,
+            )
+    ax.set_yscale("log")
+    ax.set_xticks(x, labels)
+    ax.set_ylabel("annual system $P_f$ [1/yr]")
+    ax.set_title(
+        "RQ4: annual system failure probability at the four characterised "
+        "sections\nposterior BEP, matrix $d_{70}$, $\\lambda_{ac}$ = 250 m, "
+        "primary surface curves",
+        loc="left",
+    )
+    ax.set_ylim(top=ax.get_ylim()[1] * 6.0)
+    ax.legend(fontsize=8.5, ncol=2, loc="upper left")
+    ax.grid(axis="x", visible=False)
+
+    # --- panel 2: the climate ratio, the number the thesis quotes --------------
+    ax2 = axes[1]
+    hist = bep[bep.scenario == "historical"].set_index("kp").loc[sections]
+    futu = bep[bep.scenario == "+4K"].set_index("kp").loc[sections]
+    ratio = futu.p_annual_system.to_numpy(float) / hist.p_annual_system.to_numpy(float)
+    colors = ["#2a78d6", "#1baf7a", "#eda100", "#008300"]
+    ax2.bar(x, ratio, width=0.55, color=colors[: len(sections)], lw=0)
+    for xi, value in zip(x, ratio):
+        ax2.annotate(
+            f"{value:.1f}x",
+            (xi, value),
+            textcoords="offset points",
+            xytext=(0, 4),
+            ha="center",
+            fontsize=10,
+            color=INK,
+        )
+    ax2.axhline(1.0, color=BASELINE, lw=1.2)
+    ax2.set_xticks(x, labels)
+    ax2.set_ylabel("+4K / historical annual system $P_f$")
+    ax2.set_ylim(0, max(ratio) * 1.25)
+    ax2.set_title(
+        "Climate ratio per section\nthe governing section KP 58.8 carries the "
+        "highest absolute risk, not the highest ratio",
+        loc="left",
+    )
+    ax2.grid(axis="x", visible=False)
+    fig.savefig(FIGS / "phase3_rq4_four_sections.png", dpi=160, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -405,6 +520,7 @@ def main() -> None:
 
     fig_dominance_profile(df)
     fig_bep_sections(curves)
+    fig_rq4_four_sections(df)
     fig_climate_shift(df)
     fig_attribution(attr)
     val_path = P3 / "event_based_validation.json"

@@ -181,7 +181,12 @@ toggle is evaluated. That freedom is quantified, not assumed away:
 at every common level against the persisted sweep HDF5 files; (ii) Euler-flip
 diagnostics: per-level counts of C4 rows outside C3 (same α) and of C4b rows outside C0
 — both are impossible in continuous time (the ADR-0030 argument) and are reported per
-level (expected 0 at 225 s); (iii) the finite-T sustained ladder of Decision 2;
+level (expected 0 at 225 s **at the production N = 1e5**; amended 2026-07-30 —
+at N = 1e6 KP 57.4 carries 4 `c4b_not_c3b` rows at 39.50 / 40.25 / 40.75 m, a rate
+of 4e-6 whose expected count at N = 1e5 is 0.4, so "0" is a statement about the
+sample size and not about the discretisation being exact; see
+`adr0040-hwl-bias-resolution.md` §2.7. KP 62.0 stays clean at both N);
+(iii) the finite-T sustained ladder of Decision 2;
 (iv) the full pre-existing test suite stays green.
 
 ---

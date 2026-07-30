@@ -2,7 +2,7 @@
 
 Reads persisted :class:`~bep_reliability_engine.fragility.FragilityResult`
 files (HDF5 + JSON sidecar, spec §8) from ``results/`` and renders three
-figures to ``results/figures/``:
+figures to ``results/figures/`` and the tracked ``docs/figures/``:
 
 1. ``fragility_per_section.png`` — static vs transient per cross-section
    (raw MC points with 95% Clopper-Pearson CIs + the fitted lognormal
@@ -37,6 +37,19 @@ from bep_reliability_engine.fragility import FragilityResult, LognormFragility
 REPO_ROOT = Path(__file__).resolve().parents[1]
 RESULTS_DIR = REPO_ROOT / "results"
 FIGURES_DIR = RESULTS_DIR / "figures"
+#: Tracked publication copy. ``results/`` is gitignored, so a figure that
+#: lives only there is not a deliverable; both copies are written in one
+#: call so no manual copy step can let them diverge.
+PUB_FIGURES_DIR = REPO_ROOT / "docs" / "figures"
+
+
+def save_both(fig, name: str) -> None:
+    """Write the study-local copy and the tracked publication copy."""
+    FIGURES_DIR.mkdir(parents=True, exist_ok=True)
+    PUB_FIGURES_DIR.mkdir(parents=True, exist_ok=True)
+    fig.savefig(FIGURES_DIR / name, dpi=200)
+    fig.savefig(PUB_FIGURES_DIR / name, dpi=200)
+
 
 SECTIONS = ["57.4", "58.8", "60.0", "62.0"]
 
@@ -172,10 +185,11 @@ def run_stamp(data: dict[str, dict]) -> str:
         or side["hydrograph"]["native_dt_s"]
     )
     return (
-        f"First end-to-end run — historical scenario, matrix d$_{{70}}$, "
-        f"N = 10$^5$ LHS (seed {side['lhs_seed']}), canonical d4PDF shape "
-        f"{data['57.4']['event']}, Δt = {dt_s:g} s (ADR-0030), "
-        f"raw-head conventions (ADR-0027/0028), C$_e$ prior ADR-0026."
+        f"Definitive production campaign (2026-07-29) — historical scenario, "
+        f"matrix d$_{{70}}$, N = 10$^5$ LHS (seed {side['lhs_seed']}), canonical "
+        f"d4PDF shape {data['57.4']['event']}, Δt = {dt_s:g} s (ADR-0030), "
+        f"raw-head conventions (ADR-0027/0028), C$_e$ prior ADR-0026, "
+        f"KP 62.0 at the adopted L = 40 m (ADR-0047)."
     )
 
 
@@ -259,7 +273,7 @@ def figure_per_section(data: dict[str, dict]) -> None:
         "lines: fitted lognormal deliverables (ADR-0024).",
     )
     fig.tight_layout(rect=(0, 0.055, 1, 0.95))
-    fig.savefig(FIGURES_DIR / "fragility_per_section.png", dpi=200)
+    save_both(fig, "fragility_per_section.png")
     plt.close(fig)
 
 
@@ -346,7 +360,7 @@ def figure_comparison(data: dict[str, dict]) -> None:
         "hypothetical fit-stabilizer grid extension (unattainable stages).",
     )
     fig.tight_layout(rect=(0, 0.075, 1, 0.94))
-    fig.savefig(FIGURES_DIR / "fragility_comparison.png", dpi=200)
+    save_both(fig, "fragility_comparison.png")
     plt.close(fig)
 
 
@@ -425,7 +439,7 @@ def figure_tail_log(data: dict[str, dict]) -> None:
         "lowest plotted point are extrapolation beyond the MC evidence.",
     )
     fig.tight_layout(rect=(0, 0.055, 1, 0.95))
-    fig.savefig(FIGURES_DIR / "fragility_tail_log.png", dpi=200)
+    save_both(fig, "fragility_tail_log.png")
     plt.close(fig)
 
 
@@ -441,7 +455,7 @@ def main() -> None:
         "fragility_comparison.png",
         "fragility_tail_log.png",
     ):
-        print(f"wrote {FIGURES_DIR / name}")
+        print(f"wrote {FIGURES_DIR / name} (+ docs/figures/{name})")
 
 
 if __name__ == "__main__":

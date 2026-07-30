@@ -6,13 +6,16 @@ primary), verifies C0/C4b bit-identity against the persisted production
 sweeps, runs the sustained-duration verification ladder and the bulk-d70
 sensitivity, computes the paired-bootstrap component tables, and renders the
 analysis figures. Everything is persisted under ``results/stage6_6/``; every
-number in ``docs/stage6_6_report.md`` traces to a file written here.
+number in ``docs/stage6_6_report.md`` traces to a file written here. Figures are
+written to ``results/stage6_6/figures/`` **and** to the tracked
+``docs/figures/`` in the same call -- never copy one by hand.
 
 Usage (from the repo root, venv active)::
 
     python scripts/stage6_6_gap_decomposition.py                 # everything
     python scripts/stage6_6_gap_decomposition.py --n 10000       # pilot
     python scripts/stage6_6_gap_decomposition.py --skip-run      # re-analyze
+    python scripts/stage6_6_gap_decomposition.py --figures-only   # redraw only
     python scripts/stage6_6_gap_decomposition.py --sections kp62_0
 
 Phases (each skippable): run -> verify -> analyze -> duration ladder ->
@@ -53,6 +56,23 @@ from bep_reliability_engine.gap_decomposition import (  # noqa: E402
 
 OUT_DIR = REPO_ROOT / "results" / "stage6_6"
 FIG_DIR = OUT_DIR / "figures"
+#: Tracked publication copy. ``results/`` is gitignored, so a figure that lives
+#: only there is not a deliverable; writing both copies in one call removes the
+#: manual copy step that let the KP 62.0 figures go stale twice (2026-07-29,
+#: 2026-07-30). Never copy by hand -- re-run the driver.
+PUB_FIG_DIR = REPO_ROOT / "docs" / "figures"
+
+
+def _write_figure(fig, fig_dir: Path, name: str) -> Path:
+    """Write the study-local copy and the tracked publication copy together."""
+    fig_dir.mkdir(parents=True, exist_ok=True)
+    PUB_FIG_DIR.mkdir(parents=True, exist_ok=True)
+    path = fig_dir / name
+    fig.savefig(path, dpi=170, facecolor=SURFACE)
+    fig.savefig(PUB_FIG_DIR / name, dpi=170, facecolor=SURFACE)
+    plt.close(fig)
+    return path
+
 
 # Section registry (ADR-0040): matrix d70 is the primary decomposition run;
 # attainable_max_m is the last non-hypothetical grid level (ADR-0024: the
@@ -342,10 +362,7 @@ def figure_ladder(key: str, result: GapDecompositionResult, fig_dir: Path) -> Pa
         ax.legend(fontsize=8, framealpha=0.9, loc="lower right")
     axes[0].set_ylabel("P_f per event (raw, CP 95% bands)", color=MUTED, fontsize=9)
     fig.tight_layout()
-    path = fig_dir / f"stage6_6_ladder_{key}.png"
-    fig.savefig(path, dpi=170, facecolor=SURFACE)
-    plt.close(fig)
-    return path
+    return _write_figure(fig, fig_dir, f"stage6_6_ladder_{key}.png")
 
 
 def _waterfall(ax, names, deltas, cis, start_value, start_name, end_name) -> None:
@@ -431,10 +448,7 @@ def figure_waterfall(
             )
             ax.set_ylabel("P_f per event", color=MUTED, fontsize=8)
     fig.tight_layout()
-    path = fig_dir / f"stage6_6_waterfall_{key}.png"
-    fig.savefig(path, dpi=170, facecolor=SURFACE)
-    plt.close(fig)
-    return path
+    return _write_figure(fig, fig_dir, f"stage6_6_waterfall_{key}.png")
 
 
 def figure_fractions(
@@ -478,10 +492,7 @@ def figure_fractions(
         "component share of total gap (where resolved)", color=MUTED, fontsize=9
     )
     fig.tight_layout()
-    path = fig_dir / f"stage6_6_fractions_{key}.png"
-    fig.savefig(path, dpi=170, facecolor=SURFACE)
-    plt.close(fig)
-    return path
+    return _write_figure(fig, fig_dir, f"stage6_6_fractions_{key}.png")
 
 
 def figure_c2c3(
@@ -551,10 +562,7 @@ def figure_c2c3(
             bbox=dict(facecolor=SURFACE, edgecolor=GRID_COLOR),
         )
     fig.tight_layout()
-    path = fig_dir / f"stage6_6_c2c3_{key}.png"
-    fig.savefig(path, dpi=170, facecolor=SURFACE)
-    plt.close(fig)
-    return path
+    return _write_figure(fig, fig_dir, f"stage6_6_c2c3_{key}.png")
 
 
 def figure_heq_bound(
@@ -587,10 +595,41 @@ def figure_heq_bound(
     )
     ax.legend(fontsize=8, framealpha=0.9)
     fig.tight_layout()
-    path = fig_dir / f"stage6_6_heq_{key}.png"
-    fig.savefig(path, dpi=170, facecolor=SURFACE)
-    plt.close(fig)
-    return path
+    return _write_figure(fig, fig_dir, f"stage6_6_heq_{key}.png")
+
+
+def _redraw_only(sections: list[str]) -> int:
+    """Redraw every figure from persisted evidence -- no physics, no rewrites.
+
+    This is the path that keeps the tracked ``docs/figures/`` copies honest
+    without a 25-minute ladder re-run per section, and it is deliberately
+    read-only with respect to every evidence file: a redraw can never move a
+    number.
+    """
+    drawn = 0
+    for key in sections:
+        h5_path = OUT_DIR / f"stage6_6_{key}.h5"
+        analysis_path = OUT_DIR / f"stage6_6_{key}_analysis.json"
+        if not (h5_path.exists() and analysis_path.exists()):
+            print(f"[{key}] SKIPPED -- persisted evidence missing ({h5_path.name})")
+            continue
+        result = GapDecompositionResult.load(h5_path)
+        analysis = json.loads(analysis_path.read_text())
+        ladder_path = OUT_DIR / f"stage6_6_{key}_duration_ladder.json"
+        ladder_json = (
+            json.loads(ladder_path.read_text()) if ladder_path.exists() else None
+        )
+        for path in (
+            figure_ladder(key, result, FIG_DIR),
+            figure_waterfall(key, result, analysis, FIG_DIR),
+            figure_fractions(key, result, analysis, FIG_DIR),
+            figure_c2c3(key, result, ladder_json, FIG_DIR),
+            figure_heq_bound(key, result, analysis, FIG_DIR),
+        ):
+            print(f"  {path.relative_to(REPO_ROOT)} (+ docs/figures/{path.name})")
+            drawn += 1
+    print(f"redrew {drawn} figures; no evidence file touched")
+    return 0
 
 
 def main() -> int:
@@ -604,11 +643,35 @@ def main() -> int:
     parser.add_argument("--skip-ladder", action="store_true")
     parser.add_argument("--skip-bulk", action="store_true")
     parser.add_argument("--skip-figures", action="store_true")
+    parser.add_argument(
+        "--figures-only",
+        action="store_true",
+        help=(
+            "redraw the figures from the persisted ladder, analysis and "
+            "duration-ladder JSONs; runs no physics, re-analyses nothing and "
+            "rewrites no evidence file"
+        ),
+    )
     args = parser.parse_args()
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     FIG_DIR.mkdir(parents=True, exist_ok=True)
+
+    if args.figures_only:
+        return _redraw_only(args.sections)
+
+    # The summary is MERGED, never rebuilt: --sections is a filter, and a
+    # partial re-run must not silently delete the other section's entry (the
+    # campaign's G3 gate asserts both sections are present).
+    summary_path = OUT_DIR / "stage6_6_summary.json"
     summary: dict = {"sections": {}}
+    if summary_path.exists():
+        try:
+            previous = json.loads(summary_path.read_text())
+        except json.JSONDecodeError:
+            previous = {}
+        if isinstance(previous.get("sections"), dict):
+            summary["sections"].update(previous["sections"])
 
     for key in args.sections:
         section_summary: dict = {}
@@ -668,8 +731,8 @@ def main() -> int:
             print(f"[{key}] figures: {len(figs)} written")
         summary["sections"][key] = section_summary
 
-    (OUT_DIR / "stage6_6_summary.json").write_text(json.dumps(summary, indent=2))
-    print(f"summary -> {OUT_DIR / 'stage6_6_summary.json'}")
+    summary_path.write_text(json.dumps(summary, indent=2))
+    print(f"summary -> {summary_path}")
     return 0
 
 

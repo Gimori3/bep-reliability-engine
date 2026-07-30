@@ -90,6 +90,15 @@ def _build_parser() -> argparse.ArgumentParser:
         "--no-figures", action="store_true", help="Skip figure rendering."
     )
     parser.add_argument(
+        "--figures-only",
+        action="store_true",
+        help=(
+            "Render figures against the current Phase 1 parent WITHOUT writing "
+            "or overwriting the PosteriorResult pair. Use this to refresh stale "
+            "figures without touching a persisted artifact."
+        ),
+    )
+    parser.add_argument(
         "--n-bootstrap",
         type=int,
         default=1000,
@@ -146,6 +155,7 @@ def main(argv: list[str] | None = None) -> int:
         verify_by_reevaluation=args.verify,
         trace_breach_times=not args.no_breach_times,
         figures=not args.no_figures,
+        figures_only=args.figures_only,
         n_bootstrap=args.n_bootstrap,
         progression_backend=args.backend,
         overwrite=args.overwrite,

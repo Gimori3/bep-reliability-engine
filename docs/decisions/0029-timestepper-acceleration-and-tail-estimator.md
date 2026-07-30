@@ -197,10 +197,47 @@ bottleneck** — out of scope here, noted for a follow-up.
 - The lag form, if ever activated (ADR-0004/0014), runs numpy-only until
   the exact exponential update is added to the kernel; config enforces this
   fail-fast rather than silently dropping the lag.
-- Tail P_f numbers quoted below the grid's raw-resolvable range must come
+- Tail P_f numbers quoted below the grid's raw-resolvable range may come
   from the tilted estimator with its n_eff diagnostic reported, and are
   clearly weighted estimates — they never enter FragilityResult failure
-  matrices or the ADR-0024 binomial CIs.
+  matrices or the ADR-0024 binomial CIs. **Amended 2026-07-30: this bullet
+  originally read "must come from the tilted estimator", which over-reaches
+  in two ways.** First, brute force at a larger N is always an admissible
+  alternative and is what the design-HWL bias resolution actually used
+  (`adr0040-hwl-bias-resolution.md`). Second, and load-bearing: the
+  recommendation is scoped to a **single-branch** tail probability, which is
+  the estimand this ADR validated. See the scope amendment below.
+
+## Amendment — 2026-07-30: scope, and a documented negative on a new estimand
+
+**Status:** Accepted. No decision, default or measured number of this ADR
+changes. It records the boundary of Decision 4's recommendation.
+
+`adr0040-hwl-bias-resolution.md` §2.6 pointed this sampler at the Stage 6.6
+static-vs-transient bias — a **ratio between two branches** — for the first
+time, under a pre-registered validation. It **failed** (V2: at 46.75 m the IS
+interval does not overlap the brute-force Clopper–Pearson interval; V4: Kish
+`n_eff` = 86.9 against a pre-registered floor of 200), and the diagnosis is
+structural rather than a tuning miss:
+
+* the **transient** side gets exactly what this ADR promises — CoV 0.107
+  against 0.500 under plain LHS at the same N, a **4.66×** reduction, at the
+  favourable end of the measured 3.2–4.1× range;
+* the **static** side pays for it. A proposal optimised for the transient
+  failure region is not optimal for the static one, and the measured
+  inflation of the static estimator's CoV runs **1.50× at the anchor rising to
+  940× at saturation**, with `n_eff` plateauing near 104 however many rows
+  actually fail.
+
+**The scope that survives.** `sample_theta_tilted` remains validated for what
+this ADR built it for: one deep-tail failure probability on one branch, with
+`n_eff` reported. It is **not** validated for an estimand that divides one
+branch by the other, because the variance it buys on the numerator it loses
+several-fold on the denominator. Any future use on a ratio needs its own
+pre-registration and its own proposal (iterated CE steps, a wider tilted
+parameter set, or a defensive mixture retaining part of the untilted prior —
+all recorded there as not-done, since changing method after seeing a failure
+would invalidate the test).
 
 ## References
 

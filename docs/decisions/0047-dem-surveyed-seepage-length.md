@@ -435,7 +435,7 @@ from memory; seven candidates were found and every one was re-run or re-pinned:
 | Phase 1 sweeps | re-run | both KP 62.0 strata, N = 1e5 |
 | Phase 2 posterior | re-run `--verify` | **rejection 0.00 % both strata; nesting result holds** |
 | Phase 3 campaign | re-run | 20 of 2280 RQ4 rows changed, all KP 62.0 (containment gate) |
-| `stage6_6_gap_decomposition.py` | re-run (kp62_0) | drift guard **bit-identical at 38 levels**; all Euler flips 0 |
+| `stage6_6_gap_decomposition.py` | re-run (kp62_0) | drift guard **bit-identical at 38 levels**; all Euler flips 0 **at the production N = 1e5** (KP 62.0 also stays clean at N = 1e6; KP 57.4 does not — 4 rows in 1e6, `adr0040-hwl-bias-resolution.md` §2.7) |
 | `foreshore_width_study.py` | re-run (4 sections) | KP 57.4/58.8/60.0 reproduce exactly; KP 62.0 0.00023 → 0.00024 |
 | `assess_2011_2006_closure.py` | re-run (8 strata) | **all eight reproduce exactly**, KP 62.0 still 0/100 000 |
 | `segment_fragility.py` | re-run | ADR-0037 segment tables regenerated |
@@ -515,6 +515,18 @@ it departs further. The only knob measured to cancel is `m_p` (×1.07–1.22), w
 pure common-mode by ADR-0045 §2 construction. Consequently the Stage 6.6 bias
 headlines are **k_aq-conditional as well as L-conditional**, and the k_aq
 conditionality is the larger of the two.
+
+**Also superseded 2026-07-30: the bias magnitudes this ADR quotes.** The
+"~21× at KP 62.0, ≥32× at KP 57.4" of §4.5 and the "21.0 → 44.7, but neither is
+resolved" of the headline-numbers list both rest on single-digit failing rows at
+N = 1e5. `adr0040-hwl-bias-resolution.md` resolved the estimand by brute force at
+N = 1e6: **KP 62.0 design HWL (46.39 m) B = 26.9, 95 % CI [21.6, 35.3], on 63
+failing rows, RESOLVED** — so 44.7 was counting noise that overstated the bias
+1.66× — and **KP 57.4 remains unresolved (2 rows in 1e6), bounded at B ≥ 148**,
+which supersedes "≥32×" (a zero-row bound). This ADR's own *relative* statement
+is unaffected and was the sound one: where counts are adequate the L adoption
+makes the bias **fall** by about a third (15.0 → 10.5 at 47.0 m MSL), which is
+what the ratio-of-ratios ρ = 0.475 predicts.
 
 ---
 

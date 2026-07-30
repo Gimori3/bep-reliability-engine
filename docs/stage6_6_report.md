@@ -42,6 +42,8 @@ Headline result, per event at the design flood level (HWL):
 
 The bias decays toward parity as the conditioning level rises: the total
 static-to-transient ratio falls from 15 at 47.0 m to 1.9 at 50.5 m (KP62.0)
+[**superseded — under the adopted L = 40.0 m the same cell pair reads 10.5 at
+47.0 m and 1.4 at 50.5 m; see section 8**]
 and from 13.5 at 39.75 m to 1.04 at 43.25 m (KP57.4). At design-relevant
 levels conventional practice is an order of magnitude conservative for these
 sections; at extreme overload levels the two criteria converge because almost
@@ -187,8 +189,9 @@ contributes essentially nothing to the production gap at either section:
 realizations loaded above H_c at alpha = -1/3 essentially always have the
 heave gate open. The pure temporal ratio between the sustained-peak limit
 and the real-hydrograph transient, P(C3b)/P(C4b), runs from 7.9 at 47.0 m
-down to 1.9 at 50.5 m at KP62.0, and from 3.2 at 39.75 m down to 1.04 at
-43.25 m at KP57.4.
+down to 1.9 at 50.5 m at KP62.0 [**superseded — under the adopted
+L = 40.0 m: 6.0 at 47.0 m down to 1.4 at 50.5 m; see section 8**], and from
+3.2 at 39.75 m down to 1.04 at 43.25 m at KP57.4.
 
 ### 4.2 The dimensional component (physics ladder)
 
@@ -371,8 +374,9 @@ existed. KP 57.4 was **not** adopted, so **every KP 57.4 number in sections 1 to
 stands unchanged**. The KP 62.0 ladder was re-run in full at N = 1e5.
 
 **Gates re-passed.** The production drift guard is **bit-identical at all 38 common
-levels** against the re-run KP 62.0 sweep, and **every Euler-flip count is exactly 0**
-across all five diagnostics at all 39 levels — the same gates section 3 defines.
+levels** against the re-run KP 62.0 sweep, and **every Euler-flip count is exactly 0
+at N = 1e5** across all five diagnostics at all 39 levels — the same gates section 3
+defines. (KP 62.0 stays clean at N = 1e6 too; KP 57.4 does not — see section 9.)
 
 **The headline number, and a correction to how it should be quoted.** Section 1
 reports the KP 62.0 conventional-practice bias at HWL as *"a factor of about 21"*.
@@ -442,8 +446,22 @@ rows, not a different answer** — it overstated the bias by a factor of 1.66.
 
 **Gates.** The N = 1e5 drift guard is bit-identical to the persisted sweeps at 38
 and 23 levels with identical theta; at KP 62.0 every Euler-flip count is 0 at all
-39 levels; the N = 1e6 result is consistent with N = 1e5 at all 59 adequately
-counted branch comparisons.
+39 levels **at both N = 1e5 and N = 1e6**; the N = 1e6 result is consistent with
+N = 1e5 at all 59 adequately counted branch comparisons.
+
+**Gate G-A2 fired at KP 57.4, and only at N = 1e6.** Four `c4b_not_c3b`
+barrier-jump rows out of 1e6, at **39.50 / 40.25 / 40.75 m** — a rate of 4e-6
+whose expected count at the production N = 1e5 is 0.4, which is why every earlier
+run (this report's sections 1 to 8, the campaign's G3, and this study's own
+N = 1e5 arm) saw exactly zero. **Every unqualified "all Euler-flip counts are 0"
+in this repository is an N = 1e5 statement.** No production result is affected —
+all run at N = 1e5, where the gate passes and the drift guard is bit-identical.
+The recommended KP 57.4 quotable anchor at 39.50 m **is itself one of the flip
+levels**, carrying 1 barrier-jump row out of its 521 transient failures (0.19 %);
+a spurious transient failure inflates P_transient and therefore *deflates* B, so
+the artifact biases 42.7 downward by about 0.2 % — negligible against the 1.18x
+interval, and conservative in direction. This is the indicator-level counterpart
+of ADR-0039's KP 57.4 Δt rider.
 
 **KP 57.4 remains unresolved, but its bound improves 4.6×.** At N = 1e6 the design
 HWL carries **2** failing transient rows (A2, 39.25 m: 10). R1 still fails.

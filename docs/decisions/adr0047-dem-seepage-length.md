@@ -426,6 +426,15 @@ absolute maximum.
 > construction. The mechanism argument given below for L — a transient-only channel on top
 > of the shared `H_c` — is exactly right, and is now the general rule; k_aq has *two* such
 > channels where L has one.
+>
+> **Second dated correction, same date: the bias magnitudes quoted below are
+> superseded.** "~21× at KP 62.0, ≥32× at KP 57.4 per event at HWL" rests on
+> single-digit (and at KP 57.4 zero) failing rows at N = 1e5.
+> `adr0040-hwl-bias-resolution.md` resolved it by brute force at N = 1e6: KP 62.0
+> at 46.39 m gives **B = 26.9 [21.6, 35.3] on 63 rows, RESOLVED**; KP 57.4 stays
+> unresolved (2 rows in 1e6) and is **bounded at B ≥ 148**. The *relative*
+> statement below — that the L adoption compresses the KP 62.0 bias by about a
+> third and roughly doubles KP 57.4's — is unaffected and is the sound one.
 
 This is the question that decides whether adoption is optional. The thesis defends
 **ratios** — the Stage 6.6 conventional-practice bias, the WBI+ peak-shortcut
@@ -653,7 +662,10 @@ its stated residual, and a buried drain would only lower computed P_f.
 Consumers were enumerated **programmatically**, not from memory. Seven candidates;
 all handled. The executed table is in ADR-0047 Consequences. Gates that passed:
 config diff confined to two files and one field; Phase 1 sweeps re-run; Stage 6.6
-drift guard bit-identical at 38 levels with all Euler-flip counts 0; Phase 2
+drift guard bit-identical at 38 levels with all Euler-flip counts 0 **at the
+production N = 1e5** (at N = 1e6 KP 57.4 shows 4 barrier-jump rows —
+`adr0040-hwl-bias-resolution.md` §2.7; KP 62.0, the section re-run here, stays
+clean at both N); Phase 2
 masked-vs-re-evaluation verification exact; Phase 3 containment 20/2280 rows, all
 KP 62.0; `foreshore_exhaustion_study` byte-identical; the three held sections'
 foreshore-width numbers reproduce exactly.

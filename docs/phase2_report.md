@@ -534,7 +534,10 @@ as-if-undrained constraint; the drain credit is a separate argument.
 
 **Anchor (`--anchor rating`, construction sensitivity):** KP57.4
 0.07% -> 0.00%, KP58.8 5.67% -> 10.81% (rating peak 40.99 m vs trace
-40.75 m), KP60.0 3.36% -> 0.34%, KP62.0 0.00% -> 0.01%. The
+40.75 m), KP60.0 3.36% -> 0.34%, KP62.0 0.00% -> **0.05%** (was 0.01% on the
+withdrawn L = 47.0 m Phase 1; corrected 2026-07-30 against the campaign's
+re-run, `results/production_campaign_manifest.json`, stage
+`phase2_anchor_rating`). The
 h_2016 construction is a first-order term in the rejection rate
 (factor ~2 up at KP58.8, ~10 down at KP60.0, direction section-specific)
 — the trace-anchored baseline (ADR-0035) and this bracket must be
@@ -543,9 +546,11 @@ reported together.
 **Criterion (`--criterion no_breach_no_initiation`, evidence-strength
 sensitivity):** rejects 66.4% at KP57.4 (below the 50% headroom floor,
 warned), 99.57% at KP58.8 and 99.30% at KP60.0 (posteriors collapsed to
-432 and 696 rows, auto-flagged statistically meaningless), and 30.46% at
-KP62.0 — the one usable-size strict posterior, and an interesting reading
-on its own: the uplift/heave gate latches for ~30% of the KP62.0 prior
+432 and 696 rows, auto-flagged statistically meaningless), and **39.55%** at
+KP62.0 (was 30.46% on the withdrawn L = 47.0 m Phase 1; corrected 2026-07-30
+against the campaign's re-run, stage `phase2_no_initiation`)
+— the one usable-size strict posterior, and an interesting reading
+on its own: the uplift/heave gate latches for ~40% of the KP62.0 prior
 under the 2016 loading even though breach rejection there is exactly
 zero, i.e. the initiation margin and the progression margin separate
 cleanly at the governing section. As documented in ADR-0036 and

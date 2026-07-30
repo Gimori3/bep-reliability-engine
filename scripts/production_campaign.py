@@ -45,9 +45,14 @@ interrupted campaign resumes where it stopped. Gate failures are terminal --
 the manifest is flushed and the process exits non-zero rather than continuing
 into stages that would consume a suspect artifact.
 
-Figures are deliberately NOT regenerated (``--no-figures`` / ``--skip-figures``
-/ ``--no-figure`` are passed through): the figure pass is a separate step after
-the sensitivity work lands.
+The compute stages deliberately do not regenerate figures (``--no-figures`` /
+``--skip-figures`` / ``--no-figure`` are passed through): rendering during a
+long sweep buys nothing. Instead the dedicated ``figures`` stage (added
+2026-07-30) re-renders every publication figure that has a cheap redraw path
+and then **gates on staleness** -- gate G7 fails if any figure under
+``docs/figures/`` is older than the artifact it depicts. That gate is the
+structural fix for the manual copy step that let the Stage 6.6 KP 62.0 figures
+go stale twice; figures with no redraw path are listed, not silently ignored.
 """
 
 from __future__ import annotations
@@ -1319,6 +1324,212 @@ def _git_tracked_evidence_verdict(rel: str) -> dict[str, Any]:
 # --------------------------------------------------------------------------- #
 
 
+# --------------------------------------------------------------------------- #
+# Stage -- publication figures (regenerate, then assert freshness)              #
+# --------------------------------------------------------------------------- #
+
+#: Every publication-figure driver that has a *cheap redraw path*: it reads
+#: persisted evidence and re-renders, running no physics. ``requires`` lists the
+#: inputs that must exist for the driver to work at all (several live under the
+#: gitignored ``results/`` or ``data/raw/``, so a fresh clone skips them rather
+#: than failing). ``produces`` are glob patterns under ``docs/figures/``.
+#:
+#: Note on gate ordering: every driver here WRITES its figures before this stage
+#: gates on their timestamps, so an alarm can never destroy the artifact it is
+#: raised about (the 2026-07-30 lesson from `hwl_bias_resolution.cmd_brute`).
+FIGURE_DRIVERS: list[dict[str, Any]] = [
+    {
+        "label": "phase1 fragility curves",
+        "command": [PY, "scripts/plot_fragility_curves.py"],
+        "requires": ["results/tokachi_kp62.0_historical_matrix.h5"],
+        "produces": ["fragility_*.png"],
+        "sources": ["results/tokachi_kp*_historical_*.h5"],
+    },
+    {
+        "label": "stage 6.6 (redraw only)",
+        "command": [
+            PY,
+            "scripts/stage6_6_gap_decomposition.py",
+            "--figures-only",
+        ],
+        "requires": ["results/stage6_6/stage6_6_kp62_0.h5"],
+        "produces": ["stage6_6_*.png"],
+        "sources": [
+            "results/stage6_6/stage6_6_kp*.h5",
+            "results/stage6_6/stage6_6_kp*_analysis.json",
+        ],
+    },
+    {
+        "label": "phase 3 RQ3+RQ4",
+        "command": [PY, "scripts/phase3_figures.py"],
+        "requires": ["results/system_integration/phase3/rq4_annual.csv"],
+        "produces": ["phase3_*.png"],
+        "sources": [
+            "results/system_integration/phase3/*.json",
+            "results/system_integration/phase3/rq4_annual.csv",
+        ],
+    },
+    {
+        "label": "seepage-length L study",
+        "command": [PY, "scripts/seepage_length_figures.py"],
+        "requires": ["docs/decisions/seepage-length-L-study.md"],
+        "produces": ["seepage_length_*.png"],
+        "sources": ["results/sensitivity/seepage_length/*.json"],
+    },
+    {
+        "label": "design-HWL bias resolution",
+        "command": [PY, "scripts/hwl_bias_resolution.py", "figures"],
+        "requires": ["docs/decisions/adr0040-hwl-bias-resolution.json"],
+        "produces": ["adr0040_*.png", "epistemic_vs_statistical.png"],
+        "sources": [
+            "docs/decisions/adr0040-hwl-bias-resolution.json",
+            "docs/decisions/epistemic-bracket-synthesis.json",
+        ],
+    },
+    {
+        "label": "ADR-0047 DEM seepage length (draw only)",
+        "command": [PY, "scripts/dem_cross_section_study.py", "figure"],
+        "requires": ["data/raw/geometry/dem_cross_sections/_mosaic_cache.npz"],
+        "produces": ["adr0047_dem_seepage_length.png"],
+        "sources": ["docs/decisions/adr0047-dem-seepage-length.json"],
+    },
+    {
+        "label": "ADR-0033 GSA (plot only)",
+        "command": [PY, "scripts/gsa_study.py", "--plot-only"],
+        "requires": ["docs/decisions/adr0033-gsa-study-kp58_8_matrix.json"],
+        "produces": ["gsa_*.png"],
+        "sources": ["docs/decisions/adr0033-gsa-study*.json"],
+    },
+    {
+        "label": "ADR-0031 convergence (plot only)",
+        "command": [PY, "scripts/convergence_study.py", "--plot-only"],
+        "requires": ["docs/decisions/adr0031-convergence-study.json"],
+        "produces": ["adr0031-*.png"],
+        "sources": ["docs/decisions/adr0031-convergence-study*.json"],
+    },
+    {
+        "label": "Japanese case validation (Yabe)",
+        "command": [PY, "scripts/plot_validation_yabe.py"],
+        "requires": ["results/validation_yabe/validation_results.json"],
+        "produces": ["validation_yabe_*.png"],
+        "sources": ["results/validation_yabe/validation_results.json"],
+    },
+    {
+        "label": "Japanese case validation (Gounokawa)",
+        "command": [PY, "scripts/plot_validation_gounokawa.py"],
+        "requires": ["results/validation_gounokawa/validation_results.json"],
+        "produces": ["validation_gounokawa_*.png"],
+        "sources": ["results/validation_gounokawa/validation_results.json"],
+    },
+    {
+        "label": "Japanese case validation (Shikaga)",
+        "command": [PY, "scripts/plot_validation_shikaga.py"],
+        "requires": ["results/validation_shikaga/validation_results.json"],
+        "produces": ["validation_shikaga_*.png"],
+        "sources": ["results/validation_shikaga/validation_results.json"],
+    },
+]
+
+
+def _newest(patterns: list[str]) -> tuple[float, str | None]:
+    """Newest mtime among the files matching any pattern, and which file."""
+    newest, which = 0.0, None
+    for pattern in patterns:
+        for path in REPO.glob(pattern):
+            if not path.is_file():
+                continue
+            mtime = path.stat().st_mtime
+            if mtime > newest:
+                newest, which = mtime, str(path.relative_to(REPO)).replace("\\", "/")
+    return newest, which
+
+
+def stage_figures(ctx: "Context") -> dict[str, Any]:
+    """Regenerate every redrawable publication figure, then gate on staleness.
+
+    The gate is the structural fix for the copy problem: a figure that is older
+    than the artifact it depicts fails the campaign, so the 2026-07-29 and
+    2026-07-30 cases (Stage 6.6 KP 62.0 rendered before its own ladder re-run)
+    cannot recur silently.
+    """
+    gates = Gates("figures")
+    before = _tracked_figure_state()
+    commands: list[dict[str, Any]] = []
+    skipped: list[dict[str, str]] = []
+
+    for driver in FIGURE_DRIVERS:
+        missing = [r for r in driver["requires"] if not (REPO / r).exists()]
+        if missing:
+            skipped.append({"label": driver["label"], "missing": ", ".join(missing)})
+            print(f"    -- skipped {driver['label']} (missing {missing[0]})")
+            continue
+        record = run_command(
+            driver["command"],
+            label=driver["label"],
+            log_path=ctx.log_dir / f"figures_{driver['label'].split()[0]}.log",
+        )
+        commands.append(record)
+        gates.check(
+            "G7",
+            f"{driver['label']} driver exits 0",
+            record["returncode"] == 0,
+            record,
+        )
+
+    # Staleness: per driver, every figure it owns must be at least as new as the
+    # newest artifact it depicts.
+    stale: list[dict[str, Any]] = []
+    checked = 0
+    for driver in FIGURE_DRIVERS:
+        source_mtime, source_file = _newest(driver["sources"])
+        if source_mtime == 0.0:
+            continue
+        for pattern in driver["produces"]:
+            for figure in sorted((REPO / "docs" / "figures").glob(pattern)):
+                checked += 1
+                if figure.stat().st_mtime + 1.0 < source_mtime:
+                    stale.append(
+                        {
+                            "figure": f"docs/figures/{figure.name}",
+                            "driver": driver["label"],
+                            "newest_source": source_file,
+                            "figure_age_s": round(
+                                source_mtime - figure.stat().st_mtime, 1
+                            ),
+                        }
+                    )
+    gates.check(
+        "G7",
+        "no publication figure is older than the artifact it depicts",
+        not stale,
+        {"checked": checked, "stale": stale},
+    )
+
+    mapped = {
+        f"docs/figures/{p.name}"
+        for driver in FIGURE_DRIVERS
+        for pattern in driver["produces"]
+        for p in (REPO / "docs" / "figures").glob(pattern)
+    }
+    unmapped = sorted(set(before) - mapped)
+    gates.note(
+        "G7",
+        "figures with no redraw path in FIGURE_DRIVERS (re-run their study)",
+        {"count": len(unmapped), "figures": unmapped},
+    )
+    after = _tracked_figure_state()
+    return {
+        "commands": commands,
+        "skipped_drivers": skipped,
+        "figures_checked": checked,
+        "figures_changed": sorted(
+            rel for rel, digest in after.items() if before.get(rel) != digest
+        ),
+        "figures_unmapped": unmapped,
+        "gates": gates.records,
+    }
+
+
 def stage_diagnostics(ctx: "Context") -> dict[str, Any]:
     """Collect, per run, every diagnostic G5 asks for. Reporting, not gating.
 
@@ -1614,6 +1825,7 @@ STAGES: list[tuple[str, Callable[[Context], dict[str, Any]], str]] = [
     ("phase3", stage_phase3, "RQ3+RQ4 campaign [G4]"),
     ("phase3_validation", stage_phase3_validation, "event-based surface validation"),
     ("companions", stage_companions, "bit-identity companion studies"),
+    ("figures", stage_figures, "regenerate publication figures + staleness gate [G7]"),
     ("diagnostics", stage_diagnostics, "G5 collection"),
 ]
 
