@@ -247,9 +247,12 @@ data/digitized/Gounokawa_River_Levee_Okamura/Fig13*.xlsx
 data/digitized/2016_event_data/
 
 # Raw 2011/2006 event drops (ADR-0044: gauge stage dirs empty in both, so
-# neither event is a survival constraint). Only the 2011 folder's root files
-# (README + the committed trace extract flood_trace_2011.csv) are tracked.
-data/processed/2006_event/
+# neither event is a survival constraint). Only each folder's root files are
+# tracked: 2011's README + the committed trace extract flood_trace_2011.csv,
+# and 2006's README (added 2026-07-31 -- the directory looks empty on disk and
+# its four empty stage/trace subdirectories are exactly what a future session
+# would waste time re-investigating).
+data/processed/2006_event/*/
 data/processed/2011_event/*/
 
 # Raw Uemura WP2 workproduct drop (~140 MB incl. a 97 MB workbook and PDFs);
