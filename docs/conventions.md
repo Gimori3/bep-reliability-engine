@@ -121,3 +121,134 @@ content. The check that keeps it that way is documented in `msc-thesis/project-n
 `msc-thesis/project-notes.md` for the full style contract (citation-key preservation,
 `\label{}` preservation, minimal surgical edits, plan-and-approve for multi-chapter
 tasks). That contract is binding on any edit to that repository.
+
+## 9. Repository layout conventions
+
+Recorded 2026-07-31 by the structural audit (`docs/repo_audit_2026-07-31.md`).
+Each of these describes a convention already in force. They are written down
+because they were legible only by inspection, and because the audit measured the
+alternative -- reorganising the tree to make them self-evident -- and found it
+costs far more than it earns. **Any of these could be made tidier; none should
+be.** The measured costs are in the audit, sections 3.6 and 3.7.
+
+### 9.1 Two kinds of document live in `docs/`
+
+* **Undated `docs/<name>.md` are documents of record** and stay current:
+  `architecture.md` (the authoritative spec), `conventions.md`,
+  `phase2_report.md`, `phase3_report.md`, `stage6_6_report.md`,
+  `tokachi_bep_inputs_provenance.md`. When a later run outdates one, append a
+  dated addendum section stating it is **authoritative where it differs**, rather
+  than rewriting the body (`phase2_report.md` sections 11 to 14 are the pattern).
+* **Dated `docs/<name>_YYYY-MM-DD.md` are closed one-shot artifacts** -- a
+  campaign, an audit, a document review. They are frozen records of a session and
+  are never updated in place; a later pass writes a new dated file and supersedes
+  the old one by pointer.
+
+They share a directory deliberately. Moving the dated artifacts into a
+subdirectory was proposed and **declined**: `docs/production_campaign_2026-07-29.md`
+is named by path in `tests/test_figure_pass.py`, and that guard's failure mode on
+a missing path used to be a silent skip. The guard now asserts (2026-07-31
+hardening), so a move would fail loudly rather than silently -- but the 13 inbound
+citations still buy nothing.
+
+### 9.2 `docs/decisions/` has three filename grammars, and they mean different things
+
+| Grammar | Meaning |
+|---|---|
+| `NNNN-slug.md` | A numbered **decision** (ADR). 0001 to 0048, gap-free. Superseded ADRs stay in place with their Status line updated; they are never deleted or renamed. |
+| `adrNNNN-slug.md` / `.json` | **Evidence for** the ADR of that number: a companion analysis note, an evidence JSON, or both. Note the grammar differs from the ADR's own filename (lowercase `adr` prefix, no separating dash). |
+| `<topic>-study.md`, `<topic>-synthesis.md` | An **un-numbered study**: work that produced a finding but changed no default and therefore consumed no ADR number (`seepage-length-L-study.md`, `r10-foreshore-exhaustion-screening.md`, `epistemic-bracket-synthesis.md`, `m7-pol-ode-reference-values.md`). |
+
+Do not "unify" these. The audit measured a restructure at **293 reference lines
+across 84 files** (66 tracked, 18 in the gitignored `untracked-supporting-files/` library),
+plus 12 paths whose SHA-256 is recorded in
+`results/production_campaign_manifest.json`, 16 literal path strings in gate G7's
+`FIGURE_DRIVERS`, six paths hard-coded in `tests/test_figure_pass.py`, and the
+thesis Appendix C ADR register. The grammar is consistent and already meaningful;
+what was missing was this table.
+
+### 9.3 Figures are written by their drivers, never copied by hand
+
+`docs/figures/` is the canonical publication location and the only one gate G7
+checks. Every figure driver dual-writes: the study-local copy under
+`results/<study>/figures/` and the tracked copy under `docs/figures/`
+(`scripts/_figstyle.py::save`, `stage6_6_gap_decomposition._write_figure`). This
+is the structural fix for a real failure -- a human copying figures between the
+two let the KP 62.0 set go stale twice, on 2026-07-29 and 2026-07-30. Adding a
+figure means adding it to `FIGURE_DRIVERS`; `test_every_tracked_publication_figure_is_declared`
+requires every tracked PNG to be declared.
+
+A root-level `figures/` directory existed until 2026-07-31 holding 11 byte-identical
+duplicates that nothing wrote and nothing read. It was deleted; if one reappears,
+it is a mistake.
+
+### 9.4 A test may only skip on something that is genuinely optional
+
+`pytest.skip` / `skipif` is correct for a gitignored machine-local artifact
+(`data/raw/` drops, `results/` files, the reference PDFs) -- absence there means a
+fresh clone. Its `reason` string should say so; every such mark in `tests/` now
+contains the word "untracked".
+
+**A tracked artifact must be asserted, never skipped.** Skipping on a committed
+path means a move, rename or deletion silently disables the guard while the suite
+still reports green. Eight guards in `tests/test_figure_pass.py` had this shape
+until 2026-07-31, and the worst of them skipped when a *claim was absent from a
+document*, so deleting the claim made its own guard pass.
+`test_no_guard_in_this_file_skips_on_a_tracked_path` keeps the pattern out of
+that file.
+
+## 10. Retention policy for `results/`
+
+`results/` is gitignored and machine-local: roughly 2.1 GB across 723 files as of
+2026-07-31. Nothing in it is recoverable from git, so the policy is about what
+must survive to the defence, not about disk.
+
+### 10.1 Retained until the defence, without exception
+
+These are the artifacts a thesis number traces to. Several are recorded with
+SHA-256 in `results/production_campaign_manifest.json`, so they must not move or
+change content either.
+
+| Category | Regenerated by | Note |
+|---|---|---|
+| The 8 production sweeps, `tokachi_kp*_historical_{matrix,bulk}.{h5,json}` | `python scripts/run_sweep.py configs/kp*_matrix.yaml` (hours) | Every Phase 2 and Phase 3 number descends from these. Manifest-hashed. |
+| `production_campaign_manifest.json` + `production_campaign/` | `python scripts/production_campaign.py` | The machine-readable half of the campaign document of record. |
+| `hwl_bias_resolution/` (about 839 MB, two N = 1e6 ladders) | `python scripts/hwl_bias_resolution.py`, about 170 min | **See 10.2 -- this one is not a convenience.** |
+| `sensitivity/` (ADR-0045/0046/0048, `ce_prior`, `seepage_length`, `foreshore_exhaustion`) | each companion driver | The epistemic-bracket headline numbers cite these. |
+| `phase2/`, `phase2_anchor_rating/`, `phase2_no_initiation/` | `python -m bayesian_reliability_updating ... --verify` | The posteriors and both documented variants. Manifest-hashed. |
+| `stage6_6/` (two N) | `python scripts/stage6_6_gap_decomposition.py` | |
+| `system_integration/phase3/`, `gsa/`, `convergence/`, `diagnostics/`, `validation_*/` | respective drivers | |
+
+### 10.2 `hwl_bias_resolution/` is evidence, not a cache
+
+It carries the resolved design-HWL bias at KP 62.0 (26.9, 95% CI [21.6, 35.3], on
+63 failing rows) and the pre-registered validation *failure* of the ADR-0029
+tilted sampler for a ratio between branches. **A 170-minute re-run is not a
+substitute for the artifact a reviewer may ask to see**, and a regenerated file
+is not the file the manifest hashed. Retain it until the defence regardless of
+its size.
+
+### 10.3 Regenerable, deletable at any time
+
+* `system_integration/hazard_cache/` -- a pure cache; rebuilds in about 4 minutes.
+* `phase2_selftest/`, `phase2_test_xs_historical.*` -- development-time self-test
+  at reduced N; deletable after the defence.
+
+### 10.4 `superseded_*` directories
+
+`scripts/production_campaign.py` preserves what it supersedes into
+`results/superseded_<timestamp>/`. These are **not** regenerable: they *are* the
+pre-supersession state.
+
+* `superseded_adr0047_L47/` is retained until the defence. It is the pre-adoption
+  L = 47 m state that ADR-0047's withdrawn-arm numbers were measured against, and
+  a question about the adoption decision is foreseeable.
+* A timestamped `superseded_*` directory is retained until the artifact that
+  superseded it has been quoted in a defended chapter, then for one further
+  campaign cycle.
+* **Empty ones may be removed at any time.** The driver creates the directory
+  before knowing whether it has anything to preserve, so most are empty: 11 of 15
+  on 2026-07-31, all of which were removed after asserting each was empty in the
+  same operation. Assert emptiness immediately before removing; never remove a
+  `superseded_*` directory that contains files without checking it against this
+  policy first.
