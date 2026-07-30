@@ -246,6 +246,12 @@ exactly 0** across all five diagnostics at both sections.
 
 ### 6.1 Bias factor per level, with the row count that carries it
 
+> **Superseded at the design-HWL rows (2026-07-30, see §12 and
+> `docs/stage6_6_report.md` §9).** The tables below are the N = 1e5 record and are
+> left unchanged as such. At N = 1e6 the KP 62.0 design-HWL bias is **26.9
+> [21.6, 35.3] on 63 rows, resolved** (the 44.7 below rests on 4 rows and
+> overstates it 1.66×), and KP 57.4's is bounded at **B ≥ 148**.
+
 KP 62.0 (HWL 46.39 m MSL, attainable max 50.5 m):
 
 | level [m MSL] | C0 static | C4b transient | C4b rows | bias | resolved |
@@ -677,11 +683,35 @@ containment claim was sound and that the residue is purely documentary.
 * The **Phase 3 event-based validation** and the §7 invariants re-ran and
   passed.
 
-## 12. Open item — decision 6
+## 12. Open item — decision 6 — **CLOSED 2026-07-30**
 
-The decisions-of-record block for this campaign carries decision 6 as an
+> **Closure note (2026-07-30).** The owner supplied the method — brute force at
+> N = 1e6 at KP 62.0, then validate tilted importance sampling against it, then
+> apply the validated estimator at KP 57.4 — and it was executed under a written
+> pre-registration: `docs/decisions/adr0040-hwl-bias-resolution.md`, driver
+> `scripts/hwl_bias_resolution.py`, evidence
+> `docs/decisions/adr0040-hwl-bias-resolution.json`. Outcome in one paragraph:
+> **KP 62.0's design-HWL bias is now resolved at 26.9 (95 % CI 21.6 to 35.3) on 63
+> failing rows**, superseding the 44.7 in §6.1 below, which rested on 4 rows and
+> overstated the bias by 1.66× (the two are statistically consistent — this was
+> counting noise, not a different answer). **KP 57.4 remains unresolved even at
+> N = 1e6** (2 failing rows); its defensible statements are a bound **B ≥ 148** at
+> the design HWL, superseding *"at least 32"*, and a resolved anchor **42.7
+> [39.4, 46.6] at 39.50 m MSL**. **The tilted estimator did NOT validate** and no
+> weighted number was used. §6.1's tables below are unchanged as the N = 1e5
+> record; `docs/stage6_6_report.md` §9 is the authoritative reading.
+>
+> One finding from that work touches this campaign's own gates: at **N = 1e6**,
+> KP 57.4 shows **4 Euler-flip rows in 1e6** (levels 39.50, 40.25, 40.75), which
+> the campaign's G3 could not have seen at N = 1e5 where the expected count is
+> 0.4. **No campaign result is affected** — every production artifact runs at
+> N = 1e5, where G3 passed and the drift guard is bit-identical — but a future
+> higher-N campaign at KP 57.4 should expect this gate to fire and should read
+> ADR-0039's Δt rider alongside it.
+
+The decisions-of-record block for this campaign carried decision 6 as an
 unfilled placeholder: *"Design-HWL bias resolution method: `<your D-6 answer>`"*.
-No method is recorded, so none is applied or invented here.
+No method was recorded at the time, so none was applied or invented then.
 
 Its operative clause **was** honoured: nothing forecloses a higher-N or
 importance-sampled Stage 6.6 re-run. Specifically, `results/stage6_6/` carries

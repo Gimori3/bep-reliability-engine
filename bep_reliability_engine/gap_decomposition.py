@@ -526,6 +526,7 @@ def run_comparator_ladder(
     *,
     n_jobs: int = 1,
     progress: bool = False,
+    theta_override: NDArray[np.float64] | None = None,
 ) -> GapDecompositionResult:
     """Run the full ten-comparator ladder for one section config (ADR-0040).
 
@@ -546,11 +547,32 @@ def run_comparator_ladder(
         loop); results are assembled by level index, so parallel == serial.
     progress : bool, optional
         Wrap the level loop in tqdm.
+    theta_override : numpy.ndarray, shape (N, 7), optional
+        Evaluate the ladder on this theta matrix instead of the config's own
+        M2 draw. ``None`` (the default) is the production path and is
+        bit-identical to the pre-override behaviour. The override exists so
+        an alternative *proposal* population -- specifically the ADR-0029
+        tilted importance sample (``tail_sampling.sample_theta_tilted``) --
+        can be pushed through the identical comparator machinery, preserving
+        the ADR-0002 shared-sample contract across all ten comparators on
+        one population. It changes no physics: every comparator still comes
+        from the same M8 calls. The independent stochastic-L draw is *not*
+        overridden (it stays the config's own draw, which is what keeps an
+        importance weight exact -- L is drawn from the prior under both
+        proposal and target). A run using the override stamps
+        ``metadata['theta_override']`` so a proposal-population ladder can
+        never masquerade as a baseline one, and such a ladder's raw column
+        means are NOT failure probabilities -- they must be reweighted.
 
     Returns
     -------
     GapDecompositionResult
         All ten comparator matrices plus flip diagnostics and metadata.
+
+    Raises
+    ------
+    ValueError
+        If ``theta_override`` does not have shape ``(config.mc.n_samples, 7)``.
     """
     started = time.time()
     theta_sample = sample_theta(
@@ -563,6 +585,14 @@ def run_comparator_ladder(
         bounds=config.priors.bounds,
     )
     theta = theta_sample.theta_matrix
+    if theta_override is not None:
+        override = np.asarray(theta_override, dtype=np.float64)
+        if override.shape != theta.shape:
+            raise ValueError(
+                f"theta_override shape {override.shape} must equal the config's "
+                f"own theta shape {theta.shape} (N = config.mc.n_samples, 7)."
+            )
+        theta = override
     seepage = seepage_length_samples_for_config(config)
     records = conditioning_hydrographs_for_config(config)
     geometry = config.geometry.as_evaluator_dict()
@@ -635,6 +665,14 @@ def run_comparator_ladder(
         "runtime_seconds": round(time.time() - started, 1),
         "sampling": theta_sample.metadata,
     }
+    if theta_override is not None:
+        metadata["theta_override"] = True
+        metadata["theta_override_note"] = (
+            "Evaluated on an externally supplied proposal population, NOT the "
+            "config's own M2 draw. Raw comparator column means are proposal "
+            "frequencies, not failure probabilities; they must be reweighted "
+            "by the proposal's importance weights (ADR-0029)."
+        )
     return GapDecompositionResult(
         conditioning_grid=grid,
         comparators=comparators,

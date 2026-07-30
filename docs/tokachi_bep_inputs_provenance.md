@@ -239,9 +239,12 @@ Findings that bear on this table:
 5b. **The static-vs-transient bias ratio does NOT survive the L change** (ADR-0047
    §4.5): at design HWL it moves ×2.25 / ×1.64 / ×2.23 / **×0.475** at KP 57.4 /
    58.8 / 60.0 / 62.0, every one of 87 evaluated levels resolved at 95 % by a paired
-   bootstrap. Unlike ADR-0048's k_aq bracket, the L bracket does **not** cancel in
+   bootstrap. The L bracket does **not** cancel in
    the ratio, because L enters the transient branch through `Z = L − l_e` and the
-   rate denominator in addition to the shared `H_c`. Stage 6.6's bias figures are
+   rate denominator in addition to the shared `H_c`. (ADR-0048's k_aq bracket was
+   once cited here as the cancelling counter-example; that claim was **refuted**
+   2026-07-30 — k_aq's departures are larger still, `epistemic-bracket-synthesis.md`
+   §4(c).) Stage 6.6's bias figures are
    therefore L-conditional whether or not these values are adopted.
 6. **A rule bias of ≈ −2 m** (1 m per side, finite slope window on 1:3 faces) makes
    every DEM value slightly short — conservative for piping, reported rather than

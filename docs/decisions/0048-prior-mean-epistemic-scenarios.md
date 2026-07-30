@@ -4,6 +4,10 @@ Date: 2026-07-28
 
 ## Status
 
+**Accepted; consequence 3 superseded 2026-07-30** (see the Amendment at the end — the
+"largely cancels in the static-vs-transient ratio" claim was refuted by measurement at all
+four matrix sections; every decision and every measured number below stands).
+
 **Accepted** — the mechanism (`config.prior_mean_scenario`), its two instantiations, and
 the decision **not** to change any production prior mean are recorded here. Amends
 `docs/tokachi_bep_inputs_provenance.md` §3.6 (whose "no impact on the CSV" disposition of
@@ -211,12 +215,16 @@ Three properties of the bracket matter for how results may be quoted:
    (<5%) and the ADR-0024 Clopper–Pearson bands describe sampling noise only. Absolute
    P_f levels **must never be quoted as absolute risk without this epistemic range
    attached.**
-3. **It leaves the comparative results intact.** The static-vs-transient bias of Stage 6.6
+3. ~~**It leaves the comparative results intact.** The static-vs-transient bias of Stage 6.6
    is a *ratio* computed on a shared sample at fixed k_aq, so a common shift in the k_aq
    mean moves both branches together and largely cancels. The thesis's headline
    comparative claims are therefore robust to this knob in a way its absolute
    probabilities are not — which is the single most important consequence to carry into
-   the Discussion.
+   the Discussion.~~
+   **SUPERSEDED 2026-07-30 — REFUTED BY MEASUREMENT. See the Amendment below.** The
+   replacement is: *the k_aq bracket does **not** cancel in the static-vs-transient ratio;
+   it amplifies it, by 1.1 to 1.8 decades of ρ per decade of k_aq at all four matrix
+   sections.* Do not carry the struck text into the Discussion.
 
 `gamma_bl_sub` is the opposite: nearly inert. The static branch is **exactly** invariant
 (ratio 1.000 at every level — an independent confirmation of the ADR-0028 separation, in
@@ -235,8 +243,81 @@ by the number of scenarios and is a project-owner call.
 
 ---
 
+## Amendment — 2026-07-30: consequence 3 refuted; the cancellation rule narrowed
+
+**Status of this amendment:** Accepted. It changes no decision, no default and no
+measured number of this ADR; it withdraws one *interpretive consequence* that later
+measurement refuted. Decisions 1 to 7 and the measured ratio table stand unchanged.
+
+**What was withdrawn.** Consequence 3 above (struck through in place) asserted that the
+k_aq bracket "largely cancels" in the Stage 6.6 static-vs-transient ratio, and called
+that the single most important consequence for the Discussion. It was **argued, never
+measured** — the argument being that a shift in a prior mean applied to a shared sample
+must move both branches together.
+
+**What refuted it.** `docs/decisions/epistemic-bracket-synthesis.md` §4(c) (2026-07-30,
+driver `scripts/epistemic_bracket_synthesis.py`, evidence
+`docs/decisions/epistemic-bracket-synthesis.json`) measured the cancellation directly,
+using the ADR-0047 §4.5 paired-bootstrap ratio-of-ratios
+ρ = (P_static/P_transient)_arm ÷ (P_static/P_transient)_baseline — 2000 replicates over
+the 16 joint pattern counts, null pinned at ρ = 1.0 exactly, baselines gated bit-identical
+on the whole failure matrices. Maximum **resolved** departure factor:
+
+| arm | KP 57.4 | KP 58.8 | KP 60.0 | KP 62.0 |
+|---|---|---|---|---|
+| `k_aq_field_geomean` | **82.2** | **65.6** | **162.9** | **45.6** |
+| `k_aq_field_toe` | 9.31 | 6.96 | 3.40 | 2.24 |
+| `k_aq_regional_upper` | 4.74 | 8.36 | 33.35 | 11.73 |
+| `m_p` (the control) | 1.14 | 1.14 | 1.22 | 1.07 |
+
+The refutation holds at **all four** matrix sections, including KP 58.8 and KP 60.0 — the
+two this ADR itself measured — and resolves at essentially every evaluated level. The
+departures are **larger than the L bracket's**, which ADR-0047 §4.5 had already
+established as non-cancelling.
+
+**Why it could never have cancelled — the mechanism, read from the code.** Consequence 3
+accounted for exactly one of k_aq's three channels into the limit states:
+
+| channel | implementation | branches reached |
+|---|---|---|
+| `H_c` via `_factor_Fs(d_70, k_aq, L, α)` | `sellmeijer.py` | **both** — common mode |
+| `r_e` via the Mazure leakage lengths → uplift/heave gate | `hydraulics.py`, ADR-0028 | **transient only** |
+| the erosion rate `dl/dt = 89·C_e·(k_aq·max(0, H_erosion − H_eq)/L)^0.81` | `progression.py` | **transient only** |
+
+Two transient-only channels against one shared channel. Normalised for the unequal shift
+sizes the scenarios impose (a scenario sets an absolute *target* mean, so k_aq moves ×0.17
+at KP 57.4 but ×0.515 at KP 62.0), non-cancellation is section-independent at **1.1 to 1.8
+decades of ρ per decade of k_aq** — above 1.0 everywhere, meaning the ratio does not merely
+fail to cancel, it **amplifies**: the transient branch is more than an order of magnitude
+more k_aq-sensitive than the static branch, per decade.
+
+**The rule that replaces it, and that must be carried into the Discussion instead:**
+
+> A bracket cancels in the static-vs-transient ratio **only if it is pure common-mode**.
+> `m_p` qualifies **by construction**, because ADR-0045 §2 applies it to the single-source
+> `H_c` in *both* of its uses — one model-form belief per realization. `k_aq`, `z_toe` and
+> `L` each carry at least one transient-only channel, and **none of them cancels**.
+> Cancellation must be **measured per knob**, never assumed from "shared sample, fixed
+> parameter".
+
+**Consequence for how this ADR's numbers may be quoted.** Consequences 1 (strong stage
+dependence) and 2 (the bracket dwarfs the statistical uncertainty) survive, the latter
+**confirmed for `k_aq` only** — at KP 62.0's design HWL the entire `m_p` bracket (×2.80) is
+narrower than the Clopper–Pearson band (×2.95) around the same baseline, so the general
+form of consequence 2 must not be claimed either. The Stage 6.6 bias headlines are
+therefore conditional on **`k_aq` as well as on `L`**, and the k_aq conditionality is the
+larger of the two. `gamma_bl_sub` remains inert in the ratio for an unrelated reason: it
+never touches the static branch at all (ADR-0028), so its static ratio is exactly 1.000 at
+all 98 evaluated levels.
+
+---
+
 ## References
 
+- `docs/decisions/epistemic-bracket-synthesis.md` and `.json` (2026-07-30) — the
+  measurement that refuted consequence 3; `scripts/epistemic_bracket_synthesis.py`.
+- ADR-0047 §4.5 — the paired-bootstrap ratio-of-ratios statistic reused here, and the
+  first measured non-cancellation (the L bracket).
 - `docs/tokachi_bep_inputs_provenance.md` §3.6 (amended), §8 (new).
 - `data/raw/borehole_and_soil_survey/` — PDFs, `TRANSCRIPTION_*.csv`, `SOURCE_METADATA.md`.
 - ADR-0045 (m_p), ADR-0046 (z_toe) — the default-OFF companion pattern imitated here.

@@ -27,13 +27,18 @@ Headline result, per event at the design flood level (HWL):
   (95 percent Clopper-Pearson interval 1.3e-4 to 3.2e-4) against a production
   transient P_f = 1.0e-5 (2.5e-7 to 5.6e-5): the static criterion
   overestimates the per-event failure probability by a factor of about 21.
-  [**Superseded — see section 8.** This figure belongs to the withdrawn L = 47.0 m
-  geometry and rests on 1 failing row; it is not statistically resolved. Quote a
-  resolved level instead: 10.5 at 47.0 m MSL under the adopted L = 40.0 m.]
+  [**Superseded — see section 9 (authoritative).** This figure belongs to the
+  withdrawn L = 47.0 m geometry and rests on 1 failing row. Under the adopted
+  L = 40.0 m and N = 1e6 the design-HWL bias is **26.9 (95 % CI 21.6 to 35.3)**,
+  statistically resolved on 63 failing rows.]
 - KP57.4 (HWL 39.21 m MSL): conventional static P_f = 1.18e-3
   (9.8e-4 to 1.4e-3) against a transient P_f of exactly zero failures in
   100 000 realizations (upper bound 3.7e-5): an overestimation factor of at
   least 32 at 95 percent confidence.
+  [**Superseded — see section 9 (authoritative).** At N = 1e6 the same level
+  carries 2 failing transient rows, tightening the bound to **B ≥ 148**. The
+  factor is still not statistically resolved there; the resolved figure to quote
+  at this section is **42.7 (95 % CI 39.4 to 46.6) at 39.50 m MSL**.]
 
 The bias decays toward parity as the conditioning level rises: the total
 static-to-transient ratio falls from 15 at 47.0 m to 1.9 at 50.5 m (KP62.0)
@@ -331,8 +336,9 @@ Sub-question 1 asks how large the bias of conventional static assessment is
 against time-resolved physics and where it comes from. The answer for the
 Tokachi sections: at design flood levels conventional practice overestimates
 per-event BEP failure probability by one to one-and-a-half orders of
-magnitude (a factor of about 21 at KP62.0 and at least 32 at KP57.4 — the KP62.0
-figure is **superseded and was never resolved; see section 8**), but
+magnitude (**both figures superseded; see section 9**: KP 62.0's design-HWL bias
+is **26.9 [21.6, 35.3]**, resolved at N = 1e6, and KP 57.4's is bounded at
+**B ≥ 148** with a resolved anchor of 42.7 at 39.50 m), but
 the label "temporal" belongs to only part of it. Through the fragility
 shoulder the time constraint is the dominant mechanism (58 to 76 percent of
 the production gap, pure temporal ratios of 2 to 8); in the deep tail at
@@ -352,7 +358,12 @@ intervals, at every conditioning level.
 
 ---
 
-## 8. KP 62.0 SEEPAGE-LENGTH ADOPTION ADDENDUM (2026-07-29; ADR-0047; authoritative where it differs from sections 1 to 7)
+## 8. KP 62.0 SEEPAGE-LENGTH ADOPTION ADDENDUM (2026-07-29; ADR-0047)
+
+> **Note added 2026-07-30: section 9 supersedes this section's HWL figures.** The
+> geometry adopted here is unchanged and everything below about *L* stands; what
+> section 9 replaces is the statistical status of the HWL cell — 44.7 on 4 rows
+> becomes **26.9 [21.6, 35.3] on 63 rows** at N = 1e6.
 
 **What changed.** KP 62.0's `geometry.L` was adopted from the ADR-0047 DEM survey,
 47.0 → **40.0 m**, because the 1998 value credited a landside berm that never
@@ -400,3 +411,74 @@ the HWL figure explicitly as unresolved with its row count. Do **not** quote "ab
 never resolved even there.
 
 Superseded artifacts under `results/superseded_adr0047_L47/stage6_6/`.
+
+---
+
+## 9. DESIGN-HWL BIAS RESOLVED AT N = 1e6 (2026-07-30; authoritative where it differs from sections 1 to 8)
+
+Companion note `docs/decisions/adr0040-hwl-bias-resolution.md` (pre-registered
+before any number was computed), driver `scripts/hwl_bias_resolution.py`, evidence
+`docs/decisions/adr0040-hwl-bias-resolution.json`, tests
+`tests/test_hwl_bias_resolution.py`. This closes the 2026-07-29 production
+campaign's open decision 6.
+
+**Why.** Section 8 and campaign §6.1 both reported the design-HWL bias as *not
+statistically resolved*: 4 failing transient rows at KP 62.0 and **0** at KP 57.4
+out of 100 000. The owner chose the method — brute force at N = 1e6 first, then
+validate tilted importance sampling against it. Both were executed.
+
+**The KP 62.0 headline is now resolved, and the previous figure was an
+overstatement.**
+
+| | N = 1e5 (section 8) | **N = 1e6 (this section)** |
+|---|---|---|
+| 46.39 m (design HWL) | 44.7 on **4** rows, unresolved | **26.9, 95 % CI [21.6, 35.3], on 63 rows — RESOLVED** |
+| 46.50 m | 26.2 on 15 rows, unresolved | **21.6, [18.8, 25.2], on 176 rows — RESOLVED** |
+
+The two are statistically consistent (the N = 1e6 transient P_f of 6.30e-5 lies
+inside the N = 1e5 Clopper–Pearson interval), so **44.7 was counting noise on four
+rows, not a different answer** — it overstated the bias by a factor of 1.66.
+**Quote 26.9 at 46.39 m MSL.** Do not quote 44.7 or "about 21".
+
+**Gates.** The N = 1e5 drift guard is bit-identical to the persisted sweeps at 38
+and 23 levels with identical theta; at KP 62.0 every Euler-flip count is 0 at all
+39 levels; the N = 1e6 result is consistent with N = 1e5 at all 59 adequately
+counted branch comparisons.
+
+**KP 57.4 remains unresolved, but its bound improves 4.6×.** At N = 1e6 the design
+HWL carries **2** failing transient rows (A2, 39.25 m: 10). R1 still fails.
+Reaching 30 rows would need N ≈ 1.5e7. The defensible statements are a
+Clopper–Pearson bound **B ≥ 148** at 39.21 m (superseding *"at least 32"*, which
+rested on zero rows) and a **resolved anchor above HWL: B = 42.7 [39.4, 46.6] at
+39.50 m MSL** on 521 rows — the figure the thesis should lead with at this section.
+
+**A new numerical finding at KP 57.4, visible only at 1e6.** Gate G-A2 **failed**
+there: **4 rows in 1e6** fail the transient comparator without failing the
+sustained-peak analytic limit, which is impossible in continuous time and is the
+ADR-0030 forward-Euler barrier-jump fingerprint. They sit at 39.50 m (1), 40.25 m
+(2) and 40.75 m (1) — **not** at either design-HWL anchor. At the production
+N = 1e5 the expected count is 0.4, which is why every previous run, including this
+study's own N = 1e5 gate, saw exactly zero. **No production result is affected**
+(all run at N = 1e5, where the gate passes and the drift guard is bit-identical),
+and KP 62.0 is untouched (0 flips at all 39 levels). It is the indicator-level
+counterpart of ADR-0039's rider that KP 57.4 needs Δt ≤ 112.5 s for l_e magnitudes.
+The recommended 42.7 at 39.50 m contains 1 such row in 521, biasing it **down** by
+0.2 % — conservative, and stated.
+
+**The tilted importance sampler was tested here for the first time and did NOT
+validate.** V1 passed, V3 passed, but V2 failed (one level disagrees resolvably)
+and V4 failed (Kish n_eff = 86.9 against a floor of 200). Its transient-side CoV
+gain is real (4.66×, consistent with ADR-0029), but a tilt optimised for the
+transient region **inflates the static branch's CoV 1.5× at the anchor and up to
+940× at saturation** — fatal for a *ratio between* branches. Brute force was used
+throughout; no weighted number appears in any result above. ADR-0029's own claims
+are unaffected: what failed is a new application to a different estimand.
+
+**The number is not quotable bare.** The epistemic band on the bias at 46.39 m runs
+from **2.59** (upper regional `k_aq`) through 26.9 (production) to beyond 27 (the
+field-`k_aq` and +datum arms), and is *indeterminate* at the field geometric mean,
+where neither branch fails at all. That band is **6 to 9× wider than the
+statistical interval**. `k_aq` dominates it, `z_toe` is second (rho = 0.515
+resolved at −0.30 m), `m_p` cancels (rho = 1.010 — the pre-registered negative
+control, which passed), and `gamma_bl_sub` is exactly inert (rho = 1.000). Section
+1's attribution and all component tables are unchanged.

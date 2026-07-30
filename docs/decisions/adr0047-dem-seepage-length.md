@@ -412,6 +412,21 @@ absolute maximum.
 
 ### 4.5 Does the static-vs-transient bias ratio survive the L change? **No.**
 
+> **Dated correction, 2026-07-30.** Everything this section measures about **L** stands
+> unchanged and has since been reproduced independently
+> (`epistemic-bracket-synthesis.md` §2.5, three ways). What does **not** stand is the
+> *contrast* drawn below: this section repeatedly cites ADR-0048's k_aq bracket as the
+> example of a knob that "largely cancels", and argues that L is unusual in not doing so.
+> ADR-0048 consequence 3 was **refuted by measurement on 2026-07-30**
+> (`epistemic-bracket-synthesis.md` §4(c)): k_aq's maximum resolved ratio-of-ratios
+> departure is ×82 / ×66 / ×163 / ×46 at KP 57.4 / 58.8 / 60.0 / 62.0 — **larger** than
+> L's. Read every "unlike k_aq" and "the k_aq analogy fails" below as historical: the
+> correct statement is that **neither** bracket cancels, k_aq less so than L, and the only
+> knob measured to cancel is `m_p` (×1.07–1.22), which does so by ADR-0045 §2
+> construction. The mechanism argument given below for L — a transient-only channel on top
+> of the shared `H_c` — is exactly right, and is now the general rule; k_aq has *two* such
+> channels where L has one.
+
 This is the question that decides whether adoption is optional. The thesis defends
 **ratios** — the Stage 6.6 conventional-practice bias, the WBI+ peak-shortcut
 over-rejection — not absolute probabilities, and ADR-0048 established the idiom: its

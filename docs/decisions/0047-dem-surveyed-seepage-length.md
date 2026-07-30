@@ -371,10 +371,11 @@ DEM is *shorter* than the adopted value, and it is the governing `unreinforced`
 section.
 
 **The static-vs-transient bias ratio does NOT survive the L change — this is the
-decisive result.** The thesis defends ratios, and ADR-0048 established that an
+decisive result.** The thesis defends ratios, and ADR-0048 claimed that an
 epistemic bracket can dominate absolute P_f while cancelling in the Stage 6.6
-static-vs-transient ratio (as its k_aq bracket does). **The L bracket does not
-cancel.** Ratio of ratios ρ = (P_s/P_t)_DEM ÷ (P_s/P_t)_CSV, paired bootstrap over
+static-vs-transient ratio (as it believed its k_aq bracket did — **that claim was
+refuted on 2026-07-30; see the amendment at the end of this ADR**). **The L bracket
+does not cancel.** Ratio of ratios ρ = (P_s/P_t)_DEM ÷ (P_s/P_t)_CSV, paired bootstrap over
 the joint pattern counts (2000 replicates; null case pinned at ρ = 1.0 exactly;
 baselines gated on the **whole failure matrices**, not column means), at design HWL:
 
@@ -490,8 +491,37 @@ straightforward data improvement.
 
 ---
 
+## Amendment — 2026-07-30: the k_aq contrast is withdrawn; the L result is not
+
+This ADR frames its §4.5 result by contrast with ADR-0048: L was said to be unusual
+in *not* cancelling in the static-vs-transient ratio, where k_aq was believed to
+cancel. **The contrast is withdrawn.** ADR-0048 consequence 3 was refuted by direct
+measurement on 2026-07-30 (`docs/decisions/epistemic-bracket-synthesis.md` §4(c),
+using this ADR's own §4.5 paired-bootstrap statistic, imported rather than
+re-implemented): k_aq's maximum resolved ratio-of-ratios departure is
+×82.2 / ×65.6 / ×162.9 / ×45.6 at KP 57.4 / 58.8 / 60.0 / 62.0 — **larger than the L
+bracket's** ×2.25 / ×1.82 / ×3.22 / ×2.11 measured here.
+
+**Nothing measured in this ADR changes.** The L ratio-of-ratios values, their CIs,
+the 87/87 resolution and the adoption decision all stand, and were reproduced
+independently by that later study three ways (KP 60.0 ρ = 2.226; KP 57.4 max
+departure 2.250; KP 62.0 max departure 2.106 = 1/0.475).
+
+What changes is the *generality*: §4.5's mechanism argument — that a knob fails to
+cancel when it reaches the transient branch through a channel the static branch does
+not have — turns out to be the **general rule**, not a peculiarity of L. k_aq has two
+such channels (`r_e` → uplift/heave gate; the ODE rate) where L has one, which is why
+it departs further. The only knob measured to cancel is `m_p` (×1.07–1.22), which is
+pure common-mode by ADR-0045 §2 construction. Consequently the Stage 6.6 bias
+headlines are **k_aq-conditional as well as L-conditional**, and the k_aq
+conditionality is the larger of the two.
+
+---
+
 ## References
 
+- `docs/decisions/epistemic-bracket-synthesis.md` (2026-07-30) — the measurement that
+  withdrew the k_aq contrast above; reuses this ADR's §4.5 ratio-of-ratios statistic.
 - ADR-0005 / ADR-0006 — Mazure leakage lengths and the foreland tanh; why the
   foreshore is carried in `r_e` and not in `L`.
 - ADR-0021 — surveyed landside toe elevations `z_toe` (±0.3 m), used here as an
