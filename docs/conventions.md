@@ -182,6 +182,39 @@ A root-level `figures/` directory existed until 2026-07-31 holding 11 byte-ident
 duplicates that nothing wrote and nothing read. It was deleted; if one reappears,
 it is a mistake.
 
+### 9.3.1 A rendered figure title carries no ADR number and no project-process statement
+
+Thirty of these figures are placed in the **main body** of the thesis, whose binding
+rules exclude both ADR identifiers and any narration of the project's own evolution.
+A caption can be rewritten in the thesis repository; **text rendered into the PNG
+cannot**, so it has to be right here. A title states what the figure shows, in the
+vocabulary of the physics.
+
+**Open, and the fix is a re-render.** Three of the 57 rendered titles violate this,
+established by reading every `suptitle` and `set_title` on 2026-08-02:
+
+| Driver, line | Figure | Rendered title contains | Placed |
+|---|---|---|---|
+| `dem_cross_section_study.py:2044` | `adr0047_dem_seepage_length.png` | `"ADR-0047: …"` **and `"measurement only, no input value changed"`** | thesis main body |
+| `timestep_convergence_stress.py:902` | `adr0039-timestep-stress.png` | `"(spec §11; ADR-0039)"` | thesis main body |
+| `ce_prior_study.py:388` | `ce_prior_reconciliation.png` | `"(ADR-0026)"` | thesis appendix |
+
+The first is the one that matters, and it is **not only a register problem**: the
+title asserts *no input value changed*, which was true of the measurement study but
+was overtaken when ADR-0047 was **adopted at KP 62.0** and `L_m` went 47.0 to 40.0 in
+`data/processed/tokachi_bep_inputs.csv`. A main-body thesis figure therefore renders a
+statement this repository's own record contradicts. Fix that title first.
+
+A file *name* beginning `adr…` is not a violation: it never appears in the compiled
+PDF. Only rendered text does. A contemporaneous claim that
+`adr0031-convergence-n-ladder.png` also carries an ADR number is **wrong** and should
+not be propagated; its title reads `"fm5 tail-variance: LHS vs crude MC"`.
+
+**When to act.** Next time a session re-renders any of these three, fix the title in
+the same edit; it is one string each. The figures are otherwise content-current, so
+none of this justifies a re-run of its own. Re-rendering changes only the PNG, so the
+thesis needs no edit: the filenames and captions there are unaffected.
+
 ### 9.4 A test may only skip on something that is genuinely optional
 
 `pytest.skip` / `skipif` is correct for a gitignored machine-local artifact

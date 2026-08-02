@@ -13,7 +13,14 @@ House rules this module encodes (they are the ones a reviewer checks):
 * hairline solid grid and axes, no dashed gridlines, top/right spines off;
 * a legend whenever two or more series are drawn, direct labels used
   *selectively* (endpoint / extreme / the one series that matters);
-* text wears ink tokens, never a series colour.
+* text wears ink tokens, never a series colour;
+* **a rendered title carries no ADR number and no statement about the project's
+  own evolution.** Thirty of these figures go in the thesis main body, whose
+  binding rules exclude both, and a caption can be rewritten in the thesis
+  repository while text baked into the PNG cannot. Say what the figure shows, in
+  the vocabulary of the physics. Three titles still violate this and are listed
+  with their fix in ``docs/conventions.md`` section 9.3.1; the worst of them also
+  asserts a fact the repository's own record now contradicts.
 
 Publication copies live in ``docs/figures/`` (tracked). ``results/`` is
 gitignored, so a figure that exists only there is not a deliverable —
