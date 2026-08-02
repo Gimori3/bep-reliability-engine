@@ -620,9 +620,11 @@ green. Classified and acted on as instructed:
 `requires_processed` (line 31) gates on
 `data/processed/2016_event/stage_hourly_Tokachi_201608.csv`, which **is tracked**
 — so it is a real instance of the anti-pattern. It is a module-level mark applied
-at **12 decorator sites, 6 of them unpaired** with the legitimately-optional
-`requires_rating`. Converting it changes test-collection structure rather than a
-line, so it is reported rather than executed.
+at **9 decorator sites, 4 of them unpaired** with the legitimately-optional
+`requires_rating` (**count corrected 2026-07-31 from the "12 sites, 6 unpaired"
+first written here; `ast`-parsed, not eyeballed**). Converting it changes
+test-collection structure rather than a line, so it is reported rather than
+executed. **CLOSED 2026-07-31 — see section 11.6.**
 
 ### 11.3 Amendment 2 — authorised exceptions
 
@@ -669,9 +671,137 @@ preservation directory before knowing whether it has anything to preserve.
 | `black --check .` | 125 files unchanged |
 | `production_campaign.py --dry-run` | Manifest path completes; all 11 stages resume as already-passed |
 | Gate G7 resolution | **52 of 52** tracked figures declared; 0 unresolved `requires`/`sources`; **0 stale**; 1 declared waiver (ADR-0032, no artifact to bind to) |
-| `scripts/*.py` | **43 of 43** compile; 20 of 20 argparse scripts print usage; 23 have no argparse and are compile-checked only (invoking them would start real work) |
+| `scripts/*.py` | **43 of 43** compile; 20 of 20 argparse scripts print usage; 23 have no argparse and are compile-checked only (invoking them would start real work) — **superseded 2026-07-31 by section 11.6: 42 of 42 drivers now carry argparse and answer `--help` inertly** |
 | Relative paths in `docs/`, ADRs, `README.md`, `project-notes.md`, `untracked-supporting-files/*.md` | All markdown links resolve; no live reference to any removed path |
 | msc-thesis | No engine-path reference broken; its `figures/` are its own copies |
 
 **Untouched, as required:** no `Config` default, no physics module, no
 `configs/*.yaml`, no CSV, no persisted production sweep, no figure content.
+
+---
+
+## 12. Follow-up closure (2026-07-31): four defects the audit left open
+
+Four items documented above but out of scope of what section 11 executed. None
+changes physics, a default, a config, the CSV or any persisted result.
+
+### 12.1 `scripts/assess_2011_2006_closure.py` ran when probed
+
+It had **no argparse at all**, so `python scripts/assess_2011_2006_closure.py
+--help` executed the whole 8-stratum study and rewrote its **tracked** evidence
+JSON `docs/decisions/adr0044-event-closure-bound.json`. That is how the section 11
+`--help` sweep triggered the stray run recorded in section 11.4's by-product note
+(diffed key by key: `runtime_seconds` only, restored from git).
+
+Fixed with the surface the other drivers already use — `--strata` (choices, the
+`foreshore_width_study.py` `--sections` shape) and `--out` (default = the tracked
+record, so the campaign's no-argument invocation is byte-unchanged). A `--strata`
+subset now **merges into** the existing record instead of truncating it to the
+strata just run: that is the `prior_mean_scenario_companion.py` precedent, and
+writing it any other way would have re-introduced the overwriting-per-section
+writer the 2026-07-30 hardening sweep had to fix twice. Verified: one-stratum
+re-run against a scratch copy preserved all 8 entries in `STRATA` order with zero
+substantive diffs.
+
+### 12.2 Sweep of all 43 scripts for the same two shapes
+
+**Shape (a) — no argparse, so any argument runs the tool: 22 drivers, all fixed.**
+Each gained the same three lines at the top of `main()` (an
+`ArgumentParser(description=__doc__.splitlines()[0])` whose `parse_args()` is
+reached before any work), plus `import argparse`.
+`scripts/seepage_length_figures.py` had no `main()` at all — its work ran directly
+under the `__name__` guard — and gained one. The 43rd file, `scripts/_figstyle.py`,
+is a shared style **module** with no entry point and is correctly left alone.
+
+Measured, not assumed: all 43 compile; all 42 drivers exit 0 on `--help`; and
+`git status` is clean of artifact churn after the full sweep, which also proves
+no script does I/O at import time.
+
+**Shape (b) — unconditional write to a tracked `docs/` path with no
+`--overwrite` guard.** Three classes, only the first of which is a defect:
+
+* **A driver that wrote before it could be asked what it does** — exactly one,
+  section 12.1, fixed. With `--help` inert everywhere, every remaining tracked
+  write now happens only on a deliberate run.
+* **Publication figures under `docs/figures/`** (`phase3_figures`,
+  `plot_fragility_curves`, `stage6_6_gap_decomposition`, `seepage_length_figures`,
+  the three `plot_validation_*`, and the figure paths of `gsa_study`,
+  `convergence_study`, `hwl_bias_resolution`, `dem_cross_section_study`,
+  `tail_variance_study`, `foreshore_exhaustion_study`,
+  `aquifer_response_diagnostic`). **Not fixed, and must not be:** overwriting in
+  place is the dual-write contract the figure pass installed deliberately, and
+  gate G7 re-renders them unconditionally and then fails on staleness. An
+  `--overwrite` refusal here would break G7 and reopen the copy problem.
+* **Evidence JSONs written to a hard-coded tracked path with no `--out`** —
+  `mp_model_factor_companion`, `prior_mean_scenario_companion`,
+  `ztoe_sensitivity_study`, `tail_variance_study`. **Listed, not fixed:** writing
+  that record is the driver's whole purpose, none is invoked by
+  `production_campaign.py` (the ADR-0045/0046/0048 knobs stay OFF per campaign
+  decision 3), so none can churn a tracked file during a campaign. The cheap
+  future improvement is to give each an `--out` default, as
+  `foreshore_width_study.py` has, so the campaign could compare rather than
+  rewrite.
+
+**One pre-existing observation, not a script defect.** `dem_cross_section_study.py`
+and `foreshore_exhaustion_study.py` raise `UnicodeEncodeError` on `--help` when
+stdout is a cp1252 pipe: their `description=__doc__` help text carries the
+deliberate Japanese source terms (`高水敷幅`, `様式-5`) that `docs/conventions.md`
+section 8 keeps in the repository. Both exit 0 under a UTF-8 stdout
+(`PYTHONIOENCODING=utf-8`), nothing is written either way, and the two candidate
+"fixes" are worse than the symptom (strip the CJK the convention requires, or add
+a stdout-reconfiguration idiom nothing else here uses).
+
+### 12.3 `tests/test_repo_hygiene.py` — docstring corrected to the code
+
+Lines 56–57 claimed `docs/references/` was excluded from the tree scan; line 59's
+`skip_dirs` never excluded it. **The code was right.** `skip_dirs` holds only
+directories that are *not ours* (git database, venv, third-party packages, build
+caches); `docs/references/` is curated, the stated reason for exempting it
+(gitignored PDFs) buys nothing since a `.pdf` cannot match `THESIS_SUFFIXES`, and
+being gitignored is not an exemption elsewhere in the same scan (`results/`,
+`data/` are covered on the same footing). The docstring now says so, with the
+withdrawn claim named so it cannot be reinstated as a "fix".
+
+### 12.4 `requires_processed` — the last member of the silent-skip class
+
+Converted per the Amendment 1 rule. **Final split, `ast`-parsed:**
+
+| | Before | After |
+|---|---|---|
+| `requires_processed` sites (tracked path) | 9 `skipif` (4 unpaired, 5 paired) | 9 **asserting**, same sites |
+| `requires_rating` sites (untracked `data/raw/`) | 5 `skipif` | 5 `skipif`, **unchanged** |
+
+`requires_processed` is now `pytest.mark.usefixtures("tracked_2016_extracts")`,
+whose fixture asserts both committed extracts
+(`stage_hourly_Tokachi_201608.csv`, `flood_trace_2016.csv`) and names the
+regeneration command. No decorator site moved: only the outcome flipped from skip
+to fail, so this was a one-mark change rather than the collection-structure change
+section 11.2 feared. `requires_rating` keeps `skipif` and gained a comment saying
+why (`.gitignore:224` ignores `data/raw/`). New structural guard
+`test_no_existence_skip_in_this_file_gates_on_a_tracked_path` `ast`-parses this
+module and fails if any `skipif`/`pytest.skip` condition other than
+`not _RATING_CSV.exists()` appears — the `test_figure_pass.py` pattern, parsed
+rather than grepped for the same reason.
+
+### 12.5 `docs/architecture.md` section 9 — two stale example paths
+
+Section 5.3, item 6 of the recommended order, deliberately not executed there.
+`configs/tokachi_kp58.yaml` → `configs/kp58_8_historical_matrix.yaml` and
+`results/tokachi_kp58_historical.h5` →
+`results/tokachi_kp58.8_historical_matrix.h5`. Prose only: no decision, no table
+row, no section 13 entry touched.
+
+### 12.6 Gate results
+
+| Gate | Result |
+|---|---|
+| `pytest` | **630 passed**, 7 warnings (**629 → 630**; +1 = the new structural guard in 12.4. The `requires_processed` conversion changed no count: 9 sites in, 9 sites out) |
+| `ruff check .` | All checks passed |
+| `black --check .` | 125 files unchanged |
+| `production_campaign.py --dry-run` | Completes; all 11 stages resume as already-passed |
+| Gate G7 | **52 of 52** declared, 0 unmapped, **51 staleness-gated with 0 stale**, 1 declared waiver (ADR-0032) |
+| `scripts/*.py` | **43 of 43** compile; **42 of 42 drivers answer `--help`, exit 0**; `git status` clean of artifacts afterwards |
+| Figure drivers re-run | 6 touched drivers re-executed; **0 figure bytes changed** |
+
+**Untouched:** no `Config` default, no physics, no `configs/*.yaml`, no CSV, no
+persisted production sweep, no figure content, no ADR.

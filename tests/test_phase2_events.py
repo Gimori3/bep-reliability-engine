@@ -1,10 +1,24 @@
 """Tests for the Phase 2 observed-event ingestion (ADR-0035).
 
-The pure pieces (inverse rating, guards) run everywhere; the pieces that
-touch the committed processed extracts run whenever those CSVs exist (they
-are committed, so effectively always); the pieces needing the rating CSVs
-in untracked ``data/raw`` skip on fresh clones, mirroring the Phase 1
-``tests/test_hydrographs.py`` pattern.
+The pure pieces (inverse rating, guards) run everywhere. Beyond those there
+are two kinds of dependency here, and they are deliberately handled
+differently:
+
+* the **committed** 2016 extracts under ``data/processed/2016_event/`` are
+  tracked, so they are *required*: their absence is a broken repository and
+  must fail (:data:`requires_processed` -> an asserting fixture);
+* the rating-coefficient CSVs under **untracked** ``data/raw/`` are a
+  machine-local drop that is legitimately absent on a fresh clone, so they
+  keep ``skipif`` (:data:`requires_rating`), mirroring the Phase 1
+  ``tests/test_hydrographs.py`` pattern.
+
+**Hardening, 2026-07-31.** ``requires_processed`` used to be a ``skipif`` on
+``stage_hourly_Tokachi_201608.csv`` -- a *tracked* path -- across nine
+decorator sites. That is the guard class Amendment 1 closed in
+``tests/test_figure_pass.py``: moving, renaming or deleting the extract
+disabled nine guards at once while the suite still reported green. The mark
+now pulls in a fixture that asserts, so the decorator sites are unchanged and
+only the outcome flipped from skip to fail.
 """
 
 from __future__ import annotations
@@ -28,10 +42,41 @@ from tests.phase2_helpers import flat_record
 _PROCESSED = Path("data/processed/2016_event")
 _RATING_CSV = Path("data/raw/rating_curves/HQrelation_TokachiRiv_2017.csv")
 
-requires_processed = pytest.mark.skipif(
-    not (_PROCESSED / "stage_hourly_Tokachi_201608.csv").exists(),
-    reason="processed 2016 extracts not present",
+#: The committed extracts every ``requires_processed`` test reads. Both are
+#: tracked (``git ls-files data/processed/2016_event/``).
+_TRACKED_EXTRACTS = (
+    _PROCESSED / "stage_hourly_Tokachi_201608.csv",
+    _PROCESSED / "flood_trace_2016.csv",
 )
+
+
+@pytest.fixture()
+def tracked_2016_extracts() -> Path:
+    """Assert the *committed* 2016 extracts are still where ADR-0035 put them.
+
+    These are tracked files, so a miss is not a machine without the optional
+    data drop -- it is a repository in which the extract moved, was renamed or
+    was deleted. Skipping on that silently disarmed every guard below, which
+    is exactly the failure mode the 2026-07-31 hardening pass closed in
+    ``tests/test_figure_pass.py``. Fail loudly instead.
+    """
+    missing = [p.as_posix() for p in _TRACKED_EXTRACTS if not p.is_file()]
+    assert not missing, (
+        f"committed 2016 extracts missing: {missing}. These are tracked "
+        "(ADR-0035, data/processed/2016_event/); if they moved or were "
+        "renamed, update this module in the same change, and if they were "
+        "deleted the Phase 2 event-ingestion guards are now unpinned. "
+        "Regenerate with: python scripts/extract_2016_event.py"
+    )
+    return _PROCESSED
+
+
+#: Tracked and required: asserts (see the fixture above), never skips.
+requires_processed = pytest.mark.usefixtures("tracked_2016_extracts")
+
+#: Genuinely optional: the rating-coefficient CSVs live in untracked
+#: ``data/raw/`` and are absent on a fresh clone, so ``skipif`` is correct
+#: here and must stay.
 requires_rating = pytest.mark.skipif(
     not _RATING_CSV.exists(),
     reason="rating-coefficient CSVs (untracked data/raw) not present",
@@ -183,6 +228,38 @@ def test_window_closure_confirmed_at_kp58_8() -> None:
     assert closure["closed"] is True
     assert closure["end_margin_below_toe_m"] > 0.0
     assert closure["hours_after_last_exceedance"] > 0.0
+
+
+def test_no_existence_skip_in_this_file_gates_on_a_tracked_path() -> None:
+    """The anti-pattern must not come back, and it is invisible when it does.
+
+    ``requires_processed`` gated nine tests on a *tracked* CSV, so a move or a
+    deletion disarmed all nine while the suite stayed green. The rule that
+    replaced it is not self-enforcing, hence this guard: the only
+    existence-conditional ``skipif`` left in this module must name the
+    untracked ``data/raw/`` drop (``.gitignore`` line 224), which is
+    legitimately absent on a fresh clone.
+
+    Parsed, not grepped: the prose above names both forms deliberately, and a
+    string search would match this test's own explanation.
+    """
+    import ast
+
+    tree = ast.parse(Path(__file__).read_text(encoding="utf-8"))
+    conditions: list[str] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Call) and ast.unparse(node.func).endswith(
+            ("mark.skipif", "pytest.skip")
+        ):
+            conditions.extend(ast.unparse(arg) for arg in node.args)
+
+    assert conditions == ["not _RATING_CSV.exists()"], (
+        "An existence-conditional skip appeared in this module: "
+        f"{conditions}. skipif is correct only for a gitignored, "
+        "machine-local drop such as data/raw/. A tracked artifact must "
+        "assert (see the tracked_2016_extracts fixture), or its guards vanish "
+        "silently when it moves."
+    )
 
 
 def test_window_closure_flags_a_loaded_window_end() -> None:

@@ -23,6 +23,7 @@ Validations (each a hard failure, per the ADR-0042 adapter contract):
 
 from __future__ import annotations
 
+import argparse
 import shutil
 import sys
 from pathlib import Path
@@ -71,6 +72,10 @@ def _check(condition: bool, message: str) -> None:
 
 
 def main() -> None:
+    # This driver takes no arguments. The parser exists so that a probe
+    # (--help, a stray flag) is inert instead of running the whole study.
+    argparse.ArgumentParser(description=__doc__.splitlines()[0]).parse_args()
+
     _check(DF_RIVER.exists(), f"raw drop table missing: {DF_RIVER}")
     raw = pd.read_csv(DF_RIVER)
 

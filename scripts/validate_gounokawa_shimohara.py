@@ -49,6 +49,7 @@ read-off uncertainty flagged in the validation note.
 
 from __future__ import annotations
 
+import argparse
 import datetime as _dt
 import json
 from pathlib import Path
@@ -510,6 +511,10 @@ def aquifer_diagnostics(record_2018: HydrographRecord) -> list[dict]:
 
 
 def main() -> None:
+    # This driver takes no arguments. The parser exists so that a probe
+    # (--help, a stray flag) is inert instead of running the whole study.
+    argparse.ArgumentParser(description=__doc__.splitlines()[0]).parse_args()
+
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     records = {y: load_event(y) for y in (2018, 2020, 2021)}
     for y, r in records.items():

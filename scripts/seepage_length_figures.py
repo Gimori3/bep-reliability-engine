@@ -14,6 +14,7 @@ three figures into ``docs/figures/``:
 
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 
@@ -218,8 +219,16 @@ def fig_system_and_ceiling() -> None:
     print("wrote", out)
 
 
-if __name__ == "__main__":
+def main() -> None:
+    # This driver takes no arguments. The parser exists so that a probe
+    # (--help, a stray flag) is inert instead of redrawing the figures.
+    argparse.ArgumentParser(description=__doc__.splitlines()[0]).parse_args()
+
     FIG.mkdir(parents=True, exist_ok=True)
     fig_marginal()
     fig_marginal_ratio()
     fig_system_and_ceiling()
+
+
+if __name__ == "__main__":
+    main()

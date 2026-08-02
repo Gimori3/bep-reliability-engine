@@ -25,6 +25,7 @@ Run: ``python scripts/plot_compound_demo.py``
 
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -57,6 +58,10 @@ OUT_DIR = REPO / "results" / "diagnostics"
 
 
 def main() -> None:
+    # This driver takes no arguments. The parser exists so that a probe
+    # (--help, a stray flag) is inert instead of running the whole study.
+    argparse.ArgumentParser(description=__doc__.splitlines()[0]).parse_args()
+
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 
     # Single trace: peak1 | trough | REAL peak2 | trough | DEAD peak3 (1.5 m).

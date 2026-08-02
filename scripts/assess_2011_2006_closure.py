@@ -19,13 +19,17 @@ Run from the repository root (needs the production results in
 ``results/`` and ``results/phase2/``)::
 
     python scripts/assess_2011_2006_closure.py
+    python scripts/assess_2011_2006_closure.py --strata tokachi_kp58.8_historical_matrix
 
 Writes ``docs/decisions/adr0044-event-closure-bound.json`` and prints the
-summary table quoted by ADR-0044 and the Phase 2 report section 12.
+summary table quoted by ADR-0044 and the Phase 2 report section 12. A
+``--strata`` subset merges into the existing record rather than truncating
+it, so a partial re-run cannot silently drop the other strata.
 """
 
 from __future__ import annotations
 
+import argparse
 import csv
 import json
 import logging
@@ -93,7 +97,23 @@ def _sustained_record(level_m: float, kp: float) -> HydrographRecord:
     )
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument(
+        "--strata",
+        nargs="+",
+        default=list(STRATA),
+        choices=list(STRATA),
+        help="Strata to bound (default: all eight production strata).",
+    )
+    parser.add_argument(
+        "--out",
+        type=Path,
+        default=OUT_JSON,
+        help="Evidence JSON output path (default: the tracked ADR-0044 record).",
+    )
+    args = parser.parse_args(argv)
+
     logging.basicConfig(
         level=logging.INFO, format="%(levelname)s %(name)s: %(message)s"
     )
@@ -102,7 +122,7 @@ def main() -> None:
     logging.getLogger("bayesian_reliability_updating.replay").setLevel(logging.ERROR)
 
     records = []
-    for stem in STRATA:
+    for stem in args.strata:
         phase1_path = REPO_ROOT / "results" / f"{stem}.h5"
         posterior_path = REPO_ROOT / "results" / "phase2" / f"{stem}_posterior.h5"
         run = load_phase1_run(phase1_path)
@@ -145,6 +165,16 @@ def main() -> None:
             f"({100 * entry['marginal_beyond_2016_fraction']:.4f}%)."
         )
 
+    # Merge into any existing record so a ``--strata`` subset extends it rather
+    # than truncating it to the strata just executed (the per-section
+    # overwriting-writer defect found twice in the 2026-07-30 hardening sweep).
+    merged = {entry["stratum"]: entry for entry in records}
+    if args.out.exists():
+        prior = json.loads(args.out.read_text(encoding="utf-8"))
+        for entry in prior.get("strata", []):
+            merged.setdefault(entry["stratum"], entry)
+    ordered = [merged[stem] for stem in STRATA if stem in merged]
+
     payload = {
         "generated": "scripts/assess_2011_2006_closure.py",
         "date": "2026-07-18",
@@ -159,10 +189,11 @@ def main() -> None:
             "no trace survey; closed for lack of any constructible "
             "observation"
         ),
-        "strata": records,
+        "strata": ordered,
     }
-    OUT_JSON.write_text(json.dumps(payload, indent=2), encoding="utf-8")
-    print(f"\nwrote {OUT_JSON.relative_to(REPO_ROOT)}")
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    args.out.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    print(f"\nwrote {args.out}")
 
 
 if __name__ == "__main__":

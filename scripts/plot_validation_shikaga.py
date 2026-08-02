@@ -9,6 +9,7 @@ position.
 
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 
@@ -48,6 +49,10 @@ plt.rcParams.update(
 
 
 def main() -> None:
+    # This driver takes no arguments. The parser exists so that a probe
+    # (--help, a stray flag) is inert instead of running the whole study.
+    argparse.ArgumentParser(description=__doc__.splitlines()[0]).parse_args()
+
     FIG_DIR.mkdir(parents=True, exist_ok=True)
     results = json.loads(RESULTS.read_text())
     m4 = results["m4_factor_grid"]

@@ -32,6 +32,7 @@ Runtime: first run streams six band workbooks (~5 min) into
 
 from __future__ import annotations
 
+import argparse
 import datetime as _dt
 import json
 import sys
@@ -146,6 +147,10 @@ def _compose_segment(segment, surface, bep_curve, n_eff, scenario_label):
 
 
 def main() -> None:
+    # This driver takes no arguments. The parser exists so that a probe
+    # (--help, a stray flag) is inert instead of running the whole study.
+    argparse.ArgumentParser(description=__doc__.splitlines()[0]).parse_args()
+
     t0 = time.time()
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 

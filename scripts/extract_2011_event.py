@@ -22,6 +22,7 @@ empty cells.
 
 from __future__ import annotations
 
+import argparse
 import csv
 from pathlib import Path
 
@@ -87,6 +88,10 @@ def extract_river(path: Path, river: str) -> list[list[str]]:
 
 
 def main() -> None:
+    # This driver takes no arguments. The parser exists so that a probe
+    # (--help, a stray flag) is inert instead of running the whole study.
+    argparse.ArgumentParser(description=__doc__.splitlines()[0]).parse_args()
+
     try:
         import xlrd  # noqa: F401
     except ImportError as exc:

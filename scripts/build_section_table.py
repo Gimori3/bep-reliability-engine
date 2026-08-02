@@ -18,6 +18,7 @@ the ADR-0038 D2 contract format.
 
 from __future__ import annotations
 
+import argparse
 import struct
 import sys
 from pathlib import Path
@@ -113,6 +114,10 @@ def _read_polyline_lengths() -> dict[str, float]:
 
 
 def main() -> None:
+    # This driver takes no arguments. The parser exists so that a probe
+    # (--help, a stray flag) is inert instead of running the whole study.
+    argparse.ArgumentParser(description=__doc__.splitlines()[0]).parse_args()
+
     lengths_km = _read_polyline_lengths()
     print(
         "SECTIONS.shp polyline lengths [km]:",

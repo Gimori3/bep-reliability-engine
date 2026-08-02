@@ -20,6 +20,7 @@ Runtime ~5-10 min (4 workbook reads + pruned per-event MC, N_MC = 1,000).
 
 from __future__ import annotations
 
+import argparse
 import datetime as _dt
 import json
 import sys
@@ -110,6 +111,10 @@ def _scour_upper_bound_fails(h, dt_s, seg, k_max, tau_c_min) -> bool:
 
 
 def main() -> None:
+    # This driver takes no arguments. The parser exists so that a probe
+    # (--help, a stray flag) is inert instead of running the whole study.
+    argparse.ArgumentParser(description=__doc__.splitlines()[0]).parse_args()
+
     t0 = time.time()
     inputs = load_segment_inputs(SEGMENT_INPUTS)
     results: dict[str, dict] = {}

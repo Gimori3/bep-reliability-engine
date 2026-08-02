@@ -22,6 +22,7 @@ Output: ``results/segment_fragility_adr0037.json``.
 
 from __future__ import annotations
 
+import argparse
 import datetime as _dt
 import json
 from pathlib import Path
@@ -65,6 +66,10 @@ def upscaled_block(
 
 
 def main() -> None:
+    # This driver takes no arguments. The parser exists so that a probe
+    # (--help, a stray flag) is inert instead of running the whole study.
+    argparse.ArgumentParser(description=__doc__.splitlines()[0]).parse_args()
+
     entries: dict[str, object] = {}
 
     for path in sorted(RESULTS.glob("tokachi_*_historical_*.h5")):

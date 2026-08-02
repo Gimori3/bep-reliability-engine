@@ -17,6 +17,7 @@ Run: ``python scripts/plot_s2_2.py``
 
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -57,6 +58,10 @@ def _normalized_growth_curve(
 
 
 def main() -> None:
+    # This driver takes no arguments. The parser exists so that a probe
+    # (--help, a stray flag) is inert instead of running the whole study.
+    argparse.ArgumentParser(description=__doc__.splitlines()[0]).parse_args()
+
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 
     # --- run the scalar timestepper at constant head -----------------------

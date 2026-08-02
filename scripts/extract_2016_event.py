@@ -32,6 +32,7 @@ non-numeric sentinels of the source ('閉局' station closed, '欠測' missing,
 
 from __future__ import annotations
 
+import argparse
 import csv
 from datetime import datetime
 from pathlib import Path
@@ -171,6 +172,10 @@ def _write_csv(path: Path, header: list[str], rows: list[list[str]]) -> None:
 
 
 def main() -> None:
+    # This driver takes no arguments. The parser exists so that a probe
+    # (--help, a stray flag) is inert instead of running the whole study.
+    argparse.ArgumentParser(description=__doc__.splitlines()[0]).parse_args()
+
     hq = load_workbook(HQ_WORKBOOK, read_only=True, data_only=True)
     try:
         for sheet_name, (quantity, month) in HQ_SHEETS.items():

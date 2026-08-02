@@ -43,6 +43,7 @@ halved with Clopper-Pearson 95% CIs) and a console table.
 
 from __future__ import annotations
 
+import argparse
 import datetime as _dt
 import json
 import time
@@ -139,6 +140,10 @@ def transient_failures_for_scale(
 
 
 def main() -> None:
+    # This driver takes no arguments. The parser exists so that a probe
+    # (--help, a stray flag) is inert instead of running the whole study.
+    argparse.ArgumentParser(description=__doc__.splitlines()[0]).parse_args()
+
     t0 = time.perf_counter()
     run = load_phase1_run(SOURCE_H5)
     if run.config.alpha_exponent_transient is not None:

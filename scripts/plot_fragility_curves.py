@@ -26,6 +26,7 @@ confined-blanket BEP model does not apply (generate_configs.py, provenance
 
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 
@@ -444,6 +445,10 @@ def figure_tail_log(data: dict[str, dict]) -> None:
 
 
 def main() -> None:
+    # This driver takes no arguments. The parser exists so that a probe
+    # (--help, a stray flag) is inert instead of running the whole study.
+    argparse.ArgumentParser(description=__doc__.splitlines()[0]).parse_args()
+
     style()
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
     data = load_all()

@@ -53,8 +53,18 @@ def test_no_thesis_source_anywhere_in_the_tracked_tree() -> None:
     Moving a fragment into ``docs/`` or ``notebooks/`` would evade the root
     check while recreating exactly the problem the rule prevents: a second,
     ungoverned copy of the thesis record that drifts silently.
-    ``docs/references/`` is excluded because it holds gitignored reference
-    PDFs, and the virtual environment and build caches are not ours.
+
+    ``skip_dirs`` holds only directories that are *not ours* -- the git
+    database, the virtual environment, third-party packages and build caches.
+    Nothing curated is exempt, and in particular ``docs/references/`` is
+    **not**: an earlier version of this docstring claimed it was, on the
+    grounds that it holds gitignored reference PDFs. That exemption would have
+    bought nothing (a ``.pdf`` never matches :data:`THESIS_SUFFIXES`) while
+    creating the one blind spot a curated directory should not have, since a
+    ``.bib`` or ``.tex`` dropped there is the same ungoverned second copy the
+    rule exists to prevent. Being gitignored is not an exemption anywhere else
+    in this scan either -- ``results/`` and ``data/`` are covered on the same
+    footing (2026-07-31: docstring corrected to the code, not the reverse).
     """
     skip_dirs = {".git", ".venv", "venv", "node_modules", "__pycache__", ".mypy_cache"}
     offenders = []

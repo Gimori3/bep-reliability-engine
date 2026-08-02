@@ -25,6 +25,7 @@ and ``validate_event_based_surface.py``).
 
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 
@@ -512,6 +513,10 @@ def fig_event_validation(df: pd.DataFrame, val: dict) -> None:
 
 
 def main() -> None:
+    # This driver takes no arguments. The parser exists so that a probe
+    # (--help, a stray flag) is inert instead of running the whole study.
+    argparse.ArgumentParser(description=__doc__.splitlines()[0]).parse_args()
+
     style()
     FIGS.mkdir(parents=True, exist_ok=True)
     df = pd.read_csv(P3 / "rq4_annual.csv")

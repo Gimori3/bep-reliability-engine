@@ -68,6 +68,7 @@ ADR-0026 field prior.
 
 from __future__ import annotations
 
+import argparse
 import datetime as _dt
 import json
 from pathlib import Path
@@ -578,6 +579,10 @@ def tier1_sensitivity(rec: HydrographRecord) -> list[dict]:
 
 
 def main() -> None:
+    # This driver takes no arguments. The parser exists so that a probe
+    # (--help, a stray flag) is inert instead of running the whole study.
+    argparse.ArgumentParser(description=__doc__.splitlines()[0]).parse_args()
+
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     records = {s: build_record(s) for s in SITES}
     for s, r in records.items():

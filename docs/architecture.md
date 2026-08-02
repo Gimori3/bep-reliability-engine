@@ -473,9 +473,9 @@ Notebooks become thin drivers: they import from `bep_reliability_engine`, config
 
 ```python
 from bep_reliability_engine import Config, run_fragility_analysis, plot_fragility
-cfg = Config.from_yaml("configs/tokachi_kp58.yaml")
+cfg = Config.from_yaml("configs/kp58_8_historical_matrix.yaml")
 result = run_fragility_analysis(cfg)
-result.save("results/tokachi_kp58_historical.h5")
+result.save("results/tokachi_kp58.8_historical_matrix.h5")
 plot_fragility(result)
 ```
 

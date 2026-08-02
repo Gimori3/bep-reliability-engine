@@ -29,6 +29,7 @@ vectorized MC).
 
 from __future__ import annotations
 
+import argparse
 import datetime as _dt
 import json
 import sys
@@ -117,6 +118,10 @@ def _sine_shape() -> tuple[np.ndarray, np.ndarray]:
 
 
 def main() -> None:
+    # This driver takes no arguments. The parser exists so that a probe
+    # (--help, a stray flag) is inert instead of running the whole study.
+    argparse.ArgumentParser(description=__doc__.splitlines()[0]).parse_args()
+
     t0 = time.time()
     inputs = load_segment_inputs(SEGMENT_INPUTS)
     discharges = _canonical_discharges()
