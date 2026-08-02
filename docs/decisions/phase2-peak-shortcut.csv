@@ -1,0 +1,9 @@
+section,d70,n_prior,event_peak_m_msl,z_toe_m_msl,peak_only_transient_pct,replay_transient_pct,over_rejection_factor,n_rejected_replay,n_peak_only_expected,small_number_regime
+KP57.4,matrix,100000,39.658,38.3,0.4848,0.065,7.459,65,485,True
+KP57.4,bulk,100000,39.658,38.3,0.0,0.0,not defined,0,0,False
+KP58.8,matrix,100000,40.75,38.5,15.596,5.673,2.749,5673,15596,False
+KP58.8,bulk,100000,40.75,38.5,0.0,0.0,not defined,0,0,False
+KP60.0,matrix,100000,42.296,40.0,13.1139,3.363,3.899,3363,13114,False
+KP60.0,bulk,100000,42.296,40.0,0.1408,0.023,6.121,23,141,True
+KP62.0,matrix,100000,45.729,44.9,0.0,0.0,not defined,0,0,False
+KP62.0,bulk,100000,45.729,44.9,0.0,0.0,not defined,0,0,False

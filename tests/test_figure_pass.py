@@ -363,15 +363,33 @@ def test_every_figure_driver_declares_requires_produces_and_sources() -> None:
                 ], f"{driver['label']} drops sources without a recorded reason"
         else:
             assert driver["sources"], f"{driver['label']} declares no sources"
-            assert driver["command"][1].startswith("scripts/"), driver["command"]
+            # The command must be code in this repository, not an arbitrary
+            # external tool. Two forms qualify: a driver under scripts/, and
+            # `-m <package>` for one of the three top-level packages. The
+            # second was added 2026-08-02 for the Phase 2 posterior
+            # diagnostics, whose dual-write seam lives in the shipped package
+            # (bayesian_reliability_updating.pipeline) rather than in a script,
+            # because the figures depend on a 1e5-row replay.
+            head = driver["command"][1]
+            if head == "-m":
+                assert driver["command"][2] in {
+                    "bep_reliability_engine",
+                    "bayesian_reliability_updating",
+                    "system_integration",
+                }, driver["command"]
+            else:
+                assert head.startswith("scripts/"), driver["command"]
 
 
 def test_every_tracked_publication_figure_is_declared() -> None:
-    """Coverage is the point: 52 of 52, no figure without a declared source.
+    """Coverage is the point: every figure has a declared source, no exceptions.
 
     The 2026-07-30 pass reached 44 of 52 and *listed* the remainder. A listed
     figure is an unchecked figure, so the eight were declared on 2026-07-31 and
-    the coverage note became gate G7's hard check.
+    the coverage note became gate G7's hard check. The set has grown since (57
+    on 2026-07-31, 62 on 2026-08-02 with the four promoted Phase 2 diagnostics
+    and row 4.7's peak-shortcut panel); the invariant is the coverage, not the
+    count, so this asserts the difference is empty rather than a number.
     """
     from production_campaign import FIGURE_DRIVERS
 

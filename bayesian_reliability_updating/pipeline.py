@@ -46,7 +46,71 @@ from bep_reliability_engine.hydrographs import HydrographRecord
 
 logger = logging.getLogger(__name__)
 
-__all__ = ["Phase2Settings", "run_survival_update"]
+__all__ = [
+    "PUBLICATION_FIGURES",
+    "PUBLICATION_FIGURE_DIR",
+    "Phase2Settings",
+    "run_survival_update",
+]
+
+#: Tracked publication directory. ``results/`` is gitignored, so a figure that
+#: lives only there is not a deliverable (``docs/conventions.md`` section 9.3).
+PUBLICATION_FIGURE_DIR = Path(__file__).resolve().parents[1] / "docs" / "figures"
+
+#: The Phase 2 figures promoted to ``docs/figures/``, by Phase 1 run stem and
+#: figure kind. Added 2026-08-02 to close inventory rows 4.3, 4.4 and 5.1.
+#:
+#: **The selection is deliberate and is the whole point of this being a
+#: registry rather than a blanket dual-write.** ``_figures`` renders 44 files
+#: across the eight strata; four are promoted:
+#:
+#: * only the ``marginals`` and ``fragility_update`` kinds, which are what the
+#:   thesis asks for (the posterior parameter shift and the prior-to-posterior
+#:   fragility shift). ``decomposition``, ``rejection_scatter``, ``record`` and
+#:   ``breach_times`` stay run-local diagnostics;
+#: * only at **KP 58.8 and KP 60.0 matrix**, the two informative strata
+#:   (transient rejection 5.67 % and 3.36 % against <= 0.07 % everywhere else,
+#:   ``docs/phase2_report.md`` section 11.1). Every number rows 4.3, 4.4 and
+#:   5.1 quote is measured at exactly these two. That the update is
+#:   *concentrated* there is carried across all eight strata by
+#:   ``phase2_survival_update.png``, so a near-null pair at KP 57.4 or KP 62.0
+#:   would add a figure without adding a fact.
+#:
+#: Keying on the **stem** is load-bearing: the ADR-0046 z_toe scenario suffixes
+#: the stem (``_ztoe_plus0.30m``), so a scenario run finds no entry and writes
+#: no publication copy. A scenario can therefore never masquerade as the
+#: baseline in ``docs/figures/``, which is the same guarantee the name-segregated
+#: output stem gives the posterior itself.
+PUBLICATION_FIGURES: dict[str, dict[str, str]] = {
+    "tokachi_kp58.8_historical_matrix": {
+        "marginals": "phase2_marginals_kp58_8_matrix.png",
+        "fragility_update": "phase2_fragility_update_kp58_8_matrix.png",
+    },
+    "tokachi_kp60.0_historical_matrix": {
+        "marginals": "phase2_marginals_kp60_0_matrix.png",
+        "fragility_update": "phase2_fragility_update_kp60_0_matrix.png",
+    },
+}
+
+
+def publication_path(stem: str, kind: str) -> Path | None:
+    """Tracked destination for one Phase 2 figure, or None if not promoted.
+
+    Parameters
+    ----------
+    stem : str
+        The Phase 1 run stem the figures are named for (``paths['stem'].name``).
+    kind : str
+        Figure kind, e.g. ``'marginals'`` or ``'fragility_update'``.
+
+    Returns
+    -------
+    pathlib.Path or None
+        The ``docs/figures/`` path when this (stem, kind) is promoted by
+        :data:`PUBLICATION_FIGURES`, else None.
+    """
+    name = PUBLICATION_FIGURES.get(stem, {}).get(kind)
+    return None if name is None else PUBLICATION_FIGURE_DIR / name
 
 
 class Phase2Settings(BaseModel):
@@ -188,6 +252,7 @@ def _figures(
                 result.accept,
                 fig_dir / f"{stem}_marginals.png",
                 title=f"{stem}: prior vs posterior marginals",
+                publication_path=publication_path(stem, "marginals"),
             )
         )
     )
@@ -203,6 +268,7 @@ def _figures(
                 z_toe_m=z_toe,
                 event_peak_m=float(last_event["record"]["peak_m_msl"]),
                 title=f"{stem}: fragility update",
+                publication_path=publication_path(stem, "fragility_update"),
             )
         )
     )

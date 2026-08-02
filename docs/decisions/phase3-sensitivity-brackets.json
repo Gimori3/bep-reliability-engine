@@ -1,0 +1,424 @@
+{
+ "record": "Phase 3 RQ4 sensitivity brackets at the four BEP sections",
+ "generated": "2026-08-02T01:48:19",
+ "generated_by": "scripts/thesis_figure_gaps.py extract",
+ "note": "Committed slice of results/system_integration/phase3/rq4_annual.csv (2280 rows, gitignored), restricted to the four geotechnically characterised sections -- the scope campaign decision 5 sets for RQ3/RQ4. The baseline arm is the production deliverable: matrix d70, posterior BEP source, lambda_ac = 250 m, primary surface variant. Ratios are computed here; every P_f is copied verbatim. The recorded SHA-256 identifies which CSV this was cut from; the gate is that re-extracting from the live artifact reproduces this record's `sections` block exactly.",
+ "baseline_arm": {
+  "d70": "matrix",
+  "bep_source": "posterior",
+  "lambda_ac_m": "250.0",
+  "surface_variant": "primary"
+ },
+ "source": {
+  "path": "results/system_integration/phase3/rq4_annual.csv",
+  "sha256": "019efc3fa214f813043edad7f37b3ae5602c3468aa6b21b51f3a20ddf70002a4",
+  "gitignored": true,
+  "n_rows_total": 2280
+ },
+ "sections": [
+  {
+   "section": "KP57.4",
+   "scenarios": [
+    {
+     "scenario": "historical",
+     "n_years": 3000,
+     "baseline": {
+      "p_annual_system": 0.0007529504488451719,
+      "p_annual_bep": 0.0007529504488451719,
+      "share_bep": 1.0,
+      "bep_clamped_above_grid": false
+     },
+     "arms": [
+      {
+       "arm": "lambda_ac_100m",
+       "p_annual_system": 0.0013434014037219453,
+       "p_annual_bep": 0.0013434014037219453,
+       "share_bep": 1.0,
+       "ratio_system_to_baseline": 1.7841830173318443,
+       "ratio_bep_to_baseline": 1.7841830173318443,
+       "bep_clamped_above_grid": false
+      },
+      {
+       "arm": "lambda_ac_40m",
+       "p_annual_system": 0.002535359977877313,
+       "p_annual_bep": 0.002535359977877313,
+       "share_bep": 1.0,
+       "ratio_system_to_baseline": 3.3672335035670526,
+       "ratio_bep_to_baseline": 3.3672335035670526,
+       "bep_clamped_above_grid": false
+      },
+      {
+       "arm": "bulk_d70",
+       "p_annual_system": 2.074058746414729e-06,
+       "p_annual_bep": 2.074058746414729e-06,
+       "share_bep": 1.0,
+       "ratio_system_to_baseline": 0.0027545753503378477,
+       "ratio_bep_to_baseline": 0.0027545753503378477,
+       "bep_clamped_above_grid": true
+      },
+      {
+       "arm": "prior_bep",
+       "p_annual_system": 0.0007547863728584468,
+       "p_annual_bep": 0.0007547863728584468,
+       "share_bep": 1.0,
+       "ratio_system_to_baseline": 1.0024383065526965,
+       "ratio_bep_to_baseline": 1.0024383065526965,
+       "bep_clamped_above_grid": false
+      }
+     ]
+    },
+    {
+     "scenario": "+4K",
+     "n_years": 5400,
+     "baseline": {
+      "p_annual_system": 0.009531136967007517,
+      "p_annual_bep": 0.009483949453045582,
+      "share_bep": 0.9123231549452225,
+      "bep_clamped_above_grid": false
+     },
+     "arms": [
+      {
+       "arm": "lambda_ac_100m",
+       "p_annual_system": 0.014030302141745573,
+       "p_annual_bep": 0.014027237242981935,
+       "share_bep": 0.938988252577879,
+       "ratio_system_to_baseline": 1.4720491574417753,
+       "ratio_bep_to_baseline": 1.4790501902640747,
+       "bep_clamped_above_grid": false
+      },
+      {
+       "arm": "lambda_ac_40m",
+       "p_annual_system": 0.02069903654550493,
+       "p_annual_bep": 0.020699031135016234,
+       "share_bep": 0.9578243948122023,
+       "ratio_system_to_baseline": 2.1717279498926128,
+       "ratio_bep_to_baseline": 2.182532840089015,
+       "bep_clamped_above_grid": false
+      },
+      {
+       "arm": "bulk_d70",
+       "p_annual_system": 0.001215482719636291,
+       "p_annual_bep": 0.0005672769561485688,
+       "share_bep": 0.3836292517978925,
+       "ratio_system_to_baseline": 0.12752756820552913,
+       "ratio_bep_to_baseline": 0.05981442214102048,
+       "bep_clamped_above_grid": true
+      },
+      {
+       "arm": "prior_bep",
+       "p_annual_system": 0.009542470043173192,
+       "p_annual_bep": 0.009495307767275725,
+       "share_bep": 0.9124188487881759,
+       "ratio_system_to_baseline": 1.001189058158004,
+       "ratio_bep_to_baseline": 1.0011976354667829,
+       "bep_clamped_above_grid": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "section": "KP58.8",
+   "scenarios": [
+    {
+     "scenario": "historical",
+     "n_years": 3000,
+     "baseline": {
+      "p_annual_system": 0.007419538025861581,
+      "p_annual_bep": 0.007337441136926019,
+      "share_bep": 0.9741019217609156,
+      "bep_clamped_above_grid": false
+     },
+     "arms": [
+      {
+       "arm": "lambda_ac_100m",
+       "p_annual_system": 0.011654065315516651,
+       "p_annual_bep": 0.011609686616878924,
+       "share_bep": 0.9834746584058938,
+       "ratio_system_to_baseline": 1.5707265432019055,
+       "ratio_bep_to_baseline": 1.5822527772594492,
+       "bep_clamped_above_grid": false
+      },
+      {
+       "arm": "lambda_ac_40m",
+       "p_annual_system": 0.018747722871590166,
+       "p_annual_bep": 0.018730346065366416,
+       "share_bep": 0.9896922908786752,
+       "ratio_system_to_baseline": 2.5268046078129127,
+       "ratio_bep_to_baseline": 2.552708187477657,
+       "bep_clamped_above_grid": false
+      },
+      {
+       "arm": "bulk_d70",
+       "p_annual_system": 0.00019887555820912014,
+       "p_annual_bep": 3.983552526292708e-06,
+       "share_bep": 0.020011685842466365,
+       "ratio_system_to_baseline": 0.026804304731092212,
+       "ratio_bep_to_baseline": 0.0005429075957073497,
+       "bep_clamped_above_grid": true
+      },
+      {
+       "arm": "prior_bep",
+       "p_annual_system": 0.00846694925456121,
+       "p_annual_bep": 0.008389875497708863,
+       "share_bep": 0.9772767820760168,
+       "ratio_system_to_baseline": 1.1411693322480143,
+       "ratio_bep_to_baseline": 1.143433431511487,
+       "bep_clamped_above_grid": false
+      }
+     ]
+    },
+    {
+     "scenario": "+4K",
+     "n_years": 5400,
+     "baseline": {
+      "p_annual_system": 0.0409128184765685,
+      "p_annual_bep": 0.04044800138011904,
+      "share_bep": 0.9411466886382553,
+      "bep_clamped_above_grid": false
+     },
+     "arms": [
+      {
+       "arm": "lambda_ac_100m",
+       "p_annual_system": 0.05897665893750867,
+       "p_annual_bep": 0.05878003031547964,
+       "share_bep": 0.9587443290763269,
+       "ratio_system_to_baseline": 1.4415203140132147,
+       "ratio_bep_to_baseline": 1.4532245923125175,
+       "bep_clamped_above_grid": false
+      },
+      {
+       "arm": "lambda_ac_40m",
+       "p_annual_system": 0.08456374310435459,
+       "p_annual_bep": 0.08450487393162362,
+       "share_bep": 0.9709383317629614,
+       "ratio_system_to_baseline": 2.0669253855679917,
+       "ratio_bep_to_baseline": 2.089222484381129,
+       "bep_clamped_above_grid": false
+      },
+      {
+       "arm": "bulk_d70",
+       "p_annual_system": 0.0027090843786673658,
+       "p_annual_bep": 0.00026812957381632755,
+       "share_bep": 0.09584649508195113,
+       "ratio_system_to_baseline": 0.06621602909657537,
+       "ratio_bep_to_baseline": 0.00662899437963623,
+       "bep_clamped_above_grid": true
+      },
+      {
+       "arm": "prior_bep",
+       "p_annual_system": 0.044616565137658055,
+       "p_annual_bep": 0.0441806502877034,
+       "share_bep": 0.94584972224615,
+       "ratio_system_to_baseline": 1.090527780754356,
+       "ratio_bep_to_baseline": 1.0922826537832109,
+       "bep_clamped_above_grid": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "section": "KP60.0",
+   "scenarios": [
+    {
+     "scenario": "historical",
+     "n_years": 3000,
+     "baseline": {
+      "p_annual_system": 0.0018017845066762934,
+      "p_annual_bep": 0.0018017845066762934,
+      "share_bep": 1.0,
+      "bep_clamped_above_grid": false
+     },
+     "arms": [
+      {
+       "arm": "lambda_ac_100m",
+       "p_annual_system": 0.003210920074607464,
+       "p_annual_bep": 0.003210920074607464,
+       "share_bep": 1.0,
+       "ratio_system_to_baseline": 1.782077747205501,
+       "ratio_bep_to_baseline": 1.782077747205501,
+       "bep_clamped_above_grid": false
+      },
+      {
+       "arm": "lambda_ac_40m",
+       "p_annual_system": 0.006064144692139995,
+       "p_annual_bep": 0.006064144692139995,
+       "share_bep": 1.0,
+       "ratio_system_to_baseline": 3.3656326101540137,
+       "ratio_bep_to_baseline": 3.3656326101540137,
+       "bep_clamped_above_grid": false
+      },
+      {
+       "arm": "bulk_d70",
+       "p_annual_system": 6.914576779640289e-05,
+       "p_annual_bep": 6.914576779640289e-05,
+       "share_bep": 1.0,
+       "ratio_system_to_baseline": 0.03837626949293417,
+       "ratio_bep_to_baseline": 0.03837626949293417,
+       "bep_clamped_above_grid": false
+      },
+      {
+       "arm": "prior_bep",
+       "p_annual_system": 0.0020250317468853943,
+       "p_annual_bep": 0.0020250317468853943,
+       "share_bep": 1.0,
+       "ratio_system_to_baseline": 1.1239034076394183,
+       "ratio_bep_to_baseline": 1.1239034076394183,
+       "bep_clamped_above_grid": false
+      }
+     ]
+    },
+    {
+     "scenario": "+4K",
+     "n_years": 5400,
+     "baseline": {
+      "p_annual_system": 0.014175099867898966,
+      "p_annual_bep": 0.014172922003054545,
+      "share_bep": 0.9983772493128567,
+      "bep_clamped_above_grid": false
+     },
+     "arms": [
+      {
+       "arm": "lambda_ac_100m",
+       "p_annual_system": 0.022802274568983764,
+       "p_annual_bep": 0.022802064423308524,
+       "share_bep": 0.9989907382449802,
+       "ratio_system_to_baseline": 1.6086147386250138,
+       "ratio_bep_to_baseline": 1.6088470971895723,
+       "bep_clamped_above_grid": false
+      },
+      {
+       "arm": "lambda_ac_40m",
+       "p_annual_system": 0.0375770219595846,
+       "p_annual_bep": 0.03757702173762321,
+       "share_bep": 0.9993873280389265,
+       "ratio_system_to_baseline": 2.6509176167909616,
+       "ratio_bep_to_baseline": 2.6513249511656536,
+       "bep_clamped_above_grid": false
+      },
+      {
+       "arm": "bulk_d70",
+       "p_annual_system": 0.001615179400190394,
+       "p_annual_bep": 0.001602755250945974,
+       "share_bep": 0.9858305952258037,
+       "ratio_system_to_baseline": 0.11394483391599526,
+       "ratio_bep_to_baseline": 0.11308573141096441,
+       "bep_clamped_above_grid": false
+      },
+      {
+       "arm": "prior_bep",
+       "p_annual_system": 0.015340647327771224,
+       "p_annual_bep": 0.015338550378454741,
+       "share_bep": 0.9985003827014789,
+       "ratio_system_to_baseline": 1.082224991057154,
+       "ratio_bep_to_baseline": 1.082243335223956,
+       "bep_clamped_above_grid": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "section": "KP62.0",
+   "scenarios": [
+    {
+     "scenario": "historical",
+     "n_years": 3000,
+     "baseline": {
+      "p_annual_system": 0.001006046005485643,
+      "p_annual_bep": 0.0008580186169895641,
+      "share_bep": 0.8115239173288071,
+      "bep_clamped_above_grid": false
+     },
+     "arms": [
+      {
+       "arm": "lambda_ac_100m",
+       "p_annual_system": 0.001701322535906348,
+       "p_annual_bep": 0.001591137308561253,
+       "share_bep": 0.8886990911046432,
+       "ratio_system_to_baseline": 1.6910981472314262,
+       "ratio_bep_to_baseline": 1.854432149903579,
+       "bep_clamped_above_grid": false
+      },
+      {
+       "arm": "lambda_ac_40m",
+       "p_annual_system": 0.0033054557364008245,
+       "p_annual_bep": 0.003259372007970425,
+       "share_bep": 0.9423836871416789,
+       "ratio_system_to_baseline": 3.2855910349797575,
+       "ratio_bep_to_baseline": 3.798719449009424,
+       "bep_clamped_above_grid": false
+      },
+      {
+       "arm": "bulk_d70",
+       "p_annual_system": 0.00019928757694662766,
+       "p_annual_bep": 1.6462677030194616e-08,
+       "share_bep": 8.260625760120466e-05,
+       "ratio_system_to_baseline": 0.19808992417839447,
+       "ratio_bep_to_baseline": 1.9186852947265185e-05,
+       "bep_clamped_above_grid": false
+      },
+      {
+       "arm": "prior_bep",
+       "p_annual_system": 0.001006046005485643,
+       "p_annual_bep": 0.0008580186169895641,
+       "share_bep": 0.8115239173288071,
+       "ratio_system_to_baseline": 1.0,
+       "ratio_bep_to_baseline": 1.0,
+       "bep_clamped_above_grid": false
+      }
+     ]
+    },
+    {
+     "scenario": "+4K",
+     "n_years": 5400,
+     "baseline": {
+      "p_annual_system": 0.012777595238792624,
+      "p_annual_bep": 0.008403164105895132,
+      "share_bep": 0.500336129664227,
+      "bep_clamped_above_grid": false
+     },
+     "arms": [
+      {
+       "arm": "lambda_ac_100m",
+       "p_annual_system": 0.016449480932680668,
+       "p_annual_bep": 0.013958321470914744,
+       "share_bep": 0.6245279514706954,
+       "ratio_system_to_baseline": 1.2873690726045417,
+       "ratio_bep_to_baseline": 1.66107924289167,
+       "bep_clamped_above_grid": false
+      },
+      {
+       "arm": "lambda_ac_40m",
+       "p_annual_system": 0.02461794258118692,
+       "p_annual_bep": 0.024010487265416474,
+       "share_bep": 0.741010429771158,
+       "ratio_system_to_baseline": 1.9266491167639388,
+       "ratio_bep_to_baseline": 2.857315049764674,
+       "bep_clamped_above_grid": false
+      },
+      {
+       "arm": "bulk_d70",
+       "p_annual_system": 0.008392008057548622,
+       "p_annual_bep": 1.542227589756329e-05,
+       "share_bep": 0.001834391977610745,
+       "ratio_system_to_baseline": 0.6567752304495127,
+       "ratio_bep_to_baseline": 0.0018352939087246895,
+       "bep_clamped_above_grid": false
+      },
+      {
+       "arm": "prior_bep",
+       "p_annual_system": 0.012777595238792624,
+       "p_annual_bep": 0.008403164105895132,
+       "share_bep": 0.500336129664227,
+       "ratio_system_to_baseline": 1.0,
+       "ratio_bep_to_baseline": 1.0,
+       "bep_clamped_above_grid": false
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

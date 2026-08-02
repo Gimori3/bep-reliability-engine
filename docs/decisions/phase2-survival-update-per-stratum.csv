@@ -1,0 +1,17 @@
+run,criterion,section,d70,n_prior,n_accepted,static_reject_pct,transient_reject_pct,marginal_transient_reject_pct,posterior_rejection_pct,flag_mismatch_static,flag_mismatch_trans,verified_exact
+baseline,no_breach,KP57.4,matrix,100000,99935,6.258,0.065,0.0,0.065,0,0,True
+baseline,no_breach,KP57.4,bulk,100000,100000,0.0,0.0,0.0,0.0,0,0,True
+baseline,no_breach,KP58.8,matrix,100000,94327,57.634,5.673,0.0,5.673,0,0,True
+baseline,no_breach,KP58.8,bulk,100000,100000,0.0,0.0,0.0,0.0,0,0,True
+baseline,no_breach,KP60.0,matrix,100000,96637,73.315,3.363,0.0,3.363,0,0,True
+baseline,no_breach,KP60.0,bulk,100000,99977,1.842,0.023,0.0,0.023,0,0,True
+baseline,no_breach,KP62.0,matrix,100000,100000,0.0,0.0,0.0,0.0,0,0,True
+baseline,no_breach,KP62.0,bulk,100000,100000,0.0,0.0,0.0,0.0,0,0,True
+anchor_rating,no_breach,KP57.4,matrix,100000,100000,0.158,0.0,0.0,0.0,0,0,True
+anchor_rating,no_breach,KP58.8,matrix,100000,89186,71.778,10.814,0.0,10.814,0,0,True
+anchor_rating,no_breach,KP60.0,matrix,100000,99663,35.938,0.337,0.0,0.337,0,0,True
+anchor_rating,no_breach,KP62.0,matrix,100000,99953,3.286,0.047,0.0,0.047,0,0,True
+no_initiation,no_breach_no_initiation,KP57.4,matrix,100000,33611,6.258,0.065,0.0,66.389,0,0,True
+no_initiation,no_breach_no_initiation,KP58.8,matrix,100000,432,57.634,5.673,0.0,99.568,0,0,True
+no_initiation,no_breach_no_initiation,KP60.0,matrix,100000,696,73.315,3.363,0.0,99.304,0,0,True
+no_initiation,no_breach_no_initiation,KP62.0,matrix,100000,60448,0.0,0.0,0.0,39.552,0,0,True

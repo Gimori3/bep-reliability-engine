@@ -1,0 +1,234 @@
+{
+ "record": "WBI+ peak-only shortcut against the full transient replay",
+ "generated": "2026-08-02T01:48:21",
+ "generated_by": "scripts/thesis_figure_gaps.py extract",
+ "note": "Inventory row 4.7, the RQ2 clause 'what the time-resolved replay adds over a peak-only reading'. docs/phase2_report.md section 11.1 carries this comparison in prose only; this record is the artifact behind it. The peak-only column is the Phase 1 PRIOR TRANSIENT fragility linearly interpolated on its raw Monte Carlo points at the observed 2016 peak -- the reading a peak-based (WBI+, Zethof et al. 2023) survival update would take. The replay column is the Phase 2 posterior's rejection fraction over the same N = 1e5 prior sample. Both are transient, so this compares method against method on one sample. The mechanism is the loading shape: the Phase 1 curves condition on the canonical d4PDF compound shape scaled to each level, which carries far more above-toe exposure than the real 2016 event did at the same peak, so the peak-only reading rejects realizations the full replay retains. over_rejection_factor is null where the replay rejects nothing -- not defined, never 1.",
+ "method": {
+  "peak_only": "linear interpolation of P_f_trans_raw on the conditioning grid at the observed 2016 peak",
+  "replay": "metadata['phase2']['posterior']['rejection_fraction']",
+  "n_samples": 100000,
+  "small_number_rows": 500
+ },
+ "sources": [
+  {
+   "path": "results/tokachi_kp57.4_historical_matrix.h5",
+   "sha256": "3e44a3d5cbf8e29a0290c1b42dec5915a9c981e9e24be8d00a6aea5d8bba91c8",
+   "gitignored": true
+  },
+  {
+   "path": "results/phase2/tokachi_kp57.4_historical_matrix_posterior.json",
+   "sha256": "c7d6093007b56d544bce01934f3fe7ffeee07cacb95b0bf8420e00ab54b962ad",
+   "gitignored": true
+  },
+  {
+   "path": "results/tokachi_kp57.4_historical_bulk.h5",
+   "sha256": "4007b69b8702026c7be29907a9ed9704efdf4a4e896d2196cc6279d4e6c3a2fd",
+   "gitignored": true
+  },
+  {
+   "path": "results/phase2/tokachi_kp57.4_historical_bulk_posterior.json",
+   "sha256": "f8530e6066c70a6d50b3af79a671674aa2c9a871dccca9eb3c397a1bddf53141",
+   "gitignored": true
+  },
+  {
+   "path": "results/tokachi_kp58.8_historical_matrix.h5",
+   "sha256": "5916acc5cc52e66f7abc6cde18067874f2821f52ae5485656f4aeb648b7cbd60",
+   "gitignored": true
+  },
+  {
+   "path": "results/phase2/tokachi_kp58.8_historical_matrix_posterior.json",
+   "sha256": "ec3d20fbf0a6712e28daf719dce2de4923567a6a81627cc7cc2139ddca97b793",
+   "gitignored": true
+  },
+  {
+   "path": "results/tokachi_kp58.8_historical_bulk.h5",
+   "sha256": "77943320e1ead90b226fad524af7e9ed8b8f3a468befe52c790f10b21aaaaeaf",
+   "gitignored": true
+  },
+  {
+   "path": "results/phase2/tokachi_kp58.8_historical_bulk_posterior.json",
+   "sha256": "721b727dcf0096e3325701b6d7ce81142738c6cb678423830241b5ee7e1b0ef6",
+   "gitignored": true
+  },
+  {
+   "path": "results/tokachi_kp60.0_historical_matrix.h5",
+   "sha256": "bbd0da9da4107918aa8f89d0e76f00ec6df49f9ecfbb8f89516ce7928e2f19e0",
+   "gitignored": true
+  },
+  {
+   "path": "results/phase2/tokachi_kp60.0_historical_matrix_posterior.json",
+   "sha256": "6ea8259fb60174400b5888b299210ef6e3872ec90053a33f8d555f51a29afc9a",
+   "gitignored": true
+  },
+  {
+   "path": "results/tokachi_kp60.0_historical_bulk.h5",
+   "sha256": "8577b13b80f1099b538681598007176dda7d7f5970419fde8e78f9cf59b07782",
+   "gitignored": true
+  },
+  {
+   "path": "results/phase2/tokachi_kp60.0_historical_bulk_posterior.json",
+   "sha256": "838012fedad0047d7f8bb4f45c259968d7b230b8fbc3e3028153a2d72da59726",
+   "gitignored": true
+  },
+  {
+   "path": "results/tokachi_kp62.0_historical_matrix.h5",
+   "sha256": "af447cae332963a592f17e4c70b1a6774ba5a70e7ed81931d41387073850f942",
+   "gitignored": true
+  },
+  {
+   "path": "results/phase2/tokachi_kp62.0_historical_matrix_posterior.json",
+   "sha256": "bc3efe6e0c6d973959266fe62d1284f2584205e3ded7e811650db7113a85bc37",
+   "gitignored": true
+  },
+  {
+   "path": "results/tokachi_kp62.0_historical_bulk.h5",
+   "sha256": "b8bb9d3303e68cc1dcb5a5e6c1e6e0ee6c7aa47d1012a36c9d4abd412bd531e1",
+   "gitignored": true
+  },
+  {
+   "path": "results/phase2/tokachi_kp62.0_historical_bulk_posterior.json",
+   "sha256": "60508bfaff091bed4f554f4110033392ecc452168e32d9e2feb8ab123d0de190",
+   "gitignored": true
+  }
+ ],
+ "strata": [
+  {
+   "stratum": "tokachi_kp57.4_historical_matrix",
+   "section": "KP57.4",
+   "d70": "matrix",
+   "n_prior": 100000,
+   "event_peak_m_msl": 39.658,
+   "z_toe_m_msl": 38.3,
+   "grid_min_m_msl": 34.75,
+   "grid_max_m_msl": 43.25,
+   "f_peak_only_transient": 0.004848080000000033,
+   "f_replay_transient": 0.0006500000000000394,
+   "over_rejection_factor": 7.458584615384214,
+   "n_rejected_replay": 65,
+   "n_peak_only_expected": 485,
+   "small_number_regime": true
+  },
+  {
+   "stratum": "tokachi_kp57.4_historical_bulk",
+   "section": "KP57.4",
+   "d70": "bulk",
+   "n_prior": 100000,
+   "event_peak_m_msl": 39.658,
+   "z_toe_m_msl": 38.3,
+   "grid_min_m_msl": 34.75,
+   "grid_max_m_msl": 43.25,
+   "f_peak_only_transient": 0.0,
+   "f_replay_transient": 0.0,
+   "over_rejection_factor": null,
+   "n_rejected_replay": 0,
+   "n_peak_only_expected": 0,
+   "small_number_regime": false
+  },
+  {
+   "stratum": "tokachi_kp58.8_historical_matrix",
+   "section": "KP58.8",
+   "d70": "matrix",
+   "n_prior": 100000,
+   "event_peak_m_msl": 40.75,
+   "z_toe_m_msl": 38.5,
+   "grid_min_m_msl": 36.5,
+   "grid_max_m_msl": 45.0,
+   "f_peak_only_transient": 0.15596,
+   "f_replay_transient": 0.05672999999999995,
+   "over_rejection_factor": 2.749162700511196,
+   "n_rejected_replay": 5673,
+   "n_peak_only_expected": 15596,
+   "small_number_regime": false
+  },
+  {
+   "stratum": "tokachi_kp58.8_historical_bulk",
+   "section": "KP58.8",
+   "d70": "bulk",
+   "n_prior": 100000,
+   "event_peak_m_msl": 40.75,
+   "z_toe_m_msl": 38.5,
+   "grid_min_m_msl": 36.5,
+   "grid_max_m_msl": 45.0,
+   "f_peak_only_transient": 0.0,
+   "f_replay_transient": 0.0,
+   "over_rejection_factor": null,
+   "n_rejected_replay": 0,
+   "n_peak_only_expected": 0,
+   "small_number_regime": false
+  },
+  {
+   "stratum": "tokachi_kp60.0_historical_matrix",
+   "section": "KP60.0",
+   "d70": "matrix",
+   "n_prior": 100000,
+   "event_peak_m_msl": 42.296,
+   "z_toe_m_msl": 40.0,
+   "grid_min_m_msl": 38.25,
+   "grid_max_m_msl": 46.75,
+   "f_peak_only_transient": 0.13113863999999978,
+   "f_replay_transient": 0.03363000000000005,
+   "over_rejection_factor": 3.899454058875991,
+   "n_rejected_replay": 3363,
+   "n_peak_only_expected": 13114,
+   "small_number_regime": false
+  },
+  {
+   "stratum": "tokachi_kp60.0_historical_bulk",
+   "section": "KP60.0",
+   "d70": "bulk",
+   "n_prior": 100000,
+   "event_peak_m_msl": 42.296,
+   "z_toe_m_msl": 40.0,
+   "grid_min_m_msl": 38.25,
+   "grid_max_m_msl": 46.75,
+   "f_peak_only_transient": 0.001407839999999993,
+   "f_replay_transient": 0.00022999999999995246,
+   "over_rejection_factor": 6.121043478262105,
+   "n_rejected_replay": 23,
+   "n_peak_only_expected": 141,
+   "small_number_regime": true
+  },
+  {
+   "stratum": "tokachi_kp62.0_historical_matrix",
+   "section": "KP62.0",
+   "d70": "matrix",
+   "n_prior": 100000,
+   "event_peak_m_msl": 45.729,
+   "z_toe_m_msl": 44.9,
+   "grid_min_m_msl": 41.75,
+   "grid_max_m_msl": 56.5,
+   "f_peak_only_transient": 0.0,
+   "f_replay_transient": 0.0,
+   "over_rejection_factor": null,
+   "n_rejected_replay": 0,
+   "n_peak_only_expected": 0,
+   "small_number_regime": false
+  },
+  {
+   "stratum": "tokachi_kp62.0_historical_bulk",
+   "section": "KP62.0",
+   "d70": "bulk",
+   "n_prior": 100000,
+   "event_peak_m_msl": 45.729,
+   "z_toe_m_msl": 44.9,
+   "grid_min_m_msl": 41.75,
+   "grid_max_m_msl": 56.5,
+   "f_peak_only_transient": 0.0,
+   "f_replay_transient": 0.0,
+   "over_rejection_factor": null,
+   "n_rejected_replay": 0,
+   "n_peak_only_expected": 0,
+   "small_number_regime": false
+  }
+ ],
+ "headline": {
+  "informative_strata": [
+   "tokachi_kp58.8_historical_matrix",
+   "tokachi_kp60.0_historical_matrix"
+  ],
+  "factor_min": 2.749162700511196,
+  "factor_max": 3.899454058875991,
+  "n_factor_defined": 4,
+  "n_not_defined": 4
+ }
+}

@@ -1408,10 +1408,104 @@ FIGURE_DRIVERS: list[dict[str, Any]] = [
         "label": "design-HWL bias resolution",
         "command": [PY, "scripts/hwl_bias_resolution.py", "figures"],
         "requires": ["docs/decisions/adr0040-hwl-bias-resolution.json"],
-        "produces": ["adr0040_*.png", "epistemic_vs_statistical.png"],
+        # Exact names, not ``adr0040_*.png``: the thesis-figure-gaps driver
+        # below owns adr0040_kp57_4_bound.png, and a glob that swept it up
+        # would bind it to the wrong driver's sources and leave it un-redrawn.
+        "produces": [
+            "adr0040_hwl_bias_resolved.png",
+            "adr0040_tilted_is_validation.png",
+            "epistemic_vs_statistical.png",
+        ],
         "sources": [
             "docs/decisions/adr0040-hwl-bias-resolution.json",
             "docs/decisions/epistemic-bracket-synthesis.json",
+        ],
+    },
+    {
+        "label": "thesis figure gaps (six inventory numbers)",
+        "command": [PY, "scripts/thesis_figure_gaps.py", "figures"],
+        # Every input is committed, so this driver never skips on a fresh
+        # clone. The three slices are written by the same script's ``extract``
+        # command from gitignored campaign artifacts; each records the source
+        # SHA-256, and tests/test_thesis_figure_gaps.py checks it against the
+        # live artifact whenever that artifact is present.
+        "requires": [
+            "docs/decisions/phase2-survival-update-per-stratum.json",
+            "docs/decisions/phase2-peak-shortcut.json",
+            "docs/decisions/phase3-sensitivity-brackets.json",
+            "docs/decisions/epistemic-bracket-synthesis.json",
+            "docs/decisions/adr0040-hwl-bias-resolution.json",
+            "docs/decisions/adr0045-mp-companion.json",
+            "docs/decisions/adr0046-ztoe-companion.json",
+            "docs/decisions/adr0040-stage6-6-kp62_0-analysis.json",
+        ],
+        "produces": [
+            "phase2_survival_update.png",
+            "phase2_peak_shortcut.png",
+            "epistemic_bracket_ranking.png",
+            "adr0040_kp57_4_bound.png",
+            "rq4_sensitivity_brackets.png",
+            "epistemic_knobs_mp_ztoe.png",
+        ],
+        "sources": [
+            "docs/decisions/phase2-survival-update-per-stratum.json",
+            "docs/decisions/phase2-peak-shortcut.json",
+            "docs/decisions/phase3-sensitivity-brackets.json",
+            "docs/decisions/epistemic-bracket-synthesis.json",
+            "docs/decisions/adr0040-hwl-bias-resolution.json",
+            "docs/decisions/adr0045-mp-companion.json",
+            "docs/decisions/adr0046-ztoe-companion.json",
+            "docs/decisions/adr0040-stage6-6-kp62_0-analysis.json",
+        ],
+    },
+    {
+        # Inventory rows 4.3, 4.4 and 5.1. These four are rendered by the Phase
+        # 2 package itself through the ``pipeline.PUBLICATION_FIGURES`` dual-write
+        # seam, not by a script under scripts/. ``--figures-only`` recomputes the
+        # posterior in memory from its Phase 1 parent and writes NO artifact --
+        # the persisted posteriors, whose SHA-256 this campaign's manifest
+        # records, are asserted byte-identical across it.
+        #
+        # It is the slowest redraw path here (about 5.7 min for the two strata,
+        # because the seam sits downstream of a full 1e5-row replay). Declaring
+        # it declaration-only would have been cheaper and wrong: a real plot-only
+        # path exists, so the four figures can be kept unconditionally fresh
+        # rather than merely watched.
+        "label": "Phase-2 posterior diagnostics (figures-only)",
+        "command": [
+            PY,
+            "-m",
+            "bayesian_reliability_updating",
+            "results/tokachi_kp58.8_historical_matrix.h5",
+            "results/tokachi_kp60.0_historical_matrix.h5",
+            "--figures-only",
+        ],
+        "requires": [
+            "results/tokachi_kp58.8_historical_matrix.h5",
+            "results/tokachi_kp60.0_historical_matrix.h5",
+            # The h_2016 chain: gitignored gauge rating + committed extracts.
+            "data/raw/rating_curves/HQrelation_TokachiRiv_2017.csv",
+            "data/processed/2016_event/stage_hourly_Tokachi_201608.csv",
+            "data/processed/2016_event/flood_trace_2016.csv",
+        ],
+        "produces": [
+            "phase2_marginals_kp58_8_matrix.png",
+            "phase2_marginals_kp60_0_matrix.png",
+            "phase2_fragility_update_kp58_8_matrix.png",
+            "phase2_fragility_update_kp60_0_matrix.png",
+        ],
+        # What the figures depict: the Phase 1 parents they are recomputed from,
+        # the persisted posteriors a reader compares them against, and the
+        # observed record that drives the update. Exact paths, not a
+        # results/phase2/*.json glob, which would bind these four to the other
+        # six strata as well.
+        "sources": [
+            "results/tokachi_kp58.8_historical_matrix.h5",
+            "results/tokachi_kp60.0_historical_matrix.h5",
+            "results/phase2/tokachi_kp58.8_historical_matrix_posterior.json",
+            "results/phase2/tokachi_kp60.0_historical_matrix_posterior.json",
+            "data/processed/2016_event/stage_hourly_Tokachi_201608.csv",
+            "data/processed/2016_event/flood_trace_2016.csv",
         ],
     },
     {

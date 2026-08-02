@@ -76,10 +76,50 @@ def _style(ax: plt.Axes) -> None:
     ax.tick_params(colors=_MUTED, labelsize=8)
 
 
-def _save(fig: plt.Figure, path: str | Path) -> Path:
+def _compact(value: float) -> str:
+    """Two significant figures, in the shorter of fixed and scientific form."""
+    if value == 0.0:
+        return "0"
+    exponent = int(np.floor(np.log10(abs(value))))
+    if -2 <= exponent <= 3:
+        text = f"{value:.{max(0, 1 - exponent)}f}"
+        return text.rstrip("0").rstrip(".") if "." in text else text
+    mantissa = f"{value / 10.0**exponent:.1f}".rstrip("0").rstrip(".")
+    return rf"${mantissa}\times10^{{{exponent}}}$"
+
+
+def _log_axis_ticks(ax: plt.Axes, values: NDArray[np.float64]) -> None:
+    """Three in-range labels on a log abscissa, whatever the span.
+
+    Matplotlib's default log locator labels decade minors, which collides
+    illegibly on a panel spanning well under a decade (``gamma'_bl`` runs 5.5 to
+    9.5) and crowds one spanning a few (``d_70``). Anchoring the ticks to the
+    1st, 50th and 99th percentile of the prior always yields exactly three
+    readable, in-range labels. Chrome only: no value is altered.
+    """
+    ticks = np.percentile(np.asarray(values, dtype=float), [1, 50, 99])
+    ax.set_xticks(ticks)
+    ax.set_xticklabels([_compact(float(t)) for t in ticks])
+    ax.xaxis.set_minor_locator(plt.NullLocator())
+
+
+def _save(
+    fig: plt.Figure, path: str | Path, publication_path: str | Path | None = None
+) -> Path:
+    """Write the run-local copy and, when asked, the tracked publication copy.
+
+    Both copies come from **one** ``savefig`` pair on the same figure object, so
+    no manual copy step can let them diverge (``docs/conventions.md`` section
+    9.3). ``publication_path=None`` (the default) is bit-identical to the
+    single-write behaviour this function had before the seam was added.
+    """
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(path, dpi=180, bbox_inches="tight")
+    if publication_path is not None:
+        publication_path = Path(publication_path)
+        publication_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(publication_path, dpi=180, bbox_inches="tight")
     plt.close(fig)
     return path
 
@@ -91,6 +131,7 @@ def plot_prior_posterior_marginals(
     path: str | Path,
     *,
     title: str = "",
+    publication_path: str | Path | None = None,
 ) -> Path:
     """All seven parameter marginals, prior versus posterior, C_e called out.
 
@@ -99,6 +140,11 @@ def plot_prior_posterior_marginals(
     parameter (all marginals are lognormal). The C_e panel carries the
     prior and posterior means as vertical lines: the laminar-conservatism
     headline of the filter.
+
+    ``publication_path``, when given, receives a second copy of the same figure
+    under tracked ``docs/figures/`` (the dual-write seam of section 9.3). The
+    caller decides which runs are promoted; see
+    ``pipeline.PUBLICATION_FIGURES``.
     """
     accept = np.asarray(accept, dtype=bool)
     fig, axes = plt.subplots(2, 4, figsize=(12.5, 5.8))
@@ -129,6 +175,7 @@ def plot_prior_posterior_marginals(
                 label="posterior",
             )
         ax.set_xscale("log")
+        _log_axis_ticks(ax, values)
         ax.set_yticks([])
         emphasis = name == "C_e"
         ax.set_title(
@@ -164,7 +211,10 @@ def plot_prior_posterior_marginals(
     )
     if title:
         fig.suptitle(title, fontsize=11, color=_INK)
-    return _save(fig, path)
+    # Without this the second row's panel titles land on the first row's tick
+    # labels; invisible while the figure lived only under gitignored results/.
+    fig.tight_layout(rect=(0, 0, 1, 0.94))
+    return _save(fig, path, publication_path)
 
 
 def plot_fragility_update(
@@ -177,6 +227,7 @@ def plot_fragility_update(
     z_toe_m: float | None = None,
     event_peak_m: float | None = None,
     title: str = "",
+    publication_path: str | Path | None = None,
 ) -> Path:
     """Prior versus posterior fragility, transient and static panels.
 
@@ -198,6 +249,11 @@ def plot_fragility_update(
         Landside toe and observed peak markers.
     title : str, optional
         Figure title.
+    publication_path : str or pathlib.Path, optional
+        Second destination for the same figure, under tracked
+        ``docs/figures/`` (the dual-write seam of ``docs/conventions.md``
+        section 9.3). None (default) writes only ``path``. The caller decides
+        which runs are promoted; see ``pipeline.PUBLICATION_FIGURES``.
     """
     fig, axes = plt.subplots(1, 2, figsize=(11.0, 4.6), sharey=True)
     panels = (
@@ -286,7 +342,7 @@ def plot_fragility_update(
     axes[0].legend(frameon=False, fontsize=8, loc="lower right")
     if title:
         fig.suptitle(title, fontsize=11, color=_INK)
-    return _save(fig, path)
+    return _save(fig, path, publication_path)
 
 
 def plot_decomposition(
