@@ -1470,6 +1470,16 @@ def measure_section(
 #: the consequence of the extraction ambiguity is measured rather than argued.
 ARM_DIVERGENCE_M = 2.0
 
+#: Plain-English rendering of each arm key, for figure text only. The keys
+#: themselves are the evidence JSON's own field names and must not change; a
+#: main-body thesis figure may not print them, so the display map lives here
+#: rather than in the record.
+ARM_DISPLAY_NAMES = {
+    "dem_clean_median": "clean-station median",
+    "dem_all_stations_median": "all-station median",
+    "withdrawn_1998": "withdrawn 1998 value",
+}
+
 
 def fragility_arms_from_measurements(
     measurements: list[dict[str, Any]],
@@ -1958,7 +1968,8 @@ def draw_figure(payload: dict[str, Any], path: Path = FIGURE_PATH) -> None:
             weight="bold",
         )
         ax.set_title(
-            f"{label}  (CSV {record['csv_L_m']:.1f} m, {record['remediation_state']})",
+            f"{label}  (1998 survey {record['csv_L_m']:.1f} m, "
+            f"{record['remediation_state']})",
             fontsize=11,
         )
         ax.set_xlabel("offset from alignment [m]  (negative = riverside)")
@@ -1996,7 +2007,7 @@ def draw_figure(payload: dict[str, Any], path: Path = FIGURE_PATH) -> None:
             color="#d62728",
             ls=":",
             lw=1.6,
-            label=f"CSV 1998 {record['csv_L_m']:.1f} m",
+            label=f"1998 survey {record['csv_L_m']:.1f} m",
         )
         ax.set_xlabel("chainage offset from the section [m]")
         if column == 0:
@@ -2034,17 +2045,21 @@ def draw_figure(payload: dict[str, Any], path: Path = FIGURE_PATH) -> None:
                 )
         ax.set_xticks(positions)
         ax.set_xticklabels(
-            [f"{n}\nL={entry['arms'][n]['L_m']:.0f} m" for n in names], fontsize=8
+            [
+                f"{ARM_DISPLAY_NAMES.get(n, n)}\nL={entry['arms'][n]['L_m']:.0f} m"
+                for n in names
+            ],
+            fontsize=8,
         )
         ax.set_ylabel("max |dP_f| vs production" if column == 0 else "")
         ax.legend(fontsize=8)
         ax.grid(alpha=0.3, axis="y")
 
     fig.suptitle(
-        "ADR-0047: DEM-surveyed seepage length L "
-        f"(GSI DEM5A {payload.get('dem_source', '').split('devDate ')[-1]} "
-        f"vs {payload.get('csv_geometry_vintage', '1998')} OYO geometry) "
-        "-- measurement only, no input value changed",
+        "Seepage length L surveyed from the national elevation model "
+        f"(GSI DEM5A {payload.get('dem_source', '').split('devDate ')[-1]}) "
+        f"against the {payload.get('csv_geometry_vintage', '1998')} "
+        "OYO cross-section geometry",
         fontsize=13,
     )
     fig.tight_layout(rect=(0, 0, 1, 0.97))

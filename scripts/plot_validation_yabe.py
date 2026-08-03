@@ -74,7 +74,7 @@ def fig_timeline(results: dict) -> None:
         gridspec_kw={"hspace": 0.45},
     )
     panels = [
-        ("full", "time to l ≥ L (engine breach)"),
+        ("full", "time to l ≥ L (modelled breach)"),
         ("lc", "time to l ≥ l_c (point of no return)"),
     ]
     ks = [3.4e-4, 1.0e-3, 3.1e-3]

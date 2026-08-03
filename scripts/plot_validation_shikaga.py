@@ -79,7 +79,7 @@ def main() -> None:
         if hi > lo:
             ax.plot([lo, hi], [y, y], color=BLUE, lw=5.5, solid_capstyle="round")
             ax.plot((lo + hi) / 2, y, "o", ms=8, mfc=SURFACE, mec=BLUE, mew=2)
-            txt = f"{lo:.2f}-{hi:.2f}"
+            txt = f"{lo:.2f} to {hi:.2f}"
         else:
             ax.plot(
                 lo, y, "o", ms=9, mfc=SURFACE if open_marker else BLUE, mec=BLUE, mew=2
@@ -92,10 +92,12 @@ def main() -> None:
     ax.set_xlim(0.8, 3.2)
     ax.grid(axis="y", visible=False)
     ax.set_xlabel(
-        "M4 factor: engine instantaneous Mazure / 2D-FEM peak toe " "overpressure  [-]"
+        "hydraulic-translation factor: instantaneous Mazure head / 2D-FEM "
+        "peak toe overpressure  [-]"
     )
     ax.set_title(
-        "M4 over-translation vs calibrated FEMs across the Japanese cases",
+        "Hydraulic-translation over-prediction vs calibrated FEMs "
+        "across the Japanese cases",
         fontsize=9.5,
         color=INK,
         loc="left",

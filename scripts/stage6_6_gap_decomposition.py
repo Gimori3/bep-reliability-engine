@@ -74,6 +74,13 @@ def _write_figure(fig, fig_dir: Path, name: str) -> Path:
     return path
 
 
+#: How each ladder key is rendered in figure text. The keys are the analysis
+#: record's own field names and must not change; the "engine" ladder is the one
+#: whose endpoint is the production gap, and a main-body thesis figure names it
+#: for that rather than for the implementation.
+LADDER_DISPLAY_NAMES = {"physics": "physics", "engine": "production"}
+
+
 # Section registry (ADR-0040): matrix d70 is the primary decomposition run;
 # attainable_max_m is the last non-hypothetical grid level (ADR-0024: the
 # KP62.0 levels >= 51.0 are static-bracketing fit-stabilizers, never
@@ -324,7 +331,7 @@ def figure_ladder(key: str, result: GapDecompositionResult, fig_dir: Path) -> Pa
     fig.patch.set_facecolor(SURFACE)
     panels = (
         ("Physics ladder (endpoint alpha = -1/2)", ("C0", "C1", "C2", "C3a", "C4a")),
-        ("Engine ladder (production, alpha = -1/3)", ("C0", "C1", "C3b", "C4b")),
+        ("Production ladder (alpha = -1/3)", ("C0", "C1", "C3b", "C4b")),
     )
     for ax, (title, ids) in zip(axes, panels):
         _apply_style(ax)
@@ -353,7 +360,7 @@ def figure_ladder(key: str, result: GapDecompositionResult, fig_dir: Path) -> Pa
             ax.text(
                 0.5 * (attainable + grid[-1]),
                 0.40,
-                "hypothetical\n(ADR-0024)",
+                "hypothetical\n(above the\nattainable stage)",
                 color=MUTED,
                 fontsize=7,
                 ha="center",
@@ -400,7 +407,10 @@ def _waterfall(ax, names, deltas, cis, start_value, start_name, end_name) -> Non
     )
     ax.set_xticks(positions)
     ax.set_xticklabels(
-        [start_name, *names, end_name], rotation=25, ha="right", fontsize=8
+        [start_name, *(n.replace("_", " ") for n in names), end_name],
+        rotation=25,
+        ha="right",
+        fontsize=8,
     )
 
 
@@ -441,8 +451,8 @@ def figure_waterfall(
                 ax, names, deltas, cis, float(p_f["C0"][i]), "C0 (static)", endpoint
             )
             ax.set_title(
-                f"{spec['label']}  {ladder_name} ladder at {level_label} "
-                f"({grid[i]:.2f} m MSL)",
+                f"{spec['label']}  {LADDER_DISPLAY_NAMES[ladder_name]} ladder "
+                f"at {level_label} ({grid[i]:.2f} m MSL)",
                 color=INK,
                 fontsize=9,
             )
@@ -483,7 +493,8 @@ def figure_fractions(
         ax.set_ylim(-1.0, 2.0)
         ax.set_xlabel("conditioning stage [m MSL]", color=MUTED, fontsize=9)
         ax.set_title(
-            f"{spec['label']}  {ladder_name} ladder component shares",
+            f"{spec['label']}  {LADDER_DISPLAY_NAMES[ladder_name]} "
+            "ladder component shares",
             color=INK,
             fontsize=10,
         )

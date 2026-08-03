@@ -1767,7 +1767,7 @@ def figure_hwl_bias(evidence: dict) -> Path:
     ax.set_ylabel(r"bias factor  $B = P_{f,\mathrm{static}}/P_{f,\mathrm{transient}}$")
     ax.set_title(
         "KP 62.0 conventional-practice bias against conditioning level\n"
-        "matrix $d_{70}$, adopted $L$ = 40 m (ADR-0047), 225 s grid",
+        "matrix $d_{70}$, adopted $L$ = 40 m, 225 s integration grid",
         loc="left",
     )
     ax.legend(loc="upper right")

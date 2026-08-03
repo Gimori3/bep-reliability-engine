@@ -1602,14 +1602,25 @@ FIGURE_DRIVERS: list[dict[str, Any]] = [
         ),
     },
     {
-        "label": "ADR-0039 worst-case timestep stress (declaration only)",
-        "command": None,
-        "redraw": (
-            "scripts/timestep_convergence_stress.py has no plot-only path; a "
-            "full run is ~4 min and would rewrite the production record (its "
-            "--quick smoke payload must never be merged into it)."
-        ),
-        "requires": ["docs/decisions/adr0039-timestep-stress.json"],
+        # Promoted from declaration-only on 2026-08-04 by the main-body figure
+        # register pass: ``--figures-only`` rebuilds just the showcase
+        # trajectories from the persisted ladder and writes NO evidence file,
+        # which also retires the overwriting-per-section hazard the 2026-07-31
+        # audit recorded here (a --quick payload can no longer reach the
+        # production record through the figure path, and the two flags are
+        # mutually exclusive).
+        "label": "ADR-0039 worst-case timestep stress (figures only)",
+        "command": [
+            PY,
+            "scripts/timestep_convergence_stress.py",
+            "--figures-only",
+        ],
+        "requires": [
+            "docs/decisions/adr0039-timestep-stress.json",
+            # One d4PDF workbook read per section, to recover the two members
+            # the evidence names; no ensemble ranking, no Delta-t ladder.
+            "data/raw/hydrographs",
+        ],
         "produces": ["adr0039-timestep-stress.png"],
         "sources": ["docs/decisions/adr0039-timestep-stress.json"],
         # Both files are tracked and were added by one commit (780eb0d) whose

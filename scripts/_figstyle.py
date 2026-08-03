@@ -14,13 +14,14 @@ House rules this module encodes (they are the ones a reviewer checks):
 * a legend whenever two or more series are drawn, direct labels used
   *selectively* (endpoint / extreme / the one series that matters);
 * text wears ink tokens, never a series colour;
-* **a rendered title carries no ADR number and no statement about the project's
-  own evolution.** Thirty of these figures go in the thesis main body, whose
-  binding rules exclude both, and a caption can be rewritten in the thesis
-  repository while text baked into the PNG cannot. Say what the figure shows, in
-  the vocabulary of the physics. Three titles still violate this and are listed
-  with their fix in ``docs/conventions.md`` section 9.3.1; the worst of them also
-  asserts a fact the repository's own record now contradicts.
+* **no rendered text in a main-body figure carries an ADR number, a
+  specification pointer, a module identifier, a failure-mode tag, a file-format
+  name, a run identifier or an em dash.** Thirty of these figures go in the
+  thesis main body, whose binding rules exclude all of them, and a caption can
+  be rewritten in the thesis repository while text baked into the PNG cannot.
+  Say what the figure shows, in the vocabulary of the physics. The rule and its
+  substitutions are in ``docs/conventions.md`` section 9.3.1;
+  :func:`section_label` is the substitution for a run identifier.
 
 Publication copies live in ``docs/figures/`` (tracked). ``results/`` is
 gitignored, so a figure that exists only there is not a deliverable —
@@ -37,6 +38,7 @@ that introduced this file.
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -87,6 +89,29 @@ MUTED = "#898781"
 GRID = "#e1e0d9"
 BASELINE = "#c3c2b7"
 SURFACE = "#fcfcfb"
+
+
+def section_label(cross_section_id: str) -> str:
+    """Display name for a run's cross-section identifier.
+
+    ``tokachi_kp58.8`` becomes ``KP 58.8``. A run identifier is implementation
+    vocabulary, which the thesis main body excludes; the thesis names a section
+    by its river kilometre throughout, and this is the single place that
+    conversion lives so it cannot drift between figures.
+
+    Parameters
+    ----------
+    cross_section_id
+        A ``<river>_kp<chainage>`` run identifier, or any other string.
+
+    Returns
+    -------
+    str
+        ``KP <chainage>`` where the grammar matches, otherwise the input
+        unchanged, so an unrecognised label is never silently mangled.
+    """
+    match = re.fullmatch(r"[A-Za-z]+_kp([0-9]+(?:\.[0-9]+)?)", cross_section_id)
+    return f"KP {match.group(1)}" if match else cross_section_id
 
 
 def style() -> None:
@@ -174,7 +199,7 @@ def mark_hypothetical(
         ax.text(
             attainable_max_m + 0.02 * (hi - lo),
             label_y,
-            "hypothetical fit stabiliser\n(ADR-0024; not attainable)",
+            "hypothetical fit stabiliser\n(above the attainable stage)",
             transform=ax.get_xaxis_transform(),
             fontsize=8,
             color=MUTED,

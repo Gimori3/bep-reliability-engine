@@ -59,6 +59,9 @@ import numpy as np
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
+
+from _figstyle import section_label as _section_label  # noqa: E402
 
 from bep_reliability_engine.config import Config  # noqa: E402
 from bep_reliability_engine.convergence import (  # noqa: E402
@@ -468,8 +471,8 @@ def _plot(payload: dict, paths: dict[str, Path]) -> None:
     ax.set_xlabel("realizations $N$")
     ax.set_ylabel(rf"empirical CoV of $\hat{{P}}_f$ ({branch}), $R={n_rep}$ replicates")
     ax.set_title(
-        f"Estimator convergence — {payload['cross_section_id']} "
-        f"({payload['d70_interpretation']} $d_{{70}}$), LHS"
+        f"Estimator convergence, {_section_label(payload['cross_section_id'])} "
+        f"({payload['d70_interpretation']} $d_{{70}}$), Latin hypercube sampling"
     )
     ax.grid(True, which="both", alpha=0.3)
     ax.legend(fontsize=8, loc="lower left")

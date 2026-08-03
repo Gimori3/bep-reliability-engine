@@ -71,8 +71,8 @@ SURFACE = "#fcfcfb"
 
 KP634_NOTE = (
     "KP 63.4 excluded by design: unconfined section, no A$_c$ blanket "
-    "(k$_{bl}$ undefined in the geotech table) — the confined-blanket BEP "
-    "model (uplift/heave gate) does not apply."
+    "(k$_{bl}$ not determined there), so the confined-blanket BEP model "
+    "(uplift/heave gate) does not apply."
 )
 
 
@@ -186,11 +186,11 @@ def run_stamp(data: dict[str, dict]) -> str:
         or side["hydrograph"]["native_dt_s"]
     )
     return (
-        f"Definitive production campaign (2026-07-29) — historical scenario, "
-        f"matrix d$_{{70}}$, N = 10$^5$ LHS (seed {side['lhs_seed']}), canonical "
-        f"d4PDF shape {data['57.4']['event']}, Δt = {dt_s:g} s (ADR-0030), "
-        f"raw-head conventions (ADR-0027/0028), C$_e$ prior ADR-0026, "
-        f"KP 62.0 at the adopted L = 40 m (ADR-0047)."
+        f"Historical scenario, matrix d$_{{70}}$, N = 10$^5$ Latin hypercube "
+        f"(seed {side['lhs_seed']}), canonical d4PDF shape "
+        f"{data['57.4']['event']}, integration step Δt = {dt_s:g} s.\n"
+        f"Raw driving heads on both branches; C$_e$ field prior; "
+        f"KP 62.0 at the adopted L = 40 m."
     )
 
 
@@ -259,7 +259,7 @@ def figure_per_section(data: dict[str, dict]) -> None:
         fontsize=10,
     )
     fig.suptitle(
-        "Backward erosion piping fragility — Tokachi right bank "
+        "Backward erosion piping fragility, Tokachi right bank "
         "(static vs transient limit state)",
         x=0.01,
         ha="left",
@@ -271,7 +271,7 @@ def figure_per_section(data: dict[str, dict]) -> None:
         fig,
         data,
         "Points: raw MC estimates with 95% Clopper–Pearson CIs; "
-        "lines: fitted lognormal deliverables (ADR-0024).",
+        "lines: fitted lognormal deliverables.",
     )
     fig.tight_layout(rect=(0, 0.055, 1, 0.95))
     save_both(fig, "fragility_per_section.png")
@@ -281,8 +281,8 @@ def figure_per_section(data: dict[str, dict]) -> None:
 def figure_comparison(data: dict[str, dict]) -> None:
     fig, axes = plt.subplots(1, 2, figsize=(12.6, 5.6), sharey=True)
     titles = {
-        "static": "Static limit state — Sellmeijer 2011 (raw gross head)",
-        "transient": "Transient limit state — Pol 2024 ODE (raw erosion head)",
+        "static": "Static limit state: Sellmeijer 2011 (raw gross head)",
+        "transient": "Transient limit state: Pol 2024 (raw erosion head)",
     }
     for ax, branch in zip(axes, ("static", "transient")):
         for kp in SECTIONS:
@@ -347,7 +347,7 @@ def figure_comparison(data: dict[str, dict]) -> None:
         fontsize=10,
     )
     fig.suptitle(
-        "Cross-section comparison — load excess above the landside toe",
+        "Cross-section comparison: load excess above the landside toe",
         x=0.01,
         ha="left",
         fontsize=14,
@@ -426,7 +426,7 @@ def figure_tail_log(data: dict[str, dict]) -> None:
         fontsize=10,
     )
     fig.suptitle(
-        "Tail view — raw MC points, 95% binomial CIs (log scale)",
+        "Tail view: raw MC points, 95% binomial CIs (log scale)",
         x=0.01,
         ha="left",
         fontsize=14,

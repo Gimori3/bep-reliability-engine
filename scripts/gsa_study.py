@@ -53,6 +53,9 @@ import numpy as np
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
+
+from _figstyle import section_label as _section_label  # noqa: E402
 
 from bep_reliability_engine.config import Config  # noqa: E402
 from bep_reliability_engine.gsa_qoi import evaluate_qoi_batch  # noqa: E402
@@ -609,7 +612,7 @@ def _fig_indices_bars(payload: dict, slug: str) -> None:
     )
     fig.suptitle(
         f"Sobol' indices at the design level h = {design['level_m']:.2f} m "
-        f"MSL — {payload['cross_section_id']} "
+        f"MSL, {_section_label(payload['cross_section_id'])} "
         f"({payload['d70_interpretation']} $d_{{70}}$), "
         f"R = {payload['n_replicates']} scramblings, 95% CI",
         fontsize=11,
@@ -702,7 +705,7 @@ def _fig_level_dependence(payload: dict, slug: str) -> None:
         _direct_label_lines(ax, levels[-1], names, end_values)
         _style_axis(ax)
         label = "first-order $S_i$" if which == "S" else "total-effect $S_{Ti}$"
-        ax.set_title(f"{label} — transient failure indicator", fontsize=10, color=_INK)
+        ax.set_title(f"{label}: transient failure indicator", fontsize=10, color=_INK)
         ax.set_xlabel("conditioning level h [m MSL]", fontsize=9, color=_INK_2)
         pf = [
             _final_rung(lvl, "trans_indicator")["mean_y"] for lvl in payload["levels"]
@@ -715,9 +718,9 @@ def _fig_level_dependence(payload: dict, slug: str) -> None:
         sec.spines["top"].set_visible(False)
     axes[0].set_ylabel("Sobol' index", fontsize=9, color=_INK_2)
     fig.suptitle(
-        f"Index rotation along the conditioning axis — "
-        f"{payload['cross_section_id']} (the +4K direction is rightward; "
-        "ADR-0023/ADR-0033 §6)",
+        f"Index rotation along the conditioning axis, "
+        f"{_section_label(payload['cross_section_id'])} "
+        "(a warmer climate moves rightward along this axis)",
         fontsize=11,
         color=_INK,
     )
@@ -760,7 +763,7 @@ def _fig_convergence(payload: dict, slug: str) -> None:
     worst_drift = max(drift["drift_S_last_two_rungs"], drift["drift_ST_last_two_rungs"])
     fig.suptitle(
         f"Convergence ladder, transient indicator at h = "
-        f"{design['level_m']:.2f} m — {payload['cross_section_id']} "
+        f"{design['level_m']:.2f} m, {_section_label(payload['cross_section_id'])} "
         f"(last-two-rungs drift {worst_drift:.3f})",
         fontsize=11,
         color=_INK,
@@ -802,8 +805,9 @@ def _fig_interaction_gap(payload: dict, slug: str) -> None:
     ax.set_xlabel("conditioning level h [m MSL]", fontsize=9, color=_INK_2)
     ax.set_ylabel(r"interaction gap $S_{Ti} - S_i$", fontsize=9, color=_INK_2)
     ax.set_title(
-        f"Interaction involvement, transient indicator — "
-        f"{payload['cross_section_id']} (fm7: $C_e \\times k_{{aq}}$)",
+        f"Interaction involvement, transient indicator, "
+        f"{_section_label(payload['cross_section_id'])} "
+        "(the $C_e \\times k_{aq}$ interaction)",
         fontsize=10,
         color=_INK,
     )
@@ -859,8 +863,8 @@ def _fig_companions(comp: dict, baseline_payload: dict) -> None:
     ax.set_ylabel(r"total-effect $S_{Ti}$ (Y1)", fontsize=9, color=_INK_2)
     ax.set_title(
         f"Companion runs (baseline and Nataf at h = "
-        f"{comp['design_level_m']:.2f} m) — ranking robustness "
-        "(bars grouped per input; alpha/hatch = run)",
+        f"{comp['design_level_m']:.2f} m): ranking robustness "
+        "(bars grouped per input; shade and hatch distinguish the cases)",
         fontsize=10,
         color=_INK,
     )

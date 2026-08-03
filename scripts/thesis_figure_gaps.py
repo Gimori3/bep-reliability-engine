@@ -105,6 +105,13 @@ PHASE2_RUNS = (
     ("no_initiation", "phase2_no_initiation", "criterion: no breach AND no initiation"),
 )
 
+#: Plain-English rendering of a run description, for figure text only. The
+#: descriptions above are carried verbatim into the committed slice
+#: ``docs/decisions/phase2-survival-update-per-stratum.json``, so they name the
+#: acceptance criterion exactly as the Phase 2 record does and must not change;
+#: a main-body thesis figure may not print that field name.
+RUN_DISPLAY_NAMES = {"no_breach (the deliverable)": "no breach (the deliverable)"}
+
 #: ``rq4_annual.csv`` arms, as (label, column overrides against the baseline).
 #: The baseline is the production deliverable: matrix d70, posterior BEP source,
 #: lambda_ac = 250 m (ADR-0037 primary), primary surface variant.
@@ -144,7 +151,7 @@ BRACKET_LABEL = {
     "m_p": r"$m_p$ model factor",
     "gamma_bl_sub_prior_mean": r"$\gamma'_{bl}$ prior mean",
     "clopper_pearson": "Clopper-Pearson (95%)",
-    "mc_cov": r"MC CoV (spec $\S$11)",
+    "mc_cov": "Monte Carlo CoV (target)",
 }
 
 #: Arms excluded from the per-bracket cancellation summary, with the reason.
@@ -702,7 +709,7 @@ def figure_phase2_survival(slice_: dict[str, Any]) -> tuple[Path, list[dict[str,
             height=height * 0.92,
             color=colour,
             lw=0,
-            label=description,
+            label=RUN_DISPLAY_NAMES.get(description, description),
         )
         for y, value in zip(offsets, values):
             axb.text(
@@ -1034,11 +1041,12 @@ def figure_epistemic_ranking(
     axc.text(
         0.0,
         -0.175,
-        "ADR-0045 $\\S$2 applies $m_p$ to the single-source $H_c$ in BOTH "
-        "branches, so it is pure common-mode BY\n"
-        r"CONSTRUCTION. $\gamma'_{bl}$ moves only the transient branch "
-        "(ADR-0028): near 1 there is inertness, not\n"
-        "cancellation. A bracket cancels only if it is pure common-mode.",
+        "The model factor $m_p$ multiplies the single-source critical head "
+        "$H_c$ in BOTH branches, so it is pure\n"
+        r"common-mode BY CONSTRUCTION. $\gamma'_{bl}$ enters the uplift and "
+        "heave gate alone and so moves only the\n"
+        "transient branch: near 1 there is inertness, not cancellation. A "
+        "bracket cancels only if it is pure common-mode.",
         transform=axc.transAxes,
         fontsize=8,
         color=figstyle.MUTED,

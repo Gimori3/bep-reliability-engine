@@ -182,38 +182,53 @@ A root-level `figures/` directory existed until 2026-07-31 holding 11 byte-ident
 duplicates that nothing wrote and nothing read. It was deleted; if one reappears,
 it is a mistake.
 
-### 9.3.1 A rendered figure title carries no ADR number and no project-process statement
+### 9.3.1 A main-body figure prints no engine-internal identifier and no em dash
 
-Thirty of these figures are placed in the **main body** of the thesis, whose binding
-rules exclude both ADR identifiers and any narration of the project's own evolution.
-A caption can be rewritten in the thesis repository; **text rendered into the PNG
-cannot**, so it has to be right here. A title states what the figure shows, in the
-vocabulary of the physics.
+Thirty of these figures are placed in the **main body** of the thesis. Its binding
+rules exclude ADR identifiers, any narration of the project's own evolution, and all
+software and computer-science vocabulary from Chapters 1 to 9, and its style rules
+forbid the em dash "anywhere" while stating explicitly that they cover "figures,
+figure and table captions". A caption can be rewritten in the thesis repository;
+**text rendered into the PNG cannot**, so it has to be right here. The thesis's own
+prescribed scans are `.tex` scans and cannot see inside a PNG, which is why this went
+unnoticed for seven drafting sessions.
 
-**Open, and the fix is a re-render.** Three of the 57 rendered titles violate this,
-established by reading every `suptitle` and `set_title` on 2026-08-02:
+**The rule.** No text rendered into a main-body figure (title, suptitle, axis label,
+tick label, legend entry, annotation, in-plot text) carries any of:
 
-| Driver, line | Figure | Rendered title contains | Placed |
-|---|---|---|---|
-| `dem_cross_section_study.py:2044` | `adr0047_dem_seepage_length.png` | `"ADR-0047: …"` **and `"measurement only, no input value changed"`** | thesis main body |
-| `timestep_convergence_stress.py:902` | `adr0039-timestep-stress.png` | `"(spec §11; ADR-0039)"` | thesis main body |
-| `ce_prior_study.py:388` | `ce_prior_reconciliation.png` | `"(ADR-0026)"` | thesis appendix |
+| Offence | Rendered instead |
+|---|---|
+| `ADR-00xx`, `spec §N` | the physical or statistical reason the decision encodes |
+| module identifiers `M1` to `M9` | the thesis's own name for the step (`M4` is "hydraulic translation") |
+| failure-mode tags `fm5`, `fm7` | the effect itself ("the C_e x k_aq interaction") |
+| file and data formats `CSV`, `HDF5`, `JSON` | the source ("1998 survey", "tabulated value") |
+| run and config identifiers `tokachi_kp58.8`, a policy name, a `.png` filename | `KP 58.8`, via `scripts/_figstyle.py::section_label` |
+| snake_case record field names | plain English, via a per-driver display map |
+| "engine" meaning the implementation | "model", "production", or drop |
+| literal em dash U+2014 | a comma, colon or full stop; ranges become "X to Y" |
 
-The first is the one that matters, and it is **not only a register problem**: the
-title asserts *no input value changed*, which was true of the measurement study but
-was overtaken when ADR-0047 was **adopted at KP 62.0** and `L_m` went 47.0 to 40.0 in
-`data/processed/tokachi_bep_inputs.csv`. A main-body thesis figure therefore renders a
-statement this repository's own record contradicts. Fix that title first.
+**A record field name is never renamed to satisfy this.** The keys are the evidence
+JSON's own schema and are load-bearing; the substitution happens at render time
+through a display map beside the plotting code (`ARM_DISPLAY_NAMES`,
+`LADDER_DISPLAY_NAMES`, `CASE_DISPLAY_NAMES`, `RUN_DISPLAY_NAMES`). One of these
+was caught by `test_thesis_figure_gaps.py` precisely because the first attempt
+edited the field rather than its rendering.
 
 A file *name* beginning `adr…` is not a violation: it never appears in the compiled
-PDF. Only rendered text does. A contemporaneous claim that
-`adr0031-convergence-n-ladder.png` also carries an ADR number is **wrong** and should
-not be propagated; its title reads `"fm5 tail-variance: LHS vs crude MC"`.
+PDF, and renaming one would break `\includegraphics` in two chapters plus every
+`FIGURE_DRIVERS` `produces` entry. Only rendered text is in scope.
 
-**When to act.** Next time a session re-renders any of these three, fix the title in
-the same edit; it is one string each. The figures are otherwise content-current, so
-none of this justifies a re-run of its own. Re-rendering changes only the PNG, so the
-thesis needs no edit: the filenames and captions there are unaffected.
+**Executed 2026-08-04** across all 30 main-body figures: 22 were dirty, 8 clean, and
+all 30 now pass a visual re-read. The rule is **not** enforced by a test, because a
+PNG holds no extractable text; the source-side sweep in that session's record is
+necessary and not sufficient, so a new main-body figure must be opened and read.
+
+**Appendix figures are out of scope** and deliberately still carry these items:
+`adr0031-tail-lhs-vs-crude*.png` (em dash, `fm5`), `epistemic_knobs_mp_ztoe.png`,
+`stage6_6_heq_*.png` and `adr0040_tilted_is_validation.png` (ADR numbers), and
+`ce_prior_reconciliation.png` (`(ADR-0026)`). Binding rules 2 and 3 are scoped to
+Chapters 1 to 9, and an ADR pointer in an appendix figure has been judged acceptable.
+If one of those figures is ever promoted to the main body, it comes into scope.
 
 ### 9.4 A test may only skip on something that is genuinely optional
 

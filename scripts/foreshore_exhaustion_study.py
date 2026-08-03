@@ -382,6 +382,14 @@ def _separation(records: list[dict[str, Any]]) -> dict[str, Any]:
     return out
 
 
+#: Plain-English rendering of the forcing-case and retreat-rate keys, for
+#: figure text only. The keys are the evidence record's own field names (and,
+#: for the rates, the shipped bracket's) and must not change; a main-body
+#: thesis figure may not print them.
+CASE_DISPLAY_NAMES = {"event_2016": "2016 event", "design_hwl": "design HWL"}
+RATE_DISPLAY_NAMES = {"narrative_2011": "2011 account"}
+
+
 def _make_figure(records: list[dict[str, Any]], out_path: Path) -> None:
     """Exposure ratio versus bed width, and the critical-rate ladder."""
     import matplotlib
@@ -416,7 +424,10 @@ def _make_figure(records: list[dict[str, Any]], out_path: Path) -> None:
                 color=color,
                 markersize=5,
                 linewidth=1.2,
-                label=f"{name} ({rate:g} m/h), {case}",
+                label=(
+                    f"{RATE_DISPLAY_NAMES.get(name, name)} ({rate:g} m/h), "
+                    f"{CASE_DISPLAY_NAMES[case]}"
+                ),
             )
     ax_a.axhline(1.0, color="crimson", linewidth=1.4)
     ax_a.text(
@@ -495,7 +506,7 @@ def _make_figure(records: list[dict[str, Any]], out_path: Path) -> None:
     ax_b.legend(fontsize=7.5, loc="upper right")
 
     fig.suptitle(
-        "R10 Tier 1 foreshore-exhaustion screening — order-of-magnitude only, "
+        "Foreshore-exhaustion screening indicator: order-of-magnitude only, "
         "not a probability",
         fontsize=9.5,
     )

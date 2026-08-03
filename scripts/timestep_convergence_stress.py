@@ -47,6 +47,7 @@ import argparse
 import datetime as _dt
 import json
 import math
+import sys
 import time
 from pathlib import Path
 from typing import Any
@@ -55,7 +56,11 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.stats import norm
 
-from bep_reliability_engine.config import Config
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from _figstyle import section_label as _section_label  # noqa: E402
+
+from bep_reliability_engine.config import Config  # noqa: E402
 from bep_reliability_engine.evaluator import EvaluationResult, evaluate_realization
 from bep_reliability_engine.hydrographs import (
     CanonicalShape,
@@ -804,7 +809,7 @@ def make_figure(
     ax_b.set_ylabel("pipe length l(t) [m]")
     ax_b.set_title(
         f"(b) Worst-case trajectories at h = {traj['showcase_level_m_msl']:g} m MSL"
-        f" ({primary_id})",
+        f" ({_section_label(primary_id)})",
         loc="left",
         fontsize=10,
     )
@@ -831,7 +836,7 @@ def make_figure(
     ax_c.set_xlabel("conditioning stage h [m MSL]")
     ax_c.set_ylabel("terminal eroded length l_e [m]")
     ax_c.set_title(
-        f"(c) Terminal l_e vs stage, worst-case θ ({primary_id})",
+        f"(c) Terminal l_e vs stage, worst-case θ ({_section_label(primary_id)})",
         loc="left",
         fontsize=10,
     )
@@ -851,7 +856,14 @@ def make_figure(
         xs_arr = np.asarray(xs)[order]
         ys_arr = np.asarray(ys)[order]
         flips_arr = np.asarray(flips)[order]
-        ax_d.plot(xs_arr, ys_arr, color=color, lw=1.4, label=section_id, zorder=3)
+        ax_d.plot(
+            xs_arr,
+            ys_arr,
+            color=color,
+            lw=1.4,
+            label=_section_label(section_id),
+            zorder=3,
+        )
         ax_d.scatter(
             xs_arr[~flips_arr],
             ys_arr[~flips_arr],
@@ -899,7 +911,7 @@ def make_figure(
     ax_d.invert_xaxis()
 
     fig.suptitle(
-        "Worst-case forward-Euler timestep stress test (spec §11; ADR-0039):\n"
+        "Worst-case forward-Euler timestep stress test:\n"
         "p99 k_aq × p99 C_e × p01 D_bl on the flashiest d4PDF rising limb",
         fontsize=11,
         x=0.02,
@@ -988,6 +1000,63 @@ def collect_trajectories(
     }
 
 
+def trajectories_from_evidence(
+    payload: dict[str, Any], config_paths: list[Path]
+) -> dict[str, Any]:
+    """Rebuild only the showcase trajectories the figure needs.
+
+    The redraw path. The persisted evidence carries the whole Delta-t ladder
+    and both chosen member ids, so nothing here re-runs the ladder or the
+    3000-member flashiness scan: the ensemble workbook is read once per
+    section to recover the two named members, and
+    :func:`collect_trajectories` integrates five single realizations at one
+    conditioning level. The worst-case theta is a deterministic function of
+    the config, so it is recomputed rather than stored.
+
+    Parameters
+    ----------
+    payload : dict
+        A previously written evidence payload.
+    config_paths : list of pathlib.Path
+        The section configs whose blocks the payload carries.
+
+    Returns
+    -------
+    dict
+        Showcase trajectories per section, as :func:`make_figure` expects.
+
+    Raises
+    ------
+    KeyError
+        If the payload carries no block for a config's cross-section.
+    """
+    trajectories: dict[str, Any] = {}
+    for path in config_paths:
+        config = Config.from_yaml(path)
+        block = payload["sections"][config.cross_section_id]
+        selection = block["event_selection"]
+        chosen_id = selection["chosen"]["event_id"]
+        production_id = selection["production_shape_reference"]["event_id"]
+        print(
+            f"  {config.cross_section_id}: redrawing from the persisted "
+            f"ladder ({chosen_id} against {production_id})",
+            flush=True,
+        )
+        records, _ = scan_ensemble_flashiness(config)
+        theta, _ = worst_case_theta(config)
+        production_shape, _, _ = normalize_stage_shape(records[production_id].h)
+        trajectories[config.cross_section_id] = collect_trajectories(
+            block,
+            config,
+            canonical_from_record(records[chosen_id]),
+            production_shape,
+            production_id,
+            theta,
+            config.geometry.as_evaluator_dict(),
+        )
+    return trajectories
+
+
 def main() -> None:
     """CLI entry point."""
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
@@ -997,7 +1066,33 @@ def main() -> None:
     parser.add_argument("--output-json", default=DEFAULT_JSON)
     parser.add_argument("--figure", default=DEFAULT_FIGURE)
     parser.add_argument("--quick", action="store_true", help="plumbing smoke only")
+    parser.add_argument(
+        "--figures-only",
+        action="store_true",
+        help=(
+            "redraw the figure from the persisted evidence and write no "
+            "evidence file; runs no ladder and rewrites nothing tracked "
+            "except the figure"
+        ),
+    )
     args = parser.parse_args()
+
+    if args.figures_only:
+        if args.quick:
+            parser.error("--figures-only and --quick are mutually exclusive")
+        json_path = Path(args.output_json)
+        if not json_path.is_file():
+            parser.error(f"--figures-only needs the evidence file {json_path}")
+        payload = json.loads(json_path.read_text(encoding="utf-8"))
+        config_paths = [Path(args.config)]
+        if not args.skip_confirm and args.confirm_config:
+            config_paths.append(Path(args.confirm_config))
+        make_figure(
+            payload,
+            trajectories_from_evidence(payload, config_paths),
+            Path(args.figure),
+        )
+        return
 
     start = time.perf_counter()
     payload: dict[str, Any] = {

@@ -130,7 +130,7 @@ def fig_dominance_profile(df: pd.DataFrame) -> None:
             ax.plot(sub.kp, sysv, "-", color=INK, lw=2.0, alpha=0.75, label="System")
             ax.set_yscale("log")
             ax.set_ylim(FLOOR, 1.0)
-            ax.set_title(f"{river} — {scenario}")
+            ax.set_title(f"{river}, {scenario}")
             ax.set_xlabel("KP [km]")
             if j == 0:
                 ax.set_ylabel("Annual failure probability [1/yr]")
@@ -290,10 +290,11 @@ def fig_climate_shift(df: pd.DataFrame) -> None:
     fig.suptitle(
         "REACH CONTEXT (not the RQ4 answer): climate shift of the annualized "
         "system failure probability over all 114 segments\n"
-        "posterior BEP, matrix d70. 110 of 114 segments have no BEP source under "
-        "the production 'exact' policy and are surface-only LOWER BOUNDS;\n"
-        "the quantified RQ4 answer is the four geotechnically characterised "
-        "sections (see phase3_rq4_four_sections.png).",
+        "posterior BEP, matrix d70. 110 of 114 segments have no geotechnically "
+        "characterised cross-section of their own and are surface-only "
+        "LOWER BOUNDS;\n"
+        "the quantified RQ4 answer is the four characterised sections, given "
+        "separately.",
         fontsize=9.5,
         color=INK_2,
     )
