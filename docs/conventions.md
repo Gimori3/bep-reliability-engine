@@ -223,6 +223,26 @@ all 30 now pass a visual re-read. The rule is **not** enforced by a test, becaus
 PNG holds no extractable text; the source-side sweep in that session's record is
 necessary and not sufficient, so a new main-body figure must be opened and read.
 
+**Amended 2026-08-05, and the gap is instructive.** That sweep enumerated *plan
+section 3.2's* 30 figures, and the five Phase 2 figures promoted two days earlier
+(2026-08-02) were not in that list, so they were never inspected. Two of them
+reached the main body carrying exactly the offences the table forbids:
+`phase2_fragility_update_kp58_8_matrix.png` printed the run stem
+`tokachi_kp58.8_historical_matrix` as its suptitle, and `phase2_peak_shortcut.png`
+printed the repository path `docs/phase2_report.md section 11.1` in a footnote.
+Both are fixed. **The lesson is that "the 30 figures" is a list, not a set closed
+under promotion**: promoting a figure into the main body brings it into scope, and
+the same sentence already says so for appendix figures.
+
+The package-side substitution mirrors `section_label` rather than importing it, since
+`bayesian_reliability_updating` must not depend on `scripts/`:
+`pipeline.STEM_DISPLAY_NAMES` plus `pipeline.display_label`, keyed on the same run
+stems as `PUBLICATION_FIGURES`, with **an unrecognised stem returned unchanged**.
+That last property is load-bearing twice: the six non-promoted strata keep their
+stem in the run-local diagnostic title, and an ADR-0046 `z_toe` scenario (whose stem
+carries a `_ztoe_*` suffix) keeps the suffix in its title as well as finding no
+publication entry, so a scenario cannot be mistaken for the baseline on either axis.
+
 **Appendix figures are out of scope** and deliberately still carry these items:
 `adr0031-tail-lhs-vs-crude*.png` (em dash, `fm5`), `epistemic_knobs_mp_ztoe.png`,
 `stage6_6_heq_*.png` and `adr0040_tilted_is_validation.png` (ADR numbers), and

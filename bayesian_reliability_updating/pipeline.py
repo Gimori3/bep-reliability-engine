@@ -93,6 +93,44 @@ PUBLICATION_FIGURES: dict[str, dict[str, str]] = {
 }
 
 
+#: Rendered-title display names for the promoted strata, keyed on the same run
+#: stems as :data:`PUBLICATION_FIGURES`. A run stem is implementation
+#: vocabulary, which the thesis main body excludes (``docs/conventions.md``
+#: section 9.3.1), and these four figures are the only ones this package puts
+#: in the main body.
+#:
+#: **A record field is never renamed to satisfy that rule**; the substitution
+#: happens at render time, exactly as the 2026-08-04 figure pass did it for the
+#: ``scripts/`` drivers, and an unrecognised stem is returned unchanged. That
+#: last property is load-bearing twice over: the six non-promoted strata keep
+#: their stem in the run-local diagnostic title, and an ADR-0046 z_toe scenario
+#: (whose stem carries a ``_ztoe_*`` suffix) keeps its suffix in the title as
+#: well as finding no publication entry, so it can never be mistaken for the
+#: baseline on either axis.
+STEM_DISPLAY_NAMES: dict[str, str] = {
+    "tokachi_kp58.8_historical_matrix": "KP 58.8, matrix grain-size reading",
+    "tokachi_kp60.0_historical_matrix": "KP 60.0, matrix grain-size reading",
+}
+
+
+def display_label(stem: str) -> str:
+    """Human-readable title stem for a Phase 1 run, for rendered figure text.
+
+    Parameters
+    ----------
+    stem : str
+        The Phase 1 run stem the figures are named for (``paths['stem'].name``).
+
+    Returns
+    -------
+    str
+        The display name from :data:`STEM_DISPLAY_NAMES` where one exists,
+        otherwise the input unchanged, so an unrecognised or scenario-suffixed
+        stem is never silently mangled.
+    """
+    return STEM_DISPLAY_NAMES.get(stem, stem)
+
+
 def publication_path(stem: str, kind: str) -> Path | None:
     """Tracked destination for one Phase 2 figure, or None if not promoted.
 
@@ -238,6 +276,9 @@ def _figures(
     from bayesian_reliability_updating import plots
 
     stem = paths["stem"].name
+    # Rendered titles use the display name; file names, paths and the
+    # publication registry all stay keyed on the stem itself.
+    shown = display_label(stem)
     fig_dir = paths["figures"]
     # The replay datum (equals the config toe except under the ADR-0046
     # scenario, where figures must draw the shifted toe actually used).
@@ -251,7 +292,7 @@ def _figures(
                 result.param_names,
                 result.accept,
                 fig_dir / f"{stem}_marginals.png",
-                title=f"{stem}: prior vs posterior marginals",
+                title=f"{shown}: prior vs posterior marginals",
                 publication_path=publication_path(stem, "marginals"),
             )
         )
@@ -267,7 +308,7 @@ def _figures(
                 fig_dir / f"{stem}_fragility_update.png",
                 z_toe_m=z_toe,
                 event_peak_m=float(last_event["record"]["peak_m_msl"]),
-                title=f"{stem}: fragility update",
+                title=f"{shown}: fragility update",
                 publication_path=publication_path(stem, "fragility_update"),
             )
         )
@@ -277,7 +318,7 @@ def _figures(
             plots.plot_decomposition(
                 last_event["decomposition"],
                 fig_dir / f"{stem}_decomposition.png",
-                title=f"{stem}: survival-discrimination decomposition "
+                title=f"{shown}: survival-discrimination decomposition "
                 f"({last_event['event_id']})",
             )
         )
@@ -289,7 +330,7 @@ def _figures(
                 result.param_names,
                 result.accept,
                 fig_dir / f"{stem}_rejection_scatter.png",
-                title=f"{stem}: accept/reject in the k_aq x C_e plane",
+                title=f"{shown}: accept/reject in the k_aq x C_e plane",
             )
         )
     )
@@ -302,7 +343,7 @@ def _figures(
                     fig_dir / f"{stem}_{replay.record.event_id}_record.png",
                     z_toe_m=z_toe,
                     trace_level_m=trace,
-                    title=f"{stem}: observed record {replay.record.event_id}",
+                    title=f"{shown}: observed record {replay.record.event_id}",
                 )
             )
         )
@@ -315,7 +356,7 @@ def _figures(
                         arrays.t_breach,
                         replay.record,
                         fig_dir / f"{stem}_{event_id}_breach_times.png",
-                        title=f"{stem}: rejected-realization breach times "
+                        title=f"{shown}: rejected-realization breach times "
                         f"({event_id})",
                     )
                 )

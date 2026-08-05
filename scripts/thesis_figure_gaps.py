@@ -2188,8 +2188,7 @@ def figure_peak_shortcut(slice_: dict[str, Any]) -> tuple[Path, list[dict[str, A
         "that sees only the peak cannot tell the two apart.\n"
         "* small-number regime: the factor is a ratio of two small counts. "
         "Peak-only values are the prior transient curve interpolated linearly "
-        "on its raw MC points at the observed peak (docs/phase2_report.md "
-        "section 11.1).",
+        "on its raw Monte Carlo points at the observed peak.",
         fontsize=8,
         color=figstyle.MUTED,
         ha="left",
