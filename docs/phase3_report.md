@@ -313,6 +313,22 @@ duration strata everywhere (figure `phase3_rq4_attribution.png`).
 
 ## 7. Validation
 
+> **Note added 2026-08-06 (external verification of the thesis results
+> chapters).** Two figures in this section are read more precisely from
+> `results/system_integration/phase3/event_based_validation.json` than the
+> prose below states, and the thesis uses the precise readings.
+> **(a)** The "~1.0–1.9" overflow band mixes adequately-counted comparisons
+> with ratios of very small counts. Separated: **seven** node-and-climate
+> comparisons carry more than twenty engaged overflow events, and at every one
+> of those seven the curve-based estimate exceeds the event-based one by
+> **1.03 to 1.13**, uniformly conservative. The 1.6 and 2.5 outliers rest on
+> **eight and five** engaged events and the 0.52 on **three**; they are ratios
+> of small counts, not evidence of a shape effect.
+> **(b)** The KP58.0 event-based +4K overflow annual is **1.5469e-3**, which
+> rounds to **1.5e-3**, not the 1.6e-3 printed below. The "within ~20%"
+> conclusion is unaffected (1.19). No number was recomputed; both readings are
+> transcriptions of the shipped JSON.
+
 * **Internal (canonical curves vs event-based re-execution at the 9
   section nodes; figure `phase3_event_based_validation.png`)**: overflow
   agrees to a factor ~1.0–1.9 (curve-based mildly conservative, mostly

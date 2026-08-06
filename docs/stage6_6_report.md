@@ -50,7 +50,9 @@ sections; at extreme overload levels the two criteria converge because almost
 every realization that exceeds the critical head also has time to breach.
 
 Attribution, in one sentence per section: at KP62.0 the production gap is
-carried by the temporal mechanism (about 76 percent at 48.0 m) with the crack
+carried by the temporal mechanism (about 76 percent at 48.0 m)
+[**superseded — under the adopted L = 40.0 m the same cell reads 81 percent;
+see section 10**] with the crack
 head convention carrying the rest and the initiation gate contributing nothing;
 at KP57.4 the head convention carries more (42 percent at 40.5 m, and the
 entirety of the small gap at HWL) because the thicker blanket (D_bl mean
@@ -195,6 +197,12 @@ L = 40.0 m: 6.0 at 47.0 m down to 1.4 at 50.5 m; see section 8**], and from
 
 ### 4.2 The dimensional component (physics ladder)
 
+> **Note added 2026-08-06: every KP 62.0 figure in this subsection is
+> pre-adoption and section 10 supersedes it.** The KP 57.4 figures stand
+> (that section was not adopted). This subsection carried no supersession
+> marker until now, which is how the stale bulk figure `+0.40` reached the
+> thesis; it is `+0.61` live.
+
 Switching the resistance scaling to the 3D hole-exit exponent moves a lot of
 probability: the dimensional step C1 to C2 is -0.563 (paired 95 percent
 interval -0.566 to -0.560) at KP62.0, 48.0 m, and -0.501 (-0.504 to -0.498)
@@ -238,6 +246,11 @@ suppression under real loading; the remainder (gate timing within the
 hydrograph) sits inside the temporal step by construction.
 
 ### 4.4 The H_eq-conservatism bound (ADR-0009, closed at the indicator level)
+
+> **Note added 2026-08-06: the two KP 62.0 figures below and the "10 to 25
+> percent" summary are pre-adoption; section 10 supersedes them.** The
+> KP 57.4 figure and the "5 to 15 percent of the temporal component" statement
+> both reproduce live and stand.
 
 The 0.9 H_c end anchor inflates the production transient P_f by +0.0084
 (23 percent of C4b) at KP62.0, 48.0 m, +0.045 (9 percent) at 50.5 m, and
@@ -344,11 +357,17 @@ is **26.9 [21.6, 35.3]**, resolved at N = 1e6, and KP 57.4's is bounded at
 **B ≥ 148** with a resolved anchor of 42.7 at 39.50 m), but
 the label "temporal" belongs to only part of it. Through the fragility
 shoulder the time constraint is the dominant mechanism (58 to 76 percent of
-the production gap, pure temporal ratios of 2 to 8); in the deep tail at
+the production gap, pure temporal ratios of 2 to 8)
+[**superseded — 58 to 81 percent live; see section 10**]; in the deep tail at
 design levels the crack head convention carries most of the gap (85 to
-97 percent); the initiation gate is immaterial to the production comparison;
+97 percent)
+[**superseded — 75 to 97 percent live; the 85 is the pre-adoption KP 62.0
+design-level share and reads 0.749 under L = 40.0 m; see section 10**];
+the initiation gate is immaterial to the production comparison;
 the H_eq-conservatism inflates the transient side by 10 to 25 percent of
-itself and is now quantified rather than open; and the dimensional axis is
+itself and is now quantified rather than open
+[**superseded — 1 to 39 percent over the levels this report tabulates; see
+section 10**]; and the dimensional axis is
 absent from the production gap by construction, while re-anchoring the
 transient at its 3D calibration exponent would erase most of the static
 margin (physics-ladder totals near zero through the shoulder) under the
@@ -500,3 +519,78 @@ statistical interval**. `k_aq` dominates it, `z_toe` is second (rho = 0.515
 resolved at −0.30 m), `m_p` cancels (rho = 1.010 — the pre-registered negative
 control, which passed), and `gamma_bl_sub` is exactly inert (rho = 1.000). Section
 1's attribution and all component tables are unchanged.
+
+---
+
+## 10. COMPONENT FIGURES RE-READ FROM THE LIVE ANALYSIS (2026-08-06; authoritative where it differs from sections 1 to 7)
+
+Raised by the external verification of the thesis results chapters
+(`msc-thesis/scratch/EXECUTION_LOG.md`, step 11). Section 8 corrected the
+KP 62.0 **bias** figures after the ADR-0047 adoption and section 9 resolved them
+at N = 1e6, but **neither pass re-read the component decomposition**, and
+sections 4.2 and 4.4 carried no supersession marker at all. Every figure below
+is read from the live `results/stage6_6/stage6_6_kp*_analysis.json`, which the
+2026-07-29 production campaign regenerated post-adoption. **No number was
+recomputed and nothing was re-run: this is a transcription of what the shipped
+analysis files already contain.**
+
+**KP 57.4 was not adopted, so every KP 57.4 figure in sections 1 to 7 stands.**
+Everything below is KP 62.0 except where stated.
+
+### 10.1 The two ranges the thesis inherited, and what they should be
+
+| Where | Reported | Live | Why |
+|---|---|---|---|
+| §1, §7 | head convention carries **85 to 97 percent** of the gap at design levels | **75 to 97 percent** | the 85 is KP 62.0's design-level head share at the withdrawn *L* = 47.0 m; live it is **0.749** at 46.39 m. KP 57.4's 0.975 at 39.21 m is unchanged. |
+| §1, §4.4, §7 | H_eq conservatism inflates the transient side by **10 to 25 percent** of itself | **1 to 39 percent** | the reported range rests on three levels of which two are pre-adoption KP 62.0 rows. Live, over the six levels this report tabulates: **28.9 / 18.6 / 5.6 percent** at KP 62.0's 47.00, 48.00 and 50.50 m, and **38.7 / 17.0 / 0.95 percent** at KP 57.4's 39.50, 40.50 and 43.25 m. |
+| §1, §7 | temporal share through the shoulder **58 to 76 percent** | **58 to 81 percent** | 0.809 at KP 62.0's 48.00 m against the reported 0.76. The 58 is KP 57.4's 40.50 m and is unchanged. |
+
+**What did not change.** §4.4's "5 to 15 percent of the temporal component"
+reproduces live (6.8 percent at 48.00 m, 13.3 at 50.50 m, 14.8 at KP 57.4's
+40.50 m), and so does the companion statement that the pure time-constraint
+bound is 5 to 15 percent larger than the temporal-net numbers. §4.3's initiation
+gate conclusion is unchanged in substance: the gate is immaterial to the
+production comparison, identically zero at every KP 62.0 level and never above
+**3 percent** of the gap at KP 57.4, where its largest resolved contribution is
+an absolute **1.5e-3** at 40.00 m. (§4.1's parenthetical "+2e-4 (resolved,
+negligible)" is one row of a three-row table and is not the whole resolved set;
+there are **six** resolved gate levels at KP 57.4, deltas 4.3e-4 to 1.51e-3.)
+
+### 10.2 Section 4.2, which had no supersession marker and reached the thesis
+
+| Quantity | Reported | Live |
+|---|---|---|
+| dimensional step C1 to C2, KP 62.0, 48.0 m | **-0.563** | **-0.4692** |
+| temporal step at the 3D endpoint, KP 62.0, 48.0 m | **+0.517** | **+0.4685** |
+| physics-ladder total, KP 62.0, 48.0 m | **+0.004** | **+0.0648** |
+| engine-ladder total, KP 62.0, 48.0 m | **+0.208** | **+0.3422** |
+| bulk d70 dimensional component, KP 62.0, 56.5 m | **+0.40** | **+0.6133** |
+| dimensional step, KP 57.4, 40.5 m | -0.501 | **-0.5013**, unchanged |
+| bulk d70 dimensional component, KP 57.4, 43.25 m | +0.37 | **+0.3738**, unchanged |
+
+**The qualitative reading of §4.2 survives all of it**: the dimensional step is
+negative throughout the resolved range under the matrix reading, it nearly
+cancels the temporal step so the physics-ladder total is small, and it reverses
+sign under the bulk reading. Only the magnitudes move.
+
+**One presentational point the bulk row needs and did not carry.** KP 62.0's
++0.6133 sits at **56.5 m MSL**, inside the ADR-0024 hypothetical grid extension
+and six metres above that section's maximum attainable stage of 50.5 m. Within
+the attainable range the bulk dimensional component is resolved but tiny,
++0.0069 at 50.50 m. KP 57.4's +0.3738 is at its **maximum attainable** stage, so
+the two entries are not comparable as stated. The bulk companion also runs at
+**N = 10 000**, not the 100 000 of the matrix ladder.
+
+### 10.3 What this changes downstream
+
+**Nothing computational.** No persisted artifact, no `Config` default, no
+physics, no configs, no test. The live analysis files were already correct; what
+was stale was this report's prose and, through it, the running index in
+`project-notes.md`, whose Stage 6.6 bullet is corrected in the same pass.
+
+**In the thesis**, the one figure that had propagated is §4.2's bulk
+`+0.40`, corrected there to `+0.61` with its stage and its sample size. The
+head-convention and H_eq ranges had **not** propagated: the thesis quotes the
+per-level values from these same live files and states them correctly as 75 to
+97 percent and 1 to 39 percent, so on those two the thesis was right and this
+report was stale.

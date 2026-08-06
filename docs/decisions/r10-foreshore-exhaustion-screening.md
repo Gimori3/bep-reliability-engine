@@ -201,6 +201,20 @@ the sections is unchanged across the whole band.
 
 ### 4.3 Climate (d4PDF ensemble, `z_mob` datum)
 
+> **Provenance note added 2026-08-06 (external verification of the thesis
+> results chapters).** This subsection is the **only** record of these figures.
+> The tracked evidence file `r10-foreshore-exhaustion-screening.json` carries
+> `"d4pdf_ensemble": null`, because the ensemble block is populated only when
+> the study is run against the gitignored d4PDF workbooks and the production
+> campaign restores the tracked record from git rather than letting a timing- or
+> data-availability-dependent block churn it. That is the deliberate campaign
+> rule and it is not changed here; it does mean that a reader checking the
+> machine-readable record will not find the numbers below, and that regenerating
+> them requires `scripts/foreshore_exhaustion_study.py` on a machine holding
+> `data/raw/hydrographs/`. Every other block of that JSON (the four sections,
+> the brackets, the coverage, the sanity anchor) is populated and was verified
+> against this note.
+
 Share of simulated annual-maximum years in which the bed is engaged at all:
 
 | Section | historical (3,000 y) | +4K (5,400 y) |

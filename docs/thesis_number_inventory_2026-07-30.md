@@ -356,3 +356,31 @@ path exists, so the figures are kept unconditionally fresh rather than merely
 watched. That entry is also the first whose command is `-m <package>` rather than
 a `scripts/` path, which the driver-shape guard in `tests/test_figure_pass.py` was
 widened to allow for this repository's three packages.
+
+---
+
+## Correction, 2026-08-06: rows 2.8, 2.10 and 2.11 carry pre-adoption values
+
+Raised by the external verification of the drafted results chapters
+(`msc-thesis/scratch/EXECUTION_LOG.md`, step 11). Per the practice of the
+2026-07-31 addendum above, the rows are left as this pass wrote them and the
+correction is recorded here.
+
+Three rows were transcribed from `stage6_6_report.md` sections 1, 4.2, 4.4 and 7
+rather than from the analysis files the "source artifact" column names, and those
+report sections still held the **withdrawn L = 47.0 m** KP 62.0 geometry. Report
+sections 4.2 and 4.4 carried no supersession marker at all, which is why this
+went unnoticed; both now do, and `stage6_6_report.md` section 10 tabulates the
+live values.
+
+| Row | As written | Live, from `stage6_6_kp*_analysis.json` |
+|---|---|---|
+| 2.8 | temporal 58 to 76 %; head convention **85 to 97 %** | temporal 58 to **81** %; head convention **75 to 97 %** (KP 62.0's design-level share is 0.749, not 0.85) |
+| 2.10 | H_eq conservatism **+10 to 25 %** of transient P_f | **+1 to 39 %** over the levels the report tabulates: 28.9 / 18.6 / 5.6 % at KP 62.0's 47.00 / 48.00 / 50.50 m and 38.7 / 17.0 / 0.95 % at KP 57.4's 39.50 / 40.50 / 43.25 m |
+| 2.11 | dimensional −0.5 matrix, **+0.4 bulk** | −0.4692 at KP 62.0's 48.00 m; bulk **+0.6133** at that section's grid top of 56.5 m, which is six metres above its attainable maximum, and +0.3738 at KP 57.4's attainable maximum. The bulk companion runs at N = 1e4, not 1e5. |
+
+**The drafted chapters are not affected by rows 2.8 and 2.10**: step 8a took
+those two from the live files rather than from this manifest and recorded doing
+so. Row 2.11 did reach the thesis and is corrected there. The Shapley figures in
+2.11 (+0.14 interaction, order-conditionality) reproduce live and stand, as do
+rows 2.1 to 2.7, 2.9 and 2.12 to 2.14.
