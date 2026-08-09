@@ -805,3 +805,22 @@ row, no section 13 entry touched.
 
 **Untouched:** no `Config` default, no physics, no `configs/*.yaml`, no CSV, no
 persisted production sweep, no figure content, no ADR.
+
+### 12.7 Stale internal cross-references in the provenance record — CLOSED 2026-08-09
+
+Four pointer defects closed as pointer substitutions only: provenance §7.3's
+"Section 4.1" → **6.1** (the dated chronology) and "section 4.3 above" → **6.3**
+(the countermeasure → engine-quantity map), the same §4.3 → **6.3** target in
+`tokachi_basin_document_review_2026-07-27.md` register item R8, and the orphan
+heading "4.6 Kasumi-tei coincidence audit" renumbered to **7.5**, where it
+physically sits (between 7.4 and section 8, inside the 2026-07-28 full-volume
+review). The pre-sweep claim that no inbound reference to §4.6 existed was
+**wrong by one**: `system_integration/segments.py`'s `KASUMI_TEI_CSV` comment
+cites it, and was updated with the heading — comment text only, no code. A fifth
+of the same class was found on the line directly above R8 and closed in the same
+pass on the owner's authorisation: register item **R7's "provenance §4.4" → §6.4**
+(the Chiyoda regional band, whose own text recommends exactly the ADR-0046-pattern
+bounding scenario R7 names). Correct and deliberately not
+touched: `tokachi_chisuishi_full_review_2026-07-27.md`'s §4.3/§4.6 (internal to
+its own numbering) and `bep_reliability_engine/sensitivity.py`'s five §4.3/§4.6
+(Saltelli et al. 2008, *The Primer*).

@@ -1674,8 +1674,8 @@ Each entry states exactly what is needed.
 
 | # | Item | Scope discipline |
 |---|---|---|
-| R7 | **$k_\text{aq}$ upper-bracket scenario** at the measured Chiyoda upper bound (§2.1, provenance §4.4) | A **scenario** in the ADR-0046 pattern, not a prior change. Do not edit the CSV or generated configs — `tests/test_configs.py` pins them to ADR-0012/0023 |
-| R8 | **Remediation sensitivity** converting `remediation_state` labels into a measured ΔP_f, using the countermeasure→quantity map (provenance §4.3) | Default-OFF, bit-identical baseline, `None` dropped from `Config.to_metadata()` so the Phase 2 replay hash gate keeps passing. Route through `bep-change-control` |
+| R7 | **$k_\text{aq}$ upper-bracket scenario** at the measured Chiyoda upper bound (§2.1, provenance §6.4) | A **scenario** in the ADR-0046 pattern, not a prior change. Do not edit the CSV or generated configs — `tests/test_configs.py` pins them to ADR-0012/0023 |
+| R8 | **Remediation sensitivity** converting `remediation_state` labels into a measured ΔP_f, using the countermeasure→quantity map (provenance §6.3) | Default-OFF, bit-identical baseline, `None` dropped from `Config.to_metadata()` so the Phase 2 replay hash gate keeps passing. Route through `bep-change-control` |
 | R9 | **Observed-vs-d4PDF hazard check** using the 115-year Obihiro annual-max record (§2.2) | Read-only comparison; validates the Phase 3 hazard side, which is currently ensemble-only |
 | R10 | **Migration-capable bank-retreat surface mechanism** (§5.1, and now Ch7 §Limitations) | This is the substantive one. The corrected-USACE scour model returns exactly zero at all 114 nodes while two levees in this system failed by falling-limb channel migration in 2016. A point-scour formulation cannot represent that. Recommended in Ch8 rather than executed |
 | R11 | **Satsunai gauge choice** — 札内 (KP 4.0) vs Nantai (KP 15.0) for the KP 4.2–7.0 nodes (§2.2) | Engine-side only by explicit decision; not carried into the thesis, since the Satsunai is not assessed for BEP |

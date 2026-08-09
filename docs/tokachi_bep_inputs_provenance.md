@@ -919,7 +919,7 @@ physical feature of the cross-section. That gap is closed here.
 
 ### 7.3 QUALIFIED: `remediation_state` — the toe drains have three documented drivers
 
-Section 4.1 dated the institutional chronology behind this column. The
+Section 6.1 dated the institutional chronology behind this column. The
 full-volume pass adds a qualification the `drained` label does not carry: the
 toe-drain programme in this basin has **three distinct documented rationales**,
 deployed in different reaches.
@@ -934,7 +934,7 @@ The current allocation is undisturbed — the study sections' drains are the
 seepage-driven works. What changes is the confidence statement: **a `drained`
 label identifies a physical feature, not a design intent.** That matters if the
 label is ever converted into physics (the standing opt-in remediation
-sensitivity, section 4.3 above), because a seismically-motivated drain need not
+sensitivity, section 6.3 above), because a seismically-motivated drain need not
 have been sized against the seepage exit gradient.
 
 Related, same source: p122 records that 1993-damaged sites repaired with 基盤処理
@@ -974,7 +974,7 @@ Two further items supporting existing decisions:
   64.79, Chiyoda 18.74 and Moiwa 12.68 exactly. This verifies the *input* stage
   only, not the section-rating and trace-anchoring steps downstream of it.
 
-### 4.6 Kasumi-tei (霞堤) coincidence audit — CLOSED 2026-07-28
+### 7.5 Kasumi-tei (霞堤) coincidence audit — CLOSED 2026-07-28
 
 **Question.** A kasumi-tei is a deliberately discontinuous levee: the embankment
 is interrupted and left open at its downstream end, with the next embankment

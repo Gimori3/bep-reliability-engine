@@ -335,7 +335,7 @@ def load_section_table(
 # Kasumi-tei (霞堤) registry: the open, discontinuous levees of the upper
 # Tokachi system. Transcribed from the 霞堤一覧表 of 続十勝川治水史 (2023),
 # PDF p. 268 (printed p. 246); see docs/tokachi_basin_document_review_2026-07-27.md
-# and docs/tokachi_bep_inputs_provenance.md section 4.6.
+# and docs/tokachi_bep_inputs_provenance.md section 7.5.
 KASUMI_TEI_CSV = Path("data/processed/kasumi_tei_locations.csv")
 
 
