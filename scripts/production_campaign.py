@@ -1550,6 +1550,27 @@ FIGURE_DRIVERS: list[dict[str, Any]] = [
         "produces": ["validation_shikaga_*.png"],
         "sources": ["results/validation_shikaga/validation_results.json"],
     },
+    {
+        # Companion study, not a campaign stage: it consumes the gitignored
+        # ADR-0048 prior-mean arm sweeps, which this campaign deliberately does
+        # not produce (the epistemic knobs stay OFF, campaign decision 3). Only
+        # its figure is declared here, and it has a real plot-only path --
+        # ``--figures-only`` re-renders from the committed evidence record and
+        # writes no evidence file -- so the figure is kept unconditionally
+        # fresh rather than merely watched.
+        "label": "conductivity bracket through the annualisation (figures only)",
+        "command": [
+            PY,
+            "scripts/conductivity_annualisation_study.py",
+            "--figures-only",
+        ],
+        "requires": ["docs/decisions/conductivity-bracket-annualisation.json"],
+        # Exact name, not a glob: nothing else in docs/figures/ begins
+        # "conductivity", but a glob that later swept up a sibling would bind it
+        # to this driver's sources and leave it un-redrawn.
+        "produces": ["conductivity_bracket_annual.png"],
+        "sources": ["docs/decisions/conductivity-bracket-annualisation.json"],
+    },
     # ---- declaration only (no plot-only path); see the module note above ---- #
     {
         "label": "ADR-0012 k_aq-d70 scatter (declaration only)",
