@@ -156,3 +156,68 @@ ADR-0027 change (raw erosion head) raises transient P_f and may make the KP 62.0
 transition reachable, which would also bear on this framing — re-check on the
 next sweep. See `docs/validation/pol-meeting-2026-07-07-dispositions.md`,
 Answer 9.
+
+## Dated note (2026-08-10): the hypothetical extension is NOT weightless on the +4K hazard side
+
+**Status of this note:** a back-pointer and a factual correction to one
+parenthetical. **The Decision above is unaffected** — raw tail points with
+binomial CIs where the transition is not bracketed, and a static-bracketing grid
+extension at KP 62.0, both stand exactly as decided. Nothing in Implementation
+items 1 to 4, 6 or 7 is touched. What is corrected is a forward-looking
+assertion inside Implementation item 5 about how those added levels would behave
+once composed against a hazard — an assertion made on 2026-07-03, **ten days
+before Phase 3 existed** (ADR-0038, 2026-07-13) and 26 days before the ADR-0047
+KP 62.0 seepage-length adoption raised that section's transient fragility by
+×8.7 at design HWL.
+
+**The parenthetical that no longer holds.** Implementation item 5 says the added
+levels "exceed the maximum attainable stage (51.5 m) and the crest (47.9 m),
+which is harmless in the fragility x hazard composition (**the hazard carries
+zero weight there**) but must not be plotted as attainable states." The final
+clause stands and is if anything more important than when written. **The
+parenthetical does not.**
+
+**Measured (2026-08-10, from the committed Phase 3 hazard for KP 62.0; no sweep
+re-run):**
+
+| quantity | historical (3,000 yr) | +4K (5,400 yr) |
+|---|---|---|
+| highest ensemble peak stage | 48.78 m MSL | **51.47 m MSL** |
+| years peaking above the attainable maximum, 50.5 m | 0 | **7 (0.13 %)** |
+| years peaking above 51.0 m, the **first added level** | 0 | **4 (0.07 %)** |
+| share of the section's annual piping probability they carry | 0.0 | **11.8 %** |
+
+So under the +4K ensemble the hazard carries **non-zero** weight on the
+hypothetical extension: four member-years land on or above the first added
+level, and because the fragility is near saturation up there the seven
+above-attainable years contribute about an eighth of KP 62.0's annual piping
+probability. The historical ensemble does carry zero weight there, as item 5
+assumed, and KP 57.4 carries exactly zero in both climates — the assumption was
+correct for every case that existed when it was written.
+
+**Why this is not a coverage-clamp problem, which is the point worth carrying.**
+The HKV-audit diagnostics on `AnnualizedResult.coverage` detect peaks landing
+*outside* the composition grid. Here nothing leaves the grid: the highest peak
+is 51.47 m against a grid top of 56.5 m, so `lower_bound_clamp` and
+`below_grid_unresolved` are correctly False in every KP 62.0 row. The exposure is
+to the part of the grid that is *inside* it and physically unreachable, which
+this ADR created deliberately and which no flag can see. **A clean coverage-flag
+set is therefore not by itself a statement that an annualized number rests only
+on attainable stages.** A consumer must read `coverage` together with the
+section's attainable maximum.
+
+**What a reader of this ADR should do.** Treat 50.5 m MSL as KP 62.0's attainable
+maximum (it is the last non-hypothetical conditioning level, pinned as
+`attainable_max_m` in `scripts/stage6_6_gap_decomposition.py` and
+`scripts/hwl_bias_resolution.py`), and where an annualized number is quoted for
+that section under +4K, quote the 11.8 % exposure with it. The "must not be
+plotted as attainable states" instruction is unchanged and unrelaxed.
+
+**Provenance.** Surfaced by the conductivity-bracket annualisation companion,
+`docs/decisions/conductivity-bracket-annualisation.md` section 2.5 and its
+evidence JSON (`sections.KP 62.0.*.baseline.driving_stage_band`). Promoted to
+`docs/phase3_report.md` **caveat 8 of section 8**, which is the standing caveat
+list Phase 3 consumers are told to carry; that caveat and this note say the same
+thing. The exposure is a property of the **production** deliverable and is
+identical under every sensitivity arm of that study, so it changes no comparison
+there.

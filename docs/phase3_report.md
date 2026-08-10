@@ -136,6 +136,14 @@ their grid (ADR-0024 clamp, flagged per segment).
 
 ## 5. RQ3 — multi-mechanism dominance
 
+> **The dominance ordering stated in this section is conditional on the adopted
+> aquifer conductivity, and the bracket around it contests that ordering at three
+> of the four quantified sections historically and at all four under +4K — see
+> section 12, which is authoritative on the bracket.** The figures below remain
+> the production reading at the adopted prior means; what section 12 adds is the
+> measured range around them (matrix d70, prior side only). Nothing in this
+> section is withdrawn.
+
 ### 5.1 At the four BEP sections (posterior, matrix d70, lambda 250 m)
 
 Annualized per-mechanism failure probabilities and dominance shares
@@ -239,6 +247,13 @@ rule inverts the Eq. 4.19 rating exactly and takes Uemura's Eq. 14 max
 conditional on discharge.)
 
 ## 6. RQ4 — climate sensitivity and attribution
+
+> **The climate ratios in this section are conditional on the adopted aquifer
+> conductivity too, and unlike the length-effect and d70 brackets of section 6.2
+> that bracket moves the ratio itself — see section 12, which is authoritative
+> on it.** At KP 60.0 the historical-to-+4K ratio runs from the production 7.58
+> to 671 across the conductivity bracket, and at KP 57.4 from 12.6 to 234. The
+> production figures below are unchanged.
 
 ### 6.1 Annualized shift (posterior matrix, lambda 250)
 
@@ -403,6 +418,27 @@ duration strata everywhere (figure `phase3_rq4_attribution.png`).
    Obihiro N(-0.16, 0.29) m, Nantai N(-0.05, 0.28) m — replacing the interim
    0.6/0.38 m; both rivers now carry `wl_err_assumed=False`. No longer a
    limitation; retained here for traceability of the correction (D7 closed).
+8. **A clean coverage-flag set is NOT a statement that an annualized number
+   rests only on attainable stages** (added 2026-08-10). The HKV-audit
+   diagnostics of `AnnualizedResult.coverage` detect peaks landing *outside*
+   the composition grid. They cannot detect peaks landing on the part of the
+   grid that is inside it but physically unreachable — and at KP 62.0 that
+   part exists by construction, because ADR-0024 extends the conditioning grid
+   from the attainable maximum of **50.5 m MSL** up to 56.5 m purely to
+   stabilize the static lognormal fit. **Measured at KP 62.0 under +4K: 7 of
+   5,400 ensemble years (0.13 %) peak above 50.5 m, and because the curve is
+   near saturation there they carry 11.8 % of that section's annual piping
+   probability; 4 of those years peak above 51.0 m, the first added level.**
+   No coverage flag fires, correctly — the highest peak is 51.47 m against a
+   grid top of 56.5 m, so nothing leaves the grid. **Historical is exactly
+   0.0, and KP 57.4 is exactly 0.0 in both climates.** This is a property of
+   the production +4K deliverable, unchanged by any sensitivity arm, and it is
+   the reason ADR-0024's implementation note that the hypothetical levels are
+   "harmless in the fragility x hazard composition (the hazard carries zero
+   weight there)" does not hold on the +4K hazard side (ADR-0024, dated note
+   2026-08-10; that ADR's Decision is unaffected). The operative rule for a
+   consumer: **read `coverage` and the section's attainable maximum, not
+   `coverage` alone.**
 
 ## 9. Blocker manifest (updated; supersedes close-out items D1/D2)
 
@@ -513,3 +549,144 @@ transient P_f at HWL 1.5e-4 → 1.3e-3 — so more of that curve is now defensib
 plottable. That is a presentational gain, not a lifted coverage clamp.)
 
 Superseded artifacts under `results/superseded_adr0047_L47/phase3/`.
+
+---
+
+## 12. AQUIFER-CONDUCTIVITY BRACKET ADDENDUM (2026-08-10; authoritative where it differs from sections 1 to 10)
+
+**Scope, first and inside every sentence that quotes a number below: this is
+matrix d70 and prior side only. No bulk-d70 conductivity arm has ever been run,
+and no Phase 2 posterior exists for any conductivity arm.** The comparison is
+arm-prior against baseline-prior, which is exact at KP 62.0 (its prior and
+posterior annual numbers are identical to full floating-point precision, because
+the 2016 update rejects 0.00 % there) and a documented campaign variant
+elsewhere. Evidence: `docs/decisions/conductivity-bracket-annualisation.md` and
+`.json`, driver `scripts/conductivity_annualisation_study.py`, figure
+`docs/figures/conductivity_bracket_annual.png`.
+
+**What this addendum adds.** ADR-0048 and `epistemic-bracket-synthesis.md`
+established the aquifer conductivity prior mean as the largest single epistemic
+knob quantified in this project, but both measured it on the **conditional**
+fragility curves. Every RQ3 and RQ4 headline in sections 5 and 6 is
+**annualized**. The bracket has now been carried across that integral, using the
+persisted ADR-0048 arm sweeps read-only. **No sweep was re-run**; the composition
+step is imported from `scripts/phase3_campaign.py` rather than re-implemented,
+and the baseline pass reproduces `rq4_annual.csv` **string-identically over all
+228 matrix / prior / 250 m / primary rows and all 20 fields** before any arm
+number is reported.
+
+### 12.1 The result: the mechanism-dominance ordering is not robust to the bracket
+
+Verdict per section and scenario. **REVERSED** = at least one arm hands the lead
+to overflow; **COLLAPSED** = an arm leaves no mechanism loaded at all, so no
+share exists (this is a fact about the section, never reported as "overflow
+leads"); **ROBUST** = every arm preserves the production lead.
+
+| section | historical | +4K | arms that change the lead |
+|---|---|---|---|
+| KP 57.4 | **COLLAPSED** | **REVERSED** | field geomean (both); field toe (+4K) |
+| KP 58.8 | **REVERSED** | **REVERSED** | field geomean (both) |
+| KP 60.0 | ROBUST | **REVERSED** | field geomean (+4K) |
+| KP 62.0 | **REVERSED** | **REVERSED** | field geomean and field toe (both) |
+
+**Three of four sections historically, four of four under +4K.** The
+`k_aq_field_geomean` arm, the geometric mean of the six-member, two-contractor,
+two-decade field permeability population, changes the answer at **all eight**
+section-and-climate cells. The far milder `k_aq_field_toe` arm still reverses
+three. The upward `k_aq_regional_upper` arm reverses none, which is the expected
+sign check on ADR-0048's monotone mechanism rather than a reassurance.
+
+**Section 5's dominance shares are therefore the production reading, not the
+answer.** They stand at the adopted prior means; what changes is that they can no
+longer be quoted without the bracket. Concretely at the governing section
+KP 62.0, whose production shares are 0.812 piping historically and 0.500/0.500 at
++4K: under the field-population arms **overflow leads in both climates** (piping
+share 0.000 and 0.493 historically, 0.001 and 0.254 at +4K), while under the
+regional upper arm piping's lead strengthens to 0.986 and 0.892. The +4K
+0.500/0.500 balance is a knife edge, the baseline margin being 1.0013, and must
+not be presented as a finding any conductivity value would reproduce.
+
+**KP 60.0 is the one robust cell, for a reason that does not generalize.** Its
+historical overflow is *exactly* zero, so piping leads as long as any piping
+failure survives; the low arm suppresses it 39,000-fold and it still leads, at an
+annual probability of 5.2e-8. That is a statement about overflow's absence, not
+about piping's resilience. Under +4K, where overflow becomes nonzero at 2.3e-5,
+even a **666-fold** dominance margin falls. At KP 58.8 the bracket consumes a
+43-fold margin historically.
+
+### 12.2 Bracket width, and the climate ratio
+
+`span` is the largest annual system probability any conductivity arm produces
+divided by the smallest, production value included. The length-effect yardstick
+is the published lambda_ac 40 m versus 250 m factor of section 6.2.
+
+| section | historical span | +4K span | length-effect yardstick (hist / +4K) | climate ratio: production, low arm, toe arm, upper arm |
+|---|---|---|---|---|
+| KP 57.4 | **unbounded** | 27.6 | 3.37 / 2.17 | 12.6 to not defined, 234, 7.25 |
+| KP 58.8 | 185 | 48.6 | 2.53 / 2.07 | 5.27 to 13.1, 9.00, 3.43 |
+| KP 60.0 | **4.4e5** | 2.8e3 | 3.37 / 2.65 | 7.58 to 671, 10.7, 4.18 |
+| KP 62.0 | 69.1 | 8.27 | 3.29 / 1.93 | 12.7 to 42.1, 25.0, 5.04 |
+
+("unbounded" means an arm gives exactly zero failures; "not defined" means the
+historical denominator is zero, so no ratio exists.)
+
+**The conductivity bracket is wider than the length-effect bracket at every
+section and both scenarios**, by factors of 4 to five orders of magnitude, a
+pre-registered falsifier that would have deflated this study if it had fired, and
+did not. **It also moves the climate ratio itself**, which no bracket in section
+6.2 was shown to do: the downward arms raise it and the upward arm lowers it, at
+every cell where the ratio is defined, because the +4K hazard samples higher on
+the fragility curve where the conductivity spread has begun to compress.
+
+### 12.3 Why annualization does not average the bracket away
+
+Measured, not assumed. Two properties do it:
+
+* **The integral samples the wide part of the bracket.** The
+  contribution-weighted band of ensemble peak stages that actually carries each
+  annual number sits **at or above design high water at every section**. At
+  KP 62.0 the whole band (47.5 to 48.7 m MSL historically) lies 1.1 to 2.3 m
+  above the 46.39 m design stage. The collapse of the conductivity spread toward
+  unity needs the arm to saturate, which happens far higher on these grids.
+* **The dominance ratio has a conductivity-free denominator.** Overflow and
+  fluvial scour are Uemura surface curves with no aquifer dependence, so the
+  whole bracket lands on the piping numerator undiluted. Unlike the Stage 6.6
+  static-versus-transient ratio, there is not even a partial common-mode channel
+  here, which is what `epistemic-bracket-synthesis.md`'s cancellation rule
+  predicts.
+
+### 12.4 The comparison against the d70 bracket
+
+Section 6.2 already reports the bulk-versus-matrix d70 interpretation as a
+sensitivity. Re-read from `rq4_annual.csv`, that axis reverses the mechanism lead
+at **2 of 4 sections historically and 3 of 4 under +4K** (KP 58.8 and KP 62.0
+historically; KP 57.4, 58.8 and 62.0 at +4K, identically on the prior and
+posterior sides). The conductivity bracket is strictly worse on the same axis,
+**3 of 4 and 4 of 4**, and it subsumes every cell the d70 axis flips. Two
+structural differences matter as much as the counts: the d70 axis is a second
+documented *interpretation*, whereas conductivity is a **two-sided bracket
+containing** the production value; and only conductivity moves the climate ratio.
+
+### 12.5 Coverage
+
+**No annualized number in this addendum is a clamped bound.** Across the baseline
+and all four arms at all four sections in both scenarios, `lower_bound_clamp` and
+`below_grid_unresolved` are False for every system curve and every mechanism
+curve, zero flagged cells. The separate attainable-stage exposure at KP 62.0
+under +4K, which no coverage flag can detect, is **caveat 8 of section 8** and
+applies to the production deliverable identically to every arm here, so it
+changes no comparison above.
+
+### 12.6 What is unchanged
+
+Every production number in sections 1 to 10 stands: this addendum re-runs no
+sweep, writes nothing into `results/system_integration/phase3/`, and leaves
+`rq4_annual.csv` untouched (the production campaign's own G4 gate still asserts
+zero changed rows). The 110 segments carrying no BEP source are asserted
+**bit-identical** under every arm, 880 segment-scenario cells. The
+`gamma_bl_sub_lower` negative control moves every annual system probability by
+0.009 % to 1.4 % and changes no ordering anywhere.
+
+**Registered follow-on, not blocking:** a bulk-d70 conductivity arm, which would
+answer whether the two brackets compound or overlap. Until it exists, every
+figure in this addendum carries the matrix-d70, prior-side scope.

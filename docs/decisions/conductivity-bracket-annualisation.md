@@ -347,7 +347,7 @@ where the conductivity spread has begun to compress, so a shift in conductivity
 always moves the historical number further than the warmed one.
 
 **P7, the negative control.** The unit-weight arm moves every annual system
-probability by 0.02 % to 1.4 % and changes no ordering anywhere, against
+probability by 0.009 % to 1.4 % and changes no ordering anywhere, against
 conductivity movements spanning five orders of magnitude at the same cells. The
 machinery is not manufacturing motion.
 
@@ -450,6 +450,29 @@ KP 57.4 is exactly 0.0 in both climates. This affects the published production
 +4K number at KP 62.0 identically to every arm here, so it changes no comparison
 in this note; it is recorded because "the clamp flags are clean" is not by itself
 a statement that an annualised number rests only on attainable stages.
+
+**Promoted 2026-08-10, and it turned out to falsify a claim rather than merely
+extend one.** This caveat is now `docs/phase3_report.md` **caveat 8 of section
+8**, the standing list every Phase 3 consumer is told to carry. Checking it
+against ADR-0024, which created the hypothetical extension, showed that ADR's
+Implementation item 5 asserting the added levels are *"harmless in the
+fragility x hazard composition (the hazard carries zero weight there)"* is
+measurably wrong on the +4K hazard side: **4 of the 7 exposed years peak above
+51.0 m, the first added level**, so the extension is not weightless. **Decision:
+ADR-0024 carries a dated back-pointer** (a note appended 2026-08-10) rather than
+no pointer, because a reader arriving at that ADR would otherwise take the
+parenthetical as licence to ignore the extension in any composition — the exact
+opposite of the correct conclusion. Its **Decision is untouched and was asserted
+byte-identical**, as was Implementation item 5 itself: the parenthetical is left
+standing verbatim and the appended note governs. The assertion was not wrong when
+written — it dates from 2026-07-03, ten days before Phase 3 existed and 26 days
+before the ADR-0047 adoption raised KP 62.0's fragility ×8.7 at design HWL. **One
+thing a future session may still want:** an inline marker at item 5 in the
+ADR-0038 decision-4 style (`[Correction 2026-08-10: ...]`), so the correction is
+visible at the point of the claim rather than only at the end of the file. It was
+not added here because the brief scoping this work forbade amending ADR-0024's
+Decision or Consequences, and item 5 is the section that serves as this ADR's
+Consequences.
 
 ### 2.6 Scope
 
