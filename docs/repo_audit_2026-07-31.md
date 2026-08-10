@@ -824,3 +824,84 @@ bounding scenario R7 names). Correct and deliberately not
 touched: `tokachi_chisuishi_full_review_2026-07-27.md`'s §4.3/§4.6 (internal to
 its own numbering) and `bep_reliability_engine/sensitivity.py`'s five §4.3/§4.6
 (Saltelli et al. 2008, *The Primer*).
+
+### 12.8 The silent-skip class in a *driver* gate — CLOSED 2026-08-10
+
+**This is not something the 2026-07-31 audit missed. It is a scope boundary the
+audit drew, now extended.** Amendment 1 and section 12.4 closed the class for
+`tests/`: 13 guards that gated on a tracked path via `pytest.skip`/`skipif` were
+converted to assert, and two AST guards
+(`test_no_guard_in_this_file_skips_on_a_tracked_path`,
+`test_no_existence_skip_in_this_file_gates_on_a_tracked_path`) keep the pattern
+out. Both are **per-test-file** by construction — each parses the module it
+lives in — so neither could ever have seen a driver. Driver gates were never in
+scope, and the sweep of all 43 scripts in 12.2 looked for two *other* shapes
+(no-argparse, and unguarded tracked writes), not for a gate that records a
+failure and continues.
+
+**The defect.** `scripts/stage6_6_gap_decomposition.py::verify_against_production`
+implements ADR-0040 gate (i) — C0 and C4b bit-identical to the persisted
+production sweep. On four outcomes it set a `status` string and **returned**:
+`skipped_missing_production_file`, `skipped_config_mismatch_beyond_length_effect`,
+`skipped_n_mismatch`, and — the one not in the enumeration, because it produced no
+status at all — a pilot run, since `main` called the guard only `if args.n is
+None`. The driver then persisted `results/stage6_6/`, dual-wrote the tracked
+`docs/figures/` copies and exited 0 regardless. So a run that never verified
+replaced the guarded record *and the publication figures* with unguarded
+evidence, and nothing said so at the time. The campaign's own G3 gate does check
+the status, but only after the driver has already overwritten everything.
+
+The pilot case is the sharpest of the four: `--n 10000` writes to exactly the same
+paths as a production run, could never be bit-identical, and was the one path that
+skipped the guard entirely rather than recording why.
+
+**The fix.** The driver now **refuses** — exit 1, before persisting anything and
+before writing any figure — when a section's `production_verification` status is
+anything but `bit_identical`, including absent. `--allow-unverified` permits it
+(named for what it permits, the `system_integration --allow-stub` precedent); when
+passed, the summary records `allowed_unverified: true` beside the status, so a
+permitted run is still legible afterwards and G3 still fails on it.
+
+Three details worth keeping:
+
+* **The gate runs before the write here, and that is the opposite of the
+  2026-07-30 hardening on purpose.** That hardening made two sibling functions
+  persist *then* gate, after a gate discarded 2.5 h of freshly computed evidence
+  it was raised about. The rule it encodes is "do not let a gate destroy
+  evidence", and it is direction-dependent: there the write *created* evidence,
+  here the write *overwrites a guarded record*. The distinction is stated in
+  `verification_blocks_write`'s docstring so the next reader does not reverse it.
+* **The cheap outcomes are caught before the ladder starts.** Three of the four
+  are decidable from the config alone, so `production_comparability` was factored
+  out of `verify_against_production` and is called once before the run. A
+  never-verifiable run is refused in seconds rather than after a twenty-minute
+  ladder — one implementation, two call sites, no parallel rules.
+* **`--figures-only` cannot reach the gate.** It is a read-only redraw of
+  already-persisted evidence; a test replaces all three gate entry points with
+  raisers and asserts the redraw still completes.
+
+**Campaign path asserted, not assumed.** The campaign invokes the driver with
+`--n-jobs N --skip-figures` and no opt-out, and its recorded status is
+`bit_identical` at both sections (38 and 23 levels). Replaying the refactored
+guard over the persisted ladders reproduces both records **key-for-key in the same
+order with the same values**, so `stage6_6_summary.json` is byte-unchanged and the
+refusal never fires there.
+
+**Tests:** `tests/test_stage6_6_driver_gate.py` (9). The named pair is
+`test_gate_refuses_a_mismatched_config_before_anything_is_written` and
+`test_gate_passes_on_the_production_path`, both end to end on the stub hydrograph
+path at N = 400. `test_every_status_the_driver_can_write_is_classified` AST-parses
+the driver and fails if a fifth non-verifying status is ever added without being
+classified — the generalisation of the per-test-file guards to this driver.
+Nothing skips on a tracked path; the one `skipif` is on gitignored
+`results/stage6_6/` and says "untracked".
+
+**Gates:** `pytest` **692 passed** (685 → 692), `ruff check .` clean,
+`black --check .` clean, `--help` inert with `git status` unchanged. No physics,
+no `Config` field, no ADR, no persisted result, no figure content.
+
+**Not extended to the other drivers.** 12.2's sweep shape (c) — a gate that
+records and continues — has not been swept for across all 43 scripts. This
+closure is the one instance the 2026-08-09 canonical-shape review surfaced, not a
+class sweep; `docs/conventions.md` section 9.4 now states the rule for drivers so
+the next one is written correctly.

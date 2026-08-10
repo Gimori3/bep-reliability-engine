@@ -13,13 +13,25 @@ written to ``results/stage6_6/figures/`` **and** to the tracked
 Usage (from the repo root, venv active)::
 
     python scripts/stage6_6_gap_decomposition.py                 # everything
-    python scripts/stage6_6_gap_decomposition.py --n 10000       # pilot
     python scripts/stage6_6_gap_decomposition.py --skip-run      # re-analyze
-    python scripts/stage6_6_gap_decomposition.py --figures-only   # redraw only
+    python scripts/stage6_6_gap_decomposition.py --figures-only  # redraw only
     python scripts/stage6_6_gap_decomposition.py --sections kp62_0
+    python scripts/stage6_6_gap_decomposition.py --n 10000 --allow-unverified
 
-Phases (each skippable): run -> verify -> analyze -> duration ladder ->
-bulk sensitivity -> figures.
+Phases: run -> verify -> **gate** -> persist -> analyze -> duration ladder ->
+bulk sensitivity -> figures. Everything after the gate is skippable; the gate
+is not.
+
+The gate (added 2026-08-10). ADR-0040 gate (i) requires C0 and C4b to be
+bit-identical to the persisted production sweep. That check has always recorded
+a status, but four of its outcomes only *recorded* one and returned, after
+which the driver overwrote ``results/stage6_6/`` and the tracked
+``docs/figures/`` copies regardless and exited 0 -- so a run that never verified
+replaced the guarded record with unguarded evidence, silently. It now **refuses**
+(exit 1, nothing written) unless ``--allow-unverified`` is passed. A pilot ``--n``
+is one of those outcomes: it can never be bit-identical, and it writes to the
+same paths, so it needs the flag. ``--figures-only`` never reaches the gate --
+it is a read-only redraw of whatever is already persisted.
 """
 
 from __future__ import annotations
@@ -133,13 +145,50 @@ def _apply_style(ax) -> None:
         spine.set_color(NEUTRAL)
 
 
-def run_section(
-    key: str, *, n_samples: int | None, n_jobs: int, out_dir: Path, suffix: str = ""
-) -> GapDecompositionResult:
-    """Run and persist the comparator ladder for one section."""
+def section_config(key: str, suffix: str = "") -> Config:
+    """The section's base config (matrix, or bulk for the ``_bulk`` suffix)."""
     spec = SECTIONS[key]
     config_path = spec["bulk_config"] if suffix == "_bulk" else spec["config"]
-    config = Config.from_yaml(REPO_ROOT / config_path)
+    return Config.from_yaml(REPO_ROOT / config_path)
+
+
+def section_h5_path(key: str, suffix: str = "", *, out_dir: Path | None = None) -> Path:
+    """Where one section's comparator ladder is persisted."""
+    return (out_dir if out_dir is not None else OUT_DIR) / f"stage6_6_{key}{suffix}.h5"
+
+
+def persist_section(
+    result: GapDecompositionResult,
+    key: str,
+    *,
+    out_dir: Path,
+    suffix: str = "",
+) -> Path:
+    """Write one section's ladder (HDF5 + JSON sidecar) and say where."""
+    path = section_h5_path(key, suffix, out_dir=out_dir)
+    result.save(path)
+    print(f"[{key}{suffix}] persisted -> {path}")
+    return path
+
+
+def run_section(
+    key: str,
+    *,
+    n_samples: int | None,
+    n_jobs: int,
+    out_dir: Path,
+    suffix: str = "",
+    persist: bool = True,
+) -> GapDecompositionResult:
+    """Run the comparator ladder for one section, persisting it by default.
+
+    ``persist=False`` returns the computed ladder without writing anything, so
+    the caller can run the ADR-0040 gate (i) drift guard *before* the guarded
+    record is overwritten. See :func:`verification_blocks_write` for why the
+    gate runs before the write here and after it in the sibling drivers.
+    """
+    config = section_config(key, suffix)
+    spec = SECTIONS[key]
     hwl = float(config.geometry.HWL)
     config_run = prepare_config(config, n_samples=n_samples, extra_levels=(hwl,))
     print(
@@ -153,14 +202,91 @@ def run_section(
     result.metadata["attainable_max_m"] = spec["attainable_max_m"]
     result.metadata["section_key"] = key + suffix
     result.metadata["base_config_hash"] = config.config_hash()
-    path = out_dir / f"stage6_6_{key}{suffix}.h5"
-    result.save(path)
-    print(f"[{key}{suffix}] done in {time.time() - started:.0f} s -> {path}")
+    print(f"[{key}{suffix}] done in {time.time() - started:.0f} s")
+    if persist:
+        persist_section(result, key, out_dir=out_dir, suffix=suffix)
     return result
 
 
-def verify_against_production(key: str, result: GapDecompositionResult) -> dict:
-    """ADR-0040 gate (i): C0/C4b bit-identical to the persisted production sweep."""
+#: The one status that means the ADR-0040 gate (i) drift guard actually ran and
+#: passed. Every other value -- including the key being absent altogether --
+#: means this section was never verified against the persisted production sweep.
+VERIFIED_STATUS = "bit_identical"
+
+#: Returned by :func:`production_comparability` when nothing cheap rules the
+#: comparison out, so the caller should go on to compare the failure matrices.
+_COMPARABLE = "comparable"
+
+
+def verification_blocks_write(record: dict | None) -> str | None:
+    """Return the blocking status for one section, or None when it verified.
+
+    ``record`` is a section's ``production_verification`` entry. A **missing**
+    entry blocks too: until 2026-08-10 the driver omitted the key entirely on a
+    pilot ``--n`` run, and that absence is exactly the silent skip this gate
+    closes -- the pilot then overwrote the production ladder and the tracked
+    publication figures with reduced-N evidence, exit code 0, saying nothing.
+
+    Ordering note for the next reader, because it looks like a regression
+    against the 2026-07-30 hardening and is not. That hardening made two
+    sibling functions **persist before gating**, after a gate discarded 2.5 h of
+    freshly computed evidence it was raised about. The rule it encodes is "do
+    not let a gate destroy evidence", and the rule is direction-dependent: there
+    the write created new evidence, so gating first destroyed it; here the write
+    *overwrites a guarded record* (``results/stage6_6/`` and the tracked
+    ``docs/figures/`` copies) with evidence that was never verified, so writing
+    first destroys the thing the guard exists to protect. Gate before the write
+    here. Do not "fix" this back to persist-then-gate.
+    """
+    status = (record or {}).get("status", "absent")
+    return None if status == VERIFIED_STATUS else status
+
+
+#: Exit code for a drift-guard refusal (argparse already owns 2 for usage).
+REFUSAL_EXIT_CODE = 1
+
+
+def _refuse(key: str, status: str, record: dict, *, ladder_spent: bool) -> int:
+    """Print why the run is refused and return the non-zero exit code."""
+    print(
+        f"\n[{key}] REFUSED: the ADR-0040 production drift guard did not verify "
+        f"(status: {status}).",
+        file=sys.stderr,
+    )
+    print(
+        f"  production sweep: {record.get('production_file')}\n"
+        "  Nothing was written: results/stage6_6/ and the tracked docs/figures/ "
+        "copies still hold the last verified evidence.\n"
+        "  Re-run with --allow-unverified to overwrite them anyway (the summary "
+        "will record this status).",
+        file=sys.stderr,
+    )
+    if ladder_spent:
+        print(
+            "  The ladder had already been computed when the matrices were "
+            "compared, so this refusal cost the run; the cheap outcomes are "
+            "caught before the ladder starts.",
+            file=sys.stderr,
+        )
+    return REFUSAL_EXIT_CODE
+
+
+def production_comparability(
+    key: str,
+    *,
+    n_samples: int,
+    config_snapshot: dict,
+    base_config_hash: str | None,
+) -> dict:
+    """Everything the drift guard can rule out without the ladder.
+
+    Split out of :func:`verify_against_production` so the driver can fast-fail
+    a run that could never verify -- a modified config, a pilot N, a missing
+    production sweep -- **before** spending twenty minutes on the ladder, using
+    the identical rules rather than a parallel reimplementation. Returns the
+    same ``record`` shape; ``status == "comparable"`` means only the failure
+    matrix comparison is left to do.
+    """
     spec = SECTIONS[key]
     prod_path = REPO_ROOT / spec["production_h5"]
     record: dict = {"production_file": spec["production_h5"]}
@@ -169,14 +295,14 @@ def verify_against_production(key: str, result: GapDecompositionResult) -> dict:
         return record
     production = FragilityResult.load(prod_path)
     prod_hash = production.metadata.get("config_hash")
-    if prod_hash != result.metadata.get("base_config_hash"):
+    if prod_hash != base_config_hash:
         # The generated YAMLs gained the (inert, enabled: false) ADR-0037
         # length_effect block after the production sweeps ran, so the raw
         # hashes differ while the physics inputs are identical. Compare the
         # config snapshots with that key excluded; any OTHER difference is a
         # real mismatch and skips the bit-check.
         prod_cfg = json.loads(json.dumps(production.metadata.get("config", {})))
-        run_cfg = json.loads(json.dumps(result.metadata.get("config", {})))
+        run_cfg = json.loads(json.dumps(config_snapshot))
         prod_cfg.pop("length_effect", None)
         run_cfg.pop("length_effect", None)
         # The run grid legitimately carries the inserted HWL level; drop the
@@ -192,9 +318,32 @@ def verify_against_production(key: str, result: GapDecompositionResult) -> dict:
             "raw config hashes differ only by the post-sweep ADR-0037 "
             "length_effect block (enabled: false, physics-inert)"
         )
-    if production.theta_matrix.shape[0] != result.n_samples:
+    if production.theta_matrix.shape[0] != n_samples:
         record["status"] = "skipped_n_mismatch"
+        record["production_n_samples"] = int(production.theta_matrix.shape[0])
+        record["run_n_samples"] = int(n_samples)
         return record
+    record["status"] = _COMPARABLE
+    return record
+
+
+def verify_against_production(key: str, result: GapDecompositionResult) -> dict:
+    """ADR-0040 gate (i): C0/C4b bit-identical to the persisted production sweep.
+
+    The returned ``record`` is what :func:`verification_blocks_write` gates on;
+    ``status`` is ``"bit_identical"`` only when the comparison actually ran and
+    every common level matched.
+    """
+    record = production_comparability(
+        key,
+        n_samples=result.n_samples,
+        config_snapshot=result.metadata.get("config", {}),
+        base_config_hash=result.metadata.get("base_config_hash"),
+    )
+    if record["status"] != _COMPARABLE:
+        return record
+
+    production = FragilityResult.load(REPO_ROOT / SECTIONS[key]["production_h5"])
     np.testing.assert_array_equal(production.theta_matrix, result.theta_matrix)
     prod_grid = np.asarray(production.conditioning_grid, dtype=np.float64)
     checked = 0
@@ -663,6 +812,18 @@ def main() -> int:
             "rewrites no evidence file"
         ),
     )
+    parser.add_argument(
+        "--allow-unverified",
+        action="store_true",
+        help=(
+            "permit a run whose ADR-0040 drift guard did not verify against the "
+            "persisted production sweep -- a pilot --n, a modified config, or a "
+            "missing production file. Without it such a run refuses before "
+            "writing anything. With it, results/stage6_6/ and the tracked "
+            "docs/figures/ copies are overwritten with unverified evidence and "
+            "the summary records the status that permitted it."
+        ),
+    )
     args = parser.parse_args()
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -686,18 +847,56 @@ def main() -> int:
 
     for key in args.sections:
         section_summary: dict = {}
-        h5_path = OUT_DIR / f"stage6_6_{key}.h5"
-        if args.skip_run and h5_path.exists():
+        h5_path = section_h5_path(key)
+        loaded_from_disk = bool(args.skip_run and h5_path.exists())
+
+        # Fast-fail: the three cheap non-verifying outcomes (missing production
+        # sweep, config changed beyond the inert ADR-0037 block, N mismatch) are
+        # decidable from the config alone, so a run that could never verify is
+        # refused in seconds rather than after a twenty-minute ladder. Same
+        # rules, one implementation -- verify_against_production calls this too.
+        if not loaded_from_disk:
+            base = section_config(key)
+            pre = production_comparability(
+                key,
+                n_samples=args.n if args.n is not None else base.mc.n_samples,
+                config_snapshot=base.to_metadata(),
+                base_config_hash=base.config_hash(),
+            )
+            if pre["status"] != _COMPARABLE and not args.allow_unverified:
+                return _refuse(key, pre["status"], pre, ladder_spent=False)
+
+        if loaded_from_disk:
             result = GapDecompositionResult.load(h5_path)
             print(f"[{key}] loaded persisted ladder ({result.n_samples} rows)")
         else:
+            # persist=False: gate BEFORE the write, because the write overwrites
+            # a guarded record. See verification_blocks_write for why this is the
+            # opposite order from the 2026-07-30 persist-then-gate hardening.
             result = run_section(
-                key, n_samples=args.n, n_jobs=args.n_jobs, out_dir=OUT_DIR
+                key,
+                n_samples=args.n,
+                n_jobs=args.n_jobs,
+                out_dir=OUT_DIR,
+                persist=False,
             )
-        if args.n is None:
-            section_summary["production_verification"] = verify_against_production(
-                key, result
+
+        record = verify_against_production(key, result)
+        section_summary["production_verification"] = record
+        blocking = verification_blocks_write(record)
+        if blocking is not None:
+            if not args.allow_unverified:
+                return _refuse(key, blocking, record, ladder_spent=not loaded_from_disk)
+            # Permitted, but never silently: the summary carries the reason, and
+            # the campaign's G3 still fails on any status but bit_identical.
+            record["allowed_unverified"] = True
+            print(
+                f"[{key}] WARNING: writing UNVERIFIED evidence ({blocking}) "
+                "because --allow-unverified was passed."
             )
+
+        if not loaded_from_disk:
+            persist_section(result, key, out_dir=OUT_DIR)
         analysis = analyze_section(
             key, result, n_bootstrap=args.bootstrap, out_dir=OUT_DIR
         )

@@ -265,6 +265,23 @@ document*, so deleting the claim made its own guard pass.
 `test_no_guard_in_this_file_skips_on_a_tracked_path` keeps the pattern out of
 that file.
 
+**The same rule binds a driver gate, added 2026-08-10.** A gate in `scripts/`
+that records a "did not verify" status and then continues is the same defect
+wearing different clothes, and the two AST guards above cannot see it -- each
+parses only the test file it lives in. If a driver checks something before
+overwriting a guarded artifact, a non-verifying outcome must **refuse**: non-zero
+exit, before the write. Permitting it anyway is an explicit opt-out flag named
+for what it permits (`--allow-unverified`, `--allow-stub`), never a default, and
+the run's own record says the flag was used.
+
+Which side of the write the gate sits on is direction-dependent, and both
+directions are in force here. Gate **after** the write when the write *creates*
+evidence -- the 2026-07-30 hardening, applied twice after a gate discarded 2.5 h
+of a run it was raised about. Gate **before** the write when the write
+*overwrites* a guarded record, as `stage6_6_gap_decomposition.py` does over
+`results/stage6_6/` and the tracked `docs/figures/` copies. The rule underneath
+both is the same: never let a gate destroy the evidence it exists to protect.
+
 ## 10. Retention policy for `results/`
 
 `results/` is gitignored and machine-local: roughly 2.1 GB across 723 files as of
