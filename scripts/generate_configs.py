@@ -260,8 +260,18 @@ CONDITIONING_GRID_MSL: dict[str, list[float]] = {
 # secondary peak 64% of max at t = 75 h, inter-peak trough 30%; mirrors the
 # 2016 typhoon-sequence character and exercises the spec §5 memory model).
 # Second: HPB_m067_1978, the isolated single-peak end-member (largest HPB peak
-# 7,581 m^3/s, 32 h rise) recorded as the approved shape-sensitivity alternate
-# (a sensitivity config reorders the list; selection stays config-side).
+# 7,581 m^3/s) recorded as the approved shape-sensitivity alternate. The "32 h
+# rise" this comment carried until 2026-08-10 does not reproduce: measured with
+# the same function that gives the production member its 23 h rising limb, the
+# alternate rises in 16 h, and no discharge- or stage-domain onset threshold
+# from 2% to 50% of amplitude yields 32 h (it gives 13 to 16 h). The alternate
+# is SHORTER than the production member on every definition-matched measure --
+# rising limb 16 h against 23 h, half-amplitude width 21 h against 55 h, one
+# significant peak against two. See docs/decisions/canonical-shape-sensitivity.md.
+# Selection stays config-side, but note that a sensitivity config CANNOT simply
+# reorder this list: the field is inside config_hash(), run.py hard-codes entry
+# 0, and tests/test_configs.py pins the committed order, so a shape arm swaps
+# the member in memory instead.
 CANONICAL_EVENT_IDS: list[str] = ["HPB_m064_1987", "HPB_m067_1978"]
 
 # Root of the raw data drop (ADR-0020): hydrographs/ + rating_curves/ beneath.

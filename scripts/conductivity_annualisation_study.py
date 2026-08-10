@@ -14,10 +14,17 @@ prior curve at the four BEP sections. Nothing is re-swept: the arms already exis
 under ``results/sensitivity/adr0048_prior_means/`` (N = 1e5, 2026-07-29/30) and
 the Phase 3 hazard cache is reused read-only.
 
-**Scope: matrix d70 and prior-side only.** No bulk-d70 conductivity arm exists
-and no Phase 2 posterior exists for any arm. At KP 62.0 the production prior and
-posterior annual numbers are identical to full precision (the 2016 update rejects
-0.00 % there), so prior-against-prior is apples-to-apples where it matters most.
+**Scope: prior-side only.** No Phase 2 posterior exists for any conductivity arm
+under either grain-size reading. At KP 62.0 the production prior and posterior
+annual numbers are identical to full precision (the 2016 update rejects 0.00 %
+there), so prior-against-prior is apples-to-apples where it matters most.
+
+**Both d70 readings are covered, and they are co-primary.** ``--d70 matrix`` is
+the default and reproduces the 2026-08-10 record byte for byte apart from its own
+timestamp stamps; ``--d70 bulk`` is the 2026-08-10 Part 3 replication. Under bulk
+the production lead is ALREADY overflow at five of the eight section-and-climate
+cells, so the decisive arm there is the UPWARD one -- the mirror image of the
+matrix run, whose P4 recorded the upward arm as reversing nothing anywhere.
 
 Gates (pre-registered; a failure aborts rather than being tabulated)
 -------------------------------------------------------------------
@@ -42,6 +49,8 @@ Usage (repo root, venv active)::
     python scripts/conductivity_annualisation_study.py
     python scripts/conductivity_annualisation_study.py --arms k_aq_field_geomean
     python scripts/conductivity_annualisation_study.py --figures-only
+    python scripts/conductivity_annualisation_study.py --d70 bulk
+    python scripts/conductivity_annualisation_study.py --d70 bulk --figures-only
 
 ``--n-jobs`` is deliberately absent: this study re-runs no sweep and has no
 parallelisable work, and a flag that controls nothing is the dead surface the
@@ -79,21 +88,60 @@ from system_integration.surface_curves import (  # noqa: E402
 )
 from system_integration.uemura_models import load_segment_inputs  # noqa: E402
 
-DEFAULT_OUT = (
-    REPO_ROOT / "docs" / "decisions" / "conductivity-bracket-annualisation.json"
-)
-DEFAULT_OUT_DIR = REPO_ROOT / "results" / "sensitivity" / "conductivity_annualisation"
+#: The two co-primary grain-size readings. ``matrix`` is the default and its
+#: behaviour is byte-identical to the 2026-08-10 run that produced the committed
+#: record; ``bulk`` is the Part 3 replication. This is a genuine axis of the
+#: deliverable, not a sensitivity, which is why it is a flag rather than a
+#: second driver.
+DEFAULT_D70 = "matrix"
+D70_CHOICES: tuple[str, ...] = ("matrix", "bulk")
+
+DECISIONS = REPO_ROOT / "docs" / "decisions"
+DEFAULT_OUT: dict[str, Path] = {
+    "matrix": DECISIONS / "conductivity-bracket-annualisation.json",
+    "bulk": DECISIONS / "conductivity-bracket-annualisation-bulk.json",
+}
+DEFAULT_OUT_DIR: dict[str, Path] = {
+    "matrix": REPO_ROOT / "results" / "sensitivity" / "conductivity_annualisation",
+    "bulk": REPO_ROOT / "results" / "sensitivity" / "conductivity_annualisation_bulk",
+}
 ARM_DIR = REPO_ROOT / "results" / "sensitivity" / "adr0048_prior_means"
 PRODUCTION_TABLE = (
     REPO_ROOT / "results" / "system_integration" / "phase3" / "rq4_annual.csv"
 )
-FIGURE_NAME = "conductivity_bracket_annual.png"
+#: One figure per reading, declared in the campaign by exact filename. The bulk
+#: figure is the cross-reading comparison, so it reads BOTH committed records.
+FIGURE_NAME: dict[str, str] = {
+    "matrix": "conductivity_bracket_annual.png",
+    "bulk": "conductivity_bracket_both_d70.png",
+}
 
-#: The pre-registered variant axis. Fixed here so it cannot drift.
-D70 = "matrix"
+#: The rest of the pre-registered variant axis. Fixed here so it cannot drift.
 BEP_SOURCE = "prior"
 LAMBDA_AC_M = 250.0
 SURFACE_VARIANT = "primary"
+
+#: Scope sentence per reading. The matrix string was frozen verbatim until
+#: 2026-08-10, when running the bulk arms made its second clause ("no bulk-d70
+#: conductivity arm has ever been run") false. A record of this kind may not
+#: carry a claim its own repository has overtaken, so the clause is replaced by
+#: a pointer to the companion record; the matrix numbers are untouched.
+SCOPE_STATEMENT: dict[str, str] = {
+    "matrix": (
+        "matrix-d70 and prior-side ONLY. The bulk-d70 reading is the "
+        "co-primary companion record conductivity-bracket-annualisation-bulk"
+        ".json, run 2026-08-10; no Phase 2 posterior exists for any "
+        "conductivity arm under either reading. "
+        "Quote this scope wherever any number here is quoted."
+    ),
+    "bulk": (
+        "bulk-d70 and prior-side ONLY. This is the co-primary grain-size "
+        "reading, not a sensitivity; the matrix reading is the companion "
+        "record conductivity-bracket-annualisation.json. No Phase 2 "
+        "posterior exists for any conductivity arm under either reading. "
+        "Quote this scope wherever any number here is quoted."
+    ),
+}
 
 #: Arm labels in the pre-registered order: the conductivity ladder low to high,
 #: then the negative control.
@@ -164,8 +212,8 @@ def _load_campaign_module():
 # --------------------------------------------------------------------------- #
 # Helpers                                                                       #
 # --------------------------------------------------------------------------- #
-def _stem(kp: float) -> str:
-    return f"tokachi_kp{kp:.1f}_historical_{D70}"
+def _stem(kp: float, d70: str) -> str:
+    return f"tokachi_kp{kp:.1f}_historical_{d70}"
 
 
 def _label(kp: float) -> str:
@@ -178,12 +226,25 @@ def _label(kp: float) -> str:
     return figstyle.section_label(f"tokachi_kp{kp:.1f}")
 
 
-def _baseline_sweep(kp: float) -> Path:
-    return REPO_ROOT / "results" / f"{_stem(kp)}.h5"
+def _baseline_sweep(kp: float, d70: str) -> Path:
+    return REPO_ROOT / "results" / f"{_stem(kp, d70)}.h5"
 
 
-def _arm_sweep(kp: float, arm: str) -> Path:
-    return ARM_DIR / f"{_stem(kp)}_{arm}.h5"
+def _arm_sweep(kp: float, arm: str, d70: str) -> Path:
+    return ARM_DIR / f"{_stem(kp, d70)}_{arm}.h5"
+
+
+def _rel(path: Path) -> str:
+    """Repo-relative path where possible, absolute otherwise.
+
+    ``--out`` and ``--out-dir`` accept any path, and a scratch directory outside
+    the repository is exactly how the matrix path is re-verified without
+    overwriting the committed record. A bare ``relative_to`` raises there.
+    """
+    try:
+        return str(path.relative_to(REPO_ROOT)).replace("\\", "/")
+    except ValueError:
+        return str(path).replace("\\", "/")
 
 
 def _sha256(path: Path) -> str:
@@ -200,9 +261,9 @@ def _cache_state(cache_dir: Path) -> dict[str, str]:
     return {p.name: _sha256(p) for p in sorted(cache_dir.glob("*.csv"))}
 
 
-def _arm_provenance(kp: float, arm: str) -> dict[str, Any]:
-    """Gate 2 on one arm sweep: N, hash round-trip, scenario label."""
-    h5 = _arm_sweep(kp, arm)
+def _arm_provenance(kp: float, arm: str, d70: str) -> dict[str, Any]:
+    """Gate 2 on one arm sweep: N, hash round-trip, scenario label, reading."""
+    h5 = _arm_sweep(kp, arm, d70)
     sidecar = h5.with_suffix(".json")
     if not h5.is_file() or not sidecar.is_file():
         raise FileNotFoundError(
@@ -230,6 +291,15 @@ def _arm_provenance(kp: float, arm: str) -> dict[str, Any]:
         raise AssertionError(
             f"KP {kp:.1f} arm {arm!r}: N = {n_samples}, expected 100000."
         )
+    # The two readings share an arm directory and differ only in the stem, so a
+    # mistyped stem would silently compare a bulk arm against a matrix baseline.
+    # Asserted from the arm's own config rather than trusted from its filename.
+    if config.priors.d70_interpretation != d70:
+        raise AssertionError(
+            f"KP {kp:.1f} arm {arm!r}: sweep carries "
+            f"d70_interpretation={config.priors.d70_interpretation!r}, expected "
+            f"{d70!r}; refusing to compare across grain-size readings."
+        )
     parameter = next(iter(scenario["factors"]))
     return {
         "sweep": str(h5.relative_to(REPO_ROOT)).replace("\\", "/"),
@@ -246,8 +316,16 @@ def _arm_provenance(kp: float, arm: str) -> dict[str, Any]:
 # --------------------------------------------------------------------------- #
 # Pipeline                                                                      #
 # --------------------------------------------------------------------------- #
-def build_context(campaign) -> dict[str, Any]:
-    """Registry, surface curves and per-node hazard, as the campaign builds them."""
+def build_context(campaign, d70: str) -> dict[str, Any]:
+    """Registry, surface curves and per-node hazard, as the campaign builds them.
+
+    The node exposure datum stays pinned to the **matrix** curve whatever ``d70``
+    is under test, because that is what the campaign used when it wrote the
+    hazard cache. It is the exit toe elevation and is identical across the two
+    readings at all four sections, but that is asserted below rather than
+    assumed: a datum that moved would silently invalidate the cache lookup and
+    with it gate 1.
+    """
     registry = load_section_table(
         campaign.SECTION_TABLE, build_registry(campaign.DATA_ROOT), allow_gaps=True
     )
@@ -261,12 +339,17 @@ def build_context(campaign) -> dict[str, Any]:
     # study is prior-side, so it reads the prior's and asserts the two agree,
     # which is what keeps the warm hazard cache valid (gate 4).
     baseline_curves = {
-        kp: load_bep_curve(_baseline_sweep(kp), branch="transient") for kp in BEP_KPS
+        kp: load_bep_curve(_baseline_sweep(kp, d70), branch="transient")
+        for kp in BEP_KPS
+    }
+    node_datum = {
+        kp: load_bep_curve(_baseline_sweep(kp, "matrix"), branch="transient").datum_m
+        for kp in BEP_KPS
     }
     datum_agreement = {}
     for kp in BEP_KPS:
         posterior_sidecar = (
-            REPO_ROOT / "results" / "phase2" / f"{_stem(kp)}_posterior.json"
+            REPO_ROOT / "results" / "phase2" / f"{_stem(kp, 'matrix')}_posterior.json"
         )
         posterior_datum = (
             json.loads(posterior_sidecar.read_text(encoding="utf-8"))
@@ -274,19 +357,26 @@ def build_context(campaign) -> dict[str, Any]:
             .get("posterior_fragility", {})
             .get("datum_m")
         )
-        prior_datum = baseline_curves[kp].datum_m
+        prior_datum = node_datum[kp]
         if posterior_datum is None or float(posterior_datum) != float(prior_datum):
             raise AssertionError(
                 f"KP {kp:.1f}: prior curve datum {prior_datum} differs from the "
                 f"posterior datum {posterior_datum} the production campaign used "
                 "for its hazard nodes; the cache lookup would not match."
             )
+        if float(baseline_curves[kp].datum_m) != float(prior_datum):
+            raise AssertionError(
+                f"KP {kp:.1f}: the {d70} curve datum "
+                f"{baseline_curves[kp].datum_m} differs from the matrix datum "
+                f"{prior_datum} the hazard cache was built on; the two readings "
+                "would not be composed against the same exposure."
+            )
         datum_agreement[_label(kp)] = float(prior_datum)
 
     nodes = []
     for segment in registry.segments:
         if segment.bep_source_kp is not None:
-            datum = baseline_curves[segment.kp].datum_m
+            datum = node_datum[segment.kp]
         else:
             datum = seg_inputs[(segment.river, round(segment.kp, 3))].ground_m_msl
         nodes.append((segment.river, segment.kp, datum))
@@ -309,7 +399,9 @@ def build_context(campaign) -> dict[str, Any]:
     }
 
 
-def annualise_variant(campaign, context: dict[str, Any], curves: dict[float, Any]):
+def annualise_variant(
+    campaign, context: dict[str, Any], curves: dict[float, Any], d70: str
+):
     """One full 114-segment composition + annualisation pass.
 
     Returns ``{(river, kp, scenario): row}`` with the campaign's own field set,
@@ -335,7 +427,7 @@ def annualise_variant(campaign, context: dict[str, Any], curves: dict[float, Any
                 "kp": segment.kp,
                 "section_id": segment.section_id or "",
                 "scenario": scenario,
-                "d70": D70,
+                "d70": d70,
                 "bep_source": BEP_SOURCE,
                 "lambda_ac_m": LAMBDA_AC_M,
                 "surface_variant": SURFACE_VARIANT,
@@ -414,7 +506,9 @@ def _driving_stage_band(
     return band
 
 
-def gate_one(rows: dict[tuple[str, float, str], dict[str, Any]]) -> dict[str, Any]:
+def gate_one(
+    rows: dict[tuple[str, float, str], dict[str, Any]], d70: str
+) -> dict[str, Any]:
     """Assert the baseline pass reproduces the production table EXACTLY.
 
     The production CSV writes ``str(value)``, so a stringified comparison is an
@@ -427,14 +521,14 @@ def gate_one(rows: dict[tuple[str, float, str], dict[str, Any]]) -> dict[str, An
         published = [
             r
             for r in csv.DictReader(handle)
-            if r["d70"] == D70
+            if r["d70"] == d70
             and r["bep_source"] == BEP_SOURCE
             and r["lambda_ac_m"] == str(LAMBDA_AC_M)
             and r["surface_variant"] == SURFACE_VARIANT
         ]
     if not published:
         raise AssertionError(
-            f"no matrix/prior/{LAMBDA_AC_M:g}/{SURFACE_VARIANT} rows found in "
+            f"no {d70}/prior/{LAMBDA_AC_M:g}/{SURFACE_VARIANT} rows found in "
             f"{PRODUCTION_TABLE.relative_to(REPO_ROOT)}"
         )
 
@@ -465,6 +559,50 @@ def gate_one(rows: dict[tuple[str, float, str], dict[str, Any]]) -> dict[str, An
         "table": str(PRODUCTION_TABLE.relative_to(REPO_ROOT)).replace("\\", "/"),
         "criterion": "every field string-identical to the published table",
     }
+
+
+def clamped_cells(
+    baseline_rows: dict[tuple[str, float, str], dict[str, Any]],
+    arm_rows: dict[str, dict[tuple[str, float, str], dict[str, Any]]],
+) -> list[dict[str, Any]]:
+    """Cells whose piping annual probability is an ADR-0024 lower bound.
+
+    ``bep_clamped_above_grid`` fires where the section's transient transition is
+    not bracketed, so the raw-tail branch holds its last value above the grid
+    instead of extrapolating. The piping contribution there can only be higher
+    than reported, which is why such a cell must never be quoted as an estimate
+    and why a *failure* to reverse at one is weaker evidence than a reversal.
+
+    Emitted into the record only when the list is non-empty. Under the matrix
+    reading nothing is clamped at these four sections -- a fact gate 1 already
+    proves, since it reproduces the published flag field for field -- so the
+    matrix record stays byte-identical to the one this study first wrote.
+    """
+    cells: list[dict[str, Any]] = []
+    for kp in BEP_KPS:
+        for (river, seg_kp, scenario), row in baseline_rows.items():
+            if river != "Tokachi" or seg_kp != kp:
+                continue
+            arms = sorted(
+                arm
+                for arm, rows in arm_rows.items()
+                if bool(rows[(river, seg_kp, scenario)]["bep_clamped_above_grid"])
+            )
+            if not row["bep_clamped_above_grid"] and not arms:
+                continue
+            cells.append(
+                {
+                    "section": _label(kp),
+                    "scenario": scenario,
+                    "baseline_clamped": bool(row["bep_clamped_above_grid"]),
+                    "arms_clamped": arms,
+                    "reading": (
+                        "the piping annual probability here is a LOWER BOUND, "
+                        "not an estimate"
+                    ),
+                }
+            )
+    return cells
 
 
 def _leading_mechanism(row: dict[str, Any]) -> str:
@@ -804,6 +942,294 @@ def evaluate_preregistration(
     }
 
 
+def evaluate_preregistration_bulk(
+    sections: dict[str, Any],
+    matrix_sections: dict[str, Any],
+    lambda_yardstick: dict[str, Any],
+    matrix_spans: dict[str, Any],
+    scenarios,
+) -> dict[str, Any]:
+    """Score Part 3 section 3.1's predictions against the measured bulk record.
+
+    Separate from :func:`evaluate_preregistration` on purpose. The bulk
+    predictions are not the matrix ones re-run: under bulk the production lead is
+    already overflow at five of eight cells, so the arm that can change an
+    ordering is the upward one and several matrix predictions invert. Folding
+    both into one scorer would have meant a statement string that reads
+    differently depending on an argument, which is how a pre-registration
+    quietly becomes a description.
+    """
+    labels = [_label(kp) for kp in BEP_KPS]
+
+    def _cells():
+        for lab in labels:
+            for sc in scenarios:
+                yield lab, sc
+
+    def _changing(lab: str, sc: str) -> list[str]:
+        return sections[lab][sc]["arms_changing_the_lead"]
+
+    def _reversing(lab: str, sc: str) -> list[str]:
+        return sections[lab][sc]["arms_reversing_the_lead"]
+
+    upward_reversals = [
+        {"section": lab, "scenario": sc}
+        for lab, sc in _cells()
+        if "k_aq_regional_upper" in _reversing(lab, sc)
+    ]
+    downward_reversals = [
+        {"section": lab, "scenario": sc}
+        for lab, sc in _cells()
+        if set(_reversing(lab, sc)) & {"k_aq_field_geomean", "k_aq_field_toe"}
+    ]
+
+    # B7: climate ratio direction, same rule as the matrix P6.
+    b7_rows = []
+    for lab in labels:
+        ratios = sections[lab]["climate_ratio_plus4k_over_historical"]
+        base = ratios["baseline"]
+        for arm in CONDUCTIVITY_ARMS:
+            value = ratios.get(arm)
+            if value is None or base is None:
+                continue
+            b7_rows.append(
+                {
+                    "section": lab,
+                    "arm": arm,
+                    "baseline_ratio": base,
+                    "arm_ratio": value,
+                    "moved_as_predicted": (value > base)
+                    == (arm != "k_aq_regional_upper"),
+                }
+            )
+
+    # B8: the control, and whether it is louder here than it was under matrix.
+    b8_rows = []
+    for lab, sc in _cells():
+        entry = sections[lab][sc]
+        base = entry["baseline"]["p_annual_system"]
+        if base <= 0.0:
+            continue
+        shift = abs(entry["arms"][CONTROL_ARM]["p_annual_system"] / base - 1.0)
+        b8_rows.append(
+            {
+                "section": lab,
+                "scenario": sc,
+                "control_relative_shift": float(shift),
+                "under_two_percent": bool(shift < 0.02),
+            }
+        )
+
+    # B9: wider than the matrix span, and wider than the length-effect bracket.
+    b9_rows = []
+    for lab, sc in _cells():
+        span = sections[lab][sc]["conductivity_span_p_annual_system"]
+        matrix_span = matrix_spans[lab][sc]
+        yardstick = lambda_yardstick[lab][sc]
+        b9_rows.append(
+            {
+                "section": lab,
+                "scenario": sc,
+                "bulk_span": span,
+                "matrix_span": matrix_span,
+                # ``None`` is an unbounded span (an arm gives exactly zero),
+                # which is wider than any finite figure by definition.
+                "wider_than_matrix": span is None
+                or (matrix_span is not None and span > matrix_span),
+                "wider_than_length_effect": span is None or span > yardstick,
+            }
+        )
+
+    # C: the two brackets together.
+    d70_flipped, restored, conductivity_changes_it = [], [], []
+    for lab, sc in _cells():
+        bulk_lead = sections[lab][sc]["baseline"]["leading_mechanism"]
+        matrix_lead = matrix_sections[lab][sc]["baseline"]["leading_mechanism"]
+        if bulk_lead != matrix_lead:
+            d70_flipped.append({"section": lab, "scenario": sc})
+            if "k_aq_regional_upper" in _reversing(lab, sc):
+                restored.append({"section": lab, "scenario": sc})
+            if _changing(lab, sc):
+                conductivity_changes_it.append({"section": lab, "scenario": sc})
+
+    invariant = [
+        {
+            "section": lab,
+            "scenario": sc,
+            "overflow_is_exactly_zero": (
+                sections[lab][sc]["baseline"]["p_annual_overflow"] == 0.0
+            ),
+        }
+        for lab, sc in _cells()
+        if not _changing(lab, sc)
+        and not matrix_sections[lab][sc]["arms_changing_the_lead"]
+    ]
+
+    return {
+        "B1": {
+            "statement": (
+                "under bulk the contest is driven by the upward arm, not the "
+                "downward ones"
+            ),
+            "held": bool(upward_reversals)
+            and len(upward_reversals) >= len(downward_reversals),
+            "cells_reversed_by_the_upward_arm": upward_reversals,
+            "cells_reversed_by_a_downward_arm": downward_reversals,
+        },
+        "B2": {
+            "statement": ("the upward arm reverses KP 57.4 +4K and KP 58.8 +4K"),
+            "held": all(
+                "k_aq_regional_upper" in _reversing(_label(kp), "+4K")
+                for kp in (57.4, 58.8)
+            ),
+            "kp57_4_plus4k": "k_aq_regional_upper" in _reversing(_label(57.4), "+4K"),
+            "kp58_8_plus4k": "k_aq_regional_upper" in _reversing(_label(58.8), "+4K"),
+        },
+        "B3": {
+            "statement": "the upward arm does not reverse KP 62.0 in either climate",
+            "held": not any(
+                "k_aq_regional_upper" in _reversing(_label(62.0), sc)
+                for sc in scenarios
+            ),
+        },
+        "B4": {
+            "statement": (
+                "the matrix P4, that the upward arm reverses no ordering "
+                "anywhere, does NOT replicate under bulk"
+            ),
+            "held": bool(upward_reversals),
+            "note": "held here means the matrix prediction failed to replicate",
+        },
+        "B5": {
+            "statement": (
+                "KP 57.4 and KP 60.0 cannot REVERSE historically, overflow being "
+                "exactly zero; KP 57.4 historical collapses under the lowest arm"
+            ),
+            "held": (
+                not _reversing(_label(57.4), "historical")
+                and not _reversing(_label(60.0), "historical")
+                and "k_aq_field_geomean"
+                in sections[_label(57.4)]["historical"]["arms_collapsing_to_undefined"]
+            ),
+            "kp57_4_historical_verdict": sections[_label(57.4)]["historical"][
+                "ordering_verdict"
+            ],
+            "kp60_0_historical_verdict": sections[_label(60.0)]["historical"][
+                "ordering_verdict"
+            ],
+        },
+        "B6": {
+            "statement": (
+                "the lowest arm reverses KP 60.0 +4K, the one warmed cell piping "
+                "still leads under bulk; the milder downward arm does not"
+            ),
+            "held": (
+                "k_aq_field_geomean" in _reversing(_label(60.0), "+4K")
+                and "k_aq_field_toe" not in _reversing(_label(60.0), "+4K")
+            ),
+            "arms_reversing": _reversing(_label(60.0), "+4K"),
+        },
+        "B7": {
+            "statement": (
+                "the climate ratio rises under the downward arms and falls "
+                "under the upward arm"
+            ),
+            "held": all(row["moved_as_predicted"] for row in b7_rows),
+            "cells": b7_rows,
+        },
+        "B8": {
+            "statement": (
+                "the blanket unit weight control changes no ordering and moves "
+                "every annual number by under two per cent"
+            ),
+            "held": all(row["under_two_percent"] for row in b8_rows)
+            and not any(CONTROL_ARM in _changing(lab, sc) for lab, sc in _cells()),
+            "cells": b8_rows,
+        },
+        "B9": {
+            "statement": (
+                "the annualised conductivity span is wider under bulk than under "
+                "matrix at every cell, and wider than the length-effect bracket"
+            ),
+            "held": all(row["wider_than_matrix"] for row in b9_rows),
+            "wider_than_length_effect_everywhere": all(
+                row["wider_than_length_effect"] for row in b9_rows
+            ),
+            "cells": b9_rows,
+        },
+        "C1": {
+            "statement": (
+                "the two brackets act on the same piping numerator in opposite "
+                "directions: the bulk reading suppresses piping, the upward "
+                "conductivity arm restores it"
+            ),
+            "held": bool(restored),
+            "cells_where_the_grain_size_reading_flips_the_lead": d70_flipped,
+            "cells_restored_to_piping_by_the_upward_arm": restored,
+        },
+        "C2": {
+            "statement": (
+                "at least one cell whose lead the bulk reading hands to overflow "
+                "is restored to piping by the upward arm"
+            ),
+            "held": bool(restored),
+        },
+        "C3": {
+            "statement": (
+                "the conductivity bracket still changes the lead at every cell "
+                "the grain-size reading flips"
+            ),
+            "held": len(conductivity_changes_it) == len(d70_flipped),
+            "flipped_by_grain_size": len(d70_flipped),
+            "also_changed_by_conductivity": len(conductivity_changes_it),
+        },
+        "C4": {
+            "statement": (
+                "across the union of both readings and the full bracket, the only "
+                "cells whose lead is invariant are those where overflow is "
+                "exactly zero"
+            ),
+            "held": all(cell["overflow_is_exactly_zero"] for cell in invariant),
+            "invariant_cells": invariant,
+        },
+        "BF1": {
+            "statement": (
+                "no arm changes any lead under bulk (the bracket would be inert "
+                "where the curves sit lowest; would indict the pipeline)"
+            ),
+            "fired": not any(_changing(lab, sc) for lab, sc in _cells()),
+        },
+        "BF2": {
+            "statement": (
+                "a cell whose overflow annual is exactly zero reports overflow "
+                "as the leading mechanism (bug signature)"
+            ),
+            "fired": any(
+                sections[lab][sc]["baseline"]["p_annual_overflow"] == 0.0
+                and any(
+                    sections[lab][sc]["arms"][arm]["leading_mechanism"] == "overflow"
+                    for arm in sections[lab][sc]["arms"]
+                )
+                for lab, sc in _cells()
+            ),
+        },
+        "BF3": {
+            "statement": (
+                "the bulk conductivity span is narrower than the matrix span at "
+                "every cell (would refute B9)"
+            ),
+            "fired": all(not row["wider_than_matrix"] for row in b9_rows),
+        },
+        "BF5": {
+            "statement": (
+                "if B2 fails it fails at KP 58.8 +4K, which needs a factor of "
+                "9.43 against a matrix multiplier of 2.81"
+            ),
+            "fired": "k_aq_regional_upper" not in _reversing(_label(58.8), "+4K"),
+        },
+    }
+
+
 def reach_invariance(
     baseline_rows: dict[tuple[str, float, str], dict[str, Any]],
     arm_rows: dict[str, dict[tuple[str, float, str], dict[str, Any]]],
@@ -1066,7 +1492,179 @@ def render_figure(payload: dict[str, Any], out_dir: Path) -> Path:
         color=fs.MUTED,
     )
     fig.tight_layout()
-    return fs.save(fig, FIGURE_NAME, mirror=out_dir / "figures")
+    return fs.save(fig, FIGURE_NAME["matrix"], mirror=out_dir / "figures")
+
+
+def render_both_d70_figure(
+    bulk: dict[str, Any], matrix: dict[str, Any], out_dir: Path
+) -> Path:
+    """The cross-reading answer: do the two brackets compound or offset?
+
+    Both grain-size readings on one dominance axis, so the crossing of the
+    equal-contribution line is visible rather than asserted, and so the reader
+    can see that the two act on the same quantity in opposite directions. Cells
+    whose piping number is a lower bound are marked, never quoted as estimates.
+
+    No rendered text carries a decision identifier, a run identifier, a record
+    field name or an em dash (conventions section 9.3.1).
+    """
+    import matplotlib.pyplot as plt
+
+    fs = figstyle
+    fs.style()
+    fig, axes = plt.subplots(2, 4, figsize=(15.2, 7.4), sharey="row", sharex="col")
+
+    labels = [_label(kp) for kp in BEP_KPS]
+    reading_name = {"matrix": "matrix grain size", "bulk": "bulk grain size"}
+    reading_style = {"matrix": ("-", "o"), "bulk": ("--", "s")}
+    scenario_name = {"historical": "historical climate", "+4K": "4 K warming"}
+    clamped = {
+        (cell["section"], cell["scenario"])
+        for cell in bulk.get("bep_clamped_cells", [])
+    }
+
+    for col, label in enumerate(labels):
+        colour = fs.SECTION_COLORS[label.replace(" ", "")]
+        for row, scenario in enumerate(("historical", "+4K")):
+            ax = axes[row][col]
+            for reading, payload in (("matrix", matrix), ("bulk", bulk)):
+                entry = payload["sections"][label][scenario]
+                linestyle, marker = reading_style[reading]
+                points = []
+                undefined = []
+                for arm in CONDUCTIVITY_ARMS:
+                    x = payload["arms"][arm][label]["effective_prior_mean"]
+                    if entry["arms"][arm]["leading_mechanism"] == "not defined":
+                        undefined.append(x)
+                        continue
+                    points.append((x, entry["arms"][arm]["share_bep"]))
+                points.append(
+                    (
+                        payload["baseline_prior_mean_k_aq"][label],
+                        entry["baseline"]["share_bep"],
+                    )
+                )
+                points.sort()
+                ax.plot(
+                    [p[0] for p in points],
+                    [p[1] for p in points],
+                    color=colour,
+                    lw=1.7,
+                    linestyle=linestyle,
+                    marker=marker,
+                    ms=5.0,
+                    mfc=colour if reading == "matrix" else fs.SURFACE,
+                    zorder=3,
+                )
+                ax.plot(
+                    [payload["baseline_prior_mean_k_aq"][label]],
+                    [entry["baseline"]["share_bep"]],
+                    linestyle="none",
+                    marker="o",
+                    ms=9,
+                    mfc="none",
+                    mec=fs.INK,
+                    mew=1.2,
+                    zorder=4,
+                )
+                if undefined:
+                    ax.plot(
+                        undefined,
+                        [0.0] * len(undefined),
+                        linestyle="none",
+                        marker="x",
+                        ms=8,
+                        mew=2.0,
+                        color=fs.CRITICAL,
+                        zorder=5,
+                    )
+            ax.axhline(0.5, color=fs.CRITICAL, lw=1.1, zorder=2)
+            ax.set_xscale("log")
+            ax.set_ylim(-0.06, 1.06)
+            if (label, scenario) in clamped:
+                # Tinted panel rather than a text label: these curves occupy
+                # the top edge at one section and the bottom edge at another,
+                # so every corner collides somewhere. The tint carries a
+                # legend entry instead.
+                ax.set_facecolor("#fbeeee")
+            if row == 0:
+                ax.set_title(label, fontsize=10.5)
+            if row == 1:
+                ax.set_xlabel("conductivity [m/s]", fontsize=9)
+            if col == 0:
+                ax.set_ylabel(f"{scenario_name[scenario]}\npiping share", fontsize=9.5)
+
+    handles = [
+        plt.Line2D(
+            [],
+            [],
+            color=fs.INK_2,
+            lw=1.7,
+            linestyle=reading_style[r][0],
+            marker=reading_style[r][1],
+            ms=5.0,
+            mfc=fs.INK_2 if r == "matrix" else fs.SURFACE,
+            label=reading_name[r],
+        )
+        for r in ("matrix", "bulk")
+    ]
+    handles += [
+        plt.Line2D(
+            [],
+            [],
+            linestyle="none",
+            marker="o",
+            ms=9,
+            mfc="none",
+            mec=fs.INK,
+            mew=1.2,
+            label="production value",
+        ),
+        plt.Line2D([], [], color=fs.CRITICAL, lw=1.1, label="equal contribution"),
+        plt.Line2D(
+            [],
+            [],
+            linestyle="none",
+            marker="x",
+            ms=8,
+            mew=2.0,
+            color=fs.CRITICAL,
+            label="no mechanism loaded, share undefined",
+        ),
+        plt.Rectangle(
+            (0, 0),
+            1,
+            1,
+            facecolor="#fbeeee",
+            edgecolor=fs.MUTED,
+            lw=0.6,
+            label="tinted panel: piping is a lower bound",
+        ),
+    ]
+    fig.legend(
+        handles=handles,
+        loc="upper center",
+        bbox_to_anchor=(0.5, 0.095),
+        ncol=3,
+        fontsize=9.0,
+    )
+    fig.suptitle(
+        "Which mechanism leads, across the conductivity bracket, under both "
+        "grain-size readings",
+        fontsize=12.5,
+    )
+    fig.text(
+        0.5,
+        0.012,
+        "Above the line piping leads; below it overflow does. The two readings "
+        "move the same piping contribution in opposite directions, so raising "
+        "conductivity can restore a lead the bulk reading removes.",
+        ha="center",
+        fontsize=8.5,
+        color=fs.MUTED,
+    )
+    fig.tight_layout(rect=(0, 0.135, 1, 1))
+    return fs.save(fig, FIGURE_NAME["bulk"], mirror=out_dir / "figures")
 
 
 # --------------------------------------------------------------------------- #
@@ -1082,15 +1680,24 @@ def main(argv: list[str] | None = None) -> int:
         help="Arms to propagate (default: all four, the pre-registered set).",
     )
     parser.add_argument(
+        "--d70",
+        default=DEFAULT_D70,
+        choices=list(D70_CHOICES),
+        help=(
+            "Grain-size reading to propagate. The two are co-primary "
+            "deliverables, not a result and a sensitivity (default: matrix)."
+        ),
+    )
+    parser.add_argument(
         "--out",
         type=Path,
-        default=DEFAULT_OUT,
-        help="Evidence JSON output path.",
+        default=None,
+        help="Evidence JSON output path (default: the record for the reading).",
     )
     parser.add_argument(
         "--out-dir",
         type=Path,
-        default=DEFAULT_OUT_DIR,
+        default=None,
         help="Study-local output directory (gitignored).",
     )
     parser.add_argument(
@@ -1105,11 +1712,24 @@ def main(argv: list[str] | None = None) -> int:
         ),
     )
     args = parser.parse_args(argv)
+    d70 = args.d70
+    if args.out is None:
+        args.out = DEFAULT_OUT[d70]
+    if args.out_dir is None:
+        args.out_dir = DEFAULT_OUT_DIR[d70]
 
     if args.figures_only:
         payload = json.loads(args.out.read_text(encoding="utf-8"))
-        path = render_figure(payload, args.out_dir)
-        print(f"wrote {path.relative_to(REPO_ROOT)} (figure only; no record written)")
+        if d70 == "bulk":
+            # The bulk figure is the cross-reading comparison, so it reads the
+            # committed matrix record too. Both are tracked evidence.
+            matrix_payload = json.loads(
+                DEFAULT_OUT["matrix"].read_text(encoding="utf-8")
+            )
+            path = render_both_d70_figure(payload, matrix_payload, args.out_dir)
+        else:
+            path = render_figure(payload, args.out_dir)
+        print(f"wrote {_rel(path)} (figure only; no record written)")
         return 0
 
     started = time.time()
@@ -1117,13 +1737,13 @@ def main(argv: list[str] | None = None) -> int:
     cache_before = _cache_state(campaign.HAZARD_CACHE)
 
     print("building registry, surface curves and node hazard ...", flush=True)
-    context = build_context(campaign)
+    context = build_context(campaign, d70)
 
-    print("baseline pass (gate 1) ...", flush=True)
+    print(f"baseline pass, {d70} reading (gate 1) ...", flush=True)
     baseline_rows, baseline_coverage, baseline_driving = annualise_variant(
-        campaign, context, context["baseline_curves"]
+        campaign, context, context["baseline_curves"], d70
     )
-    gate1 = gate_one(baseline_rows)
+    gate1 = gate_one(baseline_rows, d70)
     print(
         f"  GATE 1 PASSED: {gate1['rows_compared']} published rows reproduced "
         f"field for field ({gate1['fields_compared']} fields each)",
@@ -1140,8 +1760,8 @@ def main(argv: list[str] | None = None) -> int:
         arm_provenance[arm] = {}
         for kp in BEP_KPS:
             label = _label(kp)
-            arm_provenance[arm][label] = _arm_provenance(kp, arm)
-            curve = load_bep_curve(_arm_sweep(kp, arm), branch="transient")
+            arm_provenance[arm][label] = _arm_provenance(kp, arm, d70)
+            curve = load_bep_curve(_arm_sweep(kp, arm, d70), branch="transient")
             if not np.array_equal(
                 np.asarray(curve.grid_m_msl),
                 np.asarray(context["baseline_curves"][kp].grid_m_msl),
@@ -1152,7 +1772,7 @@ def main(argv: list[str] | None = None) -> int:
                 )
             curves[kp] = curve
         arm_rows[arm], arm_coverage[arm], arm_driving[arm] = annualise_variant(
-            campaign, context, curves
+            campaign, context, curves, d70
         )
 
     gate3 = reach_invariance(baseline_rows, arm_rows)
@@ -1191,7 +1811,7 @@ def main(argv: list[str] | None = None) -> int:
                     for r in published
                     if float(r["kp"]) == _kp
                     and r["scenario"] == _scenario
-                    and r["d70"] == D70
+                    and r["d70"] == d70
                     and r["bep_source"] == "posterior"
                     and r["surface_variant"] == SURFACE_VARIANT
                     and float(r["lambda_ac_m"]) == lam
@@ -1199,9 +1819,33 @@ def main(argv: list[str] | None = None) -> int:
 
             lambda_yardstick[label][scenario] = _p(40.0) / _p(250.0)
 
-    prereg = evaluate_preregistration(
-        sections, lambda_yardstick, list(campaign.SCENARIOS)
+    matrix_payload = (
+        None
+        if d70 == "matrix"
+        else json.loads(DEFAULT_OUT["matrix"].read_text(encoding="utf-8"))
     )
+    if matrix_payload is None:
+        prereg = evaluate_preregistration(
+            sections, lambda_yardstick, list(campaign.SCENARIOS)
+        )
+    else:
+        prereg = evaluate_preregistration_bulk(
+            sections,
+            matrix_payload["sections"],
+            lambda_yardstick,
+            {
+                label: {
+                    scenario: matrix_payload["sections"][label][scenario][
+                        "conductivity_span_p_annual_system"
+                    ]
+                    for scenario in campaign.SCENARIOS
+                }
+                for label in (_label(kp) for kp in BEP_KPS)
+            },
+            list(campaign.SCENARIOS),
+        )
+
+    clamped = clamped_cells(baseline_rows, arm_rows)
 
     payload: dict[str, Any] = {
         "study": (
@@ -1212,17 +1856,13 @@ def main(argv: list[str] | None = None) -> int:
         "generated": _dt.datetime.now().isoformat(timespec="seconds"),
         "note": "docs/decisions/conductivity-bracket-annualisation.md",
         "scope": {
-            "d70_interpretation": D70,
+            "d70_interpretation": d70,
             "bep_source": BEP_SOURCE,
             "lambda_ac_m": LAMBDA_AC_M,
             "surface_variant": SURFACE_VARIANT,
             "scenarios": list(campaign.SCENARIOS),
             "sections": [_label(kp) for kp in BEP_KPS],
-            "statement": (
-                "matrix-d70 and prior-side ONLY. No bulk-d70 conductivity arm "
-                "has ever been run and no Phase 2 posterior exists for any arm. "
-                "Quote this scope wherever any number here is quoted."
-            ),
+            "statement": SCOPE_STATEMENT[d70],
         },
         "gates": {
             "gate_1_reproduces_production_table": gate1,
@@ -1241,9 +1881,9 @@ def main(argv: list[str] | None = None) -> int:
             "gate_5_no_production_artifact_written": {
                 "passed": True,
                 "writes": [
-                    str(args.out.relative_to(REPO_ROOT)).replace("\\", "/"),
-                    str(args.out_dir.relative_to(REPO_ROOT)).replace("\\", "/"),
-                    f"docs/figures/{FIGURE_NAME}",
+                    _rel(args.out),
+                    _rel(args.out_dir),
+                    f"docs/figures/{FIGURE_NAME[d70]}",
                 ],
             },
         },
@@ -1252,7 +1892,7 @@ def main(argv: list[str] | None = None) -> int:
             _label(kp): float(
                 Config.model_validate(
                     json.loads(
-                        _baseline_sweep(kp)
+                        _baseline_sweep(kp, d70)
                         .with_suffix(".json")
                         .read_text(encoding="utf-8")
                     )["config"]
@@ -1272,6 +1912,11 @@ def main(argv: list[str] | None = None) -> int:
         },
         "elapsed_s": round(time.time() - started, 1),
     }
+    # Emitted only when non-empty, which keeps the matrix record byte-identical
+    # to the one this study first wrote: no matrix cell at these four sections
+    # is clamped, and gate 1 proves it by reproducing the published flag.
+    if clamped:
+        payload["bep_clamped_cells"] = clamped
 
     args.out_dir.mkdir(parents=True, exist_ok=True)
     (args.out_dir / "annual_rows.json").write_text(
@@ -1289,11 +1934,15 @@ def main(argv: list[str] | None = None) -> int:
     )
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-    print(f"\nwrote {args.out.relative_to(REPO_ROOT)}")
+    print(f"\nwrote {_rel(args.out)}")
 
     if not args.no_figure:
-        path = render_figure(payload, args.out_dir)
-        print(f"wrote {path.relative_to(REPO_ROOT)}")
+        path = (
+            render_figure(payload, args.out_dir)
+            if matrix_payload is None
+            else render_both_d70_figure(payload, matrix_payload, args.out_dir)
+        )
+        print(f"wrote {_rel(path)}")
 
     # Console summary against the pre-registered criteria.
     print(
@@ -1314,10 +1963,23 @@ def main(argv: list[str] | None = None) -> int:
                 f"{','.join(entry['arms_changing_the_lead']) or '-'}"
             )
     print("\npre-registration outcome")
-    for key in ("P1", "P2", "P3", "P4", "P5", "P6", "P7"):
-        print(f"  {key}: {'HELD' if prereg[key]['held'] else 'FAILED'}")
-    for key in ("F1", "F3", "F5"):
-        print(f"  {key}: {'FIRED' if prereg[key]['fired'] else 'did not fire'}")
+    for key, entry in prereg.items():
+        if "held" in entry:
+            print(f"  {key}: {'HELD' if entry['held'] else 'FAILED'}")
+    for key, entry in prereg.items():
+        if "fired" in entry:
+            print(f"  {key}: {'FIRED' if entry['fired'] else 'did not fire'}")
+    if clamped:
+        print(
+            "\ncells whose piping annual probability is a LOWER BOUND "
+            "(transition not bracketed, so the raw tail is held above the grid)"
+        )
+        for cell in clamped:
+            print(
+                f"  {cell['section']:<8} {cell['scenario']:<11} "
+                f"baseline {'clamped' if cell['baseline_clamped'] else 'clear':<8} "
+                f"arms {','.join(cell['arms_clamped']) or '-'}"
+            )
     return 0
 
 

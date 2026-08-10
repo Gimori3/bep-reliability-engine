@@ -1123,13 +1123,43 @@ COMPANION_EXCLUSIONS: dict[str, str] = {
     "scripts/conductivity_annualisation_study.py": (
         "consumes the same ADR-0048 arm sweeps the campaign does not produce "
         "(decision 3); recorded as a deliberate non-entry when it was built "
-        "(2026-08-10). Cheap in itself (recorded 8.0 s) but it raises "
-        "FileNotFoundError on a missing arm, so on any machine without those "
-        "gitignored sweeps it would fail the campaign at a stage unrelated to "
-        "the production deliverable. Its arm-independent Gate 1 (baseline "
-        "reproduces rq4_annual.csv over 228 rows x 20 fields) has no "
-        "gate-only entry point today; adding one is the cheap way to make it "
-        "campaign-runnable if that is ever wanted."
+        "(2026-08-10). Reason re-checked and widened the same day, when the "
+        "bulk-d70 replication landed: it now consumes THIRTY-TWO arm sweeps, "
+        "16 per grain-size reading, so the missing-arm exposure doubled while "
+        "the substantive ground for excluding it is unchanged. Cheap in itself "
+        "(recorded 8.0 s per reading) but it raises FileNotFoundError on a "
+        "missing arm, so on any machine without those gitignored sweeps it "
+        "would fail the campaign at a stage unrelated to the production "
+        "deliverable. Its arm-independent Gate 1 (the baseline reproduces "
+        "rq4_annual.csv over 228 rows x 20 fields, now once per reading) still "
+        "has no gate-only entry point; adding one is the cheap way to make it "
+        "campaign-runnable if that is ever wanted. Both its figures ARE "
+        "re-drawn by the campaign, in the figures stage under G7."
+    ),
+    "scripts/canonical_shape_sensitivity_study.py": (
+        "canonical-shape sensitivity (defence brief item A1, 2026-08-10). NOT a "
+        "cost exclusion, though it is expensive (about 70 min: 16 production-N "
+        "sweeps for the eight strata x two arms, a two-section comparator "
+        "ladder, and a Uemura surface-curve regeneration). The substantive "
+        "ground is that ALL THREE of its baseline gates are restatements of "
+        "campaign gates on campaign artifacts, so running it here would "
+        "re-assert this campaign's own claims through its own outputs -- the "
+        "hwl_bias_resolution.py ground. Its gate 1 (each baseline arm "
+        "bit-identical to the persisted sweep) is G1's claim; its gate 3 (the "
+        "peak-referenced comparators bit-identical to results/stage6_6/) rests "
+        "on the record G3 writes and verifies; and its Phase 3 baseline gate "
+        "re-checks rq4_annual.csv, which is G4. What it adds beyond them is the "
+        "ALTERNATE arm, i.e. a sensitivity, and sensitivities stay off per "
+        "campaign decision 3. It also raises FileNotFoundError on a missing "
+        "d4PDF workbook, persisted ladder or annual table, so on a machine "
+        "without those gitignored inputs it would fail the campaign at a stage "
+        "unrelated to the production deliverable. Its figure IS re-drawn by the "
+        "campaign, in the figures stage under G7."
+    ),
+    "tests/test_canonical_shape_sensitivity.py": (
+        "exercised by pytest, not by this stage -- the guard on the study "
+        "above. It quotes the run stems and the phrase 'bit-identical', so it "
+        "matches for the same self-referential reason its sibling guards do."
     ),
     "tests/test_config.py": "exercised by pytest, not by this stage",
     "tests/test_companion_enumeration_gate.py": (
@@ -1733,11 +1763,50 @@ FIGURE_DRIVERS: list[dict[str, Any]] = [
             "--figures-only",
         ],
         "requires": ["docs/decisions/conductivity-bracket-annualisation.json"],
-        # Exact name, not a glob: nothing else in docs/figures/ begins
-        # "conductivity", but a glob that later swept up a sibling would bind it
-        # to this driver's sources and leave it un-redrawn.
+        # Exact name, not a glob. A ``conductivity_*`` glob would now sweep up
+        # the bulk figure declared below, bind it to this entry's sources and
+        # leave it un-redrawn -- the trap the 2026-07-31 pass recorded for the
+        # shared C_e glob, and the reason the sibling arrived without incident.
         "produces": ["conductivity_bracket_annual.png"],
         "sources": ["docs/decisions/conductivity-bracket-annualisation.json"],
+    },
+    {
+        # The bulk-d70 replication (2026-08-10, note Part 3). Separate entry
+        # rather than a second ``produces`` on the one above, because this
+        # figure is the CROSS-READING comparison and so depends on BOTH
+        # committed records: staleness in either must re-draw it.
+        "label": "conductivity bracket, both grain-size readings (figures only)",
+        "command": [
+            PY,
+            "scripts/conductivity_annualisation_study.py",
+            "--d70",
+            "bulk",
+            "--figures-only",
+        ],
+        "requires": [
+            "docs/decisions/conductivity-bracket-annualisation-bulk.json",
+            "docs/decisions/conductivity-bracket-annualisation.json",
+        ],
+        "produces": ["conductivity_bracket_both_d70.png"],
+        "sources": [
+            "docs/decisions/conductivity-bracket-annualisation-bulk.json",
+            "docs/decisions/conductivity-bracket-annualisation.json",
+        ],
+    },
+    {
+        # Canonical-shape sensitivity (defence brief item A1, 2026-08-10). A
+        # real redraw path: ``figures`` renders from the committed evidence
+        # record and returns before any stage runs, so it writes no evidence
+        # file and re-runs no sweep. Exact filename, never a glob.
+        "label": "canonical hydrograph shape sensitivity (figures only)",
+        "command": [
+            PY,
+            "scripts/canonical_shape_sensitivity_study.py",
+            "figures",
+        ],
+        "requires": ["docs/decisions/canonical-shape-sensitivity.json"],
+        "produces": ["canonical_shape_sensitivity.png"],
+        "sources": ["docs/decisions/canonical-shape-sensitivity.json"],
     },
     # ---- declaration only (no plot-only path); see the module note above ---- #
     {

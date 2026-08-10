@@ -15,10 +15,13 @@ changed. Follows the `seepage-length-L-study.md` /
 `epistemic-bracket-synthesis.md` / `r10-foreshore-exhaustion-screening.md`
 grammar.
 
-**Scope, stated first because every number below inherits it: this result is
-matrix-d70 and prior-side only. A bulk-d70 conductivity arm has never been run,
-and no Phase 2 posterior exists for any conductivity arm.** Every quotation of
-any figure in this note must carry that sentence.
+**Scope, stated first because every number below inherits it. Every number in
+Part 2 is matrix-d70 and prior-side only; every number in Part 3 is bulk-d70 and
+prior-side only. The two grain-size readings are co-primary deliverables, not a
+result and a sensitivity, and the d70 half of the original scope was closed on
+2026-08-10 by Part 3. The prior-side half stands: no Phase 2 posterior exists for
+any conductivity arm under either reading.** Every quotation of any figure in
+this note must carry the reading it came from.
 
 ---
 
@@ -607,3 +610,547 @@ conductivity arm. It would require four new Phase 1 sweeps (bulk × the three
 conductivity scenarios is twelve, or four for the field-geomean arm alone) and
 would answer whether the two brackets compound or overlap. Until it exists,
 every statement above carries the matrix-d70 scope.
+
+*Executed 2026-08-10. See Part 3, which discharges the d70 half of §2.6's scope
+and leaves the prior-side half standing.*
+
+---
+
+## Part 3 — the bulk-d70 replication
+
+**Status:** §3.1 (pre-registration) written 2026-08-10 before any bulk arm sweep
+was started and before any bulk arm number existed. §3.2 (outcome) appended after
+execution; like Part 2 it evaluates the pre-registered rules against the
+pre-registered inputs and re-tunes nothing.
+
+**Driver:** the same `scripts/conductivity_annualisation_study.py`, with the d70
+axis threaded through as `--d70` (matrix remains the default and its behaviour is
+byte-identical).
+**Evidence:** `docs/decisions/conductivity-bracket-annualisation-bulk.json`
+**Figure:** `docs/figures/conductivity_bracket_both_d70.png`
+
+**Why a dated Part 3 rather than a sibling note.** The scope sentence being
+discharged is §2.6 of *this* note, and this note's own closing paragraph
+registered exactly this run as the follow-on. Splitting would leave §2.6 pointing
+at a recommendation that had already been executed elsewhere, and would force
+every later reader to hold two documents to answer one question. The deliverable
+here is moreover a *comparison across the two d70 readings*, not a second
+standalone measurement, so it belongs beside the reading it is compared against.
+
+### 3.1 Pre-registration
+
+*Written and committed before the bulk arms existed. Nothing below was adjusted
+after seeing a result; where a prediction failed, §3.2 says so and the text here
+is left standing.*
+
+#### 3.1.1 What this closes, and what it does not
+
+§2.6 scopes every number in Part 2 to **matrix d70 and prior side**. This part
+closes the **d70 half only**. The prior-side half stands: no Phase 2 posterior
+exists for any conductivity arm under either d70 reading, and building one
+remains out of scope.
+
+The reason this is not a sensitivity run is that the matrix and bulk d70
+interpretations are **co-primary deliverables** of the study, not a result and a
+variant. Chapter 7 already reports that the bulk reading, propagated through the
+annualisation, reverses the mechanism lead at two of four sections historically
+and three of four under warming (Part 2 §2.4 reproduces that from
+`rq4_annual.csv`). So the largest epistemic bracket in the project had been
+measured on one co-primary reading and not the other, and the two brackets were
+known to overlap in effect without being known to compound.
+
+#### 3.1.2 The structural asymmetry, read from the published table before anything ran
+
+This is the single most important fact fixed in advance, because it inverts the
+study relative to Part 2. Under bulk d70 the **production lead is already
+overflow at five of the eight section-and-climate cells**:
+
+| section | scenario | production lead | `R = P_bep / P_overflow` | multiplier on piping needed to change the lead |
+|---|---|---|---|---|
+| KP 57.4 | historical | piping | ∞ (overflow exactly 0) | cannot flip; only COLLAPSED is reachable |
+| KP 57.4 | +4K | **overflow** | 0.622 | ×1.61 **up** |
+| KP 58.8 | historical | **overflow** | 0.0204 | ×49.0 **up** |
+| KP 58.8 | +4K | **overflow** | 0.106 | ×9.43 **up** |
+| KP 60.0 | historical | piping | ∞ (overflow exactly 0) | cannot flip; only COLLAPSED is reachable |
+| KP 60.0 | +4K | piping | 69.7 | ×0.0143 **down** |
+| KP 62.0 | historical | **overflow** | 8.26e-5 | ×1.21e4 **up** |
+| KP 62.0 | +4K | **overflow** | 1.84e-3 | ×544 **up** |
+
+These eight numbers are the pre-registered yardstick, computed from the published
+production table exactly as Part 2 §1.4 computed its own, so they cannot be tuned
+afterwards.
+
+**The consequence, stated before measuring: under bulk the decisive arm is the
+upward one.** The two downward arms can only push piping further behind at the
+five cells where it is already behind; only `k_aq_regional_upper` can change a
+lead there. That is the mirror image of Part 2, whose P4 recorded the upward arm
+as reversing nothing anywhere. It also means the "cheap decisive single arm"
+available under matrix — `field_geomean` — is **not** decisive under bulk.
+
+#### 3.1.3 Scenario set and its cost
+
+**All four arms, at all four sections.** Justification: (i) the upward arm is now
+the decisive one, so a `field_geomean`-only run would answer nothing at five of
+eight cells; (ii) a two-sided bracket is the whole point, and one arm can only
+report "held" or "flipped"; (iii) `gamma_bl_sub_lower` is the negative control and
+is worth more here than under matrix, because the bulk annual numbers are drawn
+from lower on the fragility curve, which is exactly where Part 2's parent ADR
+measured that control to be at its *largest* (+29 % to +50 % transient at the
+lowest reachable level, decaying to unity by the shoulder).
+
+Cost: 16 Phase 1 sweeps at N = 1e5. The persisted bulk production sweeps record
+69 / 159 / 159 / 160 s per section, so four arms is about 37 minutes. The
+propagation itself re-sweeps nothing and runs in seconds against the warm hazard
+cache.
+
+#### 3.1.4 What is fixed before measuring
+
+Sections KP 57.4 / 58.8 / 60.0 / 62.0; `d70 = bulk`; `bep_source = prior`;
+λ_ac = 250 m; surface variant = primary; both scenarios. Arms are the same four
+ADR-0048 instantiations as Part 2, specified as absolute **target means**, so the
+per-section factors differ from the matrix run only where the section's own bulk
+prior mean differs — which it does not, since d70 and `k_aq` are independent
+columns. Nothing is re-swept on the Phase 3 side; the warm hazard cache is reused
+and asserted unchanged, and it is valid for both readings because the node
+exposure datum is `z_toe`, identical across d70 at all four sections (38.3 / 38.5
+/ 40.0 / 44.9 m MSL, verified before writing this).
+
+#### 3.1.5 A clamping rule, fixed in advance
+
+At **KP 57.4 and KP 58.8 the bulk BEP curve already carries
+`bep_clamped_above_grid = True` in production**: its transient transition is not
+bracketed (max raw P_f 0.378 and 0.152), so under ADR-0024 the raw-tail branch
+holds its last value above the grid rather than extrapolating. The piping annual
+numbers at those two sections are therefore **lower bounds**, in production and in
+every arm alike.
+
+The rule, fixed now so it cannot be chosen afterwards: **a reversal that depends
+on a clamped piping number is reported as a bound, and a failure to reverse at a
+clamped cell is weaker evidence than a reversal**, because the true piping
+contribution can only be higher than the clamped one. Clamped cells are labelled
+in the record, in the table and in the figure.
+
+#### 3.1.6 Predictions, restating Part 2's under bulk
+
+| | statement | prediction |
+|---|---|---|
+| **B1** | *(P1 analogue)* The contest is driven by the upward arm, not the downward ones | HOLDS |
+| **B2** | *(P2 analogue)* `regional_upper` reverses KP 57.4 +4K (needs ×1.61) and KP 58.8 +4K (needs ×9.43) | HOLDS |
+| **B3** | `regional_upper` does **not** reverse KP 62.0 in either climate (needs ×1.21e4 and ×544, against matrix multipliers of ×16.0 and ×8.25) | HOLDS |
+| **B4** | *(P4 analogue)* "the upward arm reverses no ordering anywhere" | **FAILS to replicate** — predicted in advance |
+| **B5** | *(P5 analogue)* KP 57.4 and KP 60.0 historically cannot REVERSE, overflow being exactly zero; KP 57.4 historical COLLAPSES under `field_geomean` | HOLDS |
+| **B6** | `field_geomean` reverses KP 60.0 +4K (needs ÷69.7; matrix gave ÷1282); `field_toe` does not (matrix gave ÷2.84) | HOLDS |
+| **B7** | *(P6 analogue)* the climate ratio rises under the downward arms and falls under the upward one | HOLDS |
+| **B8** | *(P7 analogue)* the control changes no ordering, and moves every annual number by less than a few per cent — while still moving them *more* than the 0.009 % to 1.4 % it moved the matrix numbers | HOLDS |
+| **B9** | *(F3 analogue)* the annualised conductivity span is **wider under bulk than under matrix** at every section and scenario, and wider than the length-effect yardstick everywhere | HOLDS |
+
+The mechanism behind B9, stated so it is falsifiable rather than decorative: the
+bulk reading cuts the piping curves, so the same hazard integral samples them
+lower down, and Part 2 §2.3 established that the conductivity spread is widest
+low on the curve and collapses only where an arm saturates.
+
+#### 3.1.7 The new question: compound or overlap
+
+Part 2 §2.4 established that under matrix the conductivity bracket **subsumes**
+the d70 axis: every cell d70 flipped, conductivity flipped too. The open question
+is what the two do *together*.
+
+| | statement | prediction |
+|---|---|---|
+| **C1** | The two brackets do **not** simply compound. They act on the same piping numerator in **opposite directions**: the bulk reading suppresses piping, the upward conductivity arm restores it. Downward conductivity compounds with bulk; upward conductivity **offsets** it | HOLDS |
+| **C2** | At least one cell whose lead bulk alone hands to overflow is **restored to piping** by `regional_upper` | HOLDS |
+| **C3** | Subsumption is not symmetric: the matrix finding "conductivity subsumes d70" does not re-appear in the same form once the baseline lead has already changed | HOLDS |
+| **C4** | Across the **union** of both readings and the full bracket, the only cells whose lead is invariant are KP 57.4 and KP 60.0 **historically**, and only because overflow is exactly zero there — which is a statement about overflow's absence, not about piping's resilience (the same reading Part 2 §2.3 gave KP 60.0) | HOLDS |
+
+C4 is the one that carries the RQ3 consequence, and it is deliberately the
+strongest claim here: it predicts that **no cell has a mechanism ordering that
+survives the union of the two co-primary readings on its own merits**.
+
+#### 3.1.8 What would falsify this reading
+
+* **BF1.** Neither the upward arm nor the downward arms change any lead under
+  bulk. The bracket would then be inert exactly where the curves sit lowest,
+  contradicting the stage-dependence property, and would indict the pipeline
+  rather than the physics.
+* **BF2.** A cell whose overflow annual is exactly zero reports **overflow as the
+  leading mechanism**. This is the corrected wording of Part 2's F2, which §2.1
+  recorded as too loosely worded to be a clean falsifier; it is fixed here rather
+  than re-scored.
+* **BF3.** The annualised bulk conductivity span is narrower than the matrix span
+  at every section. That refutes B9 and would mean the integral compresses the
+  bracket more under the lower-fragility reading, which the stage-dependence
+  mechanism forbids.
+* **BF4 (contamination).** Any arm whose conditioning grid differs from its bulk
+  baseline's, whose `config_hash` does not round-trip, which is not N = 1e5, or
+  which does not carry the expected `prior_mean_scenario` label. Refused, not
+  reported.
+* **BF5 (the prediction most likely to fail, named in advance).** If B2 fails it
+  fails at **KP 58.8 +4K**, which needs ×9.43 against a matrix multiplier of
+  ×2.81 at the same cell — it rests entirely on bulk amplifying the arm by more
+  than a factor of three. KP 57.4 +4K needs only ×1.61 and is far safer. The
+  second most exposed prediction is **B3 at KP 62.0 +4K**, which needs the
+  amplification to stay *below* ×66.
+
+#### 3.1.9 Gates fixed in advance
+
+* **GATE 1, non-negotiable.** The **bulk** baseline pass must reproduce
+  `results/system_integration/phase3/rq4_annual.csv` exactly for every
+  bulk / prior / 250 m / primary row, field for field, before any bulk arm number
+  is reported. Mismatch aborts.
+* **GATE 2.** Per arm: grid equal to its bulk baseline's, N = 1e5, round-tripping
+  `config_hash`, expected scenario label.
+* **GATE 3.** The segments with no BEP source are bit-identical between the bulk
+  baseline and every bulk arm.
+* **GATE 4.** The hazard cache file set and digests unchanged.
+* **GATE 5.** No production artifact written.
+* **GATE 6, new to this part.** **The matrix path is unchanged.** Re-running the
+  study with its default arguments must reproduce the committed matrix evidence
+  record field for field apart from its own timestamp and runtime stamps, and
+  re-rendering the matrix figure must change no bytes. A d70 axis that perturbed
+  the matrix answer would invalidate Part 2 rather than extend it.
+
+### 3.2 Outcome
+
+**Headline, with its scope inside the sentence: under bulk d70 on the prior side,
+the aquifer-conductivity bracket contests the mechanism-dominance ordering at
+seven of the eight section-and-climate cells, and it does so from the opposite
+direction to the matrix reading. Combining the two co-primary grain-size readings
+with the bracket leaves NO cell whose leading mechanism is invariant. The two
+brackets do not compound: on the mechanism ordering they partly cancel, and on
+the annual system probability the second one is capped by a conductivity-free
+mechanism.**
+
+#### 3.2.1 Did the pre-registration hold?
+
+| | statement | outcome |
+|---|---|---|
+| **B1** | the contest is driven by the upward arm, not the downward ones | **HELD** |
+| **B2** | the upward arm reverses KP 57.4 +4K and KP 58.8 +4K | **HELD** |
+| **B3** | the upward arm does not reverse KP 62.0 in either climate | **FAILED** (historical) |
+| **B4** | the matrix P4 does not replicate under bulk | **HELD** (i.e. P4 failed to replicate, as predicted) |
+| **B5** | KP 57.4 and KP 60.0 cannot reverse historically; KP 57.4 collapses | HELD |
+| **B6** | the lowest arm reverses KP 60.0 +4K, the milder downward arm does not | HELD |
+| **B7** | the climate ratio rises under the downward arms, falls under the upward one | **FAILED** (KP 58.8) |
+| **B8** | the control changes no ordering and moves every annual number under 2 % | HELD |
+| **B9** | the annualised span is wider under bulk than under matrix | **FAILED** |
+| **C1** | the two brackets act on the piping numerator in opposite directions | HELD |
+| **C2** | the upward arm restores a lead the bulk reading hands to overflow | HELD |
+| **C3** | conductivity changes the lead at every cell the grain-size reading flips | **FAILED** (4 of 5) |
+| **C4** | the only invariant cells are those where overflow is exactly zero | held **vacuously**; the truth is stronger |
+| BF1 | no arm changes any lead (would indict the pipeline) | did not fire |
+| BF2 | a zero-overflow cell reports overflow as leading (bug signature) | did not fire |
+| BF3 | the bulk span is narrower than the matrix span at every cell | did not fire **on the letter only** |
+| **BF5** | if B2 fails it fails at KP 58.8 +4K | did not fire |
+
+Four predictions failed and one held only vacuously. Each is reported below with
+the mechanism, and **three of the failures share a single mechanism**, which is
+the substantive result of this part.
+
+**BF5 did not fire, and that is worth stating.** Part 1 named KP 58.8 +4K in
+advance as the place B2 would break, because it needed a factor of 9.43 against a
+matrix multiplier of 2.81. The arm delivered **×27.8** and the reversal held. The
+amplification the pre-registration hoped for is real and larger than it dared
+predict.
+
+**B3 failed, and it failed by a hair at the least likely cell.** The upward arm
+was predicted not to reverse KP 62.0 in either climate, because historically it
+needed a piping multiplier of **×1.21e4**. It delivered **×1.434e4**, and the
+piping share lands at **0.542**. That is a knife edge and is reported as one: the
+cell reverses, but a 20 % smaller multiplier would leave it standing. At +4K the
+same arm needed ×544, delivered ×273, and the cell does **not** reverse, which is
+why KP 62.0 at +4K is the only ROBUST cell under bulk.
+
+**C4 held vacuously, and the truth is stronger than the prediction.** C4 predicted
+the invariant set would contain the two cells whose overflow is exactly zero. The
+measured invariant set is **empty**: those two cells do not survive either,
+because under bulk they COLLAPSE rather than hold. `all()` over an empty list is
+true, so the record scores C4 as held; the honest reading is that the prediction
+was too weak, not that it was confirmed.
+
+**BF3 did not fire on the letter, and the substance largely occurred.** It was
+worded "narrower at *every* cell". Two cells have an unbounded bulk span (an arm
+gives exactly zero failures), which counts as wider by definition, so the
+conjunction fails. At **all six cells where both spans are finite the bulk span is
+narrower**, by factors of 4 to 33. The wording, not the physics, is what kept it
+from firing. Recorded here rather than rescored, following Part 2's treatment of
+its own loosely worded F2.
+
+#### 3.2.2 Per section and scenario
+
+Annual probabilities [1/yr], bulk d70, prior BEP, λ_ac = 250 m, primary surface.
+Fluvial scour is exactly zero in every cell. `x piping` is the arm's piping annual
+divided by the production value.
+
+**KP 57.4** — production lead piping historically (overflow exactly 0), overflow at +4K
+
+| arm | hist system | hist piping | hist lead | +4K system | +4K piping | x piping | +4K lead |
+|---|---|---|---|---|---|---|---|
+| production | 2.07e-6 | 2.07e-6 | piping | 1.22e-3 | 5.67e-4 | — | overflow |
+| field geomean | **0** | 0 | **none** | 9.11e-4 | 0 | ×0 | overflow |
+| field toe | **0** | 0 | **none** | 9.12e-4 | 3.37e-6 | ×0.0059 | overflow |
+| regional upper | 1.26e-4 | 1.26e-4 | piping | 4.14e-3 | 3.98e-3 | **×7.02** | **piping** |
+| unit-weight control | 2.07e-6 | 2.07e-6 | piping | 1.22e-3 | 5.67e-4 | ×1.00 | overflow |
+
+**KP 58.8** — production lead overflow in both climates
+
+| arm | hist system | hist piping | hist lead | +4K system | +4K piping | x piping | +4K lead |
+|---|---|---|---|---|---|---|---|
+| production | 1.99e-4 | 3.98e-6 | overflow | 2.71e-3 | 2.68e-4 | — | overflow |
+| field geomean | 1.95e-4 | 0 | overflow | 2.53e-3 | 0 | ×0 | overflow |
+| field toe | 1.95e-4 | 5.76e-10 | overflow | 2.53e-3 | 2.44e-6 | ×0.0091 | overflow |
+| regional upper | 8.58e-4 | 6.84e-4 | **piping** | 8.93e-3 | 7.45e-3 | **×27.8** | **piping** |
+| unit-weight control | 1.99e-4 | 3.98e-6 | overflow | 2.71e-3 | 2.68e-4 | ×1.00 | overflow |
+
+**KP 60.0** — production lead piping in both climates
+
+| arm | hist system | hist piping | hist lead | +4K system | +4K piping | x piping | +4K lead |
+|---|---|---|---|---|---|---|---|
+| production | 6.95e-5 | 6.95e-5 | piping | 1.62e-3 | 1.61e-3 | — | piping |
+| field geomean | **0** | 0 | **none** | 2.31e-5 | 1.52e-8 | ×9.5e-6 | **overflow** |
+| field toe | 5.38e-6 | 5.38e-6 | piping | 3.17e-4 | 2.98e-4 | ×0.185 | piping |
+| regional upper | 7.33e-3 | 7.33e-3 | piping | 4.30e-2 | 4.30e-2 | ×26.8 | piping |
+| unit-weight control | 6.95e-5 | 6.95e-5 | piping | 1.62e-3 | 1.61e-3 | ×1.00 | piping |
+
+**KP 62.0, the governing section** — production lead overflow in both climates
+
+| arm | hist system | hist piping | hist lead | +4K system | +4K piping | x piping | +4K lead |
+|---|---|---|---|---|---|---|---|
+| production | 1.99e-4 | 1.65e-8 | overflow | 8.39e-3 | 1.54e-5 | — | overflow |
+| field geomean | 1.99e-4 | 0 | overflow | 8.39e-3 | 0 | ×0 | overflow |
+| field toe | 1.99e-4 | 0 | overflow | 8.39e-3 | 1.01e-6 | ×0.066 | overflow |
+| regional upper | 4.13e-4 | 2.36e-4 | **piping** | 9.69e-3 | 4.21e-3 | **×273** | overflow |
+| unit-weight control | 1.99e-4 | 1.65e-8 | overflow | 8.39e-3 | 1.54e-5 | ×1.00 | overflow |
+
+**B8, the negative control.** The unit-weight arm moves every annual system
+probability by **0.0000 % to 0.025 %** and changes no ordering anywhere. That is
+*quieter* than under matrix (0.009 % to 1.4 %), which Part 1 predicted the wrong
+way round: it reasoned that bulk samples lower on the curve, where ADR-0048
+measured that control at its largest conditionally. The conditional reasoning was
+right and irrelevant, because at five of eight cells the system number is carried
+by overflow, which the control cannot touch at all. Same mechanism as B7 and B9
+below.
+
+#### 3.2.3 The answer owed: ordering verdicts across both readings
+
+| section | climate | matrix verdict | bulk verdict | contested from |
+|---|---|---|---|---|
+| KP 57.4 | historical | COLLAPSED | COLLAPSED | below, both |
+| KP 57.4 | +4K | REVERSED | REVERSED | **below under matrix, above under bulk** |
+| KP 58.8 | historical | REVERSED | REVERSED | **below under matrix, above under bulk** |
+| KP 58.8 | +4K | REVERSED | REVERSED | **below under matrix, above under bulk** |
+| KP 60.0 | historical | **ROBUST** | COLLAPSED | — / below |
+| KP 60.0 | +4K | REVERSED | REVERSED | below, both |
+| KP 62.0 | historical | REVERSED | REVERSED | **below under matrix, above under bulk** |
+| KP 62.0 | +4K | REVERSED | **ROBUST** | below / — |
+
+**No cell is ROBUST under both readings.** Six of eight are contested under both.
+The two exceptions are each robust under exactly one reading and contested under
+the other, in opposite senses: KP 60.0 historical is the matrix reading's one
+robust cell and collapses to nothing under bulk, while KP 62.0 at +4K is the bulk
+reading's one robust cell and reverses under matrix.
+
+#### 3.2.4 Compound or overlap: the direct answer
+
+**Neither, and the word that fits is *offset*.** Three measured facts, in order of
+weight:
+
+1. **On the ordering the two brackets act in opposite directions.** The bulk
+   reading suppresses the piping contribution and hands the lead to overflow at
+   five of eight cells. The upward conductivity arm then **restores piping's lead
+   at four of those five**: KP 57.4 +4K, KP 58.8 in both climates, and KP 62.0
+   historically. Under matrix the contest came entirely from the downward arms
+   and the upward arm reversed nothing anywhere (Part 2, P4); under bulk it is the
+   upward arm that does all the reversing and the downward arms that reverse only
+   one cell between them. The same physical knob, moved the same way, changes the
+   answer in opposite directions under the two readings, because it is being
+   applied on opposite sides of the crossing.
+
+2. **On the annual system probability they do not compound, because the second
+   bracket is capped by a conductivity-free mechanism.** This is the mechanism
+   behind three of the four failed predictions, and it is one mechanism, not
+   three. Once the grain-size reading has demoted piping below overflow, the
+   system probability is carried by the Uemura surface curves, which have no
+   aquifer dependence at all. Every conductivity statistic about the *system* then
+   collapses toward the overflow-only value:
+
+   * **B9.** The bulk system span is **narrower** than the matrix span at all six
+     cells where both are finite (4.54 against 27.6, 4.40 against 185, 3.53
+     against 48.6, 1865 against 2762, 2.07 against 69.1, 1.16 against 8.27). Not
+     because the bracket on the mechanism shrank, but because the mechanism it
+     acts on no longer carries the number. The span on the **piping** contribution
+     alone is unbounded at six of eight cells and ×2.8e6 at the seventh.
+   * **B7.** At KP 58.8 the climate ratio *falls* under both downward arms
+     (13.62 to 12.97) instead of rising. 12.97 is the overflow-only ratio
+     (2.53e-3 / 1.95e-4 = 12.97) to three figures: the arms strip the small piping
+     remainder and the ratio converges on overflow's own climate response. The
+     same convergence leaves KP 62.0 unmoved at 42.11 under both downward arms.
+   * **B8.** The control is quieter under bulk than under matrix for the same
+     reason.
+
+   The pre-registration's error was uniform: it reasoned about the shape of the
+   *conditional piping curve*, and the recorded quantity is the *system*
+   probability. Both are correct statements about different things, and the
+   distinction is exactly what the union of the two brackets turns on.
+
+3. **Subsumption is not symmetric (C3).** Under matrix, conductivity flipped every
+   cell the grain-size axis flipped. Under bulk it flips **four of the five**. The
+   exception is KP 62.0 at +4K, where the bulk reading has pushed piping 544-fold
+   behind overflow and even a ×273 arm cannot close the gap. So "the larger
+   bracket subsumes the smaller" is a property of the matrix baseline, not a
+   general relation between the two.
+
+**What this means for RQ3, which is the point of the exercise.** The
+mechanism-dominance claim does not rest on either bracket alone; it rests on their
+union, and in the union **no section-and-climate cell has an invariant leading
+mechanism**. That is not the same as "the dominance finding collapses", and the
+difference matters:
+
+* The direction of each bracket is known and monotone. Lower conductivity and the
+  bulk grain-size reading both suppress piping; higher conductivity restores it.
+  Nothing here is a random spread around an unknown answer.
+* **Production sits at neither end of either bracket.** ADR-0048 places the
+  adopted conductivity at 55 % to 77 % of the log range spanned by the field
+  population and the regional upper band, and both grain-size readings are carried
+  as co-primary, with the matrix reading the conservative one. The reported
+  ordering is the ordering at a mid-range input, not at a favourable extreme.
+* The upper arm of the conductivity bracket **strengthens** piping's lead
+  everywhere it is applied, under both readings. A reader who takes only the field
+  arms away from this note has taken the comfortable half of a two-sided result.
+
+#### 3.2.5 A caveat that is much larger under bulk, and is a property of the deliverable
+
+Part 2 §2.5 recorded that at KP 62.0 under +4K, 7 of 5400 ensemble years (0.13 %)
+peak above the ADR-0024 attainable maximum of 50.5 m MSL and carry **11.8 %** of
+that section's annual piping probability, with no coverage flag firing because
+nothing leaves the grid.
+
+**Under the bulk reading the same seven years carry 81.2 %.** The bulk piping curve
+at KP 62.0 is so low that almost all of its annual piping probability is drawn
+from stages the section cannot reach. The consequence is specific and must travel
+with the number: **KP 62.0's bulk +4K piping annual probability of 1.54e-5 is
+four fifths hypothetical**, and the fact that this cell reads ROBUST is therefore
+a statement about how far behind overflow the piping contribution has been pushed,
+not a demonstration that its ordering is well founded. Historical is exactly 0.0,
+and KP 57.4 is exactly 0.0 in both climates and both readings.
+
+`docs/phase3_report.md` caveat 8 already states the operative rule (read the
+coverage flags together with the section's attainable maximum, never the flags
+alone). This part supplies the second, larger measurement of it.
+
+#### 3.2.6 Clamping, and a qualification this part puts on Part 2
+
+The ADR-0024 raw-tail branch holds a curve at its last raw value above the
+conditioning grid rather than extrapolating, and flags the cell. Under bulk this
+fires on the **production baseline** at KP 57.4 and KP 58.8 in both climates, and
+on arms at KP 60.0. The piping annual probabilities there are **lower bounds**, in
+production and in every arm alike; the figure tints those panels and the record
+names the cells.
+
+**The qualification on Part 2.** Running this part surfaced that the same flag
+fires on **six matrix arm cells** as well: a low-conductivity arm drops the arm's
+own maximum raw failure fraction below the ADR-0024 bracketing threshold, so the
+arm switches to the raw-tail branch even where the production baseline is a fitted
+lognormal. Part 2 §2.5 did not record this. Its claim there is still true as
+written, because it is about the two `AnnualizedResult.coverage` flags, which
+really are False everywhere; `bep_clamped_above_grid` is a different flag and was
+not examined. The direction matters: clamping **understates** an arm's piping
+contribution, and those are the arms that produce Part 2's reversals, so a
+reversal declared on a clamped arm is easier to declare than it should be.
+
+Quantified rather than left as a worry. Of the ten matrix arm-verdicts that change
+a lead, four are at KP 62.0 and are **unclamped**, so the governing-section claim
+is untouched. Of the six clamped ones, the margin by which the arm's piping annual
+sits behind overflow is:
+
+| cell | arm | piping is behind overflow by | at risk from the clamp? |
+|---|---|---|---|
+| KP 57.4 historical | field geomean | overflow is exactly 0 | no: the verdict is COLLAPSED, not a reversal |
+| KP 57.4 +4K | field geomean | ×1051 | no |
+| KP 57.4 +4K | field toe | **×1.35** | **yes, in attribution only** |
+| KP 58.8 historical | field geomean | ×420 | no |
+| KP 58.8 +4K | field geomean | ×71.5 | no |
+| KP 60.0 +4K | field geomean | **×1.93** | **yes, and it is the only arm reversing this cell** |
+
+So **one** Part 2 cell verdict is genuinely exposed: **KP 60.0 +4K**, whose
+REVERSED verdict rests on a single clamped arm sitting a factor of 1.93 behind
+overflow. KP 57.4 +4K is exposed only in *which* arms are credited, since the
+field-geomean arm reverses it anyway at ×1051. Part 2's headline counts, three of
+four sections historically and four of four under warming, are unchanged. The size
+of the clamp's effect cannot be quoted, because quantifying it would mean
+extrapolating a curve above its grid, which is precisely what ADR-0024 forbids;
+the exposure is reported, not corrected. The matrix evidence record now carries
+the clamped-cell list, and every matrix number in it was re-verified unchanged.
+
+#### 3.2.7 Method and gates
+
+**Sixteen new Phase 1 sweeps** (four sections × four arms, N = 1e5, bulk d70),
+written to `results/sensitivity/adr0048_prior_means/` by
+`scripts/prior_mean_scenario_companion.py` against the four persisted **bulk**
+production sweeps consumed read-only. Their per-level record merges into
+`docs/decisions/adr0048-prior-mean-companion.json` beside the matrix sections;
+the merge was **verified non-destructive on a copy before it was run for real**,
+and the four matrix sections are byte-identical to their committed form
+afterwards. That driver also gained the `--out` flag the 2026-07-31 audit had
+listed as missing, defaulting to the same tracked path so its no-argument call is
+unchanged.
+
+The propagation itself re-swept nothing and took 19 s against the warm cache.
+
+| gate | result |
+|---|---|
+| 1 — the bulk baseline reproduces `rq4_annual.csv` | **228 published bulk / prior / 250 m / primary rows, 20 fields each, string-identical** |
+| 2 — arm provenance | grid equal to baseline, N = 1e5, config hash round-trips, expected scenario label, **and `d70_interpretation` asserted from the arm's own config** rather than trusted from its filename, all 16 |
+| 3 — segments with no BEP source | 880 segment-scenario cells bit-identical under every arm |
+| 4 — hazard cache | 228 files, digests unchanged; no workbook streamed. The node exposure datum is pinned to the matrix curve, as the campaign pinned it when the cache was written, and the bulk curve's datum is asserted equal to it at all four sections |
+| 5 — production artifacts | nothing written outside this study's own outputs |
+| 6 — the matrix path is unchanged | **every matrix value reproduces exactly**, verified key by key against the committed record |
+
+**GATE 6 was relaxed once, deliberately, and both departures are named.** As
+pre-registered it demanded the matrix record reproduce "field for field apart from
+its own timestamp and runtime stamps". It was relaxed to the production campaign's
+own asymmetric metadata rule, under which an **additive** key is recorded and
+passes while a **changed value** or a regression still fails. Diffed key by key
+against the committed record, a fresh matrix run differs in exactly three places,
+two of them beyond the timestamps:
+
+* **One additive key**, the clamped-cell list of §3.2.6. The alternative was to
+  emit it only under bulk, which would have left the matrix record silently
+  omitting a real property of its own arms.
+* **One changed string**, the scope sentence, which until this part read "no
+  bulk-d70 conductivity arm has ever been run". That was true when written and
+  false the moment these arms landed. A record may not carry a claim its own
+  repository has overtaken, so the clause became a pointer to the companion
+  record. A test now forbids either record claiming it again.
+
+**Every numeric value in the matrix record is unchanged**, verified by a
+key-by-key walk against its committed form, and the matrix figure re-renders
+**byte-identical** (SHA-256 unchanged). No matrix conclusion moves.
+
+#### 3.2.8 What the thesis must change
+
+Landing instructions. **Nothing in `msc-thesis` is edited from this repository**
+(conventions §8). Every number is in
+`docs/decisions/conductivity-bracket-annualisation-bulk.json`.
+
+1. **Every occurrence of the scope sentence "matrix d70 and prior side only"**
+   narrows rather than disappears. The d70 half is discharged; the prior-side half
+   stands, and it should now read that no Phase 2 posterior exists for any
+   conductivity arm under **either** grain-size reading.
+2. **The dominance narrative** gains the cross-reading verdict table of §3.2.3 and
+   the statement that no cell's leading mechanism is invariant across the union of
+   the two readings and the bracket, together with the two sentences that keep
+   that from reading as "we do not know": the direction of each bracket is known
+   and monotone, and production sits at neither end of either.
+3. **The limitations register.** The conductivity row and the grain-size row are
+   **no longer independent** and the register must say so: they act on the same
+   piping contribution, in opposite directions on the ordering, and sub-additively
+   on the annual system probability because a conductivity-free mechanism carries
+   it once piping is demoted.
+4. **The answers register and the sub-question 3 prose** record that the arms now
+   reach the reported annual probabilities, shares and climate ratios under
+   **both** co-primary readings, and that the surviving gap is the posterior side
+   alone.
+5. **The future-research item on bulk horizontal conductivity** is partly
+   discharged: the bracket has been propagated to the deliverable under both
+   readings. What remains is a measurement that would narrow it, not a
+   propagation that would quantify it.

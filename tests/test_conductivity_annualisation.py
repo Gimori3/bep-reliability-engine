@@ -8,9 +8,11 @@ stopped at the conditional fragility curve.
 
 What is pinned here, and why each one earned a guard:
 
-1. **The scope sentence travels with the numbers.** The result is matrix-d70 and
-   prior-side only; a bulk-d70 conductivity arm has never been run. A number
-   quoted without that is a different claim.
+1. **The scope sentence travels with the numbers.** Each record is one
+   grain-size reading, prior side only; a number is not portable to the other
+   reading or to the posterior. A number quoted without that is a different
+   claim. Both co-primary readings now exist (note Part 3, 2026-08-10), so a
+   record still saying the bulk arm was never run would be false.
 2. **Gate 1 is recorded as passed, over a non-trivial row count.** The whole
    study is worthless if its pipeline does not reproduce the production
    annualisation, so the record must carry the evidence that it did.
@@ -38,9 +40,11 @@ REPO = Path(__file__).resolve().parents[1]
 DECISIONS = REPO / "docs" / "decisions"
 FIGURES = REPO / "docs" / "figures"
 EVIDENCE = DECISIONS / "conductivity-bracket-annualisation.json"
+BULK_EVIDENCE = DECISIONS / "conductivity-bracket-annualisation-bulk.json"
 NOTE = DECISIONS / "conductivity-bracket-annualisation.md"
 DRIVER = REPO / "scripts" / "conductivity_annualisation_study.py"
 FIGURE = FIGURES / "conductivity_bracket_annual.png"
+BULK_FIGURE = FIGURES / "conductivity_bracket_both_d70.png"
 
 sys.path.insert(0, str(REPO / "scripts"))
 
@@ -68,36 +72,64 @@ def _evidence() -> dict:
     return json.loads(_require(EVIDENCE).read_text(encoding="utf-8"))
 
 
+def _bulk() -> dict:
+    return json.loads(_require(BULK_EVIDENCE).read_text(encoding="utf-8"))
+
+
 # --------------------------------------------------------------------------- #
 # 1. Scope                                                                      #
 # --------------------------------------------------------------------------- #
 
 
-def test_the_scope_is_recorded_as_matrix_and_prior_only() -> None:
-    """The result is not portable to the bulk grain size or the posterior.
+def test_each_record_states_which_grain_size_reading_it_is() -> None:
+    """A number is not portable between the two readings or to the posterior.
 
-    ADR-0048's arms exist only under matrix d70, and no Phase 2 posterior was
-    ever computed for a conductivity scenario. The comparison is therefore
-    prior-against-prior, which is exact at KP 62.0 (the 2016 update rejects
-    0.00 % there) and a documented campaign variant everywhere else.
+    The two grain-size readings are co-primary deliverables, so each record has
+    to name its own and point at its companion rather than implying it is the
+    result. Neither has a Phase 2 posterior: the comparison is prior-against-
+    prior, exact at KP 62.0 (the 2016 update rejects 0.00 % there) and a
+    documented campaign variant everywhere else.
     """
-    scope = _evidence()["scope"]
-    assert scope["d70_interpretation"] == "matrix"
-    assert scope["bep_source"] == "prior"
-    assert scope["lambda_ac_m"] == 250.0
-    assert scope["surface_variant"] == "primary"
-    assert sorted(scope["scenarios"]) == sorted(SCENARIOS)
-    statement = scope["statement"].lower()
-    assert "matrix" in statement and "prior" in statement
-    assert "bulk" in statement, "the absent bulk arm must be named, not implied"
+    for reading, payload in (("matrix", _evidence()), ("bulk", _bulk())):
+        scope = payload["scope"]
+        assert scope["d70_interpretation"] == reading
+        assert scope["bep_source"] == "prior"
+        assert scope["lambda_ac_m"] == 250.0
+        assert scope["surface_variant"] == "primary"
+        assert sorted(scope["scenarios"]) == sorted(SCENARIOS)
+        statement = scope["statement"].lower()
+        assert reading in statement and "prior" in statement
+        assert (
+            "no phase 2 posterior" in statement
+        ), "the surviving half of the scope must be named, not implied"
+
+
+def test_neither_record_still_claims_the_bulk_arm_was_never_run() -> None:
+    """The matrix record's own scope sentence was overtaken by this repository.
+
+    Until 2026-08-10 it read "no bulk-d70 conductivity arm has ever been run",
+    which was true when written and false the moment the replication landed. A
+    record of this kind may not carry a claim its own repository has overtaken,
+    so the clause became a pointer to the companion record. The matrix numbers
+    were not touched.
+    """
+    for payload in (_evidence(), _bulk()):
+        statement = payload["scope"]["statement"].lower()
+        assert "never been run" not in statement
+        assert "has ever been run" not in statement
 
 
 def test_the_note_leads_with_the_scope_rather_than_footnoting_it() -> None:
     """A scope that arrives after the headline is a scope nobody quotes."""
     text = _require(NOTE).read_text(encoding="utf-8")
-    head = text[: text.index("## Part 1")]
-    assert "matrix-d70 and prior-side only" in head
-    assert "bulk-d70 conductivity arm has never been run" in head
+    # Whitespace-normalised: the note is hard-wrapped, so a sentence the reader
+    # sees as one line is several in the source.
+    head = " ".join(text[: text.index("## Part 1")].split())
+    assert "Part 2 is matrix-d70 and prior-side only" in head
+    assert "Part 3 is bulk-d70 and prior-side only" in head
+    assert "co-primary" in head
+    # The surviving half of the original scope must still be stated up front.
+    assert "no Phase 2 posterior exists for" in head
 
 
 # --------------------------------------------------------------------------- #
@@ -385,6 +417,280 @@ def test_the_driver_does_not_modify_the_production_phase3_outputs() -> None:
         }:
             target = ast.unparse(node.value)
             assert "PRODUCTION_TABLE" not in target, target
+
+
+# --------------------------------------------------------------------------- #
+# 6. The bulk-d70 replication (note Part 3, 2026-08-10)                         #
+# --------------------------------------------------------------------------- #
+
+
+def test_gate_one_reproduced_the_production_table_for_the_bulk_reading() -> None:
+    """The bulk arms measure the thesis's quantity only if the baseline does.
+
+    Same standard as the matrix reading: the bulk / prior / 250 m / primary slice
+    of the published table, field for field, before any arm number is reported.
+    """
+    gate = _bulk()["gates"]["gate_1_reproduces_production_table"]
+    assert gate["passed"] is True
+    assert gate["rows_compared"] == 228
+    assert gate["fields_compared"] == 20
+
+
+def test_the_upward_arm_is_the_one_that_contests_the_ordering_under_bulk() -> None:
+    """The structural inversion, and the whole reason bulk needed its own run.
+
+    Under bulk the production lead is already overflow at five of eight cells, so
+    the downward arms can only push piping further behind and the arm that can
+    change an ordering is the upward one. That is the mirror image of the matrix
+    reading, where the upward arm reverses nothing anywhere, and it is why a
+    single cheap low-conductivity arm would have answered nothing here.
+    """
+    outcome = _bulk()["preregistration_outcome"]
+    assert outcome["B1"]["held"] is True
+    assert outcome["B4"]["held"] is True, (
+        "B4 records that the matrix prediction P4 fails to replicate; if the "
+        "upward arm stopped reversing anything under bulk, the offset finding "
+        "would go with it"
+    )
+    upward = outcome["B1"]["cells_reversed_by_the_upward_arm"]
+    downward = outcome["B1"]["cells_reversed_by_a_downward_arm"]
+    assert len(upward) > len(downward)
+    # And the matrix reading still says the opposite, which is the contrast.
+    assert _evidence()["preregistration_outcome"]["P4"]["held"] is True
+
+
+def test_the_two_brackets_offset_rather_than_compound() -> None:
+    """The compound-or-overlap answer, pinned at the cells that carry it.
+
+    The bulk grain-size reading hands the lead to overflow at five cells; the
+    upward conductivity arm restores piping at four of them. A later change that
+    left this list empty would turn an "offset" conclusion into a "compound" one
+    without anyone editing the prose.
+    """
+    outcome = _bulk()["preregistration_outcome"]
+    assert outcome["C1"]["held"] is True
+    assert outcome["C2"]["held"] is True
+    restored = {
+        (c["section"], c["scenario"])
+        for c in outcome["C1"]["cells_restored_to_piping_by_the_upward_arm"]
+    }
+    assert restored == {
+        ("KP 57.4", "+4K"),
+        ("KP 58.8", "historical"),
+        ("KP 58.8", "+4K"),
+        ("KP 62.0", "historical"),
+    }
+
+
+def test_no_cell_keeps_its_leading_mechanism_across_both_readings() -> None:
+    """The RQ3 consequence: the claim rests on the union, and the union is empty.
+
+    Six of eight cells are contested under both readings. The two that are not
+    are each robust under exactly one reading and contested under the other, in
+    opposite senses, so the intersection of the robust sets is empty. C4
+    predicted the two zero-overflow cells would survive; they do not, because
+    under bulk they collapse instead, so C4 scores as held only vacuously and
+    the measured truth is stronger than the prediction.
+    """
+    matrix, bulk = _evidence()["sections"], _bulk()["sections"]
+    robust_both = [
+        (label, scenario)
+        for label in SECTIONS
+        for scenario in SCENARIOS
+        if matrix[label][scenario]["ordering_verdict"] == "ROBUST"
+        and bulk[label][scenario]["ordering_verdict"] == "ROBUST"
+    ]
+    assert robust_both == []
+    assert _bulk()["preregistration_outcome"]["C4"]["invariant_cells"] == []
+    # The one robust cell under each reading, and they are different cells.
+    assert matrix["KP 60.0"]["historical"]["ordering_verdict"] == "ROBUST"
+    assert bulk["KP 60.0"]["historical"]["ordering_verdict"] == "COLLAPSED"
+    assert bulk["KP 62.0"]["+4K"]["ordering_verdict"] == "ROBUST"
+    assert matrix["KP 62.0"]["+4K"]["ordering_verdict"] == "REVERSED"
+
+
+def test_the_system_level_bracket_is_narrower_under_bulk_not_wider() -> None:
+    """B9 failed, and its failure is the mechanism, so it is pinned.
+
+    The prediction reasoned about the conditional piping curve; the recorded
+    quantity is the system probability. Once the grain-size reading demotes
+    piping below overflow, the system number is carried by surface curves with no
+    aquifer dependence, and every conductivity statistic about the system
+    collapses toward the overflow-only value. Upgrading B9 to "held" would delete
+    the finding that the two brackets are sub-additive on the deliverable.
+    """
+    outcome = _bulk()["preregistration_outcome"]
+    assert outcome["B9"]["held"] is False
+    finite = [c for c in outcome["B9"]["cells"] if c["bulk_span"] is not None]
+    assert len(finite) == 6
+    for cell in finite:
+        assert cell["wider_than_matrix"] is False, cell
+        assert cell["bulk_span"] < cell["matrix_span"], cell
+    # The second clause of B9 did survive: still wider than the length effect.
+    assert outcome["B9"]["wider_than_length_effect_everywhere"] is True
+
+
+def test_the_climate_ratio_converges_on_the_overflow_only_value() -> None:
+    """B7's failure, same mechanism, at the cell where it is unambiguous.
+
+    At KP 58.8 the downward arms lower the climate ratio instead of raising it,
+    because they strip the small piping remainder and leave overflow's own ratio
+    behind. That value is the overflow annual probabilities' own quotient, so the
+    convergence is checked against the arithmetic rather than against a constant.
+    """
+    bulk = _bulk()
+    ratios = bulk["sections"]["KP 58.8"]["climate_ratio_plus4k_over_historical"]
+    overflow_only = (
+        bulk["sections"]["KP 58.8"]["+4K"]["baseline"]["p_annual_overflow"]
+        / bulk["sections"]["KP 58.8"]["historical"]["baseline"]["p_annual_overflow"]
+    )
+    for arm in ("k_aq_field_geomean", "k_aq_field_toe"):
+        assert ratios[arm] < ratios["baseline"]
+        assert abs(ratios[arm] / overflow_only - 1.0) < 0.01, arm
+    assert any(
+        not row["moved_as_predicted"]
+        for row in bulk["preregistration_outcome"]["B7"]["cells"]
+    )
+
+
+def test_the_clamped_cells_are_named_under_both_readings() -> None:
+    """A clamped piping number is a lower bound and may not be quoted as an estimate.
+
+    Recorded under both readings because it fires under both: on the production
+    baseline at two sections under bulk, and on low-conductivity arms even where
+    the matrix baseline is a fitted lognormal, because such an arm drops its own
+    maximum raw failure fraction below the bracketing threshold. The matrix half
+    was not surfaced when that reading was first run.
+    """
+    for payload in (_evidence(), _bulk()):
+        cells = payload["bep_clamped_cells"]
+        assert cells, "a reading with clamped cells must name them"
+        for cell in cells:
+            assert cell["section"] in SECTIONS
+            assert cell["scenario"] in SCENARIOS
+            assert "LOWER BOUND" in cell["reading"]
+    # Under bulk the production baseline itself is clamped; under matrix only arms.
+    assert any(c["baseline_clamped"] for c in _bulk()["bep_clamped_cells"])
+    assert not any(c["baseline_clamped"] for c in _evidence()["bep_clamped_cells"])
+
+
+def test_the_attainable_stage_exposure_is_carried_for_the_bulk_reading() -> None:
+    """Caveat 8 is four times larger under bulk, and that is not a coverage flag.
+
+    At KP 62.0 under warming the ensemble years that peak above the attainable
+    maximum carry 11.8 % of the annual piping probability under matrix and 81 %
+    under bulk, while no coverage flag fires under either, because nothing leaves
+    the conditioning grid. A number four fifths built on unreachable stages must
+    not be read as an estimate of anything.
+    """
+    band = _bulk()["sections"]["KP 62.0"]["+4K"]["baseline"]["driving_stage_band"]
+    assert band["attainable_max_m_msl"] == 50.5
+    assert band["frac_of_annual_piping_above_attainable_max"] > 0.5
+    # Historical, and KP 57.4 in both climates, are exactly zero under bulk too.
+    assert (
+        _bulk()["sections"]["KP 62.0"]["historical"]["baseline"]["driving_stage_band"][
+            "frac_of_annual_piping_above_attainable_max"
+        ]
+        == 0.0
+    )
+    # And no coverage flag fires anywhere, which is why the flags alone are not
+    # a sufficient statement about attainability.
+    for label in SECTIONS:
+        for scenario in SCENARIOS:
+            entry = _bulk()["sections"][label][scenario]
+            assert entry["baseline"]["coverage_system"]["lower_bound_clamp"] is False
+
+
+def test_an_arm_cannot_be_compared_across_grain_size_readings() -> None:
+    """Both readings share one arm directory and differ only in the file stem.
+
+    A mistyped stem would silently compare a bulk arm against a matrix baseline,
+    which no gate downstream would catch, so the guard reads the reading off the
+    arm's own configuration rather than off its filename.
+    """
+    source = _require(DRIVER).read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    (provenance,) = [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef) and node.name == "_arm_provenance"
+    ]
+    checks = [
+        node
+        for node in ast.walk(provenance)
+        if isinstance(node, ast.Attribute) and node.attr == "d70_interpretation"
+    ]
+    assert checks, (
+        "_arm_provenance no longer asserts the arm's own d70 interpretation; a "
+        "bulk arm could be compared against a matrix baseline undetected"
+    )
+
+
+def test_the_bulk_figure_is_declared_by_exact_name_and_reads_both_records() -> None:
+    """G7, and the reason this figure is a separate entry rather than a sibling.
+
+    It is the cross-reading comparison, so staleness in EITHER committed record
+    must redraw it. Folding it into the matrix entry as a second ``produces``
+    would have bound it to only one of its two sources.
+    """
+    from production_campaign import FIGURE_DRIVERS
+
+    (entry,) = [
+        d
+        for d in FIGURE_DRIVERS
+        if d["produces"] == ["conductivity_bracket_both_d70.png"]
+    ]
+    assert entry["command"] is not None, "a real plot-only path exists; use it"
+    assert entry["command"][-1] == "--figures-only"
+    assert "--d70" in entry["command"] and "bulk" in entry["command"]
+    assert set(entry["sources"]) == {
+        "docs/decisions/conductivity-bracket-annualisation-bulk.json",
+        "docs/decisions/conductivity-bracket-annualisation.json",
+    }
+    _require(BULK_FIGURE)
+
+
+def test_no_figure_entry_claims_both_conductivity_figures() -> None:
+    """A ``conductivity_*`` glob would bind the sibling to the wrong sources.
+
+    The 2026-07-31 pass recorded exactly this trap for the shared prior-study
+    glob, where one entry silently claimed three figures and measured them all
+    against the newest.
+    """
+    from production_campaign import FIGURE_DRIVERS
+
+    claims: list[str] = []
+    for driver in FIGURE_DRIVERS:
+        claims.extend(driver["produces"])
+    for name in (
+        "conductivity_bracket_annual.png",
+        "conductivity_bracket_both_d70.png",
+    ):
+        assert claims.count(name) == 1, f"{name} is claimed {claims.count(name)} times"
+
+
+def test_the_companion_driver_can_write_its_record_somewhere_else() -> None:
+    """The missing flag the 2026-07-31 audit listed, now present.
+
+    Without it the only way to exercise the prior-mean companion was to write the
+    tracked ADR-0048 record, so a trial run could not be separated from a real
+    one. The default is unchanged, so the no-argument call still merges into that
+    record rather than truncating it.
+    """
+    companion = REPO / "scripts" / "prior_mean_scenario_companion.py"
+    tree = ast.parse(_require(companion).read_text(encoding="utf-8"))
+    flags = [
+        node.args[0].value
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and node.func.attr == "add_argument"
+        and node.args
+        and isinstance(node.args[0], ast.Constant)
+    ]
+    assert "--out" in flags
+    # The record must still be written through the argument, not the constant.
+    assert "JSON_OUT.write_text" not in companion.read_text(encoding="utf-8")
 
 
 def test_no_existence_guard_in_this_file_skips_on_a_tracked_path() -> None:

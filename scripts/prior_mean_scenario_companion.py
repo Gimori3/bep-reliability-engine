@@ -202,10 +202,17 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--only",
         default=None,
-        help="Run just one scenario label (default: all three).",
+        help="Run just one scenario label (default: all four).",
     )
     parser.add_argument("--n-jobs", type=int, default=-1)
     parser.add_argument("--overwrite", action="store_true", default=True)
+    parser.add_argument(
+        "--out",
+        type=Path,
+        default=JSON_OUT,
+        help="Evidence JSON path (default: the tracked ADR-0048 companion "
+        "record, which a partial run merges into rather than truncating).",
+    )
     args = parser.parse_args(argv)
 
     scenarios = [s for s in SCENARIOS if args.only is None or s[0] == args.only]
@@ -255,8 +262,8 @@ def main(argv: list[str] | None = None) -> int:
         ),
         "sections": sections,
     }
-    if JSON_OUT.exists():
-        prior = json.loads(JSON_OUT.read_text())
+    if args.out.exists():
+        prior = json.loads(args.out.read_text())
         by_file = {s["baseline_file"]: s for s in prior.get("sections", [])}
         for section in payload["sections"]:
             existing = by_file.get(section["baseline_file"])
@@ -270,8 +277,9 @@ def main(argv: list[str] | None = None) -> int:
             )
             existing["scenarios"] = list(merged.values())
         payload["sections"] = list(by_file.values())
-    JSON_OUT.write_text(json.dumps(payload, indent=2) + "\n")
-    print(f"\nWrote {JSON_OUT.relative_to(REPO_ROOT)}")
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    args.out.write_text(json.dumps(payload, indent=2) + "\n")
+    print(f"\nWrote {args.out.relative_to(REPO_ROOT)}")
     return 0
 
 

@@ -690,3 +690,102 @@ zero changed rows). The 110 segments carrying no BEP source are asserted
 **Registered follow-on, not blocking:** a bulk-d70 conductivity arm, which would
 answer whether the two brackets compound or overlap. Until it exists, every
 figure in this addendum carries the matrix-d70, prior-side scope.
+
+*Executed 2026-08-10; see section 12.7, which narrows that scope.*
+
+### 12.7 BULK-d70 REPLICATION (added 2026-08-10; authoritative on the scope of sections 12.1 to 12.6)
+
+**The scope of this whole addendum narrows rather than disappears. Sections 12.1
+to 12.6 are matrix d70, prior side. The d70 half is now closed: the same bracket
+has been propagated under the bulk reading, the second co-primary grain-size
+interpretation. The prior-side half stands, and now reads: no Phase 2 posterior
+exists for any conductivity arm under either reading.** Evidence
+`docs/decisions/conductivity-bracket-annualisation-bulk.json` and Part 3 of the
+companion note; figure `docs/figures/conductivity_bracket_both_d70.png`. Sixteen
+new Phase 1 arm sweeps (N = 1e5, bulk); the bulk baseline reproduces
+`rq4_annual.csv` string-identically over all 228 bulk / prior / 250 m / primary
+rows and all 20 fields before any arm number is reported. Nothing in sections 1
+to 11 changes, and `rq4_annual.csv` is untouched.
+
+**The structural fact that inverts the study.** Under bulk the production lead is
+**already overflow at five of the eight** section-and-climate cells, so the
+downward conductivity arms can only push piping further behind. The arm that can
+change an ordering under bulk is the **upward** one, the exact reverse of the
+matrix reading, where the upward arm reverses nothing anywhere.
+
+**Verdicts across both readings.** REVERSED = an arm hands the lead to the other
+mechanism; COLLAPSED = an arm leaves no mechanism loaded at all; ROBUST = every
+arm preserves the production lead.
+
+| section | climate | matrix | bulk | contested from |
+|---|---|---|---|---|
+| KP 57.4 | historical | COLLAPSED | COLLAPSED | below, both |
+| KP 57.4 | +4K | REVERSED | REVERSED | **below under matrix, above under bulk** |
+| KP 58.8 | historical | REVERSED | REVERSED | **below under matrix, above under bulk** |
+| KP 58.8 | +4K | REVERSED | REVERSED | **below under matrix, above under bulk** |
+| KP 60.0 | historical | **ROBUST** | COLLAPSED | — / below |
+| KP 60.0 | +4K | REVERSED | REVERSED | below, both |
+| KP 62.0 | historical | REVERSED | REVERSED | **below under matrix, above under bulk** |
+| KP 62.0 | +4K | REVERSED | **ROBUST** | below / — |
+
+**No cell is ROBUST under both readings**; six of eight are contested under both.
+The two exceptions are robust under exactly one reading each and contested under
+the other, in opposite senses.
+
+**The two brackets OFFSET; they do not compound.** Three measured statements:
+
+1. **On the ordering they act in opposite directions.** The bulk reading hands the
+   lead to overflow at five cells; the upward conductivity arm **restores piping
+   at four of them** (KP 57.4 +4K, KP 58.8 in both climates, KP 62.0 historical).
+   The same knob moved the same way changes the answer in opposite directions
+   under the two readings, because it is applied on opposite sides of the
+   crossing.
+2. **On the annual system probability they are sub-additive, because a
+   conductivity-free mechanism carries the number once piping is demoted.** The
+   bulk system span is **narrower** than the matrix span at all six cells where
+   both are finite (for example 4.40 against 185 at KP 58.8 historical), while the
+   span on the **piping contribution alone** is unbounded at six of eight cells.
+   The same mechanism makes the climate ratio converge on the overflow-only value
+   under the downward arms (KP 58.8: 13.62 to 12.97, which is overflow's own ratio
+   to three figures) and makes the unit-weight control quieter under bulk
+   (0.0000 % to 0.025 %) than under matrix.
+3. **Subsumption is not symmetric.** Under matrix the conductivity bracket flipped
+   every cell the d70 axis flipped; under bulk it flips four of five. The
+   exception is KP 62.0 at +4K, where the bulk reading has pushed piping 544-fold
+   behind overflow and even a 273-fold arm cannot close the gap.
+
+**What this means for the RQ3 answer, and what it does not.** The dominance claim
+rests on the **union** of the two brackets, and in that union no cell has an
+invariant leading mechanism. That is **not** the same as "the dominance finding
+collapses". Each bracket's direction is known and monotone, lower conductivity and
+the bulk grain size both suppressing piping while higher conductivity restores it;
+production sits at neither end of either, at 55 % to 77 % of the log conductivity
+range with the matrix grain size the conservative reading; and the upper
+conductivity arm **strengthens** piping's lead everywhere it is applied, under both
+readings. A reader who takes only the field arms away has taken the comfortable
+half of a two-sided result.
+
+**Caveat 8 is four times larger under bulk, and it is a property of the
+deliverable.** At KP 62.0 under +4K the 7 of 5400 ensemble years that peak above
+the attainable maximum of 50.5 m MSL carry 11.8 % of the annual piping probability
+under matrix and **81.2 % under bulk**, while no coverage flag fires under either,
+because nothing leaves the conditioning grid. KP 62.0's bulk +4K piping annual
+probability is therefore four fifths built on stages the section cannot reach, and
+the ROBUST verdict at that cell reflects how far behind overflow piping has been
+pushed rather than a well-founded ordering. Historical is exactly 0.0 and KP 57.4
+is exactly 0.0 in both climates and both readings. The operative rule of caveat 8
+is unchanged and now has its second, larger measurement.
+
+**A qualification on section 12.5.** Its statement that no number in this addendum
+is a clamped bound is about the two `AnnualizedResult.coverage` flags and remains
+true. A different flag, `bep_clamped_above_grid`, was not examined and does fire:
+on the production baseline at KP 57.4 and KP 58.8 under bulk, and on
+low-conductivity arms even under matrix, because such an arm drops its own maximum
+raw failure fraction below the ADR-0024 bracketing threshold. Clamping
+**understates** piping, so a reversal declared on a clamped arm is easier to
+declare than it should be. Quantified: of the ten matrix arm-verdicts that change
+a lead, the four at KP 62.0 are unclamped, so the governing-section claim is
+untouched, and of the six clamped ones only **KP 60.0 +4K** is genuinely exposed
+(its single reversing arm sits a factor of 1.93 behind overflow). The headline
+counts of section 12.1, three of four sections historically and four of four under
+warming, are unchanged.
