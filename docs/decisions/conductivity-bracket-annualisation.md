@@ -463,16 +463,14 @@ ADR-0024 carries a dated back-pointer** (a note appended 2026-08-10) rather than
 no pointer, because a reader arriving at that ADR would otherwise take the
 parenthetical as licence to ignore the extension in any composition — the exact
 opposite of the correct conclusion. Its **Decision is untouched and was asserted
-byte-identical**, as was Implementation item 5 itself: the parenthetical is left
-standing verbatim and the appended note governs. The assertion was not wrong when
-written — it dates from 2026-07-03, ten days before Phase 3 existed and 26 days
-before the ADR-0047 adoption raised KP 62.0's fragility ×8.7 at design HWL. **One
-thing a future session may still want:** an inline marker at item 5 in the
-ADR-0038 decision-4 style (`[Correction 2026-08-10: ...]`), so the correction is
-visible at the point of the claim rather than only at the end of the file. It was
-not added here because the brief scoping this work forbade amending ADR-0024's
-Decision or Consequences, and item 5 is the section that serves as this ADR's
-Consequences.
+byte-identical**, and Implementation item 5 is byte-identical apart from an
+inserted pointer: the parenthetical itself is left standing **verbatim**, with a
+bracketed `[Pointer added 2026-08-10: ...]` marker beside it sending the reader to
+the dated note, in the ADR-0038 decision-4 style. A reader who stops at item 5
+therefore cannot miss the correction, and nothing in that item was reworded. The
+assertion was not wrong when written — it dates from 2026-07-03, ten days before
+Phase 3 existed and 26 days before the ADR-0047 adoption raised KP 62.0's
+fragility ×8.7 at design HWL.
 
 ### 2.6 Scope
 

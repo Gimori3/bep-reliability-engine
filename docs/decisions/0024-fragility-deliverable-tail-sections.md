@@ -100,7 +100,10 @@ temporal mechanism, not a fitting inconvenience.
    grid. The added levels are documented as fit-stabilizing hypothetical
    loads — they exceed the maximum attainable stage (51.5 m) and the crest
    (47.9 m), which is harmless in the fragility × hazard composition (the
-   hazard carries zero weight there) but must not be plotted as attainable
+   hazard carries zero weight there) **[Pointer added 2026-08-10: the
+   parenthetical immediately above is superseded on the +4K hazard side — see
+   the dated note at the end of this file. Nothing else in this item
+   changes.]** but must not be plotted as attainable
    states.
 
 6. **Anticipated classification** (decided by the criterion at sweep time,
@@ -205,6 +208,10 @@ this ADR created deliberately and which no flag can see. **A clean coverage-flag
 set is therefore not by itself a statement that an annualized number rests only
 on attainable stages.** A consumer must read `coverage` together with the
 section's attainable maximum.
+
+**Where this is flagged in place.** Implementation item 5 carries a bracketed
+pointer beside the superseded parenthetical, which is itself left standing
+verbatim; that item is otherwise byte-identical to the 2026-07-03 text.
 
 **What a reader of this ADR should do.** Treat 50.5 m MSL as KP 62.0's attainable
 maximum (it is the last non-hypothetical conditioning level, pinned as
