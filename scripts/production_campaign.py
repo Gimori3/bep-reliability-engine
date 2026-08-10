@@ -1046,12 +1046,26 @@ VOLATILE_JSON_KEYS = frozenset(
 #: Why an enumerated hit is NOT run by the companions stage. Every hit must be
 #: classified here or the enumeration reports it as UNCLASSIFIED, which is the
 #: signal to investigate rather than to widen this dict reflexively.
+#:
+#: Since 2026-08-10 an unclassified hit **fails** G6 (``gate_companion_
+#: classification``) instead of merely being noted, so a new consumer of the
+#: persisted sweeps stops the campaign until someone answers two questions in
+#: this order: (a) should it RUN here? and only if no, (b) what actually
+#: excludes it? A reason that would still be true of a file that SHOULD run is
+#: not a reason -- say which gate runs it instead, or which input the campaign
+#: deliberately does not produce.
 COMPANION_EXCLUSIONS: dict[str, str] = {
     "scripts/production_campaign.py": (
         "this driver itself (it is the thing doing the asserting)"
     ),
     "scripts/run_sweep.py": (
         "produces the persisted sweeps; it is the source, not a consumer"
+    ),
+    "scripts/generate_configs.py": (
+        "produces configs/; run as the campaign's FIRST stage, whose gate is "
+        "the EMPTY-diff assertion on configs/*.yaml. Its config_hash match is "
+        "a round-trip of what it just wrote (reloaded == in-memory), not a "
+        "check against a persisted sweep. Source, not a consumer."
     ),
     "scripts/stage6_6_gap_decomposition.py": (
         "run as its own campaign stage (G3), not as a companion"
@@ -1069,7 +1083,61 @@ COMPANION_EXCLUSIONS: dict[str, str] = {
         "ADR-0048 prior-mean companion: OFF in production (decision 3). Same "
         "sidecar-reconstructed hash gate, so unaffected by the re-run."
     ),
+    "bayesian_reliability_updating/pipeline.py": (
+        "not a driver at all -- the shipped Phase 2 package module, which this "
+        "campaign already executes as THREE of its own stages (phase2_baseline, "
+        "phase2_anchor_rating, phase2_no_initiation), each `python -m "
+        "bayesian_reliability_updating ... --verify` under G2. G2 gates the "
+        "thing that matters: zero flag mismatches in the exact masked-vs-"
+        "re-evaluation check, and every posterior replaying the freshly re-run "
+        "Phase 1 hash. Its own regex match is the replay hash it STAMPS into "
+        "the posterior sidecar; the gate that consumes it lives in replay.py "
+        "and is what --verify exercises. Structurally unreachable from here in "
+        "any case: COMPANION_COMMANDS keys resolve to scripts/<name>.py."
+    ),
+    "scripts/epistemic_bracket_synthesis.py": (
+        "synthesises the 16 persisted ADR-0045/0046/0048 arm sweeps under "
+        "results/sensitivity/, which the campaign deliberately does NOT "
+        "produce (knobs OFF, decision 3) -- the same substantive ground as the "
+        "three companion entries above. Running it here would be worse than "
+        "redundant: absent an arm it records `available: false` and continues, "
+        "so on a machine without those gitignored sweeps it exits 0 and G6's "
+        "completion check would pass on a synthesis with every epistemic arm "
+        "missing. Cost if ever wired: ~20 min (recorded 249/293/322/359 s for "
+        "the four fresh baseline sweeps it gates on)."
+    ),
+    "scripts/hwl_bias_resolution.py": (
+        "ADR-0040 resolution at N = 1e6. A cheap verification-only mode does "
+        "exist -- `verify`, ~25 min (recorded 883.4 + 600.1 s) -- so this is "
+        "NOT excluded on cost: it is excluded because that mode IMPORTS "
+        "stage6_6_gap_decomposition.verify_against_production and calls it at "
+        "kp62_0 and kp57_4, i.e. it re-asserts G3's own claim through G3's own "
+        "function at G3's own two sections, and its G-A2 flip check is G3's "
+        "third check. Its remaining stages are the evidence itself (brute "
+        "alone 10188.9 + 4781.5 s = 4.2 h), which conventions section 10.2 "
+        "classifies as evidence rather than a regenerable cache -- and "
+        "`verify` overwrites files in that directory. Its `figures` "
+        "subcommand IS already run by the campaign, in the figures stage "
+        "under G7."
+    ),
+    "scripts/conductivity_annualisation_study.py": (
+        "consumes the same ADR-0048 arm sweeps the campaign does not produce "
+        "(decision 3); recorded as a deliberate non-entry when it was built "
+        "(2026-08-10). Cheap in itself (recorded 8.0 s) but it raises "
+        "FileNotFoundError on a missing arm, so on any machine without those "
+        "gitignored sweeps it would fail the campaign at a stage unrelated to "
+        "the production deliverable. Its arm-independent Gate 1 (baseline "
+        "reproduces rq4_annual.csv over 228 rows x 20 fields) has no "
+        "gate-only entry point today; adding one is the cheap way to make it "
+        "campaign-runnable if that is ever wanted."
+    ),
     "tests/test_config.py": "exercised by pytest, not by this stage",
+    "tests/test_companion_enumeration_gate.py": (
+        "exercised by pytest, not by this stage -- the guard on this very "
+        "enumeration. It matched the moment it was written (its docstrings "
+        "quote both the f-string stem and the phrase 'bit-identity'), which is "
+        "the new gate firing on the first new hit that appeared after it."
+    ),
     "tests/test_fragility.py": "exercised by pytest, not by this stage",
     "tests/test_phase2_end_to_end.py": "exercised by pytest, not by this stage",
 }
@@ -1080,7 +1148,33 @@ def enumerate_companions() -> dict[str, Any]:
 
     Returns the programmatic enumeration (the campaign spec asks for this to
     be derived, not copied from a list), together with what the invocation
-    table covers and what it does not.
+    table covers and what it does not. ``unclassified`` is the field that
+    gates: see ``gate_companion_classification``.
+
+    THIS ENUMERATION IS A FLOOR, NOT A CENSUS -- state it plainly rather than
+    let a later reader infer a completeness the regex does not deliver. A file
+    is reported only when it matches BOTH halves textually, so either half can
+    be evaded:
+
+    * *Path half.* Widened 2026-08-10 to plain ``tokachi_kp`` after
+      ``scripts/conductivity_annualisation_study.py`` -- a genuine consumer
+      that raises on ``config_hash`` drift -- slipped through by composing its
+      stem as ``f"tokachi_kp{kp:.1f}_historical_{D70}"``: the old pattern
+      required a literal digit where the f-string places ``{``. A stem built
+      from smaller parts (``f"tokachi_{river}_kp..."``) would still evade it.
+    * *Assertion half.* A file that reaches its bit-identity check through a
+      helper whose name matches none of ``bit-ident`` / ``array_equal`` /
+      ``config_hash`` / ``drift guard`` is invisible.
+      ``scripts/segment_fragility.py`` is the live example of the second half
+      and of why a non-match is not automatically a defect: it reads the
+      sweeps by glob and is deliberately run as a companion, but it asserts
+      nothing this regex recognises, so it appears under
+      ``run_but_not_matched_by_the_regex`` rather than as a hit. That list is
+      the superset direction (run here, not detected) and is benign -- running
+      something undetected costs coverage, never correctness. The direction
+      that matters is a consumer that is neither detected nor run, which is
+      what the widening narrows and what this docstring admits is still
+      possible.
     """
     import re
 
@@ -1091,7 +1185,7 @@ def enumerate_companions() -> dict[str, Any]:
         REPO / "bayesian_reliability_updating",
         REPO / "system_integration",
     ]
-    path_pat = re.compile(r"results/tokachi_kp|tokachi_kp[0-9]", re.I)
+    path_pat = re.compile(r"results/tokachi_kp|tokachi_kp", re.I)
     assert_pat = re.compile(
         r"bit[-_ ]ident|array_equal|assert_array_equal|config_hash|drift.?guard",
         re.I,
@@ -1114,11 +1208,19 @@ def enumerate_companions() -> dict[str, Any]:
                 }
     covered = {f"scripts/{name}.py" for name in COMPANION_COMMANDS}
     not_run = sorted(set(hits) - covered)
+    unclassified = sorted(p for p in not_run if p not in COMPANION_EXCLUSIONS)
+    stale_exclusions = sorted(
+        path for path in COMPANION_EXCLUSIONS if not (REPO / path).is_file()
+    )
     return {
         "method": (
             "regex over scripts/, tests/ and the three packages for a "
             "persisted-sweep path reference AND a bit-identity / config-hash "
             "assertion pattern"
+        ),
+        "detection_is_a_floor_not_a_census": (
+            "both halves are textual and either can be evaded; see the "
+            "enumerate_companions docstring for the two known routes"
         ),
         "hits": hits,
         "covered_by_this_stage": sorted(covered & set(hits)),
@@ -1126,8 +1228,63 @@ def enumerate_companions() -> dict[str, Any]:
             path: COMPANION_EXCLUSIONS.get(path, "UNCLASSIFIED -- investigate")
             for path in not_run
         },
+        "unclassified": unclassified,
+        "exclusions_with_no_file_on_disk": stale_exclusions,
         "run_but_not_matched_by_the_regex": sorted(covered - set(hits)),
     }
+
+
+def gate_companion_classification(gates: Gates, enumeration: dict[str, Any]) -> None:
+    """Fail G6 when a hit carries no classification, or a reason no file.
+
+    The enforcement half of the enumeration. Before 2026-08-10 the enumeration
+    reached the manifest only through ``gates.note``, and G6's sole assertion
+    was that every companion which *runs* completes -- so a hit that was
+    neither run nor excluded was recorded as ``UNCLASSIFIED -- investigate``
+    and could never fail anything. Three accumulated that way across four
+    sessions. This is the third instance of the class closed twice already:
+    the 13 test guards that skipped on a tracked path (repo audit section
+    12.4) and the Stage 6.6 driver gate that recorded a non-verifying status
+    and continued (section 12.8). Each time the fix was the same: make the
+    recorded outcome refuse.
+
+    Both directions are gated, because both silently classify nothing:
+
+    * a **hit with no classification** -- a new consumer of the persisted
+      sweeps, which is exactly what this enumeration exists to catch, so it
+      must fail loudly rather than pass silently (the 2026-07-29 asymmetric-
+      allowlist precedent: additive facts are recorded and pass, a new
+      unexplained one does not);
+    * an **exclusion key naming no file on disk** -- a rename or deletion
+      leaves a reason behind that reads as a classification but classifies
+      nothing, and would mask the renamed file's own reappearance as a hit.
+
+    Called before the companion subprocesses, not after: the verdict is
+    decidable from source alone, so an unclassified consumer refuses in
+    milliseconds rather than after ~40 minutes of companions. Nothing has been
+    written at that point, so this is not the conventions section 9.4
+    persist-then-gate case -- there is no evidence for the gate to destroy.
+    """
+    gates.check(
+        "G6",
+        "every enumerated bit-identity consumer is classified (run by this "
+        "stage, or carrying an explicit COMPANION_EXCLUSIONS reason)",
+        not enumeration["unclassified"],
+        {
+            "unclassified": enumeration["unclassified"],
+            "remedy": (
+                "answer (a) should it RUN as a campaign companion? -- and only "
+                "if no, (b) what actually excludes it. Add to "
+                "COMPANION_COMMANDS or COMPANION_EXCLUSIONS accordingly."
+            ),
+        },
+    )
+    gates.check(
+        "G6",
+        "every COMPANION_EXCLUSIONS key still names a file on disk",
+        not enumeration["exclusions_with_no_file_on_disk"],
+        {"stale_keys": enumeration["exclusions_with_no_file_on_disk"]},
+    )
 
 
 def _tracked_figure_state() -> dict[str, str | None]:
@@ -1141,6 +1298,13 @@ def _tracked_figure_state() -> dict[str, str | None]:
 def stage_companions(ctx: "Context") -> dict[str, Any]:
     """Run every enumerated bit-identity companion; a failing assert is a gate.
 
+    G6 gates twice. ``gate_companion_classification`` runs first and refuses
+    when the enumeration finds a consumer that is neither run here nor
+    explicitly excluded; the completion check below then requires every
+    companion that does run to finish with its own asserts holding. The first
+    without the second would let a new consumer be recorded and ignored, which
+    is how three accumulated before 2026-08-10.
+
     Two of them (``ce_prior_study``, ``gsa_study``) render figures as a side
     effect and offer no skip flag. Figure regeneration is explicitly out of
     scope for this campaign (it is a separate pass), so any tracked figure they
@@ -1148,7 +1312,11 @@ def stage_companions(ctx: "Context") -> dict[str, Any]:
     """
     gates = Gates("companions")
     enumeration = enumerate_companions()
+    # The note is the evidence, the check is the enforcement; keep both. The
+    # check runs first because it is free and its failure means the campaign's
+    # own census of bit-identity consumers is out of date.
     gates.note("G6", "programmatic companion enumeration", enumeration)
+    gate_companion_classification(gates, enumeration)
     figures_before = _tracked_figure_state()
 
     (CAMPAIGN_DIR / "companions").mkdir(parents=True, exist_ok=True)

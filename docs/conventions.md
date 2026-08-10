@@ -282,6 +282,19 @@ of a run it was raised about. Gate **before** the write when the write
 `results/stage6_6/` and the tracked `docs/figures/` copies. The rule underneath
 both is the same: never let a gate destroy the evidence it exists to protect.
 
+**A recorded unresolved outcome needs a paired check, added 2026-08-10.** The
+two paragraphs above are both scoped to a write, and the third instance of this
+class had none: `production_campaign.py::enumerate_companions` greps for
+consumers of the persisted sweeps and reached the manifest only through
+`gates.note`, so a hit it could not classify was written down as `UNCLASSIFIED
+-- investigate` and could never fail anything. Three accumulated across four
+sessions. Where a gate framework distinguishes an observation from an
+assertion, **keep both and pair them**: the note carries the evidence into the
+manifest, the check refuses. A field whose value can say "I found something
+nobody has accounted for" is an assertion wearing a note's clothes. Prefer the
+cheap side -- a verdict decidable from source alone belongs before the
+subprocesses it guards, where refusing costs milliseconds and destroys nothing.
+
 ## 10. Retention policy for `results/`
 
 `results/` is gitignored and machine-local: roughly 2.1 GB across 723 files as of

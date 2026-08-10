@@ -905,3 +905,138 @@ records and continues — has not been swept for across all 43 scripts. This
 closure is the one instance the 2026-08-09 canonical-shape review surfaced, not a
 class sweep; `docs/conventions.md` section 9.4 now states the rule for drivers so
 the next one is written correctly.
+
+### 12.9 The same class in the campaign's own G6 gate — CLOSED 2026-08-10
+
+**Third instance, and the first with no write anywhere in it.** 12.4 closed the
+class for `tests/` (13 guards, skip → assert) and 12.8 closed it for a driver
+gate (Stage 6.6 recording a non-verifying status and continuing). Neither could
+have caught this one, and not by oversight: both AST guards
+(`test_no_guard_in_this_file_skips_on_a_tracked_path`,
+`test_no_existence_skip_in_this_file_gates_on_a_tracked_path`) parse **only the
+test module they live in**, and 12.8's fix is a predicate inside a different
+driver. Nothing in either closure can see the campaign's own gate records.
+
+**The defect.** `scripts/production_campaign.py::enumerate_companions` greps
+`scripts/`, `tests/` and the three packages for files that both reference a
+persisted production sweep and assert bit-identity or a config hash — the census
+of who depends on the artifacts the campaign produces. Its result was passed to
+`gates.note`, never `gates.check`. G6's only assertion was that every companion
+which *runs* completes. So a hit that was neither run nor excluded would be
+written into the manifest as `UNCLASSIFIED -- investigate` and could not fail
+anything. **Three accumulated across four sessions.**
+
+**Enumeration reproduced before anything was changed** (17 hits / 5 covered /
+9 excluded / 3 unclassified / 4 run-but-unmatched) — every figure in the brief
+confirmed by calling the function directly, so the work started from measurement
+rather than from the brief's summary.
+
+**One brief premise did not reproduce, and the difference is the finding.** The
+brief stated that `results/production_campaign_manifest.json` "lists the three as
+UNCLASSIFIED". **It does not — it never recorded them at all.** Its G6 detail
+carries **14 hits**, none of them the three, and a `found_but_not_run_here` that
+is a plain **list** rather than the path → reason dict the function returns today:
+an older return shape, from the 2026-07-29 campaign. `git log` puts
+`epistemic_bracket_synthesis.py` at 2026-07-30 and `hwl_bias_resolution.py` at
+2026-08-04, i.e. **after** that run. So the three did not slip past a gate that
+saw them; they accumulated in the window since the last campaign, and the
+note-only wiring is what guaranteed the *next* run would have recorded and passed
+them. The instruction to leave the manifest alone stands, and for a stronger
+reason than the one given: it is an accurate record of an enumeration that ran
+before these consumers existed, and rewriting it would fabricate history rather
+than merely refresh a view. **It was left untouched** (mtime 2026-08-04, verified
+after the change).
+
+#### The three classifications
+
+Question (a) — *should this RUN as a campaign companion?* — was answered first in
+each case, since an exclusion is only correct once that answer is genuinely no.
+All three answered no, and **none of them on cost**; the runtimes are recorded
+below so the owner can overrule.
+
+| Hit | (a) Run it? | (b) What actually excludes it |
+|---|---|---|
+| `bayesian_reliability_updating/pipeline.py` | No | Not a driver — the shipped Phase 2 module, which the campaign already executes as **three of its own stages** (`phase2_baseline`, `phase2_anchor_rating`, `phase2_no_initiation`), each under **G2**. The 12.8-style answer: name the gate that runs it instead. Its regex match is the replay hash it *stamps* into the posterior sidecar; the gate consuming that hash lives in `replay.py` and is what `--verify` exercises. Structurally unreachable anyway — `COMPANION_COMMANDS` keys resolve to `scripts/<name>.py`. |
+| `scripts/epistemic_bracket_synthesis.py` | No | Synthesises the 16 persisted ADR-0045/0046/0048 arm sweeps the campaign **deliberately does not produce** (knobs OFF, campaign decision 3) — the same substantive ground as the three companion entries beside it. Running it would be worse than redundant: on a missing arm it records `available: false` and continues, so without those gitignored sweeps it exits 0 and G6's completion check would pass on a synthesis with **every epistemic arm missing**. Would add ~20 min (recorded 249/293/322/359 s of fresh baseline sweeps). |
+| `scripts/hwl_bias_resolution.py` | No | **A cheap verification-only mode does exist**, so this is explicitly *not* a cost exclusion: `verify` costs ~25 min (recorded 883.4 + 600.1 s). It is excluded because that mode **imports `stage6_6_gap_decomposition.verify_against_production`** and calls it at `kp62_0` and `kp57_4` — G3's own function, at G3's own two sections — and its G-A2 flip check is G3's third check. Its remaining stages are the N = 1e6 evidence (`brute` alone 10 188.9 + 4 781.5 s = 4.2 h), which conventions section 10.2 classifies as evidence rather than a regenerable cache, and `verify` overwrites files inside that directory. Its `figures` subcommand **is already run by the campaign**, in the figures stage under G7. |
+
+The ADR-0045/0046/0048 entries beside them say their hash gates survive a config
+change because each reconstructs its `Config` from the sidecar's own config
+block. **That sentence was deliberately not reused** for
+`epistemic_bracket_synthesis.py`, which reads the current `configs/*.yaml`
+instead — it reads well and would have been false.
+
+#### The structural fix
+
+`enumerate_companions` now returns `unclassified` and
+`exclusions_with_no_file_on_disk`, and a new `gate_companion_classification`
+turns both into `gates.check`. **The note is kept**: the note is the evidence,
+the check is the enforcement. Both directions gate, because both silently
+classify nothing — a hit no rule mentions, and a reason naming a file that no
+longer exists (which would also mask the renamed file's reappearance as a hit).
+The check runs **before** the companion subprocesses: the verdict is decidable
+from source, so an unclassified consumer refuses in milliseconds instead of after
+~40 minutes, and since nothing has been written there is no evidence for the gate
+to destroy — this is not 9.4's persist-then-gate case. Per the 2026-07-29
+asymmetric-allowlist precedent, a **new** hit fails loudly rather than passing
+silently.
+
+**The gate's first live catch was the test file written to guard it.**
+`tests/test_companion_enumeration_gate.py` quotes both the f-string stem and the
+phrase "bit-identity" in its docstrings, so it became a hit the moment it
+existed — the same self-matching trap the AST guards were written around. It was
+**classified, not exempted by narrowing the pattern**, and a test pins that it
+stayed classified.
+
+#### The blind spot (decided, not inherited)
+
+`scripts/conductivity_annualisation_study.py` raises on `config_hash` drift and
+asserts against the persisted `rq4_annual.csv`, yet did not match: it composes
+its stem as `f"tokachi_kp{kp:.1f}_historical_{D70}"`, and the pattern
+`tokachi_kp[0-9]` wanted a digit where the f-string places `{`. **Decision:
+widen** — the path half drops the digit requirement. Measured first: the minimal
+widening pulls in **exactly two** files, at the brief's ask-first threshold and
+so decided rather than escalated. Both were then classified in the same pass,
+leaving no fresh crop:
+
+* `scripts/conductivity_annualisation_study.py` — recorded as a deliberate
+  non-entry when built (2026-08-10) on the decision-3 ground; now the exclusion
+  key is one that is actually read. Cheap in itself (8.0 s) but it raises
+  `FileNotFoundError` on a missing arm, so on a machine without those gitignored
+  sweeps it would fail the campaign at a stage unrelated to the production
+  deliverable. Its arm-independent Gate 1 has no gate-only entry point today;
+  adding one is the cheap route if that is ever wanted.
+* `scripts/generate_configs.py` — produces `configs/`; run as the campaign's
+  **first stage**, gated by the empty-diff assertion. Its `config_hash` match is
+  a round-trip of what it just wrote, not a check against a persisted sweep.
+
+**The widening does not make the regex a census, and the docstring now says so.**
+Both halves are textual and either can be evaded — a stem built from smaller
+parts still escapes the path half, and a bit-identity check reached through a
+differently-named helper escapes the assertion half. Recorded as
+`detection_is_a_floor_not_a_census` in the enumeration payload as well as in the
+docstring, so the manifest carries the caveat with the evidence.
+
+**`run_but_not_matched_by_the_regex` examined and found benign**, not left alone
+unexamined. The four members (`segment_fragility`, `foreshore_exhaustion_study`,
+`assess_2011_2006_closure`, `gsa_study`) are run by the stage while failing one
+half of the regex — `segment_fragility.py` globs `tokachi_*_historical_*.h5` and
+asserts nothing the pattern recognises. That is the superset direction: running
+something undetected costs coverage, never correctness. The direction that
+matters is a consumer neither detected nor run, which is what the widening
+narrows. Pinned by a test so the list stays a recorded fact.
+
+**Tests:** `tests/test_companion_enumeration_gate.py` (12). The gate is proved by
+being **fired**, not by being asserted to exist — a classification is removed and
+`GateFailure` must be raised, both tables are emptied so every hit becomes
+unclassified, and a stale exclusion key is injected (with the pass/FAIL order
+checked, so it is the stale-key check that fails and not the other one). Nothing
+skips on a tracked path.
+
+**Gates:** `pytest` **723 passed** (711 → 723), `ruff check .` clean,
+`black --check .` clean, `--dry-run` completes with all 11 stages resumed,
+`enumerate_companions()` reports **20 hits / 5 covered / 15 classified / 0
+unclassified / 0 stale** (the 20th hit is the new guard file itself). **`results/production_campaign_manifest.json` was
+deliberately left untouched** (see the premise correction above). No `Config`
+field, no default, no physics, no config YAML, no CSV, no persisted sweep, no
+Phase 2 posterior, no figure content, no ADR, no `.tex`.
