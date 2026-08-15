@@ -800,6 +800,48 @@ def _span_cell(section: dict[str, Any], bracket: str, anchor: str) -> dict[str, 
     }
 
 
+def _bracket_span_curve(section: dict[str, Any], bracket: str) -> list[dict[str, Any]]:
+    """The bracket's multiplicative span at *every* conditioning level.
+
+    ``_span_cell`` reads the span the record precomputes at its five named
+    anchors. This forms the same quantity over the whole grid, which the record
+    stores in the form it costs least to store: the stage grid and the baseline
+    curve once per section, and each arm's own ``P_f_trans_arm`` per level. The
+    span is the largest transient failure probability any arm of the bracket
+    produces divided by the smallest, both relative to the same baseline, so it
+    is identical whether it is formed from the probabilities or from the ratios.
+
+    Reproduces the record's own ``ratio_min`` and ``ratio_max`` at all five
+    anchors of all four sections, which is the provenance gate on this curve.
+
+    The two ways a number goes missing are kept apart exactly as in
+    ``_span_cell``: a level whose *baseline* carries no failure yields no
+    multiplier of any kind and is dropped, while a level where an *arm* sits at
+    zero failures is retained and marked ``unbounded``.
+    """
+    grid = section["grid_m_msl"]
+    baseline = section["P_f_trans_baseline_curve"]
+    arm_levels = [
+        section["arms"][arm]["levels"] for arm in section["brackets"][bracket]["arms"]
+    ]
+
+    curve: list[dict[str, Any]] = []
+    for index, stage in enumerate(grid):
+        base = float(baseline[index])
+        if base <= 0.0:
+            continue
+        ratios = [float(levels[index]["P_f_trans_arm"]) / base for levels in arm_levels]
+        low, high = min(ratios), max(ratios)
+        curve.append(
+            {
+                "stage_m_msl": float(stage),
+                "unbounded": low <= 0.0,
+                "span": None if low <= 0.0 else high / low,
+            }
+        )
+    return curve
+
+
 def _cancellation_by_bracket(section: dict[str, Any]) -> dict[str, dict[str, Any]]:
     """Per bracket, the worst resolved ratio-of-ratios departure over its arms.
 
@@ -855,11 +897,22 @@ def _bracket_order(sections: list[dict[str, Any]]) -> list[str]:
 def figure_epistemic_ranking(
     synthesis: dict[str, Any], attainable_max_kp62: float
 ) -> tuple[Path, list[dict[str, Any]]]:
-    """The brackets, four sections, ranked -- plus which one actually cancels.
+    """The brackets, four sections, ranked -- and the winner's stage dependence.
 
     Panels A and B are the ranking at the two anchors that carry the thesis's
-    claims. Panel C is the separate question the same study answered: whether a
-    bracket cancels when the static and transient branches are divided.
+    claims. Panel C takes the bracket that wins that ranking and plots its span
+    across the whole conditioning grid, which is the one claim the text makes
+    about it that no figure showed: it spans orders of magnitude at the
+    low-stage end and collapses toward unity as the conditional probability
+    saturates, so no single factor for it exists.
+
+    Panel C carried the cancellation test until 2026-08-15, when a coherence
+    audit found it drew the same quantity as the bar panel of
+    ``epistemic_vs_statistical.png``, which additionally carries the
+    Clopper-Pearson yardstick on the same axis and is therefore the better of
+    the two. The cancellation numbers are not lost with the panel: every one of
+    them stays in this figure's own table source, in the ``cancellation_arm``
+    and ``max_resolved_departure_factor`` columns built below.
     """
     sections = {s["section"]: s for s in synthesis["sections"]}
     ordered = _bracket_order(synthesis["sections"])
@@ -985,68 +1038,108 @@ def figure_epistemic_ranking(
         va="top",
     )
 
-    # --- Panel C: does the bracket cancel in the static/transient ratio? ----- #
+    # --- Panel C: the top knob has no single value, it depends on stage ------ #
+    # Panels A and B are two stage slices of the ranking; this is the whole
+    # stage axis for the knob that wins it. The bracket is the same quantity
+    # those panels plot, so the panel needs no second definition: what it adds
+    # is that the number they report is a reading off a curve, not a constant.
+    # ``ordered`` is computed from the evidence, so the panel draws whichever
+    # bracket the ranking actually puts first.
     axc = axes[2]
-    for row, bracket in enumerate(ordered):
-        y = len(ordered) - 1 - row
-        if bracket == COMMON_MODE_BRACKET:
-            axc.axhspan(
-                y - 0.5, y + 0.5, color=figstyle.GOOD, alpha=0.09, lw=0, zorder=0
-            )
-        drawn = 0
-        for name in SECTIONS:
-            record = cancellation[name].get(bracket)
-            if record is None:
-                continue
-            drawn += 1
+    largest = ordered[0]
+    curves = {name: _bracket_span_curve(sections[name], largest) for name in SECTIONS}
+
+    spans = [
+        float(point["span"])
+        for curve in curves.values()
+        for point in curve
+        if point["span"] is not None
+    ]
+    # The unbounded levels sit in a strip above every finite value, so that the
+    # eye never reads one as a large finite span.
+    y_unbounded = max(spans) * 4.0
+    for name in SECTIONS:
+        colour = figstyle.SECTION_COLORS[name]
+        marker = figstyle.SECTION_MARKERS[name]
+        finite = [p for p in curves[name] if p["span"] is not None]
+        axc.plot(
+            [p["stage_m_msl"] for p in finite],
+            [float(p["span"]) for p in finite],
+            marker=marker,
+            color=colour,
+            ms=3.4,
+            lw=1.4,
+            zorder=4,
+        )
+        for point in (p for p in curves[name] if p["unbounded"]):
             axc.plot(
-                [record["max_resolved_departure_factor"]],
-                [y + (SECTIONS.index(name) - 1.5) * 0.17],
-                marker=figstyle.SECTION_MARKERS[name],
-                color=figstyle.SECTION_COLORS[name],
-                ms=6.0,
+                [point["stage_m_msl"]],
+                [y_unbounded],
+                marker=marker,
+                color=colour,
+                ms=5.0,
+                mfc=figstyle.SURFACE,
+                mew=1.3,
                 ls="none",
                 zorder=4,
             )
-        if drawn == 0:
-            # An empty row would read as "cancels perfectly". The CoV(L) curves
-            # come from the seepage-length study at N = 30000 and no failure
-            # matrices were retained, so the paired-bootstrap test cannot run.
-            axc.text(
-                1.05,
-                y,
-                "no failure matrices retained -- not testable",
-                fontsize=8,
-                color=figstyle.MUTED,
-                va="center",
-                ha="left",
+            axc.annotate(
+                "",
+                xy=(point["stage_m_msl"], y_unbounded * 2.6),
+                xytext=(point["stage_m_msl"], y_unbounded * 1.35),
+                arrowprops={
+                    "arrowstyle": "-|>",
+                    "color": colour,
+                    "lw": 0.8,
+                    "shrinkA": 0,
+                    "shrinkB": 0,
+                },
             )
-    axc.axvline(1.0, color=figstyle.BASELINE, lw=1.2)
-    axc.set_xscale("log")
-    axc.set_ylim(-0.7, len(ordered) - 0.3)
-    axc.set_yticks(list(range(len(ordered)))[::-1])
-    axc.set_yticklabels([BRACKET_LABEL[b] for b in ordered])
-    axc.set_xlabel(r"largest resolved departure of $\rho$ from 1")
-    axc.set_title("C  does it cancel in the static/transient ratio?", loc="left")
-    axc.annotate(
-        "$m_p$ is the ONLY knob that cancels",
-        xy=(1.16, len(ordered) - 1 - ordered.index(COMMON_MODE_BRACKET)),
-        xytext=(3.4, len(ordered) - 1 - ordered.index(COMMON_MODE_BRACKET) - 0.05),
-        fontsize=8.5,
-        color=figstyle.INK,
-        ha="left",
-        va="center",
-        arrowprops={"arrowstyle": "-", "color": figstyle.MUTED, "lw": 0.9},
+        # A tick on the axis, not a full rule: four vertical lines across a
+        # panel this narrow would compete with the curves they annotate.
+        axc.plot(
+            [sections[name]["hwl_m_msl"]] * 2,
+            [0.0, 0.055],
+            transform=axc.get_xaxis_transform(),
+            color=colour,
+            lw=2.2,
+            solid_capstyle="butt",
+            zorder=5,
+        )
+
+    axc.axhline(1.0, color=figstyle.BASELINE, lw=1.2)
+    axc.set_yscale("log")
+    axc.set_ylim(0.55, y_unbounded * 5.0)
+    axc.set_xlim(min(p["stage_m_msl"] for c in curves.values() for p in c) - 0.7, 57.4)
+    axc.set_xlabel("conditioning water level [m MSL]")
+    axc.set_ylabel(f"span factor, {BRACKET_LABEL[largest]} bracket")
+    axc.set_title("C  and the largest one has no single value", loc="left")
+    figstyle.mark_hypothetical(axc, attainable_max_kp62, label=False)
+    # ``get_yaxis_transform`` takes x as an axes fraction and y in data units,
+    # so the label tracks the unbounded strip whatever the finite maximum is.
+    # It sits above the arrow tips, the one band clear of every mark.
+    axc.text(
+        0.985,
+        y_unbounded * 3.1,
+        "unbounded",
+        transform=axc.get_yaxis_transform(),
+        fontsize=8,
+        color=figstyle.MUTED,
+        ha="right",
+        va="bottom",
     )
     axc.text(
         0.0,
         -0.175,
-        "The model factor $m_p$ multiplies the single-source critical head "
-        "$H_c$ in BOTH branches, so it is pure\n"
-        r"common-mode BY CONSTRUCTION. $\gamma'_{bl}$ enters the uplift and "
-        "heave gate alone and so moves only the\n"
-        "transient branch: near 1 there is inertness, not cancellation. A "
-        "bracket cancels only if it is pure common-mode.",
+        # No decade count is quoted here: the fall runs from 1.6 decades at
+        # KP 57.4, whose grid stops before saturation, to 3.9 at KP 60.0, so
+        # any single figure would be wrong for two of the four sections.
+        "The same span as panels A and B, read at every level rather than at "
+        "two anchors. It falls by\n"
+        "orders of magnitude toward the unit line as the probability "
+        "saturates, so a single factor\n"
+        "cannot be quoted. Ticks mark each section's design high water "
+        "level; shading is the\nunattainable grid extension.",
         transform=axc.transAxes,
         fontsize=8,
         color=figstyle.MUTED,
