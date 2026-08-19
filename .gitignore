@@ -237,6 +237,7 @@ docs/references/
 # thesis reproduction: project-notes.md, the hand-written guide library, and the
 # per-machine settings/lock files under .local-project/.
 project-notes.md
+project-notes.md.backup-*
 .local-project/
 
 # Waseda DEM workbook exceeds the 500 KB pre-commit limit (see README there)
