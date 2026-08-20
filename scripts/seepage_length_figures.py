@@ -54,6 +54,19 @@ COV_VAL = {
     "cov0.40": 0.40,
 }
 
+#: Rendered names for the stochastic inputs. The keys are ``sampling``'s own
+#: ``PARAM_NAMES`` and the evidence JSON's ``theta_marginal_shift`` keys, so
+#: they index the record and are never renamed to satisfy the figure rule
+#: (conventions section 9.3.1); the substitution happens here, at render
+#: time, in the same symbols the sensitivity figures already use.
+PARAM_LABEL = {
+    "L": "$L$",
+    "k_aq": "$k_{aq}$",
+    "C_e": "$C_e$",
+    "D_bl": "$D_{bl}$",
+    "d_70": "$d_{70}$",
+}
+
 
 def fig_marginal() -> None:
     d = json.loads((REC / "marginal_sensitivity.json").read_text())
@@ -198,7 +211,7 @@ def fig_system_and_ceiling() -> None:
         ax.bar(np.arange(len(params)) + j * width, shifts, width, label=lab)
     ax.axhline(0, color="#000000", lw=0.8)
     ax.set_xticks(np.arange(len(params)) + width * (len(labels) - 1) / 2)
-    ax.set_xticklabels(params)
+    ax.set_xticklabels([PARAM_LABEL[p] for p in params])
     ax.set_ylabel("posterior mean shift [%]")
     ax.set_title(
         "Phase 2: 2016 survival barely moves L\n"

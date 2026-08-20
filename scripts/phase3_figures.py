@@ -51,6 +51,19 @@ MECH_LABELS = {
     "overflow": "Overflow",
     "fluvial_scour": "Fluvial scour",
 }
+
+#: Rendered names for the ``rq4_annual.csv`` record vocabulary. ``d70`` and
+#: ``lambda_ac_m`` are the annual table's own column names and are never
+#: renamed to satisfy the figure rule (conventions section 9.3.1); the
+#: substitution happens here, at render time. Chapter 3 names these the
+#: grain-size reading and the spatial autocorrelation length, and the RQ4
+#: headline figure already rendered them this way, so this is the driver's
+#: single source for both.
+D70_DISPLAY_NAMES: dict[str, str] = {
+    "matrix": "matrix $d_{70}$",
+    "bulk": "bulk $d_{70}$",
+}
+LAMBDA_AC_SYMBOL = r"$\lambda_{ac}$"
 INK = "#0b0b0b"
 INK_2 = "#52514e"
 MUTED = "#898781"
@@ -193,7 +206,8 @@ def fig_dominance_profile(df: pd.DataFrame) -> None:
     fig.legend(handles, labels, loc="upper center", ncol=4, bbox_to_anchor=(0.5, 1.02))
     fig.suptitle(
         "Annualized per-mechanism failure probability along the study reaches\n"
-        "(posterior BEP, matrix d70, lambda_ac = 250 m; values at the display "
+        f"(posterior BEP, {D70_DISPLAY_NAMES['matrix']}, "
+        f"{LAMBDA_AC_SYMBOL} = 250 m; values at the display "
         f"floor {FLOOR:g} are exact zeros)",
         y=1.10,
         fontsize=11,
@@ -253,7 +267,7 @@ def fig_bep_sections(curves: dict) -> None:
     fig.legend(handles, labels, loc="upper center", ncol=4, bbox_to_anchor=(0.5, 1.02))
     fig.suptitle(
         "Composed three-mechanism segment fragility at the BEP sections "
-        "(posterior, matrix d70)",
+        f"(posterior, {D70_DISPLAY_NAMES['matrix']})",
         y=1.07,
         fontsize=11,
         color=INK_2,
@@ -320,13 +334,20 @@ def fig_climate_shift(df: pd.DataFrame) -> None:
                     mfc="none",
                     color=color,
                     label=(
-                        "lambda_ac = 40 m bracket" if scen == "historical" else None
+                        f"{LAMBDA_AC_SYMBOL} = 40 m bracket"
+                        if scen == "historical"
+                        else None
                     ),
                 )
         ax.set_yscale("log")
+        # Headroom above the data, then pin the legend into it. The house
+        # style draws legends unframed, so a marker left under the legend
+        # strikes through its text: the 40 m bracket triangle at KP 57.4 sat
+        # on the last letter of its own legend entry.
+        ax.set_ylim(top=ax.get_ylim()[1] * 12.0)
         ax.set_title(river)
         ax.set_ylabel("Annual system P_f [1/yr]" if j == 0 else "")
-        ax.legend(fontsize=8.5)
+        ax.legend(fontsize=8.5, loc="upper left")
 
         merged = hist.merge(futu, on="kp", suffixes=("_h", "_f"))
         ratio = np.where(
@@ -345,9 +366,9 @@ def fig_climate_shift(df: pd.DataFrame) -> None:
     fig.suptitle(
         "REACH CONTEXT (not the RQ4 answer): climate shift of the annualized "
         "system failure probability over all 114 segments\n"
-        "posterior BEP, matrix d70. 110 of 114 segments have no geotechnically "
-        "characterised cross-section of their own and are surface-only "
-        "LOWER BOUNDS;\n"
+        f"posterior BEP, {D70_DISPLAY_NAMES['matrix']}. 110 of 114 segments "
+        "have no geotechnically characterised cross-section of their own and "
+        "are surface-only LOWER BOUNDS;\n"
         "the quantified RQ4 answer is the four characterised sections, given "
         "separately.",
         fontsize=9.5,
@@ -456,8 +477,8 @@ def fig_rq4_four_sections(df: pd.DataFrame) -> None:
     ax.set_ylabel("annual system $P_f$ [1/yr]")
     ax.set_title(
         "RQ4: annual system failure probability at the four characterised "
-        "sections\nposterior BEP, matrix $d_{70}$, $\\lambda_{ac}$ = 250 m, "
-        "primary surface curves",
+        f"sections\nposterior BEP, {D70_DISPLAY_NAMES['matrix']}, "
+        f"{LAMBDA_AC_SYMBOL} = 250 m, primary surface curves",
         loc="left",
     )
     ax.set_ylim(top=headroom * 12.0)
@@ -574,7 +595,8 @@ def fig_attribution(attr: dict) -> None:
     axes[0].set_ylabel("Conditional annual system P_f within stratum")
     fig.suptitle(
         "RQ4 attribution: duration- and compound-stratified conditional "
-        "failure probability (BEP sections, posterior matrix)",
+        f"failure probability (BEP sections, posterior, "
+        f"{D70_DISPLAY_NAMES['matrix']})",
         fontsize=11,
         color=INK_2,
     )

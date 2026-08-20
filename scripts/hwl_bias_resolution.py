@@ -1730,14 +1730,19 @@ def figure_hwl_bias(evidence: dict) -> Path:
                     else None
                 ),
             )
+        # Both labels hang below-left of their own lower cap. A2's used to
+        # hang to the right, where the N = 1e6 curve runs: its open marker
+        # landed on the word "rows" and ate two letters. Left of the anchor
+        # the curve is above the label, and the two labels clear each other
+        # vertically because their lower caps differ by more than a decade.
         axz.annotate(
             f"{ratio:.1f} on {int(row['k_transient'])} rows",
             (level, clo),
             textcoords="offset points",
-            xytext=(-6 if key == "A1" else 8, -14),
+            xytext=(-6, -14),
             fontsize=8.5,
             color=figstyle.RED,
-            ha="right" if key == "A1" else "left",
+            ha="right",
             va="top",
         )
 

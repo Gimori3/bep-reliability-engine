@@ -222,18 +222,25 @@ def test_run_but_not_matched_is_the_benign_direction() -> None:
     each of these is invoked by the stage but fails one half of the regex.
 
     ``annualisation_uncertainty_study.py`` joined the list on 2026-08-20 and
-    fails the **assertion** half. Its load-bearing gate is a string-identity
+    **left it again the same day**, which is worth recording because it left
+    for no substantive reason. Its load-bearing gate is still a string-identity
     comparison against ``rq4_annual.csv``, not a bit-identity comparison against
-    an array or a ``config_hash`` round trip, so none of the four assertion
-    patterns fires. It reaches the persisted sweeps only through the campaign's
-    own ``_bep_path``, so it does not compose a ``tokachi_kp`` stem either.
-    Neither absence was engineered around the regex and neither is worth
-    engineering around: the enumeration exists to catch a consumer that is
-    **neither run nor excluded**, and this one is run.
+    an array or a ``config_hash`` round trip. What changed is that it gained the
+    sentence "bit-identity is not asserted because ...", and the assertion half
+    of the regex matched that **disclaimer** -- a textual false positive on a
+    negation. It composes a ``tokachi_kp`` stem too, at ``section_label``, for a
+    display label rather than a path. So it is now a full hit and is excluded
+    from this list by matching, not by running.
+
+    This is the converse of the evasion the ``enumerate_companions`` docstring
+    warns about: both halves are textual, so either can be dodged by a consumer
+    and either can be tripped by prose. Neither direction costs correctness
+    here. The enumeration exists to catch a consumer that is **neither run nor
+    excluded**, and this one is run; tightening the regex to ignore negated
+    prose would be a separate decision about the detection floor.
     """
     enumeration = PC.enumerate_companions()
     assert set(enumeration["run_but_not_matched_by_the_regex"]) == {
-        "scripts/annualisation_uncertainty_study.py",
         "scripts/assess_2011_2006_closure.py",
         "scripts/foreshore_exhaustion_study.py",
         "scripts/gsa_study.py",
