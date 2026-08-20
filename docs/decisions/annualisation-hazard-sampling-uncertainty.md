@@ -352,6 +352,179 @@ than inferred from the absence of an ADR.
 
 ## 2. Outcome
 
-*Part 2 is written after the driver has run. It evaluates the section 1 rules
-against the section 1 statistics and records the outcome. It may not re-tune
-anything above.*
+Executed 2026-08-20 by `scripts/annualisation_uncertainty_study.py`, R = 10,000,
+seed 20260820, about 45 s. Evidence:
+`docs/decisions/annualisation-hazard-sampling-uncertainty.json`; the full
+114-segment table is under gitignored
+`results/sensitivity/annualisation_uncertainty/reach_intervals.json`. Section 1
+was not touched after the numbers were seen.
+
+**The scope sentence at the top of this note applies to every number below.**
+
+### 2.1 Gates
+
+All four passed. Gate 0: every per-event probability vector's unresampled mean
+equals its `AnnualizedResult` field exactly, at every node, scenario and curve
+of all four arms, with no tolerance. Gate 1: **912 published rows reproduced
+field for field, 20 fields each** -- 228 rows in each of matrix/prior,
+matrix/posterior, bulk/prior and bulk/posterior at 250 m and the primary surface.
+Gate 2: all 228 hazard-cache files byte-unchanged, no workbook streamed. Gate 3:
+every file under `results/system_integration/phase3/` byte-unchanged.
+
+### 2.2 The headline intervals
+
+Matrix, posterior, 250 m, primary -- the arm Chapter 7's system annual table
+prints. 95 % percentile, hazard-sampling only.
+
+| Section | historical | +4K | climate ratio |
+|---|---|---|---|
+| KP 57.4 | 7.53e-4 [3.46e-4, 1.22e-3] | 9.53e-3 [7.51e-3, 1.16e-2] | 12.7 [7.3, 28.1] |
+| KP 58.8 | 7.42e-3 [5.39e-3, 9.66e-3] | 4.09e-2 [3.65e-2, 4.54e-2] | 5.51 [4.13, 7.73] |
+| KP 60.0 | 1.80e-3 [1.13e-3, 2.55e-3] | 1.42e-2 [1.20e-2, 1.64e-2] | 7.87 [5.34, 12.9] |
+| KP 62.0 | 1.01e-3 [5.33e-4, 1.57e-3] | 1.28e-2 [1.02e-2, 1.55e-2] | 12.7 [7.7, 24.8] |
+
+Relative half-widths run **29 to 58 % historically and 11 to 21 % under
+warming**, the warming numbers being tighter because the ensemble is 5,400 years
+against 3,000 and because more of it loads the section at all. **Every absolute
+annual probability in Chapter 7 is therefore quoted to about one significant
+figure of sampling precision, and the second digit is not an estimated digit.**
+
+The KP 58.8 dominance margin, prior side, is **43.0 [33.9, 57.9]**; the same
+margin on the posterior side is **37.6 [30.2, 49.4]**.
+
+### 2.3 Q1. The four climate ratios: PARTIAL, 5 of 6 pairs resolve
+
+| Pair | difference | 95 % interval | resolved |
+|---|---|---|---|
+| KP 57.4 - KP 58.8 | +7.14 | [+2.58, +21.1] | yes |
+| KP 57.4 - KP 60.0 | +4.79 | [+1.54, +15.9] | yes |
+| **KP 57.4 - KP 62.0** | **-0.04** | **[-1.00, +3.83]** | **no** |
+| KP 58.8 - KP 60.0 | -2.35 | [-5.44, -0.97] | yes |
+| KP 58.8 - KP 62.0 | -7.19 | [-17.7, -3.04] | yes |
+| KP 60.0 - KP 62.0 | -4.83 | [-12.5, -2.01] | yes |
+
+Five of six resolve, which is above the pre-registered unanswerable threshold of
+two, so Q1 is answered rather than abandoned. The one that does not is exactly
+the pair the thesis prints as two identical 12.7s. **That is the useful finding
+and it is a negative one: KP 57.4 and KP 62.0 rise by a factor this ensemble
+cannot tell apart, so their near-equality is not a property of the two sections.
+It must not be read as one.** Everything else in the ordering survives, including
+the claim Chapter 7 actually rests on, that KP 58.8 has the smallest ratio of the
+four.
+
+Two mechanical points. The differences are **paired on all 10,000 replicates**:
+every one of the 114 nodes carries the identical event sequence, so one block
+draw serves them all and the difference reflects the discordance between two
+sections rather than the variance of two independent estimates. Had the pairing
+been dropped, every one of these six intervals would have been wider and the
+verdict weaker for a reason with no physical content. And no replicate had an
+undefined ratio at any of the four sections, so nothing was discarded.
+
+### 2.4 Q2. The KP 62.0 warming split: a TIE, and the third decimal is not real
+
+Paired inside each replicate at KP 62.0 under +4K:
+
+* `p_bep - p_overflow` = +1.13e-5, 95 % interval **[-9.23e-4, +9.07e-4]**. The
+  interval contains zero by two orders of magnitude of its own width, so
+  pre-registered rule 1 does not fire.
+* `share_bep` = 0.500, 95 % interval **[0.476, 0.532]**. The endpoints round to
+  0.476 and 0.532, not to a common third decimal, so pre-registered rule 2 does
+  not fire either.
+* The margin `p_bep / p_overflow` = 1.0013, 95 % interval **[0.909, 1.139]**.
+
+**Verdict: the split is not distinguishable from level, and the three-decimal
+quotation "0.500 against 0.500" is not supported by the data behind it.** The
+thesis already reads the KP 62.0 tie as a knife edge on the separate ground that
+the canonical event flips it; this is an independent second reason, and the
+stronger one, because it does not depend on choosing an event. The right way to
+print the number is one decimal, or "level", with the interval attached.
+
+Q2 was pre-registered as answerable either way, and it was: the non-exclusion is
+the answer, not a failure to get one.
+
+### 2.5 Q3. The historical shares: the lead resolves at four of four, two only by coverage
+
+| Section | share | 95 % interval | lead resolved | classification |
+|---|---|---|---|---|
+| KP 57.4 | 1.000 | [1.000, 1.000] | yes | **structurally degenerate** |
+| KP 58.8 | 0.974 | [0.968, 0.980] | yes | measured |
+| KP 60.0 | 1.000 | [1.000, 1.000] | yes | **structurally degenerate** |
+| KP 62.0 | 0.812 | [0.690, 0.980] | yes | measured |
+
+Piping's historical lead clears 0.5 at every section, so the dominance claim
+survives hazard-sampling uncertainty. Two qualifications travel with it, both
+pre-registered.
+
+**The two 1.000s are coverage, not measurement.** At KP 57.4 and KP 60.0 the
+overflow branch returns exactly zero at every one of the 3,000 simulated years,
+so the share is 1.000 in every replicate. That is a statement about what the
+ensemble loads, not a zero-width confidence statement about a probability, and
+the record says so in those words.
+
+**Neither measured share supports the precision Chapter 7 prints.** KP 58.8's
+0.974 is [0.968, 0.980], which rounds to 0.97 or 0.98 depending on the endpoint;
+"about 97 per cent" is right, "97 per cent" overstates. KP 62.0's 0.812 is
+**[0.690, 0.980]**, so **the "81" that forms the lower end of the thesis's "81 to
+100 per cent" range is a one-significant-figure quantity at best**: the honest
+range statement is "69 to 100 per cent", or "81 per cent, 95 % interval 69 to 98
+per cent". This is the one place where a headline number in Chapter 7 needs
+rewording rather than merely annotating.
+
+### 2.6 The resampling unit was worth little, and the SST design is worth a lot
+
+Relative half-width of the annual system probability, primary arm, per unit:
+
+| Unit | blocks (hist / +4K) | KP 57.4 | KP 58.8 | KP 60.0 | KP 62.0 |
+|---|---|---|---|---|---|
+| **member** (the estimator), historical | 50 | 56.4 % | 29.1 % | 40.2 % | 49.9 % |
+| member, +4K | 90 | 21.1 % | 10.6 % | 15.2 % | 19.9 % |
+| S1 i.i.d. over events, historical | 3,000 | 59.7 % | 26.9 % | 39.0 % | 52.3 % |
+| S1 i.i.d. over events, +4K | 5,400 | 19.7 % | 9.5 % | 13.8 % | 18.9 % |
+| S2 calendar year, historical | 60 | 55.9 % | 28.7 % | 38.0 % | 49.0 % |
+| S2 calendar year, +4K | 60 | 22.0 % | 12.3 % | 16.4 % | 21.3 % |
+| S3 sea-surface pattern, +4K | 6 | 35.0 % | 25.0 % | 30.6 % | 34.8 % |
+
+**The nesting is worth almost nothing on this estimand.** The member block is
+within about 10 % of the naive i.i.d.-over-events width, in both directions, and
+the measured intra-cluster correlation behind that is 0.00 to 0.005. **The member
+block is used because it is the valid estimator, not because it is the wider
+one**, and stating that plainly is more useful than implying the correction
+mattered: it means a reader who mentally applied the naive binomial intuition to
+these numbers was not far wrong about their width, only about their justification.
+
+**The sea-surface-pattern grouping is a different matter.** Under warming the
+5,400 events sit in six SST families, and resampling those six widens the
+interval by a factor of 1.6 to 2.4 (for example KP 58.8, 25.0 % against 10.6 %).
+That number is reported and is deliberately **not** the headline, for the reason
+pre-registered in section 1.6: the six patterns are a design spanning CMIP5
+structural spread, not a random sample, so resampling them measures
+climate-model structural uncertainty rather than hazard-sampling noise, and a
+percentile interval from six units is untrustworthy at its ends. It is recorded
+because it is the largest measured grouping in the ensemble and suppressing it
+would be the more misleading choice. **If a reader wants one sentence: the
+warming intervals here would roughly double if the choice of climate model's
+sea-surface pattern were treated as sampled rather than given.**
+
+### 2.7 Where this does not reach
+
+The nine Uemura section aggregates are intervalled in the record as well, because
+Chapter 7 quotes Tokachi 4 alongside the segment numbers and it is a different
+node's curve: **7.48e-3 [5.44e-3, 9.72e-3] historically and 4.10e-2 [3.67e-2,
+4.55e-2] under warming, ratio 5.49 [4.12, 7.68]**. Six of the nine have a
+historical value at or near zero; two of those (Satsunai KP 5.2 and KP 4.2) are
+exactly zero in every replicate and have no ratio at all, and three more
+(Tokachi KP 61.4, Satsunai KP 7.0 and KP 6.4) have an undefined ratio in 5 to
+13 % of replicates. **Those ratios are not quotable and the record marks them
+so**, which is consistent with Chapter 7 already calling them "arithmetically
+enormous and uninformative".
+
+Nothing here touches the stratified entries of the RQ4 attribution table. The
+KP 57.4 long-duration stratum still rests on three simulated years (section 0c),
+and a three-year conditional mean is not rescued by an interval on a different
+quantity. It should continue to be presented as the thesis presents it, with the
+count visible.
+
+Nothing here is total uncertainty. The intervals above are between about 10 and
+60 per cent of a production value. The conductivity bracket at the same sections
+spans four orders of magnitude and reverses the mechanism ordering. **A reader
+who takes the interval and forgets the bracket has the uncertainty backwards.**

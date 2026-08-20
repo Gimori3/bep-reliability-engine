@@ -1,0 +1,2803 @@
+{
+  "study": "Hazard-sampling uncertainty on the Phase 3 annualised results: a block bootstrap over d4PDF ensemble members with the fragility curves held fixed",
+  "generated_by": "scripts/annualisation_uncertainty_study.py",
+  "generated": "2026-08-20T22:03:01",
+  "note": "docs/decisions/annualisation-hazard-sampling-uncertainty.md",
+  "scope": {
+    "statement": "Hazard-sampling uncertainty ONLY: the finite-ensemble spread of the d4PDF peak-stage distribution with the fragility curves held fixed, which is not the total uncertainty and is far smaller than the aquifer-conductivity bracket that dominates it and does not cancel. Quote this scope wherever any number here is quoted.",
+    "resamples": "the d4PDF hazard only",
+    "held_fixed": "every fragility curve, so this is not the total uncertainty",
+    "dominated_by": "the aquifer-conductivity bracket, docs/decisions/conductivity-bracket-annualisation.md",
+    "arms": [
+      "matrix/posterior",
+      "matrix/prior",
+      "bulk/posterior",
+      "bulk/prior"
+    ],
+    "primary_arm": "matrix/posterior",
+    "lambda_ac_m": 250.0,
+    "surface_variant": "primary"
+  },
+  "estimator": {
+    "unit": "d4PDF ensemble member (the prefix-and-member pair)",
+    "why_not_years": "the simulated years are nested exactly 60-per-member inside the ensemble members, so they are not independent draws and an i.i.d. bootstrap over them is not a resample of the ensemble's independent units",
+    "replicates": 10000,
+    "preregistered_replicates": 10000,
+    "seed": 20260820,
+    "interval": "two-sided 95 % percentile (2.5 / 97.5)",
+    "point_estimates": "always the unresampled production values, never a bootstrap mean",
+    "pairing": "one block draw per scenario shared by all 114 nodes, so every between-node difference is paired; the two scenarios are drawn from independent streams and the climate ratio is formed inside each replicate"
+  },
+  "ensemble_structure": {
+    "historical": {
+      "n_events": 3000,
+      "member": {
+        "n_blocks": 50,
+        "events_per_block": [
+          60
+        ],
+        "balanced": true
+      },
+      "year": {
+        "n_blocks": 60,
+        "events_per_block": [
+          50
+        ],
+        "balanced": true
+      },
+      "sst": {
+        "n_blocks": 1,
+        "events_per_block": [
+          3000
+        ],
+        "balanced": true
+      }
+    },
+    "+4K": {
+      "n_events": 5400,
+      "member": {
+        "n_blocks": 90,
+        "events_per_block": [
+          60
+        ],
+        "balanced": true
+      },
+      "year": {
+        "n_blocks": 60,
+        "events_per_block": [
+          90
+        ],
+        "balanced": true
+      },
+      "sst": {
+        "n_blocks": 6,
+        "events_per_block": [
+          900
+        ],
+        "balanced": true
+      }
+    }
+  },
+  "gates": {
+    "gate_0_per_event_matrix_averages_to_the_published_number": {
+      "passed": true,
+      "criterion": "float equality, no tolerance, at every node, scenario and curve of every arm"
+    },
+    "gate_1_reproduces_production_table": {
+      "passed": true,
+      "rows_compared": 912,
+      "rows_per_arm": {
+        "matrix/posterior": 228,
+        "matrix/prior": 228,
+        "bulk/posterior": 228,
+        "bulk/prior": 228
+      },
+      "fields_compared": 20,
+      "table": "results/system_integration/phase3/rq4_annual.csv",
+      "criterion": "every field string-identical to the published table"
+    },
+    "gate_2_hazard_cache_unchanged": {
+      "passed": true,
+      "cache_files": 228
+    },
+    "gate_3_no_production_artifact_written": {
+      "passed": true,
+      "phase3_files_unchanged": 12,
+      "criterion": "SHA-256 of every file under results/system_integration/phase3/ unchanged across the run; this study's own two outputs are listed under the record's 'writes' key"
+    }
+  },
+  "writes": [
+    "docs/decisions/annualisation-hazard-sampling-uncertainty.json",
+    "results/sensitivity/annualisation_uncertainty"
+  ],
+  "sections": {
+    "KP 57.4": {
+      "matrix/posterior": {
+        "historical": {
+          "n_years": 3000,
+          "p_annual_system": {
+            "point": 0.0007529504488451719,
+            "ci_low": 0.00034591479838239704,
+            "ci_high": 0.0012239905570975117,
+            "relative_half_width": 0.5830900028427184
+          },
+          "mechanisms_present": [
+            "bep",
+            "overflow",
+            "fluvial_scour"
+          ],
+          "mechanisms_never_loaded": [
+            "overflow",
+            "fluvial_scour"
+          ],
+          "p_annual_bep": {
+            "point": 0.0007529504488451719,
+            "ci_low": 0.00034591479838239704,
+            "ci_high": 0.0012239905570975117,
+            "relative_half_width": 0.5830900028427184
+          },
+          "share_bep": {
+            "point": 1.0,
+            "ci_low": 1.0,
+            "ci_high": 1.0,
+            "relative_half_width": 0.0,
+            "degenerate": "identical in every replicate because overflow and fluvial_scour returns exactly zero at every simulated event, leaving only one loaded mechanism; this is a statement about coverage, not a zero-width confidence statement about a probability"
+          },
+          "p_annual_overflow": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_overflow": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null,
+            "degenerate": "identical in every replicate because overflow and fluvial_scour returns exactly zero at every simulated event, leaving only one loaded mechanism; this is a statement about coverage, not a zero-width confidence statement about a probability"
+          },
+          "p_annual_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null,
+            "degenerate": "identical in every replicate because overflow and fluvial_scour returns exactly zero at every simulated event, leaving only one loaded mechanism; this is a statement about coverage, not a zero-width confidence statement about a probability"
+          }
+        },
+        "+4K": {
+          "n_years": 5400,
+          "p_annual_system": {
+            "point": 0.009531136967007517,
+            "ci_low": 0.0075049285620437355,
+            "ci_high": 0.011631444873901503,
+            "relative_half_width": 0.2164755540782752
+          },
+          "mechanisms_present": [
+            "bep",
+            "overflow",
+            "fluvial_scour"
+          ],
+          "mechanisms_never_loaded": [
+            "fluvial_scour"
+          ],
+          "p_annual_bep": {
+            "point": 0.009483949453045582,
+            "ci_low": 0.007473373191359744,
+            "ci_high": 0.011570040675391755,
+            "relative_half_width": 0.21597898134708252
+          },
+          "share_bep": {
+            "point": 0.9123231549452225,
+            "ci_low": 0.8629850222768645,
+            "ci_high": 0.9647036619645692,
+            "relative_half_width": 0.05574704485814138
+          },
+          "p_annual_overflow": {
+            "point": 0.0009114344650738865,
+            "ci_low": 0.00031417114536708775,
+            "ci_high": 0.0016332433544913336,
+            "relative_half_width": 0.7236242756177284
+          },
+          "share_overflow": {
+            "point": 0.0876768450547775,
+            "ci_low": 0.035296338035430704,
+            "ci_high": 0.13701497772313537,
+            "relative_half_width": 0.5800769839753833
+          },
+          "p_annual_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "margin_bep_over_overflow": {
+            "point": 10.405519888121363,
+            "ci_low": 6.298472413314045,
+            "ci_high": 27.331552917032724,
+            "relative_half_width": 1.0106693721151514,
+            "n_replicates_undefined": 0
+          }
+        },
+        "climate_ratio": {
+          "point": 12.658385397904704,
+          "ci_low": 7.300261141160971,
+          "ci_high": 28.065567660247357,
+          "relative_half_width": 0.8202193986969141,
+          "n_replicates_undefined": 0,
+          "definition": "warming p_annual_system divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
+        },
+        "climate_ratio_piping_only": {
+          "point": 12.595715252698856,
+          "ci_low": 7.266313616524028,
+          "ci_high": 27.955203538384232,
+          "relative_half_width": 0.8212669747923701,
+          "n_replicates_undefined": 0,
+          "definition": "warming p_annual_bep divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
+        }
+      },
+      "matrix/prior": {
+        "historical": {
+          "n_years": 3000,
+          "p_annual_system": {
+            "point": 0.0007547863728584468,
+            "ci_low": 0.00034687960795589843,
+            "ci_high": 0.0012268821586982114,
+            "relative_half_width": 0.5829480912656522
+          },
+          "mechanisms_present": [
+            "bep",
+            "overflow",
+            "fluvial_scour"
+          ],
+          "mechanisms_never_loaded": [
+            "overflow",
+            "fluvial_scour"
+          ],
+          "p_annual_bep": {
+            "point": 0.0007547863728584468,
+            "ci_low": 0.00034687960795589843,
+            "ci_high": 0.0012268821586982114,
+            "relative_half_width": 0.5829480912656522
+          },
+          "share_bep": {
+            "point": 1.0,
+            "ci_low": 1.0,
+            "ci_high": 1.0,
+            "relative_half_width": 0.0,
+            "degenerate": "identical in every replicate because overflow and fluvial_scour returns exactly zero at every simulated event, leaving only one loaded mechanism; this is a statement about coverage, not a zero-width confidence statement about a probability"
+          },
+          "p_annual_overflow": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_overflow": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null,
+            "degenerate": "identical in every replicate because overflow and fluvial_scour returns exactly zero at every simulated event, leaving only one loaded mechanism; this is a statement about coverage, not a zero-width confidence statement about a probability"
+          },
+          "p_annual_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null,
+            "degenerate": "identical in every replicate because overflow and fluvial_scour returns exactly zero at every simulated event, leaving only one loaded mechanism; this is a statement about coverage, not a zero-width confidence statement about a probability"
+          }
+        },
+        "+4K": {
+          "n_years": 5400,
+          "p_annual_system": {
+            "point": 0.009542470043173192,
+            "ci_low": 0.007514291064964955,
+            "ci_high": 0.011644308201016404,
+            "relative_half_width": 0.21640189161537468
+          },
+          "mechanisms_present": [
+            "bep",
+            "overflow",
+            "fluvial_scour"
+          ],
+          "mechanisms_never_loaded": [
+            "fluvial_scour"
+          ],
+          "p_annual_bep": {
+            "point": 0.009495307767275725,
+            "ci_low": 0.007483757443823086,
+            "ci_high": 0.011583224218372662,
+            "relative_half_width": 0.2158680305591476
+          },
+          "share_bep": {
+            "point": 0.9124188487881759,
+            "ci_low": 0.8631209491568879,
+            "ci_high": 0.9647469565902276,
+            "relative_half_width": 0.055690436233487364
+          },
+          "p_annual_overflow": {
+            "point": 0.0009114344650738865,
+            "ci_low": 0.00031417114536708775,
+            "ci_high": 0.0016332433544913336,
+            "relative_half_width": 0.7236242756177284
+          },
+          "share_overflow": {
+            "point": 0.08758115121182403,
+            "ci_low": 0.035253043409772415,
+            "ci_high": 0.13687905084311222,
+            "relative_half_width": 0.5801819571173873
+          },
+          "p_annual_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "margin_bep_over_overflow": {
+            "point": 10.417981907789692,
+            "ci_low": 6.305720087400337,
+            "ci_high": 27.366347091589134,
+            "relative_half_width": 1.0107824716244433,
+            "n_replicates_undefined": 0
+          }
+        },
+        "climate_ratio": {
+          "point": 12.642610394560997,
+          "ci_low": 7.292427534567733,
+          "ci_high": 28.015656676926177,
+          "relative_half_width": 0.8195787300095013,
+          "n_replicates_undefined": 0,
+          "definition": "warming p_annual_system divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
+        },
+        "climate_ratio_piping_only": {
+          "point": 12.58012612405296,
+          "ci_low": 7.25875798993229,
+          "ci_high": 27.907094845187572,
+          "relative_half_width": 0.8206728872048451,
+          "n_replicates_undefined": 0,
+          "definition": "warming p_annual_bep divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
+        }
+      },
+      "bulk/posterior": {
+        "historical": {
+          "n_years": 3000,
+          "p_annual_system": {
+            "point": 2.074058746414729e-06,
+            "ci_low": 1.3258680495137467e-07,
+            "ci_high": 4.756599039361481e-06,
+            "relative_half_width": 1.114725473037659
+          },
+          "mechanisms_present": [
+            "bep",
+            "overflow",
+            "fluvial_scour"
+          ],
+          "mechanisms_never_loaded": [
+            "overflow",
+            "fluvial_scour"
+          ],
+          "p_annual_bep": {
+            "point": 2.074058746414729e-06,
+            "ci_low": 1.3258680495137467e-07,
+            "ci_high": 4.756599039361481e-06,
+            "relative_half_width": 1.114725473037659
+          },
+          "share_bep": {
+            "point": 1.0,
+            "ci_low": 1.0,
+            "ci_high": 1.0,
+            "relative_half_width": 0.0,
+            "degenerate": "identical in every replicate because overflow and fluvial_scour returns exactly zero at every simulated event, leaving only one loaded mechanism; this is a statement about coverage, not a zero-width confidence statement about a probability"
+          },
+          "p_annual_overflow": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_overflow": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null,
+            "degenerate": "identical in every replicate because overflow and fluvial_scour returns exactly zero at every simulated event, leaving only one loaded mechanism; this is a statement about coverage, not a zero-width confidence statement about a probability"
+          },
+          "p_annual_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null,
+            "degenerate": "identical in every replicate because overflow and fluvial_scour returns exactly zero at every simulated event, leaving only one loaded mechanism; this is a statement about coverage, not a zero-width confidence statement about a probability"
+          }
+        },
+        "+4K": {
+          "n_years": 5400,
+          "p_annual_system": {
+            "point": 0.001215482719636291,
+            "ci_low": 0.0005678133939954148,
+            "ci_high": 0.0019821313934740726,
+            "relative_half_width": 0.5817927217845863
+          },
+          "mechanisms_present": [
+            "bep",
+            "overflow",
+            "fluvial_scour"
+          ],
+          "mechanisms_never_loaded": [
+            "fluvial_scour"
+          ],
+          "p_annual_bep": {
+            "point": 0.0005672769561485688,
+            "ci_low": 0.00032181251675808157,
+            "ci_high": 0.000848754859670344,
+            "relative_half_width": 0.46444892322953557
+          },
+          "share_bep": {
+            "point": 0.3836292517978925,
+            "ci_low": 0.33089063059503704,
+            "ci_high": 0.524701066946903,
+            "relative_half_width": 0.25260122298230164
+          },
+          "p_annual_overflow": {
+            "point": 0.0009114344650738865,
+            "ci_low": 0.00031417114536708775,
+            "ci_high": 0.0016332433544913336,
+            "relative_half_width": 0.7236242756177284
+          },
+          "share_overflow": {
+            "point": 0.6163707482021075,
+            "ci_low": 0.47529893305309695,
+            "ci_high": 0.6691093694049629,
+            "relative_half_width": 0.15721904139447876
+          },
+          "p_annual_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "margin_bep_over_overflow": {
+            "point": 0.6224001591848755,
+            "ci_low": 0.4945239844453384,
+            "ci_high": 1.1039391036170063,
+            "relative_half_width": 0.48956857592210984,
+            "n_replicates_undefined": 0
+          }
+        },
+        "climate_ratio": {
+          "point": 586.0406421647436,
+          "ci_low": 194.42729858183398,
+          "ci_high": 9248.930558441953,
+          "relative_half_width": 7.725149595780748,
+          "n_replicates_undefined": 0,
+          "definition": "warming p_annual_system divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
+        },
+        "climate_ratio_piping_only": {
+          "point": 273.5105537049894,
+          "ci_low": 102.0516131845936,
+          "ci_high": 4293.535394350234,
+          "relative_half_width": 7.662380343989592,
+          "n_replicates_undefined": 0,
+          "definition": "warming p_annual_bep divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
+        }
+      },
+      "bulk/prior": {
+        "historical": {
+          "n_years": 3000,
+          "p_annual_system": {
+            "point": 2.074058746414729e-06,
+            "ci_low": 1.3258680495137467e-07,
+            "ci_high": 4.756599039361481e-06,
+            "relative_half_width": 1.114725473037659
+          },
+          "mechanisms_present": [
+            "bep",
+            "overflow",
+            "fluvial_scour"
+          ],
+          "mechanisms_never_loaded": [
+            "overflow",
+            "fluvial_scour"
+          ],
+          "p_annual_bep": {
+            "point": 2.074058746414729e-06,
+            "ci_low": 1.3258680495137467e-07,
+            "ci_high": 4.756599039361481e-06,
+            "relative_half_width": 1.114725473037659
+          },
+          "share_bep": {
+            "point": 1.0,
+            "ci_low": 1.0,
+            "ci_high": 1.0,
+            "relative_half_width": 0.0,
+            "degenerate": "identical in every replicate because overflow and fluvial_scour returns exactly zero at every simulated event, leaving only one loaded mechanism; this is a statement about coverage, not a zero-width confidence statement about a probability"
+          },
+          "p_annual_overflow": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_overflow": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null,
+            "degenerate": "identical in every replicate because overflow and fluvial_scour returns exactly zero at every simulated event, leaving only one loaded mechanism; this is a statement about coverage, not a zero-width confidence statement about a probability"
+          },
+          "p_annual_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null,
+            "degenerate": "identical in every replicate because overflow and fluvial_scour returns exactly zero at every simulated event, leaving only one loaded mechanism; this is a statement about coverage, not a zero-width confidence statement about a probability"
+          }
+        },
+        "+4K": {
+          "n_years": 5400,
+          "p_annual_system": {
+            "point": 0.001215482719636291,
+            "ci_low": 0.0005678133939954148,
+            "ci_high": 0.0019821313934740726,
+            "relative_half_width": 0.5817927217845863
+          },
+          "mechanisms_present": [
+            "bep",
+            "overflow",
+            "fluvial_scour"
+          ],
+          "mechanisms_never_loaded": [
+            "fluvial_scour"
+          ],
+          "p_annual_bep": {
+            "point": 0.0005672769561485688,
+            "ci_low": 0.00032181251675808157,
+            "ci_high": 0.000848754859670344,
+            "relative_half_width": 0.46444892322953557
+          },
+          "share_bep": {
+            "point": 0.3836292517978925,
+            "ci_low": 0.33089063059503704,
+            "ci_high": 0.524701066946903,
+            "relative_half_width": 0.25260122298230164
+          },
+          "p_annual_overflow": {
+            "point": 0.0009114344650738865,
+            "ci_low": 0.00031417114536708775,
+            "ci_high": 0.0016332433544913336,
+            "relative_half_width": 0.7236242756177284
+          },
+          "share_overflow": {
+            "point": 0.6163707482021075,
+            "ci_low": 0.47529893305309695,
+            "ci_high": 0.6691093694049629,
+            "relative_half_width": 0.15721904139447876
+          },
+          "p_annual_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "margin_bep_over_overflow": {
+            "point": 0.6224001591848755,
+            "ci_low": 0.4945239844453384,
+            "ci_high": 1.1039391036170063,
+            "relative_half_width": 0.48956857592210984,
+            "n_replicates_undefined": 0
+          }
+        },
+        "climate_ratio": {
+          "point": 586.0406421647436,
+          "ci_low": 194.42729858183398,
+          "ci_high": 9248.930558441953,
+          "relative_half_width": 7.725149595780748,
+          "n_replicates_undefined": 0,
+          "definition": "warming p_annual_system divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
+        },
+        "climate_ratio_piping_only": {
+          "point": 273.5105537049894,
+          "ci_low": 102.0516131845936,
+          "ci_high": 4293.535394350234,
+          "relative_half_width": 7.662380343989592,
+          "n_replicates_undefined": 0,
+          "definition": "warming p_annual_bep divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
+        }
+      }
+    },
+    "KP 58.8": {
+      "matrix/posterior": {
+        "historical": {
+          "n_years": 3000,
+          "p_annual_system": {
+            "point": 0.007419538025861581,
+            "ci_low": 0.0053858709409247306,
+            "ci_high": 0.00966287941541281,
+            "relative_half_width": 0.28822606337349543
+          },
+          "mechanisms_present": [
+            "bep",
+            "overflow",
+            "fluvial_scour"
+          ],
+          "mechanisms_never_loaded": [
+            "fluvial_scour"
+          ],
+          "p_annual_bep": {
+            "point": 0.007337441136926019,
+            "ci_low": 0.005327134137862624,
+            "ci_high": 0.009553889598765195,
+            "relative_half_width": 0.2880265328215871
+          },
+          "share_bep": {
+            "point": 0.9741019217609156,
+            "ci_low": 0.9678988877250565,
+            "ci_high": 0.9801544538755382,
+            "relative_half_width": 0.006290700119104041
+          },
+          "p_annual_overflow": {
+            "point": 0.00019507776382913884,
+            "ci_low": 0.00011930611141319952,
+            "ci_high": 0.0002815269885979412,
+            "relative_half_width": 0.4157851566486704
+          },
+          "share_overflow": {
+            "point": 0.025898078239084365,
+            "ci_low": 0.019845546124461762,
+            "ci_high": 0.03210111227494343,
+            "relative_half_width": 0.23661149752775956
+          },
+          "p_annual_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "margin_bep_over_overflow": {
+            "point": 37.61290365903827,
+            "ci_low": 30.151568575975563,
+            "ci_high": 49.38914000895889,
+            "relative_half_width": 0.25573100666957677,
+            "n_replicates_undefined": 0
+          }
+        },
+        "+4K": {
+          "n_years": 5400,
+          "p_annual_system": {
+            "point": 0.0409128184765685,
+            "ci_low": 0.036535291646593644,
+            "ci_high": 0.045371559440650286,
+            "relative_half_width": 0.10798898881920505
+          },
+          "mechanisms_present": [
+            "bep",
+            "overflow",
+            "fluvial_scour"
+          ],
+          "mechanisms_never_loaded": [
+            "fluvial_scour"
+          ],
+          "p_annual_bep": {
+            "point": 0.04044800138011904,
+            "ci_low": 0.03612672129235541,
+            "ci_high": 0.044852253926504715,
+            "relative_half_width": 0.10786110977584752
+          },
+          "share_bep": {
+            "point": 0.9411466886382553,
+            "ci_low": 0.9318077594172404,
+            "ci_high": 0.9508161029835328,
+            "relative_half_width": 0.010098502069744093
+          },
+          "p_annual_overflow": {
+            "point": 0.0025293600327370483,
+            "ci_low": 0.0019500994711381643,
+            "ci_high": 0.0031517382953680046,
+            "relative_half_width": 0.23753811412318668
+          },
+          "share_overflow": {
+            "point": 0.058853311361744626,
+            "ci_low": 0.04918389701646728,
+            "ci_high": 0.06819224058275966,
+            "relative_half_width": 0.16148915945830733
+          },
+          "p_annual_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "margin_bep_over_overflow": {
+            "point": 15.991397371907475,
+            "ci_low": 13.664425093515844,
+            "ci_high": 19.331857907066468,
+            "relative_half_width": 0.17720255090111006,
+            "n_replicates_undefined": 0
+          }
+        },
+        "climate_ratio": {
+          "point": 5.514200255320825,
+          "ci_low": 4.127954185354333,
+          "ci_high": 7.734992021782197,
+          "relative_half_width": 0.3270680850724745,
+          "n_replicates_undefined": 0,
+          "definition": "warming p_annual_system divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
+        },
+        "climate_ratio_piping_only": {
+          "point": 5.512548669939246,
+          "ci_low": 4.128303651028533,
+          "ci_high": 7.728512368010948,
+          "relative_half_width": 0.32654666040545755,
+          "n_replicates_undefined": 0,
+          "definition": "warming p_annual_bep divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
+        }
+      },
+      "matrix/prior": {
+        "historical": {
+          "n_years": 3000,
+          "p_annual_system": {
+            "point": 0.00846694925456121,
+            "ci_low": 0.0062590056367103596,
+            "ci_high": 0.01087031326942526,
+            "relative_half_width": 0.27231222805727534
+          },
+          "mechanisms_present": [
+            "bep",
+            "overflow",
+            "fluvial_scour"
+          ],
+          "mechanisms_never_loaded": [
+            "fluvial_scour"
+          ],
+          "p_annual_bep": {
+            "point": 0.008389875497708863,
+            "ci_low": 0.006204251913007031,
+            "ci_high": 0.010767568217374414,
+            "relative_half_width": 0.27195375578657566
+          },
+          "share_bep": {
+            "point": 0.9772767820760168,
+            "ci_low": 0.971361507154707,
+            "ci_high": 0.9830138549996414,
+            "relative_half_width": 0.005961641603815386
+          },
+          "p_annual_overflow": {
+            "point": 0.00019507776382913884,
+            "ci_low": 0.00011930611141319952,
+            "ci_high": 0.0002815269885979412,
+            "relative_half_width": 0.4157851566486704
+          },
+          "share_overflow": {
+            "point": 0.022723217923983255,
+            "ci_low": 0.016986145000358506,
+            "ci_high": 0.028638492845293004,
+            "relative_half_width": 0.2563973967929078
+          },
+          "p_annual_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "margin_bep_over_overflow": {
+            "point": 43.007851499965085,
+            "ci_low": 33.91803864832804,
+            "ci_high": 57.87150969093191,
+            "relative_half_width": 0.2784778849348393,
+            "n_replicates_undefined": 0
+          }
+        },
+        "+4K": {
+          "n_years": 5400,
+          "p_annual_system": {
+            "point": 0.044616565137658055,
+            "ci_low": 0.0400508788352336,
+            "ci_high": 0.04925255948910607,
+            "relative_half_width": 0.10311955464839115
+          },
+          "mechanisms_present": [
+            "bep",
+            "overflow",
+            "fluvial_scour"
+          ],
+          "mechanisms_never_loaded": [
+            "fluvial_scour"
+          ],
+          "p_annual_bep": {
+            "point": 0.0441806502877034,
+            "ci_low": 0.0396600851706377,
+            "ci_high": 0.04876527536448791,
+            "relative_half_width": 0.10304499972903763
+          },
+          "share_bep": {
+            "point": 0.94584972224615,
+            "ci_low": 0.9368634799136247,
+            "ci_high": 0.9550356738101241,
+            "relative_half_width": 0.009606279660020985
+          },
+          "p_annual_overflow": {
+            "point": 0.0025293600327370483,
+            "ci_low": 0.0019500994711381643,
+            "ci_high": 0.0031517382953680046,
+            "relative_half_width": 0.23753811412318668
+          },
+          "share_overflow": {
+            "point": 0.05415027775384996,
+            "ci_low": 0.04496432618987582,
+            "ci_high": 0.06313652008637527,
+            "relative_half_width": 0.16779409681982146
+          },
+          "p_annual_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "margin_bep_over_overflow": {
+            "point": 17.46712595908896,
+            "ci_low": 14.83869365356216,
+            "ci_high": 21.2398529181834,
+            "relative_half_width": 0.1832344737083211,
+            "n_replicates_undefined": 0
+          }
+        },
+        "climate_ratio": {
+          "point": 5.269497170261505,
+          "ci_low": 4.006334239731322,
+          "ci_high": 7.238402883450214,
+          "relative_half_width": 0.3066771400845536,
+          "n_replicates_undefined": 0,
+          "definition": "warming p_annual_system divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
+        },
+        "climate_ratio_piping_only": {
+          "point": 5.265948261063993,
+          "ci_low": 4.005291377886446,
+          "ci_high": 7.229896049569857,
+          "relative_half_width": 0.30617511906885636,
+          "n_replicates_undefined": 0,
+          "definition": "warming p_annual_bep divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
+        }
+      },
+      "bulk/posterior": {
+        "historical": {
+          "n_years": 3000,
+          "p_annual_system": {
+            "point": 0.00019887555820912014,
+            "ci_low": 0.00012065174423238188,
+            "ci_high": 0.0002880220183917857,
+            "relative_half_width": 0.4207914629293255
+          },
+          "mechanisms_present": [
+            "bep",
+            "overflow",
+            "fluvial_scour"
+          ],
+          "mechanisms_never_loaded": [
+            "fluvial_scour"
+          ],
+          "p_annual_bep": {
+            "point": 3.983552526292708e-06,
+            "ci_low": 1.2990521125619692e-06,
+            "ci_high": 7.377295864728586e-06,
+            "relative_half_width": 0.7629174853410724
+          },
+          "share_bep": {
+            "point": 0.020011685842466365,
+            "ci_low": 0.0095215012257125,
+            "ci_high": 0.02853376667176772,
+            "relative_half_width": 0.4750290804013549
+          },
+          "p_annual_overflow": {
+            "point": 0.00019507776382913884,
+            "ci_low": 0.00011930611141319952,
+            "ci_high": 0.0002815269885979412,
+            "relative_half_width": 0.4157851566486704
+          },
+          "share_overflow": {
+            "point": 0.9799883141575337,
+            "ci_low": 0.9714662333282323,
+            "ci_high": 0.9904784987742875,
+            "relative_half_width": 0.009700251100646764
+          },
+          "p_annual_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "margin_bep_over_overflow": {
+            "point": 0.02042033109310064,
+            "ci_low": 0.00961303171901045,
+            "ci_high": 0.0293718563702358,
+            "relative_half_width": 0.4838027493565275,
+            "n_replicates_undefined": 0
+          }
+        },
+        "+4K": {
+          "n_years": 5400,
+          "p_annual_system": {
+            "point": 0.0027090843786673658,
+            "ci_low": 0.0020718526072699157,
+            "ci_high": 0.003392602917168481,
+            "relative_half_width": 0.24376322869431255
+          },
+          "mechanisms_present": [
+            "bep",
+            "overflow",
+            "fluvial_scour"
+          ],
+          "mechanisms_never_loaded": [
+            "fluvial_scour"
+          ],
+          "p_annual_bep": {
+            "point": 0.00026812957381632755,
+            "ci_low": 0.000165191341056451,
+            "ci_high": 0.0003854372094485062,
+            "relative_half_width": 0.41070790002248436
+          },
+          "share_bep": {
+            "point": 0.09584649508195113,
+            "ci_low": 0.07604658109640616,
+            "ci_high": 0.11187304886207289,
+            "relative_half_width": 0.18689503322491974
+          },
+          "p_annual_overflow": {
+            "point": 0.0025293600327370483,
+            "ci_low": 0.0019500994711381643,
+            "ci_high": 0.0031517382953680046,
+            "relative_half_width": 0.23753811412318668
+          },
+          "share_overflow": {
+            "point": 0.9041535049180489,
+            "ci_low": 0.8881269511379272,
+            "ci_high": 0.9239534189035937,
+            "relative_half_width": 0.01981215997659259
+          },
+          "p_annual_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "margin_bep_over_overflow": {
+            "point": 0.10600688330090421,
+            "ci_low": 0.08230564392178406,
+            "ci_high": 0.12596515477798653,
+            "relative_half_width": 0.20592771665719778,
+            "n_replicates_undefined": 0
+          }
+        },
+        "climate_ratio": {
+          "point": 13.622007666818108,
+          "ci_low": 8.618993227362912,
+          "ci_high": 23.567405010631994,
+          "relative_half_width": 0.5486860728937176,
+          "n_replicates_undefined": 0,
+          "definition": "warming p_annual_system divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
+        },
+        "climate_ratio_piping_only": {
+          "point": 67.30915986336002,
+          "ci_low": 30.758081302270966,
+          "ci_high": 218.4229707880252,
+          "relative_half_width": 1.3940516407181474,
+          "n_replicates_undefined": 0,
+          "definition": "warming p_annual_bep divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
+        }
+      },
+      "bulk/prior": {
+        "historical": {
+          "n_years": 3000,
+          "p_annual_system": {
+            "point": 0.00019887555820912014,
+            "ci_low": 0.00012065174423238188,
+            "ci_high": 0.0002880220183917857,
+            "relative_half_width": 0.4207914629293255
+          },
+          "mechanisms_present": [
+            "bep",
+            "overflow",
+            "fluvial_scour"
+          ],
+          "mechanisms_never_loaded": [
+            "fluvial_scour"
+          ],
+          "p_annual_bep": {
+            "point": 3.983552526292708e-06,
+            "ci_low": 1.2990521125619692e-06,
+            "ci_high": 7.377295864728586e-06,
+            "relative_half_width": 0.7629174853410724
+          },
+          "share_bep": {
+            "point": 0.020011685842466365,
+            "ci_low": 0.0095215012257125,
+            "ci_high": 0.02853376667176772,
+            "relative_half_width": 0.4750290804013549
+          },
+          "p_annual_overflow": {
+            "point": 0.00019507776382913884,
+            "ci_low": 0.00011930611141319952,
+            "ci_high": 0.0002815269885979412,
+            "relative_half_width": 0.4157851566486704
+          },
+          "share_overflow": {
+            "point": 0.9799883141575337,
+            "ci_low": 0.9714662333282323,
+            "ci_high": 0.9904784987742875,
+            "relative_half_width": 0.009700251100646764
+          },
+          "p_annual_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "margin_bep_over_overflow": {
+            "point": 0.02042033109310064,
+            "ci_low": 0.00961303171901045,
+            "ci_high": 0.0293718563702358,
+            "relative_half_width": 0.4838027493565275,
+            "n_replicates_undefined": 0
+          }
+        },
+        "+4K": {
+          "n_years": 5400,
+          "p_annual_system": {
+            "point": 0.0027090843786673658,
+            "ci_low": 0.0020718526072699157,
+            "ci_high": 0.003392602917168481,
+            "relative_half_width": 0.24376322869431255
+          },
+          "mechanisms_present": [
+            "bep",
+            "overflow",
+            "fluvial_scour"
+          ],
+          "mechanisms_never_loaded": [
+            "fluvial_scour"
+          ],
+          "p_annual_bep": {
+            "point": 0.00026812957381632755,
+            "ci_low": 0.000165191341056451,
+            "ci_high": 0.0003854372094485062,
+            "relative_half_width": 0.41070790002248436
+          },
+          "share_bep": {
+            "point": 0.09584649508195113,
+            "ci_low": 0.07604658109640616,
+            "ci_high": 0.11187304886207289,
+            "relative_half_width": 0.18689503322491974
+          },
+          "p_annual_overflow": {
+            "point": 0.0025293600327370483,
+            "ci_low": 0.0019500994711381643,
+            "ci_high": 0.0031517382953680046,
+            "relative_half_width": 0.23753811412318668
+          },
+          "share_overflow": {
+            "point": 0.9041535049180489,
+            "ci_low": 0.8881269511379272,
+            "ci_high": 0.9239534189035937,
+            "relative_half_width": 0.01981215997659259
+          },
+          "p_annual_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "margin_bep_over_overflow": {
+            "point": 0.10600688330090421,
+            "ci_low": 0.08230564392178406,
+            "ci_high": 0.12596515477798653,
+            "relative_half_width": 0.20592771665719778,
+            "n_replicates_undefined": 0
+          }
+        },
+        "climate_ratio": {
+          "point": 13.622007666818108,
+          "ci_low": 8.618993227362912,
+          "ci_high": 23.567405010631994,
+          "relative_half_width": 0.5486860728937176,
+          "n_replicates_undefined": 0,
+          "definition": "warming p_annual_system divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
+        },
+        "climate_ratio_piping_only": {
+          "point": 67.30915986336002,
+          "ci_low": 30.758081302270966,
+          "ci_high": 218.4229707880252,
+          "relative_half_width": 1.3940516407181474,
+          "n_replicates_undefined": 0,
+          "definition": "warming p_annual_bep divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
+        }
+      }
+    },
+    "KP 60.0": {
+      "matrix/posterior": {
+        "historical": {
+          "n_years": 3000,
+          "p_annual_system": {
+            "point": 0.0018017845066762934,
+            "ci_low": 0.0011253552210259406,
+            "ci_high": 0.00255385513190895,
+            "relative_half_width": 0.39641253035251356
+          },
+          "mechanisms_present": [
+            "bep",
+            "overflow",
+            "fluvial_scour"
+          ],
+          "mechanisms_never_loaded": [
+            "overflow",
+            "fluvial_scour"
+          ],
+          "p_annual_bep": {
+            "point": 0.0018017845066762934,
+            "ci_low": 0.0011253552210259406,
+            "ci_high": 0.00255385513190895,
+            "relative_half_width": 0.39641253035251356
+          },
+          "share_bep": {
+            "point": 1.0,
+            "ci_low": 1.0,
+            "ci_high": 1.0,
+            "relative_half_width": 0.0,
+            "degenerate": "identical in every replicate because overflow and fluvial_scour returns exactly zero at every simulated event, leaving only one loaded mechanism; this is a statement about coverage, not a zero-width confidence statement about a probability"
+          },
+          "p_annual_overflow": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_overflow": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null,
+            "degenerate": "identical in every replicate because overflow and fluvial_scour returns exactly zero at every simulated event, leaving only one loaded mechanism; this is a statement about coverage, not a zero-width confidence statement about a probability"
+          },
+          "p_annual_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null,
+            "degenerate": "identical in every replicate because overflow and fluvial_scour returns exactly zero at every simulated event, leaving only one loaded mechanism; this is a statement about coverage, not a zero-width confidence statement about a probability"
+          }
+        },
+        "+4K": {
+          "n_years": 5400,
+          "p_annual_system": {
+            "point": 0.014175099867898966,
+            "ci_low": 0.011985258543112366,
+            "ci_high": 0.01643953114038283,
+            "relative_half_width": 0.15711609225969697
+          },
+          "mechanisms_present": [
+            "bep",
+            "overflow",
+            "fluvial_scour"
+          ],
+          "mechanisms_never_loaded": [
+            "fluvial_scour"
+          ],
+          "p_annual_bep": {
+            "point": 0.014172922003054545,
+            "ci_low": 0.01198450663133679,
+            "ci_high": 0.016436789631400547,
+            "relative_half_width": 0.15707004522794243
+          },
+          "share_bep": {
+            "point": 0.9983772493128567,
+            "ci_low": 0.9965127687416637,
+            "ci_high": 0.9998861932498051,
+            "relative_half_width": 0.0016894538164121677
+          },
+          "p_annual_overflow": {
+            "point": 2.3036501417792023e-05,
+            "ci_low": 1.4875780467046744e-06,
+            "ci_high": 5.147170087939367e-05,
+            "relative_half_width": 1.0848896263840704
+          },
+          "share_overflow": {
+            "point": 0.0016227506871434243,
+            "ci_low": 0.000113806750194945,
+            "ci_high": 0.003487231258336256,
+            "relative_half_width": 1.0394155229352111
+          },
+          "p_annual_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "margin_bep_over_overflow": {
+            "point": 615.2376068749842,
+            "ci_low": 285.7030747018392,
+            "ci_high": 8104.383330086738,
+            "relative_half_width": 6.35419565385382,
+            "n_replicates_undefined": 17
+          }
+        },
+        "climate_ratio": {
+          "point": 7.867255942858237,
+          "ci_low": 5.342454398083511,
+          "ci_high": 12.880592193648619,
+          "relative_half_width": 0.47908304053639583,
+          "n_replicates_undefined": 0,
+          "definition": "warming p_annual_system divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
+        },
+        "climate_ratio_piping_only": {
+          "point": 7.866047216267265,
+          "ci_low": 5.341275499965448,
+          "ci_high": 12.880317951595586,
+          "relative_half_width": 0.4792141621041334,
+          "n_replicates_undefined": 0,
+          "definition": "warming p_annual_bep divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
+        }
+      },
+      "matrix/prior": {
+        "historical": {
+          "n_years": 3000,
+          "p_annual_system": {
+            "point": 0.0020250317468853943,
+            "ci_low": 0.0012887804417086456,
+            "ci_high": 0.002842017774876022,
+            "relative_half_width": 0.3835093784471126
+          },
+          "mechanisms_present": [
+            "bep",
+            "overflow",
+            "fluvial_scour"
+          ],
+          "mechanisms_never_loaded": [
+            "overflow",
+            "fluvial_scour"
+          ],
+          "p_annual_bep": {
+            "point": 0.0020250317468853943,
+            "ci_low": 0.0012887804417086456,
+            "ci_high": 0.002842017774876022,
+            "relative_half_width": 0.3835093784471126
+          },
+          "share_bep": {
+            "point": 1.0,
+            "ci_low": 1.0,
+            "ci_high": 1.0,
+            "relative_half_width": 0.0,
+            "degenerate": "identical in every replicate because overflow and fluvial_scour returns exactly zero at every simulated event, leaving only one loaded mechanism; this is a statement about coverage, not a zero-width confidence statement about a probability"
+          },
+          "p_annual_overflow": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_overflow": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null,
+            "degenerate": "identical in every replicate because overflow and fluvial_scour returns exactly zero at every simulated event, leaving only one loaded mechanism; this is a statement about coverage, not a zero-width confidence statement about a probability"
+          },
+          "p_annual_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null,
+            "degenerate": "identical in every replicate because overflow and fluvial_scour returns exactly zero at every simulated event, leaving only one loaded mechanism; this is a statement about coverage, not a zero-width confidence statement about a probability"
+          }
+        },
+        "+4K": {
+          "n_years": 5400,
+          "p_annual_system": {
+            "point": 0.015340647327771224,
+            "ci_low": 0.013054920998175644,
+            "ci_high": 0.017703045333679477,
+            "relative_half_width": 0.15149700779214573
+          },
+          "mechanisms_present": [
+            "bep",
+            "overflow",
+            "fluvial_scour"
+          ],
+          "mechanisms_never_loaded": [
+            "fluvial_scour"
+          ],
+          "p_annual_bep": {
+            "point": 0.015338550378454741,
+            "ci_low": 0.01305327113773701,
+            "ci_high": 0.017701350757675982,
+            "relative_half_width": 0.1515162614867402
+          },
+          "share_bep": {
+            "point": 0.9985003827014789,
+            "ci_low": 0.9967767192654969,
+            "ci_high": 0.9998951773687857,
+            "relative_half_width": 0.0015615708102443143
+          },
+          "p_annual_overflow": {
+            "point": 2.3036501417792023e-05,
+            "ci_low": 1.4875780467046744e-06,
+            "ci_high": 5.147170087939367e-05,
+            "relative_half_width": 1.0848896263840704
+          },
+          "share_overflow": {
+            "point": 0.0014996172985211262,
+            "ci_low": 0.00010482263121428639,
+            "ci_high": 0.0032232807345030194,
+            "relative_half_width": 1.0397513106724146
+          },
+          "p_annual_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "margin_bep_over_overflow": {
+            "point": 665.836799619588,
+            "ci_low": 309.1471341830038,
+            "ci_high": 8790.296205364548,
+            "relative_half_width": 6.368789676409499,
+            "n_replicates_undefined": 17
+          }
+        },
+        "climate_ratio": {
+          "point": 7.575509545154514,
+          "ci_low": 5.1968905072418705,
+          "ci_high": 12.18260313818643,
+          "relative_half_width": 0.46107212916211004,
+          "n_replicates_undefined": 0,
+          "definition": "warming p_annual_system divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
+        },
+        "climate_ratio_piping_only": {
+          "point": 7.574474030862104,
+          "ci_low": 5.196465524201961,
+          "ci_high": 12.181043287470219,
+          "relative_half_width": 0.4610602488575232,
+          "n_replicates_undefined": 0,
+          "definition": "warming p_annual_bep divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
+        }
+      },
+      "bulk/posterior": {
+        "historical": {
+          "n_years": 3000,
+          "p_annual_system": {
+            "point": 6.914576779640289e-05,
+            "ci_low": 3.1522470723068666e-05,
+            "ci_high": 0.00011399086970982376,
+            "relative_half_width": 0.5963372858161051
+          },
+          "mechanisms_present": [
+            "bep",
+            "overflow",
+            "fluvial_scour"
+          ],
+          "mechanisms_never_loaded": [
+            "overflow",
+            "fluvial_scour"
+          ],
+          "p_annual_bep": {
+            "point": 6.914576779640289e-05,
+            "ci_low": 3.1522470723068666e-05,
+            "ci_high": 0.00011399086970982376,
+            "relative_half_width": 0.5963372858161051
+          },
+          "share_bep": {
+            "point": 1.0,
+            "ci_low": 1.0,
+            "ci_high": 1.0,
+            "relative_half_width": 0.0,
+            "degenerate": "identical in every replicate because overflow and fluvial_scour returns exactly zero at every simulated event, leaving only one loaded mechanism; this is a statement about coverage, not a zero-width confidence statement about a probability"
+          },
+          "p_annual_overflow": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_overflow": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null,
+            "degenerate": "identical in every replicate because overflow and fluvial_scour returns exactly zero at every simulated event, leaving only one loaded mechanism; this is a statement about coverage, not a zero-width confidence statement about a probability"
+          },
+          "p_annual_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null,
+            "degenerate": "identical in every replicate because overflow and fluvial_scour returns exactly zero at every simulated event, leaving only one loaded mechanism; this is a statement about coverage, not a zero-width confidence statement about a probability"
+          }
+        },
+        "+4K": {
+          "n_years": 5400,
+          "p_annual_system": {
+            "point": 0.001615179400190394,
+            "ci_low": 0.0011621639244598992,
+            "ci_high": 0.0021111702797747592,
+            "relative_half_width": 0.2937773832439273
+          },
+          "mechanisms_present": [
+            "bep",
+            "overflow",
+            "fluvial_scour"
+          ],
+          "mechanisms_never_loaded": [
+            "fluvial_scour"
+          ],
+          "p_annual_bep": {
+            "point": 0.001602755250945974,
+            "ci_low": 0.0011596891250903259,
+            "ci_high": 0.002087709478498185,
+            "relative_half_width": 0.289507818757769
+          },
+          "share_bep": {
+            "point": 0.9858305952258037,
+            "ci_low": 0.972520050885685,
+            "ci_high": 0.998825491322906,
+            "relative_half_width": 0.013341765088552409
+          },
+          "p_annual_overflow": {
+            "point": 2.3036501417792023e-05,
+            "ci_low": 1.4875780467046744e-06,
+            "ci_high": 5.147170087939367e-05,
+            "relative_half_width": 1.0848896263840704
+          },
+          "share_overflow": {
+            "point": 0.014169404774196244,
+            "ci_low": 0.0011745086770940344,
+            "ci_high": 0.027479949114314936,
+            "relative_half_width": 0.9282478994857097
+          },
+          "p_annual_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "margin_bep_over_overflow": {
+            "point": 69.57459476498897,
+            "ci_low": 35.372068946222214,
+            "ci_high": 813.0605832032772,
+            "relative_half_width": 5.588882816234526,
+            "n_replicates_undefined": 17
+          }
+        },
+        "climate_ratio": {
+          "point": 23.359049319493117,
+          "ci_low": 12.716069004809697,
+          "ci_high": 54.192019373132034,
+          "relative_half_width": 0.8877919174071582,
+          "n_replicates_undefined": 0,
+          "definition": "warming p_annual_system divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
+        },
+        "climate_ratio_piping_only": {
+          "point": 23.179368774459583,
+          "ci_low": 12.652708029742719,
+          "ci_high": 53.75804183031641,
+          "relative_half_width": 0.8866793181586983,
+          "n_replicates_undefined": 0,
+          "definition": "warming p_annual_bep divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
+        }
+      },
+      "bulk/prior": {
+        "historical": {
+          "n_years": 3000,
+          "p_annual_system": {
+            "point": 6.946455662597709e-05,
+            "ci_low": 3.168011120595514e-05,
+            "ci_high": 0.000114463167460036,
+            "relative_half_width": 0.5958654332152115
+          },
+          "mechanisms_present": [
+            "bep",
+            "overflow",
+            "fluvial_scour"
+          ],
+          "mechanisms_never_loaded": [
+            "overflow",
+            "fluvial_scour"
+          ],
+          "p_annual_bep": {
+            "point": 6.946455662597709e-05,
+            "ci_low": 3.168011120595514e-05,
+            "ci_high": 0.000114463167460036,
+            "relative_half_width": 0.5958654332152115
+          },
+          "share_bep": {
+            "point": 1.0,
+            "ci_low": 1.0,
+            "ci_high": 1.0,
+            "relative_half_width": 0.0,
+            "degenerate": "identical in every replicate because overflow and fluvial_scour returns exactly zero at every simulated event, leaving only one loaded mechanism; this is a statement about coverage, not a zero-width confidence statement about a probability"
+          },
+          "p_annual_overflow": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_overflow": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null,
+            "degenerate": "identical in every replicate because overflow and fluvial_scour returns exactly zero at every simulated event, leaving only one loaded mechanism; this is a statement about coverage, not a zero-width confidence statement about a probability"
+          },
+          "p_annual_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null,
+            "degenerate": "identical in every replicate because overflow and fluvial_scour returns exactly zero at every simulated event, leaving only one loaded mechanism; this is a statement about coverage, not a zero-width confidence statement about a probability"
+          }
+        },
+        "+4K": {
+          "n_years": 5400,
+          "p_annual_system": {
+            "point": 0.0016186230078056277,
+            "ci_low": 0.0011651225410667311,
+            "ci_high": 0.0021154060440296326,
+            "relative_half_width": 0.29354689090055747
+          },
+          "mechanisms_present": [
+            "bep",
+            "overflow",
+            "fluvial_scour"
+          ],
+          "mechanisms_never_loaded": [
+            "fluvial_scour"
+          ],
+          "p_annual_bep": {
+            "point": 0.001606203714958804,
+            "ci_low": 0.0011626260468441173,
+            "ci_high": 0.0020916967293170452,
+            "relative_half_width": 0.28921321555303364
+          },
+          "share_bep": {
+            "point": 0.9858605863111919,
+            "ci_low": 0.9725764508856364,
+            "ci_high": 0.998828326942175,
+            "relative_half_width": 0.013314192909752928
+          },
+          "p_annual_overflow": {
+            "point": 2.3036501417792023e-05,
+            "ci_low": 1.4875780467046744e-06,
+            "ci_high": 5.147170087939367e-05,
+            "relative_half_width": 1.0848896263840704
+          },
+          "share_overflow": {
+            "point": 0.014139413688808168,
+            "ci_low": 0.001171673057824981,
+            "ci_high": 0.027423549114363618,
+            "relative_half_width": 0.9283226530573151
+          },
+          "p_annual_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "margin_bep_over_overflow": {
+            "point": 69.72429041322515,
+            "ci_low": 35.44465753318131,
+            "ci_high": 815.0552229478523,
+            "relative_half_width": 5.5906669024113596,
+            "n_replicates_undefined": 17
+          }
+        },
+        "climate_ratio": {
+          "point": 23.30142286117068,
+          "ci_low": 12.69266541861752,
+          "ci_high": 54.02181454256533,
+          "relative_half_width": 0.8868374555962933,
+          "n_replicates_undefined": 0,
+          "definition": "warming p_annual_system divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
+        },
+        "climate_ratio_piping_only": {
+          "point": 23.122636823368783,
+          "ci_low": 12.628021178555507,
+          "ci_high": 53.580478425977844,
+          "relative_half_width": 0.885549030593992,
+          "n_replicates_undefined": 0,
+          "definition": "warming p_annual_bep divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
+        }
+      }
+    },
+    "KP 62.0": {
+      "matrix/posterior": {
+        "historical": {
+          "n_years": 3000,
+          "p_annual_system": {
+            "point": 0.001006046005485643,
+            "ci_low": 0.0005330230946676522,
+            "ci_high": 0.0015647030626748505,
+            "relative_half_width": 0.5127399554204191
+          },
+          "mechanisms_present": [
+            "bep",
+            "overflow",
+            "fluvial_scour"
+          ],
+          "mechanisms_never_loaded": [
+            "fluvial_scour"
+          ],
+          "p_annual_bep": {
+            "point": 0.0008580186169895641,
+            "ci_low": 0.0004848956023562627,
+            "ci_high": 0.001281170047062147,
+            "relative_half_width": 0.4640193283332739
+          },
+          "share_bep": {
+            "point": 0.8115239173288071,
+            "ci_low": 0.6902902420099024,
+            "ci_high": 0.9795314119486352,
+            "relative_half_width": 0.17820865396721283
+          },
+          "p_annual_overflow": {
+            "point": 0.00019927445677934933,
+            "ci_low": 1.2871145725332569e-05,
+            "ci_high": 0.00045950075301614776,
+            "relative_half_width": 1.1206393797509
+          },
+          "share_overflow": {
+            "point": 0.18847608267119284,
+            "ci_low": 0.02046858805136472,
+            "ci_high": 0.30970975799009753,
+            "relative_half_width": 0.7673153161914192
+          },
+          "p_annual_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "margin_bep_over_overflow": {
+            "point": 4.305712989295073,
+            "ci_low": 2.228829549773896,
+            "ci_high": 47.85536501975823,
+            "relative_half_width": 5.298371673102886,
+            "n_replicates_undefined": 0
+          }
+        },
+        "+4K": {
+          "n_years": 5400,
+          "p_annual_system": {
+            "point": 0.012777595238792624,
+            "ci_low": 0.010190827746132168,
+            "ci_high": 0.015461127625315136,
+            "relative_half_width": 0.20623207186835918
+          },
+          "mechanisms_present": [
+            "bep",
+            "overflow",
+            "fluvial_scour"
+          ],
+          "mechanisms_never_loaded": [
+            "fluvial_scour"
+          ],
+          "p_annual_bep": {
+            "point": 0.008403164105895132,
+            "ci_low": 0.006864425926508586,
+            "ci_high": 0.010001934632830715,
+            "relative_half_width": 0.18668614981117945
+          },
+          "share_bep": {
+            "point": 0.500336129664227,
+            "ci_low": 0.4762563075430249,
+            "ci_high": 0.5324629925815907,
+            "relative_half_width": 0.056168924954795696
+          },
+          "p_annual_overflow": {
+            "point": 0.008391873485202778,
+            "ci_low": 0.006196492054739491,
+            "ci_high": 0.010661825863957985,
+            "relative_half_width": 0.26605106816088964
+          },
+          "share_overflow": {
+            "point": 0.49966387033577286,
+            "ci_low": 0.4675370074184093,
+            "ci_high": 0.5237436924569752,
+            "relative_half_width": 0.05624449592562606
+          },
+          "p_annual_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "margin_bep_over_overflow": {
+            "point": 1.0013454231301584,
+            "ci_low": 0.9093308700470066,
+            "ci_high": 1.1388681200575,
+            "relative_half_width": 0.11461442011337643,
+            "n_replicates_undefined": 0
+          }
+        },
+        "climate_ratio": {
+          "point": 12.70080609546734,
+          "ci_low": 7.712769963069567,
+          "ci_high": 24.765982128961387,
+          "relative_half_width": 0.6713436941603953,
+          "n_replicates_undefined": 0,
+          "definition": "warming p_annual_system divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
+        },
+        "climate_ratio_piping_only": {
+          "point": 9.79368505473505,
+          "ci_low": 6.244600254665252,
+          "ci_high": 17.661486071497006,
+          "relative_half_width": 0.5828697652122231,
+          "n_replicates_undefined": 0,
+          "definition": "warming p_annual_bep divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
+        }
+      },
+      "matrix/prior": {
+        "historical": {
+          "n_years": 3000,
+          "p_annual_system": {
+            "point": 0.001006046005485643,
+            "ci_low": 0.0005330230946676522,
+            "ci_high": 0.0015647030626748505,
+            "relative_half_width": 0.5127399554204191
+          },
+          "mechanisms_present": [
+            "bep",
+            "overflow",
+            "fluvial_scour"
+          ],
+          "mechanisms_never_loaded": [
+            "fluvial_scour"
+          ],
+          "p_annual_bep": {
+            "point": 0.0008580186169895641,
+            "ci_low": 0.0004848956023562627,
+            "ci_high": 0.001281170047062147,
+            "relative_half_width": 0.4640193283332739
+          },
+          "share_bep": {
+            "point": 0.8115239173288071,
+            "ci_low": 0.6902902420099024,
+            "ci_high": 0.9795314119486352,
+            "relative_half_width": 0.17820865396721283
+          },
+          "p_annual_overflow": {
+            "point": 0.00019927445677934933,
+            "ci_low": 1.2871145725332569e-05,
+            "ci_high": 0.00045950075301614776,
+            "relative_half_width": 1.1206393797509
+          },
+          "share_overflow": {
+            "point": 0.18847608267119284,
+            "ci_low": 0.02046858805136472,
+            "ci_high": 0.30970975799009753,
+            "relative_half_width": 0.7673153161914192
+          },
+          "p_annual_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "margin_bep_over_overflow": {
+            "point": 4.305712989295073,
+            "ci_low": 2.228829549773896,
+            "ci_high": 47.85536501975823,
+            "relative_half_width": 5.298371673102886,
+            "n_replicates_undefined": 0
+          }
+        },
+        "+4K": {
+          "n_years": 5400,
+          "p_annual_system": {
+            "point": 0.012777595238792624,
+            "ci_low": 0.010190827746132168,
+            "ci_high": 0.015461127625315136,
+            "relative_half_width": 0.20623207186835918
+          },
+          "mechanisms_present": [
+            "bep",
+            "overflow",
+            "fluvial_scour"
+          ],
+          "mechanisms_never_loaded": [
+            "fluvial_scour"
+          ],
+          "p_annual_bep": {
+            "point": 0.008403164105895132,
+            "ci_low": 0.006864425926508586,
+            "ci_high": 0.010001934632830715,
+            "relative_half_width": 0.18668614981117945
+          },
+          "share_bep": {
+            "point": 0.500336129664227,
+            "ci_low": 0.4762563075430249,
+            "ci_high": 0.5324629925815907,
+            "relative_half_width": 0.056168924954795696
+          },
+          "p_annual_overflow": {
+            "point": 0.008391873485202778,
+            "ci_low": 0.006196492054739491,
+            "ci_high": 0.010661825863957985,
+            "relative_half_width": 0.26605106816088964
+          },
+          "share_overflow": {
+            "point": 0.49966387033577286,
+            "ci_low": 0.4675370074184093,
+            "ci_high": 0.5237436924569752,
+            "relative_half_width": 0.05624449592562606
+          },
+          "p_annual_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "margin_bep_over_overflow": {
+            "point": 1.0013454231301584,
+            "ci_low": 0.9093308700470066,
+            "ci_high": 1.1388681200575,
+            "relative_half_width": 0.11461442011337643,
+            "n_replicates_undefined": 0
+          }
+        },
+        "climate_ratio": {
+          "point": 12.70080609546734,
+          "ci_low": 7.712769963069567,
+          "ci_high": 24.765982128961387,
+          "relative_half_width": 0.6713436941603953,
+          "n_replicates_undefined": 0,
+          "definition": "warming p_annual_system divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
+        },
+        "climate_ratio_piping_only": {
+          "point": 9.79368505473505,
+          "ci_low": 6.244600254665252,
+          "ci_high": 17.661486071497006,
+          "relative_half_width": 0.5828697652122231,
+          "n_replicates_undefined": 0,
+          "definition": "warming p_annual_bep divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
+        }
+      },
+      "bulk/posterior": {
+        "historical": {
+          "n_years": 3000,
+          "p_annual_system": {
+            "point": 0.00019928757694662766,
+            "ci_low": 1.2871150671160035e-05,
+            "ci_high": 0.00045953139014716057,
+            "relative_half_width": 1.1206424562922535
+          },
+          "mechanisms_present": [
+            "bep",
+            "overflow",
+            "fluvial_scour"
+          ],
+          "mechanisms_never_loaded": [
+            "fluvial_scour"
+          ],
+          "p_annual_bep": {
+            "point": 1.6462677030194616e-08,
+            "ci_low": 2.6072386432011523e-12,
+            "ci_high": 3.772499790692509e-08,
+            "relative_half_width": 1.145694305947152
+          },
+          "share_bep": {
+            "point": 8.260625760120466e-05,
+            "ci_low": 1.829426638091921e-07,
+            "ci_high": 0.00010514218547450545,
+            "relative_half_width": 0.6352983772573522
+          },
+          "p_annual_overflow": {
+            "point": 0.00019927445677934933,
+            "ci_low": 1.2871145725332569e-05,
+            "ci_high": 0.00045950075301614776,
+            "relative_half_width": 1.1206393797509
+          },
+          "share_overflow": {
+            "point": 0.9999173937423989,
+            "ci_low": 0.9998948578145256,
+            "ci_high": 0.9999998170573361,
+            "relative_half_width": 5.248395690851906e-05
+          },
+          "p_annual_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "margin_bep_over_overflow": {
+            "point": 8.261308195873417e-05,
+            "ci_low": 1.8294269727721738e-07,
+            "ci_high": 0.00010515324151615902,
+            "relative_half_width": 0.6353128120272478,
+            "n_replicates_undefined": 0
+          }
+        },
+        "+4K": {
+          "n_years": 5400,
+          "p_annual_system": {
+            "point": 0.008392008057548622,
+            "ci_low": 0.006196596486238806,
+            "ci_high": 0.010661994863381994,
+            "relative_half_width": 0.266050648815009
+          },
+          "mechanisms_present": [
+            "bep",
+            "overflow",
+            "fluvial_scour"
+          ],
+          "mechanisms_never_loaded": [
+            "fluvial_scour"
+          ],
+          "p_annual_bep": {
+            "point": 1.542227589756329e-05,
+            "ci_low": 6.732906444446372e-06,
+            "ci_high": 2.5957771833234643e-05,
+            "relative_half_width": 0.6232823714373372
+          },
+          "share_bep": {
+            "point": 0.001834391977610745,
+            "ci_low": 0.0009071383045711984,
+            "ci_high": 0.002835528678839633,
+            "relative_half_width": 0.5256211316351591
+          },
+          "p_annual_overflow": {
+            "point": 0.008391873485202778,
+            "ci_low": 0.006196492054739491,
+            "ci_high": 0.010661825863957985,
+            "relative_half_width": 0.26605106816088964
+          },
+          "share_overflow": {
+            "point": 0.9981656080223893,
+            "ci_low": 0.9971644713211604,
+            "ci_high": 0.9990928616954288,
+            "relative_half_width": 0.0009659671495239202
+          },
+          "p_annual_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "margin_bep_over_overflow": {
+            "point": 0.0018377631556001264,
+            "ci_low": 0.0009079619516595886,
+            "ci_high": 0.0028435917648421244,
+            "relative_half_width": 0.5266265697198753,
+            "n_replicates_undefined": 0
+          }
+        },
+        "climate_ratio": {
+          "point": 42.11004110806231,
+          "ci_low": 17.450747623895758,
+          "ci_high": 646.2209882916388,
+          "relative_half_width": 7.465799416512086,
+          "n_replicates_undefined": 0,
+          "definition": "warming p_annual_system divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
+        },
+        "climate_ratio_piping_only": {
+          "point": 936.8024331205003,
+          "ci_low": 292.6277468671482,
+          "ci_high": 3114723.82749792,
+          "relative_half_width": 1662.2668182963855,
+          "n_replicates_undefined": 171,
+          "definition": "warming p_annual_bep divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
+        }
+      },
+      "bulk/prior": {
+        "historical": {
+          "n_years": 3000,
+          "p_annual_system": {
+            "point": 0.00019928757694662766,
+            "ci_low": 1.2871150671160035e-05,
+            "ci_high": 0.00045953139014716057,
+            "relative_half_width": 1.1206424562922535
+          },
+          "mechanisms_present": [
+            "bep",
+            "overflow",
+            "fluvial_scour"
+          ],
+          "mechanisms_never_loaded": [
+            "fluvial_scour"
+          ],
+          "p_annual_bep": {
+            "point": 1.6462677030194616e-08,
+            "ci_low": 2.6072386432011523e-12,
+            "ci_high": 3.772499790692509e-08,
+            "relative_half_width": 1.145694305947152
+          },
+          "share_bep": {
+            "point": 8.260625760120466e-05,
+            "ci_low": 1.829426638091921e-07,
+            "ci_high": 0.00010514218547450545,
+            "relative_half_width": 0.6352983772573522
+          },
+          "p_annual_overflow": {
+            "point": 0.00019927445677934933,
+            "ci_low": 1.2871145725332569e-05,
+            "ci_high": 0.00045950075301614776,
+            "relative_half_width": 1.1206393797509
+          },
+          "share_overflow": {
+            "point": 0.9999173937423989,
+            "ci_low": 0.9998948578145256,
+            "ci_high": 0.9999998170573361,
+            "relative_half_width": 5.248395690851906e-05
+          },
+          "p_annual_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "margin_bep_over_overflow": {
+            "point": 8.261308195873417e-05,
+            "ci_low": 1.8294269727721738e-07,
+            "ci_high": 0.00010515324151615902,
+            "relative_half_width": 0.6353128120272478,
+            "n_replicates_undefined": 0
+          }
+        },
+        "+4K": {
+          "n_years": 5400,
+          "p_annual_system": {
+            "point": 0.008392008057548622,
+            "ci_low": 0.006196596486238806,
+            "ci_high": 0.010661994863381994,
+            "relative_half_width": 0.266050648815009
+          },
+          "mechanisms_present": [
+            "bep",
+            "overflow",
+            "fluvial_scour"
+          ],
+          "mechanisms_never_loaded": [
+            "fluvial_scour"
+          ],
+          "p_annual_bep": {
+            "point": 1.542227589756329e-05,
+            "ci_low": 6.732906444446372e-06,
+            "ci_high": 2.5957771833234643e-05,
+            "relative_half_width": 0.6232823714373372
+          },
+          "share_bep": {
+            "point": 0.001834391977610745,
+            "ci_low": 0.0009071383045711984,
+            "ci_high": 0.002835528678839633,
+            "relative_half_width": 0.5256211316351591
+          },
+          "p_annual_overflow": {
+            "point": 0.008391873485202778,
+            "ci_low": 0.006196492054739491,
+            "ci_high": 0.010661825863957985,
+            "relative_half_width": 0.26605106816088964
+          },
+          "share_overflow": {
+            "point": 0.9981656080223893,
+            "ci_low": 0.9971644713211604,
+            "ci_high": 0.9990928616954288,
+            "relative_half_width": 0.0009659671495239202
+          },
+          "p_annual_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "share_fluvial_scour": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "relative_half_width": null
+          },
+          "margin_bep_over_overflow": {
+            "point": 0.0018377631556001264,
+            "ci_low": 0.0009079619516595886,
+            "ci_high": 0.0028435917648421244,
+            "relative_half_width": 0.5266265697198753,
+            "n_replicates_undefined": 0
+          }
+        },
+        "climate_ratio": {
+          "point": 42.11004110806231,
+          "ci_low": 17.450747623895758,
+          "ci_high": 646.2209882916388,
+          "relative_half_width": 7.465799416512086,
+          "n_replicates_undefined": 0,
+          "definition": "warming p_annual_system divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
+        },
+        "climate_ratio_piping_only": {
+          "point": 936.8024331205003,
+          "ci_low": 292.6277468671482,
+          "ci_high": 3114723.82749792,
+          "relative_half_width": 1662.2668182963855,
+          "n_replicates_undefined": 171,
+          "definition": "warming p_annual_bep divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
+        }
+      }
+    }
+  },
+  "section_aggregates": {
+    "KP62.4": {
+      "river": "Tokachi",
+      "representative_kp": 62.4,
+      "historical": {
+        "point": 0.0010742793413435375,
+        "ci_low": 0.0005497116225410845,
+        "ci_high": 0.0017016609218667492,
+        "relative_half_width": 0.5361497959576278
+      },
+      "+4K": {
+        "point": 0.01353453183442802,
+        "ci_low": 0.010796055836099692,
+        "ci_high": 0.016354538161476688,
+        "relative_half_width": 0.20534446234918113
+      },
+      "climate_ratio": {
+        "point": 12.598708095327593,
+        "ci_low": 7.508743561605906,
+        "ci_high": 25.311392848535164,
+        "relative_half_width": 0.7065267784691202,
+        "n_replicates_undefined": 0
+      }
+    },
+    "KP61.4": {
+      "river": "Tokachi",
+      "representative_kp": 61.4,
+      "historical": {
+        "point": 3.719040673514298e-07,
+        "ci_low": 0.0,
+        "ci_high": 1.0127987772824717e-06,
+        "relative_half_width": 1.3616398235373828
+      },
+      "+4K": {
+        "point": 0.0023676053028101034,
+        "ci_low": 0.0014032297539351751,
+        "ci_high": 0.003440592925872196,
+        "relative_half_width": 0.43025819580630276
+      },
+      "climate_ratio": {
+        "point": 6366.172114414766,
+        "ci_low": 2017.6016932432153,
+        "ci_high": 62567.4082532048,
+        "relative_half_width": 4.755589816905841,
+        "n_replicates_undefined": 520
+      }
+    },
+    "KP59.6": {
+      "river": "Tokachi",
+      "representative_kp": 59.6,
+      "historical": {
+        "point": 0.0018208940645852772,
+        "ci_low": 0.0011436106753570832,
+        "ci_high": 0.002573776089967234,
+        "relative_half_width": 0.3927096700531786
+      },
+      "+4K": {
+        "point": 0.014311238525327001,
+        "ci_low": 0.012090285229159552,
+        "ci_high": 0.01659765068905973,
+        "relative_half_width": 0.15747642846995277
+      },
+      "climate_ratio": {
+        "point": 7.859456957803032,
+        "ci_low": 5.3484435332652,
+        "ci_high": 12.808597636147908,
+        "relative_half_width": 0.47459729997478467,
+        "n_replicates_undefined": 0
+      }
+    },
+    "KP58.0": {
+      "river": "Tokachi",
+      "representative_kp": 58.0,
+      "historical": {
+        "point": 0.007479886717939812,
+        "ci_low": 0.005440483066777793,
+        "ci_high": 0.009724010238686293,
+        "relative_half_width": 0.2863363666748361
+      },
+      "+4K": {
+        "point": 0.04104191210250174,
+        "ci_low": 0.036664844465733655,
+        "ci_high": 0.0455055618939126,
+        "relative_half_width": 0.10770352762926035
+      },
+      "climate_ratio": {
+        "point": 5.486969743013158,
+        "ci_low": 4.11542403479713,
+        "ci_high": 7.67811296191545,
+        "relative_half_width": 0.3246499519753026,
+        "n_replicates_undefined": 0
+      }
+    },
+    "KP56.4": {
+      "river": "Tokachi",
+      "representative_kp": 56.4,
+      "historical": {
+        "point": 1.6749205401646475e-05,
+        "ci_low": 4.9037417713362816e-06,
+        "ci_high": 3.2327974786939336e-05,
+        "relative_half_width": 0.8186726581341944
+      },
+      "+4K": {
+        "point": 0.003765865133305215,
+        "ci_low": 0.0024868236450032288,
+        "ci_high": 0.005099903410094892,
+        "relative_half_width": 0.3469428235734802
+      },
+      "climate_ratio": {
+        "point": 224.83843519735117,
+        "ci_low": 103.554083582848,
+        "ci_high": 789.3666470049969,
+        "relative_half_width": 1.525123057408266,
+        "n_replicates_undefined": 0
+      }
+    },
+    "KP7.0": {
+      "river": "Satsunai",
+      "representative_kp": 7.0,
+      "historical": {
+        "point": 1.1436064057936982e-08,
+        "ci_low": 0.0,
+        "ci_high": 3.1627889839593534e-08,
+        "relative_half_width": 1.3828136008753291
+      },
+      "+4K": {
+        "point": 0.0008955862496243866,
+        "ci_low": 0.00035809685218146593,
+        "ci_high": 0.001563833297687895,
+        "relative_half_width": 0.673154844668574
+      },
+      "climate_ratio": {
+        "point": 78312.45479976322,
+        "ci_low": 18531.084099995263,
+        "ci_high": 461043.8917825615,
+        "relative_half_width": 2.825302876879708,
+        "n_replicates_undefined": 1304
+      }
+    },
+    "KP6.4": {
+      "river": "Satsunai",
+      "representative_kp": 6.4,
+      "historical": {
+        "point": 1.8910027347467848e-07,
+        "ci_low": 0.0,
+        "ci_high": 5.47495267917691e-07,
+        "relative_half_width": 1.44763214208414
+      },
+      "+4K": {
+        "point": 0.001524667398919725,
+        "ci_low": 0.000770056081106744,
+        "ci_high": 0.0023990341656631425,
+        "relative_half_width": 0.5342076854632627
+      },
+      "climate_ratio": {
+        "point": 8062.745605303875,
+        "ci_low": 2038.5275545728393,
+        "ci_high": 99400.28883497843,
+        "relative_half_width": 6.03775475790521,
+        "n_replicates_undefined": 1304
+      }
+    },
+    "KP5.2": {
+      "river": "Satsunai",
+      "representative_kp": 5.2,
+      "historical": {
+        "point": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.0,
+        "relative_half_width": null
+      },
+      "+4K": {
+        "point": 0.0002187559407207677,
+        "ci_low": 3.611829664949052e-05,
+        "ci_high": 0.0005093280592787172,
+        "relative_half_width": 1.0815929411335576
+      }
+    },
+    "KP4.2": {
+      "river": "Satsunai",
+      "representative_kp": 4.2,
+      "historical": {
+        "point": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.0,
+        "relative_half_width": null
+      },
+      "+4K": {
+        "point": 1.1071155592858941e-05,
+        "ci_low": 5.795373582412317e-07,
+        "ci_high": 3.0702057731922384e-05,
+        "relative_half_width": 1.3604054301752666
+      }
+    }
+  },
+  "preregistration_outcome": {
+    "Q1": {
+      "question": "are the four per-section climate ratios resolvably different from one another",
+      "rule": "a pair resolves iff the 95 % percentile interval of the paired bootstrap difference of ratios excludes zero",
+      "pairs": {
+        "KP 57.4 - KP 58.8": {
+          "point": 7.144185142583879,
+          "ci_low": 2.5799025830106546,
+          "ci_high": 21.12363242407933,
+          "resolved": true,
+          "n_replicates_paired": 10000
+        },
+        "KP 57.4 - KP 60.0": {
+          "point": 4.791129455046467,
+          "ci_low": 1.5374370819329666,
+          "ci_high": 15.921126725244926,
+          "resolved": true,
+          "n_replicates_paired": 10000
+        },
+        "KP 57.4 - KP 62.0": {
+          "point": -0.04242069756263689,
+          "ci_low": -0.998637930066415,
+          "ci_high": 3.82727213762224,
+          "resolved": false,
+          "n_replicates_paired": 10000
+        },
+        "KP 58.8 - KP 60.0": {
+          "point": -2.3530556875374122,
+          "ci_low": -5.44315592346891,
+          "ci_high": -0.9660710549447922,
+          "resolved": true,
+          "n_replicates_paired": 10000
+        },
+        "KP 58.8 - KP 62.0": {
+          "point": -7.186605840146516,
+          "ci_low": -17.684477452509174,
+          "ci_high": -3.035369857279653,
+          "resolved": true,
+          "n_replicates_paired": 10000
+        },
+        "KP 60.0 - KP 62.0": {
+          "point": -4.833550152609104,
+          "ci_low": -12.479533972204658,
+          "ci_high": -2.0132980206683837,
+          "resolved": true,
+          "n_replicates_paired": 10000
+        }
+      },
+      "n_resolved": 5,
+      "n_pairs": 6,
+      "verdict": "PARTIAL: 5 of 6 pairs resolve"
+    },
+    "Q2": {
+      "question": "is the KP 62.0 warming mechanism split resolvably distinguishable from a tie",
+      "rule_1": "not a tie iff the 95 % interval of the paired difference of the two mechanisms' annual contributions excludes zero",
+      "rule_2": "the three-decimal quotation is supported iff both endpoints of the 95 % interval of the piping share round to the same third decimal",
+      "difference_p_annual_bep_minus_overflow": {
+        "point": 1.1290620692354023e-05,
+        "ci_low": -0.0009232490384221733,
+        "ci_high": 0.0009074659609384515
+      },
+      "production_margin_bep_over_overflow": 1.0013454231301584,
+      "share_bep": {
+        "point": 0.500336129664227,
+        "ci_low": 0.4762563075430249,
+        "ci_high": 0.5324629925815907
+      },
+      "resolvably_not_a_tie": false,
+      "three_decimal_quotation_supported": false,
+      "verdict": "TIE: the split is not distinguishable from level"
+    },
+    "Q3": {
+      "question": "are the historical mechanism shares (81 to 100 per cent) resolvable as a lead",
+      "rule_1": "the lead is resolved at a section iff the lower endpoint of the 95 % interval of the piping share exceeds 0.5",
+      "rule_3": "a section whose competing branch is exactly zero at every event is classified as structurally degenerate, not as a resolved share",
+      "sections": {
+        "KP 57.4": {
+          "share_bep": 1.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "lead_resolved": true,
+          "structurally_degenerate": true,
+          "two_decimal_quotation_supported": true
+        },
+        "KP 58.8": {
+          "share_bep": 0.9741019217609156,
+          "ci_low": 0.9678988877250565,
+          "ci_high": 0.9801544538755382,
+          "lead_resolved": true,
+          "structurally_degenerate": false,
+          "two_decimal_quotation_supported": false
+        },
+        "KP 60.0": {
+          "share_bep": 1.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "lead_resolved": true,
+          "structurally_degenerate": true,
+          "two_decimal_quotation_supported": true
+        },
+        "KP 62.0": {
+          "share_bep": 0.8115239173288071,
+          "ci_low": 0.6902902420099024,
+          "ci_high": 0.9795314119486352,
+          "lead_resolved": true,
+          "structurally_degenerate": false,
+          "two_decimal_quotation_supported": false
+        }
+      },
+      "n_resolved": 4,
+      "n_structurally_degenerate": 2,
+      "verdict": "YES: piping's lead resolves at all four sections"
+    }
+  },
+  "resampling_unit_sensitivity": {
+    "member": {
+      "historical": {
+        "n_blocks": 50,
+        "sections": {
+          "KP 57.4": {
+            "ci_low": 0.0003702986741623621,
+            "ci_high": 0.00121960832051333,
+            "relative_half_width": 0.5639877415928137
+          },
+          "KP 58.8": {
+            "ci_low": 0.00539754998228168,
+            "ci_high": 0.009717872434094582,
+            "relative_half_width": 0.29114497673264583
+          },
+          "KP 60.0": {
+            "ci_low": 0.0011362301288587744,
+            "ci_high": 0.0025845728106829507,
+            "relative_half_width": 0.4019189521436994
+          },
+          "KP 62.0": {
+            "ci_low": 0.0005521546813394719,
+            "ci_high": 0.0015563124969054645,
+            "relative_half_width": 0.4990615787402591
+          }
+        }
+      },
+      "+4K": {
+        "n_blocks": 90,
+        "sections": {
+          "KP 57.4": {
+            "ci_low": 0.007570722525681493,
+            "ci_high": 0.011590065152327234,
+            "relative_half_width": 0.2108532612929017
+          },
+          "KP 58.8": {
+            "ci_low": 0.036643299054028855,
+            "ci_high": 0.045299137685519957,
+            "relative_half_width": 0.10578394441889227
+          },
+          "KP 60.0": {
+            "ci_low": 0.01206610086977111,
+            "ci_high": 0.01637524633868766,
+            "relative_half_width": 0.15199700563221683
+          },
+          "KP 62.0": {
+            "ci_low": 0.010267214238337543,
+            "ci_high": 0.01536223763871487,
+            "relative_half_width": 0.199373329063864
+          }
+        }
+      }
+    },
+    "event": {
+      "historical": {
+        "n_blocks": 3000,
+        "sections": {
+          "KP 57.4": {
+            "ci_low": 0.00034702006848127785,
+            "ci_high": 0.0012463925932673292,
+            "relative_half_width": 0.5972322124021922
+          },
+          "KP 58.8": {
+            "ci_low": 0.005518287706963995,
+            "ci_high": 0.009507204750752724,
+            "relative_half_width": 0.26881168543681144
+          },
+          "KP 60.0": {
+            "ci_low": 0.0011503025997373836,
+            "ci_high": 0.002557065426164468,
+            "relative_half_width": 0.39038043151511626
+          },
+          "KP 62.0": {
+            "ci_low": 0.0005332287265656812,
+            "ci_high": 0.0015847986219551737,
+            "relative_half_width": 0.5226251531518552
+          }
+        }
+      },
+      "+4K": {
+        "n_blocks": 5400,
+        "sections": {
+          "KP 57.4": {
+            "ci_low": 0.007717304811263762,
+            "ci_high": 0.011481884494138086,
+            "relative_half_width": 0.19748848935366237
+          },
+          "KP 58.8": {
+            "ci_low": 0.03708858284393971,
+            "ci_high": 0.04485289067348726,
+            "relative_half_width": 0.09488844961872163
+          },
+          "KP 60.0": {
+            "ci_low": 0.012282715900769186,
+            "ci_high": 0.016183210423167,
+            "relative_half_width": 0.13758261171869776
+          },
+          "KP 62.0": {
+            "ci_low": 0.010439967504804498,
+            "ci_high": 0.015276715174060323,
+            "relative_half_width": 0.1892667430320346
+          }
+        }
+      }
+    },
+    "year": {
+      "historical": {
+        "n_blocks": 60,
+        "sections": {
+          "KP 57.4": {
+            "ci_low": 0.0003654392637415186,
+            "ci_high": 0.0012073383637939664,
+            "relative_half_width": 0.5590667362930055
+          },
+          "KP 58.8": {
+            "ci_low": 0.005422851783171493,
+            "ci_high": 0.009686172524087199,
+            "relative_half_width": 0.2873036519292342
+          },
+          "KP 60.0": {
+            "ci_low": 0.00115743868052901,
+            "ci_high": 0.0025285559295917266,
+            "relative_half_width": 0.38048868884769743
+          },
+          "KP 62.0": {
+            "ci_low": 0.0005520650105663655,
+            "ci_high": 0.001537498456485138,
+            "relative_half_width": 0.48975565756711087
+          }
+        }
+      },
+      "+4K": {
+        "n_blocks": 60,
+        "sections": {
+          "KP 57.4": {
+            "ci_low": 0.007490752695138817,
+            "ci_high": 0.011692905623773052,
+            "relative_half_width": 0.2204434236534522
+          },
+          "KP 58.8": {
+            "ci_low": 0.03594064562438136,
+            "ci_high": 0.046038376000985856,
+            "relative_half_width": 0.12340546010521919
+          },
+          "KP 60.0": {
+            "ci_low": 0.011901198658015416,
+            "ci_high": 0.01654065924489594,
+            "relative_half_width": 0.163648250457377
+          },
+          "KP 62.0": {
+            "ci_low": 0.010158864726936535,
+            "ci_high": 0.01558949308336197,
+            "relative_half_width": 0.21250588451644298
+          }
+        }
+      }
+    },
+    "sst": {
+      "+4K": {
+        "n_blocks": 6,
+        "sections": {
+          "KP 57.4": {
+            "ci_low": 0.006091684219147979,
+            "ci_high": 0.012760476259791742,
+            "relative_half_width": 0.34984241983554026
+          },
+          "KP 58.8": {
+            "ci_low": 0.030658181891250746,
+            "ci_high": 0.05114975085866122,
+            "relative_half_width": 0.2504296908699453
+          },
+          "KP 60.0": {
+            "ci_low": 0.009732239144760409,
+            "ci_high": 0.018397363421955373,
+            "relative_half_width": 0.3056459692681978
+          },
+          "KP 62.0": {
+            "ci_low": 0.008246571164113956,
+            "ci_high": 0.017134934313688177,
+            "relative_half_width": 0.34781048325076297
+          }
+        }
+      }
+    },
+    "reading": "member is the estimator; event is the naive independent-years alternative the production numbers implicitly assume; year is the crossed shared-forcing axis; sst is the six warming sea-surface patterns and is structural climate-model spread rather than hazard-sampling noise, reported because it is the largest measured grouping and never quoted as the sampling interval"
+  },
+  "elapsed_s": 40.9
+}

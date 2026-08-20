@@ -1020,6 +1020,30 @@ COMPANION_COMMANDS: dict[str, dict[str, Any]] = {
         ],
         "git_tracked": True,
     },
+    # RUN, not excluded. It consumes only artifacts this campaign itself
+    # produces -- the eight sweeps, the eight posteriors, rq4_annual.csv and the
+    # warm hazard cache the phase3 stage leaves behind -- so none of the
+    # missing-gitignored-arm grounds that exclude the other Phase 3 companions
+    # applies to it. Its gate 1 does restate G4's artifact, but unlike
+    # hwl_bias_resolution it does not re-assert G4's claim through G4's own
+    # function: it reproduces the published table from the persisted curves
+    # upward, which is the check that makes its intervals attributable to the
+    # production quantity. About 45 s, deterministic given its seed.
+    "annualisation_uncertainty_study": {
+        "argv": [
+            "scripts/annualisation_uncertainty_study.py",
+            "--out",
+            "results/production_campaign/companions/"
+            "annualisation-hazard-sampling-uncertainty.json",
+            "--out-dir",
+            "results/production_campaign/companions/annualisation_uncertainty",
+        ],
+        "outputs": [
+            "results/production_campaign/companions/"
+            "annualisation-hazard-sampling-uncertainty.json"
+        ],
+        "compare_to": "docs/decisions/annualisation-hazard-sampling-uncertainty.json",
+    },
 }
 
 #: Volatile keys that are ignored when comparing a companion's fresh record
@@ -1034,6 +1058,11 @@ VOLATILE_JSON_KEYS = frozenset(
         "timestamp",
         "campaign",
         "elapsed_s",
+        # Where a companion was told to write. The campaign runs several of
+        # them into results/production_campaign/companions/ and compares the
+        # result against the committed record, so a driver that records its own
+        # --out path would otherwise differ on nothing else.
+        "writes",
         # config_hash moves by construction in this campaign (the ADR-0037
         # length_effect keys, section 1). It is asserted directly by G0 and G1,
         # so re-failing every companion on it here would be double-counting a
@@ -1590,9 +1619,23 @@ FIGURE_DRIVERS: list[dict[str, Any]] = [
         "command": [PY, "scripts/phase3_figures.py"],
         "requires": ["results/system_integration/phase3/rq4_annual.csv"],
         "produces": ["phase3_*.png"],
+        # The RQ4 headline figure also depicts the committed hazard-sampling
+        # intervals (2026-08-20), so staleness in that record must redraw it
+        # too. The driver additionally refuses to draw if the record's point
+        # estimates have drifted from the live annual table, which is the gate
+        # an mtime comparison cannot make.
+        #
+        # This binds the entry's other five figures to a record they do not
+        # depict, so a bootstrap re-run marks all six stale. That is the safe
+        # direction (an unnecessary redraw, never a missed one) and it is the
+        # only correct shape here: splitting the RQ4 figure into its own entry
+        # would leave the ``phase3_*.png`` glob above sweeping it up as well,
+        # binding it to the wrong sources -- the trap recorded for the shared
+        # C_e glob on 2026-07-31. One command, one entry, one source set.
         "sources": [
             "results/system_integration/phase3/*.json",
             "results/system_integration/phase3/rq4_annual.csv",
+            "docs/decisions/annualisation-hazard-sampling-uncertainty.json",
         ],
     },
     {

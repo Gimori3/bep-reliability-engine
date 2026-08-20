@@ -26,6 +26,7 @@ and ``validate_event_based_surface.py``).
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 from pathlib import Path
 
@@ -36,6 +37,8 @@ import pandas as pd
 REPO = Path(__file__).resolve().parents[1]
 P3 = REPO / "results/system_integration/phase3"
 FIGS = REPO / "docs/figures"
+#: Committed 95 % hazard-sampling intervals for the RQ4 headline figure.
+INTERVALS = REPO / "docs/decisions/annualisation-hazard-sampling-uncertainty.json"
 
 # Reference palette (dataviz guide, validated set; light mode), fixed slots.
 MECH_COLORS = {
@@ -94,6 +97,58 @@ def _primary(df: pd.DataFrame) -> pd.DataFrame:
         & (df.lambda_ac_m == 250.0)
         & (df.surface_variant == "primary")
     ]
+
+
+def _hazard_intervals(df: pd.DataFrame) -> dict:
+    """The committed 95 % hazard-sampling intervals, checked against this table.
+
+    Written by ``scripts/annualisation_uncertainty_study.py``, which
+    block-bootstraps the annualisation over d4PDF ensemble members with the
+    fragility curves held fixed. Two properties matter here and both are
+    asserted rather than assumed, because the alternative is a figure that
+    silently loses its intervals or draws stale ones over fresh bars:
+
+    * the record is a **tracked** artifact, so its absence is a failure, never
+      a skip (``docs/conventions.md`` section 9.4);
+    * every point estimate it carries must equal the published value, exactly.
+
+    The comparison reads ``rq4_annual.csv`` again through the ``csv`` module
+    rather than reusing the DataFrame: ``pandas.read_csv`` does not round-trip
+    a float by default, and a staleness gate that fires on the reader's own
+    last three digits is worse than no gate at all.
+    """
+    if not INTERVALS.is_file():
+        raise FileNotFoundError(
+            f"{INTERVALS.relative_to(REPO).as_posix()} is missing. It is a "
+            "tracked artifact and the RQ4 headline figure draws its intervals "
+            "from it. Regenerate with "
+            "'python scripts/annualisation_uncertainty_study.py'."
+        )
+    payload = json.loads(INTERVALS.read_text(encoding="utf-8"))
+    arm = payload["scope"]["primary_arm"]
+    d70, source = arm.split("/")
+    with open(P3 / "rq4_annual.csv", encoding="utf-8", newline="") as handle:
+        for record in csv.DictReader(handle):
+            label = f"KP {float(record['kp']):.1f}"
+            if (
+                record["d70"] != d70
+                or record["bep_source"] != source
+                or record["lambda_ac_m"] != "250.0"
+                or record["surface_variant"] != "primary"
+                or label not in payload["sections"]
+            ):
+                continue
+            block = payload["sections"][label][arm][record["scenario"]]
+            if str(block["p_annual_system"]["point"]) != record["p_annual_system"]:
+                raise AssertionError(
+                    f"the hazard-sampling record is stale at {label} "
+                    f"{record['scenario']}: it carries "
+                    f"{block['p_annual_system']['point']!r} where the annual "
+                    f"table now has {record['p_annual_system']}. Drawing its "
+                    "intervals over these bars would be wrong. Re-run "
+                    "'python scripts/annualisation_uncertainty_study.py'."
+                )
+    return payload
 
 
 def fig_dominance_profile(df: pd.DataFrame) -> None:
@@ -309,7 +364,18 @@ def fig_rq4_four_sections(df: pd.DataFrame) -> None:
     geotechnically characterised sections, because the other 110 segments carry
     no BEP source and are surface-only lower bounds. This is therefore the
     figure that answers RQ4; ``phase3_climate_shift.png`` is reach context.
+
+    Both panels carry a 95 % hazard-sampling interval (2026-08-20). It is the
+    finite-ensemble spread of the peak-stage distribution with the fragility
+    curves held fixed, so it is **not** the total uncertainty, and the figure
+    says so in its own footnote rather than leaving the reader to assume
+    otherwise: the aquifer-conductivity range is far wider and is a separate
+    figure. The climate-ratio interval is formed inside each replicate, so it
+    is an interval on the ratio and not a quotient of two marginal intervals.
     """
+    intervals = _hazard_intervals(df)
+    arm = intervals["scope"]["primary_arm"]
+    recorded = intervals["sections"]
     base = _primary(df)
     bep = base[base.p_annual_bep.notna()].copy()
     bep["kp"] = bep.kp.astype(float)
@@ -327,6 +393,7 @@ def fig_rq4_four_sections(df: pd.DataFrame) -> None:
     ax = axes[0]
     x = np.arange(len(sections), dtype=float)
     width = 0.34
+    headroom = 0.0
     for offset, scenario, color in (
         (-width / 2, "historical", "#2a78d6"),
         (+width / 2, "+4K", "#e34948"),
@@ -334,6 +401,15 @@ def fig_rq4_four_sections(df: pd.DataFrame) -> None:
         rows = bep[bep.scenario == scenario].set_index("kp").loc[sections]
         total = rows.p_annual_system.to_numpy(float)
         bep_part = rows.p_annual_bep.to_numpy(float)
+        band = np.array(
+            [
+                [
+                    recorded[f"KP {kp:.1f}"][arm][scenario]["p_annual_system"][end]
+                    for kp in sections
+                ]
+                for end in ("ci_low", "ci_high")
+            ]
+        )
         ax.bar(
             x + offset,
             np.maximum(total, FLOOR),
@@ -351,16 +427,30 @@ def fig_rq4_four_sections(df: pd.DataFrame) -> None:
             lw=0,
             label=f"{scenario}: BEP contribution",
         )
-        for xi, value, share in zip(x + offset, total, rows.share_bep.to_numpy(float)):
+        ax.errorbar(
+            x + offset,
+            total,
+            yerr=np.abs(band - total),
+            fmt="none",
+            ecolor=INK_2,
+            elinewidth=1.1,
+            capsize=3.5,
+            capthick=1.1,
+            zorder=5,
+        )
+        for xi, value, top, share in zip(
+            x + offset, total, band[1], rows.share_bep.to_numpy(float)
+        ):
             ax.annotate(
                 f"{value:.1e}\nBEP {share:.0%}",
-                (xi, value),
+                (xi, top),
                 textcoords="offset points",
-                xytext=(0, 4),
+                xytext=(0, 5),
                 ha="center",
                 fontsize=8,
                 color=INK_2,
             )
+        headroom = max(headroom, float(band[1].max()))
     ax.set_yscale("log")
     ax.set_xticks(x, labels)
     ax.set_ylabel("annual system $P_f$ [1/yr]")
@@ -370,7 +460,16 @@ def fig_rq4_four_sections(df: pd.DataFrame) -> None:
         "primary surface curves",
         loc="left",
     )
-    ax.set_ylim(top=ax.get_ylim()[1] * 6.0)
+    ax.set_ylim(top=headroom * 12.0)
+    ax.plot(
+        [],
+        [],
+        color=INK_2,
+        lw=1.1,
+        marker="_",
+        markersize=7,
+        label="95 per cent flood-ensemble sampling interval",
+    )
     ax.legend(fontsize=8.5, ncol=2, loc="upper left")
     ax.grid(axis="x", visible=False)
 
@@ -379,14 +478,31 @@ def fig_rq4_four_sections(df: pd.DataFrame) -> None:
     hist = bep[bep.scenario == "historical"].set_index("kp").loc[sections]
     futu = bep[bep.scenario == "+4K"].set_index("kp").loc[sections]
     ratio = futu.p_annual_system.to_numpy(float) / hist.p_annual_system.to_numpy(float)
+    ratio_band = np.array(
+        [
+            [recorded[f"KP {kp:.1f}"][arm]["climate_ratio"][end] for kp in sections]
+            for end in ("ci_low", "ci_high")
+        ]
+    )
     colors = ["#2a78d6", "#1baf7a", "#eda100", "#008300"]
     ax2.bar(x, ratio, width=0.55, color=colors[: len(sections)], lw=0)
-    for xi, value in zip(x, ratio):
+    ax2.errorbar(
+        x,
+        ratio,
+        yerr=np.abs(ratio_band - ratio),
+        fmt="none",
+        ecolor=INK_2,
+        elinewidth=1.1,
+        capsize=3.5,
+        capthick=1.1,
+        zorder=5,
+    )
+    for xi, value, top in zip(x, ratio, ratio_band[1]):
         ax2.annotate(
             f"{value:.1f}x",
-            (xi, value),
+            (xi, top),
             textcoords="offset points",
-            xytext=(0, 4),
+            xytext=(0, 5),
             ha="center",
             fontsize=10,
             color=INK,
@@ -394,13 +510,25 @@ def fig_rq4_four_sections(df: pd.DataFrame) -> None:
     ax2.axhline(1.0, color=BASELINE, lw=1.2)
     ax2.set_xticks(x, labels)
     ax2.set_ylabel("+4K / historical annual system $P_f$")
-    ax2.set_ylim(0, max(ratio) * 1.25)
+    ax2.set_ylim(0, float(ratio_band[1].max()) * 1.18)
     ax2.set_title(
-        "Climate ratio per section\nthe governing section KP 58.8 carries the "
-        "highest absolute risk, not the highest ratio",
+        "Climate ratio per section, with its 95 per cent sampling interval\n"
+        "KP 58.8 carries the highest absolute risk and the lowest ratio; the "
+        "two outer sections are not distinguishable",
         loc="left",
     )
     ax2.grid(axis="x", visible=False)
+    fig.text(
+        0.5,
+        -0.045,
+        "Intervals are flood-ensemble sampling only: the fragility curves are "
+        "held fixed, so this is not the total uncertainty. The aquifer "
+        "conductivity range is far wider and does not cancel in the ratio.",
+        ha="center",
+        va="top",
+        fontsize=8.5,
+        color=INK_2,
+    )
     fig.savefig(FIGS / "phase3_rq4_four_sections.png", dpi=160, bbox_inches="tight")
     plt.close(fig)
 

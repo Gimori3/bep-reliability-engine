@@ -220,9 +220,20 @@ def test_run_but_not_matched_is_the_benign_direction() -> None:
 
     Pinned so the list is a recorded fact rather than an unexamined leftover:
     each of these is invoked by the stage but fails one half of the regex.
+
+    ``annualisation_uncertainty_study.py`` joined the list on 2026-08-20 and
+    fails the **assertion** half. Its load-bearing gate is a string-identity
+    comparison against ``rq4_annual.csv``, not a bit-identity comparison against
+    an array or a ``config_hash`` round trip, so none of the four assertion
+    patterns fires. It reaches the persisted sweeps only through the campaign's
+    own ``_bep_path``, so it does not compose a ``tokachi_kp`` stem either.
+    Neither absence was engineered around the regex and neither is worth
+    engineering around: the enumeration exists to catch a consumer that is
+    **neither run nor excluded**, and this one is run.
     """
     enumeration = PC.enumerate_companions()
     assert set(enumeration["run_but_not_matched_by_the_regex"]) == {
+        "scripts/annualisation_uncertainty_study.py",
         "scripts/assess_2011_2006_closure.py",
         "scripts/foreshore_exhaustion_study.py",
         "scripts/gsa_study.py",
