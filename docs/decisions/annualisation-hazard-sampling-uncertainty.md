@@ -781,3 +781,261 @@ Additional to the four of section 1.7, which are re-asserted unchanged.
    is the one already made; every interval in sections 2.2 to 2.7 must come out
    unchanged, which is what proves the extension added a quantity rather than
    perturbing the estimator.
+
+---
+
+## 4. Outcome, part two
+
+Executed 2026-08-20 by the same `scripts/annualisation_uncertainty_study.py`,
+R = 10,000, seed 20260820, the same multiplicity draw as part one. Evidence:
+the `stratified_attribution` block and the `Q4`, `Q5`, `Q4_compound` and
+`Q6_floor_sensitivity` entries of
+`docs/decisions/annualisation-hazard-sampling-uncertainty.json`. Section 3 was
+not touched after the numbers were seen.
+
+**The scope sentence at the top of this note applies to every number below.**
+
+### 4.1 Gates
+
+All six passed. Gates 0 to 3 are re-asserted **unchanged** by the same run:
+gate 1 reproduced **912 published rows**, 20 fields each, across all four
+250 m / primary arms; the 228 hazard-cache files and every file under
+`results/system_integration/phase3/` came out byte-unchanged.
+
+**Gate 4**, new: all 8 section-and-climate cells of `rq4_attribution.json`
+reproduced field for field through the production `stratified_annual_p_f`,
+by float equality with no tolerance, over the two conditional probabilities
+and the stratum size of both stratifications plus the year count, the two
+loading fractions and the median duration. Its 4a half asserts that the
+unresampled block estimator reproduces those conditional means; bit-identity is
+**not** asserted there and is not achievable, because the block-grouped sum
+reorders the addends `np.mean` adds pairwise. The bound is 1e-12 relative and
+the **worst measured deviation over every cell is 2.57e-16**, which is one unit
+in the last place.
+
+**Gate 5**, new: the random stream's state is unchanged across the stratified
+pass, so part one's draw is the one used. Checked directly as well: every key
+of the record outside the new blocks, including all four arms' section
+intervals, the nine section aggregates, Q1 to Q3 and the resampling-unit
+sensitivity, is **byte-for-byte identical to the committed part-one record**.
+The extension added a quantity; it moved nothing.
+
+### 4.2 Which cells clear the floor
+
+Applied mechanically, exactly as section 3.3 fixed it.
+
+| Stratifier | Scenario | Clears | Below the floor |
+|---|---|---|---|
+| duration | historical | KP 58.8 (46 blocks), KP 60.0 (43) | KP 62.0 (14), KP 57.4 (3) |
+| duration | +4K | all four (33, 90, 88, 72) | none |
+| compound | historical | KP 58.8 (23), KP 60.0 (20) | KP 62.0 (9), KP 57.4 (5) |
+| compound | +4K | all four (25, 71, 58, 53) | none |
+
+**The floor's own first requirement is verified rather than assumed:
+zero of the 10,000 replicates left any clearing stratum empty**, at every
+clearing cell of both stratifications and both climates, so no interval below
+was computed after discarding anything.
+
+**F2 did not bind.** It fired once, at KP 57.4 historical duration, where the
+single largest member block holds 33.3 % of a three-event stratum, and there F1
+had already failed on 3 blocks against 20. It excluded no cell F1 admitted, and
+the two 20.0 % cells (KP 57.4 and KP 62.0 compound, historically) sit exactly at
+the cap rather than above it. This is the ADR-0032 pattern: a pre-registered
+conservative guard that turns out not to be the binding one is a reportable
+outcome, not a wasted clause.
+
+### 4.3 The concentration factor
+
+Duration stratum, matrix / posterior / 250 m / primary, 95 % percentile.
+
+| Section | Scenario | Occupancy | Concentration factor |
+|---|---|---|---|
+| KP 57.4 | historical | 3 yr in 3 of 50 | **151, count-limited, no interval** |
+| KP 58.8 | historical | 152 yr in 46 of 50 | 153 [98, 252] |
+| KP 60.0 | historical | 105 yr in 43 of 50 | 378 [141, 1358] |
+| KP 62.0 | historical | 19 yr in 14 of 50 | **221, count-limited, no interval** |
+| KP 57.4 | +4K | 42 yr in 33 of 90 | 54 [39, 75] |
+| KP 58.8 | +4K | 727 yr in 90 of 90 | 64 [51, 82] |
+| KP 60.0 | +4K | 531 yr in 88 of 90 | 72 [54, 97] |
+| KP 62.0 | +4K | 186 yr in 72 of 90 | 35 [25, 50] |
+
+**Q4 historical: RANGE SUPPORTED.** Two cells clear, and their paired
+difference is **-225 [-1131, -9.3]**, which excludes zero, so the two endpoints
+are resolvably different from one another and the spread between them is a
+measured range rather than two point estimates read as though they were.
+
+**Q4 +4K: the range holds, the ordering inside it does not.** All four clear;
+the endpoint pair KP 60.0 against KP 62.0 is **+36 [+17, +61]** and resolves, as
+do KP 57.4 against KP 62.0 and KP 58.8 against KP 62.0. The three pairs that do
+not resolve are the ones among KP 57.4, KP 58.8 and KP 60.0, whose factors of
+54, 64 and 72 are not distinguishable from one another. The defensible warming
+statement is the range 35 to 72 and the single ordering claim that KP 62.0 is
+the lowest of the four; not a ranking of the other three.
+
+**Rule 3: not one of the eight values supports the precision the table prints.**
+The intervals are 24 % to 161 % of their own point in relative half-width. At
+KP 58.8 historically "153" is a value between 98 and 252; at KP 60.0 "378" is a
+value between 141 and 1358, uncertain by an order of magnitude. The
+concentration factors are one-significant-figure quantities, and the KP 60.0
+historical one is barely that.
+
+### 4.4 The share of the annual total from long-duration years
+
+| Section | Scenario | Share | 95 % interval |
+|---|---|---|---|
+| KP 57.4 | historical | 13 % | **count-limited, no interval** |
+| KP 58.8 | historical | 89 % | [84, 93] |
+| KP 60.0 | historical | 93 % | [83, 98] |
+| KP 62.0 | historical | 59 % | **count-limited, no interval** |
+| KP 57.4 | +4K | 30 % | [21, 39] |
+| KP 58.8 | +4K | 91 % | [89, 93] |
+| KP 60.0 | +4K | 89 % | [85, 92] |
+| KP 62.0 | +4K | 56 % | [47, 65] |
+
+**Q5 historical: COLLAPSED, and this is the finding.** The two cells that clear
+are exactly the pair the chapter quotes as "89 and 93 per cent", and their
+paired difference is **-0.041 [-0.101, +0.043]**, which contains zero. **The two
+shares are not distinguishable from one another.** They are one number, about
+90 per cent, at both sections; printing them as two invites a reader to see a
+difference between KP 58.8 and KP 60.0 that this ensemble cannot resolve. Rule
+3 fails as well: neither endpoint pair rounds to its printed whole percentage.
+
+**Q5 +4K:** five of the six pairs resolve, including the endpoint pair, so the
+warming range 30 to 91 per cent stands. The one pair that does not is again
+KP 58.8 against KP 60.0, at **+0.022 [-0.005, +0.052]**. Across both climates,
+therefore, the KP 58.8 and KP 60.0 shares are never distinguishable from each
+other, which is a consistent property of the pair rather than a historical
+accident.
+
+### 4.5 The two count-limited cells, and the one comparison that is permitted
+
+**KP 57.4 historical** fails both criteria: 3 simulated years in 3 of the 50
+ensemble members, with one of them holding a third of the stratum. **KP 62.0
+historical** fails F1 alone: 19 years in 14 of 50. Neither carries an interval,
+a half-width or a resolution verdict, per section 3.4.
+
+The one comparison section 3.4 permits, because it costs nothing, is where each
+count-limited point falls relative to the clearing cells' intervals. It runs in
+opposite directions for the two quantities, and both directions are stated.
+
+* **Concentration factor.** KP 57.4's 151 and KP 62.0's 221 both fall **inside
+  both** clearing intervals, [98, 252] and [141, 1358]. Nothing about the
+  measured cells suggests the withheld ones behave differently; they are
+  unmeasured, not anomalous.
+* **Share.** KP 57.4's 13 per cent and KP 62.0's 59 per cent fall **outside
+  both** clearing intervals, [84, 93] and [83, 98]. That is an observation about
+  where an unmeasured value sits and **not** a measurement that the sections
+  differ, because these two cells have no interval with which to make one.
+
+### 4.6 Q6, the floor sensitivity, and what it settles
+
+Membership of the clearing set at three floors, with the point-estimate range
+that follows. No interval was computed for a cell the pre-registered floor
+excludes; section 3.4 forbids printing one and a declared sensitivity does not
+suspend a rule fixed in advance.
+
+| Floor | duration / historical | compound / historical |
+|---|---|---|
+| 10 blocks | KP 58.8, KP 60.0, KP 62.0, range **153 to 378** | KP 58.8, KP 60.0, range 4 to 7 |
+| **20 blocks (pre-registered)** | KP 58.8, KP 60.0, range **153 to 378** | KP 58.8, KP 60.0, range 4 to 7 |
+| 30 blocks | KP 58.8, KP 60.0, range **153 to 378** | none, no range may be quoted |
+
+**The headline verdict does not depend on the floor.** Halving it to 10 blocks
+admits KP 62.0, and the range does not move, because KP 62.0's 221 lies inside
+153 to 378 rather than outside it. Raising it to 30 changes nothing at all.
+Whatever a reader thinks of 20 as a number, the duration range answer is the
+same across the whole span, which is the strongest available answer to the
+objection that section 3.3 could have been tuned after the counts were seen.
+
+**The compound statement is a different matter, and is genuinely
+floor-sensitive**: at 30 blocks no historical cell clears and no range may be
+quoted at all. Where the compound stratification is discussed, the floor value
+is load-bearing and should be named.
+
+### 4.7 The compound stratification, beyond the question that was asked
+
+Section 3.3 fixed the floor for **every** stratified entry of the table, and
+having fixed it, applying it to the compound rows as well is what "apply the
+rule mechanically" means. The result is recorded here rather than left for a
+later session, because the compound range carries the same defect as the
+duration one in a sharper form.
+
+| Section | Scenario | Occupancy | Compound concentration factor |
+|---|---|---|---|
+| KP 57.4 | historical | 5 yr in 5 of 50 | **91, count-limited, no interval** |
+| KP 58.8 | historical | 35 yr in 23 of 50 | 3.7 [0.3, 9.3] |
+| KP 60.0 | historical | 27 yr in 20 of 50 | 6.5 [0.1, 18.4] |
+| KP 62.0 | historical | 10 yr in 9 of 50 | **17, count-limited, no interval** |
+| KP 57.4 | +4K | 29 yr in 25 of 90 | 22 [10, 40] |
+| KP 58.8 | +4K | 131 yr in 71 of 90 | 1.9 [1.1, 2.8] |
+| KP 60.0 | +4K | 101 yr in 58 of 90 | 1.6 [0.6, 2.9] |
+| KP 62.0 | +4K | 72 yr in 53 of 90 | 5.5 [2.0, 10.6] |
+
+Three things follow, and the third is the one that matters for the argument the
+chapter makes.
+
+* **The upper endpoint of "3.7 to 91 historically" is the 5-year cell.** The 91
+  is KP 57.4, 5 simulated years in 5 of 50 members, below the floor. This is the
+  same defect class as the "81" in part one's "81 to 100 per cent" range and as
+  the "151" in the duration range, and in this case it is the worse of the two
+  endpoints: the range is more than an order of magnitude wide and its wide end
+  is the least populated cell in the whole table.
+* **The two clearing historical cells do not resolve from one another**,
+  at **-2.9 [-9.7, +0.9]**, so the historical compound statement collapses to a
+  single unresolved value.
+* **Neither clearing historical interval excludes 1.** KP 58.8 is 3.7 [0.3, 9.3]
+  and KP 60.0 is 6.5 [0.1, 18.4]. Historically, the compound stratification does
+  not resolve *any* concentration of risk at either well-populated section.
+  Under warming it does at three of the four, and only weakly. **This
+  strengthens the chapter's own conclusion rather than weakening it**: the
+  argument there is that compound clustering is real but discriminates the
+  dangerous years less sharply than duration does, and the sharper version is
+  that historically the duration stratification resolves a concentration of
+  about 150 and 380 while the compound stratification at the same two sections
+  cannot be told apart from no concentration at all.
+
+### 4.8 The defensible form of the headline
+
+The range **151 to 378** is quoted in the Summary, in Chapter 7 twice, in
+Chapter 8 twice and in Chapter 9 four times. Its lower endpoint is the 3-year,
+3-member cell.
+
+**What the sections clearing the floor support** is the range **about 150 to
+about 380**, carried by KP 58.8 and KP 60.0, with 95 % flood-ensemble sampling
+intervals of 98 to 252 and 141 to 1358, the two being resolvably different from
+one another. The printed three-figure values 153 and 378 are not supported and
+should be rounded.
+
+**How the count-limited sections should be named alongside it**, never folded
+into it: KP 62.0 at 221 on 19 simulated years in 14 of the 50 ensemble members,
+and KP 57.4 at 151 on 3 years in 3 members, both without an interval. That both
+happen to fall inside the measured range may be said as a consistency
+observation, and the fact that this is why the numerical endpoints barely move
+should be stated rather than relied on silently.
+
+The recommended wording is in the thesis handoff at
+`msc-thesis/scratch/BOOTSTRAP_HANDOFF.md`, section "Part two". The change to the
+range's arithmetic is almost nothing, 151 becoming about 150. **The change to
+what supports it is the entire point**: the endpoint stops resting on three
+simulated years in three ensemble members, and starts resting on the pair of
+sections the chapter itself already identifies as the well-populated one.
+
+### 4.9 What this still does not reach
+
+Section 2.7's refusal was too broad but it was not empty, and what survives of
+it is recorded here.
+
+* **KP 57.4's long-duration stratum is not rescued by anything in part two.**
+  Three years in three members is below the floor by an order of magnitude and
+  under F2 as well. The chapter should keep printing the count exactly as it
+  does.
+* **These are hazard-sampling intervals only.** The fragility curves are held
+  fixed inside every one of them. The conductivity bracket at the same sections
+  spans four orders of magnitude and does not cancel; a stratified interval of
+  98 to 252 sits inside that bracket, not beside it.
+* **Nothing here re-opens the loading strata themselves.** The duration
+  stratifier is `hours_above_datum > 24` on the production datum, and the
+  framework's shape invariance means peak magnitude and duration are not
+  separable inputs to the fragility, which Chapter 7 already states as a
+  structural qualification on the whole attribution. An interval on a stratified
+  mean does not touch that.

@@ -85,6 +85,7 @@ import _figstyle as figstyle  # noqa: E402
 from system_integration.annualize import (  # noqa: E402
     _curve_interpolators,
     annualize,
+    stratified_annual_p_f,
 )
 from system_integration.bep_input import load_bep_curve  # noqa: E402
 from system_integration.hazard import load_reach_hazard  # noqa: E402
@@ -101,6 +102,9 @@ DEFAULT_OUT_DIR = REPO_ROOT / "results" / "sensitivity" / "annualisation_uncerta
 NOTE = "docs/decisions/annualisation-hazard-sampling-uncertainty.md"
 PRODUCTION_TABLE = (
     REPO_ROOT / "results" / "system_integration" / "phase3" / "rq4_annual.csv"
+)
+ATTRIBUTION_TABLE = (
+    REPO_ROOT / "results" / "system_integration" / "phase3" / "rq4_attribution.json"
 )
 PHASE3_DIR = REPO_ROOT / "results" / "system_integration" / "phase3"
 
@@ -133,6 +137,60 @@ MECHANISMS: tuple[str, ...] = ("bep", "overflow", "fluvial_scour")
 #: three are declared sensitivities on the choice of resampling unit and are
 #: never quoted as the hazard-sampling interval.
 RESAMPLING_UNITS: tuple[str, ...] = ("member", "event", "year", "sst")
+
+#: Pre-registration section 3.3, fixed 2026-08-20 and committed in aeeb918
+#: BEFORE this file carried a line of stratified code. The unit is the MEMBER
+#: BLOCK, not the simulated year: a stratum's information is carried by the
+#: blocks that hold at least one of its events.
+#:
+#: F1, occupancy: at least this many carrying blocks. Twenty is where the
+#: probability of a replicate containing none of them, about e^-m, reaches
+#: 2.1e-9, so no replicate is ever discarded, AND where one block's leverage
+#: 1/m reaches the project's standing 5 % Monte Carlo tolerance (ADR-0031,
+#: ADR-0032).
+STRATUM_BLOCK_FLOOR = 20
+#: F2, concentration: no single block may hold more than this share of the
+#: stratum. F1 bounds the AVERAGE block weight; an average hides concentration.
+#: Expected not to bind; whether it did is reported either way.
+STRATUM_MAX_BLOCK_SHARE = 0.20
+#: Section 3.6 Q6. The verdict is additionally scored at these floors, reported
+#: and never used to choose. Scored as the MEMBERSHIP of the clearing set, not
+#: as intervals for cells the pre-registered floor excludes: section 3.4 forbids
+#: printing one below the floor, and a sensitivity is not an exemption from it.
+FLOOR_SENSITIVITY: tuple[int, ...] = (10, 30)
+
+#: The two stratifications of Table ``tab: rq4 attribution``. The record keys
+#: mirror ``rq4_attribution.json`` so gate 4 compares field for field, and the
+#: predicates are the campaign's own (``phase3_campaign.main``), not lookalikes.
+STRATIFIERS: tuple[dict[str, Any], ...] = (
+    {
+        "name": "duration",
+        "definition": "hours_above_datum > 24 h",
+        "predicate": lambda e: e.hours_above_datum > 24.0,
+        "inside_key": "p_f_long_loading",
+        "outside_key": "p_f_short_loading",
+        "count_key": "n_long",
+        "quotes": (
+            "the concentration-factor range 151 to 378 and the 89 and 93 per "
+            "cent share claim"
+        ),
+    },
+    {
+        "name": "compound",
+        "definition": "n_peaks_above_datum >= 2",
+        "predicate": lambda e: e.n_peaks_above_datum >= 2,
+        "inside_key": "p_f_compound",
+        "outside_key": "p_f_noncompound",
+        "count_key": "n_compound",
+        "quotes": "the 3.7 to 91 historically and 1.6 to 23 under warming ranges",
+    },
+)
+
+#: Gate 4a's bound. Bit-identity is NOT achievable here and is not asserted:
+#: the block-grouped sum reorders the same addends that ``np.mean`` adds
+#: pairwise, so the difference is floating-point ordering, not quantity. The
+#: measured deviation is recorded next to the bound (toolkit recipe 8).
+UNRESAMPLED_TOLERANCE = 1e-12
 
 SCOPE_STATEMENT = (
     "Hazard-sampling uncertainty ONLY: the finite-ensemble spread of the d4PDF "
@@ -834,6 +892,584 @@ def answer_q3(sections: dict[str, Any], arm: str):
 
 
 # --------------------------------------------------------------------------- #
+# Part two: the stratified entries of the RQ4 attribution table                 #
+# --------------------------------------------------------------------------- #
+def stratum_occupancy(event_ids: list[str], mask: np.ndarray) -> dict[str, Any]:
+    """Occupancy of one stratum in the study's own resampling unit.
+
+    Pre-registration section 3.2. The year count is not the resource a block
+    bootstrap spends: the **carrying member blocks** are, so a stratum of 152
+    years spread over 46 members and one of 152 years inside 3 members are not
+    the same object. Section 3.3's floor is evaluated on what this returns.
+
+    Parameters
+    ----------
+    event_ids : list of str
+        Verbatim member headers, workbook order.
+    mask : numpy.ndarray
+        Boolean stratum membership, one entry per event.
+
+    Returns
+    -------
+    dict
+        Year count, carrying and total block counts, the largest single block's
+        share of the stratum, the SST patterns spanned, and the F1/F2 verdict
+        with any failing criterion named in full.
+    """
+    labels = block_labels(event_ids, "member")
+    _, n_blocks_total, _ = block_index(labels)
+    n_events = int(mask.sum())
+    if n_events:
+        _, counts = np.unique(labels[mask], return_counts=True)
+        carrying = int(counts.size)
+        largest = float(counts.max()) / float(n_events)
+        patterns = int(np.unique(block_labels(event_ids, "sst")[mask]).size)
+    else:
+        carrying, largest, patterns = 0, 0.0, 0
+
+    failures: list[str] = []
+    if carrying < STRATUM_BLOCK_FLOOR:
+        failures.append(
+            f"F1 occupancy: {carrying} carrying member blocks, floor is "
+            f"{STRATUM_BLOCK_FLOOR}"
+        )
+    if largest > STRATUM_MAX_BLOCK_SHARE:
+        failures.append(
+            f"F2 concentration: the largest member block holds "
+            f"{100.0 * largest:.1f} % of the stratum, cap is "
+            f"{100.0 * STRATUM_MAX_BLOCK_SHARE:.0f} %"
+        )
+    return {
+        "n_years": n_events,
+        "n_carrying_member_blocks": carrying,
+        "n_member_blocks": n_blocks_total,
+        "largest_block_share": largest,
+        "n_sst_patterns": patterns,
+        "clears_floor": not failures,
+        "floor_failures": failures,
+    }
+
+
+def stratum_replicates(
+    values: np.ndarray,
+    mask: np.ndarray,
+    index: np.ndarray,
+    n_blocks: int,
+    multiplicities: np.ndarray,
+) -> dict[str, np.ndarray]:
+    """Replicate conditional means, concentration factor and share.
+
+    Stratum membership is a property of the event and travels with it through
+    the resample, so a replicate's two strata are whatever its drawn blocks
+    happen to contain. Both the ratio and the share are formed **inside** the
+    replicate (pre-registration section 3.5), never as a quotient of two
+    marginal intervals.
+
+    Five per-block sums carry everything: the probability sum and the event
+    count inside the stratum, the same two outside it, and the whole-ensemble
+    probability sum that is the share's denominator.
+
+    Returns
+    -------
+    dict of numpy.ndarray
+        ``p_in``, ``p_out``, ``concentration``, ``share``; ``nan`` in any
+        replicate where the quantity is undefined (an empty stratum, or a zero
+        denominator). Under the section 3.3 floor no replicate is undefined,
+        and the count is reported so that claim is checkable rather than
+        assumed.
+    """
+    inside = mask.astype(np.float64)
+    stacked = np.column_stack(
+        [
+            np.where(mask, values, 0.0),
+            inside,
+            np.where(mask, 0.0, values),
+            1.0 - inside,
+            values,
+        ]
+    )
+    totals = multiplicities.astype(np.float64) @ block_sums(stacked, index, n_blocks)
+    s_in, n_in, s_out, n_out, s_all = (totals[:, i] for i in range(5))
+
+    def _ratio(num: np.ndarray, den: np.ndarray) -> np.ndarray:
+        out = np.full(num.shape, np.nan, dtype=np.float64)
+        np.divide(num, den, out=out, where=den > 0.0)
+        return out
+
+    p_in = _ratio(s_in, n_in)
+    p_out = _ratio(s_out, n_out)
+    concentration = np.full(p_in.shape, np.nan, dtype=np.float64)
+    usable = np.isfinite(p_in) & np.isfinite(p_out) & (p_out > 0.0)
+    concentration[usable] = p_in[usable] / p_out[usable]
+    return {
+        "p_in": p_in,
+        "p_out": p_out,
+        "concentration": concentration,
+        "share": _ratio(s_in, s_all),
+    }
+
+
+def _defined_interval(point: float, samples: np.ndarray) -> dict[str, Any]:
+    """``_interval`` over the defined replicates, with the undefined count kept."""
+    defined = np.isfinite(samples)
+    record = _interval(point, samples[defined])
+    record["n_replicates_undefined"] = int((~defined).sum())
+    return record
+
+
+def _with_printed_precision(record: dict[str, Any], fmt: str) -> dict[str, Any]:
+    """Pre-registered rule 3: does the interval support the printed precision?
+
+    A quoted value is supported at the precision the thesis prints it to iff
+    **both** endpoints of its interval round to that same printed value. The
+    thesis prints a concentration factor as a whole number and a share as a
+    whole percentage, so those are the two formats scored. Applied
+    mechanically here rather than eyeballed from the note.
+    """
+    printed = fmt.format(record["point"])
+    record["printed"] = printed
+    record["printed_precision_supported"] = bool(
+        fmt.format(record["ci_low"]) == printed == fmt.format(record["ci_high"])
+    )
+    return record
+
+
+def _count_limited(
+    point: float, occupancy: dict[str, Any], what: str
+) -> dict[str, Any]:
+    """Pre-registration section 3.4: the count and no number.
+
+    The production point estimate stays visible, because it is arithmetically
+    exact for the ensemble as simulated and it is the value the thesis prints.
+    It carries no interval, no half-width and no resolution verdict, and it may
+    not be an endpoint of any range quoted as measured.
+    """
+    return {
+        "point": float(point),
+        "count_limited": True,
+        "interval_withheld_because": "; ".join(occupancy["floor_failures"]),
+        "n_years": occupancy["n_years"],
+        "n_carrying_member_blocks": occupancy["n_carrying_member_blocks"],
+        "n_member_blocks": occupancy["n_member_blocks"],
+        "rule": (
+            f"pre-registered floor, section 3.3: {what} is reported with the "
+            "count and no number below "
+            f"{STRATUM_BLOCK_FLOOR} carrying member blocks or above a "
+            f"{100.0 * STRATUM_MAX_BLOCK_SHARE:.0f} % single-block share"
+        ),
+    }
+
+
+def compose_bep_sections(campaign, context: dict[str, Any], d70: str, source: str):
+    """The four characterised sections' composed curves, production path.
+
+    Composed through the campaign's own ``_compose_segment`` exactly as
+    ``annualise_arm`` does, so the stratified pass consumes the same curve gate
+    1 has already proven reproduces the published annualisation.
+    """
+    n_eff = max(1.0, campaign.SEGMENT_LENGTH_M / LAMBDA_AC_M)
+    out = {}
+    for segment in context["registry"].bep_segments():
+        frag, _ = campaign._compose_segment(
+            segment,
+            context["surface"],
+            context["bep_curves"][(segment.kp, d70, source)],
+            n_eff,
+            "historical",
+        )
+        out[(segment.river, round(segment.kp, 3))] = frag
+    return out
+
+
+def stratified_attribution(
+    campaign,
+    context: dict[str, Any],
+    frags: dict[tuple[str, float], Any],
+    per_event: dict[tuple[str, float, str], dict[str, np.ndarray]],
+    rows: dict[tuple[str, float, str], dict[str, Any]],
+    event_ids: dict[str, list[str]],
+    index_by_scenario: dict[str, tuple[np.ndarray, int]],
+    multiplicities: dict[str, np.ndarray],
+) -> tuple[dict[str, Any], dict[str, dict[str, np.ndarray]], dict[str, Any]]:
+    """Intervals on the stratified entries, at the cells that clear the floor.
+
+    Part two of the pre-registration. Same estimator, same seed, **same
+    multiplicity draw** as part one, so every stratified quantity is paired
+    with every other and with the annual quantities on the replicate index,
+    and so this pass cannot perturb a single number in sections 2.2 to 2.7.
+
+    Gate 4 runs here, in two halves. **4a** asserts that the unresampled
+    stratified estimator reproduces the production ``stratified_annual_p_f``
+    output to within ``UNRESAMPLED_TOLERANCE``; exact equality is not asserted
+    and is not achievable, because the block-grouped sum reorders the addends
+    ``np.mean`` adds pairwise. **4b** asserts that the production output itself
+    is field for field the published ``rq4_attribution.json``, by float
+    equality with no tolerance.
+
+    Returns
+    -------
+    tuple
+        ``(record, samples, gate4)``. ``samples`` carries the replicate arrays
+        of the clearing cells only, which is what Q4 and Q5 difference.
+    """
+    published = json.loads(ATTRIBUTION_TABLE.read_text(encoding="utf-8"))
+    sections: dict[str, Any] = {}
+    samples: dict[str, dict[str, np.ndarray]] = {}
+    mismatches: list[str] = []
+    worst_deviation = 0.0
+
+    for kp in BEP_KPS:
+        label = _label(kp)
+        node = ("Tokachi", round(kp, 3))
+        frag = frags[node]
+        entry = published[f"Tokachi_KP{kp:g}"]
+        sections[label] = {}
+
+        for scenario in campaign.SCENARIOS:
+            hazard = context["hazards"][scenario][node]
+            values = per_event[("Tokachi", kp, scenario)]["__system__"]
+            index, n_blocks = index_by_scenario[scenario]
+            pub = entry[scenario]
+            p_annual = float(rows[("Tokachi", kp, scenario)]["p_annual_system"])
+
+            hours = np.asarray([e.hours_above_datum for e in hazard.events])
+            loaded = hours > 0.0
+            for field, mine in (
+                ("n_years", hazard.n_years),
+                ("frac_years_loading_toe", float(np.mean(loaded))),
+                (
+                    "median_hours_above_toe_when_loaded",
+                    float(np.median(hours[loaded])) if loaded.any() else 0.0,
+                ),
+                ("frac_years_gt24h", float(np.mean(hours > 24.0))),
+            ):
+                if mine != pub[field]:
+                    mismatches.append(
+                        f"{label} {scenario} {field}: published {pub[field]!r} "
+                        f"!= reproduced {mine!r}"
+                    )
+
+            block: dict[str, Any] = {
+                "n_years": hazard.n_years,
+                "p_annual_system": p_annual,
+            }
+            for strat in STRATIFIERS:
+                name = strat["name"]
+                p_in, p_out, n_in, n_out = stratified_annual_p_f(
+                    frag, hazard, strat["predicate"]
+                )
+                for field, mine in (
+                    (strat["inside_key"], p_in),
+                    (strat["outside_key"], p_out),
+                    (strat["count_key"], n_in),
+                ):
+                    if mine != pub[field]:
+                        mismatches.append(
+                            f"{label} {scenario} {field}: published "
+                            f"{pub[field]!r} != reproduced {mine!r}"
+                        )
+
+                mask = np.asarray(
+                    [strat["predicate"](e) for e in hazard.events], dtype=bool
+                )
+                occupancy = stratum_occupancy(event_ids[scenario], mask)
+                concentration_point = p_in / p_out if p_out > 0.0 else float("nan")
+                share_point = (
+                    n_in * p_in / (hazard.n_years * p_annual)
+                    if p_annual > 0.0
+                    else float("nan")
+                )
+                cell: dict[str, Any] = {
+                    "definition": strat["definition"],
+                    "occupancy": occupancy,
+                    "p_f_inside": p_in,
+                    "p_f_outside": p_out,
+                    "n_inside": n_in,
+                    "n_outside": n_out,
+                }
+
+                if occupancy["clears_floor"]:
+                    reps = stratum_replicates(
+                        values, mask, index, n_blocks, multiplicities[scenario]
+                    )
+                    # GATE 4a. Unit multiplicities reduce the replicate formula
+                    # to the production estimator, so the two must agree; the
+                    # difference is summation order alone.
+                    unit = stratum_replicates(
+                        values,
+                        mask,
+                        index,
+                        n_blocks,
+                        np.ones((1, n_blocks), dtype=np.int32),
+                    )
+                    for got, want in (
+                        (float(unit["p_in"][0]), p_in),
+                        (float(unit["p_out"][0]), p_out),
+                    ):
+                        deviation = abs(got - want) / want if want else abs(got)
+                        worst_deviation = max(worst_deviation, deviation)
+                        if deviation > UNRESAMPLED_TOLERANCE:
+                            mismatches.append(
+                                f"{label} {scenario} {name}: the unresampled "
+                                f"block estimator gives {got!r} against the "
+                                f"production {want!r} (relative {deviation:.3e})"
+                            )
+                    cell["concentration_factor"] = _with_printed_precision(
+                        _defined_interval(concentration_point, reps["concentration"]),
+                        "{:.0f}",
+                    )
+                    cell["share_of_annual_total"] = _with_printed_precision(
+                        _defined_interval(share_point, reps["share"]),
+                        "{:.0%}",
+                    )
+                    cell["p_f_inside_interval"] = _defined_interval(p_in, reps["p_in"])
+                    samples[f"{label}|{scenario}|{name}"] = reps
+                else:
+                    cell["concentration_factor"] = _count_limited(
+                        concentration_point, occupancy, "the concentration factor"
+                    )
+                    cell["share_of_annual_total"] = _count_limited(
+                        share_point, occupancy, "the share of the annual total"
+                    )
+                block[name] = cell
+            sections[label][scenario] = block
+
+    if mismatches:
+        raise AssertionError(
+            "GATE 4 FAILED: the stratified pass does not reproduce the "
+            "published RQ4 attribution, so its intervals would not be on the "
+            "published quantity.\n  " + "\n  ".join(mismatches[:20])
+        )
+    gate4 = {
+        "passed": True,
+        "table": _rel(ATTRIBUTION_TABLE),
+        "cells_compared": len(BEP_KPS) * len(campaign.SCENARIOS),
+        "fields_per_cell": 10,
+        "criterion_4b": (
+            "every field of rq4_attribution.json reproduced by float equality "
+            "with no tolerance, through the production stratified_annual_p_f"
+        ),
+        "criterion_4a": (
+            "the unresampled block estimator reproduces the production "
+            "conditional means; bit-identity is not asserted because the "
+            "block-grouped sum reorders the addends np.mean adds pairwise"
+        ),
+        "unresampled_tolerance": UNRESAMPLED_TOLERANCE,
+        "worst_relative_deviation": worst_deviation,
+    }
+    return sections, samples, gate4
+
+
+def _clearing_cells(
+    sections: dict[str, Any], stratifier: str, scenario: str
+) -> list[str]:
+    """Section labels whose cell clears the pre-registered floor, in KP order."""
+    return [
+        _label(kp)
+        for kp in BEP_KPS
+        if sections[_label(kp)][scenario][stratifier]["occupancy"]["clears_floor"]
+    ]
+
+
+def _range_verdict(
+    sections: dict[str, Any],
+    samples: dict[str, dict[str, np.ndarray]],
+    stratifier: str,
+    scenario: str,
+    quantity: str,
+    key: str,
+) -> dict[str, Any]:
+    """One question's scoring: the range, its pairs, and the excluded cells.
+
+    Pre-registration section 3.6 rules 1 to 3. The pairs are **paired** on the
+    replicate index, which the shared multiplicity draw makes valid: one block
+    draw serves every node, so a difference reflects the discordance between two
+    sections under a common resample of the hazard rather than the variance of
+    two independent estimates.
+    """
+    clearing = _clearing_cells(sections, stratifier, scenario)
+    withheld = []
+    for kp in BEP_KPS:
+        label = _label(kp)
+        if label in clearing:
+            continue
+        occupancy = sections[label][scenario][stratifier]["occupancy"]
+        point = sections[label][scenario][stratifier][key]["point"]
+        withheld.append(
+            {
+                "section": label,
+                "point": point,
+                "n_years": occupancy["n_years"],
+                "n_carrying_member_blocks": occupancy["n_carrying_member_blocks"],
+                "failing_criterion": "; ".join(occupancy["floor_failures"]),
+                # Section 3.4 permits exactly one comparison against an
+                # intervalled cell, because it costs nothing: whether the
+                # count-limited point falls inside the other's interval. It is
+                # an observation about where an unmeasured value sits, never a
+                # measurement of it, and never a resolution verdict.
+                "point_falls_inside": [
+                    other
+                    for other in clearing
+                    if sections[other][scenario][stratifier][key]["ci_low"]
+                    <= point
+                    <= sections[other][scenario][stratifier][key]["ci_high"]
+                ],
+                "observation_is_not_a_measurement": (
+                    "where a count-limited point sits relative to another "
+                    "cell's interval; this cell has no interval of its own and "
+                    "no resolution verdict may be formed from it"
+                ),
+            }
+        )
+
+    pairs: dict[str, Any] = {}
+    resolved = 0
+    for i, first in enumerate(clearing):
+        for second in clearing[i + 1 :]:
+            delta = (
+                samples[f"{first}|{scenario}|{stratifier}"][quantity]
+                - samples[f"{second}|{scenario}|{stratifier}"][quantity]
+            )
+            usable = np.isfinite(delta)
+            lo, hi = percentile_interval(delta[usable])
+            excludes_zero = bool(lo > 0.0 or hi < 0.0)
+            resolved += int(excludes_zero)
+            pairs[f"{first} - {second}"] = {
+                "point": (
+                    sections[first][scenario][stratifier][key]["point"]
+                    - sections[second][scenario][stratifier][key]["point"]
+                ),
+                "ci_low": lo,
+                "ci_high": hi,
+                "resolved": excludes_zero,
+                "n_replicates_paired": int(usable.sum()),
+            }
+
+    blocks = [sections[label][scenario][stratifier][key] for label in clearing]
+    # Derived from rule 2's pairs, not a new rule: a RANGE is carried by its two
+    # endpoints, so whether those two resolve is the question a reader of the
+    # range actually has. Every other pair speaks to the ordering in between.
+    endpoints_resolve = None
+    if len(clearing) >= 2:
+        lowest = min(
+            clearing,
+            key=lambda label: sections[label][scenario][stratifier][key]["point"],
+        )
+        highest = max(
+            clearing,
+            key=lambda label: sections[label][scenario][stratifier][key]["point"],
+        )
+        endpoints_resolve = bool(
+            pairs.get(
+                f"{lowest} - {highest}", pairs.get(f"{highest} - {lowest}", {})
+            ).get("resolved", False)
+        )
+
+    if not clearing:
+        verdict = (
+            "UNANSWERABLE (pre-registered section 3.7): no cell clears the "
+            "floor, so no range may be quoted at all"
+        )
+    elif len(clearing) == 1:
+        verdict = (
+            f"SINGLE CELL: only {clearing[0]} clears the floor, so there is no "
+            "range, only one intervalled value"
+        )
+    elif resolved == 0:
+        verdict = (
+            "COLLAPSED (pre-registered section 3.7): cells clear the floor but "
+            "no pair of them resolves, so the spread is not a measured range"
+        )
+    elif resolved == len(pairs):
+        verdict = f"RANGE SUPPORTED over the {len(clearing)} cells that clear"
+    else:
+        verdict = (
+            f"PARTIAL: {resolved} of {len(pairs)} pairs among the "
+            f"{len(clearing)} clearing cells resolve"
+        )
+    return {
+        "scenario": scenario,
+        "stratifier": stratifier,
+        "quantity": key,
+        "clearing_cells": clearing,
+        "range_point": (
+            [min(b["point"] for b in blocks), max(b["point"] for b in blocks)]
+            if blocks
+            else None
+        ),
+        "range_interval": (
+            [min(b["ci_low"] for b in blocks), max(b["ci_high"] for b in blocks)]
+            if blocks
+            else None
+        ),
+        "per_cell": {
+            label: sections[label][scenario][stratifier][key] for label in clearing
+        },
+        "printed_precision_supported_at": [
+            label
+            for label in clearing
+            if sections[label][scenario][stratifier][key]["printed_precision_supported"]
+        ],
+        "pairs": pairs,
+        "endpoints_resolve": endpoints_resolve,
+        "n_resolved": resolved,
+        "n_pairs": len(pairs),
+        "withheld_below_floor": withheld,
+        "verdict": verdict,
+    }
+
+
+def floor_sensitivity(sections: dict[str, Any]) -> dict[str, Any]:
+    """Q6: which cells clear at 10, at the pre-registered 20, and at 30 blocks.
+
+    Reported, never used to choose. Scored as the **membership** of the
+    clearing set and the point-estimate endpoints that follow from it, not as
+    intervals for cells the pre-registered floor excludes: section 3.4 forbids
+    printing one below the floor, and a declared sensitivity is not an
+    exemption from a rule fixed in advance.
+    """
+    out: dict[str, Any] = {}
+    for floor in sorted({*FLOOR_SENSITIVITY, STRATUM_BLOCK_FLOOR}):
+        per_floor: dict[str, Any] = {}
+        for strat in STRATIFIERS:
+            name = strat["name"]
+            for scenario in ("historical", "+4K"):
+                clearing = [
+                    _label(kp)
+                    for kp in BEP_KPS
+                    if sections[_label(kp)][scenario][name]["occupancy"][
+                        "n_carrying_member_blocks"
+                    ]
+                    >= floor
+                    and sections[_label(kp)][scenario][name]["occupancy"][
+                        "largest_block_share"
+                    ]
+                    <= STRATUM_MAX_BLOCK_SHARE
+                ]
+                points = [
+                    sections[label][scenario][name]["concentration_factor"]["point"]
+                    for label in clearing
+                ]
+                per_floor[f"{name}/{scenario}"] = {
+                    "clearing_cells": clearing,
+                    "concentration_range_point": (
+                        [min(points), max(points)] if points else None
+                    ),
+                }
+        out[str(floor)] = {
+            "is_the_preregistered_floor": floor == STRATUM_BLOCK_FLOOR,
+            "cells": per_floor,
+        }
+    out["reading"] = (
+        "membership of the clearing set at each floor, with the point-estimate "
+        "endpoints that follow. No interval is computed for a cell the "
+        "pre-registered floor excludes: section 3.4 forbids printing one and a "
+        "sensitivity does not suspend it"
+    )
+    return out
+
+
+# --------------------------------------------------------------------------- #
 # Sensitivity on the resampling unit                                            #
 # --------------------------------------------------------------------------- #
 def unit_sensitivity(
@@ -1186,6 +1822,70 @@ def main(argv: list[str] | None = None) -> int:
     )
     q3 = answer_q3(sections, primary)
 
+    # ----- Part two: the stratified entries -------------------------------- #
+    # GATE 5. The stratified pass reuses the multiplicity draw already made and
+    # takes nothing further from the stream, which is what proves it added a
+    # quantity rather than perturbing the estimator: every interval of sections
+    # 2.2 to 2.7 is computed from the same draw and comes out unchanged.
+    print("stratified attribution (part two) ...", flush=True)
+    rng_state_before = rng.bit_generator.state
+    stratified, stratified_samples, gate4 = stratified_attribution(
+        campaign,
+        context,
+        compose_bep_sections(campaign, context, *PRIMARY_ARM),
+        per_event_by_arm[primary],
+        rows_by_arm[primary],
+        event_ids,
+        index_by_scenario,
+        multiplicities,
+    )
+    if rng.bit_generator.state != rng_state_before:
+        raise AssertionError(
+            "GATE 5 FAILED: the stratified pass advanced the random stream, so "
+            "it did not reuse part one's multiplicity draw and every part-one "
+            "interval would move with it."
+        )
+    print(
+        f"  GATE 4 PASSED: {gate4['cells_compared']} attribution cells "
+        f"reproduced field for field (worst unresampled deviation "
+        f"{gate4['worst_relative_deviation']:.2e})",
+        flush=True,
+    )
+    q4 = {
+        scenario: _range_verdict(
+            stratified,
+            stratified_samples,
+            "duration",
+            scenario,
+            "concentration",
+            "concentration_factor",
+        )
+        for scenario in campaign.SCENARIOS
+    }
+    q5 = {
+        scenario: _range_verdict(
+            stratified,
+            stratified_samples,
+            "duration",
+            scenario,
+            "share",
+            "share_of_annual_total",
+        )
+        for scenario in campaign.SCENARIOS
+    }
+    q4_compound = {
+        scenario: _range_verdict(
+            stratified,
+            stratified_samples,
+            "compound",
+            scenario,
+            "concentration",
+            "concentration_factor",
+        )
+        for scenario in campaign.SCENARIOS
+    }
+    q6 = floor_sensitivity(stratified)
+
     print("resampling-unit sensitivity ...", flush=True)
     sensitivity = unit_sensitivity(
         per_event_by_arm[primary], event_ids, campaign, np.random.default_rng(SEED + 1)
@@ -1265,6 +1965,15 @@ def main(argv: list[str] | None = None) -> int:
                 ),
             },
             "gate_1_reproduces_production_table": gate1,
+            "gate_4_reproduces_rq4_attribution": gate4,
+            "gate_5_stratified_pass_reused_the_part_one_draw": {
+                "passed": True,
+                "criterion": (
+                    "the random stream's state is unchanged across the "
+                    "stratified pass, so part one's multiplicity draw is the "
+                    "one used and no interval in sections 2.2 to 2.7 moved"
+                ),
+            },
             "gate_2_hazard_cache_unchanged": {
                 "passed": True,
                 "cache_files": len(cache_after),
@@ -1287,7 +1996,42 @@ def main(argv: list[str] | None = None) -> int:
         "writes": [_rel(args.out), _rel(args.out_dir)],
         "sections": sections,
         "section_aggregates": aggregates,
-        "preregistration_outcome": {"Q1": q1, "Q2": q2, "Q3": q3},
+        "stratified_attribution": {
+            "scope": (
+                "the stratified entries of Table 'tab: rq4 attribution', "
+                "matrix / posterior / 250 m / primary, the only arm "
+                "rq4_attribution.json exists for"
+            ),
+            "floor": {
+                "F1_min_carrying_member_blocks": STRATUM_BLOCK_FLOOR,
+                "F2_max_single_block_share": STRATUM_MAX_BLOCK_SHARE,
+                "unit": (
+                    "the d4PDF ensemble member block, not the simulated year: "
+                    "a stratum's information is carried by the blocks holding "
+                    "at least one of its events"
+                ),
+                "preregistered": (
+                    "section 3.3 of the note, committed 2026-08-20 in aeeb918 "
+                    "before this driver carried a line of stratified code"
+                ),
+                "below_the_floor": (
+                    "the year count, the carrying-member count, the failing "
+                    "criterion and the production point estimate labelled "
+                    "count-limited; no interval, no half-width, no resolution "
+                    "verdict, and no admission to a range quoted as measured"
+                ),
+            },
+            "sections": stratified,
+        },
+        "preregistration_outcome": {
+            "Q1": q1,
+            "Q2": q2,
+            "Q3": q3,
+            "Q4": q4,
+            "Q5": q5,
+            "Q4_compound": q4_compound,
+            "Q6_floor_sensitivity": q6,
+        },
         "resampling_unit_sensitivity": sensitivity,
         "elapsed_s": round(time.time() - started, 1),
     }
@@ -1326,9 +2070,42 @@ def main(argv: list[str] | None = None) -> int:
             f"  {_label(kp):<8} {block['point']:.2f}  "
             f"[{block['ci_low']:.2f}, {block['ci_high']:.2f}]"
         )
+    print("\nstratified attribution, duration stratum, primary arm")
+    for kp in BEP_KPS:
+        label = _label(kp)
+        for scenario in campaign.SCENARIOS:
+            cell = stratified[label][scenario]["duration"]
+            occ = cell["occupancy"]
+            stamp = (
+                f"{occ['n_years']:>4} yr / {occ['n_carrying_member_blocks']:>2} of "
+                f"{occ['n_member_blocks']} members"
+            )
+            conc = cell["concentration_factor"]
+            share = cell["share_of_annual_total"]
+            if conc.get("count_limited"):
+                print(
+                    f"  {label:<8} {scenario:<11} {stamp}  "
+                    f"concentration {conc['point']:.0f}, share "
+                    f"{100.0 * share['point']:.0f} %  COUNT-LIMITED, no interval"
+                )
+            else:
+                print(
+                    f"  {label:<8} {scenario:<11} {stamp}  "
+                    f"concentration {conc['point']:.0f} "
+                    f"[{conc['ci_low']:.0f}, {conc['ci_high']:.0f}], share "
+                    f"{100.0 * share['point']:.0f} % "
+                    f"[{100.0 * share['ci_low']:.0f}, "
+                    f"{100.0 * share['ci_high']:.0f}]"
+                )
+
     print("\npre-registration outcome")
     for key, entry in payload["preregistration_outcome"].items():
-        print(f"  {key}: {entry['verdict']}")
+        if "verdict" in entry:
+            print(f"  {key}: {entry['verdict']}")
+        else:
+            for scenario, sub in entry.items():
+                if isinstance(sub, dict) and "verdict" in sub:
+                    print(f"  {key} {scenario}: {sub['verdict']}")
     return 0
 
 

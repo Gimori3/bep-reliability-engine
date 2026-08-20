@@ -1,7 +1,7 @@
 {
   "study": "Hazard-sampling uncertainty on the Phase 3 annualised results: a block bootstrap over d4PDF ensemble members with the fragility curves held fixed",
   "generated_by": "scripts/annualisation_uncertainty_study.py",
-  "generated": "2026-08-20T22:03:01",
+  "generated": "2026-08-20T22:55:02",
   "note": "docs/decisions/annualisation-hazard-sampling-uncertainty.md",
   "scope": {
     "statement": "Hazard-sampling uncertainty ONLY: the finite-ensemble spread of the d4PDF peak-stage distribution with the fragility curves held fixed, which is not the total uncertainty and is far smaller than the aquifer-conductivity bracket that dominates it and does not cancel. Quote this scope wherever any number here is quoted.",
@@ -95,6 +95,20 @@
       "fields_compared": 20,
       "table": "results/system_integration/phase3/rq4_annual.csv",
       "criterion": "every field string-identical to the published table"
+    },
+    "gate_4_reproduces_rq4_attribution": {
+      "passed": true,
+      "table": "results/system_integration/phase3/rq4_attribution.json",
+      "cells_compared": 8,
+      "fields_per_cell": 10,
+      "criterion_4b": "every field of rq4_attribution.json reproduced by float equality with no tolerance, through the production stratified_annual_p_f",
+      "criterion_4a": "the unresampled block estimator reproduces the production conditional means; bit-identity is not asserted because the block-grouped sum reorders the addends np.mean adds pairwise",
+      "unresampled_tolerance": 1e-12,
+      "worst_relative_deviation": 2.569819391342036e-16
+    },
+    "gate_5_stratified_pass_reused_the_part_one_draw": {
+      "passed": true,
+      "criterion": "the random stream's state is unchanged across the stratified pass, so part one's multiplicity draw is the one used and no interval in sections 2.2 to 2.7 moved"
     },
     "gate_2_hazard_cache_unchanged": {
       "passed": true,
@@ -2499,6 +2513,695 @@
       }
     }
   },
+  "stratified_attribution": {
+    "scope": "the stratified entries of Table 'tab: rq4 attribution', matrix / posterior / 250 m / primary, the only arm rq4_attribution.json exists for",
+    "floor": {
+      "F1_min_carrying_member_blocks": 20,
+      "F2_max_single_block_share": 0.2,
+      "unit": "the d4PDF ensemble member block, not the simulated year: a stratum's information is carried by the blocks holding at least one of its events",
+      "preregistered": "section 3.3 of the note, committed 2026-08-20 in aeeb918 before this driver carried a line of stratified code",
+      "below_the_floor": "the year count, the carrying-member count, the failing criterion and the production point estimate labelled count-limited; no interval, no half-width, no resolution verdict, and no admission to a range quoted as measured"
+    },
+    "sections": {
+      "KP 57.4": {
+        "historical": {
+          "n_years": 3000,
+          "p_annual_system": 0.0007529504488451719,
+          "duration": {
+            "definition": "hours_above_datum > 24 h",
+            "occupancy": {
+              "n_years": 3,
+              "n_carrying_member_blocks": 3,
+              "n_member_blocks": 50,
+              "largest_block_share": 0.3333333333333333,
+              "n_sst_patterns": 1,
+              "clears_floor": false,
+              "floor_failures": [
+                "F1 occupancy: 3 carrying member blocks, floor is 20",
+                "F2 concentration: the largest member block holds 33.3 % of the stratum, cap is 20 %"
+              ]
+            },
+            "p_f_inside": 0.09905624219424815,
+            "p_f_outside": 0.0006545487554063301,
+            "n_inside": 3,
+            "n_outside": 2997,
+            "concentration_factor": {
+              "point": 151.33516239406202,
+              "count_limited": true,
+              "interval_withheld_because": "F1 occupancy: 3 carrying member blocks, floor is 20; F2 concentration: the largest member block holds 33.3 % of the stratum, cap is 20 %",
+              "n_years": 3,
+              "n_carrying_member_blocks": 3,
+              "n_member_blocks": 50,
+              "rule": "pre-registered floor, section 3.3: the concentration factor is reported with the count and no number below 20 carrying member blocks or above a 20 % single-block share"
+            },
+            "share_of_annual_total": {
+              "point": 0.13155745155099435,
+              "count_limited": true,
+              "interval_withheld_because": "F1 occupancy: 3 carrying member blocks, floor is 20; F2 concentration: the largest member block holds 33.3 % of the stratum, cap is 20 %",
+              "n_years": 3,
+              "n_carrying_member_blocks": 3,
+              "n_member_blocks": 50,
+              "rule": "pre-registered floor, section 3.3: the share of the annual total is reported with the count and no number below 20 carrying member blocks or above a 20 % single-block share"
+            }
+          },
+          "compound": {
+            "definition": "n_peaks_above_datum >= 2",
+            "occupancy": {
+              "n_years": 5,
+              "n_carrying_member_blocks": 5,
+              "n_member_blocks": 50,
+              "largest_block_share": 0.2,
+              "n_sst_patterns": 1,
+              "clears_floor": false,
+              "floor_failures": [
+                "F1 occupancy: 5 carrying member blocks, floor is 20"
+              ]
+            },
+            "p_f_inside": 0.05941191188736311,
+            "p_f_outside": 0.0006550222995321202,
+            "n_inside": 5,
+            "n_outside": 2995,
+            "concentration_factor": {
+              "point": 90.70212102672046,
+              "count_limited": true,
+              "interval_withheld_because": "F1 occupancy: 5 carrying member blocks, floor is 20",
+              "n_years": 5,
+              "n_carrying_member_blocks": 5,
+              "n_member_blocks": 50,
+              "rule": "pre-registered floor, section 3.3: the concentration factor is reported with the count and no number below 20 carrying member blocks or above a 20 % single-block share"
+            },
+            "share_of_annual_total": {
+              "point": 0.13150912294092607,
+              "count_limited": true,
+              "interval_withheld_because": "F1 occupancy: 5 carrying member blocks, floor is 20",
+              "n_years": 5,
+              "n_carrying_member_blocks": 5,
+              "n_member_blocks": 50,
+              "rule": "pre-registered floor, section 3.3: the share of the annual total is reported with the count and no number below 20 carrying member blocks or above a 20 % single-block share"
+            }
+          }
+        },
+        "+4K": {
+          "n_years": 5400,
+          "p_annual_system": 0.009531136967007517,
+          "duration": {
+            "definition": "hours_above_datum > 24 h",
+            "occupancy": {
+              "n_years": 42,
+              "n_carrying_member_blocks": 33,
+              "n_member_blocks": 90,
+              "largest_block_share": 0.07142857142857142,
+              "n_sst_patterns": 6,
+              "clears_floor": true,
+              "floor_failures": []
+            },
+            "p_f_inside": 0.36427740080667426,
+            "p_f_outside": 0.006750371181030286,
+            "n_inside": 42,
+            "n_outside": 5358,
+            "concentration_factor": {
+              "point": 53.964054870102096,
+              "ci_low": 38.61096832360608,
+              "ci_high": 74.75931347561338,
+              "relative_half_width": 0.3349298457929141,
+              "n_replicates_undefined": 0,
+              "printed": "54",
+              "printed_precision_supported": false
+            },
+            "share_of_annual_total": {
+              "point": 0.29726450084059164,
+              "ci_low": 0.20860108848793685,
+              "ci_high": 0.38608280112157245,
+              "relative_half_width": 0.29852490312795593,
+              "n_replicates_undefined": 0,
+              "printed": "30%",
+              "printed_precision_supported": false
+            },
+            "p_f_inside_interval": {
+              "point": 0.36427740080667426,
+              "ci_low": 0.2747321224374014,
+              "ci_high": 0.45245089952873013,
+              "relative_half_width": 0.24393330014129244,
+              "n_replicates_undefined": 0
+            }
+          },
+          "compound": {
+            "definition": "n_peaks_above_datum >= 2",
+            "occupancy": {
+              "n_years": 29,
+              "n_carrying_member_blocks": 25,
+              "n_member_blocks": 90,
+              "largest_block_share": 0.06896551724137931,
+              "n_sst_patterns": 6,
+              "clears_floor": true,
+              "floor_failures": []
+            },
+            "p_f_inside": 0.191882845222163,
+            "p_f_outside": 0.008546553176391336,
+            "n_inside": 29,
+            "n_outside": 5371,
+            "concentration_factor": {
+              "point": 22.45148906955996,
+              "ci_low": 10.23898895478345,
+              "ci_high": 40.101922066086544,
+              "relative_half_width": 0.6650546210716971,
+              "n_replicates_undefined": 0,
+              "printed": "22",
+              "printed_precision_supported": false
+            },
+            "share_of_annual_total": {
+              "point": 0.10811742084187125,
+              "ci_low": 0.04568456252211259,
+              "ci_high": 0.18343116896096137,
+              "relative_half_width": 0.6370231798273849,
+              "n_replicates_undefined": 0,
+              "printed": "11%",
+              "printed_precision_supported": false
+            },
+            "p_f_inside_interval": {
+              "point": 0.191882845222163,
+              "ci_low": 0.0920763521069683,
+              "ci_high": 0.3054541684932152,
+              "relative_half_width": 0.5560106640570107,
+              "n_replicates_undefined": 0
+            }
+          }
+        }
+      },
+      "KP 58.8": {
+        "historical": {
+          "n_years": 3000,
+          "p_annual_system": 0.007419538025861581,
+          "duration": {
+            "definition": "hours_above_datum > 24 h",
+            "occupancy": {
+              "n_years": 152,
+              "n_carrying_member_blocks": 46,
+              "n_member_blocks": 50,
+              "largest_block_share": 0.05263157894736842,
+              "n_sst_patterns": 1,
+              "clears_floor": true,
+              "floor_failures": []
+            },
+            "p_f_inside": 0.13044716730773853,
+            "p_f_outside": 0.0008534566877838778,
+            "n_inside": 152,
+            "n_outside": 2848,
+            "concentration_factor": {
+              "point": 152.84567942922007,
+              "ci_low": 97.90898187149509,
+              "ci_high": 252.46754840517758,
+              "relative_half_width": 0.5056033219612714,
+              "n_replicates_undefined": 0,
+              "printed": "153",
+              "printed_precision_supported": false
+            },
+            "share_of_annual_total": {
+              "point": 0.8907998207643918,
+              "ci_low": 0.8346107827438589,
+              "ci_high": 0.931141239419713,
+              "relative_half_width": 0.054181901716718876,
+              "n_replicates_undefined": 0,
+              "printed": "89%",
+              "printed_precision_supported": false
+            },
+            "p_f_inside_interval": {
+              "point": 0.13044716730773853,
+              "ci_low": 0.09752934908272755,
+              "ci_high": 0.16372333664238237,
+              "relative_half_width": 0.2537195284719992,
+              "n_replicates_undefined": 0
+            }
+          },
+          "compound": {
+            "definition": "n_peaks_above_datum >= 2",
+            "occupancy": {
+              "n_years": 35,
+              "n_carrying_member_blocks": 23,
+              "n_member_blocks": 50,
+              "largest_block_share": 0.08571428571428572,
+              "n_sst_patterns": 1,
+              "clears_floor": true,
+              "floor_failures": []
+            },
+            "p_f_inside": 0.026375519256930376,
+            "p_f_outside": 0.007195774335106975,
+            "n_inside": 35,
+            "n_outside": 2965,
+            "concentration_factor": {
+              "point": 3.665417789472447,
+              "ci_low": 0.256901395770027,
+              "ci_high": 9.338724156748913,
+              "relative_half_width": 1.2388523331587264,
+              "n_replicates_undefined": 0,
+              "printed": "4",
+              "printed_precision_supported": false
+            },
+            "share_of_annual_total": {
+              "point": 0.041473524397109836,
+              "ci_low": 0.0026776140607739757,
+              "ci_high": 0.10113155610184876,
+              "relative_half_width": 1.1869493064825682,
+              "n_replicates_undefined": 0,
+              "printed": "4%",
+              "printed_precision_supported": false
+            },
+            "p_f_inside_interval": {
+              "point": 0.026375519256930376,
+              "ci_low": 0.0017557886243244323,
+              "ci_high": 0.07341238758429933,
+              "relative_half_width": 1.358392194328962,
+              "n_replicates_undefined": 0
+            }
+          }
+        },
+        "+4K": {
+          "n_years": 5400,
+          "p_annual_system": 0.0409128184765685,
+          "duration": {
+            "definition": "hours_above_datum > 24 h",
+            "occupancy": {
+              "n_years": 727,
+              "n_carrying_member_blocks": 90,
+              "n_member_blocks": 90,
+              "largest_block_share": 0.023383768913342505,
+              "n_sst_patterns": 6,
+              "clears_floor": true,
+              "floor_failures": []
+            },
+            "p_f_inside": 0.2760003355209181,
+            "p_f_outside": 0.004339177369947004,
+            "n_inside": 727,
+            "n_outside": 4673,
+            "concentration_factor": {
+              "point": 63.60660373841529,
+              "ci_low": 51.01350172498997,
+              "ci_high": 81.56851064675658,
+              "relative_half_width": 0.2401873950653403,
+              "n_replicates_undefined": 0,
+              "printed": "64",
+              "printed_precision_supported": false
+            },
+            "share_of_annual_total": {
+              "point": 0.9082195833101958,
+              "ci_low": 0.8879082546800181,
+              "ci_high": 0.9271797609869374,
+              "relative_half_width": 0.021620050386816223,
+              "n_replicates_undefined": 0,
+              "printed": "91%",
+              "printed_precision_supported": false
+            },
+            "p_f_inside_interval": {
+              "point": 0.2760003355209181,
+              "ci_low": 0.25325418002182826,
+              "ci_high": 0.298477762448797,
+              "relative_half_width": 0.08192668016438193,
+              "n_replicates_undefined": 0
+            }
+          },
+          "compound": {
+            "definition": "n_peaks_above_datum >= 2",
+            "occupancy": {
+              "n_years": 131,
+              "n_carrying_member_blocks": 71,
+              "n_member_blocks": 90,
+              "largest_block_share": 0.05343511450381679,
+              "n_sst_patterns": 6,
+              "clears_floor": true,
+              "floor_failures": []
+            },
+            "p_f_inside": 0.07639483594345373,
+            "p_f_outside": 0.040030650268528645,
+            "n_inside": 131,
+            "n_outside": 5269,
+            "concentration_factor": {
+              "point": 1.9084085677097764,
+              "ci_low": 1.072220825366237,
+              "ci_high": 2.8316227934213996,
+              "relative_half_width": 0.4609605086206901,
+              "n_replicates_undefined": 0,
+              "printed": "2",
+              "printed_precision_supported": false
+            },
+            "share_of_annual_total": {
+              "point": 0.045298324589449386,
+              "ci_low": 0.024190727597790996,
+              "ci_high": 0.06886444248367787,
+              "relative_half_width": 0.4931055981736244,
+              "n_replicates_undefined": 0,
+              "printed": "5%",
+              "printed_precision_supported": false
+            },
+            "p_f_inside_interval": {
+              "point": 0.07639483594345373,
+              "ci_low": 0.043160843674869054,
+              "ci_high": 0.11219652414380259,
+              "relative_half_width": 0.45183473212791947,
+              "n_replicates_undefined": 0
+            }
+          }
+        }
+      },
+      "KP 60.0": {
+        "historical": {
+          "n_years": 3000,
+          "p_annual_system": 0.0018017845066762934,
+          "duration": {
+            "definition": "hours_above_datum > 24 h",
+            "occupancy": {
+              "n_years": 105,
+              "n_carrying_member_blocks": 43,
+              "n_member_blocks": 50,
+              "largest_block_share": 0.05714285714285714,
+              "n_sst_patterns": 1,
+              "clears_floor": true,
+              "floor_failures": []
+            },
+            "p_f_inside": 0.047978771052005154,
+            "p_f_outside": 0.00012697152316695616,
+            "n_inside": 105,
+            "n_outside": 2895,
+            "concentration_factor": {
+              "point": 377.87032757665963,
+              "ci_low": 141.35670505818237,
+              "ci_high": 1357.8385362981296,
+              "relative_half_width": 1.6096551415421156,
+              "n_replicates_undefined": 0,
+              "printed": "378",
+              "printed_precision_supported": false
+            },
+            "share_of_annual_total": {
+              "point": 0.9319965737289325,
+              "ci_low": 0.8323726288954522,
+              "ci_high": 0.9803919710097887,
+              "relative_half_width": 0.07940981023251453,
+              "n_replicates_undefined": 0,
+              "printed": "93%",
+              "printed_precision_supported": false
+            },
+            "p_f_inside_interval": {
+              "point": 0.047978771052005154,
+              "ci_low": 0.031013853962093458,
+              "ci_high": 0.06680944065105304,
+              "relative_half_width": 0.37303567707226215,
+              "n_replicates_undefined": 0
+            }
+          },
+          "compound": {
+            "definition": "n_peaks_above_datum >= 2",
+            "occupancy": {
+              "n_years": 27,
+              "n_carrying_member_blocks": 20,
+              "n_member_blocks": 50,
+              "largest_block_share": 0.07407407407407407,
+              "n_sst_patterns": 1,
+              "clears_floor": true,
+              "floor_failures": []
+            },
+            "p_f_inside": 0.011230605664651118,
+            "p_f_outside": 0.0017161544457057855,
+            "n_inside": 27,
+            "n_outside": 2973,
+            "concentration_factor": {
+              "point": 6.544053009187306,
+              "ci_low": 0.14186284988089307,
+              "ci_high": 18.400628854507094,
+              "relative_half_width": 1.395065564031374,
+              "n_replicates_undefined": 0,
+              "printed": "7",
+              "printed_precision_supported": false
+            },
+            "share_of_annual_total": {
+              "point": 0.05609741376248784,
+              "ci_low": 0.001090929798417004,
+              "ci_high": 0.14631985337372647,
+              "relative_half_width": 1.2944351070282634,
+              "n_replicates_undefined": 0,
+              "printed": "6%",
+              "printed_precision_supported": false
+            },
+            "p_f_inside_interval": {
+              "point": 0.011230605664651118,
+              "ci_low": 0.00022085236615955329,
+              "ci_high": 0.033273064400619876,
+              "relative_half_width": 1.4715240220077257,
+              "n_replicates_undefined": 0
+            }
+          }
+        },
+        "+4K": {
+          "n_years": 5400,
+          "p_annual_system": 0.014175099867898966,
+          "duration": {
+            "definition": "hours_above_datum > 24 h",
+            "occupancy": {
+              "n_years": 531,
+              "n_carrying_member_blocks": 88,
+              "n_member_blocks": 90,
+              "largest_block_share": 0.026365348399246705,
+              "n_sst_patterns": 6,
+              "clears_floor": true,
+              "floor_failures": []
+            },
+            "p_f_inside": 0.12777781778090153,
+            "p_f_outside": 0.0017858940326546961,
+            "n_inside": 531,
+            "n_outside": 4869,
+            "concentration_factor": {
+              "point": 71.54837602036349,
+              "ci_low": 54.22815594376628,
+              "ci_high": 97.45346263813782,
+              "relative_half_width": 0.30207049480808007,
+              "n_replicates_undefined": 0,
+              "printed": "72",
+              "printed_precision_supported": false
+            },
+            "share_of_annual_total": {
+              "point": 0.8864007213740833,
+              "ci_low": 0.8527364070560572,
+              "ci_high": 0.9158320965280207,
+              "relative_half_width": 0.035590951107391675,
+              "n_replicates_undefined": 0,
+              "printed": "89%",
+              "printed_precision_supported": false
+            },
+            "p_f_inside_interval": {
+              "point": 0.12777781778090153,
+              "ci_low": 0.1100232568635066,
+              "ci_high": 0.1453846883139943,
+              "relative_half_width": 0.1383707753998481,
+              "n_replicates_undefined": 0
+            }
+          },
+          "compound": {
+            "definition": "n_peaks_above_datum >= 2",
+            "occupancy": {
+              "n_years": 101,
+              "n_carrying_member_blocks": 58,
+              "n_member_blocks": 90,
+              "largest_block_share": 0.04950495049504951,
+              "n_sst_patterns": 6,
+              "clears_floor": true,
+              "floor_failures": []
+            },
+            "p_f_inside": 0.022455275179031273,
+            "p_f_outside": 0.014017278070121205,
+            "n_inside": 101,
+            "n_outside": 5299,
+            "concentration_factor": {
+              "point": 1.6019711577882043,
+              "ci_low": 0.5905344748486415,
+              "ci_high": 2.929825052758719,
+              "relative_half_width": 0.7301288061702274,
+              "n_replicates_undefined": 0,
+              "printed": "2",
+              "printed_precision_supported": false
+            },
+            "share_of_annual_total": {
+              "point": 0.029629196086643515,
+              "ci_low": 0.00994288375875878,
+              "ci_high": 0.05577623978994548,
+              "relative_half_width": 0.7734492001935859,
+              "n_replicates_undefined": 0,
+              "printed": "3%",
+              "printed_precision_supported": false
+            },
+            "p_f_inside_interval": {
+              "point": 0.022455275179031273,
+              "ci_low": 0.008098183451568087,
+              "ci_high": 0.04120472914639591,
+              "relative_half_width": 0.7371663324291545,
+              "n_replicates_undefined": 0
+            }
+          }
+        }
+      },
+      "KP 62.0": {
+        "historical": {
+          "n_years": 3000,
+          "p_annual_system": 0.001006046005485643,
+          "duration": {
+            "definition": "hours_above_datum > 24 h",
+            "occupancy": {
+              "n_years": 19,
+              "n_carrying_member_blocks": 14,
+              "n_member_blocks": 50,
+              "largest_block_share": 0.15789473684210525,
+              "n_sst_patterns": 1,
+              "clears_floor": false,
+              "floor_failures": [
+                "F1 occupancy: 14 carrying member blocks, floor is 20"
+              ]
+            },
+            "p_f_inside": 0.09297495915609613,
+            "p_f_outside": 0.0004198637344820872,
+            "n_inside": 19,
+            "n_outside": 2981,
+            "concentration_factor": {
+              "point": 221.44079500170014,
+              "count_limited": true,
+              "interval_withheld_because": "F1 occupancy: 14 carrying member blocks, floor is 20",
+              "n_years": 19,
+              "n_carrying_member_blocks": 14,
+              "n_member_blocks": 50,
+              "rule": "pre-registered floor, section 3.3: the concentration factor is reported with the count and no number below 20 carrying member blocks or above a 20 % single-block share"
+            },
+            "share_of_annual_total": {
+              "point": 0.5853026648660671,
+              "count_limited": true,
+              "interval_withheld_because": "F1 occupancy: 14 carrying member blocks, floor is 20",
+              "n_years": 19,
+              "n_carrying_member_blocks": 14,
+              "n_member_blocks": 50,
+              "rule": "pre-registered floor, section 3.3: the share of the annual total is reported with the count and no number below 20 carrying member blocks or above a 20 % single-block share"
+            }
+          },
+          "compound": {
+            "definition": "n_peaks_above_datum >= 2",
+            "occupancy": {
+              "n_years": 10,
+              "n_carrying_member_blocks": 9,
+              "n_member_blocks": 50,
+              "largest_block_share": 0.2,
+              "n_sst_patterns": 1,
+              "clears_floor": false,
+              "floor_failures": [
+                "F1 occupancy: 9 carrying member blocks, floor is 20"
+              ]
+            },
+            "p_f_inside": 0.016483802508077565,
+            "p_f_outside": 0.0009542809335706195,
+            "n_inside": 10,
+            "n_outside": 2990,
+            "concentration_factor": {
+              "point": 17.27353227775426,
+              "count_limited": true,
+              "interval_withheld_because": "F1 occupancy: 9 carrying member blocks, floor is 20",
+              "n_years": 10,
+              "n_carrying_member_blocks": 9,
+              "n_member_blocks": 50,
+              "rule": "pre-registered floor, section 3.3: the concentration factor is reported with the count and no number below 20 carrying member blocks or above a 20 % single-block share"
+            },
+            "share_of_annual_total": {
+              "point": 0.054615800928243606,
+              "count_limited": true,
+              "interval_withheld_because": "F1 occupancy: 9 carrying member blocks, floor is 20",
+              "n_years": 10,
+              "n_carrying_member_blocks": 9,
+              "n_member_blocks": 50,
+              "rule": "pre-registered floor, section 3.3: the share of the annual total is reported with the count and no number below 20 carrying member blocks or above a 20 % single-block share"
+            }
+          }
+        },
+        "+4K": {
+          "n_years": 5400,
+          "p_annual_system": 0.012777595238792624,
+          "duration": {
+            "definition": "hours_above_datum > 24 h",
+            "occupancy": {
+              "n_years": 186,
+              "n_carrying_member_blocks": 72,
+              "n_member_blocks": 90,
+              "largest_block_share": 0.043010752688172046,
+              "n_sst_patterns": 6,
+              "clears_floor": true,
+              "floor_failures": []
+            },
+            "p_f_inside": 0.20723769152326396,
+            "p_f_outside": 0.005840583748782713,
+            "n_inside": 186,
+            "n_outside": 5214,
+            "concentration_factor": {
+              "point": 35.48235937314591,
+              "ci_low": 25.38469478538895,
+              "ci_high": 49.59077852978014,
+              "relative_half_width": 0.341100256184078,
+              "n_replicates_undefined": 0,
+              "printed": "35",
+              "printed_precision_supported": false
+            },
+            "share_of_annual_total": {
+              "point": 0.5586487143368364,
+              "ci_low": 0.4655529613695866,
+              "ci_high": 0.6455506208960794,
+              "relative_half_width": 0.16110093418917587,
+              "n_replicates_undefined": 0,
+              "printed": "56%",
+              "printed_precision_supported": false
+            },
+            "p_f_inside_interval": {
+              "point": 0.20723769152326396,
+              "ci_low": 0.1613762897622598,
+              "ci_high": 0.2532151872761275,
+              "relative_half_width": 0.2215786540537635,
+              "n_replicates_undefined": 0
+            }
+          },
+          "compound": {
+            "definition": "n_peaks_above_datum >= 2",
+            "occupancy": {
+              "n_years": 72,
+              "n_carrying_member_blocks": 53,
+              "n_member_blocks": 90,
+              "largest_block_share": 0.06944444444444445,
+              "n_sst_patterns": 6,
+              "clears_floor": true,
+              "floor_failures": []
+            },
+            "p_f_inside": 0.06568898288416967,
+            "p_f_outside": 0.012062576486828068,
+            "n_inside": 72,
+            "n_outside": 5328,
+            "concentration_factor": {
+              "point": 5.445684257911223,
+              "ci_low": 1.9827833204619814,
+              "ci_high": 10.593082407818347,
+              "relative_half_width": 0.7905617255396091,
+              "n_replicates_undefined": 0,
+              "printed": "5",
+              "printed_precision_supported": false
+            },
+            "share_of_annual_total": {
+              "point": 0.06854600484316352,
+              "ci_low": 0.024991678944989597,
+              "ci_high": 0.12570402646149087,
+              "relative_half_width": 0.7346332419149435,
+              "n_replicates_undefined": 0,
+              "printed": "7%",
+              "printed_precision_supported": false
+            },
+            "p_f_inside_interval": {
+              "point": 0.06568898288416967,
+              "ci_low": 0.024493631160072596,
+              "ci_high": 0.11799227803305483,
+              "relative_half_width": 0.7116767741544251,
+              "n_replicates_undefined": 0
+            }
+          }
+        }
+      }
+    }
+  },
   "preregistration_outcome": {
     "Q1": {
       "question": "are the four per-section climate ratios resolvably different from one another",
@@ -2611,6 +3314,698 @@
       "n_resolved": 4,
       "n_structurally_degenerate": 2,
       "verdict": "YES: piping's lead resolves at all four sections"
+    },
+    "Q4": {
+      "historical": {
+        "scenario": "historical",
+        "stratifier": "duration",
+        "quantity": "concentration_factor",
+        "clearing_cells": [
+          "KP 58.8",
+          "KP 60.0"
+        ],
+        "range_point": [
+          152.84567942922007,
+          377.87032757665963
+        ],
+        "range_interval": [
+          97.90898187149509,
+          1357.8385362981296
+        ],
+        "per_cell": {
+          "KP 58.8": {
+            "point": 152.84567942922007,
+            "ci_low": 97.90898187149509,
+            "ci_high": 252.46754840517758,
+            "relative_half_width": 0.5056033219612714,
+            "n_replicates_undefined": 0,
+            "printed": "153",
+            "printed_precision_supported": false
+          },
+          "KP 60.0": {
+            "point": 377.87032757665963,
+            "ci_low": 141.35670505818237,
+            "ci_high": 1357.8385362981296,
+            "relative_half_width": 1.6096551415421156,
+            "n_replicates_undefined": 0,
+            "printed": "378",
+            "printed_precision_supported": false
+          }
+        },
+        "printed_precision_supported_at": [],
+        "pairs": {
+          "KP 58.8 - KP 60.0": {
+            "point": -225.02464814743956,
+            "ci_low": -1130.940603351839,
+            "ci_high": -9.314949560815396,
+            "resolved": true,
+            "n_replicates_paired": 10000
+          }
+        },
+        "endpoints_resolve": true,
+        "n_resolved": 1,
+        "n_pairs": 1,
+        "withheld_below_floor": [
+          {
+            "section": "KP 57.4",
+            "point": 151.33516239406202,
+            "n_years": 3,
+            "n_carrying_member_blocks": 3,
+            "failing_criterion": "F1 occupancy: 3 carrying member blocks, floor is 20; F2 concentration: the largest member block holds 33.3 % of the stratum, cap is 20 %",
+            "point_falls_inside": [
+              "KP 58.8",
+              "KP 60.0"
+            ],
+            "observation_is_not_a_measurement": "where a count-limited point sits relative to another cell's interval; this cell has no interval of its own and no resolution verdict may be formed from it"
+          },
+          {
+            "section": "KP 62.0",
+            "point": 221.44079500170014,
+            "n_years": 19,
+            "n_carrying_member_blocks": 14,
+            "failing_criterion": "F1 occupancy: 14 carrying member blocks, floor is 20",
+            "point_falls_inside": [
+              "KP 58.8",
+              "KP 60.0"
+            ],
+            "observation_is_not_a_measurement": "where a count-limited point sits relative to another cell's interval; this cell has no interval of its own and no resolution verdict may be formed from it"
+          }
+        ],
+        "verdict": "RANGE SUPPORTED over the 2 cells that clear"
+      },
+      "+4K": {
+        "scenario": "+4K",
+        "stratifier": "duration",
+        "quantity": "concentration_factor",
+        "clearing_cells": [
+          "KP 57.4",
+          "KP 58.8",
+          "KP 60.0",
+          "KP 62.0"
+        ],
+        "range_point": [
+          35.48235937314591,
+          71.54837602036349
+        ],
+        "range_interval": [
+          25.38469478538895,
+          97.45346263813782
+        ],
+        "per_cell": {
+          "KP 57.4": {
+            "point": 53.964054870102096,
+            "ci_low": 38.61096832360608,
+            "ci_high": 74.75931347561338,
+            "relative_half_width": 0.3349298457929141,
+            "n_replicates_undefined": 0,
+            "printed": "54",
+            "printed_precision_supported": false
+          },
+          "KP 58.8": {
+            "point": 63.60660373841529,
+            "ci_low": 51.01350172498997,
+            "ci_high": 81.56851064675658,
+            "relative_half_width": 0.2401873950653403,
+            "n_replicates_undefined": 0,
+            "printed": "64",
+            "printed_precision_supported": false
+          },
+          "KP 60.0": {
+            "point": 71.54837602036349,
+            "ci_low": 54.22815594376628,
+            "ci_high": 97.45346263813782,
+            "relative_half_width": 0.30207049480808007,
+            "n_replicates_undefined": 0,
+            "printed": "72",
+            "printed_precision_supported": false
+          },
+          "KP 62.0": {
+            "point": 35.48235937314591,
+            "ci_low": 25.38469478538895,
+            "ci_high": 49.59077852978014,
+            "relative_half_width": 0.341100256184078,
+            "n_replicates_undefined": 0,
+            "printed": "35",
+            "printed_precision_supported": false
+          }
+        },
+        "printed_precision_supported_at": [],
+        "pairs": {
+          "KP 57.4 - KP 58.8": {
+            "point": -9.642548868313192,
+            "ci_low": -32.5595602327538,
+            "ci_high": 14.734900631509662,
+            "resolved": false,
+            "n_replicates_paired": 10000
+          },
+          "KP 57.4 - KP 60.0": {
+            "point": -17.584321150261395,
+            "ci_low": -47.73013696865688,
+            "ci_high": 10.00161074257884,
+            "resolved": false,
+            "n_replicates_paired": 10000
+          },
+          "KP 57.4 - KP 62.0": {
+            "point": 18.481695496956185,
+            "ci_low": 2.82862701644558,
+            "ci_high": 35.97810432503413,
+            "resolved": true,
+            "n_replicates_paired": 10000
+          },
+          "KP 58.8 - KP 60.0": {
+            "point": -7.941772281948204,
+            "ci_low": -30.015061326697623,
+            "ci_high": 10.911748666271881,
+            "resolved": false,
+            "n_replicates_paired": 10000
+          },
+          "KP 58.8 - KP 62.0": {
+            "point": 28.124244365269377,
+            "ci_low": 10.828855079318283,
+            "ci_high": 47.06177431277478,
+            "resolved": true,
+            "n_replicates_paired": 10000
+          },
+          "KP 60.0 - KP 62.0": {
+            "point": 36.06601664721758,
+            "ci_low": 17.01682872939321,
+            "ci_high": 61.39247097327328,
+            "resolved": true,
+            "n_replicates_paired": 10000
+          }
+        },
+        "endpoints_resolve": true,
+        "n_resolved": 3,
+        "n_pairs": 6,
+        "withheld_below_floor": [],
+        "verdict": "PARTIAL: 3 of 6 pairs among the 4 clearing cells resolve"
+      }
+    },
+    "Q5": {
+      "historical": {
+        "scenario": "historical",
+        "stratifier": "duration",
+        "quantity": "share_of_annual_total",
+        "clearing_cells": [
+          "KP 58.8",
+          "KP 60.0"
+        ],
+        "range_point": [
+          0.8907998207643918,
+          0.9319965737289325
+        ],
+        "range_interval": [
+          0.8323726288954522,
+          0.9803919710097887
+        ],
+        "per_cell": {
+          "KP 58.8": {
+            "point": 0.8907998207643918,
+            "ci_low": 0.8346107827438589,
+            "ci_high": 0.931141239419713,
+            "relative_half_width": 0.054181901716718876,
+            "n_replicates_undefined": 0,
+            "printed": "89%",
+            "printed_precision_supported": false
+          },
+          "KP 60.0": {
+            "point": 0.9319965737289325,
+            "ci_low": 0.8323726288954522,
+            "ci_high": 0.9803919710097887,
+            "relative_half_width": 0.07940981023251453,
+            "n_replicates_undefined": 0,
+            "printed": "93%",
+            "printed_precision_supported": false
+          }
+        },
+        "printed_precision_supported_at": [],
+        "pairs": {
+          "KP 58.8 - KP 60.0": {
+            "point": -0.04119675296454073,
+            "ci_low": -0.10061755003541926,
+            "ci_high": 0.0431447855850778,
+            "resolved": false,
+            "n_replicates_paired": 10000
+          }
+        },
+        "endpoints_resolve": false,
+        "n_resolved": 0,
+        "n_pairs": 1,
+        "withheld_below_floor": [
+          {
+            "section": "KP 57.4",
+            "point": 0.13155745155099435,
+            "n_years": 3,
+            "n_carrying_member_blocks": 3,
+            "failing_criterion": "F1 occupancy: 3 carrying member blocks, floor is 20; F2 concentration: the largest member block holds 33.3 % of the stratum, cap is 20 %",
+            "point_falls_inside": [],
+            "observation_is_not_a_measurement": "where a count-limited point sits relative to another cell's interval; this cell has no interval of its own and no resolution verdict may be formed from it"
+          },
+          {
+            "section": "KP 62.0",
+            "point": 0.5853026648660671,
+            "n_years": 19,
+            "n_carrying_member_blocks": 14,
+            "failing_criterion": "F1 occupancy: 14 carrying member blocks, floor is 20",
+            "point_falls_inside": [],
+            "observation_is_not_a_measurement": "where a count-limited point sits relative to another cell's interval; this cell has no interval of its own and no resolution verdict may be formed from it"
+          }
+        ],
+        "verdict": "COLLAPSED (pre-registered section 3.7): cells clear the floor but no pair of them resolves, so the spread is not a measured range"
+      },
+      "+4K": {
+        "scenario": "+4K",
+        "stratifier": "duration",
+        "quantity": "share_of_annual_total",
+        "clearing_cells": [
+          "KP 57.4",
+          "KP 58.8",
+          "KP 60.0",
+          "KP 62.0"
+        ],
+        "range_point": [
+          0.29726450084059164,
+          0.9082195833101958
+        ],
+        "range_interval": [
+          0.20860108848793685,
+          0.9271797609869374
+        ],
+        "per_cell": {
+          "KP 57.4": {
+            "point": 0.29726450084059164,
+            "ci_low": 0.20860108848793685,
+            "ci_high": 0.38608280112157245,
+            "relative_half_width": 0.29852490312795593,
+            "n_replicates_undefined": 0,
+            "printed": "30%",
+            "printed_precision_supported": false
+          },
+          "KP 58.8": {
+            "point": 0.9082195833101958,
+            "ci_low": 0.8879082546800181,
+            "ci_high": 0.9271797609869374,
+            "relative_half_width": 0.021620050386816223,
+            "n_replicates_undefined": 0,
+            "printed": "91%",
+            "printed_precision_supported": false
+          },
+          "KP 60.0": {
+            "point": 0.8864007213740833,
+            "ci_low": 0.8527364070560572,
+            "ci_high": 0.9158320965280207,
+            "relative_half_width": 0.035590951107391675,
+            "n_replicates_undefined": 0,
+            "printed": "89%",
+            "printed_precision_supported": false
+          },
+          "KP 62.0": {
+            "point": 0.5586487143368364,
+            "ci_low": 0.4655529613695866,
+            "ci_high": 0.6455506208960794,
+            "relative_half_width": 0.16110093418917587,
+            "n_replicates_undefined": 0,
+            "printed": "56%",
+            "printed_precision_supported": false
+          }
+        },
+        "printed_precision_supported_at": [],
+        "pairs": {
+          "KP 57.4 - KP 58.8": {
+            "point": -0.6109550824696042,
+            "ci_low": -0.6971752638093621,
+            "ci_high": -0.5242794500283107,
+            "resolved": true,
+            "n_replicates_paired": 10000
+          },
+          "KP 57.4 - KP 60.0": {
+            "point": -0.5891362205334917,
+            "ci_low": -0.6737132664555454,
+            "ci_high": -0.5017924727274953,
+            "resolved": true,
+            "n_replicates_paired": 10000
+          },
+          "KP 57.4 - KP 62.0": {
+            "point": -0.26138421349624474,
+            "ci_low": -0.34969211232611824,
+            "ci_high": -0.17810837733688042,
+            "resolved": true,
+            "n_replicates_paired": 10000
+          },
+          "KP 58.8 - KP 60.0": {
+            "point": 0.021818861936112488,
+            "ci_low": -0.00538095783209486,
+            "ci_high": 0.0524784947063401,
+            "resolved": false,
+            "n_replicates_paired": 10000
+          },
+          "KP 58.8 - KP 62.0": {
+            "point": 0.3495708689733594,
+            "ci_low": 0.26603517251535846,
+            "ci_high": 0.4398700692973189,
+            "resolved": true,
+            "n_replicates_paired": 10000
+          },
+          "KP 60.0 - KP 62.0": {
+            "point": 0.32775200703724694,
+            "ci_low": 0.24657904501517536,
+            "ci_high": 0.4140826046430337,
+            "resolved": true,
+            "n_replicates_paired": 10000
+          }
+        },
+        "endpoints_resolve": true,
+        "n_resolved": 5,
+        "n_pairs": 6,
+        "withheld_below_floor": [],
+        "verdict": "PARTIAL: 5 of 6 pairs among the 4 clearing cells resolve"
+      }
+    },
+    "Q4_compound": {
+      "historical": {
+        "scenario": "historical",
+        "stratifier": "compound",
+        "quantity": "concentration_factor",
+        "clearing_cells": [
+          "KP 58.8",
+          "KP 60.0"
+        ],
+        "range_point": [
+          3.665417789472447,
+          6.544053009187306
+        ],
+        "range_interval": [
+          0.14186284988089307,
+          18.400628854507094
+        ],
+        "per_cell": {
+          "KP 58.8": {
+            "point": 3.665417789472447,
+            "ci_low": 0.256901395770027,
+            "ci_high": 9.338724156748913,
+            "relative_half_width": 1.2388523331587264,
+            "n_replicates_undefined": 0,
+            "printed": "4",
+            "printed_precision_supported": false
+          },
+          "KP 60.0": {
+            "point": 6.544053009187306,
+            "ci_low": 0.14186284988089307,
+            "ci_high": 18.400628854507094,
+            "relative_half_width": 1.395065564031374,
+            "n_replicates_undefined": 0,
+            "printed": "7",
+            "printed_precision_supported": false
+          }
+        },
+        "printed_precision_supported_at": [],
+        "pairs": {
+          "KP 58.8 - KP 60.0": {
+            "point": -2.878635219714859,
+            "ci_low": -9.660551128672427,
+            "ci_high": 0.8859009139442577,
+            "resolved": false,
+            "n_replicates_paired": 10000
+          }
+        },
+        "endpoints_resolve": false,
+        "n_resolved": 0,
+        "n_pairs": 1,
+        "withheld_below_floor": [
+          {
+            "section": "KP 57.4",
+            "point": 90.70212102672046,
+            "n_years": 5,
+            "n_carrying_member_blocks": 5,
+            "failing_criterion": "F1 occupancy: 5 carrying member blocks, floor is 20",
+            "point_falls_inside": [],
+            "observation_is_not_a_measurement": "where a count-limited point sits relative to another cell's interval; this cell has no interval of its own and no resolution verdict may be formed from it"
+          },
+          {
+            "section": "KP 62.0",
+            "point": 17.27353227775426,
+            "n_years": 10,
+            "n_carrying_member_blocks": 9,
+            "failing_criterion": "F1 occupancy: 9 carrying member blocks, floor is 20",
+            "point_falls_inside": [
+              "KP 60.0"
+            ],
+            "observation_is_not_a_measurement": "where a count-limited point sits relative to another cell's interval; this cell has no interval of its own and no resolution verdict may be formed from it"
+          }
+        ],
+        "verdict": "COLLAPSED (pre-registered section 3.7): cells clear the floor but no pair of them resolves, so the spread is not a measured range"
+      },
+      "+4K": {
+        "scenario": "+4K",
+        "stratifier": "compound",
+        "quantity": "concentration_factor",
+        "clearing_cells": [
+          "KP 57.4",
+          "KP 58.8",
+          "KP 60.0",
+          "KP 62.0"
+        ],
+        "range_point": [
+          1.6019711577882043,
+          22.45148906955996
+        ],
+        "range_interval": [
+          0.5905344748486415,
+          40.101922066086544
+        ],
+        "per_cell": {
+          "KP 57.4": {
+            "point": 22.45148906955996,
+            "ci_low": 10.23898895478345,
+            "ci_high": 40.101922066086544,
+            "relative_half_width": 0.6650546210716971,
+            "n_replicates_undefined": 0,
+            "printed": "22",
+            "printed_precision_supported": false
+          },
+          "KP 58.8": {
+            "point": 1.9084085677097764,
+            "ci_low": 1.072220825366237,
+            "ci_high": 2.8316227934213996,
+            "relative_half_width": 0.4609605086206901,
+            "n_replicates_undefined": 0,
+            "printed": "2",
+            "printed_precision_supported": false
+          },
+          "KP 60.0": {
+            "point": 1.6019711577882043,
+            "ci_low": 0.5905344748486415,
+            "ci_high": 2.929825052758719,
+            "relative_half_width": 0.7301288061702274,
+            "n_replicates_undefined": 0,
+            "printed": "2",
+            "printed_precision_supported": false
+          },
+          "KP 62.0": {
+            "point": 5.445684257911223,
+            "ci_low": 1.9827833204619814,
+            "ci_high": 10.593082407818347,
+            "relative_half_width": 0.7905617255396091,
+            "n_replicates_undefined": 0,
+            "printed": "5",
+            "printed_precision_supported": false
+          }
+        },
+        "printed_precision_supported_at": [],
+        "pairs": {
+          "KP 57.4 - KP 58.8": {
+            "point": 20.54308050185018,
+            "ci_low": 8.190163745442721,
+            "ci_high": 38.1273787791248,
+            "resolved": true,
+            "n_replicates_paired": 10000
+          },
+          "KP 57.4 - KP 60.0": {
+            "point": 20.849517911771756,
+            "ci_low": 8.49011411257982,
+            "ci_high": 38.55753872168748,
+            "resolved": true,
+            "n_replicates_paired": 10000
+          },
+          "KP 57.4 - KP 62.0": {
+            "point": 17.005804811648737,
+            "ci_low": 6.936022856807693,
+            "ci_high": 32.02852755374708,
+            "resolved": true,
+            "n_replicates_paired": 10000
+          },
+          "KP 58.8 - KP 60.0": {
+            "point": 0.3064374099215721,
+            "ci_low": -0.7834224384308972,
+            "ci_high": 1.3012358175577046,
+            "resolved": false,
+            "n_replicates_paired": 10000
+          },
+          "KP 58.8 - KP 62.0": {
+            "point": -3.5372756902014464,
+            "ci_low": -8.835783303128098,
+            "ci_high": 0.15263062919102913,
+            "resolved": false,
+            "n_replicates_paired": 10000
+          },
+          "KP 60.0 - KP 62.0": {
+            "point": -3.8437131001230185,
+            "ci_low": -9.29491100899169,
+            "ci_high": -0.11490095747941226,
+            "resolved": true,
+            "n_replicates_paired": 10000
+          }
+        },
+        "endpoints_resolve": true,
+        "n_resolved": 4,
+        "n_pairs": 6,
+        "withheld_below_floor": [],
+        "verdict": "PARTIAL: 4 of 6 pairs among the 4 clearing cells resolve"
+      }
+    },
+    "Q6_floor_sensitivity": {
+      "10": {
+        "is_the_preregistered_floor": false,
+        "cells": {
+          "duration/historical": {
+            "clearing_cells": [
+              "KP 58.8",
+              "KP 60.0",
+              "KP 62.0"
+            ],
+            "concentration_range_point": [
+              152.84567942922007,
+              377.87032757665963
+            ]
+          },
+          "duration/+4K": {
+            "clearing_cells": [
+              "KP 57.4",
+              "KP 58.8",
+              "KP 60.0",
+              "KP 62.0"
+            ],
+            "concentration_range_point": [
+              35.48235937314591,
+              71.54837602036349
+            ]
+          },
+          "compound/historical": {
+            "clearing_cells": [
+              "KP 58.8",
+              "KP 60.0"
+            ],
+            "concentration_range_point": [
+              3.665417789472447,
+              6.544053009187306
+            ]
+          },
+          "compound/+4K": {
+            "clearing_cells": [
+              "KP 57.4",
+              "KP 58.8",
+              "KP 60.0",
+              "KP 62.0"
+            ],
+            "concentration_range_point": [
+              1.6019711577882043,
+              22.45148906955996
+            ]
+          }
+        }
+      },
+      "20": {
+        "is_the_preregistered_floor": true,
+        "cells": {
+          "duration/historical": {
+            "clearing_cells": [
+              "KP 58.8",
+              "KP 60.0"
+            ],
+            "concentration_range_point": [
+              152.84567942922007,
+              377.87032757665963
+            ]
+          },
+          "duration/+4K": {
+            "clearing_cells": [
+              "KP 57.4",
+              "KP 58.8",
+              "KP 60.0",
+              "KP 62.0"
+            ],
+            "concentration_range_point": [
+              35.48235937314591,
+              71.54837602036349
+            ]
+          },
+          "compound/historical": {
+            "clearing_cells": [
+              "KP 58.8",
+              "KP 60.0"
+            ],
+            "concentration_range_point": [
+              3.665417789472447,
+              6.544053009187306
+            ]
+          },
+          "compound/+4K": {
+            "clearing_cells": [
+              "KP 57.4",
+              "KP 58.8",
+              "KP 60.0",
+              "KP 62.0"
+            ],
+            "concentration_range_point": [
+              1.6019711577882043,
+              22.45148906955996
+            ]
+          }
+        }
+      },
+      "30": {
+        "is_the_preregistered_floor": false,
+        "cells": {
+          "duration/historical": {
+            "clearing_cells": [
+              "KP 58.8",
+              "KP 60.0"
+            ],
+            "concentration_range_point": [
+              152.84567942922007,
+              377.87032757665963
+            ]
+          },
+          "duration/+4K": {
+            "clearing_cells": [
+              "KP 57.4",
+              "KP 58.8",
+              "KP 60.0",
+              "KP 62.0"
+            ],
+            "concentration_range_point": [
+              35.48235937314591,
+              71.54837602036349
+            ]
+          },
+          "compound/historical": {
+            "clearing_cells": [],
+            "concentration_range_point": null
+          },
+          "compound/+4K": {
+            "clearing_cells": [
+              "KP 58.8",
+              "KP 60.0",
+              "KP 62.0"
+            ],
+            "concentration_range_point": [
+              1.6019711577882043,
+              5.445684257911223
+            ]
+          }
+        }
+      },
+      "reading": "membership of the clearing set at each floor, with the point-estimate endpoints that follow. No interval is computed for a cell the pre-registered floor excludes: section 3.4 forbids printing one and a sensitivity does not suspend it"
     }
   },
   "resampling_unit_sensitivity": {
@@ -2799,5 +4194,5 @@
     },
     "reading": "member is the estimator; event is the naive independent-years alternative the production numbers implicitly assume; year is the crossed shared-forcing axis; sst is the six warming sea-surface patterns and is structural climate-model spread rather than hazard-sampling noise, reported because it is the largest measured grouping and never quoted as the sampling interval"
   },
-  "elapsed_s": 40.9
+  "elapsed_s": 44.6
 }

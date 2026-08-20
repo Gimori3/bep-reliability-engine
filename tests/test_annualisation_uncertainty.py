@@ -25,6 +25,14 @@ What is pinned here, and why each one earned a guard:
 7. **The interval on the ratio is on the ratio**, not a quotient of two
    marginal intervals.
 8. **The figure is declared, and the record is one of its sources.**
+9. **Part two's occupancy floor is applied mechanically, and the asymmetry it
+   encodes survives in both directions.** The first pass refused the stratified
+   attribution table an interval because the KP 57.4 long-duration stratum
+   rests on three simulated years. That reasoning is right there and wrong at
+   KP 58.8, whose same stratum carries 152 years in 46 of the 50 ensemble
+   members. Both halves are guarded: a later edit that generalised the refusal
+   again, or one that quietly admitted a three-year cell, would break a
+   different test.
 
 Every path referenced here is committed except the gitignored production table,
 so absence asserts rather than skips (conventions section 9.4); the one
@@ -623,3 +631,275 @@ def test_no_existence_guard_in_this_file_skips_on_a_tracked_path() -> None:
     assert (
         "untracked" in reason
     ), "a skip must name the untracked artifact it is skipping on"
+
+
+# --------------------------------------------------------------------------- #
+# 9. Part two: the stratified entries of the RQ4 attribution table              #
+# --------------------------------------------------------------------------- #
+# The companion's first pass refused the stratified table an interval, on the
+# grounds that the KP 57.4 long-duration stratum rests on three simulated
+# years. That is right about KP 57.4 and wrong about the other seven cells, so
+# the second pass fixed an occupancy floor in the study's own resampling unit
+# and applied it mechanically. What is pinned below is the asymmetry itself:
+# a later edit that either generalised the refusal again or quietly dropped the
+# floor would erase the finding in opposite directions, and both are guarded.
+STRATIFIERS = ("duration", "compound")
+
+
+def _stratified() -> dict:
+    return _evidence()["stratified_attribution"]
+
+
+def test_the_floor_is_stated_in_member_blocks_not_in_years() -> None:
+    """The resampling unit governs the floor, as it governs the estimator.
+
+    A year count is not the resource a block bootstrap spends: 152 years inside
+    46 members and 152 years inside 3 would give the same year count and very
+    different intervals. A later edit that re-expressed the floor in years would
+    silently change what it admits.
+    """
+    floor = _stratified()["floor"]
+    assert floor["F1_min_carrying_member_blocks"] == 20
+    assert floor["F2_max_single_block_share"] == 0.20
+    assert "member block" in floor["unit"]
+    assert "not the simulated year" in floor["unit"]
+
+    source = _require(DRIVER).read_text(encoding="utf-8")
+    assert "STRATUM_BLOCK_FLOOR = 20" in source
+    assert "STRATUM_MAX_BLOCK_SHARE = 0.20" in source
+
+
+def test_the_floor_was_preregistered_before_the_driver_carried_it() -> None:
+    """Section 3 predates section 4, and the record says which commit holds it.
+
+    The whole weight of a floor is that it was fixed before the numbers were
+    seen. Recording the commit makes that checkable by someone who was not
+    there, rather than a claim the note makes about itself.
+    """
+    text = _require(NOTE).read_text(encoding="utf-8")
+    assert "## 3. Pre-registration, part two" in text
+    assert "## 4. Outcome, part two" in text
+    assert text.index("## 3. Pre-registration") < text.index("## 4. Outcome")
+    assert (
+        "before this driver carried a line of stratified code"
+        in _stratified()["floor"]["preregistered"]
+    )
+
+
+def test_the_floor_is_applied_mechanically_and_not_by_hand() -> None:
+    """Every cell's verdict follows from its own counts, with no exceptions.
+
+    The failure mode this guards is a cell admitted or refused on judgement
+    after the fact. The verdict is recomputed here from the counts the record
+    itself carries, so a hand-set flag would disagree with its own evidence.
+    """
+    floor = _stratified()["floor"]
+    minimum = floor["F1_min_carrying_member_blocks"]
+    cap = floor["F2_max_single_block_share"]
+    for section, scenarios in _stratified()["sections"].items():
+        for scenario, block in scenarios.items():
+            for name in STRATIFIERS:
+                occupancy = block[name]["occupancy"]
+                expected = (
+                    occupancy["n_carrying_member_blocks"] >= minimum
+                    and occupancy["largest_block_share"] <= cap
+                )
+                assert occupancy["clears_floor"] is expected, (
+                    f"{section} {scenario} {name}: the recorded verdict does "
+                    "not follow from the recorded counts"
+                )
+                assert occupancy["n_member_blocks"] in (50, 90)
+                assert (
+                    occupancy["n_carrying_member_blocks"]
+                    <= occupancy["n_member_blocks"]
+                )
+                assert occupancy["n_years"] == block[name]["n_inside"]
+
+
+def test_a_cell_below_the_floor_carries_its_count_and_no_number() -> None:
+    """Section 3.4, enforced on the record rather than trusted to the prose.
+
+    "No interval" has to mean the keys are absent, not present and ignored: a
+    ``ci_low`` on a three-year stratum would be quoted by the first reader who
+    found it, whatever the surrounding text said.
+    """
+    withheld = 0
+    for section, scenarios in _stratified()["sections"].items():
+        for scenario, block in scenarios.items():
+            for name in STRATIFIERS:
+                cell = block[name]
+                if cell["occupancy"]["clears_floor"]:
+                    continue
+                withheld += 1
+                for key in ("concentration_factor", "share_of_annual_total"):
+                    quantity = cell[key]
+                    assert quantity["count_limited"] is True
+                    assert "ci_low" not in quantity
+                    assert "ci_high" not in quantity
+                    assert "relative_half_width" not in quantity
+                    assert quantity["interval_withheld_because"]
+                    assert quantity["n_years"] == cell["occupancy"]["n_years"]
+                    assert (
+                        quantity["n_carrying_member_blocks"]
+                        == cell["occupancy"]["n_carrying_member_blocks"]
+                    )
+    assert withheld == 4, (
+        "four cells are below the floor: the historical duration stratum at "
+        "KP 57.4 and KP 62.0, and the historical compound stratum at the same "
+        "two sections"
+    )
+
+
+def test_the_refusal_is_not_generalised_to_the_well_populated_pair() -> None:
+    """The asymmetry itself, which is the point of the second pass.
+
+    KP 57.4's three-year stratum gets no interval; KP 58.8's 152 years in 46 of
+    the 50 members does. Reverting either half would be a real regression, in
+    opposite directions, so both are asserted together.
+    """
+    sections = _stratified()["sections"]
+    sparse = sections["KP 57.4"]["historical"]["duration"]
+    assert sparse["occupancy"]["n_years"] == 3
+    assert sparse["occupancy"]["n_carrying_member_blocks"] == 3
+    assert sparse["concentration_factor"]["count_limited"] is True
+
+    for label, blocks in (("KP 58.8", 46), ("KP 60.0", 43)):
+        cell = sections[label]["historical"]["duration"]
+        assert cell["occupancy"]["n_carrying_member_blocks"] == blocks
+        assert cell["occupancy"]["clears_floor"] is True
+        assert cell["concentration_factor"]["ci_low"] > 0.0
+        assert cell["share_of_annual_total"]["ci_high"] <= 1.0
+
+
+def test_no_replicate_was_discarded_at_any_reported_cell() -> None:
+    """F1's first requirement, verified rather than assumed.
+
+    An interval taken after dropping the replicates in which the stratum came
+    out empty is silently conditioned on the stratum being non-empty. The floor
+    exists partly to make that impossible; this checks that it did.
+    """
+    for section, scenarios in _stratified()["sections"].items():
+        for scenario, block in scenarios.items():
+            for name in STRATIFIERS:
+                cell = block[name]
+                if not cell["occupancy"]["clears_floor"]:
+                    continue
+                for key in ("concentration_factor", "share_of_annual_total"):
+                    assert cell[key]["n_replicates_undefined"] == 0, (
+                        f"{section} {scenario} {name} {key}: a replicate was "
+                        "discarded above the floor"
+                    )
+
+
+def test_a_count_limited_cell_is_never_an_endpoint_of_a_quoted_range() -> None:
+    """Section 3.4's hardest clause, and the reason part two exists.
+
+    "151 to 378" put a three-year cell at one end of a range read as measured.
+    Nothing withheld below the floor may reach ``clearing_cells`` or the range
+    endpoints computed from them.
+    """
+    outcome = _evidence()["preregistration_outcome"]
+    for question in ("Q4", "Q5", "Q4_compound"):
+        for scenario, entry in outcome[question].items():
+            withheld = {row["section"] for row in entry["withheld_below_floor"]}
+            assert not (withheld & set(entry["clearing_cells"]))
+            for row in entry["withheld_below_floor"]:
+                assert row["failing_criterion"]
+                assert (
+                    "no resolution verdict" in row["observation_is_not_a_measurement"]
+                )
+            if entry["range_point"] is None:
+                continue
+            points = [block["point"] for block in entry["per_cell"].values()]
+            assert entry["range_point"] == [min(points), max(points)], (
+                f"{question} {scenario}: the range endpoints must come from "
+                "the clearing cells alone"
+            )
+
+
+def test_the_two_historical_shares_are_recorded_as_indistinguishable() -> None:
+    """Q5's finding: "89 and 93 per cent" is one number, not two.
+
+    The chapter prints them as a pair, which invites a reader to see a
+    difference between KP 58.8 and KP 60.0 that the ensemble cannot resolve. A
+    later edit that flipped this into a clean separation would erase the most
+    directly usable correction part two produced.
+    """
+    entry = _evidence()["preregistration_outcome"]["Q5"]["historical"]
+    assert entry["clearing_cells"] == ["KP 58.8", "KP 60.0"]
+    assert entry["n_resolved"] == 0
+    assert entry["endpoints_resolve"] is False
+    assert "COLLAPSED" in entry["verdict"]
+    pair = entry["pairs"]["KP 58.8 - KP 60.0"]
+    assert pair["ci_low"] < 0.0 < pair["ci_high"]
+
+
+def test_the_historical_concentration_range_rests_on_the_populated_pair() -> None:
+    """Q4's finding: two cells clear, and they resolve from one another.
+
+    Both halves matter. If only one cleared there would be no range at all; if
+    the two did not resolve, the spread between them would not be a measured
+    range. The defensible headline depends on both, so both are pinned.
+    """
+    entry = _evidence()["preregistration_outcome"]["Q4"]["historical"]
+    assert entry["clearing_cells"] == ["KP 58.8", "KP 60.0"]
+    assert entry["endpoints_resolve"] is True
+    assert entry["pairs"]["KP 58.8 - KP 60.0"]["resolved"] is True
+    assert entry["printed_precision_supported_at"] == [], (
+        "neither printed concentration factor is supported at the precision "
+        "the table prints it to; a later edit claiming otherwise would restore "
+        "the false precision part two removed"
+    )
+
+
+def test_the_headline_verdict_does_not_depend_on_where_the_floor_was_drawn() -> None:
+    """Q6. The strongest answer to "you tuned the floor after seeing the counts".
+
+    The historical duration range is the same at 10, 20 and 30 blocks, because
+    the one cell the floor's exact value moves in and out sits inside the range
+    rather than outside it. That is a property of these numbers, not of the
+    method, so it is asserted rather than asserted about.
+    """
+    sensitivity = _evidence()["preregistration_outcome"]["Q6_floor_sensitivity"]
+    ranges = set()
+    for floor, block in sensitivity.items():
+        if floor == "reading":
+            continue
+        cell = block["cells"]["duration/historical"]
+        ranges.add(tuple(round(value) for value in cell["concentration_range_point"]))
+    assert len(ranges) == 1, (
+        "the historical duration range moved with the floor; the note's claim "
+        "that the headline is floor-independent no longer holds"
+    )
+    assert sensitivity[str(20)]["is_the_preregistered_floor"] is True
+
+
+def test_gate_four_and_five_are_recorded_as_passed() -> None:
+    """The stratified pass resamples the published quantity and moved nothing.
+
+    Gate 4 is the stratified analogue of gate 1: without it these intervals
+    would be on a lookalike. Gate 5 is what makes part one's numbers safe, since
+    a second draw from the same stream would have moved every one of them.
+    """
+    gates = _evidence()["gates"]
+    gate4 = gates["gate_4_reproduces_rq4_attribution"]
+    assert gate4["passed"] is True
+    assert gate4["cells_compared"] == 8
+    assert gate4["worst_relative_deviation"] < gate4["unresampled_tolerance"]
+    assert "bit-identity is not asserted" in gate4["criterion_4a"]
+    assert gates["gate_5_stratified_pass_reused_the_part_one_draw"]["passed"] is True
+    assert gates["gate_1_reproduces_production_table"]["rows_compared"] == 912
+
+
+def test_the_part_two_prose_agrees_with_the_part_two_record() -> None:
+    """Same drift guard the part-one verdicts carry, applied to section 4."""
+    text = _require(NOTE).read_text(encoding="utf-8")
+    part_two = text[text.index("## 4. Outcome, part two") :]
+    assert len(part_two.splitlines()) > 40, "section 4 is still a placeholder"
+    outcome = _evidence()["preregistration_outcome"]
+    assert "RANGE SUPPORTED" in outcome["Q4"]["historical"]["verdict"]
+    assert "COLLAPSED" in outcome["Q5"]["historical"]["verdict"]
+    assert "count-limited" in part_two
+    assert "3 yr" in part_two or "3 years in 3" in part_two
+    for label in ("KP 58.8", "KP 60.0"):
+        assert label in part_two
