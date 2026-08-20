@@ -12,6 +12,21 @@ number-bearing evidence follow the repository convention:
 summary with the verification statuses) and `docs/figures/stage6_6_*.png`.
 Every number below traces to those files.
 
+[**Amended 2026-08-20; read this before tracing a number.** The committed
+copies are hand-placed: no driver writes `docs/decisions/`, so they can only be
+kept current by hand and the two KP 62.0 records were not. They were still the
+pre-adoption L = 47.0 m run while sections 8 to 10 and the thesis carried the
+post-adoption values, and they stated a design-level ratio of 21.0, which
+section 9 retires. They now carry the live post-adoption artifact and each
+names its source in a `provenance` block; the KP 57.4 pair was verified already
+current and left untouched, and the summary was left untouched because every
+value it shares with the live record is identical. **The consequence for the
+sentence above: the committed copies trace sections 8 to 10, not sections 1 to
+7.** Sections 1 to 7 are the pre-adoption run, which is retained at
+`results/superseded_adr0047_L47/stage6_6/` (`docs/conventions.md` section 10.4)
+and in git at 05821aa. `tests/test_stage6_6_committed_evidence.py` now pins each
+copy against its live artifact so the drift cannot recur silently.]
+
 ## 1. Scope and headline
 
 This stage quantifies the total bias between the static Sellmeijer (2011)

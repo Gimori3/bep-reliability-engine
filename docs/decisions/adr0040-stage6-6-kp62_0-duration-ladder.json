@@ -1,8 +1,8 @@
 {
   "levels_m": [
     46.0,
-    46.75,
-    47.5
+    46.5,
+    47.25
   ],
   "alpha_minus_half": {
     "n_samples": 10000,
@@ -16,103 +16,103 @@
     ],
     "levels_m": [
       46.0,
-      46.75,
-      47.5
+      46.5,
+      47.25
     ],
     "rows": [
       {
         "level_m": 46.0,
         "hours": 24.0,
-        "analytic_failures": 108,
-        "ode_failures": 44,
-        "analytic_not_ode": 64,
+        "analytic_failures": 236,
+        "ode_failures": 94,
+        "analytic_not_ode": 142,
         "ode_not_analytic": 0
       },
       {
         "level_m": 46.0,
         "hours": 96.0,
-        "analytic_failures": 108,
-        "ode_failures": 88,
-        "analytic_not_ode": 20,
+        "analytic_failures": 236,
+        "ode_failures": 203,
+        "analytic_not_ode": 33,
         "ode_not_analytic": 0
       },
       {
         "level_m": 46.0,
         "hours": 384.0,
-        "analytic_failures": 108,
-        "ode_failures": 108,
+        "analytic_failures": 236,
+        "ode_failures": 236,
         "analytic_not_ode": 0,
         "ode_not_analytic": 0
       },
       {
         "level_m": 46.0,
         "hours": 1536.0,
-        "analytic_failures": 108,
-        "ode_failures": 108,
+        "analytic_failures": 236,
+        "ode_failures": 236,
         "analytic_not_ode": 0,
         "ode_not_analytic": 0
       },
       {
-        "level_m": 46.75,
+        "level_m": 46.5,
         "hours": 24.0,
-        "analytic_failures": 2209,
-        "ode_failures": 939,
-        "analytic_not_ode": 1270,
+        "analytic_failures": 1919,
+        "ode_failures": 943,
+        "analytic_not_ode": 976,
         "ode_not_analytic": 0
       },
       {
-        "level_m": 46.75,
+        "level_m": 46.5,
         "hours": 96.0,
-        "analytic_failures": 2209,
+        "analytic_failures": 1919,
+        "ode_failures": 1723,
+        "analytic_not_ode": 196,
+        "ode_not_analytic": 0
+      },
+      {
+        "level_m": 46.5,
+        "hours": 384.0,
+        "analytic_failures": 1919,
         "ode_failures": 1904,
-        "analytic_not_ode": 305,
+        "analytic_not_ode": 15,
         "ode_not_analytic": 0
       },
       {
-        "level_m": 46.75,
-        "hours": 384.0,
-        "analytic_failures": 2209,
-        "ode_failures": 2191,
-        "analytic_not_ode": 18,
-        "ode_not_analytic": 0
-      },
-      {
-        "level_m": 46.75,
+        "level_m": 46.5,
         "hours": 1536.0,
-        "analytic_failures": 2209,
-        "ode_failures": 2209,
+        "analytic_failures": 1919,
+        "ode_failures": 1919,
         "analytic_not_ode": 0,
         "ode_not_analytic": 0
       },
       {
-        "level_m": 47.5,
+        "level_m": 47.25,
         "hours": 24.0,
-        "analytic_failures": 5746,
-        "ode_failures": 3082,
-        "analytic_not_ode": 2664,
+        "analytic_failures": 5847,
+        "ode_failures": 3619,
+        "analytic_not_ode": 2228,
         "ode_not_analytic": 0
       },
       {
-        "level_m": 47.5,
+        "level_m": 47.25,
         "hours": 96.0,
-        "analytic_failures": 5746,
-        "ode_failures": 5212,
-        "analytic_not_ode": 534,
+        "analytic_failures": 5847,
+        "ode_failures": 5482,
+        "analytic_not_ode": 365,
         "ode_not_analytic": 0
       },
       {
-        "level_m": 47.5,
+        "level_m": 47.25,
         "hours": 384.0,
-        "analytic_failures": 5746,
-        "ode_failures": 5717,
-        "analytic_not_ode": 29,
+        "analytic_failures": 5847,
+        "ode_failures": 5830,
+        "analytic_not_ode": 17,
         "ode_not_analytic": 0
       },
       {
-        "level_m": 47.5,
+        "level_m": 47.25,
         "hours": 1536.0,
-        "analytic_failures": 5746,
-        "ode_failures": 5746,
+        "analytic_failures": 5847,
+        "ode_failures": 5847,
         "analytic_not_ode": 0,
         "ode_not_analytic": 0
       }
@@ -129,41 +129,53 @@
       1536.0
     ],
     "levels_m": [
-      47.5
+      47.25
     ],
     "rows": [
       {
-        "level_m": 47.5,
+        "level_m": 47.25,
         "hours": 24.0,
-        "analytic_failures": 600,
-        "ode_failures": 352,
-        "analytic_not_ode": 248,
+        "analytic_failures": 782,
+        "ode_failures": 503,
+        "analytic_not_ode": 279,
         "ode_not_analytic": 0
       },
       {
-        "level_m": 47.5,
+        "level_m": 47.25,
         "hours": 96.0,
-        "analytic_failures": 600,
-        "ode_failures": 581,
-        "analytic_not_ode": 19,
+        "analytic_failures": 782,
+        "ode_failures": 759,
+        "analytic_not_ode": 23,
         "ode_not_analytic": 0
       },
       {
-        "level_m": 47.5,
+        "level_m": 47.25,
         "hours": 384.0,
-        "analytic_failures": 600,
-        "ode_failures": 599,
-        "analytic_not_ode": 1,
+        "analytic_failures": 782,
+        "ode_failures": 782,
+        "analytic_not_ode": 0,
         "ode_not_analytic": 0
       },
       {
-        "level_m": 47.5,
+        "level_m": 47.25,
         "hours": 1536.0,
-        "analytic_failures": 600,
-        "ode_failures": 600,
+        "analytic_failures": 782,
+        "ode_failures": 782,
         "analytic_not_ode": 0,
         "ode_not_analytic": 0
       }
     ]
+  },
+  "provenance": {
+    "record": "committed copy of the live Stage 6.6 campaign artifact",
+    "source": {
+      "path": "results/stage6_6/stage6_6_kp62_0_duration_ladder.json",
+      "gitignored": true,
+      "sha256": "fb9953cf04bed1a6d2ac1c70136fbed69ddeb4652dd4e5eab7e70e572abc6583"
+    },
+    "transcribed": "2026-08-20",
+    "transcribed_by": "documentation reconciliation; transcribed from the live artifact, no sweep, ladder or study was re-run",
+    "supersedes": "Replaces the 2026-07-17 pre-adoption copy committed by 05821aa, which was computed at the withdrawn KP 62.0 seepage length L = 47.0 m. ADR-0047 (2026-07-29) adopted L = 40.0 m at this section, the production campaign regenerated the live artifact, and commit 263bf85 (2026-08-06) carried the post-adoption component figures into docs/stage6_6_report.md section 10 and the thesis; this committed copy was missed by that pass. The pre-adoption numbers are retained at results/superseded_adr0047_L47/stage6_6/ (retention policy, docs/conventions.md section 10.4) and in git at 05821aa.",
+    "quotable_design_hwl_bias": "This record is an N = 1e5 fragility decomposition. Its design-level static/transient ratio is NOT the quotable design-HWL bias, and neither is the retired 'about 21' of the superseded copy. Quote B = 26.9, 95 per cent CI [21.6, 35.3], at 46.39 m MSL, resolved at N = 1e6 on 63 failing rows: docs/stage6_6_report.md section 9 and docs/decisions/adr0040-hwl-bias-resolution.json."
   }
 }

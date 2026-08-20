@@ -46,5 +46,18 @@
         "results\\stage6_6\\figures\\stage6_6_heq_kp57_4.png"
       ]
     }
+  },
+  "provenance": {
+    "record": "the 2026-07-17 Stage 6.6 run summary, committed by 05821aa and deliberately left at its original values",
+    "checked_against": {
+      "path": "results/stage6_6/stage6_6_summary.json",
+      "gitignored": true,
+      "sha256": "567ca4ea1129a5e6598a5a27f10974d540af645d040158feb173530b0ced1342",
+      "result": "every key present in both records is identical: both sections' production_verification status (bit_identical), levels_checked (38 / 23), theta_identical, and all five flip_totals (0). This record carries no superseded number, which is why it was not replaced when the two KP 62.0 records were, on 2026-08-20."
+    },
+    "keys_the_live_record_does_not_carry": {
+      "figures": "written only when the driver renders figures; the 2026-07-29 campaign run did not, so the live summary omits the list. The paths recorded here are the study-local copies under gitignored results/stage6_6/figures/, not the docs/figures/ deliverables.",
+      "hash_note": "emitted only when the production sweep's config_hash differs from the companion run's. It is a statement about the 2026-07-17 run, NOT a current one: both configs have since been regenerated, so the condition no longer fires and the live summary has no such note."
+    }
   }
 }
