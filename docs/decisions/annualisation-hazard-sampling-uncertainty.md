@@ -528,3 +528,256 @@ Nothing here is total uncertainty. The intervals above are between about 10 and
 60 per cent of a production value. The conductivity bracket at the same sections
 spans four orders of magnitude and reverses the mechanism ordering. **A reader
 who takes the interval and forgets the bracket has the uncertainty backwards.**
+
+---
+
+# Part two: the stratified entries of the RQ4 attribution table
+
+**Status: section 3 pre-registered 2026-08-20, before any stratified interval
+was computed and before the driver carried a line of stratified code. Section 4
+records the outcome and may not re-tune anything in section 3.** Same study,
+same estimator, same record; this extends the companion rather than opening a
+second one.
+
+Section 2.7 above closed with a refusal: *"Nothing here touches the stratified
+entries of the RQ4 attribution table. The KP 57.4 long-duration stratum still
+rests on three simulated years, and a three-year conditional mean is not rescued
+by an interval on a different quantity."* That sentence is right about KP 57.4
+and wrong as a statement about the table, because it generalises a count
+argument from the sparsest cell to seven others that are not sparse. Section 3.2
+measures the occupancy of every cell; two of the eight duration cells carry more
+ensemble members than there are SST patterns in the whole warming ensemble by an
+order of magnitude, and refusing them an interval on KP 57.4's grounds is the
+mirror image of quoting KP 57.4 as though it had one.
+
+**The scope sentence at the top of this note applies to every number in this
+part too.** These are hazard-sampling intervals with the fragility curves held
+fixed, and the conductivity bracket remains four orders of magnitude wider.
+
+---
+
+## 3. Pre-registration, part two
+
+### 3.1 The question
+
+Table `tab: rq4 attribution` in Chapter 7 prints, per section and climate, a
+conditional annual probability inside and outside a duration stratum, their
+ratio (the concentration factor), and the share of the annual total the long
+stratum contributes. The concentration-factor row is quoted as the range **151
+to 378** in the Summary, in Chapter 7 twice, in Chapter 8 twice and in Chapter 9
+four times, and the share row supplies the **"89 and 93 per cent"** claim at
+KP 58.8 and KP 60.0. None of them carries an interval. This part asks which of
+them can be given one, and states in advance the occupancy at which the answer
+becomes no.
+
+### 3.2 The counts, measured before the floor was fixed
+
+Executed 2026-08-20 from the 8 cached node files at the four characterised
+sections, read-only through `system_integration.hazard._read_cache`. Nothing
+here is a bootstrap result; these are properties of the ensemble as simulated.
+A **carrying member** is a d4PDF ensemble member, the study's resampling unit
+from section 1.1, holding at least one event of the stratum. There are 50
+members historically and 90 under warming.
+
+Long-duration stratum, `hours_above_datum > 24`:
+
+| Section | Scenario | Years | Carrying members | of | SST patterns | Largest member's share |
+|---|---|---|---|---|---|---|
+| KP 57.4 | historical | **3** | **3** | 50 | 1 | 33.3 % |
+| KP 58.8 | historical | 152 | 46 | 50 | 1 | 5.3 % |
+| KP 60.0 | historical | 105 | 43 | 50 | 1 | 5.7 % |
+| KP 62.0 | historical | 19 | **14** | 50 | 1 | 15.8 % |
+| KP 57.4 | +4K | 42 | 33 | 90 | 6 | 7.1 % |
+| KP 58.8 | +4K | 727 | 90 | 90 | 6 | 2.3 % |
+| KP 60.0 | +4K | 531 | 88 | 90 | 6 | 2.6 % |
+| KP 62.0 | +4K | 186 | 72 | 90 | 6 | 4.3 % |
+
+Compound stratum, `n_peaks_above_datum >= 2`, which supplies the separate
+"3.7 to 91 historically" and "1.6 to 23 under warming" ranges in the same
+subsection:
+
+| Section | Scenario | Years | Carrying members | of | Largest member's share |
+|---|---|---|---|---|---|
+| KP 57.4 | historical | **5** | **5** | 50 | 20.0 % |
+| KP 58.8 | historical | 35 | 23 | 50 | 8.6 % |
+| KP 60.0 | historical | 27 | 20 | 50 | 7.4 % |
+| KP 62.0 | historical | 10 | **9** | 50 | 20.0 % |
+| KP 57.4 | +4K | 29 | 25 | 90 | 6.9 % |
+| KP 58.8 | +4K | 131 | 71 | 90 | 5.3 % |
+| KP 60.0 | +4K | 101 | 58 | 90 | 5.0 % |
+| KP 62.0 | +4K | 72 | 53 | 90 | 6.9 % |
+
+The complement stratum is never the binding one: the short-duration stratum
+holds 2,848 to 5,214 years and 50 or 90 carrying members in every cell.
+
+Three things follow, and they are the reason a floor is needed rather than a
+blanket verdict in either direction.
+
+* The year counts confirm section 0c and the chapter's own text. KP 57.4's
+  long-duration stratum is 3 years in **3 distinct members**, so a bootstrap
+  over members has three carrying blocks to work with, not three years' worth of
+  something better.
+* KP 58.8 and KP 60.0 historically carry 46 and 43 of the 50 members. The
+  chapter already singles out exactly this pair as *"the two sections where the
+  historical loading is frequent enough for the stratification to be well
+  populated"*, and it is that pair which carries the 89 and 93 per cent claim.
+  The chapter's own qualitative judgement and the measured block occupancy agree.
+* KP 62.0 historically sits between them at 19 years in 14 members, and is the
+  one cell where the verdict will depend on where the line is drawn rather than
+  being obvious from either end.
+
+### 3.3 The floor, fixed now
+
+**A stratified quantity is reported with a 95 % interval only where both of the
+following hold, evaluated on the smaller of the two strata forming it.**
+
+> **F1, occupancy.** At least **20 distinct member blocks** carry at least one
+> event of the stratum.
+>
+> **F2, concentration.** No single member block holds more than **20 %** of the
+> stratum's events.
+
+**Justification of F1, stated without reference to any section.** The resampling
+unit is the member block, so a stratum's information is carried by the m blocks
+that hold at least one of its events, not by its year count. Two independent
+requirements both land on the same number.
+
+*The estimator must be defined in every replicate.* A bootstrap replicate omits
+a given block with probability `(1 - 1/K)^K`, which is 0.364 at K = 50 and 0.367
+at K = 90, so the probability that a replicate contains none of the m carrying
+blocks is about `e^-m`. At m = 10 that is 4.5e-5, which at R = 10,000 is an
+expected 0.45 replicates with an empty stratum and an undefined conditional
+mean. At m = 20 it is 2.1e-9, an expected 2e-5. This matters because this
+study's existing practice discards undefined replicates (`ratio_replicates`
+holds them as `nan` and the interval is taken over the rest), and an interval
+computed after discarding is silently conditioned on the stratum being
+non-empty. A floor that permits discarding is not a floor.
+
+*No single block may carry more leverage than the project's own tolerance.* Each
+carrying block's expected multiplicity is 1, so under roughly even occupancy a
+block's weight in the stratum's conditional mean is about `1/m`, and dropping it
+moves that mean by `1/m` of its deviation. Requiring that leverage to sit at or
+below the project's standing 5 % Monte Carlo tolerance, the Schweckendiek (2014)
+figure this repository already uses in ADR-0031 and ADR-0032, gives
+`1/m <= 0.05` and therefore **m >= 20**.
+
+**Justification of F2.** F1 bounds the *average* block weight, and an average
+hides concentration: a stratum can clear m >= 20 while one member holds most of
+its events, in which case the interval's endpoint is a two-atom object, that
+block present or absent, wearing a percentile's clothes. F2 caps the most
+influential block at four times the weight F1 permits a uniform one. It is
+expected **not** to bind at the occupancies section 3.2 measures, and section 4
+will say plainly whether it bound, in the ADR-0032 idiom where a pre-registered
+conservative pole that turns out not to bind is itself the reportable outcome.
+
+**This floor is not blind and does not claim to be.** Section 3.2 was measured
+before it was written, exactly as section 0 preceded section 1, so a reader can
+see that the counts were known. The defence is therefore not ignorance of the
+counts but two things that are checkable: the justification above names no
+section and would read identically had the counts come out differently, and
+section 3.6 pre-registers a **sensitivity of the verdict to the floor itself**,
+reported at 10 and at 30 blocks alongside the fixed 20, so that any verdict which
+depends on the exact value is visible as such rather than presented as robust.
+
+**Scope of the floor.** Every stratified entry of Table `tab: rq4 attribution`,
+both stratifications, both climates, all four sections. It is not extended to
+the annual quantities of part one, which are means over the whole ensemble at 50
+or 90 carrying blocks and were never in question.
+
+### 3.4 What is printed below the floor
+
+A cell that fails F1 or F2 is reported as **the count and no number**:
+
+> its year count, its carrying-member count out of 50 or 90, the failing
+> criterion, and the production point estimate labelled as count-limited.
+
+No interval, no half-width, no relative width, and no resolution verdict of any
+kind. The production point estimate stays visible, because it is arithmetically
+exact for the ensemble as simulated and it is the value the thesis prints, but
+**it may not be an endpoint of any range quoted as measured**, and no statement
+of the form "resolvably larger than" or "not distinguishable from" may be made
+about it. A count-limited cell may be compared with an intervalled one only in
+the one direction that costs nothing: whether its point estimate falls inside
+the other's interval, reported as a consistency observation and never as a
+measurement.
+
+### 3.5 The quantities and their estimator
+
+No change of method. Same block bootstrap over d4PDF ensemble members, same
+R = 10,000, same seed 20260820, same two-sided 95 % percentile interval, same
+**shared multiplicity draw**, so every stratified quantity is paired with every
+other one and with the annual quantities of part one on the replicate index. The
+point estimate is always the unresampled production value and never a bootstrap
+mean. The arm is **matrix / posterior / 250 m / primary**, which is the only arm
+`rq4_attribution.json` exists for, so the reported numbers are the production
+quantity rather than a variant of it.
+
+Stratum membership is a property of the event and is carried through the
+resample with it. Inside replicate r, with block multiplicities `c_b`:
+
+    p_in,r   = sum_b c_b * S_in,b  / sum_b c_b * n_in,b
+    p_out,r  = sum_b c_b * S_out,b / sum_b c_b * n_out,b
+    C_r      = p_in,r / p_out,r                       (the concentration factor)
+    share_r  = sum_b c_b * S_in,b  / sum_b c_b * S_all,b
+
+with `S_.,b` the per-block sum of the composed system probability over the
+events of that stratum in that block and `n_.,b` the per-block event count. Both
+the ratio and the share are formed **inside** the replicate, so each interval is
+an interval on the quantity itself and never a quotient of two marginal
+intervals, which is the same rule part one applied to the climate ratio.
+
+### 3.6 Resolution criteria
+
+**Q4. Is the concentration-factor range "151 to 378" supported?**
+
+1. The defensible range is the envelope of the cells that clear the floor, at
+   the printed precision their intervals support. A cell below the floor is
+   named alongside it with its count and is never an endpoint.
+2. Two clearing cells are **resolvably different** iff the 95 % percentile
+   interval of their **paired** difference excludes zero. If the two historical
+   clearing cells do not resolve, the range collapses and must be replaced by a
+   single statement covering both.
+3. A quoted value is supported at the precision printed iff both endpoints of
+   its interval round to that same printed value.
+
+**Q5. Is the "89 and 93 per cent" share claim supported?**
+
+Same three rules applied to the share of the annual total from the long stratum,
+with rule 3 evaluated at the two significant figures the chapter prints.
+
+**Q6, the floor sensitivity.** Q4 and Q5 are additionally scored at floors of 10
+and 30 carrying blocks. Reported, never used to choose. The pre-registered
+verdict is the one at 20.
+
+### 3.7 What would make this unanswerable
+
+Named now, so the verdict cannot be redefined afterwards.
+
+* **Unanswerable outright** if fewer than two cells clear the floor, in which
+  case there is no range to defend and the concentration factor must be quoted
+  per cell with its count, with no range statement anywhere in the thesis.
+* **The range collapses**, rather than being unanswerable, if two or more cells
+  clear but no pair of them resolves. The honest statement is then a single
+  concentration factor with one interval covering the clearing cells, and the
+  present four-number spread is an artifact of reading point estimates as
+  measurements.
+* **Q5 unanswerable at a section** whose share interval is wider than the gap
+  between the two printed shares, in which case "89 and 93" must become one
+  number for both.
+* A cell that clears F1 but fails F2 is **below the floor**, not a special case.
+  It is reported under section 3.4 with F2 named as the failing criterion.
+
+### 3.8 Gates
+
+Additional to the four of section 1.7, which are re-asserted unchanged.
+
+4. **Reproduces `rq4_attribution.json` exactly.** Every field of every one of
+   the 8 section-and-climate entries, by float equality with no tolerance: the
+   two conditional probabilities and the stratum size of both stratifications,
+   the loading fractions, the median duration and the year count. Load-bearing
+   in the same way gate 1 is: without it the bootstrap is not resampling the
+   published stratified quantity.
+5. **The stratified pass changes no number in part one.** The multiplicity draw
+   is the one already made; every interval in sections 2.2 to 2.7 must come out
+   unchanged, which is what proves the extension added a quantity rather than
+   perturbing the estimator.
