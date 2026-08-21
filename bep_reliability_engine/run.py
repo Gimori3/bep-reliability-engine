@@ -276,6 +276,12 @@ class _EvalSettings:
         every pre-ADR-0049 config) is the published formula, bit-identical to
         prior behaviour. Transient-only: l_c enters nothing but the M7
         equilibrium curve, so the static column is unchanged by construction.
+    toe_gradient_relief_factor : float or None
+        ADR-0050 relief on the landside-toe exit gradient, from
+        ``config.toe_gradient_relief_factor``. None (production, and every
+        pre-ADR-0050 config) is the undrained baseline, bit-identical to prior
+        behaviour. Gate-only: since ADR-0028 r_e reaches the uplift/heave gate
+        and nothing else, so the static column is unchanged by construction.
     """
 
     l_ini_m: float
@@ -288,6 +294,7 @@ class _EvalSettings:
     progression_backend: str
     model_factor_samples: NDArray[np.float64] | None = None
     critical_length_factor: float | None = None
+    toe_gradient_relief_factor: float | None = None
 
 
 # ============================================================================
@@ -477,6 +484,7 @@ def _evaluate_level(
         progression_backend=settings.progression_backend,
         model_factor_samples=settings.model_factor_samples,
         critical_length_factor=settings.critical_length_factor,
+        toe_gradient_relief_factor=settings.toe_gradient_relief_factor,
     )
     return level_index, col_static, col_trans
 
@@ -1183,6 +1191,7 @@ def run_fragility_analysis(
         progression_backend=config.timestepper.progression_backend,
         model_factor_samples=model_factor_samples,
         critical_length_factor=config.critical_length_factor,
+        toe_gradient_relief_factor=config.toe_gradient_relief_factor,
     )
     grid = np.asarray(config.mc.conditioning_grid, dtype=np.float64)
     n_levels = int(grid.size)

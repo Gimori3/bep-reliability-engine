@@ -272,6 +272,14 @@ def verify_posterior_fragility_by_reevaluation(
 
     retained_stat = run.result.failure_matrix_stat[accept, :]
     retained_tran = run.result.failure_matrix_tran[accept, :]
+    # Optional M8 keywords the parent run may carry. They must be forwarded or
+    # this function re-evaluates a DIFFERENT model from the one that produced
+    # the matrices it is checking, and reports the difference as a verification
+    # failure. All three default to None/absent, so a production run is
+    # unaffected; the arms of ADR-0045, ADR-0049 and ADR-0050 are not.
+    model_factor_accepted = (
+        None if run.model_factor_samples is None else run.model_factor_samples[accept]
+    )
     flag_mismatch_static = 0
     flag_mismatch_trans = 0
     p_trans = np.empty(grid.size, dtype=np.float64)
@@ -289,6 +297,9 @@ def verify_posterior_fragility_by_reevaluation(
             relative_density=config.relative_density_insitu,
             foreland_open=config.foreland_treatment == "open_entry",
             progression_backend=config.timestepper.progression_backend,
+            model_factor_samples=model_factor_accepted,
+            critical_length_factor=config.critical_length_factor,
+            toe_gradient_relief_factor=config.toe_gradient_relief_factor,
         )
         flag_mismatch_static += int((col_static != retained_stat[:, i]).sum())
         flag_mismatch_trans += int((col_trans != retained_tran[:, i]).sum())

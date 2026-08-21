@@ -108,6 +108,14 @@ cross-reference stability:
 4. **geometry keys.** Spec §2 names the contents (L, z_toe, foreshore_width,
    D_fore, k_fore) but not the exact dict keys; the keys ``'L'``, ``'z_toe'``,
    ``'foreshore_width'``, ``'D_fore'`` and ``'k_fore'`` are assumed.
+4b. **Landside-toe gradient relief (ADR-0050).** The optional
+   ``toe_gradient_relief_factor`` scales the response factor handed to the M4
+   head model, and therefore scales ``Delta_h_blanket`` and the exit gradient
+   ``i_exit`` by the same factor at every timestep. It is the engine handle for
+   the one quantity Japanese guidance names for a landside toe drain (PWRI 2014
+   Table 7.1.1, "reduce the hydraulic gradient at the landside toe"), and by
+   ADR-0028 it reaches that gate and nothing else. Default None; the reported
+   ``r_e`` stays the unrelieved physical response factor.
 5. **Aquifer-lag wiring.** Spec §3 step 8a allows M8 to activate the M4 lag
    form, but the §2/§8 signature carries no lag flag, tau_aq or S_s. Phase 1
    defaults to :class:`~bep_reliability_engine.hydraulics.InstantaneousHead`;
@@ -178,6 +186,53 @@ __all__ = [
     "evaluate_batch",
     "evaluate_batch_diagnostics",
 ]
+
+
+def _gate_response_factor(r_e, toe_gradient_relief_factor: float | None):
+    """Scale the response factor the uplift/heave gate sees (ADR-0050).
+
+    The landside-toe exit gradient is ``i_exit = Delta_h_blanket / D_bl`` with
+    ``Delta_h_blanket = r_e * (h - z_toe)``, so multiplying ``r_e`` by a relief
+    factor multiplies ``i_exit`` by exactly the same factor at every timestep.
+    Since ADR-0028 ``r_e`` reaches the uplift/heave gate and nothing else --
+    both piping heads are r_e-independent and the static comparator is entirely
+    r_e-independent -- this is a perturbation of the one quantity Japanese
+    guidance names for a landside toe drain (PWRI 2014 Table 7.1.1) and of
+    nothing else.
+
+    Returns the input unchanged for ``None`` and for ``1.0`` (both are the
+    undrained baseline), so the axis is bit-identical when off.
+
+    Parameters
+    ----------
+    r_e : float or numpy.ndarray
+        The physical M4 response factor. Never mutated: the value reported in
+        ``EvaluationResult.r_e`` / ``BatchDiagnostics.r_e`` stays the
+        blanket-aquifer property, and the drain credit is recorded separately
+        in run metadata.
+    toe_gradient_relief_factor : float or None
+        Fraction of the undrained landside-toe exit gradient that survives the
+        drain, in ``(0, 1]``. None is the undrained baseline.
+
+    Raises
+    ------
+    ValueError
+        If the factor is outside ``(0, 1]``. The mapping is one-sided: the
+        guidance states the countermeasure *reduces* the gradient, so a value
+        above 1 would be an aggravation it does not license, and a value of 0
+        would assert a perfect drain rather than bracket one.
+    """
+    if toe_gradient_relief_factor is None:
+        return r_e
+    factor = float(toe_gradient_relief_factor)
+    if not 0.0 < factor <= 1.0:
+        raise ValueError(
+            "toe_gradient_relief_factor must lie in (0, 1]; got "
+            f"{toe_gradient_relief_factor!r}."
+        )
+    if factor == 1.0:
+        return r_e
+    return r_e * factor
 
 
 @dataclass(frozen=True)
@@ -332,6 +387,7 @@ def evaluate_realization(
     foreland_open: bool = False,
     model_factor_mp: float | None = None,
     critical_length_factor: float | None = None,
+    toe_gradient_relief_factor: float | None = None,
 ) -> EvaluationResult:
     """Evaluate both limit states for one realization (M8, spec §2-§4).
 
@@ -434,6 +490,20 @@ float, optional
         static branch is exactly invariant under it. Works on both
         progression backends (the scaling happens upstream of the M7
         kernel, which receives l_c as an input array).
+    toe_gradient_relief_factor : float, optional
+        Keyword-only relief on the landside-toe exit gradient (ADR-0050), in
+        ``(0, 1]``: the fraction of the undrained gradient that survives a
+        landside toe drain. ``None`` (default) and ``1.0`` are the undrained
+        baseline and **bit-identical** to prior behaviour. Applied by scaling
+        the response factor handed to the M4 head model, so
+        ``Delta_h_blanket`` and ``i_exit = Delta_h_blanket / D_bl`` scale by
+        exactly this factor at every timestep. Since ADR-0028 r_e reaches the
+        uplift/heave gate and nothing else, the knob is **gate-only by
+        construction**: the static branch is exactly invariant under it, and
+        neither piping head moves. The reported ``r_e`` diagnostic stays the
+        *physical* response factor, unrelieved; the credit belongs to a
+        structure, not to the blanket-aquifer system. Works on both
+        progression backends. Companion sensitivity runs only.
 
     Returns
     -------
@@ -570,7 +640,9 @@ float, optional
     # instantaneous (quasi-static) M4 form (module docstring ambiguity 5).
     h_river_m = np.asarray(hydrograph.h, dtype=np.float64)
     dt_s = float(hydrograph.native_dt)
-    head_model = InstantaneousHead(r_e, z_toe_m)
+    head_model = InstantaneousHead(
+        _gate_response_factor(r_e, toe_gradient_relief_factor), z_toe_m
+    )
     progression = integrate_progression(
         h_river_m,
         dt_s,
@@ -625,6 +697,7 @@ def evaluate_batch(
     equilibrium_end_factor: float | None = None,
     model_factor_samples: npt.NDArray[float64] | None = None,
     critical_length_factor: float | None = None,
+    toe_gradient_relief_factor: float | None = None,
 ) -> tuple[npt.NDArray[np.bool_], npt.NDArray[np.bool_]]:
     """Evaluate both limit states for all N realizations at one level (M8 batch).
 
@@ -722,6 +795,20 @@ integrate_progression_numba`) — numerically equivalent to < 1e-10 but NOT
         static branch is exactly invariant under it. Works on both
         progression backends (the scaling happens upstream of the M7
         kernel, which receives l_c as an input array).
+    toe_gradient_relief_factor : float, optional
+        Keyword-only relief on the landside-toe exit gradient (ADR-0050), in
+        ``(0, 1]``: the fraction of the undrained gradient that survives a
+        landside toe drain. ``None`` (default) and ``1.0`` are the undrained
+        baseline and **bit-identical** to prior behaviour. Applied by scaling
+        the response factor handed to the M4 head model, so
+        ``Delta_h_blanket`` and ``i_exit = Delta_h_blanket / D_bl`` scale by
+        exactly this factor at every timestep. Since ADR-0028 r_e reaches the
+        uplift/heave gate and nothing else, the knob is **gate-only by
+        construction**: the static branch is exactly invariant under it, and
+        neither piping head moves. The reported ``r_e`` diagnostic stays the
+        *physical* response factor, unrelieved; the credit belongs to a
+        structure, not to the blanket-aquifer system. Works on both
+        progression backends. Companion sensitivity runs only.
 
     Returns
     -------
@@ -751,6 +838,7 @@ integrate_progression_numba`) — numerically equivalent to < 1e-10 but NOT
         equilibrium_end_factor=equilibrium_end_factor,
         model_factor_samples=model_factor_samples,
         critical_length_factor=critical_length_factor,
+        toe_gradient_relief_factor=toe_gradient_relief_factor,
     )
     return diagnostics.failure_static, diagnostics.failure_trans
 
@@ -772,6 +860,7 @@ def evaluate_batch_diagnostics(
     equilibrium_end_factor: float | None = None,
     model_factor_samples: npt.NDArray[float64] | None = None,
     critical_length_factor: float | None = None,
+    toe_gradient_relief_factor: float | None = None,
 ) -> BatchDiagnostics:
     """Evaluate all N realizations at one level, retaining diagnostics (ADR-0034).
 
@@ -934,7 +1023,7 @@ def evaluate_batch_diagnostics(
         progression = integrate_progression_numba(
             h_river_m,
             dt_s,
-            r_e,
+            _gate_response_factor(r_e, toe_gradient_relief_factor),
             z_toe_m,
             c_e=c_e,
             k_aq_mps=k_aq_mps,
@@ -946,7 +1035,9 @@ def evaluate_batch_diagnostics(
             l_ini_m=l_ini,
         )
     else:
-        head_model = InstantaneousHead(r_e, z_toe_m)
+        head_model = InstantaneousHead(
+            _gate_response_factor(r_e, toe_gradient_relief_factor), z_toe_m
+        )
         progression = integrate_progression(
             h_river_m,
             dt_s,

@@ -150,6 +150,32 @@ At KP 58.8 and KP 60.0, both `d70` readings, historical, production N = 1e5 and
   factor never raises `P_f,trans` at any level. The gate is a necessary condition
   for erosion and a row that never latches never erodes. *Falsifier:* any level
   where a smaller factor raises the transient probability.
+  **AMENDED 2026-08-21, after this prediction fired.** P2 as written above is
+  **falsified**, and the pre-registered text is left standing because that is
+  what a pre-registration is for. At KP 58.8 under the bulk gradation reading,
+  one realization in 100 000 (row 22 790, stage 43.25 m, 2.2 m above the design
+  level) fails at relief 0.80 having survived the berm arm. It is a **forward-
+  Euler barrier jump**, ADR-0030's pathology, not a physical inversion: at
+  Δt = 225 s the relieved arm returns `Z_transient = 0.00000` exactly, the
+  signature of one step traversing the whole remaining length, and the
+  inversion disappears completely at Δt = 112.5 s and 56.25 s, where the two
+  arms agree to five decimals. The realization sits at C_e = 0.314 and
+  k_aq = 6.6e-3, deep in the tails of the two inputs ADR-0030 names.
+
+  There is a mechanism, and this axis makes it more likely than the baseline
+  does: relief **delays** the gate, so a relieved realization meets its first
+  active timestep at a higher driving head and takes a larger first step. A
+  gradient-relief axis is therefore a more sensitive probe of the ADR-0030
+  discretisation limit than the production configuration is.
+
+  The surviving claim, and the one the driver now enforces, is stronger than a
+  tolerance on the count: **every violation must vanish under timestep
+  refinement.** Each violating row is re-integrated at 112.5 s and 56.25 s on
+  the ADR-0013 integer-subdivision hook, and the driver refuses if a single one
+  survives. That tests the continuous-time claim rather than the discrete
+  approximation of it, and it does not care how many artifacts there are, only
+  whether any of them is real.
+
 - **P3. The berm arm moves both branches.** L enters `H_c` and `Z = L − l_e`, so
   `berm_only` is not a gate-only arm and must not be described as one. It is the
   one arm of this bracket that is not r_e-mediated.

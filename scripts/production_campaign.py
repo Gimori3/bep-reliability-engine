@@ -1124,6 +1124,28 @@ COMPANION_EXCLUSIONS: dict[str, str] = {
         "driver already refuses without. Same substantive ground as the three "
         "ADR-0045/0046/0048 companion entries above."
     ),
+    "scripts/drained_configuration_bracket.py": (
+        "ADR-0050 drained-configuration bracket: the knob is OFF in production "
+        "and dropped from to_metadata() when None, so it changes no config_hash "
+        "and produces no campaign artifact. It carries its own gate, which is "
+        "STRONGER than anything this stage would apply: it re-runs each "
+        "committed YAML with toe_gradient_relief_factor=None set explicitly and "
+        "refuses unless BOTH whole failure matrices are bit-identical to the "
+        "persisted sweep, and it refuses again if a relief arm moves a single "
+        "static cell. Running it here would add twenty-four full-N sweeps "
+        "(~1 h) to the campaign to re-derive a gate the driver already refuses "
+        "without. Same substantive ground as the ADR-0045/0046/0048/0049 "
+        "companion entries above; KP58.8 + KP60.0 only."
+    ),
+    "scripts/drained_bracket_annualisation.py": (
+        "ADR-0050 Phase 3 companion: re-sweeps nothing and writes nothing the "
+        "campaign produces. It reads the persisted ADR-0050 arm curves, which "
+        "the campaign deliberately does not produce, and its gate 1 asserts it "
+        "reproduces THIS campaign's own rq4_annual.csv field for field, so it "
+        "is a consumer of the campaign's output rather than a stage of it. "
+        "Same ground as scripts/conductivity_annualisation_study.py, whose "
+        "composition seam it imports."
+    ),
     "bayesian_reliability_updating/pipeline.py": (
         "not a driver at all -- the shipped Phase 2 package module, which this "
         "campaign already executes as THREE of its own stages (phase2_baseline, "

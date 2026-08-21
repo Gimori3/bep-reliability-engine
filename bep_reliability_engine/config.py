@@ -918,6 +918,26 @@ class Config(_StrictModel):
             "sensitivity runs only — production configs never carry it set."
         ),
     )
+    toe_gradient_relief_factor: float | None = Field(
+        default=None,
+        gt=0.0,
+        le=1.0,
+        description=(
+            "ADR-0050 relief on the landside-toe exit gradient, in (0, 1]: the "
+            "fraction of the undrained gradient that survives a landside toe "
+            "drain. None (production, and every pre-ADR-0050 config) and 1.0 "
+            "are the undrained baseline, bit-identical to prior behaviour; the "
+            "None case is dropped from to_metadata() so config_hash of "
+            "pre-ADR-0050 snapshots is preserved. Applied by scaling the "
+            "response factor the M4 head model receives, which since ADR-0028 "
+            "reaches the uplift/heave gate and nothing else — so the knob is "
+            "gate-only and the static comparator is exactly invariant under "
+            "it. One-sided by construction: PWRI 2014 Table 7.1.1 states the "
+            "countermeasure reduces the gradient, so no value above 1 is "
+            "licensed. Companion sensitivity runs only — production configs "
+            "never carry it set."
+        ),
+    )
 
     seepage_length_cov: float | None = Field(
         default=None,
@@ -1096,8 +1116,9 @@ class Config(_StrictModel):
 
             ``length_effect`` is dropped when None (ADR-0037),
             ``sellmeijer_model_factor`` is dropped when None (ADR-0045),
-            ``prior_mean_scenario`` is dropped when None (ADR-0048) and
-            ``critical_length_factor`` is dropped when None (ADR-0049):
+            ``prior_mean_scenario`` is dropped when None (ADR-0048),
+            ``critical_length_factor`` is dropped when None (ADR-0049) and
+            ``toe_gradient_relief_factor`` is dropped when None (ADR-0050):
             pre-ADR snapshots reconstruct to the None defaults, and dropping
             the keys keeps their :meth:`config_hash` byte-identical to what
             their persisted runs recorded — the Phase 2 replay refuses hash
@@ -1112,6 +1133,8 @@ class Config(_StrictModel):
             snapshot.pop("prior_mean_scenario", None)
         if snapshot.get("critical_length_factor") is None:
             snapshot.pop("critical_length_factor", None)
+        if snapshot.get("toe_gradient_relief_factor") is None:
+            snapshot.pop("toe_gradient_relief_factor", None)
         return snapshot
 
     def config_hash(self) -> str:
