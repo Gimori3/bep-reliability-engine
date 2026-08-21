@@ -376,6 +376,22 @@ three: KP 62.0 in both climates and KP 57.4 at +4K. Only the upward arm leaves
 every ordering intact, and it does so trivially, by pushing piping further ahead
 of a mechanism it already leads.
 
+> **Correction, 2026-08-21 (thesis reconciliation pass).** The sentence above,
+> *"it reverses seven and collapses the eighth"*, does not reconcile with this
+> section's own verdict table two paragraphs up, and the table is right. The
+> `field_geomean` arm **reverses six** cells (KP 57.4 +4K, KP 58.8 in both
+> climates, KP 60.0 +4K, KP 62.0 in both climates), **collapses one**
+> (KP 57.4 historical, where both mechanisms go to exactly zero and no lead is
+> defined), and **leaves one ROBUST** (KP 60.0 historical, where overflow is
+> exactly zero so piping leads by construction). The evidence JSON agrees:
+> `leading_mechanism` under that arm is `overflow` at six cells, `bep` at
+> KP 60.0 historical, and `not defined` at KP 57.4 historical. The headline
+> *"No, at seven of the eight section-and-climate cells"* in section 2.3 is
+> **correct as written** and is a different count: seven cells are **not
+> robust** (the six reversed plus the one collapsed). The two counts were
+> conflated once downstream, in msc-thesis Chapter 7, and were corrected there
+> on the same date.
+
 **KP 60.0 is the one robust cell, and it is robust for a reason that does not
 generalise.** Its historical overflow is *exactly* zero, so piping leads by
 construction as long as any piping failure survives; the low arm suppresses it
