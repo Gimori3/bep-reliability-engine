@@ -1,0 +1,2955 @@
+{
+  "study": "Aquifer-conductivity epistemic bracket measured on the POSTERIOR side of the 2016 survival update",
+  "generated_by": "scripts/conductivity_annualisation_study.py",
+  "generated": "2026-08-21T17:48:19",
+  "note": "docs/decisions/conductivity-bracket-posterior-side.md",
+  "scope": {
+    "d70_interpretation": "bulk",
+    "bep_source": "posterior",
+    "lambda_ac_m": 250.0,
+    "surface_variant": "primary",
+    "scenarios": [
+      "historical",
+      "+4K"
+    ],
+    "sections": [
+      "KP 57.4",
+      "KP 58.8",
+      "KP 60.0",
+      "KP 62.0"
+    ],
+    "statement": "bulk-d70 and posterior-side ONLY: every arm is replayed against the 2016 survival record before it is annualised. This is the co-primary grain-size reading, not a sensitivity; the matrix posterior is conductivity-bracket-posterior-side.json and the prior-side counterpart is conductivity-bracket-annualisation-bulk.json. Quote this scope wherever any number here is quoted."
+  },
+  "gates": {
+    "gate_1_reproduces_production_table": {
+      "passed": true,
+      "rows_compared": 228,
+      "fields_compared": 20,
+      "table": "results/system_integration/phase3/rq4_annual.csv",
+      "criterion": "every field string-identical to the published table"
+    },
+    "gate_2_arm_provenance": {
+      "passed": true,
+      "criterion": "grid equal to baseline, N = 1e5, config hash round-trips, expected prior_mean_scenario label; Phase 2 settings identical to the production campaign in every field but the output path"
+    },
+    "gate_3_non_bep_segments_invariant": {
+      "passed": true,
+      "segment_scenario_cells_checked": 880,
+      "criterion": "every segment with no BEP source is bit-identical to baseline under every arm"
+    },
+    "gate_4_hazard_cache_unchanged": {
+      "passed": true,
+      "cache_files": 228
+    },
+    "gate_5_no_production_artifact_written": {
+      "passed": true,
+      "writes": [
+        "docs/decisions/conductivity-bracket-posterior-side-bulk.json",
+        "results/sensitivity/conductivity_posterior_bulk"
+      ]
+    },
+    "gate_6_theta_verified_on_every_replay": {
+      "passed": true,
+      "criterion": "every Phase 2 replay ran with verify_by_reevaluation, so each arm regenerated its OWN shifted population (ADR-0048 decision 3) rather than the baseline one",
+      "replays_checked": 20
+    },
+    "gate_7_prior_side_record_is_the_committed_one": {
+      "passed": true,
+      "criterion": "the prior-side comparison numbers are read from the committed evidence record, not recomputed here",
+      "record": "docs/decisions/conductivity-bracket-annualisation-bulk.json",
+      "record_generated": "2026-08-10T16:53:38"
+    }
+  },
+  "arms": {
+    "k_aq_field_geomean": {
+      "KP 57.4": {
+        "sweep": "results/sensitivity/adr0048_prior_means/tokachi_kp57.4_historical_bulk_k_aq_field_geomean.h5",
+        "sha256": "b42a9b10be9774b5199b72ed729c4981b783749aa5f8dfe546f0526d1254f919",
+        "n_samples": 100000,
+        "config_hash_round_trips": true,
+        "parameter": "k_aq",
+        "factor": 0.019799999999999998,
+        "baseline_prior_mean": 0.003,
+        "effective_prior_mean": 5.9399999999999994e-05,
+        "phase2": {
+          "posterior": "results/sensitivity/conductivity_posterior/phase2/tokachi_kp57.4_historical_bulk_k_aq_field_geomean_posterior.h5",
+          "sha256": "a7b8af785b7b5fd0c4fdae85fd9946a2e52688a6fa1a40358f043d43dd74c8a0",
+          "n_prior": 100000,
+          "n_accepted": 100000,
+          "rejection_fraction": 0.0,
+          "criterion": "no_breach",
+          "anchor": "trace_right",
+          "theta_verified": true,
+          "phase2_settings_match_production": true
+        }
+      },
+      "KP 58.8": {
+        "sweep": "results/sensitivity/adr0048_prior_means/tokachi_kp58.8_historical_bulk_k_aq_field_geomean.h5",
+        "sha256": "634c6617a22f8474bb4e2d51fa2f55199401e6474b269d04f0efa39f9bc19ae5",
+        "n_samples": 100000,
+        "config_hash_round_trips": true,
+        "parameter": "k_aq",
+        "factor": 0.0297,
+        "baseline_prior_mean": 0.002,
+        "effective_prior_mean": 5.94e-05,
+        "phase2": {
+          "posterior": "results/sensitivity/conductivity_posterior/phase2/tokachi_kp58.8_historical_bulk_k_aq_field_geomean_posterior.h5",
+          "sha256": "c82a0b5fb0bd83a297ddf62e6dc34e92e45eee13c47da5e57ebcc2295a829786",
+          "n_prior": 100000,
+          "n_accepted": 100000,
+          "rejection_fraction": 0.0,
+          "criterion": "no_breach",
+          "anchor": "trace_right",
+          "theta_verified": true,
+          "phase2_settings_match_production": true
+        }
+      },
+      "KP 60.0": {
+        "sweep": "results/sensitivity/adr0048_prior_means/tokachi_kp60.0_historical_bulk_k_aq_field_geomean.h5",
+        "sha256": "3a29715fad13d46b8389789b9163cd1c6a307dde6b89cacc61949170725778fa",
+        "n_samples": 100000,
+        "config_hash_round_trips": true,
+        "parameter": "k_aq",
+        "factor": 0.0594,
+        "baseline_prior_mean": 0.001,
+        "effective_prior_mean": 5.94e-05,
+        "phase2": {
+          "posterior": "results/sensitivity/conductivity_posterior/phase2/tokachi_kp60.0_historical_bulk_k_aq_field_geomean_posterior.h5",
+          "sha256": "684ec42ad5d4e1e589d1b1a2d0d23b9b69dc9ccffb92015d383c8bb82fad6cc8",
+          "n_prior": 100000,
+          "n_accepted": 100000,
+          "rejection_fraction": 0.0,
+          "criterion": "no_breach",
+          "anchor": "trace_right",
+          "theta_verified": true,
+          "phase2_settings_match_production": true
+        }
+      },
+      "KP 62.0": {
+        "sweep": "results/sensitivity/adr0048_prior_means/tokachi_kp62.0_historical_bulk_k_aq_field_geomean.h5",
+        "sha256": "23bf4ab82c790ef9dbecda6ed7cba7cbf0844aedccb83e266c538a16d609b2c3",
+        "n_samples": 100000,
+        "config_hash_round_trips": true,
+        "parameter": "k_aq",
+        "factor": 0.0594,
+        "baseline_prior_mean": 0.001,
+        "effective_prior_mean": 5.94e-05,
+        "phase2": {
+          "posterior": "results/sensitivity/conductivity_posterior/phase2/tokachi_kp62.0_historical_bulk_k_aq_field_geomean_posterior.h5",
+          "sha256": "9a567dd500b3f4c665e72b552066b3a3f022505a91f634a11577f5394523431e",
+          "n_prior": 100000,
+          "n_accepted": 100000,
+          "rejection_fraction": 0.0,
+          "criterion": "no_breach",
+          "anchor": "trace_right",
+          "theta_verified": true,
+          "phase2_settings_match_production": true
+        }
+      }
+    },
+    "k_aq_field_toe": {
+      "KP 57.4": {
+        "sweep": "results/sensitivity/adr0048_prior_means/tokachi_kp57.4_historical_bulk_k_aq_field_toe.h5",
+        "sha256": "c49802c85079177476526db9c99733446326f72734fc02f4197977716b390b1e",
+        "n_samples": 100000,
+        "config_hash_round_trips": true,
+        "parameter": "k_aq",
+        "factor": 0.1716666666666667,
+        "baseline_prior_mean": 0.003,
+        "effective_prior_mean": 0.000515,
+        "phase2": {
+          "posterior": "results/sensitivity/conductivity_posterior/phase2/tokachi_kp57.4_historical_bulk_k_aq_field_toe_posterior.h5",
+          "sha256": "c08e2f0e4bdb79d41c907a599fba5fb6b4f65860c99d8778fe33c8c38e9f72ff",
+          "n_prior": 100000,
+          "n_accepted": 100000,
+          "rejection_fraction": 0.0,
+          "criterion": "no_breach",
+          "anchor": "trace_right",
+          "theta_verified": true,
+          "phase2_settings_match_production": true
+        }
+      },
+      "KP 58.8": {
+        "sweep": "results/sensitivity/adr0048_prior_means/tokachi_kp58.8_historical_bulk_k_aq_field_toe.h5",
+        "sha256": "85a8056169fa3fd6eaf02cdb65fb5d15ee2c40d3b079e83e9a23b4b51a64e974",
+        "n_samples": 100000,
+        "config_hash_round_trips": true,
+        "parameter": "k_aq",
+        "factor": 0.2575,
+        "baseline_prior_mean": 0.002,
+        "effective_prior_mean": 0.000515,
+        "phase2": {
+          "posterior": "results/sensitivity/conductivity_posterior/phase2/tokachi_kp58.8_historical_bulk_k_aq_field_toe_posterior.h5",
+          "sha256": "4f9e224fdb417bf7f28cd616300c7a242e12525f477e5113c8709b4bf8f1bd66",
+          "n_prior": 100000,
+          "n_accepted": 100000,
+          "rejection_fraction": 0.0,
+          "criterion": "no_breach",
+          "anchor": "trace_right",
+          "theta_verified": true,
+          "phase2_settings_match_production": true
+        }
+      },
+      "KP 60.0": {
+        "sweep": "results/sensitivity/adr0048_prior_means/tokachi_kp60.0_historical_bulk_k_aq_field_toe.h5",
+        "sha256": "d4f6f9011f9249df79b940f6999a7febfaa33d03e95769da9e7484ab168e5173",
+        "n_samples": 100000,
+        "config_hash_round_trips": true,
+        "parameter": "k_aq",
+        "factor": 0.515,
+        "baseline_prior_mean": 0.001,
+        "effective_prior_mean": 0.000515,
+        "phase2": {
+          "posterior": "results/sensitivity/conductivity_posterior/phase2/tokachi_kp60.0_historical_bulk_k_aq_field_toe_posterior.h5",
+          "sha256": "8a3a3a34f3918915ad47d45fb1ac24490d67b91c0fbc654cb4477d1cf2d602ee",
+          "n_prior": 100000,
+          "n_accepted": 100000,
+          "rejection_fraction": 0.0,
+          "criterion": "no_breach",
+          "anchor": "trace_right",
+          "theta_verified": true,
+          "phase2_settings_match_production": true
+        }
+      },
+      "KP 62.0": {
+        "sweep": "results/sensitivity/adr0048_prior_means/tokachi_kp62.0_historical_bulk_k_aq_field_toe.h5",
+        "sha256": "166ecb82978c73e1474e1269de83c54c5559b923f98905285ebc56a4ddda1597",
+        "n_samples": 100000,
+        "config_hash_round_trips": true,
+        "parameter": "k_aq",
+        "factor": 0.515,
+        "baseline_prior_mean": 0.001,
+        "effective_prior_mean": 0.000515,
+        "phase2": {
+          "posterior": "results/sensitivity/conductivity_posterior/phase2/tokachi_kp62.0_historical_bulk_k_aq_field_toe_posterior.h5",
+          "sha256": "b6f3daad49a621ac149c54fb88de2e316d90d44e62643900b44f095157408242",
+          "n_prior": 100000,
+          "n_accepted": 100000,
+          "rejection_fraction": 0.0,
+          "criterion": "no_breach",
+          "anchor": "trace_right",
+          "theta_verified": true,
+          "phase2_settings_match_production": true
+        }
+      }
+    },
+    "k_aq_regional_upper": {
+      "KP 57.4": {
+        "sweep": "results/sensitivity/adr0048_prior_means/tokachi_kp57.4_historical_bulk_k_aq_regional_upper.h5",
+        "sha256": "5e848dda157f7db7ae6e93fe603e11509457a7efa58f5b9973a85d71109ec55b",
+        "n_samples": 100000,
+        "config_hash_round_trips": true,
+        "parameter": "k_aq",
+        "factor": 3.3333333333333335,
+        "baseline_prior_mean": 0.003,
+        "effective_prior_mean": 0.01,
+        "phase2": {
+          "posterior": "results/sensitivity/conductivity_posterior/phase2/tokachi_kp57.4_historical_bulk_k_aq_regional_upper_posterior.h5",
+          "sha256": "0896d22756ef223823fe7ec3eb6c5cd3376cc52bec81f3859d99f4f7a2be30f3",
+          "n_prior": 100000,
+          "n_accepted": 99995,
+          "rejection_fraction": 4.999999999999449e-05,
+          "criterion": "no_breach",
+          "anchor": "trace_right",
+          "theta_verified": true,
+          "phase2_settings_match_production": true
+        }
+      },
+      "KP 58.8": {
+        "sweep": "results/sensitivity/adr0048_prior_means/tokachi_kp58.8_historical_bulk_k_aq_regional_upper.h5",
+        "sha256": "72879c368b1a3d62e027ea157eaded7844524dcdc9bab88af516585b10f82bab",
+        "n_samples": 100000,
+        "config_hash_round_trips": true,
+        "parameter": "k_aq",
+        "factor": 5.0,
+        "baseline_prior_mean": 0.002,
+        "effective_prior_mean": 0.01,
+        "phase2": {
+          "posterior": "results/sensitivity/conductivity_posterior/phase2/tokachi_kp58.8_historical_bulk_k_aq_regional_upper_posterior.h5",
+          "sha256": "9772443a62441de3a89efa6c5d25d40f4538a62efa00d6b5a3b59dc586e6a060",
+          "n_prior": 100000,
+          "n_accepted": 99940,
+          "rejection_fraction": 0.0006000000000000449,
+          "criterion": "no_breach",
+          "anchor": "trace_right",
+          "theta_verified": true,
+          "phase2_settings_match_production": true
+        }
+      },
+      "KP 60.0": {
+        "sweep": "results/sensitivity/adr0048_prior_means/tokachi_kp60.0_historical_bulk_k_aq_regional_upper.h5",
+        "sha256": "eb3ddbcbc85c52f53a484c5e41b90c7a32bc1aff016dfee453d5af6d78a72057",
+        "n_samples": 100000,
+        "config_hash_round_trips": true,
+        "parameter": "k_aq",
+        "factor": 10.0,
+        "baseline_prior_mean": 0.001,
+        "effective_prior_mean": 0.01,
+        "phase2": {
+          "posterior": "results/sensitivity/conductivity_posterior/phase2/tokachi_kp60.0_historical_bulk_k_aq_regional_upper_posterior.h5",
+          "sha256": "08d07445886e1993d1ed751cd8bf95a8bd014310e5eb7072b81d680a1252c04d",
+          "n_prior": 100000,
+          "n_accepted": 60996,
+          "rejection_fraction": 0.39004000000000005,
+          "criterion": "no_breach",
+          "anchor": "trace_right",
+          "theta_verified": true,
+          "phase2_settings_match_production": true
+        }
+      },
+      "KP 62.0": {
+        "sweep": "results/sensitivity/adr0048_prior_means/tokachi_kp62.0_historical_bulk_k_aq_regional_upper.h5",
+        "sha256": "ac4313cb6b216f41a05f236fa273a9225c7446fb0022ba1931cfbcd3235860ca",
+        "n_samples": 100000,
+        "config_hash_round_trips": true,
+        "parameter": "k_aq",
+        "factor": 10.0,
+        "baseline_prior_mean": 0.001,
+        "effective_prior_mean": 0.01,
+        "phase2": {
+          "posterior": "results/sensitivity/conductivity_posterior/phase2/tokachi_kp62.0_historical_bulk_k_aq_regional_upper_posterior.h5",
+          "sha256": "c380bcbaafa87c04dbbdde0c9645e67714ee30d4d11e8e4c4733461a54249be2",
+          "n_prior": 100000,
+          "n_accepted": 100000,
+          "rejection_fraction": 0.0,
+          "criterion": "no_breach",
+          "anchor": "trace_right",
+          "theta_verified": true,
+          "phase2_settings_match_production": true
+        }
+      }
+    },
+    "gamma_bl_sub_lower": {
+      "KP 57.4": {
+        "sweep": "results/sensitivity/adr0048_prior_means/tokachi_kp57.4_historical_bulk_gamma_bl_sub_lower.h5",
+        "sha256": "15df5d13b36971a2d69eabd37164cca044bc64aa2ced6d822a5af3a59a43b6ef",
+        "n_samples": 100000,
+        "config_hash_round_trips": true,
+        "parameter": "gamma_bl_sub",
+        "factor": 0.8695652173913043,
+        "baseline_prior_mean": 6.9,
+        "effective_prior_mean": 6.0,
+        "phase2": {
+          "posterior": "results/sensitivity/conductivity_posterior/phase2/tokachi_kp57.4_historical_bulk_gamma_bl_sub_lower_posterior.h5",
+          "sha256": "f32868ab5cdf58ed49b3092d903c0d11120c332d08be9748975f9c4513a72bd6",
+          "n_prior": 100000,
+          "n_accepted": 100000,
+          "rejection_fraction": 0.0,
+          "criterion": "no_breach",
+          "anchor": "trace_right",
+          "theta_verified": true,
+          "phase2_settings_match_production": true
+        }
+      },
+      "KP 58.8": {
+        "sweep": "results/sensitivity/adr0048_prior_means/tokachi_kp58.8_historical_bulk_gamma_bl_sub_lower.h5",
+        "sha256": "89ef5bf59026225a98ba89b4132102d43252a2eeba70c61404bde0d293759587",
+        "n_samples": 100000,
+        "config_hash_round_trips": true,
+        "parameter": "gamma_bl_sub",
+        "factor": 0.8695652173913043,
+        "baseline_prior_mean": 6.9,
+        "effective_prior_mean": 6.0,
+        "phase2": {
+          "posterior": "results/sensitivity/conductivity_posterior/phase2/tokachi_kp58.8_historical_bulk_gamma_bl_sub_lower_posterior.h5",
+          "sha256": "ef62e9326d3fa011010e9a933fb5d95e09dde4c1726e08e169c2f643f6444f02",
+          "n_prior": 100000,
+          "n_accepted": 100000,
+          "rejection_fraction": 0.0,
+          "criterion": "no_breach",
+          "anchor": "trace_right",
+          "theta_verified": true,
+          "phase2_settings_match_production": true
+        }
+      },
+      "KP 60.0": {
+        "sweep": "results/sensitivity/adr0048_prior_means/tokachi_kp60.0_historical_bulk_gamma_bl_sub_lower.h5",
+        "sha256": "93336b306a237ea84ca0a6d47c52cae6840bfa1c4ec28ba2a236898d081a70b3",
+        "n_samples": 100000,
+        "config_hash_round_trips": true,
+        "parameter": "gamma_bl_sub",
+        "factor": 0.8695652173913043,
+        "baseline_prior_mean": 6.9,
+        "effective_prior_mean": 6.0,
+        "phase2": {
+          "posterior": "results/sensitivity/conductivity_posterior/phase2/tokachi_kp60.0_historical_bulk_gamma_bl_sub_lower_posterior.h5",
+          "sha256": "5e9960df6839a746246d47983aaaf25cd0f911e1f7e964f9e8e293769d9d4a59",
+          "n_prior": 100000,
+          "n_accepted": 99977,
+          "rejection_fraction": 0.00022999999999995246,
+          "criterion": "no_breach",
+          "anchor": "trace_right",
+          "theta_verified": true,
+          "phase2_settings_match_production": true
+        }
+      },
+      "KP 62.0": {
+        "sweep": "results/sensitivity/adr0048_prior_means/tokachi_kp62.0_historical_bulk_gamma_bl_sub_lower.h5",
+        "sha256": "2f3477d98b863bb4439d793b46fc126f8e2a5f85f25f86c6aee4884ac504aa99",
+        "n_samples": 100000,
+        "config_hash_round_trips": true,
+        "parameter": "gamma_bl_sub",
+        "factor": 0.8695652173913043,
+        "baseline_prior_mean": 6.9,
+        "effective_prior_mean": 6.0,
+        "phase2": {
+          "posterior": "results/sensitivity/conductivity_posterior/phase2/tokachi_kp62.0_historical_bulk_gamma_bl_sub_lower_posterior.h5",
+          "sha256": "57a0fd1d17de510b770f576084a363e39172246a1e99e6b22fd75cee5fbf1df2",
+          "n_prior": 100000,
+          "n_accepted": 100000,
+          "rejection_fraction": 0.0,
+          "criterion": "no_breach",
+          "anchor": "trace_right",
+          "theta_verified": true,
+          "phase2_settings_match_production": true
+        }
+      }
+    }
+  },
+  "baseline_prior_mean_k_aq": {
+    "KP 57.4": 0.003,
+    "KP 58.8": 0.002,
+    "KP 60.0": 0.001,
+    "KP 62.0": 0.001
+  },
+  "node_exposure_datum_m_msl": {
+    "KP 57.4": 38.3,
+    "KP 58.8": 38.5,
+    "KP 60.0": 40.0,
+    "KP 62.0": 44.9
+  },
+  "preregistration_outcome": {
+    "P1_rejection_monotone_in_k_aq": {
+      "statement": "rejection fraction is monotone non-decreasing in the effective k_aq prior mean: geomean <= toe <= baseline <= regional_upper",
+      "held": true,
+      "per_section": {
+        "KP 57.4": true,
+        "KP 58.8": true,
+        "KP 60.0": true,
+        "KP 62.0": true
+      }
+    },
+    "P2_upward_arm_rejects_materially_more": {
+      "statement": "k_aq_regional_upper rejects more than baseline at all four sections, and by more than a factor of two at KP 58.8 and KP 60.0",
+      "held": false,
+      "rejection_fraction_by_arm": {
+        "KP 57.4": {
+          "baseline": 0.0,
+          "k_aq_field_geomean": 0.0,
+          "k_aq_field_toe": 0.0,
+          "k_aq_regional_upper": 4.999999999999449e-05,
+          "gamma_bl_sub_lower": 0.0
+        },
+        "KP 58.8": {
+          "baseline": 0.0,
+          "k_aq_field_geomean": 0.0,
+          "k_aq_field_toe": 0.0,
+          "k_aq_regional_upper": 0.0006000000000000449,
+          "gamma_bl_sub_lower": 0.0
+        },
+        "KP 60.0": {
+          "baseline": 0.00022999999999995246,
+          "k_aq_field_geomean": 0.0,
+          "k_aq_field_toe": 0.0,
+          "k_aq_regional_upper": 0.39004000000000005,
+          "gamma_bl_sub_lower": 0.00022999999999995246
+        },
+        "KP 62.0": {
+          "baseline": 0.0,
+          "k_aq_field_geomean": 0.0,
+          "k_aq_field_toe": 0.0,
+          "k_aq_regional_upper": 0.0,
+          "gamma_bl_sub_lower": 0.0
+        }
+      }
+    },
+    "P3_kp62_stops_being_a_copy_of_the_prior_side": {
+      "statement": "at KP 62.0 the baseline rejects exactly 0, and k_aq_regional_upper is predicted to reject a non-zero fraction there, so the posterior side stops being a copy of the prior",
+      "held": false,
+      "baseline_rejection": 0.0,
+      "regional_upper_rejection": 0.0
+    },
+    "P4_downward_arms_inert_to_the_update": {
+      "statement": "both downward arms reject no more than baseline, and their annual numbers move less than the 12.4 % the baseline itself shows",
+      "held": true,
+      "largest_downward_arm_movement": 0.0
+    },
+    "P5_posterior_span_narrower_and_by_less_than_two": {
+      "statement": "the posterior span of p_annual_system is smaller than the prior span at every cell where both are finite, and by less than a factor of two",
+      "held": false,
+      "span_ratio_posterior_over_prior": {
+        "KP 57.4 historical": null,
+        "KP 57.4 +4K": 0.9994464815331697,
+        "KP 58.8 historical": 0.9899950658830616,
+        "KP 58.8 +4K": 0.9947712107607254,
+        "KP 60.0 historical": null,
+        "KP 60.0 +4K": 0.6530073588618789,
+        "KP 62.0 historical": 1.0,
+        "KP 62.0 +4K": 1.0
+      },
+      "cells_resolved": 6,
+      "cells_unbounded": 2
+    },
+    "P6_ordering_verdicts_unchanged": {
+      "statement": "every ordering verdict of the prior-side record is reproduced on the posterior side",
+      "held": true,
+      "cells_unchanged": 8,
+      "cells_total": 8,
+      "cells_changed": []
+    },
+    "P7_climate_ratios_move_less_than_20_per_cent": {
+      "statement": "every arm's +4K/historical system ratio changes by less than 20 % from its prior-side value",
+      "held": true,
+      "largest_shift": 0.18135212674747803,
+      "ratios_resolved": 17
+    },
+    "P8_unit_weight_control_stays_quiet": {
+      "statement": "gamma_bl_sub_lower rejects within a factor of two of baseline and changes no ordering anywhere",
+      "held": true,
+      "control_rejection": {
+        "KP 57.4": 0.0,
+        "KP 58.8": 0.0,
+        "KP 60.0": 0.00022999999999995246,
+        "KP 62.0": 0.0
+      }
+    },
+    "F1_no_posterior_exceeds_its_prior": {
+      "statement": "Accept-Reject can only remove realizations, so under nesting no arm's posterior annual number may exceed its prior one; a rise indicts the pipeline",
+      "fired": false,
+      "largest_ratio_seen": 1.0
+    },
+    "F2_rejection_non_monotone": {
+      "statement": "the rejection fraction is non-monotone in k_aq",
+      "fired": false
+    },
+    "F3_posterior_span_wider_than_prior": {
+      "statement": "the falsifier for H1: the posterior span is WIDER than the prior span at any cell",
+      "fired": false,
+      "cells_wider": []
+    },
+    "F4_the_measured_null": {
+      "statement": "the deflating outcome: the span moves by less than 1 % at every cell, in which case the honest result is that the survival constraint leaves the bracket unchanged",
+      "fired": false,
+      "largest_span_movement": 0.3469926411381211
+    }
+  },
+  "sections": {
+    "KP 57.4": {
+      "historical": {
+        "baseline": {
+          "p_annual_system": 2.074058746414729e-06,
+          "p_annual_bep": 2.074058746414729e-06,
+          "p_annual_overflow": 0.0,
+          "p_annual_fluvial_scour": 0.0,
+          "share_bep": 1.0,
+          "share_overflow": 0.0,
+          "leading_mechanism": "bep",
+          "coverage_system": {
+            "grid_bottom_m_msl": 34.75,
+            "grid_top_m_msl": 45.4,
+            "p_bottom": 0.0,
+            "p_top": 1.0,
+            "frac_peaks_below_grid": 0.0,
+            "frac_peaks_above_grid": 0.0,
+            "lower_bound_clamp": false,
+            "below_grid_unresolved": false
+          },
+          "driving_stage_band": {
+            "defined": true,
+            "contribution_weighted_stage_p10_m_msl": 40.47678870114303,
+            "contribution_weighted_stage_median_m_msl": 40.76036000601738,
+            "contribution_weighted_stage_p90_m_msl": 40.84133808670937,
+            "grid_top_m_msl": 45.4,
+            "attainable_max_m_msl": 43.25,
+            "frac_peaks_above_attainable_max": 0.0,
+            "frac_of_annual_piping_above_attainable_max": 0.0
+          }
+        },
+        "reversal_margin_p_bep_over_p_overflow": null,
+        "arms": {
+          "k_aq_field_geomean": {
+            "p_annual_system": 0.0,
+            "p_annual_bep": 0.0,
+            "p_annual_overflow": 0.0,
+            "share_bep": 0.0,
+            "share_overflow": 0.0,
+            "leading_mechanism": "not defined",
+            "ratio_system_to_baseline": 0.0,
+            "ratio_bep_to_baseline": 0.0,
+            "coverage_system": {
+              "grid_bottom_m_msl": 34.75,
+              "grid_top_m_msl": 45.4,
+              "p_bottom": 0.0,
+              "p_top": 1.0,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "coverage_bep": {
+              "grid_bottom_m_msl": 34.75,
+              "grid_top_m_msl": 45.4,
+              "p_bottom": 0.0,
+              "p_top": 9.999778782798785e-13,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "driving_stage_band": {
+              "defined": false
+            }
+          },
+          "k_aq_field_toe": {
+            "p_annual_system": 0.0,
+            "p_annual_bep": 0.0,
+            "p_annual_overflow": 0.0,
+            "share_bep": 0.0,
+            "share_overflow": 0.0,
+            "leading_mechanism": "not defined",
+            "ratio_system_to_baseline": 0.0,
+            "ratio_bep_to_baseline": 0.0,
+            "coverage_system": {
+              "grid_bottom_m_msl": 34.75,
+              "grid_top_m_msl": 45.4,
+              "p_bottom": 0.0,
+              "p_top": 1.0,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "coverage_bep": {
+              "grid_bottom_m_msl": 34.75,
+              "grid_top_m_msl": 45.4,
+              "p_bottom": 0.0,
+              "p_top": 0.005260000000000042,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "driving_stage_band": {
+              "defined": false
+            }
+          },
+          "k_aq_regional_upper": {
+            "p_annual_system": 0.00012621036669469986,
+            "p_annual_bep": 0.00012621036669469986,
+            "p_annual_overflow": 0.0,
+            "share_bep": 1.0,
+            "share_overflow": 0.0,
+            "leading_mechanism": "bep",
+            "ratio_system_to_baseline": 60.85187650198931,
+            "ratio_bep_to_baseline": 60.85187650198931,
+            "coverage_system": {
+              "grid_bottom_m_msl": 34.75,
+              "grid_top_m_msl": 45.4,
+              "p_bottom": 0.0,
+              "p_top": 1.0,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "coverage_bep": {
+              "grid_bottom_m_msl": 34.75,
+              "grid_top_m_msl": 45.4,
+              "p_bottom": 0.0,
+              "p_top": 0.9958000842121053,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "driving_stage_band": {
+              "defined": true,
+              "contribution_weighted_stage_p10_m_msl": 40.23954789718905,
+              "contribution_weighted_stage_median_m_msl": 40.68611675800491,
+              "contribution_weighted_stage_p90_m_msl": 40.828461091219076,
+              "grid_top_m_msl": 45.4,
+              "attainable_max_m_msl": 43.25,
+              "frac_peaks_above_attainable_max": 0.0,
+              "frac_of_annual_piping_above_attainable_max": 0.0
+            }
+          },
+          "gamma_bl_sub_lower": {
+            "p_annual_system": 2.074058746414729e-06,
+            "p_annual_bep": 2.074058746414729e-06,
+            "p_annual_overflow": 0.0,
+            "share_bep": 1.0,
+            "share_overflow": 0.0,
+            "leading_mechanism": "bep",
+            "ratio_system_to_baseline": 1.0,
+            "ratio_bep_to_baseline": 1.0,
+            "coverage_system": {
+              "grid_bottom_m_msl": 34.75,
+              "grid_top_m_msl": 45.4,
+              "p_bottom": 0.0,
+              "p_top": 1.0,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "coverage_bep": {
+              "grid_bottom_m_msl": 34.75,
+              "grid_top_m_msl": 45.4,
+              "p_bottom": 0.0,
+              "p_top": 0.37749,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "driving_stage_band": {
+              "defined": true,
+              "contribution_weighted_stage_p10_m_msl": 40.47678870114303,
+              "contribution_weighted_stage_median_m_msl": 40.76036000601738,
+              "contribution_weighted_stage_p90_m_msl": 40.84133808670937,
+              "grid_top_m_msl": 45.4,
+              "attainable_max_m_msl": 43.25,
+              "frac_peaks_above_attainable_max": 0.0,
+              "frac_of_annual_piping_above_attainable_max": 0.0
+            }
+          }
+        },
+        "ordering_verdict": "COLLAPSED",
+        "arms_reversing_the_lead": [],
+        "arms_collapsing_to_undefined": [
+          "k_aq_field_geomean",
+          "k_aq_field_toe"
+        ],
+        "arms_changing_the_lead": [
+          "k_aq_field_geomean",
+          "k_aq_field_toe"
+        ],
+        "conductivity_span_p_annual_system": null,
+        "conductivity_span_p_annual_bep": null
+      },
+      "+4K": {
+        "baseline": {
+          "p_annual_system": 0.001215482719636291,
+          "p_annual_bep": 0.0005672769561485688,
+          "p_annual_overflow": 0.0009114344650738865,
+          "p_annual_fluvial_scour": 0.0,
+          "share_bep": 0.3836292517978925,
+          "share_overflow": 0.6163707482021075,
+          "leading_mechanism": "overflow",
+          "coverage_system": {
+            "grid_bottom_m_msl": 34.75,
+            "grid_top_m_msl": 45.4,
+            "p_bottom": 0.0,
+            "p_top": 1.0,
+            "frac_peaks_below_grid": 0.0,
+            "frac_peaks_above_grid": 0.0,
+            "lower_bound_clamp": false,
+            "below_grid_unresolved": false
+          },
+          "driving_stage_band": {
+            "defined": true,
+            "contribution_weighted_stage_p10_m_msl": 41.73592329559931,
+            "contribution_weighted_stage_median_m_msl": 42.749907219578716,
+            "contribution_weighted_stage_p90_m_msl": 43.15937731398739,
+            "grid_top_m_msl": 45.4,
+            "attainable_max_m_msl": 43.25,
+            "frac_peaks_above_attainable_max": 0.0,
+            "frac_of_annual_piping_above_attainable_max": 0.0
+          }
+        },
+        "reversal_margin_p_bep_over_p_overflow": 0.6224001591848755,
+        "arms": {
+          "k_aq_field_geomean": {
+            "p_annual_system": 0.0009114344650738865,
+            "p_annual_bep": 0.0,
+            "p_annual_overflow": 0.0009114344650738865,
+            "share_bep": 0.0,
+            "share_overflow": 1.0,
+            "leading_mechanism": "overflow",
+            "ratio_system_to_baseline": 0.749853906065086,
+            "ratio_bep_to_baseline": 0.0,
+            "coverage_system": {
+              "grid_bottom_m_msl": 34.75,
+              "grid_top_m_msl": 45.4,
+              "p_bottom": 0.0,
+              "p_top": 1.0,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "coverage_bep": {
+              "grid_bottom_m_msl": 34.75,
+              "grid_top_m_msl": 45.4,
+              "p_bottom": 0.0,
+              "p_top": 9.999778782798785e-13,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "driving_stage_band": {
+              "defined": true,
+              "contribution_weighted_stage_p10_m_msl": 42.46254257002036,
+              "contribution_weighted_stage_median_m_msl": 42.89300512599646,
+              "contribution_weighted_stage_p90_m_msl": 43.16359126791958,
+              "grid_top_m_msl": 45.4,
+              "attainable_max_m_msl": 43.25,
+              "frac_peaks_above_attainable_max": 0.0,
+              "frac_of_annual_piping_above_attainable_max": null
+            }
+          },
+          "k_aq_field_toe": {
+            "p_annual_system": 0.0009121356472612545,
+            "p_annual_bep": 3.3678518744261187e-06,
+            "p_annual_overflow": 0.0009114344650738865,
+            "share_bep": 0.003681507809972464,
+            "share_overflow": 0.9963184921900275,
+            "leading_mechanism": "overflow",
+            "ratio_system_to_baseline": 0.750430781553351,
+            "ratio_bep_to_baseline": 0.005936874110472565,
+            "coverage_system": {
+              "grid_bottom_m_msl": 34.75,
+              "grid_top_m_msl": 45.4,
+              "p_bottom": 0.0,
+              "p_top": 1.0,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "coverage_bep": {
+              "grid_bottom_m_msl": 34.75,
+              "grid_top_m_msl": 45.4,
+              "p_bottom": 0.0,
+              "p_top": 0.005260000000000042,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "driving_stage_band": {
+              "defined": true,
+              "contribution_weighted_stage_p10_m_msl": 42.46220319369674,
+              "contribution_weighted_stage_median_m_msl": 42.89271397674288,
+              "contribution_weighted_stage_p90_m_msl": 43.163583292961924,
+              "grid_top_m_msl": 45.4,
+              "attainable_max_m_msl": 43.25,
+              "frac_peaks_above_attainable_max": 0.0,
+              "frac_of_annual_piping_above_attainable_max": 0.0
+            }
+          },
+          "k_aq_regional_upper": {
+            "p_annual_system": 0.00413627320320905,
+            "p_annual_bep": 0.003982517791048536,
+            "p_annual_overflow": 0.0009114344650738865,
+            "share_bep": 0.8137631065089233,
+            "share_overflow": 0.18623689349107678,
+            "leading_mechanism": "bep",
+            "ratio_system_to_baseline": 3.4029880774008427,
+            "ratio_bep_to_baseline": 7.020411719325194,
+            "coverage_system": {
+              "grid_bottom_m_msl": 34.75,
+              "grid_top_m_msl": 45.4,
+              "p_bottom": 0.0,
+              "p_top": 1.0,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "coverage_bep": {
+              "grid_bottom_m_msl": 34.75,
+              "grid_top_m_msl": 45.4,
+              "p_bottom": 0.0,
+              "p_top": 0.9958000842121053,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "driving_stage_band": {
+              "defined": true,
+              "contribution_weighted_stage_p10_m_msl": 40.77591558496746,
+              "contribution_weighted_stage_median_m_msl": 41.67016463215886,
+              "contribution_weighted_stage_p90_m_msl": 42.96525076433819,
+              "grid_top_m_msl": 45.4,
+              "attainable_max_m_msl": 43.25,
+              "frac_peaks_above_attainable_max": 0.0,
+              "frac_of_annual_piping_above_attainable_max": 0.0
+            }
+          },
+          "gamma_bl_sub_lower": {
+            "p_annual_system": 0.001215477851739536,
+            "p_annual_bep": 0.0005672720184013853,
+            "p_annual_overflow": 0.0009114344650738865,
+            "share_bep": 0.3836271935916427,
+            "share_overflow": 0.6163728064083573,
+            "leading_mechanism": "overflow",
+            "ratio_system_to_baseline": 0.9999959950917637,
+            "ratio_bep_to_baseline": 0.9999912957028663,
+            "coverage_system": {
+              "grid_bottom_m_msl": 34.75,
+              "grid_top_m_msl": 45.4,
+              "p_bottom": 0.0,
+              "p_top": 1.0,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "coverage_bep": {
+              "grid_bottom_m_msl": 34.75,
+              "grid_top_m_msl": 45.4,
+              "p_bottom": 0.0,
+              "p_top": 0.37749,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "driving_stage_band": {
+              "defined": true,
+              "contribution_weighted_stage_p10_m_msl": 41.7358825713446,
+              "contribution_weighted_stage_median_m_msl": 42.749909373086915,
+              "contribution_weighted_stage_p90_m_msl": 43.15937738446988,
+              "grid_top_m_msl": 45.4,
+              "attainable_max_m_msl": 43.25,
+              "frac_peaks_above_attainable_max": 0.0,
+              "frac_of_annual_piping_above_attainable_max": 0.0
+            }
+          }
+        },
+        "ordering_verdict": "REVERSED",
+        "arms_reversing_the_lead": [
+          "k_aq_regional_upper"
+        ],
+        "arms_collapsing_to_undefined": [],
+        "arms_changing_the_lead": [
+          "k_aq_regional_upper"
+        ],
+        "conductivity_span_p_annual_system": 4.538201441475814,
+        "conductivity_span_p_annual_bep": null
+      },
+      "climate_ratio_plus4k_over_historical": {
+        "baseline": 586.0406421647436,
+        "k_aq_field_geomean": null,
+        "k_aq_field_toe": null,
+        "k_aq_regional_upper": 32.77284831296469,
+        "gamma_bl_sub_lower": 586.038295125749
+      }
+    },
+    "KP 58.8": {
+      "historical": {
+        "baseline": {
+          "p_annual_system": 0.00019887555820912014,
+          "p_annual_bep": 3.983552526292708e-06,
+          "p_annual_overflow": 0.00019507776382913884,
+          "p_annual_fluvial_scour": 0.0,
+          "share_bep": 0.020011685842466365,
+          "share_overflow": 0.9799883141575337,
+          "leading_mechanism": "overflow",
+          "coverage_system": {
+            "grid_bottom_m_msl": 36.5,
+            "grid_top_m_msl": 47.4,
+            "p_bottom": 0.0,
+            "p_top": 0.9810104000000001,
+            "frac_peaks_below_grid": 0.0,
+            "frac_peaks_above_grid": 0.0,
+            "lower_bound_clamp": false,
+            "below_grid_unresolved": false
+          },
+          "driving_stage_band": {
+            "defined": true,
+            "contribution_weighted_stage_p10_m_msl": 40.91539895275636,
+            "contribution_weighted_stage_median_m_msl": 42.008788750783346,
+            "contribution_weighted_stage_p90_m_msl": 42.543666535455166,
+            "grid_top_m_msl": 47.4,
+            "attainable_max_m_msl": null,
+            "frac_of_annual_piping_above_attainable_max": null
+          }
+        },
+        "reversal_margin_p_bep_over_p_overflow": 0.02042033109310064,
+        "arms": {
+          "k_aq_field_geomean": {
+            "p_annual_system": 0.00019507776382913833,
+            "p_annual_bep": 0.0,
+            "p_annual_overflow": 0.00019507776382913884,
+            "share_bep": 0.0,
+            "share_overflow": 1.0,
+            "leading_mechanism": "overflow",
+            "ratio_system_to_baseline": 0.9809036645117124,
+            "ratio_bep_to_baseline": 0.0,
+            "coverage_system": {
+              "grid_bottom_m_msl": 36.5,
+              "grid_top_m_msl": 47.4,
+              "p_bottom": 0.0,
+              "p_top": 0.9776000000000225,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "coverage_bep": {
+              "grid_bottom_m_msl": 36.5,
+              "grid_top_m_msl": 47.4,
+              "p_bottom": 0.0,
+              "p_top": 9.999778782798785e-13,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "driving_stage_band": {
+              "defined": true,
+              "contribution_weighted_stage_p10_m_msl": 40.89875120034209,
+              "contribution_weighted_stage_median_m_msl": 42.006347628129966,
+              "contribution_weighted_stage_p90_m_msl": 42.54133537363057,
+              "grid_top_m_msl": 47.4,
+              "attainable_max_m_msl": null,
+              "frac_of_annual_piping_above_attainable_max": null
+            }
+          },
+          "k_aq_field_toe": {
+            "p_annual_system": 0.00019507829707975517,
+            "p_annual_bep": 5.757159982024253e-10,
+            "p_annual_overflow": 0.00019507776382913884,
+            "share_bep": 2.951204113920688e-06,
+            "share_overflow": 0.999997048795886,
+            "leading_mechanism": "overflow",
+            "ratio_system_to_baseline": 0.9809063458397833,
+            "ratio_bep_to_baseline": 0.00014452326018108647,
+            "coverage_system": {
+              "grid_bottom_m_msl": 36.5,
+              "grid_top_m_msl": 47.4,
+              "p_bottom": 0.0,
+              "p_top": 0.977666528,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "coverage_bep": {
+              "grid_bottom_m_msl": 36.5,
+              "grid_top_m_msl": 47.4,
+              "p_bottom": 0.0,
+              "p_top": 0.002970000000000028,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "driving_stage_band": {
+              "defined": true,
+              "contribution_weighted_stage_p10_m_msl": 40.89875353786313,
+              "contribution_weighted_stage_median_m_msl": 42.006348088622396,
+              "contribution_weighted_stage_p90_m_msl": 42.54133729578534,
+              "grid_top_m_msl": 47.4,
+              "attainable_max_m_msl": null,
+              "frac_of_annual_piping_above_attainable_max": null
+            }
+          },
+          "k_aq_regional_upper": {
+            "p_annual_system": 0.0008493201434455499,
+            "p_annual_bep": 0.0006756859599609238,
+            "p_annual_overflow": 0.00019507776382913884,
+            "share_bep": 0.7759693490904185,
+            "share_overflow": 0.2240306509095816,
+            "leading_mechanism": "bep",
+            "ratio_system_to_baseline": 4.270610984545819,
+            "ratio_bep_to_baseline": 169.61894075732215,
+            "coverage_system": {
+              "grid_bottom_m_msl": 36.5,
+              "grid_top_m_msl": 47.4,
+              "p_bottom": 0.0,
+              "p_top": 0.9997358948267867,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "coverage_bep": {
+              "grid_bottom_m_msl": 36.5,
+              "grid_top_m_msl": 47.4,
+              "p_bottom": 0.0,
+              "p_top": 0.9882095904815515,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "driving_stage_band": {
+              "defined": true,
+              "contribution_weighted_stage_p10_m_msl": 41.26745664362924,
+              "contribution_weighted_stage_median_m_msl": 42.03450355697243,
+              "contribution_weighted_stage_p90_m_msl": 42.546932498880246,
+              "grid_top_m_msl": 47.4,
+              "attainable_max_m_msl": null,
+              "frac_of_annual_piping_above_attainable_max": null
+            }
+          },
+          "gamma_bl_sub_lower": {
+            "p_annual_system": 0.00019887555820912014,
+            "p_annual_bep": 3.983552526292708e-06,
+            "p_annual_overflow": 0.00019507776382913884,
+            "share_bep": 0.020011685842466365,
+            "share_overflow": 0.9799883141575337,
+            "leading_mechanism": "overflow",
+            "ratio_system_to_baseline": 1.0,
+            "ratio_bep_to_baseline": 1.0,
+            "coverage_system": {
+              "grid_bottom_m_msl": 36.5,
+              "grid_top_m_msl": 47.4,
+              "p_bottom": 0.0,
+              "p_top": 0.9810104000000001,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "coverage_bep": {
+              "grid_bottom_m_msl": 36.5,
+              "grid_top_m_msl": 47.4,
+              "p_bottom": 0.0,
+              "p_top": 0.15225,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "driving_stage_band": {
+              "defined": true,
+              "contribution_weighted_stage_p10_m_msl": 40.91539895275636,
+              "contribution_weighted_stage_median_m_msl": 42.008788750783346,
+              "contribution_weighted_stage_p90_m_msl": 42.543666535455166,
+              "grid_top_m_msl": 47.4,
+              "attainable_max_m_msl": null,
+              "frac_of_annual_piping_above_attainable_max": null
+            }
+          }
+        },
+        "ordering_verdict": "REVERSED",
+        "arms_reversing_the_lead": [
+          "k_aq_regional_upper"
+        ],
+        "arms_collapsing_to_undefined": [],
+        "arms_changing_the_lead": [
+          "k_aq_regional_upper"
+        ],
+        "conductivity_span_p_annual_system": 4.353751687401129,
+        "conductivity_span_p_annual_bep": null
+      },
+      "+4K": {
+        "baseline": {
+          "p_annual_system": 0.0027090843786673658,
+          "p_annual_bep": 0.00026812957381632755,
+          "p_annual_overflow": 0.0025293600327370483,
+          "p_annual_fluvial_scour": 0.0,
+          "share_bep": 0.09584649508195113,
+          "share_overflow": 0.9041535049180489,
+          "leading_mechanism": "overflow",
+          "coverage_system": {
+            "grid_bottom_m_msl": 36.5,
+            "grid_top_m_msl": 47.4,
+            "p_bottom": 0.0,
+            "p_top": 0.9810104000000001,
+            "frac_peaks_below_grid": 0.0,
+            "frac_peaks_above_grid": 0.0,
+            "lower_bound_clamp": false,
+            "below_grid_unresolved": false
+          },
+          "driving_stage_band": {
+            "defined": true,
+            "contribution_weighted_stage_p10_m_msl": 41.68074726200378,
+            "contribution_weighted_stage_median_m_msl": 43.166195883116664,
+            "contribution_weighted_stage_p90_m_msl": 44.71293287797607,
+            "grid_top_m_msl": 47.4,
+            "attainable_max_m_msl": null,
+            "frac_of_annual_piping_above_attainable_max": null
+          }
+        },
+        "reversal_margin_p_bep_over_p_overflow": 0.10600688330090421,
+        "arms": {
+          "k_aq_field_geomean": {
+            "p_annual_system": 0.0025293600327370466,
+            "p_annual_bep": 0.0,
+            "p_annual_overflow": 0.0025293600327370483,
+            "share_bep": 0.0,
+            "share_overflow": 1.0,
+            "leading_mechanism": "overflow",
+            "ratio_system_to_baseline": 0.9336586385623293,
+            "ratio_bep_to_baseline": 0.0,
+            "coverage_system": {
+              "grid_bottom_m_msl": 36.5,
+              "grid_top_m_msl": 47.4,
+              "p_bottom": 0.0,
+              "p_top": 0.9776000000000225,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "coverage_bep": {
+              "grid_bottom_m_msl": 36.5,
+              "grid_top_m_msl": 47.4,
+              "p_bottom": 0.0,
+              "p_top": 9.999778782798785e-13,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "driving_stage_band": {
+              "defined": true,
+              "contribution_weighted_stage_p10_m_msl": 41.649576844713245,
+              "contribution_weighted_stage_median_m_msl": 43.1390029552595,
+              "contribution_weighted_stage_p90_m_msl": 44.69428204217569,
+              "grid_top_m_msl": 47.4,
+              "attainable_max_m_msl": null,
+              "frac_of_annual_piping_above_attainable_max": null
+            }
+          },
+          "k_aq_field_toe": {
+            "p_annual_system": 0.0025306614686083644,
+            "p_annual_bep": 2.4421048658883115e-06,
+            "p_annual_overflow": 0.0025293600327370483,
+            "share_bep": 0.0009645717687087709,
+            "share_overflow": 0.9990354282312913,
+            "leading_mechanism": "overflow",
+            "ratio_system_to_baseline": 0.9341390355117806,
+            "ratio_bep_to_baseline": 0.00910792804810553,
+            "coverage_system": {
+              "grid_bottom_m_msl": 36.5,
+              "grid_top_m_msl": 47.4,
+              "p_bottom": 0.0,
+              "p_top": 0.977666528,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "coverage_bep": {
+              "grid_bottom_m_msl": 36.5,
+              "grid_top_m_msl": 47.4,
+              "p_bottom": 0.0,
+              "p_top": 0.002970000000000028,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "driving_stage_band": {
+              "defined": true,
+              "contribution_weighted_stage_p10_m_msl": 41.64960605384701,
+              "contribution_weighted_stage_median_m_msl": 43.139292173470814,
+              "contribution_weighted_stage_p90_m_msl": 44.69505011307385,
+              "grid_top_m_msl": 47.4,
+              "attainable_max_m_msl": null,
+              "frac_of_annual_piping_above_attainable_max": null
+            }
+          },
+          "k_aq_regional_upper": {
+            "p_annual_system": 0.008887430331045991,
+            "p_annual_bep": 0.007406752846520648,
+            "p_annual_overflow": 0.0025293600327370483,
+            "share_bep": 0.7454376713033064,
+            "share_overflow": 0.2545623286966936,
+            "leading_mechanism": "bep",
+            "ratio_system_to_baseline": 3.280602996728302,
+            "ratio_bep_to_baseline": 27.62378181973457,
+            "coverage_system": {
+              "grid_bottom_m_msl": 36.5,
+              "grid_top_m_msl": 47.4,
+              "p_bottom": 0.0,
+              "p_top": 0.9997358948267867,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "coverage_bep": {
+              "grid_bottom_m_msl": 36.5,
+              "grid_top_m_msl": 47.4,
+              "p_bottom": 0.0,
+              "p_top": 0.9882095904815515,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "driving_stage_band": {
+              "defined": true,
+              "contribution_weighted_stage_p10_m_msl": 41.672326470202115,
+              "contribution_weighted_stage_median_m_msl": 42.78212990021494,
+              "contribution_weighted_stage_p90_m_msl": 44.30365085595752,
+              "grid_top_m_msl": 47.4,
+              "attainable_max_m_msl": null,
+              "frac_of_annual_piping_above_attainable_max": null
+            }
+          },
+          "gamma_bl_sub_lower": {
+            "p_annual_system": 0.0027090828037358416,
+            "p_annual_bep": 0.0002681263476122397,
+            "p_annual_overflow": 0.0025293600327370483,
+            "share_bep": 0.09584545236597793,
+            "share_overflow": 0.904154547634022,
+            "leading_mechanism": "overflow",
+            "ratio_system_to_baseline": 0.999999418648036,
+            "ratio_bep_to_baseline": 0.999987967742454,
+            "coverage_system": {
+              "grid_bottom_m_msl": 36.5,
+              "grid_top_m_msl": 47.4,
+              "p_bottom": 0.0,
+              "p_top": 0.9810104000000001,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "coverage_bep": {
+              "grid_bottom_m_msl": 36.5,
+              "grid_top_m_msl": 47.4,
+              "p_bottom": 0.0,
+              "p_top": 0.15225,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "driving_stage_band": {
+              "defined": true,
+              "contribution_weighted_stage_p10_m_msl": 41.6807470402228,
+              "contribution_weighted_stage_median_m_msl": 43.166195325352184,
+              "contribution_weighted_stage_p90_m_msl": 44.71293177219517,
+              "grid_top_m_msl": 47.4,
+              "attainable_max_m_msl": null,
+              "frac_of_annual_piping_above_attainable_max": null
+            }
+          }
+        },
+        "ordering_verdict": "REVERSED",
+        "arms_reversing_the_lead": [
+          "k_aq_regional_upper"
+        ],
+        "arms_collapsing_to_undefined": [],
+        "arms_changing_the_lead": [
+          "k_aq_regional_upper"
+        ],
+        "conductivity_span_p_annual_system": 3.5137071101059547,
+        "conductivity_span_p_annual_bep": null
+      },
+      "climate_ratio_plus4k_over_historical": {
+        "baseline": 13.622007666818108,
+        "k_aq_field_geomean": 12.965906431818764,
+        "k_aq_field_toe": 12.972542340646623,
+        "k_aq_regional_upper": 10.464169959505695,
+        "gamma_bl_sub_lower": 13.621999747637199
+      }
+    },
+    "KP 60.0": {
+      "historical": {
+        "baseline": {
+          "p_annual_system": 6.914576779640289e-05,
+          "p_annual_bep": 6.914576779640289e-05,
+          "p_annual_overflow": 0.0,
+          "p_annual_fluvial_scour": 0.0,
+          "share_bep": 1.0,
+          "share_overflow": 0.0,
+          "leading_mechanism": "bep",
+          "coverage_system": {
+            "grid_bottom_m_msl": 38.25,
+            "grid_top_m_msl": 48.2,
+            "p_bottom": 0.0,
+            "p_top": 1.0,
+            "frac_peaks_below_grid": 0.0,
+            "frac_peaks_above_grid": 0.0,
+            "lower_bound_clamp": false,
+            "below_grid_unresolved": false
+          },
+          "driving_stage_band": {
+            "defined": true,
+            "contribution_weighted_stage_p10_m_msl": 42.35975576105095,
+            "contribution_weighted_stage_median_m_msl": 42.75628510729761,
+            "contribution_weighted_stage_p90_m_msl": 43.0666977989661,
+            "grid_top_m_msl": 48.2,
+            "attainable_max_m_msl": null,
+            "frac_of_annual_piping_above_attainable_max": null
+          }
+        },
+        "reversal_margin_p_bep_over_p_overflow": null,
+        "arms": {
+          "k_aq_field_geomean": {
+            "p_annual_system": 0.0,
+            "p_annual_bep": 0.0,
+            "p_annual_overflow": 0.0,
+            "share_bep": 0.0,
+            "share_overflow": 0.0,
+            "leading_mechanism": "not defined",
+            "ratio_system_to_baseline": 0.0,
+            "ratio_bep_to_baseline": 0.0,
+            "coverage_system": {
+              "grid_bottom_m_msl": 38.25,
+              "grid_top_m_msl": 48.2,
+              "p_bottom": 0.0,
+              "p_top": 1.0,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "coverage_bep": {
+              "grid_bottom_m_msl": 38.25,
+              "grid_top_m_msl": 48.2,
+              "p_bottom": 0.0,
+              "p_top": 0.0020599999999999508,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "driving_stage_band": {
+              "defined": false
+            }
+          },
+          "k_aq_field_toe": {
+            "p_annual_system": 5.375471272439602e-06,
+            "p_annual_bep": 5.375471272439602e-06,
+            "p_annual_overflow": 0.0,
+            "share_bep": 1.0,
+            "share_overflow": 0.0,
+            "leading_mechanism": "bep",
+            "ratio_system_to_baseline": 0.07774114662039006,
+            "ratio_bep_to_baseline": 0.07774114662039006,
+            "coverage_system": {
+              "grid_bottom_m_msl": 38.25,
+              "grid_top_m_msl": 48.2,
+              "p_bottom": 0.0,
+              "p_top": 1.0,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "coverage_bep": {
+              "grid_bottom_m_msl": 38.25,
+              "grid_top_m_msl": 48.2,
+              "p_bottom": 0.0,
+              "p_top": 0.7873239022084533,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "driving_stage_band": {
+              "defined": true,
+              "contribution_weighted_stage_p10_m_msl": 42.53337447509406,
+              "contribution_weighted_stage_median_m_msl": 42.89194656455914,
+              "contribution_weighted_stage_p90_m_msl": 43.07581741857494,
+              "grid_top_m_msl": 48.2,
+              "attainable_max_m_msl": null,
+              "frac_of_annual_piping_above_attainable_max": null
+            }
+          },
+          "k_aq_regional_upper": {
+            "p_annual_system": 0.004052997609888368,
+            "p_annual_bep": 0.004052997609888368,
+            "p_annual_overflow": 0.0,
+            "share_bep": 1.0,
+            "share_overflow": 0.0,
+            "leading_mechanism": "bep",
+            "ratio_system_to_baseline": 58.615266545629616,
+            "ratio_bep_to_baseline": 58.615266545629616,
+            "coverage_system": {
+              "grid_bottom_m_msl": 38.25,
+              "grid_top_m_msl": 48.2,
+              "p_bottom": 0.0,
+              "p_top": 1.0,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "coverage_bep": {
+              "grid_bottom_m_msl": 38.25,
+              "grid_top_m_msl": 48.2,
+              "p_bottom": 0.0,
+              "p_top": 0.9999999986233756,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "driving_stage_band": {
+              "defined": true,
+              "contribution_weighted_stage_p10_m_msl": 41.99104584509355,
+              "contribution_weighted_stage_median_m_msl": 42.58610280067065,
+              "contribution_weighted_stage_p90_m_msl": 43.00663312262732,
+              "grid_top_m_msl": 48.2,
+              "attainable_max_m_msl": null,
+              "frac_of_annual_piping_above_attainable_max": null
+            }
+          },
+          "gamma_bl_sub_lower": {
+            "p_annual_system": 6.915756028179305e-05,
+            "p_annual_bep": 6.915756028179305e-05,
+            "p_annual_overflow": 0.0,
+            "share_bep": 1.0,
+            "share_overflow": 0.0,
+            "leading_mechanism": "bep",
+            "ratio_system_to_baseline": 1.0001705452953373,
+            "ratio_bep_to_baseline": 1.0001705452953373,
+            "coverage_system": {
+              "grid_bottom_m_msl": 38.25,
+              "grid_top_m_msl": 48.2,
+              "p_bottom": 0.0,
+              "p_top": 1.0,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "coverage_bep": {
+              "grid_bottom_m_msl": 38.25,
+              "grid_top_m_msl": 48.2,
+              "p_bottom": 0.0,
+              "p_top": 0.9587511475652826,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "driving_stage_band": {
+              "defined": true,
+              "contribution_weighted_stage_p10_m_msl": 42.35982330342062,
+              "contribution_weighted_stage_median_m_msl": 42.756297605684495,
+              "contribution_weighted_stage_p90_m_msl": 43.066700727674935,
+              "grid_top_m_msl": 48.2,
+              "attainable_max_m_msl": null,
+              "frac_of_annual_piping_above_attainable_max": null
+            }
+          }
+        },
+        "ordering_verdict": "COLLAPSED",
+        "arms_reversing_the_lead": [],
+        "arms_collapsing_to_undefined": [
+          "k_aq_field_geomean"
+        ],
+        "arms_changing_the_lead": [
+          "k_aq_field_geomean"
+        ],
+        "conductivity_span_p_annual_system": null,
+        "conductivity_span_p_annual_bep": null
+      },
+      "+4K": {
+        "baseline": {
+          "p_annual_system": 0.001615179400190394,
+          "p_annual_bep": 0.001602755250945974,
+          "p_annual_overflow": 2.3036501417792023e-05,
+          "p_annual_fluvial_scour": 0.0,
+          "share_bep": 0.9858305952258037,
+          "share_overflow": 0.014169404774196244,
+          "leading_mechanism": "bep",
+          "coverage_system": {
+            "grid_bottom_m_msl": 38.25,
+            "grid_top_m_msl": 48.2,
+            "p_bottom": 0.0,
+            "p_top": 1.0,
+            "frac_peaks_below_grid": 0.0,
+            "frac_peaks_above_grid": 0.0,
+            "lower_bound_clamp": false,
+            "below_grid_unresolved": false
+          },
+          "driving_stage_band": {
+            "defined": true,
+            "contribution_weighted_stage_p10_m_msl": 42.8789475355359,
+            "contribution_weighted_stage_median_m_msl": 43.74272143021393,
+            "contribution_weighted_stage_p90_m_msl": 44.82552217338723,
+            "grid_top_m_msl": 48.2,
+            "attainable_max_m_msl": null,
+            "frac_of_annual_piping_above_attainable_max": null
+          }
+        },
+        "reversal_margin_p_bep_over_p_overflow": 69.57459476498897,
+        "arms": {
+          "k_aq_field_geomean": {
+            "p_annual_system": 2.3051069451922905e-05,
+            "p_annual_bep": 1.5186826538377102e-08,
+            "p_annual_overflow": 2.3036501417792023e-05,
+            "share_bep": 0.0006588162384207295,
+            "share_overflow": 0.9993411837615793,
+            "leading_mechanism": "overflow",
+            "ratio_system_to_baseline": 0.014271522686090284,
+            "ratio_bep_to_baseline": 9.475449560632276e-06,
+            "coverage_system": {
+              "grid_bottom_m_msl": 38.25,
+              "grid_top_m_msl": 48.2,
+              "p_bottom": 0.0,
+              "p_top": 1.0,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "coverage_bep": {
+              "grid_bottom_m_msl": 38.25,
+              "grid_top_m_msl": 48.2,
+              "p_bottom": 0.0,
+              "p_top": 0.0020599999999999508,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "driving_stage_band": {
+              "defined": true,
+              "contribution_weighted_stage_p10_m_msl": 44.68933770539327,
+              "contribution_weighted_stage_median_m_msl": 44.889708449718654,
+              "contribution_weighted_stage_p90_m_msl": 44.927787679872075,
+              "grid_top_m_msl": 48.2,
+              "attainable_max_m_msl": null,
+              "frac_of_annual_piping_above_attainable_max": null
+            }
+          },
+          "k_aq_field_toe": {
+            "p_annual_system": 0.0003170472864988322,
+            "p_annual_bep": 0.00029759822442217186,
+            "p_annual_overflow": 2.3036501417792023e-05,
+            "share_bep": 0.9281534420283283,
+            "share_overflow": 0.07184655797167168,
+            "leading_mechanism": "bep",
+            "ratio_system_to_baseline": 0.19629230440993695,
+            "ratio_bep_to_baseline": 0.1856791448641483,
+            "coverage_system": {
+              "grid_bottom_m_msl": 38.25,
+              "grid_top_m_msl": 48.2,
+              "p_bottom": 0.0,
+              "p_top": 1.0,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "coverage_bep": {
+              "grid_bottom_m_msl": 38.25,
+              "grid_top_m_msl": 48.2,
+              "p_bottom": 0.0,
+              "p_top": 0.7873239022084533,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "driving_stage_band": {
+              "defined": true,
+              "contribution_weighted_stage_p10_m_msl": 43.22671994936465,
+              "contribution_weighted_stage_median_m_msl": 44.32521651627529,
+              "contribution_weighted_stage_p90_m_msl": 44.91497097194165,
+              "grid_top_m_msl": 48.2,
+              "attainable_max_m_msl": null,
+              "frac_of_annual_piping_above_attainable_max": null
+            }
+          },
+          "k_aq_regional_upper": {
+            "p_annual_system": 0.0280665507362801,
+            "p_annual_bep": 0.028066541693832957,
+            "p_annual_overflow": 2.3036501417792023e-05,
+            "share_bep": 0.9991798915150072,
+            "share_overflow": 0.0008201084849927339,
+            "leading_mechanism": "bep",
+            "ratio_system_to_baseline": 17.376738913938397,
+            "ratio_bep_to_baseline": 17.51143331289515,
+            "coverage_system": {
+              "grid_bottom_m_msl": 38.25,
+              "grid_top_m_msl": 48.2,
+              "p_bottom": 0.0,
+              "p_top": 1.0,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "coverage_bep": {
+              "grid_bottom_m_msl": 38.25,
+              "grid_top_m_msl": 48.2,
+              "p_bottom": 0.0,
+              "p_top": 0.9999999986233756,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "driving_stage_band": {
+              "defined": true,
+              "contribution_weighted_stage_p10_m_msl": 42.09475068147383,
+              "contribution_weighted_stage_median_m_msl": 42.78446785531065,
+              "contribution_weighted_stage_p90_m_msl": 43.76166224809957,
+              "grid_top_m_msl": 48.2,
+              "attainable_max_m_msl": null,
+              "frac_of_annual_piping_above_attainable_max": null
+            }
+          },
+          "gamma_bl_sub_lower": {
+            "p_annual_system": 0.0016155835347819796,
+            "p_annual_bep": 0.001603161987779111,
+            "p_annual_overflow": 2.3036501417792023e-05,
+            "share_bep": 0.9858341392082042,
+            "share_overflow": 0.014165860791795831,
+            "leading_mechanism": "bep",
+            "ratio_system_to_baseline": 1.0002502103429116,
+            "ratio_bep_to_baseline": 1.000253773514638,
+            "coverage_system": {
+              "grid_bottom_m_msl": 38.25,
+              "grid_top_m_msl": 48.2,
+              "p_bottom": 0.0,
+              "p_top": 1.0,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "coverage_bep": {
+              "grid_bottom_m_msl": 38.25,
+              "grid_top_m_msl": 48.2,
+              "p_bottom": 0.0,
+              "p_top": 0.9587511475652826,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "driving_stage_band": {
+              "defined": true,
+              "contribution_weighted_stage_p10_m_msl": 42.87901163740939,
+              "contribution_weighted_stage_median_m_msl": 43.74272473777713,
+              "contribution_weighted_stage_p90_m_msl": 44.82551640550711,
+              "grid_top_m_msl": 48.2,
+              "attainable_max_m_msl": null,
+              "frac_of_annual_piping_above_attainable_max": null
+            }
+          }
+        },
+        "ordering_verdict": "REVERSED",
+        "arms_reversing_the_lead": [
+          "k_aq_field_geomean"
+        ],
+        "arms_collapsing_to_undefined": [],
+        "arms_changing_the_lead": [
+          "k_aq_field_geomean"
+        ],
+        "conductivity_span_p_annual_system": 1217.5812838019456,
+        "conductivity_span_p_annual_bep": 1848084.6951737297
+      },
+      "climate_ratio_plus4k_over_historical": {
+        "baseline": 23.359049319493117,
+        "k_aq_field_geomean": null,
+        "k_aq_field_toe": 58.980370358289264,
+        "k_aq_regional_upper": 6.924887068229269,
+        "gamma_bl_sub_lower": 23.360909901954862
+      }
+    },
+    "KP 62.0": {
+      "historical": {
+        "baseline": {
+          "p_annual_system": 0.00019928757694662766,
+          "p_annual_bep": 1.6462677030194616e-08,
+          "p_annual_overflow": 0.00019927445677934933,
+          "p_annual_fluvial_scour": 0.0,
+          "share_bep": 8.260625760120466e-05,
+          "share_overflow": 0.9999173937423989,
+          "leading_mechanism": "overflow",
+          "coverage_system": {
+            "grid_bottom_m_msl": 41.75,
+            "grid_top_m_msl": 56.5,
+            "p_bottom": 0.0,
+            "p_top": 1.0,
+            "frac_peaks_below_grid": 0.0,
+            "frac_peaks_above_grid": 0.0,
+            "lower_bound_clamp": false,
+            "below_grid_unresolved": false
+          },
+          "driving_stage_band": {
+            "defined": true,
+            "contribution_weighted_stage_p10_m_msl": 48.33693487126959,
+            "contribution_weighted_stage_median_m_msl": 48.66179920174771,
+            "contribution_weighted_stage_p90_m_msl": 48.75629503772999,
+            "grid_top_m_msl": 56.5,
+            "attainable_max_m_msl": 50.5,
+            "frac_peaks_above_attainable_max": 0.0,
+            "frac_of_annual_piping_above_attainable_max": 0.0
+          }
+        },
+        "reversal_margin_p_bep_over_p_overflow": 8.261308195873417e-05,
+        "arms": {
+          "k_aq_field_geomean": {
+            "p_annual_system": 0.00019927445677934941,
+            "p_annual_bep": 0.0,
+            "p_annual_overflow": 0.00019927445677934933,
+            "share_bep": 0.0,
+            "share_overflow": 1.0,
+            "leading_mechanism": "overflow",
+            "ratio_system_to_baseline": 0.9999341646505052,
+            "ratio_bep_to_baseline": 0.0,
+            "coverage_system": {
+              "grid_bottom_m_msl": 41.75,
+              "grid_top_m_msl": 56.5,
+              "p_bottom": 0.0,
+              "p_top": 1.0,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "coverage_bep": {
+              "grid_bottom_m_msl": 41.75,
+              "grid_top_m_msl": 56.5,
+              "p_bottom": 0.0,
+              "p_top": 4.999999999999449e-05,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "driving_stage_band": {
+              "defined": true,
+              "contribution_weighted_stage_p10_m_msl": 48.33692960555844,
+              "contribution_weighted_stage_median_m_msl": 48.661800801256284,
+              "contribution_weighted_stage_p90_m_msl": 48.75629533054696,
+              "grid_top_m_msl": 56.5,
+              "attainable_max_m_msl": 50.5,
+              "frac_peaks_above_attainable_max": 0.0,
+              "frac_of_annual_piping_above_attainable_max": null
+            }
+          },
+          "k_aq_field_toe": {
+            "p_annual_system": 0.00019927445677934941,
+            "p_annual_bep": 0.0,
+            "p_annual_overflow": 0.00019927445677934933,
+            "share_bep": 0.0,
+            "share_overflow": 1.0,
+            "leading_mechanism": "overflow",
+            "ratio_system_to_baseline": 0.9999341646505052,
+            "ratio_bep_to_baseline": 0.0,
+            "coverage_system": {
+              "grid_bottom_m_msl": 41.75,
+              "grid_top_m_msl": 56.5,
+              "p_bottom": 0.0,
+              "p_top": 1.0,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "coverage_bep": {
+              "grid_bottom_m_msl": 41.75,
+              "grid_top_m_msl": 56.5,
+              "p_bottom": 0.0,
+              "p_top": 0.15006000000000008,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "driving_stage_band": {
+              "defined": true,
+              "contribution_weighted_stage_p10_m_msl": 48.33692960555844,
+              "contribution_weighted_stage_median_m_msl": 48.661800801256284,
+              "contribution_weighted_stage_p90_m_msl": 48.75629533054696,
+              "grid_top_m_msl": 56.5,
+              "attainable_max_m_msl": 50.5,
+              "frac_peaks_above_attainable_max": 0.0,
+              "frac_of_annual_piping_above_attainable_max": null
+            }
+          },
+          "k_aq_regional_upper": {
+            "p_annual_system": 0.0004126208173305842,
+            "p_annual_bep": 0.0002360525623003434,
+            "p_annual_overflow": 0.00019927445677934933,
+            "share_bep": 0.5422419283769075,
+            "share_overflow": 0.45775807162309246,
+            "leading_mechanism": "bep",
+            "ratio_system_to_baseline": 2.070479372836625,
+            "ratio_bep_to_baseline": 14338.649896817715,
+            "coverage_system": {
+              "grid_bottom_m_msl": 41.75,
+              "grid_top_m_msl": 56.5,
+              "p_bottom": 0.0,
+              "p_top": 1.0,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "coverage_bep": {
+              "grid_bottom_m_msl": 41.75,
+              "grid_top_m_msl": 56.5,
+              "p_bottom": 0.0,
+              "p_top": 0.9979006603609494,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "driving_stage_band": {
+              "defined": true,
+              "contribution_weighted_stage_p10_m_msl": 47.97567436781554,
+              "contribution_weighted_stage_median_m_msl": 48.5920864262408,
+              "contribution_weighted_stage_p90_m_msl": 48.74387711237991,
+              "grid_top_m_msl": 56.5,
+              "attainable_max_m_msl": 50.5,
+              "frac_peaks_above_attainable_max": 0.0,
+              "frac_of_annual_piping_above_attainable_max": 0.0
+            }
+          },
+          "gamma_bl_sub_lower": {
+            "p_annual_system": 0.00019928757694662766,
+            "p_annual_bep": 1.6462677030194616e-08,
+            "p_annual_overflow": 0.00019927445677934933,
+            "share_bep": 8.260625760120466e-05,
+            "share_overflow": 0.9999173937423989,
+            "leading_mechanism": "overflow",
+            "ratio_system_to_baseline": 1.0,
+            "ratio_bep_to_baseline": 1.0,
+            "coverage_system": {
+              "grid_bottom_m_msl": 41.75,
+              "grid_top_m_msl": 56.5,
+              "p_bottom": 0.0,
+              "p_top": 1.0,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "coverage_bep": {
+              "grid_bottom_m_msl": 41.75,
+              "grid_top_m_msl": 56.5,
+              "p_bottom": 0.0,
+              "p_top": 0.42647999999999997,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "driving_stage_band": {
+              "defined": true,
+              "contribution_weighted_stage_p10_m_msl": 48.33693487126959,
+              "contribution_weighted_stage_median_m_msl": 48.66179920174771,
+              "contribution_weighted_stage_p90_m_msl": 48.75629503772999,
+              "grid_top_m_msl": 56.5,
+              "attainable_max_m_msl": 50.5,
+              "frac_peaks_above_attainable_max": 0.0,
+              "frac_of_annual_piping_above_attainable_max": 0.0
+            }
+          }
+        },
+        "ordering_verdict": "REVERSED",
+        "arms_reversing_the_lead": [
+          "k_aq_regional_upper"
+        ],
+        "arms_collapsing_to_undefined": [],
+        "arms_changing_the_lead": [
+          "k_aq_regional_upper"
+        ],
+        "conductivity_span_p_annual_system": 2.0706156925444126,
+        "conductivity_span_p_annual_bep": null
+      },
+      "+4K": {
+        "baseline": {
+          "p_annual_system": 0.008392008057548622,
+          "p_annual_bep": 1.542227589756329e-05,
+          "p_annual_overflow": 0.008391873485202778,
+          "p_annual_fluvial_scour": 0.0,
+          "share_bep": 0.001834391977610745,
+          "share_overflow": 0.9981656080223893,
+          "leading_mechanism": "overflow",
+          "coverage_system": {
+            "grid_bottom_m_msl": 41.75,
+            "grid_top_m_msl": 56.5,
+            "p_bottom": 0.0,
+            "p_top": 1.0,
+            "frac_peaks_below_grid": 0.0,
+            "frac_peaks_above_grid": 0.0,
+            "lower_bound_clamp": false,
+            "below_grid_unresolved": false
+          },
+          "driving_stage_band": {
+            "defined": true,
+            "contribution_weighted_stage_p10_m_msl": 48.77441360138334,
+            "contribution_weighted_stage_median_m_msl": 49.432937973334994,
+            "contribution_weighted_stage_p90_m_msl": 50.83246074105822,
+            "grid_top_m_msl": 56.5,
+            "attainable_max_m_msl": 50.5,
+            "frac_peaks_above_attainable_max": 0.0012962962962962963,
+            "frac_of_annual_piping_above_attainable_max": 0.8124934967646934
+          }
+        },
+        "reversal_margin_p_bep_over_p_overflow": 0.0018377631556001264,
+        "arms": {
+          "k_aq_field_geomean": {
+            "p_annual_system": 0.008391873485202778,
+            "p_annual_bep": 0.0,
+            "p_annual_overflow": 0.008391873485202778,
+            "share_bep": 0.0,
+            "share_overflow": 1.0,
+            "leading_mechanism": "overflow",
+            "ratio_system_to_baseline": 0.9999839642258539,
+            "ratio_bep_to_baseline": 0.0,
+            "coverage_system": {
+              "grid_bottom_m_msl": 41.75,
+              "grid_top_m_msl": 56.5,
+              "p_bottom": 0.0,
+              "p_top": 1.0,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "coverage_bep": {
+              "grid_bottom_m_msl": 41.75,
+              "grid_top_m_msl": 56.5,
+              "p_bottom": 0.0,
+              "p_top": 4.999999999999449e-05,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "driving_stage_band": {
+              "defined": true,
+              "contribution_weighted_stage_p10_m_msl": 48.77443651712806,
+              "contribution_weighted_stage_median_m_msl": 49.432955794945165,
+              "contribution_weighted_stage_p90_m_msl": 50.832469976417585,
+              "grid_top_m_msl": 56.5,
+              "attainable_max_m_msl": 50.5,
+              "frac_peaks_above_attainable_max": 0.0012962962962962963,
+              "frac_of_annual_piping_above_attainable_max": null
+            }
+          },
+          "k_aq_field_toe": {
+            "p_annual_system": 0.008391873781198513,
+            "p_annual_bep": 1.0127633598086406e-06,
+            "p_annual_overflow": 0.008391873485202778,
+            "share_bep": 0.0001206692584427785,
+            "share_overflow": 0.9998793307415571,
+            "leading_mechanism": "overflow",
+            "ratio_system_to_baseline": 0.9999839994969991,
+            "ratio_bep_to_baseline": 0.06566886538248591,
+            "coverage_system": {
+              "grid_bottom_m_msl": 41.75,
+              "grid_top_m_msl": 56.5,
+              "p_bottom": 0.0,
+              "p_top": 1.0,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "coverage_bep": {
+              "grid_bottom_m_msl": 41.75,
+              "grid_top_m_msl": 56.5,
+              "p_bottom": 0.0,
+              "p_top": 0.15006000000000008,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "driving_stage_band": {
+              "defined": true,
+              "contribution_weighted_stage_p10_m_msl": 48.77443653050555,
+              "contribution_weighted_stage_median_m_msl": 49.432955827234494,
+              "contribution_weighted_stage_p90_m_msl": 50.83246995610414,
+              "grid_top_m_msl": 56.5,
+              "attainable_max_m_msl": 50.5,
+              "frac_peaks_above_attainable_max": 0.0012962962962962963,
+              "frac_of_annual_piping_above_attainable_max": 0.9425791621547607
+            }
+          },
+          "k_aq_regional_upper": {
+            "p_annual_system": 0.009693734984319705,
+            "p_annual_bep": 0.004208144862822308,
+            "p_annual_overflow": 0.008391873485202778,
+            "share_bep": 0.3339792646795541,
+            "share_overflow": 0.6660207353204459,
+            "leading_mechanism": "overflow",
+            "ratio_system_to_baseline": 1.1551150711301068,
+            "ratio_bep_to_baseline": 272.86146939487656,
+            "coverage_system": {
+              "grid_bottom_m_msl": 41.75,
+              "grid_top_m_msl": 56.5,
+              "p_bottom": 0.0,
+              "p_top": 1.0,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "coverage_bep": {
+              "grid_bottom_m_msl": 41.75,
+              "grid_top_m_msl": 56.5,
+              "p_bottom": 0.0,
+              "p_top": 0.9979006603609494,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "driving_stage_band": {
+              "defined": true,
+              "contribution_weighted_stage_p10_m_msl": 48.5821644415766,
+              "contribution_weighted_stage_median_m_msl": 49.37942666302737,
+              "contribution_weighted_stage_p90_m_msl": 50.73579915440414,
+              "grid_top_m_msl": 56.5,
+              "attainable_max_m_msl": 50.5,
+              "frac_peaks_above_attainable_max": 0.0012962962962962963,
+              "frac_of_annual_piping_above_attainable_max": 0.21843538033980858
+            }
+          },
+          "gamma_bl_sub_lower": {
+            "p_annual_system": 0.008392008057548622,
+            "p_annual_bep": 1.542227589756329e-05,
+            "p_annual_overflow": 0.008391873485202778,
+            "share_bep": 0.001834391977610745,
+            "share_overflow": 0.9981656080223893,
+            "leading_mechanism": "overflow",
+            "ratio_system_to_baseline": 1.0,
+            "ratio_bep_to_baseline": 1.0,
+            "coverage_system": {
+              "grid_bottom_m_msl": 41.75,
+              "grid_top_m_msl": 56.5,
+              "p_bottom": 0.0,
+              "p_top": 1.0,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "coverage_bep": {
+              "grid_bottom_m_msl": 41.75,
+              "grid_top_m_msl": 56.5,
+              "p_bottom": 0.0,
+              "p_top": 0.42647999999999997,
+              "frac_peaks_below_grid": 0.0,
+              "frac_peaks_above_grid": 0.0,
+              "lower_bound_clamp": false,
+              "below_grid_unresolved": false
+            },
+            "driving_stage_band": {
+              "defined": true,
+              "contribution_weighted_stage_p10_m_msl": 48.77441360138334,
+              "contribution_weighted_stage_median_m_msl": 49.432937973334994,
+              "contribution_weighted_stage_p90_m_msl": 50.83246074105822,
+              "grid_top_m_msl": 56.5,
+              "attainable_max_m_msl": 50.5,
+              "frac_peaks_above_attainable_max": 0.0012962962962962963,
+              "frac_of_annual_piping_above_attainable_max": 0.8124934967646934
+            }
+          }
+        },
+        "ordering_verdict": "ROBUST",
+        "arms_reversing_the_lead": [],
+        "arms_collapsing_to_undefined": [],
+        "arms_changing_the_lead": [],
+        "conductivity_span_p_annual_system": 1.1551335945915382,
+        "conductivity_span_p_annual_bep": null
+      },
+      "climate_ratio_plus4k_over_historical": {
+        "baseline": 42.11004110806231,
+        "k_aq_field_geomean": 42.11213830829732,
+        "k_aq_field_toe": 42.11213979366448,
+        "k_aq_regional_upper": 23.49308269765086,
+        "gamma_bl_sub_lower": 42.11004110806231
+      }
+    }
+  },
+  "lambda_ac_bracket_yardstick": {
+    "definition": "published system P_f at lambda_ac = 40 m divided by 250 m, posterior side, matrix, primary surface (phase3_report section 6.2)",
+    "values": {
+      "KP 57.4": {
+        "historical": 4.976148093533973,
+        "+4K": 1.7886559293871647
+      },
+      "KP 58.8": {
+        "historical": 1.0760106003764407,
+        "+4K": 1.2323792418746364
+      },
+      "KP 60.0": {
+        "historical": 4.791554029888219,
+        "+4K": 3.587359845596837
+      },
+      "KP 62.0": {
+        "historical": 1.0002633302681436,
+        "+4K": 1.0000641321850905
+      }
+    }
+  },
+  "elapsed_s": 15.4,
+  "phase2_settings_exemption": {
+    "field": "trace_breach_times",
+    "production_value": true,
+    "value_used_here": false,
+    "why_exempt": "run_survival_update fixes state.alive in the Accept-Reject chain BEFORE the tracing block, and the posterior is posterior_fragility_from_matrices(run, state.alive, ...). The traced array t_breach is only persisted and only plotted, and figures are off.",
+    "why_needed": "breach_times_for_rows re-runs the scalar M8 with trajectory storage once per REJECTED row, so its cost is linear in exactly the quantity a high-conductivity arm inflates",
+    "measured_on": "KP 58.8 matrix, k_aq_regional_upper",
+    "rejected_rows": 65530,
+    "runtime_s_tracing_on": 5902.2,
+    "runtime_s_tracing_off": 65.5,
+    "speedup": 90.1,
+    "bit_identical": [
+      "conditioning_grid",
+      "P_f_trans_post_raw",
+      "P_f_static_post_raw",
+      "binomial_ci transient lower/upper",
+      "binomial_ci static lower/upper",
+      "transient fit mu/sigma",
+      "static fit mu/sigma",
+      "rejection_fraction",
+      "n_accepted"
+    ],
+    "recorded_in": "docs/decisions/conductivity-bracket-posterior-side.md Part 1a"
+  },
+  "survival_update": {
+    "definition": "Phase 2 Accept-Reject against the 2016 typhoon survival record, per arm; rejection_fraction is the share of the N = 1e5 prior realizations that would have breached under that event and is the mechanism behind everything the bracket does here",
+    "by_section": {
+      "KP 57.4": {
+        "baseline": {
+          "rejection_fraction": 0.0,
+          "n_accepted": 100000
+        },
+        "k_aq_field_geomean": {
+          "rejection_fraction": 0.0,
+          "n_accepted": 100000
+        },
+        "k_aq_field_toe": {
+          "rejection_fraction": 0.0,
+          "n_accepted": 100000
+        },
+        "k_aq_regional_upper": {
+          "rejection_fraction": 4.999999999999449e-05,
+          "n_accepted": 99995
+        },
+        "gamma_bl_sub_lower": {
+          "rejection_fraction": 0.0,
+          "n_accepted": 100000
+        }
+      },
+      "KP 58.8": {
+        "baseline": {
+          "rejection_fraction": 0.0,
+          "n_accepted": 100000
+        },
+        "k_aq_field_geomean": {
+          "rejection_fraction": 0.0,
+          "n_accepted": 100000
+        },
+        "k_aq_field_toe": {
+          "rejection_fraction": 0.0,
+          "n_accepted": 100000
+        },
+        "k_aq_regional_upper": {
+          "rejection_fraction": 0.0006000000000000449,
+          "n_accepted": 99940
+        },
+        "gamma_bl_sub_lower": {
+          "rejection_fraction": 0.0,
+          "n_accepted": 100000
+        }
+      },
+      "KP 60.0": {
+        "baseline": {
+          "rejection_fraction": 0.00022999999999995246,
+          "n_accepted": 99977
+        },
+        "k_aq_field_geomean": {
+          "rejection_fraction": 0.0,
+          "n_accepted": 100000
+        },
+        "k_aq_field_toe": {
+          "rejection_fraction": 0.0,
+          "n_accepted": 100000
+        },
+        "k_aq_regional_upper": {
+          "rejection_fraction": 0.39004000000000005,
+          "n_accepted": 60996
+        },
+        "gamma_bl_sub_lower": {
+          "rejection_fraction": 0.00022999999999995246,
+          "n_accepted": 99977
+        }
+      },
+      "KP 62.0": {
+        "baseline": {
+          "rejection_fraction": 0.0,
+          "n_accepted": 100000
+        },
+        "k_aq_field_geomean": {
+          "rejection_fraction": 0.0,
+          "n_accepted": 100000
+        },
+        "k_aq_field_toe": {
+          "rejection_fraction": 0.0,
+          "n_accepted": 100000
+        },
+        "k_aq_regional_upper": {
+          "rejection_fraction": 0.0,
+          "n_accepted": 100000
+        },
+        "gamma_bl_sub_lower": {
+          "rejection_fraction": 0.0,
+          "n_accepted": 100000
+        }
+      }
+    }
+  },
+  "posterior_vs_prior": {
+    "KP 57.4": {
+      "historical": {
+        "prior_span_p_annual_system": null,
+        "posterior_span_p_annual_system": null,
+        "prior_span_p_annual_bep": null,
+        "posterior_span_p_annual_bep": null,
+        "prior_ordering_verdict": "COLLAPSED",
+        "posterior_ordering_verdict": "COLLAPSED",
+        "ordering_verdict_unchanged": true,
+        "prior_arms_changing_the_lead": [
+          "k_aq_field_geomean",
+          "k_aq_field_toe"
+        ],
+        "posterior_arms_changing_the_lead": [
+          "k_aq_field_geomean",
+          "k_aq_field_toe"
+        ],
+        "arms": {
+          "baseline": {
+            "prior_p_annual_system": 2.074058746414729e-06,
+            "posterior_p_annual_system": 2.074058746414729e-06,
+            "posterior_over_prior_system": 1.0,
+            "prior_p_annual_bep": 2.074058746414729e-06,
+            "posterior_p_annual_bep": 2.074058746414729e-06,
+            "posterior_over_prior_bep": 1.0
+          },
+          "k_aq_field_geomean": {
+            "prior_p_annual_system": 0.0,
+            "posterior_p_annual_system": 0.0,
+            "posterior_over_prior_system": null,
+            "prior_p_annual_bep": 0.0,
+            "posterior_p_annual_bep": 0.0,
+            "posterior_over_prior_bep": null
+          },
+          "k_aq_field_toe": {
+            "prior_p_annual_system": 0.0,
+            "posterior_p_annual_system": 0.0,
+            "posterior_over_prior_system": null,
+            "prior_p_annual_bep": 0.0,
+            "posterior_p_annual_bep": 0.0,
+            "posterior_over_prior_bep": null
+          },
+          "k_aq_regional_upper": {
+            "prior_p_annual_system": 0.00012648050571616203,
+            "posterior_p_annual_system": 0.00012621036669469986,
+            "posterior_over_prior_system": 0.9978641845244642,
+            "prior_p_annual_bep": 0.00012648050571616203,
+            "posterior_p_annual_bep": 0.00012621036669469986,
+            "posterior_over_prior_bep": 0.9978641845244642
+          },
+          "gamma_bl_sub_lower": {
+            "prior_p_annual_system": 2.074058746414729e-06,
+            "posterior_p_annual_system": 2.074058746414729e-06,
+            "posterior_over_prior_system": 1.0,
+            "prior_p_annual_bep": 2.074058746414729e-06,
+            "posterior_p_annual_bep": 2.074058746414729e-06,
+            "posterior_over_prior_bep": 1.0
+          }
+        },
+        "span_ratio_p_annual_system": null,
+        "span_ratio_p_annual_bep": null
+      },
+      "+4K": {
+        "prior_span_p_annual_system": 4.540714810976299,
+        "posterior_span_p_annual_system": 4.538201441475814,
+        "prior_span_p_annual_bep": null,
+        "posterior_span_p_annual_bep": null,
+        "prior_ordering_verdict": "REVERSED",
+        "posterior_ordering_verdict": "REVERSED",
+        "ordering_verdict_unchanged": true,
+        "prior_arms_changing_the_lead": [
+          "k_aq_regional_upper"
+        ],
+        "posterior_arms_changing_the_lead": [
+          "k_aq_regional_upper"
+        ],
+        "arms": {
+          "baseline": {
+            "prior_p_annual_system": 0.001215482719636291,
+            "posterior_p_annual_system": 0.001215482719636291,
+            "posterior_over_prior_system": 1.0,
+            "prior_p_annual_bep": 0.0005672769561485688,
+            "posterior_p_annual_bep": 0.0005672769561485688,
+            "posterior_over_prior_bep": 1.0
+          },
+          "k_aq_field_geomean": {
+            "prior_p_annual_system": 0.0009114344650738865,
+            "posterior_p_annual_system": 0.0009114344650738865,
+            "posterior_over_prior_system": 1.0,
+            "prior_p_annual_bep": 0.0,
+            "posterior_p_annual_bep": 0.0,
+            "posterior_over_prior_bep": null
+          },
+          "k_aq_field_toe": {
+            "prior_p_annual_system": 0.0009121356472612545,
+            "posterior_p_annual_system": 0.0009121356472612545,
+            "posterior_over_prior_system": 1.0,
+            "prior_p_annual_bep": 3.3678518744261187e-06,
+            "posterior_p_annual_bep": 3.3678518744261187e-06,
+            "posterior_over_prior_bep": 1.0
+          },
+          "k_aq_regional_upper": {
+            "prior_p_annual_system": 0.004138563974795257,
+            "posterior_p_annual_system": 0.00413627320320905,
+            "posterior_over_prior_system": 0.9994464815331697,
+            "prior_p_annual_bep": 0.003984742545428393,
+            "posterior_p_annual_bep": 0.003982517791048536,
+            "posterior_over_prior_bep": 0.9994416817763022
+          },
+          "gamma_bl_sub_lower": {
+            "prior_p_annual_system": 0.001215477851739536,
+            "posterior_p_annual_system": 0.001215477851739536,
+            "posterior_over_prior_system": 1.0,
+            "prior_p_annual_bep": 0.0005672720184013853,
+            "posterior_p_annual_bep": 0.0005672720184013853,
+            "posterior_over_prior_bep": 1.0
+          }
+        },
+        "span_ratio_p_annual_system": 0.9994464815331697,
+        "span_ratio_p_annual_bep": null
+      },
+      "climate_ratio_plus4k_over_historical": {
+        "baseline": {
+          "prior": 586.0406421647436,
+          "posterior": 586.0406421647436,
+          "posterior_over_prior": 1.0
+        },
+        "gamma_bl_sub_lower": {
+          "prior": 586.038295125749,
+          "posterior": 586.038295125749,
+          "posterior_over_prior": 1.0
+        },
+        "k_aq_field_geomean": {
+          "prior": null,
+          "posterior": null,
+          "posterior_over_prior": null
+        },
+        "k_aq_field_toe": {
+          "prior": null,
+          "posterior": null,
+          "posterior_over_prior": null
+        },
+        "k_aq_regional_upper": {
+          "prior": 32.72096321375176,
+          "posterior": 32.77284831296469,
+          "posterior_over_prior": 1.0015856837365693
+        }
+      }
+    },
+    "KP 58.8": {
+      "historical": {
+        "prior_span_p_annual_system": 4.397750895372033,
+        "posterior_span_p_annual_system": 4.353751687401129,
+        "prior_span_p_annual_bep": null,
+        "posterior_span_p_annual_bep": null,
+        "prior_ordering_verdict": "REVERSED",
+        "posterior_ordering_verdict": "REVERSED",
+        "ordering_verdict_unchanged": true,
+        "prior_arms_changing_the_lead": [
+          "k_aq_regional_upper"
+        ],
+        "posterior_arms_changing_the_lead": [
+          "k_aq_regional_upper"
+        ],
+        "arms": {
+          "baseline": {
+            "prior_p_annual_system": 0.00019887555820912014,
+            "posterior_p_annual_system": 0.00019887555820912014,
+            "posterior_over_prior_system": 1.0,
+            "prior_p_annual_bep": 3.983552526292708e-06,
+            "posterior_p_annual_bep": 3.983552526292708e-06,
+            "posterior_over_prior_bep": 1.0
+          },
+          "k_aq_field_geomean": {
+            "prior_p_annual_system": 0.00019507776382913833,
+            "posterior_p_annual_system": 0.00019507776382913833,
+            "posterior_over_prior_system": 1.0,
+            "prior_p_annual_bep": 0.0,
+            "posterior_p_annual_bep": 0.0,
+            "posterior_over_prior_bep": null
+          },
+          "k_aq_field_toe": {
+            "prior_p_annual_system": 0.00019507829707975517,
+            "posterior_p_annual_system": 0.00019507829707975517,
+            "posterior_over_prior_system": 1.0,
+            "prior_p_annual_bep": 5.757159982024253e-10,
+            "posterior_p_annual_bep": 5.757159982024253e-10,
+            "posterior_over_prior_bep": 1.0
+          },
+          "k_aq_regional_upper": {
+            "prior_p_annual_system": 0.000857903410546767,
+            "posterior_p_annual_system": 0.0008493201434455499,
+            "posterior_over_prior_system": 0.9899950658830617,
+            "prior_p_annual_bep": 0.0006844599877103137,
+            "posterior_p_annual_bep": 0.0006756859599609238,
+            "posterior_over_prior_bep": 0.9871810947214881
+          },
+          "gamma_bl_sub_lower": {
+            "prior_p_annual_system": 0.00019887555820912014,
+            "posterior_p_annual_system": 0.00019887555820912014,
+            "posterior_over_prior_system": 1.0,
+            "prior_p_annual_bep": 3.983552526292708e-06,
+            "posterior_p_annual_bep": 3.983552526292708e-06,
+            "posterior_over_prior_bep": 1.0
+          }
+        },
+        "span_ratio_p_annual_system": 0.9899950658830616,
+        "span_ratio_p_annual_bep": null
+      },
+      "+4K": {
+        "prior_span_p_annual_system": 3.532176114565015,
+        "posterior_span_p_annual_system": 3.5137071101059547,
+        "prior_span_p_annual_bep": null,
+        "posterior_span_p_annual_bep": null,
+        "prior_ordering_verdict": "REVERSED",
+        "posterior_ordering_verdict": "REVERSED",
+        "ordering_verdict_unchanged": true,
+        "prior_arms_changing_the_lead": [
+          "k_aq_regional_upper"
+        ],
+        "posterior_arms_changing_the_lead": [
+          "k_aq_regional_upper"
+        ],
+        "arms": {
+          "baseline": {
+            "prior_p_annual_system": 0.0027090843786673658,
+            "posterior_p_annual_system": 0.0027090843786673658,
+            "posterior_over_prior_system": 1.0,
+            "prior_p_annual_bep": 0.00026812957381632755,
+            "posterior_p_annual_bep": 0.00026812957381632755,
+            "posterior_over_prior_bep": 1.0
+          },
+          "k_aq_field_geomean": {
+            "prior_p_annual_system": 0.0025293600327370466,
+            "posterior_p_annual_system": 0.0025293600327370466,
+            "posterior_over_prior_system": 1.0,
+            "prior_p_annual_bep": 0.0,
+            "posterior_p_annual_bep": 0.0,
+            "posterior_over_prior_bep": null
+          },
+          "k_aq_field_toe": {
+            "prior_p_annual_system": 0.0025306614686083644,
+            "posterior_p_annual_system": 0.0025306614686083644,
+            "posterior_over_prior_system": 1.0,
+            "prior_p_annual_bep": 2.4421048658883115e-06,
+            "posterior_p_annual_bep": 2.4421048658883115e-06,
+            "posterior_over_prior_bep": 1.0
+          },
+          "k_aq_regional_upper": {
+            "prior_p_annual_system": 0.00893414509276918,
+            "posterior_p_annual_system": 0.008887430331045991,
+            "posterior_over_prior_system": 0.9947712107607254,
+            "prior_p_annual_bep": 0.007454763309796963,
+            "posterior_p_annual_bep": 0.007406752846520648,
+            "posterior_over_prior_bep": 0.9935597602122095
+          },
+          "gamma_bl_sub_lower": {
+            "prior_p_annual_system": 0.0027090828037358416,
+            "posterior_p_annual_system": 0.0027090828037358416,
+            "posterior_over_prior_system": 1.0,
+            "prior_p_annual_bep": 0.0002681263476122397,
+            "posterior_p_annual_bep": 0.0002681263476122397,
+            "posterior_over_prior_bep": 1.0
+          }
+        },
+        "span_ratio_p_annual_system": 0.9947712107607254,
+        "span_ratio_p_annual_bep": null
+      },
+      "climate_ratio_plus4k_over_historical": {
+        "baseline": {
+          "prior": 13.622007666818108,
+          "posterior": 13.622007666818108,
+          "posterior_over_prior": 1.0
+        },
+        "gamma_bl_sub_lower": {
+          "prior": 13.621999747637199,
+          "posterior": 13.621999747637199,
+          "posterior_over_prior": 1.0
+        },
+        "k_aq_field_geomean": {
+          "prior": 12.965906431818764,
+          "posterior": 12.965906431818764,
+          "posterior_over_prior": 1.0
+        },
+        "k_aq_field_toe": {
+          "prior": 12.972542340646623,
+          "posterior": 12.972542340646623,
+          "posterior_over_prior": 1.0
+        },
+        "k_aq_regional_upper": {
+          "prior": 10.413928867674262,
+          "posterior": 10.464169959505695,
+          "posterior_over_prior": 1.0048244128099804
+        }
+      }
+    },
+    "KP 60.0": {
+      "historical": {
+        "prior_span_p_annual_system": null,
+        "posterior_span_p_annual_system": null,
+        "prior_span_p_annual_bep": null,
+        "posterior_span_p_annual_bep": null,
+        "prior_ordering_verdict": "COLLAPSED",
+        "posterior_ordering_verdict": "COLLAPSED",
+        "ordering_verdict_unchanged": true,
+        "prior_arms_changing_the_lead": [
+          "k_aq_field_geomean"
+        ],
+        "posterior_arms_changing_the_lead": [
+          "k_aq_field_geomean"
+        ],
+        "arms": {
+          "baseline": {
+            "prior_p_annual_system": 6.946455662597709e-05,
+            "posterior_p_annual_system": 6.914576779640289e-05,
+            "posterior_over_prior_system": 0.9954107699658881,
+            "prior_p_annual_bep": 6.946455662597709e-05,
+            "posterior_p_annual_bep": 6.914576779640289e-05,
+            "posterior_over_prior_bep": 0.9954107699658881
+          },
+          "k_aq_field_geomean": {
+            "prior_p_annual_system": 0.0,
+            "posterior_p_annual_system": 0.0,
+            "posterior_over_prior_system": null,
+            "prior_p_annual_bep": 0.0,
+            "posterior_p_annual_bep": 0.0,
+            "posterior_over_prior_bep": null
+          },
+          "k_aq_field_toe": {
+            "prior_p_annual_system": 5.375471272439602e-06,
+            "posterior_p_annual_system": 5.375471272439602e-06,
+            "posterior_over_prior_system": 1.0,
+            "prior_p_annual_bep": 5.375471272439602e-06,
+            "posterior_p_annual_bep": 5.375471272439602e-06,
+            "posterior_over_prior_bep": 1.0
+          },
+          "k_aq_regional_upper": {
+            "prior_p_annual_system": 0.007332256338564186,
+            "posterior_p_annual_system": 0.004052997609888368,
+            "posterior_over_prior_system": 0.5527626725993642,
+            "prior_p_annual_bep": 0.007332256338564186,
+            "posterior_p_annual_bep": 0.004052997609888368,
+            "posterior_over_prior_bep": 0.5527626725993642
+          },
+          "gamma_bl_sub_lower": {
+            "prior_p_annual_system": 6.94766211350011e-05,
+            "posterior_p_annual_system": 6.915756028179305e-05,
+            "posterior_over_prior_system": 0.995407651552483,
+            "prior_p_annual_bep": 6.94766211350011e-05,
+            "posterior_p_annual_bep": 6.915756028179305e-05,
+            "posterior_over_prior_bep": 0.995407651552483
+          }
+        },
+        "span_ratio_p_annual_system": null,
+        "span_ratio_p_annual_bep": null
+      },
+      "+4K": {
+        "prior_span_p_annual_system": 1864.575134228285,
+        "posterior_span_p_annual_system": 1217.5812838019456,
+        "prior_span_p_annual_bep": 2830113.3675376344,
+        "posterior_span_p_annual_bep": 1848084.6951737297,
+        "prior_ordering_verdict": "REVERSED",
+        "posterior_ordering_verdict": "REVERSED",
+        "ordering_verdict_unchanged": true,
+        "prior_arms_changing_the_lead": [
+          "k_aq_field_geomean"
+        ],
+        "posterior_arms_changing_the_lead": [
+          "k_aq_field_geomean"
+        ],
+        "arms": {
+          "baseline": {
+            "prior_p_annual_system": 0.0016186230078056277,
+            "posterior_p_annual_system": 0.001615179400190394,
+            "posterior_over_prior_system": 0.9978725079288833,
+            "prior_p_annual_bep": 0.001606203714958804,
+            "posterior_p_annual_bep": 0.001602755250945974,
+            "posterior_over_prior_bep": 0.9978530344683467
+          },
+          "k_aq_field_geomean": {
+            "prior_p_annual_system": 2.3051069451922905e-05,
+            "posterior_p_annual_system": 2.3051069451922905e-05,
+            "posterior_over_prior_system": 1.0,
+            "prior_p_annual_bep": 1.5186826538377102e-08,
+            "posterior_p_annual_bep": 1.5186826538377102e-08,
+            "posterior_over_prior_bep": 1.0
+          },
+          "k_aq_field_toe": {
+            "prior_p_annual_system": 0.0003170472864988322,
+            "posterior_p_annual_system": 0.0003170472864988322,
+            "posterior_over_prior_system": 1.0,
+            "prior_p_annual_bep": 0.00029759822442217186,
+            "posterior_p_annual_bep": 0.00029759822442217186,
+            "posterior_over_prior_bep": 1.0
+          },
+          "k_aq_regional_upper": {
+            "prior_p_annual_system": 0.04298045091742467,
+            "posterior_p_annual_system": 0.0280665507362801,
+            "posterior_over_prior_system": 0.6530073588618788,
+            "prior_p_annual_bep": 0.04298044079673634,
+            "posterior_p_annual_bep": 0.028066541693832957,
+            "posterior_over_prior_bep": 0.6530073022416315
+          },
+          "gamma_bl_sub_lower": {
+            "prior_p_annual_system": 0.0016190298375679665,
+            "posterior_p_annual_system": 0.0016155835347819796,
+            "posterior_over_prior_system": 0.9978713778424468,
+            "prior_p_annual_bep": 0.0016066131474965285,
+            "posterior_p_annual_bep": 0.001603161987779111,
+            "posterior_over_prior_bep": 0.9978519037250534
+          }
+        },
+        "span_ratio_p_annual_system": 0.6530073588618789,
+        "span_ratio_p_annual_bep": 0.6530073022416315
+      },
+      "climate_ratio_plus4k_over_historical": {
+        "baseline": {
+          "prior": 23.30142286117068,
+          "posterior": 23.359049319493117,
+          "posterior_over_prior": 1.0024730875305674
+        },
+        "gamma_bl_sub_lower": {
+          "prior": 23.30323224012297,
+          "posterior": 23.360909901954862,
+          "posterior_over_prior": 1.0024750927784423
+        },
+        "k_aq_field_geomean": {
+          "prior": null,
+          "posterior": null,
+          "posterior_over_prior": null
+        },
+        "k_aq_field_toe": {
+          "prior": 58.980370358289264,
+          "posterior": 58.980370358289264,
+          "posterior_over_prior": 1.0
+        },
+        "k_aq_regional_upper": {
+          "prior": 5.861831465352338,
+          "posterior": 6.924887068229269,
+          "posterior_over_prior": 1.181352126747478
+        }
+      }
+    },
+    "KP 62.0": {
+      "historical": {
+        "prior_span_p_annual_system": 2.0706156925444126,
+        "posterior_span_p_annual_system": 2.0706156925444126,
+        "prior_span_p_annual_bep": null,
+        "posterior_span_p_annual_bep": null,
+        "prior_ordering_verdict": "REVERSED",
+        "posterior_ordering_verdict": "REVERSED",
+        "ordering_verdict_unchanged": true,
+        "prior_arms_changing_the_lead": [
+          "k_aq_regional_upper"
+        ],
+        "posterior_arms_changing_the_lead": [
+          "k_aq_regional_upper"
+        ],
+        "arms": {
+          "baseline": {
+            "prior_p_annual_system": 0.00019928757694662766,
+            "posterior_p_annual_system": 0.00019928757694662766,
+            "posterior_over_prior_system": 1.0,
+            "prior_p_annual_bep": 1.6462677030194616e-08,
+            "posterior_p_annual_bep": 1.6462677030194616e-08,
+            "posterior_over_prior_bep": 1.0
+          },
+          "k_aq_field_geomean": {
+            "prior_p_annual_system": 0.00019927445677934941,
+            "posterior_p_annual_system": 0.00019927445677934941,
+            "posterior_over_prior_system": 1.0,
+            "prior_p_annual_bep": 0.0,
+            "posterior_p_annual_bep": 0.0,
+            "posterior_over_prior_bep": null
+          },
+          "k_aq_field_toe": {
+            "prior_p_annual_system": 0.00019927445677934941,
+            "posterior_p_annual_system": 0.00019927445677934941,
+            "posterior_over_prior_system": 1.0,
+            "prior_p_annual_bep": 0.0,
+            "posterior_p_annual_bep": 0.0,
+            "posterior_over_prior_bep": null
+          },
+          "k_aq_regional_upper": {
+            "prior_p_annual_system": 0.0004126208173305842,
+            "posterior_p_annual_system": 0.0004126208173305842,
+            "posterior_over_prior_system": 1.0,
+            "prior_p_annual_bep": 0.0002360525623003434,
+            "posterior_p_annual_bep": 0.0002360525623003434,
+            "posterior_over_prior_bep": 1.0
+          },
+          "gamma_bl_sub_lower": {
+            "prior_p_annual_system": 0.00019928757694662766,
+            "posterior_p_annual_system": 0.00019928757694662766,
+            "posterior_over_prior_system": 1.0,
+            "prior_p_annual_bep": 1.6462677030194616e-08,
+            "posterior_p_annual_bep": 1.6462677030194616e-08,
+            "posterior_over_prior_bep": 1.0
+          }
+        },
+        "span_ratio_p_annual_system": 1.0,
+        "span_ratio_p_annual_bep": null
+      },
+      "+4K": {
+        "prior_span_p_annual_system": 1.1551335945915382,
+        "posterior_span_p_annual_system": 1.1551335945915382,
+        "prior_span_p_annual_bep": null,
+        "posterior_span_p_annual_bep": null,
+        "prior_ordering_verdict": "ROBUST",
+        "posterior_ordering_verdict": "ROBUST",
+        "ordering_verdict_unchanged": true,
+        "prior_arms_changing_the_lead": [],
+        "posterior_arms_changing_the_lead": [],
+        "arms": {
+          "baseline": {
+            "prior_p_annual_system": 0.008392008057548622,
+            "posterior_p_annual_system": 0.008392008057548622,
+            "posterior_over_prior_system": 1.0,
+            "prior_p_annual_bep": 1.542227589756329e-05,
+            "posterior_p_annual_bep": 1.542227589756329e-05,
+            "posterior_over_prior_bep": 1.0
+          },
+          "k_aq_field_geomean": {
+            "prior_p_annual_system": 0.008391873485202778,
+            "posterior_p_annual_system": 0.008391873485202778,
+            "posterior_over_prior_system": 1.0,
+            "prior_p_annual_bep": 0.0,
+            "posterior_p_annual_bep": 0.0,
+            "posterior_over_prior_bep": null
+          },
+          "k_aq_field_toe": {
+            "prior_p_annual_system": 0.008391873781198513,
+            "posterior_p_annual_system": 0.008391873781198513,
+            "posterior_over_prior_system": 1.0,
+            "prior_p_annual_bep": 1.0127633598086406e-06,
+            "posterior_p_annual_bep": 1.0127633598086406e-06,
+            "posterior_over_prior_bep": 1.0
+          },
+          "k_aq_regional_upper": {
+            "prior_p_annual_system": 0.009693734984319705,
+            "posterior_p_annual_system": 0.009693734984319705,
+            "posterior_over_prior_system": 1.0,
+            "prior_p_annual_bep": 0.004208144862822308,
+            "posterior_p_annual_bep": 0.004208144862822308,
+            "posterior_over_prior_bep": 1.0
+          },
+          "gamma_bl_sub_lower": {
+            "prior_p_annual_system": 0.008392008057548622,
+            "posterior_p_annual_system": 0.008392008057548622,
+            "posterior_over_prior_system": 1.0,
+            "prior_p_annual_bep": 1.542227589756329e-05,
+            "posterior_p_annual_bep": 1.542227589756329e-05,
+            "posterior_over_prior_bep": 1.0
+          }
+        },
+        "span_ratio_p_annual_system": 1.0,
+        "span_ratio_p_annual_bep": null
+      },
+      "climate_ratio_plus4k_over_historical": {
+        "baseline": {
+          "prior": 42.11004110806231,
+          "posterior": 42.11004110806231,
+          "posterior_over_prior": 1.0
+        },
+        "gamma_bl_sub_lower": {
+          "prior": 42.11004110806231,
+          "posterior": 42.11004110806231,
+          "posterior_over_prior": 1.0
+        },
+        "k_aq_field_geomean": {
+          "prior": 42.11213830829732,
+          "posterior": 42.11213830829732,
+          "posterior_over_prior": 1.0
+        },
+        "k_aq_field_toe": {
+          "prior": 42.11213979366448,
+          "posterior": 42.11213979366448,
+          "posterior_over_prior": 1.0
+        },
+        "k_aq_regional_upper": {
+          "prior": 23.49308269765086,
+          "posterior": 23.49308269765086,
+          "posterior_over_prior": 1.0
+        }
+      }
+    }
+  },
+  "bep_clamped_cells": [
+    {
+      "section": "KP 57.4",
+      "scenario": "historical",
+      "baseline_clamped": true,
+      "arms_clamped": [
+        "gamma_bl_sub_lower",
+        "k_aq_field_geomean",
+        "k_aq_field_toe"
+      ],
+      "reading": "the piping annual probability here is a LOWER BOUND, not an estimate"
+    },
+    {
+      "section": "KP 57.4",
+      "scenario": "+4K",
+      "baseline_clamped": true,
+      "arms_clamped": [
+        "gamma_bl_sub_lower",
+        "k_aq_field_geomean",
+        "k_aq_field_toe"
+      ],
+      "reading": "the piping annual probability here is a LOWER BOUND, not an estimate"
+    },
+    {
+      "section": "KP 58.8",
+      "scenario": "historical",
+      "baseline_clamped": true,
+      "arms_clamped": [
+        "gamma_bl_sub_lower",
+        "k_aq_field_geomean",
+        "k_aq_field_toe"
+      ],
+      "reading": "the piping annual probability here is a LOWER BOUND, not an estimate"
+    },
+    {
+      "section": "KP 58.8",
+      "scenario": "+4K",
+      "baseline_clamped": true,
+      "arms_clamped": [
+        "gamma_bl_sub_lower",
+        "k_aq_field_geomean",
+        "k_aq_field_toe"
+      ],
+      "reading": "the piping annual probability here is a LOWER BOUND, not an estimate"
+    },
+    {
+      "section": "KP 60.0",
+      "scenario": "historical",
+      "baseline_clamped": false,
+      "arms_clamped": [
+        "k_aq_field_geomean"
+      ],
+      "reading": "the piping annual probability here is a LOWER BOUND, not an estimate"
+    },
+    {
+      "section": "KP 60.0",
+      "scenario": "+4K",
+      "baseline_clamped": false,
+      "arms_clamped": [
+        "k_aq_field_geomean"
+      ],
+      "reading": "the piping annual probability here is a LOWER BOUND, not an estimate"
+    }
+  ]
+}
