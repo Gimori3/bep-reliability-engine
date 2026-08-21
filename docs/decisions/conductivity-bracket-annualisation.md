@@ -19,9 +19,12 @@ grammar.
 Part 2 is matrix-d70 and prior-side only; every number in Part 3 is bulk-d70 and
 prior-side only. The two grain-size readings are co-primary deliverables, not a
 result and a sensitivity, and the d70 half of the original scope was closed on
-2026-08-10 by Part 3. The prior-side half stands: no Phase 2 posterior exists for
-any conductivity arm under either reading.** Every quotation of any figure in
-this note must carry the reading it came from.
+2026-08-10 by Part 3. The prior-side half was closed on 2026-08-21 by the
+companion record `conductivity-bracket-posterior-side.md`, which replays every
+arm against the 2016 survival record before annualising it; the numbers in this
+note are unchanged and remain prior-side.** Every quotation of any figure in
+this note must carry the reading it came from, and now also the side of the
+update it came from.
 
 ---
 
@@ -504,6 +507,15 @@ moves the system number by about 12 % at KP 58.8 and less than 2 % at the other
 three, `phase3_report.md` §6.2). Because the bracket spans one to five orders of
 magnitude, a 12 % prior-versus-posterior difference cannot change any verdict
 here, but the numbers are prior-side numbers and must be labelled as such.
+
+> **Both sentences above were overtaken by this repository, and both are left
+> standing as written.** "No bulk-d70 conductivity arm has ever been run" was
+> discharged on 2026-08-10 by Part 3 below. "No Phase 2 posterior exists for any
+> conductivity arm" was discharged on 2026-08-21 by the companion record
+> `conductivity-bracket-posterior-side.md`, which replays all four arms at all
+> four sections under both readings against the 2016 survival record. Not one
+> number in this note changed; its scope is still prior-side, and a quotation
+> from it must still say so.
 
 ### 2.7 Method, gates and decisions of record
 
@@ -1152,6 +1164,9 @@ Landing instructions. **Nothing in `msc-thesis` is edited from this repository**
    narrows rather than disappears. The d70 half is discharged; the prior-side half
    stands, and it should now read that no Phase 2 posterior exists for any
    conductivity arm under **either** grain-size reading.
+   *(Superseded 2026-08-21: the prior-side half is discharged too, by
+   `conductivity-bracket-posterior-side.md`. The thesis instruction that
+   replaced this one is that record's own landing section.)*
 2. **The dominance narrative** gains the cross-reading verdict table of §3.2.3 and
    the statement that no cell's leading mechanism is invariant across the union of
    the two readings and the bracket, together with the two sentences that keep

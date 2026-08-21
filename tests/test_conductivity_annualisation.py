@@ -42,7 +42,11 @@ FIGURES = REPO / "docs" / "figures"
 EVIDENCE = DECISIONS / "conductivity-bracket-annualisation.json"
 BULK_EVIDENCE = DECISIONS / "conductivity-bracket-annualisation-bulk.json"
 NOTE = DECISIONS / "conductivity-bracket-annualisation.md"
+POSTERIOR_EVIDENCE = DECISIONS / "conductivity-bracket-posterior-side.json"
+POSTERIOR_BULK_EVIDENCE = DECISIONS / "conductivity-bracket-posterior-side-bulk.json"
+POSTERIOR_NOTE = DECISIONS / "conductivity-bracket-posterior-side.md"
 DRIVER = REPO / "scripts" / "conductivity_annualisation_study.py"
+REPLAY_DRIVER = REPO / "scripts" / "conductivity_posterior_replay.py"
 FIGURE = FIGURES / "conductivity_bracket_annual.png"
 BULK_FIGURE = FIGURES / "conductivity_bracket_both_d70.png"
 
@@ -76,19 +80,27 @@ def _bulk() -> dict:
     return json.loads(_require(BULK_EVIDENCE).read_text(encoding="utf-8"))
 
 
+def _posterior() -> dict:
+    return json.loads(_require(POSTERIOR_EVIDENCE).read_text(encoding="utf-8"))
+
+
+def _posterior_bulk() -> dict:
+    return json.loads(_require(POSTERIOR_BULK_EVIDENCE).read_text(encoding="utf-8"))
+
+
 # --------------------------------------------------------------------------- #
 # 1. Scope                                                                      #
 # --------------------------------------------------------------------------- #
 
 
 def test_each_record_states_which_grain_size_reading_it_is() -> None:
-    """A number is not portable between the two readings or to the posterior.
+    """A number is not portable between the two readings or across the update.
 
     The two grain-size readings are co-primary deliverables, so each record has
     to name its own and point at its companion rather than implying it is the
-    result. Neither has a Phase 2 posterior: the comparison is prior-against-
-    prior, exact at KP 62.0 (the 2016 update rejects 0.00 % there) and a
-    documented campaign variant everywhere else.
+    result. Each also has to name which side of the Bayesian update it is,
+    because since 2026-08-21 both sides exist and a prior-side number is a
+    different claim from a posterior-side one.
     """
     for reading, payload in (("matrix", _evidence()), ("bulk", _bulk())):
         scope = payload["scope"]
@@ -99,24 +111,39 @@ def test_each_record_states_which_grain_size_reading_it_is() -> None:
         assert sorted(scope["scenarios"]) == sorted(SCENARIOS)
         statement = scope["statement"].lower()
         assert reading in statement and "prior" in statement
-        assert (
-            "no phase 2 posterior" in statement
-        ), "the surviving half of the scope must be named, not implied"
+        assert "posterior" in statement, "the companion side must be named, not implied"
+    for reading, payload in (
+        ("matrix", _posterior()),
+        ("bulk", _posterior_bulk()),
+    ):
+        scope = payload["scope"]
+        assert scope["d70_interpretation"] == reading
+        assert scope["bep_source"] == "posterior"
+        assert scope["lambda_ac_m"] == 250.0
+        assert scope["surface_variant"] == "primary"
+        assert sorted(scope["scenarios"]) == sorted(SCENARIOS)
+        statement = scope["statement"].lower()
+        assert reading in statement
+        assert "posterior-side only" in statement
+        assert "prior-side counterpart" in statement
 
 
-def test_neither_record_still_claims_the_bulk_arm_was_never_run() -> None:
-    """The matrix record's own scope sentence was overtaken by this repository.
+def test_no_record_still_claims_a_side_or_reading_was_never_run() -> None:
+    """These records have now overtaken their own scope sentence twice.
 
-    Until 2026-08-10 it read "no bulk-d70 conductivity arm has ever been run",
-    which was true when written and false the moment the replication landed. A
-    record of this kind may not carry a claim its own repository has overtaken,
-    so the clause became a pointer to the companion record. The matrix numbers
-    were not touched.
+    Until 2026-08-10 the matrix record read "no bulk-d70 conductivity arm has
+    ever been run"; the replication made that false the moment it landed. Until
+    2026-08-21 both prior-side records read "no Phase 2 posterior exists for any
+    conductivity arm under either reading"; the posterior-side study made that
+    false in the same way. Both times the overtaken clause became a pointer to
+    the companion record and not one number was touched. A record may not carry
+    a claim its own repository has already overtaken.
     """
-    for payload in (_evidence(), _bulk()):
+    for payload in (_evidence(), _bulk(), _posterior(), _posterior_bulk()):
         statement = payload["scope"]["statement"].lower()
         assert "never been run" not in statement
         assert "has ever been run" not in statement
+        assert "no phase 2 posterior exists" not in statement
 
 
 def test_the_note_leads_with_the_scope_rather_than_footnoting_it() -> None:
@@ -128,8 +155,19 @@ def test_the_note_leads_with_the_scope_rather_than_footnoting_it() -> None:
     assert "Part 2 is matrix-d70 and prior-side only" in head
     assert "Part 3 is bulk-d70 and prior-side only" in head
     assert "co-primary" in head
-    # The surviving half of the original scope must still be stated up front.
-    assert "no Phase 2 posterior exists for" in head
+    # The prior-side note's own head sentence was overtaken on 2026-08-21 in
+    # exactly the way its scope statement was, and is pinned the same way.
+    assert "no Phase 2 posterior exists for" not in head
+    assert "conductivity-bracket-posterior-side" in head
+
+    posterior_head = " ".join(
+        _require(POSTERIOR_NOTE)
+        .read_text(encoding="utf-8")
+        .split("## Part 1")[0]
+        .split()
+    )
+    assert "posterior" in posterior_head
+    assert "Phase 1 is not re-run" in posterior_head
 
 
 # --------------------------------------------------------------------------- #
@@ -691,6 +729,153 @@ def test_the_companion_driver_can_write_its_record_somewhere_else() -> None:
     assert "--out" in flags
     # The record must still be written through the argument, not the constant.
     assert "JSON_OUT.write_text" not in companion.read_text(encoding="utf-8")
+
+
+# --------------------------------------------------------------------------- #
+# 5. The posterior side (2026-08-21)                                            #
+# --------------------------------------------------------------------------- #
+
+
+def test_the_posterior_side_reproduced_the_production_table_on_its_own_side() -> None:
+    """Gate 1 is side-specific, and passing it on the wrong side proves nothing.
+
+    The prior-side pass is checked against the ``prior`` rows of the production
+    table and the posterior-side pass against the ``posterior`` rows. A study
+    that reproduced the prior rows while claiming to measure the posterior would
+    be measuring the wrong quantity with a green gate.
+    """
+    for payload in (_posterior(), _posterior_bulk()):
+        gate = payload["gates"]["gate_1_reproduces_production_table"]
+        assert gate["passed"] is True
+        assert gate["rows_compared"] >= 100
+        assert gate["fields_compared"] >= 15
+
+
+def test_every_replay_verified_its_own_shifted_population() -> None:
+    """GATE 6: the subtlest way this study could have measured the wrong thing.
+
+    ADR-0048 decision 3 routes both Phase 1 and the Phase 2 replay through
+    ``Config.effective_marginal_specs()`` so that a scenario run regenerates its
+    OWN shifted population. Without theta verification on, a replay that
+    silently regenerated the baseline population would produce a plausible
+    posterior for the wrong prior, and nothing downstream would notice.
+    """
+    for payload in (_posterior(), _posterior_bulk()):
+        gate = payload["gates"]["gate_6_theta_verified_on_every_replay"]
+        assert gate["passed"] is True
+        # Four sections times four arms plus the four baselines.
+        assert gate["replays_checked"] == 20
+
+
+def test_the_posterior_side_is_compared_against_the_committed_prior_record() -> None:
+    """GATE 7: the prior half of the comparison is read, never recomputed.
+
+    If the prior-side numbers were recomputed inside the posterior-side run,
+    any drift in the pipeline between 2026-08-10 and 2026-08-21 would be
+    silently absorbed into the difference and attributed to the survival
+    constraint.
+    """
+    for payload, record in (
+        (_posterior(), "conductivity-bracket-annualisation.json"),
+        (_posterior_bulk(), "conductivity-bracket-annualisation-bulk.json"),
+    ):
+        gate = payload["gates"]["gate_7_prior_side_record_is_the_committed_one"]
+        assert gate["passed"] is True
+        assert gate["record"].endswith(record)
+
+
+def test_the_rejection_fraction_is_carried_beside_every_annual_number() -> None:
+    """The rejection fraction is the mechanism, so it is part of the record.
+
+    Whatever the bracket does on the posterior side, it does it because the
+    arms are rejected unequally. A record carrying only the annual numbers would
+    state the effect without the cause, and the effect alone is not quotable.
+    """
+    for payload in (_posterior(), _posterior_bulk()):
+        by_section = payload["survival_update"]["by_section"]
+        assert sorted(by_section) == sorted(SECTIONS)
+        for section, arms in by_section.items():
+            assert "baseline" in arms, section
+            for arm in CONDUCTIVITY_ARMS:
+                assert arm in arms, f"{section} {arm}"
+                entry = arms[arm]
+                assert 0.0 <= entry["rejection_fraction"] <= 1.0
+                assert entry["n_accepted"] <= 100_000
+
+
+def test_no_arm_posterior_exceeds_its_own_prior() -> None:
+    """F1, the bug signature: Accept-Reject can only remove realizations.
+
+    Under the nesting the Phase 2 self-test measured (marginal transient
+    rejection exactly 0 at N = 1e5), a posterior conditional curve cannot rise
+    above its prior, so no annual number may either. A rise indicts the
+    pipeline, and the record has to be able to say it did not happen.
+    """
+    for payload in (_posterior(), _posterior_bulk()):
+        f1 = payload["preregistration_outcome"]["F1_no_posterior_exceeds_its_prior"]
+        assert f1["fired"] is False
+        assert f1["largest_ratio_seen"] <= 1.0 + 1e-12
+
+
+def test_the_posterior_side_carries_no_figure_of_its_own() -> None:
+    """A float that makes the same point as an existing one is one too many.
+
+    The posterior-side finding is a comparison of two spans and a rejection
+    ladder, both of which a table states completely. Redrawing the prior-side
+    figure with one arm moved would be a second float proving what the first
+    already proves, so the driver renders none and the record declares none.
+    """
+    for payload in (_posterior(), _posterior_bulk()):
+        writes = payload["gates"]["gate_5_no_production_artifact_written"]["writes"]
+        assert not any(w.startswith("docs/figures/") for w in writes), writes
+
+
+def test_the_replay_driver_pins_its_settings_to_the_production_campaign() -> None:
+    """A posterior under a different acceptance rule is a different quantity.
+
+    The arm posteriors are only comparable to the production ones if they were
+    filtered by the same event, the same anchor and the same criterion, so the
+    driver reads those from the production sidecar rather than restating them,
+    and refuses on drift.
+    """
+    source = _require(REPLAY_DRIVER).read_text(encoding="utf-8")
+    assert "production_settings" in source
+    assert "settings drift against the production campaign" in source
+    # Read from the artifact, not retyped: a retyped constant cannot drift-check.
+    assert '"phase2"]["settings"]' in source
+
+
+def test_the_side_flag_defaults_to_the_prior_so_nothing_pre_existing_moves() -> None:
+    """Every invocation that existed before 2026-08-21 must be unchanged.
+
+    The new axis is a flag on a companion driver rather than a config field, but
+    it obeys the same rule every optional axis in this repository obeys: default
+    off, and the default path byte-identical to what it produced before.
+    """
+    tree = ast.parse(_require(DRIVER).read_text(encoding="utf-8"))
+    default_side = next(
+        node.value.value
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Assign)
+        and any(
+            isinstance(t, ast.Name) and t.id == "DEFAULT_SIDE" for t in node.targets
+        )
+    )
+    assert default_side == "prior"
+    for node in ast.walk(tree):
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "add_argument"
+            and node.args
+            and isinstance(node.args[0], ast.Constant)
+            and node.args[0].value == "--side"
+        ):
+            default = next(kw.value for kw in node.keywords if kw.arg == "default")
+            assert isinstance(default, ast.Name) and default.id == "DEFAULT_SIDE"
+            break
+    else:  # pragma: no cover - the flag is present or this test is wrong
+        raise AssertionError("--side is not declared on the study driver")
 
 
 def test_no_existence_guard_in_this_file_skips_on_a_tracked_path() -> None:

@@ -14,10 +14,13 @@ prior curve at the four BEP sections. Nothing is re-swept: the arms already exis
 under ``results/sensitivity/adr0048_prior_means/`` (N = 1e5, 2026-07-29/30) and
 the Phase 3 hazard cache is reused read-only.
 
-**Scope: prior-side only.** No Phase 2 posterior exists for any conductivity arm
-under either grain-size reading. At KP 62.0 the production prior and posterior
-annual numbers are identical to full precision (the 2016 update rejects 0.00 %
-there), so prior-against-prior is apples-to-apples where it matters most.
+**Two sides, selected by ``--side``.** ``prior`` (the default) is the 2026-08-10
+study: it substitutes the arm's Phase 1 curve directly and compares
+prior-against-prior. ``posterior`` is the 2026-08-21 continuation: each arm is
+first replayed through the Phase 2 Accept-Reject update against the 2016 typhoon
+survival record, and the resulting posterior curve is what gets annualised. The
+posterior side is measured against the committed prior-side evidence record, so
+the difference it reports is the survival constraint and nothing else.
 
 **Both d70 readings are covered, and they are co-primary.** ``--d70 matrix`` is
 the default and reproduces the 2026-08-10 record byte for byte apart from its own
@@ -44,6 +47,14 @@ gitignored ADR-0048 arm outputs the campaign deliberately does not produce
 (knobs stay OFF, campaign decision 3). The composition step itself is **imported**
 from the campaign, never re-implemented, so gate 1 tests the production code path.
 
+On the posterior side two further gates apply: 6, that every replay ran with
+theta verification on, which is what proves an arm regenerated its OWN shifted
+population rather than the baseline one (ADR-0048 decision 3); and 7, that the
+prior-side numbers it is compared against are read from the committed record
+rather than recomputed. The arm posteriors themselves are produced beforehand
+by the ordinary Phase 2 CLI, with settings gated equal to the production
+campaign's; ``scripts/conductivity_posterior_replay.py`` is the batch driver.
+
 Usage (repo root, venv active)::
 
     python scripts/conductivity_annualisation_study.py
@@ -51,6 +62,8 @@ Usage (repo root, venv active)::
     python scripts/conductivity_annualisation_study.py --figures-only
     python scripts/conductivity_annualisation_study.py --d70 bulk
     python scripts/conductivity_annualisation_study.py --d70 bulk --figures-only
+    python scripts/conductivity_annualisation_study.py --side posterior
+    python scripts/conductivity_annualisation_study.py --side posterior --d70 bulk
 
 ``--n-jobs`` is deliberately absent: this study re-runs no sweep and has no
 parallelisable work, and a flag that controls nothing is the dead surface the
@@ -96,16 +109,45 @@ from system_integration.uemura_models import load_segment_inputs  # noqa: E402
 DEFAULT_D70 = "matrix"
 D70_CHOICES: tuple[str, ...] = ("matrix", "bulk")
 
+#: Which side of the Bayesian update the arms are carried through. ``prior``
+#: reproduces the 2026-08-10 records byte for byte apart from their own scope
+#: sentence and timestamps; ``posterior`` is the 2026-08-21 continuation, which
+#: replays each arm against the 2016 survival record before annualising it.
+#: Default ``prior``, so every pre-existing invocation is unchanged.
+DEFAULT_SIDE = "prior"
+SIDE_CHOICES: tuple[str, ...] = ("prior", "posterior")
+
 DECISIONS = REPO_ROOT / "docs" / "decisions"
-DEFAULT_OUT: dict[str, Path] = {
-    "matrix": DECISIONS / "conductivity-bracket-annualisation.json",
-    "bulk": DECISIONS / "conductivity-bracket-annualisation-bulk.json",
+DEFAULT_OUT: dict[tuple[str, str], Path] = {
+    ("prior", "matrix"): DECISIONS / "conductivity-bracket-annualisation.json",
+    ("prior", "bulk"): DECISIONS / "conductivity-bracket-annualisation-bulk.json",
+    ("posterior", "matrix"): (DECISIONS / "conductivity-bracket-posterior-side.json"),
+    ("posterior", "bulk"): (
+        DECISIONS / "conductivity-bracket-posterior-side-bulk.json"
+    ),
 }
-DEFAULT_OUT_DIR: dict[str, Path] = {
-    "matrix": REPO_ROOT / "results" / "sensitivity" / "conductivity_annualisation",
-    "bulk": REPO_ROOT / "results" / "sensitivity" / "conductivity_annualisation_bulk",
+DEFAULT_OUT_DIR: dict[tuple[str, str], Path] = {
+    ("prior", "matrix"): (
+        REPO_ROOT / "results" / "sensitivity" / "conductivity_annualisation"
+    ),
+    ("prior", "bulk"): (
+        REPO_ROOT / "results" / "sensitivity" / "conductivity_annualisation_bulk"
+    ),
+    ("posterior", "matrix"): (
+        REPO_ROOT / "results" / "sensitivity" / "conductivity_posterior"
+    ),
+    ("posterior", "bulk"): (
+        REPO_ROOT / "results" / "sensitivity" / "conductivity_posterior_bulk"
+    ),
 }
 ARM_DIR = REPO_ROOT / "results" / "sensitivity" / "adr0048_prior_means"
+#: Production Phase 2 posteriors (the campaign's own BEP input, ADR-0038).
+PHASE2_DIR = REPO_ROOT / "results" / "phase2"
+#: This study's own arm posteriors. Gitignored like every other results/ path;
+#: the record of what they contained is the evidence JSON, not the HDF5.
+POSTERIOR_ARM_DIR = (
+    REPO_ROOT / "results" / "sensitivity" / "conductivity_posterior" / "phase2"
+)
 PRODUCTION_TABLE = (
     REPO_ROOT / "results" / "system_integration" / "phase3" / "rq4_annual.csv"
 )
@@ -117,6 +159,8 @@ FIGURE_NAME: dict[str, str] = {
 }
 
 #: The rest of the pre-registered variant axis. Fixed here so it cannot drift.
+#: ``bep_source`` is now the ``--side`` flag rather than a constant; the name is
+#: kept for the prior side so nothing that reads it moves.
 BEP_SOURCE = "prior"
 LAMBDA_AC_M = 250.0
 SURFACE_VARIANT = "primary"
@@ -126,19 +170,42 @@ SURFACE_VARIANT = "primary"
 #: conductivity arm has ever been run") false. A record of this kind may not
 #: carry a claim its own repository has overtaken, so the clause is replaced by
 #: a pointer to the companion record; the matrix numbers are untouched.
-SCOPE_STATEMENT: dict[str, str] = {
-    "matrix": (
+#: The prior-side strings were frozen verbatim until 2026-08-21, when running
+#: the arms through Phase 2 made their last clause ("no Phase 2 posterior exists
+#: for any conductivity arm under either reading") false. This is the second
+#: time this record has overtaken its own scope sentence, and it is handled the
+#: same way as the first: the overtaken clause is replaced by a pointer to the
+#: companion record, and not one number is touched.
+SCOPE_STATEMENT: dict[tuple[str, str], str] = {
+    ("prior", "matrix"): (
         "matrix-d70 and prior-side ONLY. The bulk-d70 reading is the "
         "co-primary companion record conductivity-bracket-annualisation-bulk"
-        ".json, run 2026-08-10; no Phase 2 posterior exists for any "
-        "conductivity arm under either reading. "
+        ".json, run 2026-08-10; the Phase 2 posterior side of both readings is "
+        "the companion record conductivity-bracket-posterior-side.json, run "
+        "2026-08-21. "
         "Quote this scope wherever any number here is quoted."
     ),
-    "bulk": (
+    ("prior", "bulk"): (
         "bulk-d70 and prior-side ONLY. This is the co-primary grain-size "
         "reading, not a sensitivity; the matrix reading is the companion "
-        "record conductivity-bracket-annualisation.json. No Phase 2 "
-        "posterior exists for any conductivity arm under either reading. "
+        "record conductivity-bracket-annualisation.json. The Phase 2 posterior "
+        "side of both readings is the companion record "
+        "conductivity-bracket-posterior-side-bulk.json, run 2026-08-21. "
+        "Quote this scope wherever any number here is quoted."
+    ),
+    ("posterior", "matrix"): (
+        "matrix-d70 and posterior-side ONLY: every arm is replayed against the "
+        "2016 survival record before it is annualised. The prior-side "
+        "counterpart is conductivity-bracket-annualisation.json and the "
+        "bulk-d70 posterior is conductivity-bracket-posterior-side-bulk.json. "
+        "Quote this scope wherever any number here is quoted."
+    ),
+    ("posterior", "bulk"): (
+        "bulk-d70 and posterior-side ONLY: every arm is replayed against the "
+        "2016 survival record before it is annualised. This is the co-primary "
+        "grain-size reading, not a sensitivity; the matrix posterior is "
+        "conductivity-bracket-posterior-side.json and the prior-side "
+        "counterpart is conductivity-bracket-annualisation-bulk.json. "
         "Quote this scope wherever any number here is quoted."
     ),
 }
@@ -227,11 +294,118 @@ def _label(kp: float) -> str:
 
 
 def _baseline_sweep(kp: float, d70: str) -> Path:
+    """The production Phase 1 sweep. Always Phase 1, whichever side is under
+    test: on the posterior side it is still the parent whose provenance and
+    conditioning grid the posterior inherits."""
     return REPO_ROOT / "results" / f"{_stem(kp, d70)}.h5"
 
 
 def _arm_sweep(kp: float, arm: str, d70: str) -> Path:
+    """The persisted ADR-0048 companion sweep. Phase 1, both sides."""
     return ARM_DIR / f"{_stem(kp, d70)}_{arm}.h5"
+
+
+def _baseline_curve_path(kp: float, d70: str, side: str) -> Path:
+    """The artifact the baseline BEP curve is read from, per side."""
+    if side == "prior":
+        return _baseline_sweep(kp, d70)
+    return PHASE2_DIR / f"{_stem(kp, d70)}_posterior.h5"
+
+
+def _arm_curve_path(kp: float, arm: str, d70: str, side: str) -> Path:
+    """The artifact an arm's BEP curve is read from, per side."""
+    if side == "prior":
+        return _arm_sweep(kp, arm, d70)
+    return POSTERIOR_ARM_DIR / f"{_stem(kp, d70)}_{arm}_posterior.h5"
+
+
+#: Phase 2 settings fields that may legitimately differ between this study's arm
+#: replays and the production campaign. Everything else is gated equal, because
+#: a posterior computed under a different acceptance rule is not comparable to
+#: the production posterior the thesis reports.
+#:
+#: ``trace_breach_times`` is the pre-registration's 2026-08-21 amendment and the
+#: only substantive exemption: it is a persisted diagnostic that
+#: ``pipeline.run_survival_update`` computes AFTER ``state.alive`` is fixed and
+#: that the posterior fragility never reads, and it costs about 60x on the
+#: upward conductivity arm because it is linear in the rejected-row count.
+#: ``scripts/conductivity_posterior_replay.py`` carries the full argument and the
+#: bit-identity measurement that backs it.
+_PHASE2_SETTINGS_EXEMPT = frozenset({"output_dir", "trace_breach_times"})
+
+
+def _production_phase2_settings(d70: str) -> dict[str, Any]:
+    """The production campaign's Phase 2 settings, read from its own sidecar.
+
+    Read from the artifact rather than restated here, so the gate cannot drift
+    away from what the campaign actually did.
+    """
+    sidecar = PHASE2_DIR / f"{_stem(57.4, d70)}_posterior.json"
+    if not sidecar.is_file():
+        raise FileNotFoundError(
+            f"missing production Phase 2 sidecar {_rel(sidecar)}; the arm "
+            "settings gate has nothing to compare against."
+        )
+    return json.loads(sidecar.read_text(encoding="utf-8"))["phase2"]["settings"]
+
+
+def _posterior_provenance(
+    kp: float, arm: str | None, d70: str, reference: dict[str, Any]
+) -> dict[str, Any]:
+    """Gate 2 and gate 6 on one Phase 2 replay, plus the rejection fraction.
+
+    ``arm`` is ``None`` for the baseline posterior, which is the production
+    artifact and is checked on exactly the same terms as the arms.
+    """
+    path = (
+        _baseline_curve_path(kp, d70, "posterior")
+        if arm is None
+        else _arm_curve_path(kp, arm, d70, "posterior")
+    )
+    sidecar = path.with_suffix(".json")
+    if not path.is_file() or not sidecar.is_file():
+        raise FileNotFoundError(
+            f"missing Phase 2 posterior for KP {kp:.1f} "
+            f"{'baseline' if arm is None else 'arm ' + repr(arm)}: "
+            f"{_rel(path)}. Produce it with "
+            "'python -m bayesian_reliability_updating <phase1.h5> --out "
+            f"{_rel(POSTERIOR_ARM_DIR)} --verify --no-figures'."
+        )
+    block = json.loads(sidecar.read_text(encoding="utf-8"))["phase2"]
+
+    settings = block["settings"]
+    drift = sorted(
+        field
+        for field, value in reference.items()
+        if field not in _PHASE2_SETTINGS_EXEMPT and settings.get(field) != value
+    )
+    if drift:
+        raise AssertionError(
+            f"GATE 2 FAILED: KP {kp:.1f} "
+            f"{'baseline' if arm is None else repr(arm)} Phase 2 settings "
+            f"differ from production in {drift}; a posterior computed under a "
+            "different acceptance rule is not comparable to the production one."
+        )
+    verification = block.get("verification") or {}
+    if not verification.get("verified"):
+        raise AssertionError(
+            f"GATE 6 FAILED: KP {kp:.1f} "
+            f"{'baseline' if arm is None else repr(arm)} was replayed without "
+            "theta verification, so nothing proves the arm regenerated its own "
+            "shifted population rather than the baseline one (ADR-0048 dec. 3)."
+        )
+    posterior = block["posterior"]
+    return {
+        "posterior": _rel(path),
+        "sha256": _sha256(path),
+        "n_prior": int(posterior["n_prior"]),
+        "n_accepted": int(posterior["n_accepted"]),
+        "rejection_fraction": float(posterior["rejection_fraction"]),
+        "criterion": posterior["criterion"],
+        "anchor": settings["anchor"],
+        "theta_verified": True,
+        "phase2_settings_match_production": True,
+    }
 
 
 def _rel(path: Path) -> str:
@@ -316,7 +490,7 @@ def _arm_provenance(kp: float, arm: str, d70: str) -> dict[str, Any]:
 # --------------------------------------------------------------------------- #
 # Pipeline                                                                      #
 # --------------------------------------------------------------------------- #
-def build_context(campaign, d70: str) -> dict[str, Any]:
+def build_context(campaign, d70: str, side: str = "prior") -> dict[str, Any]:
     """Registry, surface curves and per-node hazard, as the campaign builds them.
 
     The node exposure datum stays pinned to the **matrix** curve whatever ``d70``
@@ -335,11 +509,13 @@ def build_context(campaign, d70: str) -> dict[str, Any]:
         curves=tuple(c for part in parts for c in part.curves), source="uemura_csv"
     )
 
-    # Node exposure datum. The campaign reads it from the posterior curve; this
-    # study is prior-side, so it reads the prior's and asserts the two agree,
-    # which is what keeps the warm hazard cache valid (gate 4).
+    # Node exposure datum. The campaign reads it from the posterior curve; on
+    # the prior side this study reads the prior's and asserts the two agree,
+    # which is what keeps the warm hazard cache valid (gate 4). On the posterior
+    # side it is reading the campaign's own artifact, and the same assertion
+    # then simply confirms the two sides share one exposure datum.
     baseline_curves = {
-        kp: load_bep_curve(_baseline_sweep(kp, d70), branch="transient")
+        kp: load_bep_curve(_baseline_curve_path(kp, d70, side), branch="transient")
         for kp in BEP_KPS
     }
     node_datum = {
@@ -400,7 +576,11 @@ def build_context(campaign, d70: str) -> dict[str, Any]:
 
 
 def annualise_variant(
-    campaign, context: dict[str, Any], curves: dict[float, Any], d70: str
+    campaign,
+    context: dict[str, Any],
+    curves: dict[float, Any],
+    d70: str,
+    side: str = "prior",
 ):
     """One full 114-segment composition + annualisation pass.
 
@@ -428,7 +608,7 @@ def annualise_variant(
                 "section_id": segment.section_id or "",
                 "scenario": scenario,
                 "d70": d70,
-                "bep_source": BEP_SOURCE,
+                "bep_source": side,
                 "lambda_ac_m": LAMBDA_AC_M,
                 "surface_variant": SURFACE_VARIANT,
                 "mechanisms": "|".join(frag.mechanisms),
@@ -507,7 +687,7 @@ def _driving_stage_band(
 
 
 def gate_one(
-    rows: dict[tuple[str, float, str], dict[str, Any]], d70: str
+    rows: dict[tuple[str, float, str], dict[str, Any]], d70: str, side: str = "prior"
 ) -> dict[str, Any]:
     """Assert the baseline pass reproduces the production table EXACTLY.
 
@@ -522,13 +702,13 @@ def gate_one(
             r
             for r in csv.DictReader(handle)
             if r["d70"] == d70
-            and r["bep_source"] == BEP_SOURCE
+            and r["bep_source"] == side
             and r["lambda_ac_m"] == str(LAMBDA_AC_M)
             and r["surface_variant"] == SURFACE_VARIANT
         ]
     if not published:
         raise AssertionError(
-            f"no {d70}/prior/{LAMBDA_AC_M:g}/{SURFACE_VARIANT} rows found in "
+            f"no {d70}/{side}/{LAMBDA_AC_M:g}/{SURFACE_VARIANT} rows found in "
             f"{PRODUCTION_TABLE.relative_to(REPO_ROOT)}"
         )
 
@@ -1230,6 +1410,323 @@ def evaluate_preregistration_bulk(
     }
 
 
+def compare_against_prior_side(
+    sections: dict[str, Any], prior_sections: dict[str, Any], scenarios
+) -> dict[str, Any]:
+    """Cell-by-cell posterior-against-prior comparison of the same bracket.
+
+    The prior-side numbers come from the committed evidence record rather than
+    being recomputed here, so the two sides are compared on exactly the
+    quantities the repository already published. ``span_ratio`` below 1 means
+    the survival constraint NARROWED the bracket at that cell; above 1 means it
+    widened it. ``None`` appears wherever a span is unbounded, which is a fact
+    about an arm producing no failures at all and is never rendered as a number.
+    """
+    cells: dict[str, Any] = {}
+    for kp in BEP_KPS:
+        label = _label(kp)
+        cells[label] = {}
+        for scenario in scenarios:
+            post = sections[label][scenario]
+            prior = prior_sections[label][scenario]
+            entry: dict[str, Any] = {
+                "prior_span_p_annual_system": prior[
+                    "conductivity_span_p_annual_system"
+                ],
+                "posterior_span_p_annual_system": post[
+                    "conductivity_span_p_annual_system"
+                ],
+                "prior_span_p_annual_bep": prior["conductivity_span_p_annual_bep"],
+                "posterior_span_p_annual_bep": post["conductivity_span_p_annual_bep"],
+                "prior_ordering_verdict": prior["ordering_verdict"],
+                "posterior_ordering_verdict": post["ordering_verdict"],
+                "ordering_verdict_unchanged": (
+                    prior["ordering_verdict"] == post["ordering_verdict"]
+                ),
+                "prior_arms_changing_the_lead": prior["arms_changing_the_lead"],
+                "posterior_arms_changing_the_lead": post["arms_changing_the_lead"],
+                "arms": {},
+            }
+            for span_field in ("p_annual_system", "p_annual_bep"):
+                a = prior[f"conductivity_span_{span_field}"]
+                b = post[f"conductivity_span_{span_field}"]
+                entry[f"span_ratio_{span_field}"] = (
+                    None if a in (None, 0.0) or b is None else b / a
+                )
+            # Per-arm posterior/prior movement, which is the mechanism: the
+            # bracket can only move if the arms move unequally.
+            for arm in ("baseline", *ARMS):
+                prior_v = (
+                    prior["baseline"] if arm == "baseline" else prior["arms"].get(arm)
+                )
+                post_v = (
+                    post["baseline"] if arm == "baseline" else post["arms"].get(arm)
+                )
+                if prior_v is None or post_v is None:
+                    continue
+                entry["arms"][arm] = {
+                    "prior_p_annual_system": prior_v["p_annual_system"],
+                    "posterior_p_annual_system": post_v["p_annual_system"],
+                    "posterior_over_prior_system": (
+                        None
+                        if prior_v["p_annual_system"] == 0.0
+                        else post_v["p_annual_system"] / prior_v["p_annual_system"]
+                    ),
+                    "prior_p_annual_bep": prior_v["p_annual_bep"],
+                    "posterior_p_annual_bep": post_v["p_annual_bep"],
+                    "posterior_over_prior_bep": (
+                        None
+                        if prior_v["p_annual_bep"] == 0.0
+                        else post_v["p_annual_bep"] / prior_v["p_annual_bep"]
+                    ),
+                }
+            cells[label][scenario] = entry
+
+        prior_ratios = prior_sections[label]["climate_ratio_plus4k_over_historical"]
+        post_ratios = sections[label]["climate_ratio_plus4k_over_historical"]
+        cells[label]["climate_ratio_plus4k_over_historical"] = {
+            arm: {
+                "prior": prior_ratios.get(arm),
+                "posterior": post_ratios.get(arm),
+                "posterior_over_prior": (
+                    None
+                    if not prior_ratios.get(arm) or post_ratios.get(arm) is None
+                    else post_ratios[arm] / prior_ratios[arm]
+                ),
+            }
+            for arm in sorted(set(prior_ratios) | set(post_ratios))
+        }
+    return cells
+
+
+def evaluate_preregistration_posterior(
+    sections: dict[str, Any],
+    comparison: dict[str, Any],
+    rejection: dict[str, Any],
+    scenarios,
+) -> dict[str, Any]:
+    """Score the 2026-08-21 Part 1 predictions against the measured record.
+
+    A third scorer rather than an argument on the first two, for the reason the
+    bulk scorer already gives: a pre-registration whose statement string depends
+    on a flag has stopped being a pre-registration.
+    """
+    labels = [_label(kp) for kp in BEP_KPS]
+
+    def _cells():
+        for lab in labels:
+            for sc in scenarios:
+                yield lab, sc
+
+    def _rej(lab: str, arm: str) -> float:
+        entry = rejection[lab].get(arm)
+        # A partial --arms run scores only what it measured; a missing arm is
+        # absent from the ladder rather than silently scored as zero, which
+        # would let an incomplete run report P1 as held.
+        return float("nan") if entry is None else float(entry["rejection_fraction"])
+
+    full_ladder = (
+        "k_aq_field_geomean",
+        "k_aq_field_toe",
+        "baseline",
+        "k_aq_regional_upper",
+    )
+    ladder = tuple(a for a in full_ladder if a in rejection[labels[0]])
+    monotone = {
+        lab: len(ladder) == len(full_ladder)
+        and all(
+            _rej(lab, ladder[i]) <= _rej(lab, ladder[i + 1]) + 1e-12
+            for i in range(len(ladder) - 1)
+        )
+        for lab in labels
+    }
+    narrowed = {
+        (lab, sc): comparison[lab][sc]["span_ratio_p_annual_system"]
+        for lab, sc in _cells()
+    }
+    resolved = {k: v for k, v in narrowed.items() if v is not None}
+    ordering_held = {
+        (lab, sc): comparison[lab][sc]["ordering_verdict_unchanged"]
+        for lab, sc in _cells()
+    }
+    climate_shift = {
+        (lab, arm): entry["posterior_over_prior"]
+        for lab in labels
+        for arm, entry in comparison[lab][
+            "climate_ratio_plus4k_over_historical"
+        ].items()
+        if entry["posterior_over_prior"] is not None
+    }
+    arm_moves = {
+        (lab, sc, arm): v["posterior_over_prior_system"]
+        for lab, sc in _cells()
+        for arm, v in comparison[lab][sc]["arms"].items()
+        if v["posterior_over_prior_system"] is not None
+    }
+    downward = ("k_aq_field_geomean", "k_aq_field_toe")
+
+    return {
+        "P1_rejection_monotone_in_k_aq": {
+            "statement": (
+                "rejection fraction is monotone non-decreasing in the effective "
+                "k_aq prior mean: geomean <= toe <= baseline <= regional_upper"
+            ),
+            "held": all(monotone.values()),
+            "per_section": monotone,
+        },
+        "P2_upward_arm_rejects_materially_more": {
+            "statement": (
+                "k_aq_regional_upper rejects more than baseline at all four "
+                "sections, and by more than a factor of two at KP 58.8 and "
+                "KP 60.0"
+            ),
+            "held": all(
+                _rej(lab, "k_aq_regional_upper") > _rej(lab, "baseline")
+                for lab in labels
+            )
+            and all(
+                _rej(lab, "k_aq_regional_upper") > 2.0 * _rej(lab, "baseline")
+                for lab in (_label(58.8), _label(60.0))
+            ),
+            "rejection_fraction_by_arm": {
+                lab: {
+                    arm: _rej(lab, arm)
+                    for arm in ("baseline", *ARMS)
+                    if arm in rejection[lab]
+                }
+                for lab in labels
+            },
+        },
+        "P3_kp62_stops_being_a_copy_of_the_prior_side": {
+            "statement": (
+                "at KP 62.0 the baseline rejects exactly 0, and "
+                "k_aq_regional_upper is predicted to reject a non-zero fraction "
+                "there, so the posterior side stops being a copy of the prior"
+            ),
+            "held": _rej(_label(62.0), "k_aq_regional_upper") > 0.0,
+            "baseline_rejection": _rej(_label(62.0), "baseline"),
+            "regional_upper_rejection": _rej(_label(62.0), "k_aq_regional_upper"),
+        },
+        "P4_downward_arms_inert_to_the_update": {
+            "statement": (
+                "both downward arms reject no more than baseline, and their "
+                "annual numbers move less than the 12.4 % the baseline itself "
+                "shows"
+            ),
+            "held": all(
+                _rej(lab, arm) <= _rej(lab, "baseline") + 1e-12
+                for lab in labels
+                for arm in downward
+            )
+            and all(
+                abs(v - 1.0) <= 0.124
+                for (_lab, _sc, arm), v in arm_moves.items()
+                if arm in downward
+            ),
+            "largest_downward_arm_movement": (
+                max(
+                    (
+                        abs(v - 1.0)
+                        for (_l, _s, a), v in arm_moves.items()
+                        if a in downward
+                    ),
+                    default=0.0,
+                )
+            ),
+        },
+        "P5_posterior_span_narrower_and_by_less_than_two": {
+            "statement": (
+                "the posterior span of p_annual_system is smaller than the prior "
+                "span at every cell where both are finite, and by less than a "
+                "factor of two"
+            ),
+            "held": bool(resolved)
+            and all(v < 1.0 for v in resolved.values())
+            and all(v > 0.5 for v in resolved.values()),
+            "span_ratio_posterior_over_prior": {
+                f"{lab} {sc}": v for (lab, sc), v in narrowed.items()
+            },
+            "cells_resolved": len(resolved),
+            "cells_unbounded": len(narrowed) - len(resolved),
+        },
+        "P6_ordering_verdicts_unchanged": {
+            "statement": (
+                "every ordering verdict of the prior-side record is reproduced "
+                "on the posterior side"
+            ),
+            "held": all(ordering_held.values()),
+            "cells_unchanged": sum(1 for v in ordering_held.values() if v),
+            "cells_total": len(ordering_held),
+            "cells_changed": [
+                f"{lab} {sc}" for (lab, sc), v in ordering_held.items() if not v
+            ],
+        },
+        "P7_climate_ratios_move_less_than_20_per_cent": {
+            "statement": (
+                "every arm's +4K/historical system ratio changes by less than "
+                "20 % from its prior-side value"
+            ),
+            "held": all(abs(v - 1.0) < 0.20 for v in climate_shift.values()),
+            "largest_shift": (
+                max((abs(v - 1.0) for v in climate_shift.values()), default=0.0)
+            ),
+            "ratios_resolved": len(climate_shift),
+        },
+        "P8_unit_weight_control_stays_quiet": {
+            "statement": (
+                "gamma_bl_sub_lower rejects within a factor of two of baseline "
+                "and changes no ordering anywhere"
+            ),
+            "held": all(
+                _rej(lab, CONTROL_ARM) <= 2.0 * max(_rej(lab, "baseline"), 1e-9)
+                for lab in labels
+            )
+            and not any(
+                CONTROL_ARM in sections[lab][sc]["arms_changing_the_lead"]
+                for lab, sc in _cells()
+            ),
+            "control_rejection": {lab: _rej(lab, CONTROL_ARM) for lab in labels},
+        },
+        "F1_no_posterior_exceeds_its_prior": {
+            "statement": (
+                "Accept-Reject can only remove realizations, so under nesting no "
+                "arm's posterior annual number may exceed its prior one; a rise "
+                "indicts the pipeline"
+            ),
+            "fired": any(v > 1.0 + 1e-12 for v in arm_moves.values()),
+            "largest_ratio_seen": max(arm_moves.values(), default=0.0),
+        },
+        "F2_rejection_non_monotone": {
+            "statement": "the rejection fraction is non-monotone in k_aq",
+            "fired": not all(monotone.values()),
+        },
+        "F3_posterior_span_wider_than_prior": {
+            "statement": (
+                "the falsifier for H1: the posterior span is WIDER than the "
+                "prior span at any cell"
+            ),
+            "fired": any(v > 1.0 for v in resolved.values()),
+            "cells_wider": [
+                f"{lab} {sc}"
+                for (lab, sc), v in narrowed.items()
+                if v is not None and v > 1.0
+            ],
+        },
+        "F4_the_measured_null": {
+            "statement": (
+                "the deflating outcome: the span moves by less than 1 % at every "
+                "cell, in which case the honest result is that the survival "
+                "constraint leaves the bracket unchanged"
+            ),
+            "fired": bool(resolved)
+            and all(abs(v - 1.0) < 0.01 for v in resolved.values()),
+            "largest_span_movement": (
+                max((abs(v - 1.0) for v in resolved.values()), default=0.0)
+            ),
+        },
+    }
+
+
 def reach_invariance(
     baseline_rows: dict[tuple[str, float, str], dict[str, Any]],
     arm_rows: dict[str, dict[tuple[str, float, str], dict[str, Any]]],
@@ -1701,6 +2198,16 @@ def main(argv: list[str] | None = None) -> int:
         help="Study-local output directory (gitignored).",
     )
     parser.add_argument(
+        "--side",
+        default=DEFAULT_SIDE,
+        choices=list(SIDE_CHOICES),
+        help=(
+            "Which side of the Bayesian update to carry the arms through. "
+            "'prior' (default) reproduces the 2026-08-10 records; 'posterior' "
+            "replays each arm against the 2016 survival record first."
+        ),
+    )
+    parser.add_argument(
         "--no-figure", action="store_true", help="Skip figure rendering."
     )
     parser.add_argument(
@@ -1713,18 +2220,24 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
     d70 = args.d70
+    side = args.side
     if args.out is None:
-        args.out = DEFAULT_OUT[d70]
+        args.out = DEFAULT_OUT[(side, d70)]
     if args.out_dir is None:
-        args.out_dir = DEFAULT_OUT_DIR[d70]
+        args.out_dir = DEFAULT_OUT_DIR[(side, d70)]
 
     if args.figures_only:
+        if side != "prior":
+            parser.error(
+                "--figures-only is a prior-side path: the posterior-side record "
+                "carries no figure of its own."
+            )
         payload = json.loads(args.out.read_text(encoding="utf-8"))
         if d70 == "bulk":
             # The bulk figure is the cross-reading comparison, so it reads the
             # committed matrix record too. Both are tracked evidence.
             matrix_payload = json.loads(
-                DEFAULT_OUT["matrix"].read_text(encoding="utf-8")
+                DEFAULT_OUT[("prior", "matrix")].read_text(encoding="utf-8")
             )
             path = render_both_d70_figure(payload, matrix_payload, args.out_dir)
         else:
@@ -1737,13 +2250,24 @@ def main(argv: list[str] | None = None) -> int:
     cache_before = _cache_state(campaign.HAZARD_CACHE)
 
     print("building registry, surface curves and node hazard ...", flush=True)
-    context = build_context(campaign, d70)
+    context = build_context(campaign, d70, side)
 
-    print(f"baseline pass, {d70} reading (gate 1) ...", flush=True)
+    # On the posterior side the acceptance rule itself is part of the
+    # comparison, so it is gated against the production campaign's own settings
+    # for the baseline as well as for every arm.
+    phase2_reference = _production_phase2_settings(d70) if side == "posterior" else None
+    rejection: dict[str, dict[str, Any]] = {}
+    if phase2_reference is not None:
+        for kp in BEP_KPS:
+            rejection[_label(kp)] = {
+                "baseline": _posterior_provenance(kp, None, d70, phase2_reference)
+            }
+
+    print(f"baseline pass, {d70} reading, {side} side (gate 1) ...", flush=True)
     baseline_rows, baseline_coverage, baseline_driving = annualise_variant(
-        campaign, context, context["baseline_curves"], d70
+        campaign, context, context["baseline_curves"], d70, side
     )
-    gate1 = gate_one(baseline_rows, d70)
+    gate1 = gate_one(baseline_rows, d70, side)
     print(
         f"  GATE 1 PASSED: {gate1['rows_compared']} published rows reproduced "
         f"field for field ({gate1['fields_compared']} fields each)",
@@ -1760,8 +2284,16 @@ def main(argv: list[str] | None = None) -> int:
         arm_provenance[arm] = {}
         for kp in BEP_KPS:
             label = _label(kp)
+            # The Phase 1 provenance is checked on both sides: a posterior is
+            # only as sound as the sweep it was filtered from.
             arm_provenance[arm][label] = _arm_provenance(kp, arm, d70)
-            curve = load_bep_curve(_arm_sweep(kp, arm, d70), branch="transient")
+            if phase2_reference is not None:
+                phase2 = _posterior_provenance(kp, arm, d70, phase2_reference)
+                arm_provenance[arm][label]["phase2"] = phase2
+                rejection[label][arm] = phase2
+            curve = load_bep_curve(
+                _arm_curve_path(kp, arm, d70, side), branch="transient"
+            )
             if not np.array_equal(
                 np.asarray(curve.grid_m_msl),
                 np.asarray(context["baseline_curves"][kp].grid_m_msl),
@@ -1772,7 +2304,7 @@ def main(argv: list[str] | None = None) -> int:
                 )
             curves[kp] = curve
         arm_rows[arm], arm_coverage[arm], arm_driving[arm] = annualise_variant(
-            campaign, context, curves, d70
+            campaign, context, curves, d70, side
         )
 
     gate3 = reach_invariance(baseline_rows, arm_rows)
@@ -1821,10 +2353,28 @@ def main(argv: list[str] | None = None) -> int:
 
     matrix_payload = (
         None
-        if d70 == "matrix"
-        else json.loads(DEFAULT_OUT["matrix"].read_text(encoding="utf-8"))
+        if d70 == "matrix" or side == "posterior"
+        else json.loads(DEFAULT_OUT[("prior", "matrix")].read_text(encoding="utf-8"))
     )
-    if matrix_payload is None:
+    comparison: dict[str, Any] | None = None
+    if side == "posterior":
+        # GATE 7's other half: the prior-side record this is measured against is
+        # the committed one, read rather than recomputed, so the difference
+        # reported is the update and nothing else.
+        prior_record = DEFAULT_OUT[("prior", d70)]
+        if not prior_record.is_file():
+            raise FileNotFoundError(
+                f"missing prior-side record {_rel(prior_record)}; the posterior "
+                "side is defined only against it."
+            )
+        prior_payload = json.loads(prior_record.read_text(encoding="utf-8"))
+        comparison = compare_against_prior_side(
+            sections, prior_payload["sections"], list(campaign.SCENARIOS)
+        )
+        prereg = evaluate_preregistration_posterior(
+            sections, comparison, rejection, list(campaign.SCENARIOS)
+        )
+    elif matrix_payload is None:
         prereg = evaluate_preregistration(
             sections, lambda_yardstick, list(campaign.SCENARIOS)
         )
@@ -1851,18 +2401,27 @@ def main(argv: list[str] | None = None) -> int:
         "study": (
             "Aquifer-conductivity epistemic bracket propagated through the "
             "Phase 3 annualisation (defence-brief item A2)"
+            if side == "prior"
+            else (
+                "Aquifer-conductivity epistemic bracket measured on the "
+                "POSTERIOR side of the 2016 survival update"
+            )
         ),
         "generated_by": "scripts/conductivity_annualisation_study.py",
         "generated": _dt.datetime.now().isoformat(timespec="seconds"),
-        "note": "docs/decisions/conductivity-bracket-annualisation.md",
+        "note": (
+            "docs/decisions/conductivity-bracket-annualisation.md"
+            if side == "prior"
+            else "docs/decisions/conductivity-bracket-posterior-side.md"
+        ),
         "scope": {
             "d70_interpretation": d70,
-            "bep_source": BEP_SOURCE,
+            "bep_source": side,
             "lambda_ac_m": LAMBDA_AC_M,
             "surface_variant": SURFACE_VARIANT,
             "scenarios": list(campaign.SCENARIOS),
             "sections": [_label(kp) for kp in BEP_KPS],
-            "statement": SCOPE_STATEMENT[d70],
+            "statement": SCOPE_STATEMENT[(side, d70)],
         },
         "gates": {
             "gate_1_reproduces_production_table": gate1,
@@ -1871,6 +2430,12 @@ def main(argv: list[str] | None = None) -> int:
                 "criterion": (
                     "grid equal to baseline, N = 1e5, config hash round-trips, "
                     "expected prior_mean_scenario label"
+                    + (
+                        ""
+                        if side == "prior"
+                        else "; Phase 2 settings identical to the production "
+                        "campaign in every field but the output path"
+                    )
                 ),
             },
             "gate_3_non_bep_segments_invariant": gate3,
@@ -1880,12 +2445,33 @@ def main(argv: list[str] | None = None) -> int:
             },
             "gate_5_no_production_artifact_written": {
                 "passed": True,
-                "writes": [
-                    _rel(args.out),
-                    _rel(args.out_dir),
-                    f"docs/figures/{FIGURE_NAME[d70]}",
-                ],
+                "writes": [_rel(args.out), _rel(args.out_dir)]
+                + ([] if side == "posterior" else [f"docs/figures/{FIGURE_NAME[d70]}"]),
             },
+            **(
+                {}
+                if side == "prior"
+                else {
+                    "gate_6_theta_verified_on_every_replay": {
+                        "passed": True,
+                        "criterion": (
+                            "every Phase 2 replay ran with verify_by_reevaluation, "
+                            "so each arm regenerated its OWN shifted population "
+                            "(ADR-0048 decision 3) rather than the baseline one"
+                        ),
+                        "replays_checked": sum(len(v) for v in rejection.values()),
+                    },
+                    "gate_7_prior_side_record_is_the_committed_one": {
+                        "passed": True,
+                        "criterion": (
+                            "the prior-side comparison numbers are read from the "
+                            "committed evidence record, not recomputed here"
+                        ),
+                        "record": _rel(DEFAULT_OUT[("prior", d70)]),
+                        "record_generated": prior_payload["generated"],
+                    },
+                }
+            ),
         },
         "arms": arm_provenance,
         "baseline_prior_mean_k_aq": {
@@ -1912,6 +2498,27 @@ def main(argv: list[str] | None = None) -> int:
         },
         "elapsed_s": round(time.time() - started, 1),
     }
+    # Posterior-side only, so the prior-side records keep their exact key set.
+    if side == "posterior":
+        payload["survival_update"] = {
+            "definition": (
+                "Phase 2 Accept-Reject against the 2016 typhoon survival "
+                "record, per arm; rejection_fraction is the share of the N = 1e5 "
+                "prior realizations that would have breached under that event "
+                "and is the mechanism behind everything the bracket does here"
+            ),
+            "by_section": {
+                label: {
+                    arm: {
+                        "rejection_fraction": entry["rejection_fraction"],
+                        "n_accepted": entry["n_accepted"],
+                    }
+                    for arm, entry in arms.items()
+                }
+                for label, arms in rejection.items()
+            },
+        }
+        payload["posterior_vs_prior"] = comparison
     # Emitted only when non-empty, which keeps the matrix record byte-identical
     # to the one this study first wrote: no matrix cell at these four sections
     # is clamped, and gate 1 proves it by reproducing the published flag.
@@ -1936,13 +2543,52 @@ def main(argv: list[str] | None = None) -> int:
     args.out.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     print(f"\nwrote {_rel(args.out)}")
 
-    if not args.no_figure:
+    # The posterior side carries no figure of its own: its finding is a
+    # comparison of two spans and a rejection ladder, both of which a table
+    # states completely. A second conductivity figure would make the same point
+    # as the first with one arm moved, which is the definition of a float that
+    # has not earned its place.
+    if not args.no_figure and side == "prior":
         path = (
             render_figure(payload, args.out_dir)
             if matrix_payload is None
             else render_both_d70_figure(payload, matrix_payload, args.out_dir)
         )
         print(f"wrote {_rel(path)}")
+
+    if side == "posterior":
+        print("\nrejection fraction by arm (the mechanism)")
+        for kp in BEP_KPS:
+            label = _label(kp)
+            cells = "  ".join(
+                f"{arm.replace('k_aq_', '').replace('gamma_bl_sub_', 'gamma '):>14s}"
+                f" {100.0 * rejection[label][arm]['rejection_fraction']:6.3f}%"
+                for arm in (
+                    "k_aq_field_geomean",
+                    "k_aq_field_toe",
+                    "baseline",
+                    "k_aq_regional_upper",
+                    CONTROL_ARM,
+                )
+                if arm in rejection[label]
+            )
+            print(f"  {label:<8} {cells}")
+        print("\nbracket span, prior against posterior")
+        for kp in BEP_KPS:
+            label = _label(kp)
+            for scenario in campaign.SCENARIOS:
+                cell = comparison[label][scenario]
+                pri = cell["prior_span_p_annual_system"]
+                post = cell["posterior_span_p_annual_system"]
+                ratio = cell["span_ratio_p_annual_system"]
+                print(
+                    f"  {label:<8} {scenario:<11} prior "
+                    f"{'unbnd' if pri is None else format(pri, '.4g'):>9}  "
+                    f"posterior {'unbnd' if post is None else format(post, '.4g'):>9}"
+                    f"  ratio {'n/d' if ratio is None else format(ratio, '.4g'):>8}"
+                    f"  ordering "
+                    f"{'unchanged' if cell['ordering_verdict_unchanged'] else 'MOVED'}"
+                )
 
     # Console summary against the pre-registered criteria.
     print(

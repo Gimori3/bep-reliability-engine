@@ -260,6 +260,62 @@ of four sections and 0.023 % at the fourth.
 
 ---
 
+## Part 1a — Amendment to GATE 2, 2026-08-21, before the campaign ran
+
+*A pre-registration may be amended, but only in the open. This records what was
+changed, what was known at the time it was changed, and why the change cannot
+move any measured number. Section 1.7's GATE 2 as written above stands
+everywhere except in the one field named here.*
+
+**What changed.** `trace_breach_times` is exempted from the "identical to
+production in every field other than the input path" clause, and the campaign
+runs with it **off**. Every other Phase 2 setting stays gated equal, including
+the two that define the acceptance rule (`anchor = trace_right`,
+`criterion = no_breach`) and the one that discharges GATE 6
+(`verify_by_reevaluation = True`).
+
+**Why.** `breach_times_for_rows` (`replay.py`) re-runs the scalar M8 evaluator
+with trajectory storage once per **rejected** row. Its cost is therefore linear
+in exactly the quantity a high-conductivity arm inflates. Measured on the
+worst-case arm, KP 58.8 matrix under `k_aq_regional_upper`:
+
+| | rejected rows | wall clock |
+|---|---|---|
+| production baseline, tracing on | 5 673 | 273 s |
+| this arm, tracing **on** | 65 530 | **> 69 min** |
+| this arm, tracing **off** | 65 530 | **69 s** |
+
+A factor of about 60. Across 32 replays that is the difference between roughly
+one hour and well over a day, and the campaign would not have been run at all.
+
+**Why it cannot move a number.** `run_survival_update` fixes `state.alive` in
+the Accept-Reject chain and only afterwards enters the tracing block; the
+posterior is `posterior_fragility_from_matrices(run, state.alive, ...)`, which
+never reads the traced array. `t_breach` is persisted and, when figures are on,
+plotted. Figures are off here. The structural argument was confirmed by
+measurement on the worst-case arm above: every array the Phase 3 annualisation
+consumes is **bit-identical** with tracing on and off, as is the rejection
+fraction and the accepted-row count. The evidence records carry that comparison.
+
+**What is lost.** The arm posteriors carry no breach-time diagnostic. That is a
+diagnostic this study does not use and does not report. The production
+posteriors, which do carry it, are untouched.
+
+**Disclosure, because pre-registration discipline requires it.** At the moment
+this amendment was written, one number bearing on the predictions had been
+seen: the rejection fraction of KP 58.8 matrix under `k_aq_regional_upper`,
+65.53 % against the baseline 5.673 %. It is consistent with P1, P2 and the
+step-4 mechanism. No prediction was altered in the light of it, and the
+predictions in §1.5 stand exactly as committed in `4bec61a`.
+
+**One caveat this pilot surfaced, recorded here so Part 2 cannot bury it.** At
+34 470 accepted rows the upward arm falls below the 50 % headroom floor Phase 2
+warns at, so its posterior tail resolution is degraded relative to the Phase 1
+spec §11 standard. That is a property of the arm, not of the amendment, and it
+must be carried wherever that arm's posterior numbers are quoted.
+
+---
+
 ## Part 2 — Outcome
 
 *Appended after execution. Empty at pre-registration time.*
