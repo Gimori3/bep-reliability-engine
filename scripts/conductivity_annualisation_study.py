@@ -333,6 +333,45 @@ def _arm_curve_path(kp: float, arm: str, d70: str, side: str) -> Path:
 #: bit-identity measurement that backs it.
 _PHASE2_SETTINGS_EXEMPT = frozenset({"output_dir", "trace_breach_times"})
 
+#: The exemption's own evidence, carried into the record so a later reader does
+#: not have to take it on trust. Measured once, 2026-08-21, on the worst-case
+#: arm: KP 58.8 matrix under ``k_aq_regional_upper``, which rejects 65 530 of
+#: 100 000 rows and therefore gives any side effect of tracing the largest
+#: opportunity there is to show. It showed none.
+PHASE2_EXEMPTION_RECORD: dict[str, Any] = {
+    "field": "trace_breach_times",
+    "production_value": True,
+    "value_used_here": False,
+    "why_exempt": (
+        "run_survival_update fixes state.alive in the Accept-Reject chain "
+        "BEFORE the tracing block, and the posterior is "
+        "posterior_fragility_from_matrices(run, state.alive, ...). The traced "
+        "array t_breach is only persisted and only plotted, and figures are off."
+    ),
+    "why_needed": (
+        "breach_times_for_rows re-runs the scalar M8 with trajectory storage "
+        "once per REJECTED row, so its cost is linear in exactly the quantity a "
+        "high-conductivity arm inflates"
+    ),
+    "measured_on": "KP 58.8 matrix, k_aq_regional_upper",
+    "rejected_rows": 65530,
+    "runtime_s_tracing_on": 5902.2,
+    "runtime_s_tracing_off": 65.5,
+    "speedup": 90.1,
+    "bit_identical": [
+        "conditioning_grid",
+        "P_f_trans_post_raw",
+        "P_f_static_post_raw",
+        "binomial_ci transient lower/upper",
+        "binomial_ci static lower/upper",
+        "transient fit mu/sigma",
+        "static fit mu/sigma",
+        "rejection_fraction",
+        "n_accepted",
+    ],
+    "recorded_in": "docs/decisions/conductivity-bracket-posterior-side.md Part 1a",
+}
+
 
 def _production_phase2_settings(d70: str) -> dict[str, Any]:
     """The production campaign's Phase 2 settings, read from its own sidecar.
@@ -2500,6 +2539,7 @@ def main(argv: list[str] | None = None) -> int:
     }
     # Posterior-side only, so the prior-side records keep their exact key set.
     if side == "posterior":
+        payload["phase2_settings_exemption"] = PHASE2_EXEMPTION_RECORD
         payload["survival_update"] = {
             "definition": (
                 "Phase 2 Accept-Reject against the 2016 typhoon survival "

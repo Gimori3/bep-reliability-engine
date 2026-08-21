@@ -817,6 +817,32 @@ def test_no_arm_posterior_exceeds_its_own_prior() -> None:
         assert f1["largest_ratio_seen"] <= 1.0 + 1e-12
 
 
+def test_the_one_settings_exemption_carries_its_own_evidence() -> None:
+    """A pre-registration amended for cost must show why the cost was the reason.
+
+    GATE 2 as pre-registered required the arm replays to match production in
+    every field but the input path. One field is exempt, ``trace_breach_times``,
+    and the exemption was taken for runtime. That is exactly the kind of change
+    that can quietly become "we turned off the thing that was slow", so the
+    record carries both halves: why it was needed, and the measurement showing
+    it reaches nothing. The measurement was made on the worst-case arm, where
+    any side effect has the most opportunity to appear.
+    """
+    for payload in (_posterior(), _posterior_bulk()):
+        ex = payload["phase2_settings_exemption"]
+        assert ex["field"] == "trace_breach_times"
+        assert ex["production_value"] is True and ex["value_used_here"] is False
+        assert ex["rejected_rows"] > 50_000, "not measured on a worst case"
+        assert ex["runtime_s_tracing_on"] / ex["runtime_s_tracing_off"] > 50
+        for array in (
+            "P_f_trans_post_raw",
+            "P_f_static_post_raw",
+            "rejection_fraction",
+            "n_accepted",
+        ):
+            assert array in ex["bit_identical"], array
+
+
 def test_the_posterior_side_carries_no_figure_of_its_own() -> None:
     """A float that makes the same point as an existing one is one too many.
 

@@ -282,20 +282,33 @@ worst-case arm, KP 58.8 matrix under `k_aq_regional_upper`:
 | | rejected rows | wall clock |
 |---|---|---|
 | production baseline, tracing on | 5 673 | 273 s |
-| this arm, tracing **on** | 65 530 | **> 69 min** |
-| this arm, tracing **off** | 65 530 | **69 s** |
+| this arm, tracing **on** | 65 530 | **5 902.2 s** |
+| this arm, tracing **off** | 65 530 | **65.5 s** |
 
-A factor of about 60. Across 32 replays that is the difference between roughly
-one hour and well over a day, and the campaign would not have been run at all.
+**A factor of 90.** Across 32 replays that is the difference between about
+three quarters of an hour and about two days, and the campaign would not have
+been run at all.
 
 **Why it cannot move a number.** `run_survival_update` fixes `state.alive` in
 the Accept-Reject chain and only afterwards enters the tracing block; the
 posterior is `posterior_fragility_from_matrices(run, state.alive, ...)`, which
 never reads the traced array. `t_breach` is persisted and, when figures are on,
-plotted. Figures are off here. The structural argument was confirmed by
-measurement on the worst-case arm above: every array the Phase 3 annualisation
-consumes is **bit-identical** with tracing on and off, as is the rejection
-fraction and the accepted-row count. The evidence records carry that comparison.
+plotted. Figures are off here.
+
+The structural argument was then confirmed by measurement on the worst-case arm
+above, which is the strongest available test of it: at 65 530 traced rows, any
+side effect of tracing has the largest opportunity to show. The two runs agree
+**bit-identically** on every quantity the Phase 3 annualisation consumes, and on
+the two that define the update:
+
+| quantity | verdict |
+|---|---|
+| `conditioning_grid` | identical |
+| `P_f_trans_post_raw`, `P_f_static_post_raw` | identical |
+| `binomial_ci` lower and upper, both branches | identical |
+| fitted `mu` and `sigma`, both branches | identical |
+| `rejection_fraction`, `n_accepted` | identical |
+| Phase 2 settings | differ in `trace_breach_times` and `output_dir`, nothing else |
 
 **What is lost.** The arm posteriors carry no breach-time diagnostic. That is a
 diagnostic this study does not use and does not report. The production
