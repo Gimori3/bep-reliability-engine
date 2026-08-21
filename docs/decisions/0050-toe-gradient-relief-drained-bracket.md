@@ -241,6 +241,39 @@ attached to it.
 
 ---
 
+## Outcome (measured 2026-08-22)
+
+Full result in the companion note. The headlines, all matrix / posterior /
+λ_ac = 250 m / primary, the configuration every RQ3 and RQ4 headline is quoted
+at:
+
+- **All four Phase 1 gates bit-identical**; **static invariance exactly 0.0** at
+  every level and arm (P1 confirmed, the mapping's falsifier survived);
+- conditional at the design level: KP 58.8 **0.2627 → 0.1084** on the measured
+  berm alone **→ 0** at 80 % relief; KP 60.0 **0.3143 → 0.1111 → 0**;
+- the relief **shifts the curve right rather than scaling it down** (P4): the
+  lowest initiating stage moves from 39.75 to 42.00 m (KP 58.8) and 41.25 to
+  43.50 m (KP 60.0), both above the design level;
+- annual system P_f, historical: KP 58.8 **7.42e-3 → 4.25e-3 → 1.97e-4** (the
+  last a lower bound, ADR-0024 raw tail); KP 60.0 **1.80e-3 → 6.40e-4 → 0**;
+- 2016 survival rejection: KP 58.8 **5.673 % → 1.551 %** on the measured berm
+  alone, KP 60.0 **3.363 % → 0.555 %**; **marginal transient rejection stays
+  exactly 0.000 in all 24 replays**;
+- **the climate ratio RISES** with credited drainage (KP 58.8 5.51 → 14.22,
+  KP 60.0 7.87 → 26.01): the as-if-undrained treatment *understates* warming
+  sensitivity at these two sections;
+- **the ranking**: KP 58.8 keeps the top under every arm but the strongest, in
+  both climates; **KP 60.0 leaves second place for last under every arm,
+  including the measured-berm-only arm that assumes nothing about the drain.**
+
+**P2 falsified** (see the amendment above) and **P5 refuted**: there is no single
+verdict on berm-versus-gate, because the response is strongly non-linear in the
+relief fraction (×2.42 from the berm, ×1.03 from the first 20 % of relief, ×41 at
+60 %). That is the strongest argument for having swept the axis rather than
+choosing a value.
+
+---
+
 ## Consequences
 
 - The thesis can state a range for the protected configuration at KP 58.8 and
@@ -259,6 +292,12 @@ attached to it.
   the same ground as the ADR-0045/0046/0048/0049 companions.
 - Nothing about the production deliverable changes. No CSV edit, no config
   regeneration, no re-run of the eight sweeps.
+- **A latent defect in `fragility_update.verify_posterior_fragility_by_reevaluation`
+  was found and fixed in passing**: it forwarded none of the optional M8
+  keywords, so the ADR-0045, ADR-0049 and ADR-0050 arms all re-evaluated a
+  different model from the one that wrote the matrices they were checking.
+  Invisible in production because all three default to absent. Pinned by
+  `tests/test_phase2_verification_threading.py`.
 
 ---
 

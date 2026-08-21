@@ -1,0 +1,563 @@
+{
+  "study": "ADR-0050 drained-configuration bracket, Phase 3 annualisation",
+  "generated": "2026-08-22T00:55:00",
+  "generated_by": "scripts/drained_bracket_annualisation.py",
+  "d70_interpretation": "bulk",
+  "side": "posterior",
+  "scope": "KP 58.8 and KP 60.0 only; KP 57.4 and KP 62.0 keep their production curves because their recorded works are a berm alone and none at all",
+  "bracketed_sections": [
+    "KP 58.8",
+    "KP 60.0"
+  ],
+  "arm_curve_sources": {
+    "berm_only": {
+      "KP 58.8": "results/sensitivity/adr0050_drained_bracket/phase2/tokachi_kp58.8_historical_bulk_berm_only_posterior.h5",
+      "KP 60.0": "results/sensitivity/adr0050_drained_bracket/phase2/tokachi_kp60.0_historical_bulk_berm_only_posterior.h5"
+    },
+    "joint_0.80": {
+      "KP 58.8": "results/sensitivity/adr0050_drained_bracket/phase2/tokachi_kp58.8_historical_bulk_joint_0.80_posterior.h5",
+      "KP 60.0": "results/sensitivity/adr0050_drained_bracket/phase2/tokachi_kp60.0_historical_bulk_joint_0.80_posterior.h5"
+    },
+    "joint_0.60": {
+      "KP 58.8": "results/sensitivity/adr0050_drained_bracket/phase2/tokachi_kp58.8_historical_bulk_joint_0.60_posterior.h5",
+      "KP 60.0": "results/sensitivity/adr0050_drained_bracket/phase2/tokachi_kp60.0_historical_bulk_joint_0.60_posterior.h5"
+    },
+    "joint_0.40": {
+      "KP 58.8": "results/sensitivity/adr0050_drained_bracket/phase2/tokachi_kp58.8_historical_bulk_joint_0.40_posterior.h5",
+      "KP 60.0": "results/sensitivity/adr0050_drained_bracket/phase2/tokachi_kp60.0_historical_bulk_joint_0.40_posterior.h5"
+    },
+    "joint_0.20": {
+      "KP 58.8": "results/sensitivity/adr0050_drained_bracket/phase2/tokachi_kp58.8_historical_bulk_joint_0.20_posterior.h5",
+      "KP 60.0": "results/sensitivity/adr0050_drained_bracket/phase2/tokachi_kp60.0_historical_bulk_joint_0.20_posterior.h5"
+    }
+  },
+  "gates": {
+    "gate_1": {
+      "passed": true,
+      "rows_compared": 228,
+      "fields_compared": 20,
+      "table": "results/system_integration/phase3/rq4_annual.csv",
+      "criterion": "every field string-identical to the published table"
+    },
+    "gate_2": {
+      "passed": true,
+      "cells_compared": 1120,
+      "untouched_bep_sections": [
+        "KP 57.4",
+        "KP 62.0"
+      ],
+      "criterion": "every segment-and-scenario row outside KP 58.8 and KP 60.0 identical, field for field, in every arm"
+    },
+    "gate_3": {
+      "passed": true,
+      "comparisons": 16,
+      "ladder": [
+        "joint_0.80",
+        "joint_0.60",
+        "joint_0.40",
+        "joint_0.20"
+      ],
+      "criterion": "annual system probability non-increasing along the ladder, up to the annualised image of the Phase 1 Euler artifacts, bounded by n_artifact / N",
+      "tolerated_inversions": [
+        {
+          "section": "KP 58.8",
+          "scenario": "+4K",
+          "arm": "joint_0.60",
+          "increase": 1.88172e-08,
+          "artifact_budget": 5e-05,
+          "relative_increase": 7.32335e-06
+        }
+      ]
+    }
+  },
+  "per_section": [
+    {
+      "section": "KP 58.8",
+      "kp": 58.8,
+      "consequence_section_id": "KP58.0",
+      "scenarios": {
+        "historical": {
+          "as_if_undrained": {
+            "p_annual_system": 0.000198876,
+            "p_annual_bep": 3.98355e-06,
+            "p_annual_overflow": 0.000195078,
+            "share_bep": 0.0200117,
+            "leading_mechanism": "overflow",
+            "bep_clamped_above_grid": true,
+            "system_lower_bound_clamp": false
+          },
+          "arms": {
+            "berm_only": {
+              "relief_factor": null,
+              "p_annual_system": 0.000195436,
+              "p_annual_bep": 3.7737e-07,
+              "p_annual_overflow": 0.000195078,
+              "share_bep": 0.00193072,
+              "leading_mechanism": "overflow",
+              "bep_clamped_above_grid": true,
+              "system_lower_bound_clamp": false,
+              "ratio_to_as_if_undrained": 0.982705
+            },
+            "joint_0.80": {
+              "relief_factor": 0.8,
+              "p_annual_system": 0.000195436,
+              "p_annual_bep": 3.7737e-07,
+              "p_annual_overflow": 0.000195078,
+              "share_bep": 0.00193072,
+              "leading_mechanism": "overflow",
+              "bep_clamped_above_grid": true,
+              "system_lower_bound_clamp": false,
+              "ratio_to_as_if_undrained": 0.982705
+            },
+            "joint_0.60": {
+              "relief_factor": 0.6,
+              "p_annual_system": 0.000195436,
+              "p_annual_bep": 3.7737e-07,
+              "p_annual_overflow": 0.000195078,
+              "share_bep": 0.00193072,
+              "leading_mechanism": "overflow",
+              "bep_clamped_above_grid": true,
+              "system_lower_bound_clamp": false,
+              "ratio_to_as_if_undrained": 0.982705
+            },
+            "joint_0.40": {
+              "relief_factor": 0.4,
+              "p_annual_system": 0.000195436,
+              "p_annual_bep": 3.7737e-07,
+              "p_annual_overflow": 0.000195078,
+              "share_bep": 0.00193072,
+              "leading_mechanism": "overflow",
+              "bep_clamped_above_grid": true,
+              "system_lower_bound_clamp": false,
+              "ratio_to_as_if_undrained": 0.982705
+            },
+            "joint_0.20": {
+              "relief_factor": 0.2,
+              "p_annual_system": 0.000195079,
+              "p_annual_bep": 1.72644e-09,
+              "p_annual_overflow": 0.000195078,
+              "share_bep": 8.84994e-06,
+              "leading_mechanism": "overflow",
+              "bep_clamped_above_grid": true,
+              "system_lower_bound_clamp": false,
+              "ratio_to_as_if_undrained": 0.980912
+            }
+          }
+        },
+        "+4K": {
+          "as_if_undrained": {
+            "p_annual_system": 0.00270908,
+            "p_annual_bep": 0.00026813,
+            "p_annual_overflow": 0.00252936,
+            "share_bep": 0.0958465,
+            "leading_mechanism": "overflow",
+            "bep_clamped_above_grid": true,
+            "system_lower_bound_clamp": false
+          },
+          "arms": {
+            "berm_only": {
+              "relief_factor": null,
+              "p_annual_system": 0.00256945,
+              "p_annual_bep": 6.49433e-05,
+              "p_annual_overflow": 0.00252936,
+              "share_bep": 0.025033,
+              "leading_mechanism": "overflow",
+              "bep_clamped_above_grid": true,
+              "system_lower_bound_clamp": false,
+              "ratio_to_as_if_undrained": 0.948457
+            },
+            "joint_0.80": {
+              "relief_factor": 0.8,
+              "p_annual_system": 0.00256946,
+              "p_annual_bep": 6.49558e-05,
+              "p_annual_overflow": 0.00252936,
+              "share_bep": 0.0250377,
+              "leading_mechanism": "overflow",
+              "bep_clamped_above_grid": true,
+              "system_lower_bound_clamp": false,
+              "ratio_to_as_if_undrained": 0.948462
+            },
+            "joint_0.60": {
+              "relief_factor": 0.6,
+              "p_annual_system": 0.00256948,
+              "p_annual_bep": 6.49822e-05,
+              "p_annual_overflow": 0.00252936,
+              "share_bep": 0.0250477,
+              "leading_mechanism": "overflow",
+              "bep_clamped_above_grid": true,
+              "system_lower_bound_clamp": false,
+              "ratio_to_as_if_undrained": 0.948469
+            },
+            "joint_0.40": {
+              "relief_factor": 0.4,
+              "p_annual_system": 0.00256938,
+              "p_annual_bep": 6.48526e-05,
+              "p_annual_overflow": 0.00252936,
+              "share_bep": 0.024999,
+              "leading_mechanism": "overflow",
+              "bep_clamped_above_grid": true,
+              "system_lower_bound_clamp": false,
+              "ratio_to_as_if_undrained": 0.94843
+            },
+            "joint_0.20": {
+              "relief_factor": 0.2,
+              "p_annual_system": 0.00254062,
+              "p_annual_bep": 2.13262e-05,
+              "p_annual_overflow": 0.00252936,
+              "share_bep": 0.00836096,
+              "leading_mechanism": "overflow",
+              "bep_clamped_above_grid": true,
+              "system_lower_bound_clamp": false,
+              "ratio_to_as_if_undrained": 0.937815
+            }
+          }
+        }
+      },
+      "climate_ratio": {
+        "as_if_undrained": 13.622,
+        "berm_only": 13.1473,
+        "joint_0.80": 13.1473,
+        "joint_0.60": 13.1474,
+        "joint_0.40": 13.1469,
+        "joint_0.20": 13.0235
+      }
+    },
+    {
+      "section": "KP 60.0",
+      "kp": 60.0,
+      "consequence_section_id": "KP59.6",
+      "scenarios": {
+        "historical": {
+          "as_if_undrained": {
+            "p_annual_system": 6.91458e-05,
+            "p_annual_bep": 6.91458e-05,
+            "p_annual_overflow": 0.0,
+            "share_bep": 1.0,
+            "leading_mechanism": "bep",
+            "bep_clamped_above_grid": false,
+            "system_lower_bound_clamp": false
+          },
+          "arms": {
+            "berm_only": {
+              "relief_factor": null,
+              "p_annual_system": 8.40839e-06,
+              "p_annual_bep": 8.40839e-06,
+              "p_annual_overflow": 0.0,
+              "share_bep": 1.0,
+              "leading_mechanism": "bep",
+              "bep_clamped_above_grid": false,
+              "system_lower_bound_clamp": false,
+              "ratio_to_as_if_undrained": 0.121604
+            },
+            "joint_0.80": {
+              "relief_factor": 0.8,
+              "p_annual_system": 8.3973e-06,
+              "p_annual_bep": 8.3973e-06,
+              "p_annual_overflow": 0.0,
+              "share_bep": 1.0,
+              "leading_mechanism": "bep",
+              "bep_clamped_above_grid": false,
+              "system_lower_bound_clamp": false,
+              "ratio_to_as_if_undrained": 0.121444
+            },
+            "joint_0.60": {
+              "relief_factor": 0.6,
+              "p_annual_system": 8.19e-06,
+              "p_annual_bep": 8.19e-06,
+              "p_annual_overflow": 0.0,
+              "share_bep": 1.0,
+              "leading_mechanism": "bep",
+              "bep_clamped_above_grid": false,
+              "system_lower_bound_clamp": false,
+              "ratio_to_as_if_undrained": 0.118445
+            },
+            "joint_0.40": {
+              "relief_factor": 0.4,
+              "p_annual_system": 4.03457e-06,
+              "p_annual_bep": 4.03457e-06,
+              "p_annual_overflow": 0.0,
+              "share_bep": 1.0,
+              "leading_mechanism": "bep",
+              "bep_clamped_above_grid": false,
+              "system_lower_bound_clamp": false,
+              "ratio_to_as_if_undrained": 0.0583487
+            },
+            "joint_0.20": {
+              "relief_factor": 0.2,
+              "p_annual_system": 0.0,
+              "p_annual_bep": 0.0,
+              "p_annual_overflow": 0.0,
+              "share_bep": 0.0,
+              "leading_mechanism": "not defined",
+              "bep_clamped_above_grid": true,
+              "system_lower_bound_clamp": false,
+              "ratio_to_as_if_undrained": 0.0
+            }
+          }
+        },
+        "+4K": {
+          "as_if_undrained": {
+            "p_annual_system": 0.00161518,
+            "p_annual_bep": 0.00160276,
+            "p_annual_overflow": 2.30365e-05,
+            "share_bep": 0.985831,
+            "leading_mechanism": "bep",
+            "bep_clamped_above_grid": false,
+            "system_lower_bound_clamp": false
+          },
+          "arms": {
+            "berm_only": {
+              "relief_factor": null,
+              "p_annual_system": 0.000422573,
+              "p_annual_bep": 0.000404032,
+              "p_annual_overflow": 2.30365e-05,
+              "share_bep": 0.946059,
+              "leading_mechanism": "bep",
+              "bep_clamped_above_grid": false,
+              "system_lower_bound_clamp": false,
+              "ratio_to_as_if_undrained": 0.261626
+            },
+            "joint_0.80": {
+              "relief_factor": 0.8,
+              "p_annual_system": 0.000422224,
+              "p_annual_bep": 0.000403681,
+              "p_annual_overflow": 2.30365e-05,
+              "share_bep": 0.946015,
+              "leading_mechanism": "bep",
+              "bep_clamped_above_grid": false,
+              "system_lower_bound_clamp": false,
+              "ratio_to_as_if_undrained": 0.26141
+            },
+            "joint_0.60": {
+              "relief_factor": 0.6,
+              "p_annual_system": 0.000417872,
+              "p_annual_bep": 0.000399309,
+              "p_annual_overflow": 2.30365e-05,
+              "share_bep": 0.945456,
+              "leading_mechanism": "bep",
+              "bep_clamped_above_grid": false,
+              "system_lower_bound_clamp": false,
+              "ratio_to_as_if_undrained": 0.258716
+            },
+            "joint_0.40": {
+              "relief_factor": 0.4,
+              "p_annual_system": 0.000318717,
+              "p_annual_bep": 0.000299645,
+              "p_annual_overflow": 2.30365e-05,
+              "share_bep": 0.928609,
+              "leading_mechanism": "bep",
+              "bep_clamped_above_grid": false,
+              "system_lower_bound_clamp": false,
+              "ratio_to_as_if_undrained": 0.197326
+            },
+            "joint_0.20": {
+              "relief_factor": 0.2,
+              "p_annual_system": 2.56662e-05,
+              "p_annual_bep": 2.72855e-06,
+              "p_annual_overflow": 2.30365e-05,
+              "share_bep": 0.105901,
+              "leading_mechanism": "overflow",
+              "bep_clamped_above_grid": true,
+              "system_lower_bound_clamp": false,
+              "ratio_to_as_if_undrained": 0.0158906
+            }
+          }
+        }
+      },
+      "climate_ratio": {
+        "as_if_undrained": 23.359,
+        "berm_only": 50.2561,
+        "joint_0.80": 50.2809,
+        "joint_0.60": 51.0223,
+        "joint_0.40": 78.9966,
+        "joint_0.20": null
+      }
+    }
+  ],
+  "ranking": {
+    "historical": {
+      "as_if_undrained": {
+        "order": [
+          "KP 62.0",
+          "KP 58.8",
+          "KP 60.0",
+          "KP 57.4"
+        ],
+        "values": {
+          "KP 62.0": 0.000199288,
+          "KP 58.8": 0.000198876,
+          "KP 60.0": 6.91458e-05,
+          "KP 57.4": 2.07406e-06
+        },
+        "leader": "KP 62.0"
+      },
+      "berm_only": {
+        "order": [
+          "KP 62.0",
+          "KP 58.8",
+          "KP 60.0",
+          "KP 57.4"
+        ],
+        "values": {
+          "KP 62.0": 0.000199288,
+          "KP 58.8": 0.000195436,
+          "KP 60.0": 8.40839e-06,
+          "KP 57.4": 2.07406e-06
+        },
+        "leader": "KP 62.0"
+      },
+      "joint_0.80": {
+        "order": [
+          "KP 62.0",
+          "KP 58.8",
+          "KP 60.0",
+          "KP 57.4"
+        ],
+        "values": {
+          "KP 62.0": 0.000199288,
+          "KP 58.8": 0.000195436,
+          "KP 60.0": 8.3973e-06,
+          "KP 57.4": 2.07406e-06
+        },
+        "leader": "KP 62.0"
+      },
+      "joint_0.60": {
+        "order": [
+          "KP 62.0",
+          "KP 58.8",
+          "KP 60.0",
+          "KP 57.4"
+        ],
+        "values": {
+          "KP 62.0": 0.000199288,
+          "KP 58.8": 0.000195436,
+          "KP 60.0": 8.19e-06,
+          "KP 57.4": 2.07406e-06
+        },
+        "leader": "KP 62.0"
+      },
+      "joint_0.40": {
+        "order": [
+          "KP 62.0",
+          "KP 58.8",
+          "KP 60.0",
+          "KP 57.4"
+        ],
+        "values": {
+          "KP 62.0": 0.000199288,
+          "KP 58.8": 0.000195436,
+          "KP 60.0": 4.03457e-06,
+          "KP 57.4": 2.07406e-06
+        },
+        "leader": "KP 62.0"
+      },
+      "joint_0.20": {
+        "order": [
+          "KP 62.0",
+          "KP 58.8",
+          "KP 57.4",
+          "KP 60.0"
+        ],
+        "values": {
+          "KP 62.0": 0.000199288,
+          "KP 58.8": 0.000195079,
+          "KP 57.4": 2.07406e-06,
+          "KP 60.0": 0.0
+        },
+        "leader": "KP 62.0"
+      }
+    },
+    "+4K": {
+      "as_if_undrained": {
+        "order": [
+          "KP 62.0",
+          "KP 58.8",
+          "KP 60.0",
+          "KP 57.4"
+        ],
+        "values": {
+          "KP 62.0": 0.00839201,
+          "KP 58.8": 0.00270908,
+          "KP 60.0": 0.00161518,
+          "KP 57.4": 0.00121548
+        },
+        "leader": "KP 62.0"
+      },
+      "berm_only": {
+        "order": [
+          "KP 62.0",
+          "KP 58.8",
+          "KP 57.4",
+          "KP 60.0"
+        ],
+        "values": {
+          "KP 62.0": 0.00839201,
+          "KP 58.8": 0.00256945,
+          "KP 57.4": 0.00121548,
+          "KP 60.0": 0.000422573
+        },
+        "leader": "KP 62.0"
+      },
+      "joint_0.80": {
+        "order": [
+          "KP 62.0",
+          "KP 58.8",
+          "KP 57.4",
+          "KP 60.0"
+        ],
+        "values": {
+          "KP 62.0": 0.00839201,
+          "KP 58.8": 0.00256946,
+          "KP 57.4": 0.00121548,
+          "KP 60.0": 0.000422224
+        },
+        "leader": "KP 62.0"
+      },
+      "joint_0.60": {
+        "order": [
+          "KP 62.0",
+          "KP 58.8",
+          "KP 57.4",
+          "KP 60.0"
+        ],
+        "values": {
+          "KP 62.0": 0.00839201,
+          "KP 58.8": 0.00256948,
+          "KP 57.4": 0.00121548,
+          "KP 60.0": 0.000417872
+        },
+        "leader": "KP 62.0"
+      },
+      "joint_0.40": {
+        "order": [
+          "KP 62.0",
+          "KP 58.8",
+          "KP 57.4",
+          "KP 60.0"
+        ],
+        "values": {
+          "KP 62.0": 0.00839201,
+          "KP 58.8": 0.00256938,
+          "KP 57.4": 0.00121548,
+          "KP 60.0": 0.000318717
+        },
+        "leader": "KP 62.0"
+      },
+      "joint_0.20": {
+        "order": [
+          "KP 62.0",
+          "KP 58.8",
+          "KP 57.4",
+          "KP 60.0"
+        ],
+        "values": {
+          "KP 62.0": 0.00839201,
+          "KP 58.8": 0.00254062,
+          "KP 57.4": 0.00121548,
+          "KP 60.0": 2.56662e-05
+        },
+        "leader": "KP 62.0"
+      }
+    }
+  }
+}
