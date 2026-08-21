@@ -331,4 +331,268 @@ must be carried wherever that arm's posterior numbers are quoted.
 
 ## Part 2 — Outcome
 
-*Appended after execution. Empty at pre-registration time.*
+*Appended 2026-08-21 after execution. It evaluates the pre-registered rules
+against the pre-registered inputs and re-tunes nothing. Where a prediction
+failed, it says so and Part 1 is left standing.*
+
+### 2.1 The direct answer
+
+**The 2016 survival constraint narrows the conductivity bracket. It narrows it
+at every cell where the bracket is resolved and the update rejects anything at
+all, it never widens it, and it leaves every mechanism-ordering verdict exactly
+where the prior side left it.**
+
+Under the matrix reading, which is the one where piping carries the annual
+number, the bracket on the annual system failure probability narrows by a factor
+of **2.81 at KP 60.0 historically and 1.96 at KP 58.8 historically**, and by 1.97
+and 1.49 at the same two sections under warming. At KP 57.4 and KP 62.0 it
+narrows by 3.6 % and 0.02 %, which is to say not materially. Under the bulk
+reading it narrows by 35 % at one cell and by 1 % or less at the rest.
+
+The narrowing is **asymmetric in exactly the predicted way**: it is the upper arm
+coming down, not the lower arms coming up. No downward arm moves by more than
+2.8 %, while the upward arm loses 49 % of its annual number at KP 58.8 and 64 %
+at KP 60.0.
+
+### 2.2 The mechanism, which is the rejection fraction
+
+Everything above follows from one table. `rejection_fraction` is the share of the
+N = 1e5 prior realizations that would have breached under the 2016 event.
+
+| section | field geomean | field toe | **production** | regional upper | unit-weight control |
+|---|---|---|---|---|---|
+| **matrix** | | | | | |
+| KP 57.4 | 0.000 % | 0.000 % | **0.065 %** | 3.951 % | 0.072 % |
+| KP 58.8 | 0.000 % | 0.067 % | **5.673 %** | 65.530 % | 5.826 % |
+| KP 60.0 | 0.000 % | 0.352 % | **3.363 %** | 86.881 % | 3.566 % |
+| KP 62.0 | 0.000 % | 0.000 % | **0.000 %** | 0.010 % | 0.000 % |
+| **bulk** | | | | | |
+| KP 57.4 | 0.000 % | 0.000 % | **0.000 %** | 0.005 % | 0.000 % |
+| KP 58.8 | 0.000 % | 0.000 % | **0.000 %** | 0.060 % | 0.000 % |
+| KP 60.0 | 0.000 % | 0.000 % | **0.023 %** | 39.004 % | 0.023 % |
+| KP 62.0 | 0.000 % | 0.000 % | **0.000 %** | 0.000 % | 0.000 % |
+
+The ladder is monotone in the effective `k_aq` prior mean at all eight
+section-and-reading combinations, and the upward arm rejects **11.6 times** more
+than production at KP 58.8 and **25.8 times** more at KP 60.0. That is the
+predicted step-4 mechanism measured directly: the 2016 anchor sits at or below
+the tenth percentile of the stage band that carries the annual number, the
+conductivity arms amplify the conditional curve most strongly at the low-stage
+end, so a high-conductivity arm inflates its own rejection far more than it
+inflates its own contribution to the integral.
+
+### 2.3 The bracket, prior against posterior
+
+`span` is the largest annual system probability any conductivity arm produces
+divided by the smallest, production included. `ratio` below 1 means the survival
+constraint narrowed the bracket.
+
+**Matrix d70**
+
+| section | climate | prior span | posterior span | ratio | ordering verdict |
+|---|---|---|---|---|---|
+| KP 57.4 | historical | unbounded | unbounded | not defined | COLLAPSED, both |
+| KP 57.4 | +4K | 27.56 | 26.57 | 0.9641 | REVERSED, both |
+| KP 58.8 | historical | 184.8 | 94.14 | **0.5093** | REVERSED, both |
+| KP 58.8 | +4K | 48.59 | 32.58 | **0.6704** | REVERSED, both |
+| KP 60.0 | historical | 4.437e5 | 1.581e5 | **0.3563** | ROBUST, both |
+| KP 60.0 | +4K | 2762 | 1399 | **0.5065** | REVERSED, both |
+| KP 62.0 | historical | 69.08 | 69.07 | 0.9998 | REVERSED, both |
+| KP 62.0 | +4K | 8.265 | 8.265 | 0.9999 | REVERSED, both |
+
+**Bulk d70**
+
+| section | climate | prior span | posterior span | ratio | ordering verdict |
+|---|---|---|---|---|---|
+| KP 57.4 | historical | unbounded | unbounded | not defined | COLLAPSED, both |
+| KP 57.4 | +4K | 4.541 | 4.538 | 0.9994 | REVERSED, both |
+| KP 58.8 | historical | 4.398 | 4.354 | 0.9900 | REVERSED, both |
+| KP 58.8 | +4K | 3.532 | 3.514 | 0.9948 | REVERSED, both |
+| KP 60.0 | historical | unbounded | unbounded | not defined | COLLAPSED, both |
+| KP 60.0 | +4K | 1865 | 1218 | **0.6530** | REVERSED, both |
+| KP 62.0 | historical | 2.071 | 2.071 | 1.0000 | REVERSED, both |
+| KP 62.0 | +4K | 1.155 | 1.155 | 1.0000 | ROBUST, both |
+
+**Why the bulk reading barely moves, and it is structural rather than
+statistical.** Under bulk the gradation has already handed the lead to overflow
+at five of the eight cells, and overflow carries no aquifer-conductivity
+dependence at all. The span there is set by a mechanism the update cannot touch,
+so however hard the survival constraint bites the piping arm, the system span
+cannot follow it down. This is the same capping mechanism the prior-side record
+identified in its Part 3 B9, arriving from the other direction.
+
+### 2.4 The annual numbers behind it, matrix d70 [1/yr]
+
+Only the arms that move are tabulated in full; the rest are in the evidence
+record.
+
+| section | arm | historical prior | historical posterior | ratio |
+|---|---|---|---|---|
+| KP 57.4 | production | 7.548e-4 | 7.530e-4 | 0.9976 |
+| KP 57.4 | regional upper | 3.464e-3 | 3.287e-3 | 0.9488 |
+| KP 58.8 | production | 8.467e-3 | 7.420e-3 | 0.8763 |
+| KP 58.8 | regional upper | 3.614e-2 | **1.841e-2** | **0.5093** |
+| KP 60.0 | production | 2.025e-3 | 1.802e-3 | 0.8898 |
+| KP 60.0 | regional upper | 2.296e-2 | **8.181e-3** | **0.3563** |
+| KP 62.0 | production | 1.006e-3 | 1.006e-3 | 1.0000 |
+| KP 62.0 | regional upper | 1.377e-2 | 1.376e-2 | 0.9998 |
+
+The two downward arms are inert to the update at every section: the largest
+movement either of them makes anywhere, in either reading and either climate, is
+**2.8 %**, against 12.4 % for production itself and 64 % for the upward arm.
+
+### 2.5 The climate ratios
+
+The +4K over historical system ratio moves in the direction the mechanism
+requires: the update suppresses the historical number of a heavily rejected arm
+more than its warmed number, because the warmed hazard samples higher on the
+curve, so that arm's ratio **rises**. Since the upward arm carries the lowest
+ratio at every section, raising it narrows the spread of ratios across arms.
+
+| section | prior ratio-span across arms | posterior | ratio |
+|---|---|---|---|
+| KP 57.4 | 32.28 | 31.77 | 0.9842 |
+| KP 58.8 | 3.803 | 2.890 | **0.7598** |
+| KP 60.0 | 160.7 | 113.0 | **0.7034** |
+| KP 62.0 | 8.358 | 8.357 | 0.9999 |
+
+The largest single movement is the upward arm at KP 60.0, whose ratio runs from
+4.178 to 5.939, a rise of 42 %. **Production's own climate ratios move by 4.6 %
+or less** (5.269 to 5.514 at KP 58.8, 7.576 to 7.867 at KP 60.0, and unchanged to
+four figures at KP 57.4 and KP 62.0), so no headline climate ratio in the thesis
+is disturbed by this measurement.
+
+### 2.6 The mechanism ordering does not move, at any of the sixteen cells
+
+This is the result that matters most for what the thesis claims, and it is a
+clean negative. **All sixteen ordering verdicts, four sections by two climates by
+two readings, are reproduced exactly on the posterior side.** Not one cell
+changes from ROBUST to REVERSED or the reverse, and the set of arms that changes
+the lead is identical cell by cell.
+
+The reason is that the two things are decoupled. Under matrix, every reversal is
+driven by a **downward** arm, and §2.4 shows the downward arms are inert to the
+update. Under bulk, every reversal is driven by the **upward** arm, which the
+update does bite hard, but there the system number is carried by overflow, so
+biting the piping arm cannot move the lead either. The survival constraint
+therefore narrows the bracket without resolving any part of the ordering contest
+the prior side reported.
+
+### 2.7 Did the pre-registration hold?
+
+Five of eight predictions held under matrix, five under bulk. No falsifier fired.
+
+| | matrix | bulk |
+|---|---|---|
+| P1 rejection monotone in `k_aq` | **HELD** | **HELD** |
+| P2 upward arm rejects materially more | **HELD** | **FAILED** |
+| P3 KP 62.0 stops being a copy of the prior | **HELD** | **FAILED** |
+| P4 downward arms inert to the update | **HELD** | **HELD** |
+| P5 span narrower, by less than a factor of two | **FAILED** | **FAILED** |
+| P6 ordering verdicts unchanged | **HELD** | **HELD** |
+| P7 climate ratios move less than 20 % | **FAILED** | **HELD** |
+| P8 unit-weight control stays quiet | **HELD** | **HELD** |
+| F1 a posterior exceeds its prior | did not fire | did not fire |
+| F2 rejection non-monotone | did not fire | did not fire |
+| F3 posterior span wider than prior | did not fire | did not fire |
+| F4 the measured null | did not fire | did not fire |
+
+**P5 failed in the informative direction, and only on its magnitude clause.** Its
+direction clause held at all seven resolved matrix cells and all six resolved
+bulk cells: every one narrowed, none widened. What failed is the bound "by less
+than a factor of two": KP 60.0 historical narrows by **2.81**, which is more than
+predicted. Part 1 reasoned that the annualisation is carried by stages well above
+the 2016 anchor where `p` is much larger than `r`, and that reasoning was right
+in form and too conservative in size, because at 86.9 % rejection the upward arm
+has almost no prior left to carry the integral.
+
+**P7 failed at two cells, both the upward arm**, at KP 60.0 (+42 %) and KP 58.8
+(+32 %). Part 1 argued that one common subtraction applied to a curve shared by
+both climates cannot move the ratio much. That is true when the subtraction is
+small; at 87 % rejection it is not a small subtraction, and the differential
+effect on the two climates' hazard weightings survives into the ratio. The
+prediction was sound for production and wrong for the extreme arm.
+
+**P2 and P3 failed under bulk only, and for one reason.** Both concern KP 62.0,
+where under bulk no arm rejects anything at all, including the upward one. P3 was
+worded for the matrix reading and **held there**: KP 62.0 matrix under
+`k_aq_regional_upper` rejects 0.010 %, so the posterior side at that section
+stops being an exact copy of the prior side for the first time. The scorer
+applies the same test to bulk, where it fails; both verdicts are reported rather
+than the convenient one.
+
+**F4, the deflating outcome, is the one worth naming.** Part 1 committed in
+advance to reporting a measured null if the span moved by less than 1 % at every
+cell. It did not: the largest span movement is 64 %, and four matrix cells move
+by more than 30 %. This is a real narrowing, not a null dressed up as one. It is
+also not a large narrowing relative to the bracket itself, and §2.8 says what
+that means.
+
+### 2.8 What this does and does not license
+
+**It does not shrink the conductivity bracket into insignificance.** After the
+update the span is still 94 at KP 58.8 historically and 1.6e5 at KP 60.0. A
+bracket that runs from 94 to 1.6e5 is the same order of statement as one that
+runs from 185 to 4.4e5. The honest summary is that the survival constraint takes
+a factor of about two off a bracket that spans two to five orders of magnitude,
+which changes the number and not the character of the limitation.
+
+**It does not resolve the ordering contest**, per §2.6.
+
+**It does close the question of direction.** Before this measurement it was
+possible to argue either way, and the thesis said so. It is now measured: the
+constraint narrows, never widens, and narrows by an asymmetric mechanism that is
+visible in the rejection ladder.
+
+**A caveat that travels with the upward arm's posterior numbers.** At KP 58.8 the
+upward arm keeps 34 470 rows and at KP 60.0 it keeps 13 119, both below the 50 %
+headroom floor Phase 2 warns at, so the tail resolution of those two posterior
+curves is degraded relative to the Phase 1 spec §11 standard. This does not
+affect the direction of the finding, since the arm's annual number can only fall
+further as resolution improves, but the two most heavily narrowed cells are the
+two carrying that caveat and it must be quoted with them.
+
+### 2.9 Method, gates and scope
+
+All seven gates passed on both readings before any arm number was reported.
+
+| gate | matrix | bulk |
+|---|---|---|
+| 1, baseline reproduces the production posterior table | 228 rows x 20 fields | 228 rows x 20 fields |
+| 2, arm provenance and Phase 2 settings | passed | passed |
+| 3, the 110 non-BEP segments invariant | 880 cells | 880 cells |
+| 4, hazard cache unchanged | 228 files | 228 files |
+| 5, no production artifact written | passed | passed |
+| 6, theta verified on every replay | 20 replays | 20 replays |
+| 7, prior side read from the committed record | passed | passed |
+
+**Nothing was re-swept.** Phase 1 was not run: the 32 persisted ADR-0048 arm
+sweeps were consumed read-only, exactly as the prior-side study consumes them.
+The work was 32 Phase 2 replays (46.5 min for the bulk half, comparable for the
+matrix half) plus two Phase 3 passes of 15.4 s and 24.6 s.
+
+**Scope.** Every number here is posterior-side, at the four geotechnically
+characterised sections, at lambda_ac = 250 m, on the primary surface variant,
+under the arm set ADR-0048 defines. It inherits every scope condition the
+prior-side record carries, and adds none of its own except the tail-resolution
+caveat of §2.8.
+
+### 2.10 What the thesis must change
+
+1. **The four "prior side only" statements are no longer true** and must state
+   the measured result: Chapter 7 Section 7.2.3, Chapter 7's synthesis,
+   Chapter 9 Section 9.1.3, and the Chapter 8 limitations register.
+2. **The Chapter 9 answers register, RQ2 row**, currently reads "The update
+   narrows no bracket." That was written when no bracket had been run across the
+   update. It is now measured and false: the update narrows this one, by up to
+   2.81 at KP 60.0. It must be corrected.
+3. **The Chapter 9 answers register, RQ3 row**, currently reads "No conductivity
+   arm exists on the posterior side." It must state that the arms now exist there
+   and that the ordering is unchanged at all sixteen cells.
+4. **No ordering statement anywhere in Chapters 7, 8 or 9 needs to change**,
+   because §2.6 reproduces every verdict. This is worth stating explicitly in the
+   thesis rather than leaving as an absence.
+5. **No figure is owed.** The finding is a rejection ladder and a comparison of
+   two spans, and a table states both completely. A second conductivity figure
+   would prove what the existing pair already proves with one arm moved.
+6. **Appendix C's study register** gains a row for this companion.

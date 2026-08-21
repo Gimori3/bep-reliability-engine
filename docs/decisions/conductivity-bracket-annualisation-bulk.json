@@ -1,7 +1,7 @@
 {
   "study": "Aquifer-conductivity epistemic bracket propagated through the Phase 3 annualisation (defence-brief item A2)",
   "generated_by": "scripts/conductivity_annualisation_study.py",
-  "generated": "2026-08-10T16:53:38",
+  "generated": "2026-08-21T18:44:53",
   "note": "docs/decisions/conductivity-bracket-annualisation.md",
   "scope": {
     "d70_interpretation": "bulk",
@@ -18,7 +18,7 @@
       "KP 60.0",
       "KP 62.0"
     ],
-    "statement": "bulk-d70 and prior-side ONLY. This is the co-primary grain-size reading, not a sensitivity; the matrix reading is the companion record conductivity-bracket-annualisation.json. No Phase 2 posterior exists for any conductivity arm under either reading. Quote this scope wherever any number here is quoted."
+    "statement": "bulk-d70 and prior-side ONLY. This is the co-primary grain-size reading, not a sensitivity; the matrix reading is the companion record conductivity-bracket-annualisation.json. The Phase 2 posterior side of both readings is the companion record conductivity-bracket-posterior-side-bulk.json, run 2026-08-21. Quote this scope wherever any number here is quoted."
   },
   "gates": {
     "gate_1_reproduces_production_table": {
@@ -2208,7 +2208,7 @@
       }
     }
   },
-  "elapsed_s": 18.9,
+  "elapsed_s": 27.0,
   "bep_clamped_cells": [
     {
       "section": "KP 57.4",

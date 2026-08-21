@@ -789,3 +789,77 @@ untouched, and of the six clamped ones only **KP 60.0 +4K** is genuinely exposed
 (its single reversing arm sits a factor of 1.93 behind overflow). The headline
 counts of section 12.1, three of four sections historically and four of four under
 warming, are unchanged.
+
+### 12.8 POSTERIOR-SIDE CLOSURE (added 2026-08-21; authoritative on the scope of sections 12.1 to 12.7)
+
+**The scope of this whole addendum narrows again, and this time it closes.
+Sections 12.1 to 12.7 are prior-side. Section 12.7 recorded the surviving half as
+"no Phase 2 posterior exists for any conductivity arm under either reading";
+that is now false.** All four arms at all four sections under both readings have
+been replayed through the Phase 2 Accept-Reject update against the 2016 survival
+record and re-annualised. Companion note
+`docs/decisions/conductivity-bracket-posterior-side.md`, evidence
+`docs/decisions/conductivity-bracket-posterior-side.json` and `-bulk.json`.
+Nothing in sections 1 to 11 changes, `rq4_annual.csv` is untouched, no Phase 1
+sweep was re-run, and the prior-side records were regenerated with **not one
+measured number moving**.
+
+**The answer.** The survival constraint **narrows** the bracket, never widens it,
+and leaves **every** mechanism ordering where the prior side left it.
+
+| reading | section | climate | prior span | posterior span | ratio |
+|---|---|---|---|---|---|
+| matrix | KP 57.4 | +4K | 27.56 | 26.57 | 0.9641 |
+| matrix | KP 58.8 | historical | 184.8 | 94.14 | **0.5093** |
+| matrix | KP 58.8 | +4K | 48.59 | 32.58 | **0.6704** |
+| matrix | KP 60.0 | historical | 4.437e5 | 1.581e5 | **0.3563** |
+| matrix | KP 60.0 | +4K | 2762 | 1399 | **0.5065** |
+| matrix | KP 62.0 | historical | 69.08 | 69.07 | 0.9998 |
+| matrix | KP 62.0 | +4K | 8.265 | 8.265 | 0.9999 |
+| bulk | KP 60.0 | +4K | 1865 | 1218 | **0.6530** |
+
+(KP 57.4 and KP 60.0 historical are unbounded on both sides under matrix and
+bulk respectively; the remaining bulk cells move by 1 % or less.)
+
+**The mechanism is the rejection ladder**, monotone in `k_aq` at all eight
+section-and-reading combinations. Matrix, regional-upper against production:
+3.951 % against 0.065 % at KP 57.4, **65.530 % against 5.673 %** at KP 58.8,
+**86.881 % against 3.363 %** at KP 60.0, and 0.010 % against 0.000 % at KP 62.0.
+The narrowing is therefore asymmetric: the upper arm loses 49 % and 64 % of its
+annual number at the two middle sections, while **no downward arm moves by more
+than 2.8 % anywhere**, in either reading or either climate.
+
+**Why the bulk reading barely moves, and it is not a statistical fact.** That
+reading has already handed the lead to overflow at five of eight cells, and
+overflow carries no aquifer-conductivity dependence. The span it dominates
+cannot follow the piping arm down however hard the update bites it. This is
+section 12.7's B9 capping mechanism arriving from the other direction.
+
+**All sixteen ordering verdicts are reproduced**, four sections by two climates
+by two readings. The two effects are decoupled: under matrix every reversal is
+driven by a downward arm, which the update cannot touch, and under bulk every
+reversal is driven by the upward arm, which it can, but there overflow carries
+the number. **Section 12.1's headline counts are unchanged**, and so is every
+ordering statement in sections 12.1 to 12.7.
+
+**Climate ratios.** The upward arm's ratio *rises* (4.178 to 5.939 at KP 60.0,
+a 42 % move), because the update suppresses a heavily rejected arm's historical
+number more than its warmed one. Since that arm carries the lowest ratio at every
+section, the spread of ratios across arms narrows: 160.7 to 113.0 at KP 60.0 and
+3.803 to 2.890 at KP 58.8. **Production's own climate ratios move by 4.6 % or
+less**, so section 12.2's numbers stand.
+
+**What this does not license.** After the update the span is still 94 at KP 58.8
+historically and 1.6e5 at KP 60.0. The constraint takes a factor of about two off
+a bracket spanning two to five orders of magnitude: it changes the number, not
+the character of the limitation. **Section 12.3 stands** — annualisation does not
+average the bracket away, and neither does the survival evidence.
+
+**Two riders.** First, `trace_breach_times` was exempted from the settings gate
+for cost (5902.2 s on against 65.5 s off on the worst arm, a factor of 90) and
+proved unable to reach the result by bit-identity on that same arm; the note's
+Part 1a carries the argument and the measurement. Second, at KP 58.8 and KP 60.0
+the upward arm keeps 34 470 and 13 119 rows, **below the 50 % headroom floor**, so
+those two posterior curves carry degraded tail resolution. The direction is
+unaffected, since the arm can only fall further, but the two most heavily
+narrowed cells are the two carrying that caveat.
