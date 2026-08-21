@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-22T14:46:32",
+  "generated": "2026-08-21T20:30:38",
   "adr": "ADR-0042",
   "canonical_event": "HPB_m064_1987",
   "n_mc": 10000,
@@ -8,6 +8,7 @@
   "scenario_labels_identical_curves": true,
   "scour_k_conversion_primary": "usace (0.3048/47.8803)",
   "scour_k_conversion_companion": "script (0.3048/0.45359237)",
+  "overflow_no_rating_error_companion": "paper Eq. (10) stage-rating error zeroed; same node seed as the primary overflow draws (crest and u_c are common random numbers)",
   "nodes": {
     "Satsunai_KP3.2": {
       "h_base_m_msl": 32.584776254806066,
@@ -19,6 +20,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.3748,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP3.4": {
@@ -31,6 +33,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.3313,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP3.6": {
@@ -43,6 +46,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.3409,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP3.8": {
@@ -55,6 +59,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.3878,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP4": {
@@ -67,6 +72,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.325,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP4.2": {
@@ -79,6 +85,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.3388,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP4.4": {
@@ -91,6 +98,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.2805,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP4.6": {
@@ -103,6 +111,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.2577,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP4.8": {
@@ -115,6 +124,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.2699,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP5": {
@@ -127,6 +137,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.2246,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP5.2": {
@@ -139,6 +150,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.2431,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP5.4": {
@@ -151,6 +163,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.2426,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP5.6": {
@@ -163,6 +176,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.2335,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP5.8": {
@@ -175,6 +189,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.2291,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP6": {
@@ -187,6 +202,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.2128,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP6.2": {
@@ -199,6 +215,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.1753,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP6.4": {
@@ -211,6 +228,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.1628,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP6.6": {
@@ -223,6 +241,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.1647,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP6.8": {
@@ -235,6 +254,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.4148,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP7": {
@@ -247,6 +267,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.5223,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP7.2": {
@@ -259,6 +280,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.4279,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP7.4": {
@@ -271,6 +293,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.4449,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP7.6": {
@@ -283,6 +306,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.4578,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP7.8": {
@@ -295,6 +319,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.4554,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP8": {
@@ -307,6 +332,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.4805,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP8.2": {
@@ -319,6 +345,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.4623,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP8.4": {
@@ -331,6 +358,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.4531,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP8.6": {
@@ -343,6 +371,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.4487,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP8.8": {
@@ -355,6 +384,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.4485,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP9": {
@@ -367,6 +397,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.3508,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP9.2": {
@@ -379,6 +410,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.4635,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP9.4": {
@@ -391,6 +423,7 @@
       "max_p_overflow": 0.9996,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.5723,
+      "max_p_overflow_no_rating_error": 0.9999,
       "discharge_proxied_from": null
     },
     "Satsunai_KP9.6": {
@@ -403,6 +436,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.5898,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP9.8": {
@@ -415,6 +449,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.5612,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP10": {
@@ -427,6 +462,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.5935,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP10.2": {
@@ -439,6 +475,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.4705,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP10.4": {
@@ -451,6 +488,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.4994,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP10.6": {
@@ -463,6 +501,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.4745,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP10.8": {
@@ -475,6 +514,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.1764,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP11": {
@@ -487,6 +527,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.2354,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP11.2": {
@@ -499,6 +540,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.4918,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP11.4": {
@@ -511,6 +553,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.469,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP11.6": {
@@ -523,6 +566,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.4932,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP11.8": {
@@ -535,6 +579,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.4724,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP12": {
@@ -547,6 +592,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.4936,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP12.2": {
@@ -559,6 +605,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.2771,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP12.4": {
@@ -571,6 +618,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.3416,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP12.6": {
@@ -583,6 +631,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.4298,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP12.8": {
@@ -595,6 +644,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.1948,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP13": {
@@ -607,6 +657,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.2975,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP13.2": {
@@ -619,6 +670,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.3438,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP13.4": {
@@ -631,6 +683,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.3309,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP13.6": {
@@ -643,6 +696,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.477,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP13.8": {
@@ -655,6 +709,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.5093,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP14": {
@@ -667,6 +722,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.5182,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP14.2": {
@@ -679,6 +735,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.5419,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP14.4": {
@@ -691,6 +748,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.465,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP14.6": {
@@ -703,6 +761,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.473,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP14.8": {
@@ -715,6 +774,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.4341,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP15": {
@@ -727,6 +787,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.3757,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP15.2": {
@@ -739,6 +800,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.3287,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP15.4": {
@@ -751,6 +813,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.3223,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP15.6": {
@@ -763,6 +826,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.4724,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP15.8": {
@@ -775,6 +839,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.4307,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP16": {
@@ -787,6 +852,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.3672,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP16.2": {
@@ -799,6 +865,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.2463,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP16.4": {
@@ -811,6 +878,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.7929,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Satsunai_KP16.6": {
@@ -823,6 +891,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.8539,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP53.8": {
@@ -835,6 +904,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.0822,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP54": {
@@ -847,6 +917,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.1099,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP54.2": {
@@ -859,6 +930,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.0815,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP54.4": {
@@ -871,6 +943,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.0844,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP54.6": {
@@ -883,6 +956,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.0832,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP54.8": {
@@ -895,6 +969,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.0901,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP55": {
@@ -907,6 +982,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.0887,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP55.2": {
@@ -919,6 +995,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.0911,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP55.4": {
@@ -931,6 +1008,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.0907,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP55.6": {
@@ -943,6 +1021,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.0862,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP55.8": {
@@ -955,6 +1034,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.0864,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP56": {
@@ -967,6 +1047,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.0943,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP56.2": {
@@ -979,6 +1060,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.1104,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP56.4": {
@@ -991,6 +1073,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.0953,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP56.6": {
@@ -1003,6 +1086,7 @@
       "max_p_overflow": 0.9998,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.0916,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP56.8": {
@@ -1015,6 +1099,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.0888,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP57": {
@@ -1027,6 +1112,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.0912,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP57.2": {
@@ -1039,6 +1125,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.0785,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP57.4": {
@@ -1051,6 +1138,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.1004,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP57.6": {
@@ -1063,6 +1151,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.1116,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP57.8": {
@@ -1075,6 +1164,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.0816,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP58": {
@@ -1087,6 +1177,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.0748,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP58.2": {
@@ -1099,6 +1190,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.0678,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP58.4": {
@@ -1111,6 +1203,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.0661,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP58.6": {
@@ -1123,6 +1216,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.0672,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP58.8": {
@@ -1135,6 +1229,7 @@
       "max_p_overflow": 0.9776,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.1357,
+      "max_p_overflow_no_rating_error": 0.9862,
       "discharge_proxied_from": null
     },
     "Tokachi_KP59": {
@@ -1147,6 +1242,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.1229,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP59.2": {
@@ -1159,6 +1255,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.1086,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP59.4": {
@@ -1171,6 +1268,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.1165,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP59.6": {
@@ -1183,6 +1281,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.0898,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP59.8": {
@@ -1195,6 +1294,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.0976,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP60": {
@@ -1207,6 +1307,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.072,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP60.2": {
@@ -1219,6 +1320,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.0681,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP60.4": {
@@ -1231,6 +1333,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.1436,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP60.6": {
@@ -1243,6 +1346,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.1382,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP60.8": {
@@ -1255,6 +1359,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.125,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP61": {
@@ -1267,6 +1372,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.1077,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP61.2": {
@@ -1279,6 +1385,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.1474,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP61.4": {
@@ -1291,6 +1398,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.1193,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP61.6": {
@@ -1303,6 +1411,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.1571,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP61.8": {
@@ -1315,6 +1424,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.1174,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": null
     },
     "Tokachi_KP62": {
@@ -1327,6 +1437,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.1463,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": "KP61.8"
     },
     "Tokachi_KP62.2": {
@@ -1339,6 +1450,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.1115,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": "KP61.8"
     },
     "Tokachi_KP62.4": {
@@ -1351,6 +1463,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.086,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": "KP61.8"
     },
     "Tokachi_KP62.6": {
@@ -1363,6 +1476,7 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.1409,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": "KP61.8"
     },
     "Tokachi_KP62.8": {
@@ -1375,8 +1489,9 @@
       "max_p_overflow": 1.0,
       "max_p_scour": 0.0,
       "max_p_scour_script_k": 0.1444,
+      "max_p_overflow_no_rating_error": 1.0,
       "discharge_proxied_from": "KP61.8"
     }
   },
-  "runtime_s": 897.3
+  "runtime_s": 3052.3
 }

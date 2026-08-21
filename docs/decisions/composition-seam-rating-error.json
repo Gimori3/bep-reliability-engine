@@ -1,0 +1,314 @@
+{
+  "study": "composition-seam-rating-error",
+  "date": "2026-08-21",
+  "description": "Direct measurement of the composition seam between the surface curves, whose argument carries the Eq. (10) stage-rating error, and the piping curve, whose argument is the realized stage. The arm suppresses the rating-error term inside the overflow model and recomposes; it is a labeled sensitivity companion and does not change the production deliverable.",
+  "configuration": {
+    "d70": "matrix",
+    "bep_source": "posterior",
+    "lambda_ac_m": 250.0,
+    "surface_arms": {
+      "primary": "uemura_csv",
+      "no_rating_error": "uemura_csv+overflow_no_rating_error"
+    },
+    "companion_file": "data/processed/uemura_surface_curves/uemura_surface_curves_overflow_no_rating_error.csv"
+  },
+  "gate": {
+    "status": "reproduces_production",
+    "checked_rows": 8,
+    "failures": []
+  },
+  "rating_error_inputs": {
+    "Satsunai": [
+      {
+        "wl_err_mu_m": -0.051,
+        "wl_err_sigma_m": 0.283
+      }
+    ],
+    "Tokachi": [
+      {
+        "wl_err_mu_m": -0.16,
+        "wl_err_sigma_m": 0.294
+      }
+    ]
+  },
+  "sections": [
+    {
+      "kp": 57.4,
+      "scenario": "historical",
+      "primary": {
+        "p_annual_system": 0.0007529504488451719,
+        "p_annual_bep": 0.0007529504488451719,
+        "share_bep": 1.0,
+        "p_annual_overflow": 0.0,
+        "share_overflow": 0.0,
+        "p_annual_fluvial_scour": 0.0,
+        "share_fluvial_scour": 0.0
+      },
+      "no_rating_error": {
+        "p_annual_system": 0.0007529504488451719,
+        "p_annual_bep": 0.0007529504488451719,
+        "share_bep": 1.0,
+        "p_annual_overflow": 0.0,
+        "share_overflow": 0.0,
+        "p_annual_fluvial_scour": 0.0,
+        "share_fluvial_scour": 0.0
+      },
+      "displacement": {
+        "p_annual_system": 1.0,
+        "p_annual_overflow": null,
+        "p_annual_bep": 1.0,
+        "delta_share_bep": 0.0,
+        "delta_share_overflow": 0.0
+      }
+    },
+    {
+      "kp": 58.8,
+      "scenario": "historical",
+      "primary": {
+        "p_annual_system": 0.007419538025861581,
+        "p_annual_bep": 0.007337441136926019,
+        "share_bep": 0.9741019217609156,
+        "p_annual_overflow": 0.00019507776382913884,
+        "share_overflow": 0.025898078239084365,
+        "p_annual_fluvial_scour": 0.0,
+        "share_fluvial_scour": 0.0
+      },
+      "no_rating_error": {
+        "p_annual_system": 0.00743647208729383,
+        "p_annual_bep": 0.007337441136926019,
+        "share_bep": 0.9685330228687288,
+        "p_annual_overflow": 0.0002383884565689129,
+        "share_overflow": 0.03146697713127124,
+        "p_annual_fluvial_scour": 0.0,
+        "share_fluvial_scour": 0.0
+      },
+      "displacement": {
+        "p_annual_system": 1.002282360623158,
+        "p_annual_overflow": 1.2220175784755676,
+        "p_annual_bep": 1.0,
+        "delta_share_bep": -0.005568898892186813,
+        "delta_share_overflow": 0.005568898892186872
+      }
+    },
+    {
+      "kp": 60.0,
+      "scenario": "historical",
+      "primary": {
+        "p_annual_system": 0.0018017845066762934,
+        "p_annual_bep": 0.0018017845066762934,
+        "share_bep": 1.0,
+        "p_annual_overflow": 0.0,
+        "share_overflow": 0.0,
+        "p_annual_fluvial_scour": 0.0,
+        "share_fluvial_scour": 0.0
+      },
+      "no_rating_error": {
+        "p_annual_system": 0.0018017845066762934,
+        "p_annual_bep": 0.0018017845066762934,
+        "share_bep": 1.0,
+        "p_annual_overflow": 0.0,
+        "share_overflow": 0.0,
+        "p_annual_fluvial_scour": 0.0,
+        "share_fluvial_scour": 0.0
+      },
+      "displacement": {
+        "p_annual_system": 1.0,
+        "p_annual_overflow": null,
+        "p_annual_bep": 1.0,
+        "delta_share_bep": 0.0,
+        "delta_share_overflow": 0.0
+      }
+    },
+    {
+      "kp": 62.0,
+      "scenario": "historical",
+      "primary": {
+        "p_annual_system": 0.001006046005485643,
+        "p_annual_bep": 0.0008580186169895641,
+        "share_bep": 0.8115239173288071,
+        "p_annual_overflow": 0.00019927445677934933,
+        "share_overflow": 0.18847608267119284,
+        "p_annual_fluvial_scour": 0.0,
+        "share_fluvial_scour": 0.0
+      },
+      "no_rating_error": {
+        "p_annual_system": 0.001039928747289801,
+        "p_annual_bep": 0.0008580186169895641,
+        "share_bep": 0.7732151895120498,
+        "p_annual_overflow": 0.0002516577430041278,
+        "share_overflow": 0.22678481048795018,
+        "p_annual_fluvial_scour": 0.0,
+        "share_fluvial_scour": 0.0
+      },
+      "displacement": {
+        "p_annual_system": 1.0336791176739497,
+        "p_annual_overflow": 1.2628700490338354,
+        "p_annual_bep": 1.0,
+        "delta_share_bep": -0.038308727816757315,
+        "delta_share_overflow": 0.03830872781675734
+      }
+    },
+    {
+      "kp": 57.4,
+      "scenario": "+4K",
+      "primary": {
+        "p_annual_system": 0.009531136967007517,
+        "p_annual_bep": 0.009483949453045582,
+        "share_bep": 0.9123231549452225,
+        "p_annual_overflow": 0.0009114344650738865,
+        "share_overflow": 0.0876768450547775,
+        "p_annual_fluvial_scour": 0.0,
+        "share_fluvial_scour": 0.0
+      },
+      "no_rating_error": {
+        "p_annual_system": 0.009542567556779201,
+        "p_annual_bep": 0.009483949453045582,
+        "share_bep": 0.8935211473815936,
+        "p_annual_overflow": 0.0011301803645168643,
+        "share_overflow": 0.10647885261840638,
+        "p_annual_fluvial_scour": 0.0,
+        "share_fluvial_scour": 0.0
+      },
+      "displacement": {
+        "p_annual_system": 1.0011992892150487,
+        "p_annual_overflow": 1.24000178600361,
+        "p_annual_bep": 1.0,
+        "delta_share_bep": -0.01880200756362893,
+        "delta_share_overflow": 0.018802007563628875
+      }
+    },
+    {
+      "kp": 58.8,
+      "scenario": "+4K",
+      "primary": {
+        "p_annual_system": 0.0409128184765685,
+        "p_annual_bep": 0.04044800138011904,
+        "share_bep": 0.9411466886382553,
+        "p_annual_overflow": 0.0025293600327370483,
+        "share_overflow": 0.058853311361744626,
+        "p_annual_fluvial_scour": 0.0,
+        "share_fluvial_scour": 0.0
+      },
+      "no_rating_error": {
+        "p_annual_system": 0.04101553620917919,
+        "p_annual_bep": 0.04044800138011904,
+        "share_bep": 0.9321197984228776,
+        "p_annual_overflow": 0.002945563962614807,
+        "share_overflow": 0.06788020157712242,
+        "p_annual_fluvial_scour": 0.0,
+        "share_fluvial_scour": 0.0
+      },
+      "displacement": {
+        "p_annual_system": 1.0025106491421392,
+        "p_annual_overflow": 1.1645491051059977,
+        "p_annual_bep": 1.0,
+        "delta_share_bep": -0.009026890215377725,
+        "delta_share_overflow": 0.009026890215377795
+      }
+    },
+    {
+      "kp": 60.0,
+      "scenario": "+4K",
+      "primary": {
+        "p_annual_system": 0.014175099867898966,
+        "p_annual_bep": 0.014172922003054545,
+        "share_bep": 0.9983772493128567,
+        "p_annual_overflow": 2.3036501417792023e-05,
+        "share_overflow": 0.0016227506871434243,
+        "p_annual_fluvial_scour": 0.0,
+        "share_fluvial_scour": 0.0
+      },
+      "no_rating_error": {
+        "p_annual_system": 0.014172922003054545,
+        "p_annual_bep": 0.014172922003054545,
+        "share_bep": 1.0,
+        "p_annual_overflow": 0.0,
+        "share_overflow": 0.0,
+        "p_annual_fluvial_scour": 0.0,
+        "share_fluvial_scour": 0.0
+      },
+      "displacement": {
+        "p_annual_system": 0.9998463598235838,
+        "p_annual_overflow": 0.0,
+        "p_annual_bep": 1.0,
+        "delta_share_bep": 0.0016227506871433484,
+        "delta_share_overflow": -0.0016227506871434243
+      }
+    },
+    {
+      "kp": 62.0,
+      "scenario": "+4K",
+      "primary": {
+        "p_annual_system": 0.012777595238792624,
+        "p_annual_bep": 0.008403164105895132,
+        "share_bep": 0.500336129664227,
+        "p_annual_overflow": 0.008391873485202778,
+        "share_overflow": 0.49966387033577286,
+        "p_annual_fluvial_scour": 0.0,
+        "share_fluvial_scour": 0.0
+      },
+      "no_rating_error": {
+        "p_annual_system": 0.013677986790903544,
+        "p_annual_bep": 0.008403164105895132,
+        "share_bep": 0.4616521023405714,
+        "p_annual_overflow": 0.009799209636780742,
+        "share_overflow": 0.5383478976594287,
+        "p_annual_fluvial_scour": 0.0,
+        "share_fluvial_scour": 0.0
+      },
+      "displacement": {
+        "p_annual_system": 1.0704664324768516,
+        "p_annual_overflow": 1.1677022602949736,
+        "p_annual_bep": 1.0,
+        "delta_share_bep": -0.03868402732365561,
+        "delta_share_overflow": 0.038684027323655834
+      }
+    }
+  ],
+  "kp62_warming_crossing": {
+    "primary": {
+      "p_annual_bep": 0.008403164105895132,
+      "p_annual_overflow": 0.008391873485202778,
+      "margin_bep_over_overflow": 1.0013454231301584,
+      "dominant": "bep",
+      "share_bep": 0.500336129664227,
+      "share_overflow": 0.49966387033577286
+    },
+    "no_rating_error": {
+      "p_annual_bep": 0.008403164105895132,
+      "p_annual_overflow": 0.009799209636780742,
+      "margin_bep_over_overflow": 0.8575348846864509,
+      "dominant": "overflow",
+      "share_bep": 0.4616521023405714,
+      "share_overflow": 0.5383478976594287
+    },
+    "survives": false
+  },
+  "reach_dominance_counts": {
+    "primary": {
+      "historical": {
+        "no mechanism loaded": 79,
+        "overflow": 31,
+        "bep": 4
+      },
+      "+4K": {
+        "overflow": 109,
+        "bep": 4,
+        "no mechanism loaded": 1
+      }
+    },
+    "no_rating_error": {
+      "historical": {
+        "no mechanism loaded": 102,
+        "overflow": 8,
+        "bep": 4
+      },
+      "+4K": {
+        "overflow": 69,
+        "bep": 3,
+        "no mechanism loaded": 42
+      }
+    }
+  },
+  "runtime_s": 15.1
+}

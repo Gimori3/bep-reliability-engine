@@ -290,6 +290,8 @@ def compute_critical_head(
     gamma_p_sub_kn_m3: float = GAMMA_P_SUB_DEFAULT,
     theta_repose_rad: float = THETA_REPOSE_DEFAULT,
     relative_density: float = D_R_MEAN,
+    *,
+    critical_length_factor: float | None = None,
 ) -> SellmeijerResult:
     """Critical head H_c and critical pipe length l_c, one realization.
 
@@ -335,6 +337,13 @@ def compute_critical_head(
         value equals the regression-mean denominator D_r,m, so the ratio is
         1 — the Pol base case); the run value is config-owned
         (``relative_density_insitu``) and threaded here by M8.
+    critical_length_factor : float, optional
+        Keyword-only multiplicative override on the Eq. (13) critical pipe
+        length (ADR-0049), forwarded to
+        :func:`compute_critical_pipe_length`. ``None`` (default) is the
+        published formula, bit-identical to pre-ADR-0049 behaviour. H_c is
+        untouched either way: l_c is scale-independent and enters only the
+        M7 equilibrium curve, so this knob never reaches the static branch.
 
     Returns
     -------
@@ -388,7 +397,9 @@ def compute_critical_head(
             f"alpha_exponent={alpha_exponent}; re-bound the priors "
             "(spec section 12, failure mode 2)."
         )
-    l_c = compute_critical_pipe_length(D_aq_m, seepage_length_m)
+    l_c = compute_critical_pipe_length(
+        D_aq_m, seepage_length_m, critical_length_factor=critical_length_factor
+    )
     return SellmeijerResult(H_c=float(h_c), l_c=float(l_c))
 
 
@@ -399,6 +410,8 @@ def compute_critical_head_vectorized(
     gamma_p_sub_kn_m3: float = GAMMA_P_SUB_DEFAULT,
     theta_repose_rad: float = THETA_REPOSE_DEFAULT,
     relative_density: float = D_R_MEAN,
+    *,
+    critical_length_factor: float | None = None,
 ) -> SellmeijerResult:
     """Critical head H_c and critical pipe length l_c for all N
     realizations at once.
@@ -430,6 +443,11 @@ def compute_critical_head_vectorized(
     relative_density : float, optional
         In-situ relative density D_r [-] for F_r (see
         :func:`compute_critical_head`); default ``D_R_MEAN`` (ratio term 1).
+    critical_length_factor : float, optional
+        Keyword-only multiplicative override on the Eq. (13) critical pipe
+        length (ADR-0049); see :func:`compute_critical_head`. ``None``
+        (default) is the published formula, bit-identical to pre-ADR-0049
+        behaviour.
 
     Returns
     -------
@@ -492,13 +510,17 @@ def compute_critical_head_vectorized(
             f"{invalid_rows}; re-bound the priors at the sampler stage "
             "(spec section 12, failure mode 2)."
         )
-    l_c = compute_critical_pipe_length(D_aq_m, seepage_length_m)
+    l_c = compute_critical_pipe_length(
+        D_aq_m, seepage_length_m, critical_length_factor=critical_length_factor
+    )
     return SellmeijerResult(H_c=h_c, l_c=l_c)
 
 
 def compute_critical_pipe_length(
     D_aq: float | npt.NDArray[np.float64],
     L: float,
+    *,
+    critical_length_factor: float | None = None,
 ) -> float | npt.NDArray[np.float64]:
     """Critical pipe length l_c per Pol et al. (2024, SIE) Eq. (13).
 
@@ -515,12 +537,28 @@ def compute_critical_pipe_length(
         Aquifer (sand layer) thickness [m].
     L : float
         Seepage length across the structure [m].
+    critical_length_factor : float, optional
+        Keyword-only multiplicative override on Eq. (13) (ADR-0049).
+        ``None`` (the default) returns the published formula unchanged and
+        is **bit-identical** to pre-ADR-0049 behaviour; a positive float
+        scales l_c for the Eq. (13) form-uncertainty bracket. The formula's
+        own stated basis is *2D* simulations, while the one 3D hole-exit
+        critical length published alongside it sits well above it, so the
+        bracket is a model-form band on a fitted anchor, not a change to
+        the production curve.
 
     Returns
     -------
     float or ndarray
-        Critical pipe length l_c [m], bounded by 0 < l_c < 0.5 * L.
-        Broadcasts over ``D_aq``.
+        Critical pipe length l_c [m], bounded by 0 < l_c < 0.5 * L at the
+        unscaled default. Broadcasts over ``D_aq``.
+
+    Raises
+    ------
+    ValueError
+        If ``critical_length_factor`` is not strictly positive (a
+        non-positive l_c has no rising H_eq branch and would divide by
+        zero in the M7 equilibrium curve).
 
     Notes
     -----
@@ -530,7 +568,16 @@ def compute_critical_pipe_length(
     cheap, and broadcasts through ``np.tanh`` unchanged, so no separate
     vectorized variant is needed.
     """
-    return 0.5 * L * np.tanh(2.0 * D_aq / L)
+    l_c = 0.5 * L * np.tanh(2.0 * D_aq / L)
+    if critical_length_factor is None:
+        return l_c
+    factor = float(critical_length_factor)
+    if not factor > 0.0:
+        raise ValueError(
+            "critical_length_factor must be strictly positive (got "
+            f"{critical_length_factor!r}); l_c <= 0 has no rising H_eq branch."
+        )
+    return l_c * factor
 
 
 if __name__ == "__main__":

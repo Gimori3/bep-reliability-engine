@@ -20,6 +20,13 @@ Outputs under ``data/processed/uemura_surface_curves/``:
   negligible at every node; the as-received script factor
   ``0.3048/0.45359237`` — ~105.6x larger — is retained here as a bounded
   sensitivity companion),
+* ``uemura_surface_curves_overflow_no_rating_error.csv`` — overflow companion
+  with the paper Eq. (10) stage-rating error suppressed, which is the
+  composition-seam sensitivity: the primary curve's argument is the stage a
+  rating relation would report, this one's is the realized stage at the levee
+  (composition-seam study, 2026-08-21). Same node seed as the primary overflow
+  draws, so the crest and turf-velocity draws are common random numbers and
+  only the term under test differs,
 * ``generation_metadata.json`` + ``provenance.md``.
 
 Every output is validated through ``load_surface_curves`` (the loader IS the
@@ -130,6 +137,7 @@ def main() -> None:
     rows_primary: list[tuple] = []
     rows_sine: list[tuple] = []
     rows_script: list[tuple] = []
+    rows_no_rating: list[tuple] = []
     node_meta: dict[str, dict] = {}
 
     for node_index, ((river, kp), seg) in enumerate(sorted(inputs.items())):
@@ -166,6 +174,18 @@ def main() -> None:
             np.random.SeedSequence((SEED_ROOT, node_index, MECH_INDEX["overflow"]))
         )
         of_draws = draw_overflow(rng_of, seg, N_MC)
+        # Composition-seam companion: identical draw stream, rating-error term
+        # zeroed. A FRESH generator on the SAME seed, so crest and u_c are the
+        # very same draws as the primary arm and the only difference between
+        # the two curve sets is the term under test.
+        of_draws_no_rating = draw_overflow(
+            np.random.default_rng(
+                np.random.SeedSequence((SEED_ROOT, node_index, MECH_INDEX["overflow"]))
+            ),
+            seg,
+            N_MC,
+            include_rating_error=False,
+        )
         # Primary scour uses the dimensionally-correct USACE stress-based
         # conversion (ADR-0042 amendment 2026-07-21); the as-received script
         # conversion is drawn alongside for the labeled sensitivity companion.
@@ -192,14 +212,21 @@ def main() -> None:
 
         # Cheap exact-zero guards (common draws make these provable zeros).
         of_zero_below = float(np.min(of_draws.crest_m_msl) - np.max(of_draws.wl_err_m))
+        of_zero_below_no_rating = float(np.min(of_draws_no_rating.crest_m_msl))
 
-        p_of, p_sc, p_sc_script = [], [], []
+        p_of, p_sc, p_sc_script, p_of_no_rating = [], [], [], []
         for level in levels:
             h = scaled(float(level))
             if float(np.max(h)) <= of_zero_below:
                 p_of.append(0.0)
             else:
                 p_of.append(overflow_failure_fraction(h, dt_s, seg, of_draws))
+            if float(np.max(h)) <= of_zero_below_no_rating:
+                p_of_no_rating.append(0.0)
+            else:
+                p_of_no_rating.append(
+                    overflow_failure_fraction(h, dt_s, seg, of_draws_no_rating)
+                )
             if level <= seg.floodplain_m_msl or crest_mean_never_loads(seg, h):
                 p_sc.append(0.0)
                 p_sc_script.append(0.0)
@@ -240,6 +267,8 @@ def main() -> None:
                 rows_script.append(
                     (river, seg.bank, kp, "fluvial_scour", scen, level, p)
                 )
+            for level, p in zip(levels, p_of_no_rating):
+                rows_no_rating.append((river, seg.bank, kp, "overflow", scen, level, p))
 
         node_meta[f"{river}_KP{kp:g}"] = {
             "h_base_m_msl": h_base,
@@ -248,6 +277,7 @@ def main() -> None:
             "max_p_overflow": max(p_of),
             "max_p_scour": max(p_sc),  # USACE-corrected primary
             "max_p_scour_script_k": max(p_sc_script),  # as-received companion
+            "max_p_overflow_no_rating_error": max(p_of_no_rating),
             "discharge_proxied_from": proxied,
         }
         if node_index % 10 == 0:
@@ -274,6 +304,7 @@ def main() -> None:
         ),
         ("uemura_surface_curves_overflow_sine30h.csv", rows_sine),
         ("uemura_surface_curves_scour_script_k.csv", rows_script),
+        ("uemura_surface_curves_overflow_no_rating_error.csv", rows_no_rating),
     ):
         path = OUT_DIR / name
         with open(path, "w", encoding="utf-8", newline="") as handle:
@@ -295,6 +326,10 @@ def main() -> None:
         "scenario_labels_identical_curves": True,
         "scour_k_conversion_primary": "usace (0.3048/47.8803)",
         "scour_k_conversion_companion": "script (0.3048/0.45359237)",
+        "overflow_no_rating_error_companion": (
+            "paper Eq. (10) stage-rating error zeroed; same node seed as the "
+            "primary overflow draws (crest and u_c are common random numbers)"
+        ),
         "nodes": node_meta,
         "runtime_s": round(time.time() - t0, 1),
     }
@@ -338,6 +373,14 @@ and the committed d4PDF HPB band workbooks via the verbatim M3 chain.
   stress-based conversion (0.3048/47.8803), under which fluvial scour is
   negligible at every node; this companion carries the as-received script
   factor (0.3048/0.45359237, ~105.6x larger) as a bounded sensitivity.
+* `uemura_surface_curves_overflow_no_rating_error.csv` — overflow companion
+  with the paper Eq. (10) stage-rating error suppressed
+  (`draw_overflow(..., include_rating_error=False)`), the composition-seam
+  sensitivity of the 2026-08-21 study. The primary curve's argument is the
+  stage a rating relation would report; this one's is the realized stage at
+  the levee, which is what the piping branch's argument already is. Drawn on
+  the SAME node seed as the primary overflow set, so the crest and turf
+  critical-velocity draws are identical and only the term under test moves.
 
 Raw drop files were read-only inputs. Regeneration:
 `python scripts/generate_uemura_surface_curves.py`.

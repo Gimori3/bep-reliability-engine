@@ -397,6 +397,7 @@ def replay_event(
         foreland_open=config.foreland_treatment == "open_entry",
         progression_backend=backend,
         model_factor_samples=run.model_factor_samples,
+        critical_length_factor=config.critical_length_factor,
     )
     return EventReplay(
         record=replay_rec,
@@ -457,6 +458,7 @@ def breach_times_for_rows(
                 if run.model_factor_samples is None
                 else float(run.model_factor_samples[j])
             ),
+            critical_length_factor=config.critical_length_factor,
         )
         trajectory = result.l_trajectory
         if trajectory is None:

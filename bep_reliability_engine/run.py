@@ -270,6 +270,12 @@ class _EvalSettings:
         (baseline: no factor, bit-identical to pre-ADR-0045 behaviour).
         Drawn once in the main process from ``config.sellmeijer_model_factor``
         when that block is present and enabled.
+    critical_length_factor : float or None
+        ADR-0049 multiplicative bracket on the Eq. (13) critical pipe length
+        l_c, from ``config.critical_length_factor``. None (production, and
+        every pre-ADR-0049 config) is the published formula, bit-identical to
+        prior behaviour. Transient-only: l_c enters nothing but the M7
+        equilibrium curve, so the static column is unchanged by construction.
     """
 
     l_ini_m: float
@@ -281,6 +287,7 @@ class _EvalSettings:
     foreland_open: bool
     progression_backend: str
     model_factor_samples: NDArray[np.float64] | None = None
+    critical_length_factor: float | None = None
 
 
 # ============================================================================
@@ -469,6 +476,7 @@ def _evaluate_level(
         foreland_open=settings.foreland_open,
         progression_backend=settings.progression_backend,
         model_factor_samples=settings.model_factor_samples,
+        critical_length_factor=settings.critical_length_factor,
     )
     return level_index, col_static, col_trans
 
@@ -1174,6 +1182,7 @@ def run_fragility_analysis(
         foreland_open=config.foreland_treatment == "open_entry",
         progression_backend=config.timestepper.progression_backend,
         model_factor_samples=model_factor_samples,
+        critical_length_factor=config.critical_length_factor,
     )
     grid = np.asarray(config.mc.conditioning_grid, dtype=np.float64)
     n_levels = int(grid.size)

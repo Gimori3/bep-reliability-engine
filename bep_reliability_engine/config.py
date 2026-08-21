@@ -904,6 +904,21 @@ class Config(_StrictModel):
             "decomposition (static keeps alpha_exponent, transient uses this)."
         ),
     )
+    critical_length_factor: float | None = Field(
+        default=None,
+        gt=0.0,
+        description=(
+            "ADR-0049 multiplicative bracket on the Pol SIE 2024 Eq. (13) "
+            "critical pipe length l_c. None (production, and every "
+            "pre-ADR-0049 config) is the published formula, bit-identical to "
+            "prior behaviour; the None case is dropped from to_metadata() so "
+            "config_hash of pre-ADR-0049 snapshots is preserved. l_c enters "
+            "only the M7 equilibrium curve, so the knob is transient-only and "
+            "the static comparator is exactly invariant under it. Companion "
+            "sensitivity runs only — production configs never carry it set."
+        ),
+    )
+
     seepage_length_cov: float | None = Field(
         default=None,
         gt=0.0,
@@ -1080,8 +1095,9 @@ class Config(_StrictModel):
             ``theta_repose_deg`` as needed.
 
             ``length_effect`` is dropped when None (ADR-0037),
-            ``sellmeijer_model_factor`` is dropped when None (ADR-0045), and
-            ``prior_mean_scenario`` is dropped when None (ADR-0048):
+            ``sellmeijer_model_factor`` is dropped when None (ADR-0045),
+            ``prior_mean_scenario`` is dropped when None (ADR-0048) and
+            ``critical_length_factor`` is dropped when None (ADR-0049):
             pre-ADR snapshots reconstruct to the None defaults, and dropping
             the keys keeps their :meth:`config_hash` byte-identical to what
             their persisted runs recorded — the Phase 2 replay refuses hash
@@ -1094,6 +1110,8 @@ class Config(_StrictModel):
             snapshot.pop("sellmeijer_model_factor", None)
         if snapshot.get("prior_mean_scenario") is None:
             snapshot.pop("prior_mean_scenario", None)
+        if snapshot.get("critical_length_factor") is None:
+            snapshot.pop("critical_length_factor", None)
         return snapshot
 
     def config_hash(self) -> str:

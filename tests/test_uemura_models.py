@@ -292,3 +292,96 @@ def test_primary_surface_curves_use_corrected_scour_conversion():
     assert any(
         np.any(c.p_f > 0.0) for c in csc
     ), "the as-received script companion must carry nonzero scour"
+
+
+# ---------------------------------------------------------------------------
+# The composition seam: draw_overflow(include_rating_error=False)
+# ---------------------------------------------------------------------------
+
+
+def test_rating_error_default_is_bit_identical_to_the_published_model():
+    """The added keyword must not disturb Uemura's model as published."""
+    seg = _example_inputs()
+    a = draw_overflow(np.random.default_rng(11), seg, 500)
+    b = draw_overflow(np.random.default_rng(11), seg, 500, include_rating_error=True)
+    assert np.array_equal(a.wl_err_m, b.wl_err_m)
+    assert np.array_equal(a.crest_m_msl, b.crest_m_msl)
+    assert np.array_equal(a.u_c_mps, b.u_c_mps)
+
+
+def test_suppressing_the_rating_error_keeps_every_other_draw_common():
+    """The draw is taken and then zeroed, never skipped.
+
+    That is what makes the two arms of the composition-seam study a paired
+    comparison: crest and turf critical velocity come from the same random
+    stream, so the only difference between the arms is the term under test.
+    Skipping the draw instead would shift the stream and confound the two.
+    """
+    seg = _example_inputs()
+    primary = draw_overflow(np.random.default_rng(23), seg, 500)
+    arm = draw_overflow(np.random.default_rng(23), seg, 500, include_rating_error=False)
+    assert np.all(arm.wl_err_m == 0.0)
+    assert np.array_equal(primary.crest_m_msl, arm.crest_m_msl)
+    assert np.array_equal(primary.u_c_mps, arm.u_c_mps)
+
+
+def test_suppressing_the_rating_error_lifts_the_effective_water_level():
+    """Direction check, from the sign of the measured rating-error mean.
+
+    Both gauges carry a NEGATIVE mean rating error (ADR-0042 decision 6 as
+    amended: -0.160 m on the Tokachi, -0.051 m on the Satsunai), so the
+    published model evaluates a water level below the conditioning stage.
+    Removing the term therefore raises the effective level and cannot lower
+    the overflow probability at a stage where the mean term is what keeps the
+    crest dry.
+    """
+    seg = _example_inputs(wl_err_mu_m=-0.160, wl_err_sigma_m=0.294)
+    primary = draw_overflow(np.random.default_rng(5), seg, 4000)
+    arm = draw_overflow(np.random.default_rng(5), seg, 4000, include_rating_error=False)
+    stage = np.full(40, seg.crest_design_m_msl + seg.crest_err_mu_m + 0.5)
+    p_primary = overflow_failure_fraction(stage, 3600.0, seg, primary)
+    p_arm = overflow_failure_fraction(stage, 3600.0, seg, arm)
+    assert p_arm > p_primary
+
+
+def test_committed_no_rating_error_companion_differs_from_the_primary():
+    """Drift guard: the companion curve set must exist and must not be a copy.
+
+    The composition-seam study reports a measured displacement; if the
+    companion file were regenerated as a duplicate of the primary overflow
+    curves the study would silently report "no effect".
+    """
+    from system_integration.surface_curves import load_surface_curves
+
+    root = "data/processed/uemura_surface_curves"
+    # The primary set is split per scenario label for the 500 KB hygiene guard;
+    # the companion carries both labels in one file, so both parts are needed
+    # for the lookup below to cover it.
+    primary_curves = [
+        curve
+        for name in ("historical", "plus4K")
+        for curve in load_surface_curves(
+            f"{root}/uemura_surface_curves_{name}.csv"
+        ).curves
+    ]
+    companion = load_surface_curves(
+        f"{root}/uemura_surface_curves_overflow_no_rating_error.csv"
+    )
+    assert all(
+        c.mechanism == "overflow" for c in companion.curves
+    ), "the companion set varies the overflow mechanism only"
+    primary_of = {
+        (c.river, c.kp, c.scenario): c
+        for c in primary_curves
+        if c.mechanism == "overflow"
+    }
+    differing = 0
+    for curve in companion.curves:
+        base = primary_of.get((curve.river, curve.kp, curve.scenario))
+        assert (
+            base is not None
+        ), f"companion node {curve.river} {curve.kp} not in primary"
+        assert np.array_equal(base.stage_m_msl, curve.stage_m_msl)
+        if not np.array_equal(base.p_f, curve.p_f):
+            differing += 1
+    assert differing > 0, "the companion must differ from the primary somewhere"

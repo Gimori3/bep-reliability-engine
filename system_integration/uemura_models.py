@@ -204,11 +204,36 @@ def _positive_normal(
 
 
 def draw_overflow(
-    rng: np.random.Generator, inputs: SegmentSurfaceInputs, n_mc: int
+    rng: np.random.Generator,
+    inputs: SegmentSurfaceInputs,
+    n_mc: int,
+    *,
+    include_rating_error: bool = True,
 ) -> OverflowDraws:
-    """Draw the overflow MC set for one segment."""
+    """Draw the overflow MC set for one segment.
+
+    Parameters
+    ----------
+    include_rating_error : bool, optional
+        ``True`` (default) is Uemura's published model, bit-identical to prior
+        behaviour: the paper Eq. (10) stage-rating error enters as an additive
+        per-draw term on the water level, so the model's argument is the stage
+        a rating relation would report. ``False`` zeroes that term, leaving the
+        argument the realized stage at the levee. That is the axis on which the
+        composition seam with the piping branch sits, and the arm is the
+        labeled sensitivity companion that measures it -- never the primary
+        product.
+
+        The draw is **taken and then zeroed**, never skipped, so the crest and
+        turf-velocity draws that follow keep the same random stream. The two
+        arms are therefore coupled by common random numbers on every input
+        except the one under test.
+    """
+    wl_err = rng.normal(inputs.wl_err_mu_m, inputs.wl_err_sigma_m, size=n_mc)
+    if not include_rating_error:
+        wl_err = np.zeros(n_mc, dtype=np.float64)
     return OverflowDraws(
-        wl_err_m=rng.normal(inputs.wl_err_mu_m, inputs.wl_err_sigma_m, size=n_mc),
+        wl_err_m=wl_err,
         crest_m_msl=inputs.crest_design_m_msl
         + rng.normal(inputs.crest_err_mu_m, inputs.crest_err_sigma_m, size=n_mc),
         u_c_mps=rng.normal(

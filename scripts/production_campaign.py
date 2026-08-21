@@ -1112,6 +1112,18 @@ COMPANION_EXCLUSIONS: dict[str, str] = {
         "ADR-0048 prior-mean companion: OFF in production (decision 3). Same "
         "sidecar-reconstructed hash gate, so unaffected by the re-run."
     ),
+    "scripts/critical_length_bracket_study.py": (
+        "ADR-0049 critical-pipe-length companion: the knob is OFF in "
+        "production and dropped from to_metadata() when None, so it changes "
+        "no config_hash and produces no campaign artifact. It carries its own "
+        "gate, which is STRONGER than anything this stage would apply: it "
+        "re-runs each committed YAML with critical_length_factor=None set "
+        "explicitly and refuses unless BOTH whole failure matrices are "
+        "bit-identical to the persisted sweep. Running it here would add "
+        "twelve full-N sweeps (~2 h) to the campaign to re-derive a gate the "
+        "driver already refuses without. Same substantive ground as the three "
+        "ADR-0045/0046/0048 companion entries above."
+    ),
     "bayesian_reliability_updating/pipeline.py": (
         "not a driver at all -- the shipped Phase 2 package module, which this "
         "campaign already executes as THREE of its own stages (phase2_baseline, "

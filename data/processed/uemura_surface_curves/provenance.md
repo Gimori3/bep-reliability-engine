@@ -24,6 +24,14 @@ and the committed d4PDF HPB band workbooks via the verbatim M3 chain.
   stress-based conversion (0.3048/47.8803), under which fluvial scour is
   negligible at every node; this companion carries the as-received script
   factor (0.3048/0.45359237, ~105.6x larger) as a bounded sensitivity.
+* `uemura_surface_curves_overflow_no_rating_error.csv` — overflow companion
+  with the paper Eq. (10) stage-rating error suppressed
+  (`draw_overflow(..., include_rating_error=False)`), the composition-seam
+  sensitivity of the 2026-08-21 study. The primary curve's argument is the
+  stage a rating relation would report; this one's is the realized stage at
+  the levee, which is what the piping branch's argument already is. Drawn on
+  the SAME node seed as the primary overflow set, so the crest and turf
+  critical-velocity draws are identical and only the term under test moves.
 
 Raw drop files were read-only inputs. Regeneration:
 `python scripts/generate_uemura_surface_curves.py`.

@@ -331,6 +331,7 @@ def evaluate_realization(
     gamma_p_sub_kn_m3: float | None = None,
     foreland_open: bool = False,
     model_factor_mp: float | None = None,
+    critical_length_factor: float | None = None,
 ) -> EvaluationResult:
     """Evaluate both limit states for one realization (M8, spec §2-§4).
 
@@ -422,6 +423,17 @@ float, optional
         used). l_c is geometric (Pol Eq. (13)) and is not scaled. Companion
         sensitivity runs only; the caller draws m_p per realization via
         ``sampling.sample_model_factor``.
+    critical_length_factor : float, optional
+        Keyword-only multiplicative override on the M6 critical pipe length
+        l_c (Pol SIE 2024 Eq. (13); ADR-0049). ``None`` (default) keeps the
+        published formula and is **bit-identical** to prior behaviour. When
+        set, l_c is scaled at source, so the reported ``l_c`` diagnostic and
+        the value the M7 equilibrium curve is built on can never disagree.
+        The knob is **transient-only by construction**: l_c enters nothing
+        but H_eq(l), and the static comparator does not read it, so the
+        static branch is exactly invariant under it. Works on both
+        progression backends (the scaling happens upstream of the M7
+        kernel, which receives l_c as an input array).
 
     Returns
     -------
@@ -484,7 +496,12 @@ float, optional
         sell_kwargs["relative_density"] = relative_density
     if gamma_p_sub_kn_m3 is not None:
         sell_kwargs["gamma_p_sub_kn_m3"] = gamma_p_sub_kn_m3
-    sellmeijer = compute_critical_head(theta_row, geometry, **sell_kwargs)
+    sellmeijer = compute_critical_head(
+        theta_row,
+        geometry,
+        **sell_kwargs,
+        critical_length_factor=critical_length_factor,
+    )
     h_c_m = float(sellmeijer.H_c)  # static (canonical) H_c
     l_c_m = float(sellmeijer.l_c)  # scale-exponent independent; shared
 
@@ -607,6 +624,7 @@ def evaluate_batch(
     progression_backend: str = "numpy",
     equilibrium_end_factor: float | None = None,
     model_factor_samples: npt.NDArray[float64] | None = None,
+    critical_length_factor: float | None = None,
 ) -> tuple[npt.NDArray[np.bool_], npt.NDArray[np.bool_]]:
     """Evaluate both limit states for all N realizations at one level (M8 batch).
 
@@ -693,6 +711,17 @@ integrate_progression_numba`) — numerically equivalent to < 1e-10 but NOT
         comparator and transient H_eq anchor) before the branches evaluate;
         the reported diagnostics carry the factored values. Works on both
         backends (the factor is applied upstream of the M7 kernel).
+    critical_length_factor : float, optional
+        Keyword-only multiplicative override on the M6 critical pipe length
+        l_c (Pol SIE 2024 Eq. (13); ADR-0049). ``None`` (default) keeps the
+        published formula and is **bit-identical** to prior behaviour. When
+        set, l_c is scaled at source, so the reported ``l_c`` diagnostic and
+        the value the M7 equilibrium curve is built on can never disagree.
+        The knob is **transient-only by construction**: l_c enters nothing
+        but H_eq(l), and the static comparator does not read it, so the
+        static branch is exactly invariant under it. Works on both
+        progression backends (the scaling happens upstream of the M7
+        kernel, which receives l_c as an input array).
 
     Returns
     -------
@@ -721,6 +750,7 @@ integrate_progression_numba`) — numerically equivalent to < 1e-10 but NOT
         progression_backend=progression_backend,
         equilibrium_end_factor=equilibrium_end_factor,
         model_factor_samples=model_factor_samples,
+        critical_length_factor=critical_length_factor,
     )
     return diagnostics.failure_static, diagnostics.failure_trans
 
@@ -741,6 +771,7 @@ def evaluate_batch_diagnostics(
     progression_backend: str = "numpy",
     equilibrium_end_factor: float | None = None,
     model_factor_samples: npt.NDArray[float64] | None = None,
+    critical_length_factor: float | None = None,
 ) -> BatchDiagnostics:
     """Evaluate all N realizations at one level, retaining diagnostics (ADR-0034).
 
@@ -818,7 +849,12 @@ def evaluate_batch_diagnostics(
         sell_kwargs["relative_density"] = relative_density
     if gamma_p_sub_kn_m3 is not None:
         sell_kwargs["gamma_p_sub_kn_m3"] = gamma_p_sub_kn_m3
-    sellmeijer = compute_critical_head_vectorized(theta, geometry_for_hc, **sell_kwargs)
+    sellmeijer = compute_critical_head_vectorized(
+        theta,
+        geometry_for_hc,
+        **sell_kwargs,
+        critical_length_factor=critical_length_factor,
+    )
     h_c = np.asarray(sellmeijer.H_c, dtype=np.float64)  # static H_c
     l_c = np.asarray(sellmeijer.l_c, dtype=np.float64)  # scale-independent; shared
 
