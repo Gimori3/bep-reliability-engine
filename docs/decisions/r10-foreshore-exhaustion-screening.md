@@ -179,9 +179,23 @@ m/h range. Per Step 4 of the task framing, *that is the finding*: this indicator
 does not deliver a clean verdict, and reporting the central value alone would
 manufacture one. What it does deliver is a **robust ordering** and an
 **order-of-magnitude scale**: the rate needed to consume the bed differs by
-~38× across the four sections (0.72 → 27.3 m/h at the design HWL), and the
-section whose narrow bed makes it the outlier — KP 62.0 — is the same section the
-BEP branch already identifies as governing.
+~38× across the four sections **and the two design-class forcings together**
+(0.72 m/h at KP 62.0 at the design HWL, up to 27.3 m/h at KP 60.0 under the
+2016 event). **At the design HWL alone the span is 0.72 to 9.77 m/h, a factor
+of 13.6**, which is the width contrast itself. The section whose narrow bed
+makes it the outlier — KP 62.0 — is the same section the BEP branch already
+identifies as governing.
+
+> [**Corrected 2026-08-21.** The paragraph above previously read "~38× across
+> the four sections (0.72 → 27.3 m/h at the design HWL)". The ~38× is right and
+> is the number the thesis rests on, but its parenthesis was mis-scoped: 27.3
+> m/h is the KP 60.0 **2016-event** entry of the §4.1 table, not a design-HWL
+> one, and the design-HWL rows of that same table run 0.72 to 9.77 m/h. **No
+> computed value moved and no artifact changed.** The evidence JSON never
+> carried the conflation: its `sanity_anchor` block holds the two separations
+> apart, 10.54 under `event_2016` and 13.62 under `design_hwl`. The thesis
+> quotes the across-forcings figure as "roughly an order and a half of
+> magnitude", so nothing reported there moved either.]
 
 ### 4.2 Threshold sensitivity (±1.0 m)
 
