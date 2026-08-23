@@ -529,3 +529,19 @@ figure migrations into Appendix G.
 The two items this record left awaiting an owner ruling, the "factor of about
 2.9" conductivity sentence at two sites and the cited 234 h Abashiri duration,
 are untouched by the campaign and remain open.
+
+### Second pass, same date: one further claim site removed
+
+The rebuild confirmed 115 main-body pages and a second pass followed, cutting
+the per-chapter overflows. It removed one further claim site, again without
+retiring a number or changing a value.
+
+| Claim | Was traced at | Now | Status |
+|---|---|---|---|
+| The drained-configuration bracket, `7.4` to `4.2` to a lower bound of `0.2` per thousand per year at KP 58.8 and `1.8` to `0.64` to zero at KP 60.0 | Chapter 1 technical scope (in per-thousand units), Chapter 7 standing-conditions register, Chapter 8 Section 8.9.4, Chapter 9 | Chapters 7, 8 and 9 | Chapter 1's scope subsection no longer quotes a Chapter 8 result. All five values survive in scientific notation at six or more sites, and Section 8.9.4 carries three qualifications the Chapter 1 passage never did. The pointer to that section was already in the Chapter 1 sentence and remains. |
+
+Chapter 1 also lost one repetition each of `110`, `114`, `58.8` and `60.0`,
+all from the same two removed passages and all still present at their other
+sites in the same chapter. Nothing else numeric moved: the whole-document
+token diff over `frontmatter/`, `mainmatter/` and `appendix/` is otherwise
+accounted for by one figure-width change and the preamble.
