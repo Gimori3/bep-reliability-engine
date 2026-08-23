@@ -9,7 +9,9 @@ after the whole-document submission gate of the same date.
 float or evidence artifact. Where the document cannot support a confident answer,
 the entry says so and is marked **KNOWN EXPOSURE**. A confident paragraph that
 collapses under one follow-up is worse than a stated limit, and three of the twelve
-entries end in a stated limit.
+entries end in a stated limit. **Amended 2026-08-23: two do.** The Q12 exposure was
+closed by a thesis edit of that date; it is marked closed in place below and removed
+from the summary table, and the paragraph that recorded it is left standing.
 
 **Why no page numbers.** The committed `report.pdf` was built on 2026-08-15 and
 predates the edits of 2026-08-20 to 2026-08-22. Page numbers taken from it would be
@@ -582,6 +584,32 @@ uncertainty from the *absolute probabilities* and item 1 removes the most from t
 dominance ordering is the headline. Do not claim the two criteria give the same
 ranking.
 
+**Closed 2026-08-23. The paragraph above is left standing as written; what follows
+is what changed under it.** The distinction is now on the page, so it no longer has
+to be conceded from the floor. Both statements of the criterion in `msc-thesis`
+Chapter 9 were rewritten, and the order of the six rows was not touched:
+
+* the introducing sentence of "Recommendations for Future Research" now reads
+  "ordered by how much of the uncertainty in the four answers each would remove,
+  which is not the ordering by the width of the bracket each addresses. Ranked by
+  the absolute probabilities alone, the fourth item would lead";
+* the caption of Table `tab: future research` now reads "ordered by how much of the
+  uncertainty in the four answers each would remove, not by the width of the bracket
+  each addresses".
+
+The two criteria are therefore named as different and the ordering under which item
+4 leads is stated by the document rather than by the candidate. Rows 2 and 4 already
+carried the reason in their own text ("the range is already established"; "what a
+determination would supply is a narrowing of the bracket and not a first
+quantification of it"), and that text is unchanged. **The safe form of words above is
+still the right answer to give; it is now a pointer to a printed sentence and not a
+concession.** The reordering option was considered and refused: item 1 is the one the
+chapter develops in its own subsection and the one that can overturn a headline
+answer rather than narrow it, so promoting the conductivity item would have created
+the mirror-image question and contradicted `subsec: A Migration-Capable Bank-Retreat
+Model`, which calls the bank-retreat mechanism "the single most consequential
+extension available to the integrated framework".
+
 **If asked what a single six-month project should be**, the defensible answer is
 item 4 followed by item 1, because item 4 is the only one whose absence puts a
 three-order-of-magnitude band around every number in the document, and item 1 is
@@ -597,13 +625,20 @@ the only one that can overturn a headline conclusion rather than narrow it.
 
 ---
 
-## Summary of the three entries marked as known exposures
+## Summary of the entries marked as known exposures
+
+Two, as of 2026-08-23. The table held three when this brief was written.
 
 | # | Exposure | The safe form of words |
 |---|---|---|
 | Q6 | The corrected fluvial-scour branch has no independent validation; its equivalence gate tests it against the received implementation only. | "The zero belongs to the model and its inputs, not to the conditioning. What is established is that it is not an artifact of the conditioning." |
 | Q10 | The compound-event memory model is untested against field observation and cannot be tested with a survival record. | "Bounded in the conservative direction, subordinate to duration in the measured attribution, and not validated." |
-| Q12 | The future-research register's ordering criterion is "uncertainty removed by the action", which the caption does not make explicit, and it places the largest bracket fourth. | "Item 4 removes the most uncertainty from the absolute probabilities; item 1 removes the most from the dominance answer. The register orders by the latter." |
+
+**Removed 2026-08-23.** Q12, the future-research register's unstated ordering
+criterion, is closed: Chapter 9 now states the criterion in both the caption and the
+introducing sentence and names the ordering under which the conductivity item would
+lead. The Q12 discussion above is left in place with a dated note; only the row is
+gone.
 
 ## Three results to lead with when given the chance
 
