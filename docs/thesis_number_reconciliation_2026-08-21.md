@@ -504,3 +504,28 @@ a later reader does not "fix" them into disagreement with their source.
   `docs/tokachi_chisuishi_full_review_2026-07-27.md`).
 * It did not audit figures pixel by pixel. Figure **captions** carrying numbers
   were audited as claims and are included in the counts above.
+
+---
+
+## Addendum, 2026-08-23: two claim sites removed by the page-budget campaign
+
+Authoritative where it differs from the body above. The 2026-08-23 main-body
+page campaign (see `docs/project_log.md`, entry of that date) removed two
+number-bearing sentences from `msc-thesis`. Neither number is retired and
+neither value changed; what changed is the number of sites carrying it, so the
+counts in the tables above are one lower in each case.
+
+| Claim | Was traced at | Now | Status |
+|---|---|---|---|
+| `21.6` on `18.8 to 25.2` eleven cm above the KP 62.0 design level | Summary, Chapter 6, Chapter 9 | Chapter 6 and Chapter 9 | The Summary keeps `21.6` and the stage it belongs to and drops the interval alone. The value is unchanged and still `EXACT` against `adr0040-*.json` `anchor_A2`. |
+| Historical piping and overflow shares `1.000` and `0.000` at KP 57.4 and KP 60.0 | Table `tab: system annual` body and its caption | Table body only | The caption clause that restated the two values is gone; the sentence explaining why those cells carry no sampling interval remains, and both values are printed in the table itself. |
+
+The whole-document numeric-token diff run against the pre-campaign commit
+confirms that these are the only two claim sites the campaign removed, and that
+no other numeric token anywhere in `frontmatter/`, `mainmatter/` or `appendix/`
+changed in value or in count except by the deliberate additions of the three
+figure migrations into Appendix G.
+
+The two items this record left awaiting an owner ruling, the "factor of about
+2.9" conductivity sentence at two sites and the cited 234 h Abashiri duration,
+are untouched by the campaign and remain open.
