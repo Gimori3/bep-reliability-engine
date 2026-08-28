@@ -1153,6 +1153,21 @@ COMPANION_EXCLUSIONS: dict[str, str] = {
         "the campaign also does not produce. Same substantive ground as the "
         "ADR-0045/0046/0048/0049/0050 companion entries above."
     ),
+    "scripts/rq1_beta_analysis.py": (
+        "RQ1 reliability-index re-expression: pure post-processing that "
+        "evaluates no limit state, loads no Config and therefore has no "
+        "config_hash exposure at all -- there is nothing here for a companion "
+        "hash gate to assert. It re-expresses estimates that are ALREADY "
+        "persisted, so its numbers are a deterministic function of the sweeps "
+        "this campaign gates directly under G0/G1 and of the ADR-0040 N = 1e6 "
+        "ladders and Stage D epistemic arms, which the campaign deliberately "
+        "does not produce (4.2 h of brute force, classified as evidence rather "
+        "than regenerable cache by conventions section 10.2 -- the same ground "
+        "as the scripts/hwl_bias_resolution.py entry below). Unlike "
+        "scripts/epistemic_bracket_synthesis.py it cannot pass vacuously on a "
+        "machine missing those inputs: it opens each artifact directly and "
+        "raises. Its figures are regenerated from the same one command."
+    ),
     "scripts/drained_bracket_annualisation.py": (
         "ADR-0050 Phase 3 companion: re-sweeps nothing and writes nothing the "
         "campaign produces. It reads the persisted ADR-0050 arm curves, which "
@@ -1747,6 +1762,25 @@ FIGURE_DRIVERS: list[dict[str, Any]] = [
         "sources": [
             "docs/decisions/adr0040-hwl-bias-resolution.json",
             "docs/decisions/epistemic-bracket-synthesis.json",
+        ],
+    },
+    {
+        # One command writes the five figures AND the two machine-readable
+        # tables they are drawn from, so a redraw can never leave the brief
+        # and the panels disagreeing. Its sources are the union of what the
+        # re-expression reads: the eight persisted sweeps, the two N = 1e6
+        # ladders, their N = 1e5 counterparts, the Stage D epistemic arms and
+        # the canonical-shape record.
+        "label": "RQ1 reliability-index re-expression",
+        "command": [PY, "scripts/rq1_beta_analysis.py"],
+        "requires": ["results/hwl_bias_resolution/ladder_kp62_0_n1000000.h5"],
+        "produces": ["rq1_*.png"],
+        "sources": [
+            "results/tokachi_kp*_historical_*.h5",
+            "results/hwl_bias_resolution/ladder_kp*_n1000000.h5",
+            "results/stage6_6/stage6_6_kp*.h5",
+            "results/hwl_bias_resolution/stage_d_epistemic.json",
+            "docs/decisions/canonical-shape-sensitivity.json",
         ],
     },
     {
