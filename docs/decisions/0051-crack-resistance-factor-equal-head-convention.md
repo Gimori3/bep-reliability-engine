@@ -208,6 +208,53 @@ parallel implementation that has to be kept in step.
 
 ---
 
+## Measurement addendum (2026-08-28; authoritative where it differs from the pre-registration above)
+
+Executed by `scripts/equal_head_convention_study.py`; full numbers, the
+provenance quotes and the per-level tables in
+`docs/decisions/equal-head-convention-study.md`, per-level evidence in
+`docs/decisions/adr0051-equal-head-convention.json`.
+
+Design-level anchors, matrix reading, historical scenario:
+
+| section | N | stage [m MSL] | B as published | **B equal convention** | 95 % CI | Δβ as published | **Δβ equal convention** | 95 % CI |
+|---|---|---|---|---|---|---|---|---|
+| KP 62.0 | 1e6 | 46.39 | 26.9 | **7.34** | [6.52, 8.30] | 0.904 | **0.572** | [0.540, 0.605] |
+| KP 57.4 | 1e6 | 39.21 | 566 | **23.1** | [18.0, 31.3] | 1.558 | **0.842** | [0.780, 0.915] |
+| KP 58.8 | 1e5 | 41.00 | 2.75 | **1.87** | [1.86, 1.88] | 1.224 | **0.879** | [0.871, 0.887] |
+| KP 60.0 | 1e5 | 42.75 | 2.92 | **2.11** | [2.10, 2.13] | 1.866 | **1.549** | [1.537, 1.561] |
+
+Gates: E1 held (whole-matrix static identity at all four sections at N = 1e5,
+with the knob off and again with it on; the persisted ADR-0040 ladder's C0 and
+C4b counts reproduced at all ten N = 1e6 levels, including the pre-named 1696
+and 1132). E2 held (zero nesting violations anywhere at N = 1e5; 10
+forward-Euler flip rows at KP 57.4 N = 1e6, counted and reported, none at
+KP 62.0). E4 held with a Δt rider: the closed form `C0 ∧ gate` is exact at seven
+of the eight checked cells, and the eighth is a single row of 100 000 at
+KP 58.8 41.00 m whose breach vanishes at Δt/2 (the ADR-0030 barrier jump; the
+head there sits 3.04 mm below `H_c`).
+
+**E3 is a partial deviation and is recorded as a finding, not smoothed.** Its
+ratio half is confirmed at every section it covers (KP 62.0 in 4 to 12; the
+drained sections in 1.5 to 3). Its β half, `Δβ_eq ≈ 0.2 to 0.7`, holds only at
+KP 62.0: it was derived from the ratio band by a conversion that is not
+stage-independent, because `Δβ` depends on where on the normal scale the two
+probabilities sit, not on their ratio alone. At KP 60.0's design level a ratio of
+2.11 *is* a `Δβ` of 1.549. E3c was arithmetically inconsistent with E3a/E3b from
+the start; nothing in the measurement is adjusted for it.
+
+Two results worth carrying forward. First, the head convention accounts for most
+but nowhere near all of the as-published gap: the equal-convention comparison
+retains 63 % (KP 62.0), 54 % (KP 57.4), 72 % (KP 58.8) and 83 % (KP 60.0) of the
+as-published `Δβ`. Second, **there is no unique equal convention**: equalising on
+the gross head (this ADR) and equalising on the crack-reduced head (Stage 6.6's
+C1 against C4b) give 7.34 against 8.03 at the KP 62.0 design level, agreeing to
+within 10 to 24 % at every KP 62.0 level, but 23.1 against 12.0 at the KP 57.4
+design level where the reduced-vs-reduced reading rests on two rows. Quote
+KP 62.0 as 7 to 8 and KP 57.4 as a band of roughly 5 to 23.
+
+---
+
 ## References
 
 - ADR-0027 / ADR-0028 (the two raw heads and the `r_e` scope), ADR-0009 (the

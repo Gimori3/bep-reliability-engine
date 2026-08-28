@@ -1137,6 +1137,22 @@ COMPANION_EXCLUSIONS: dict[str, str] = {
         "without. Same substantive ground as the ADR-0045/0046/0048/0049 "
         "companion entries above; KP58.8 + KP60.0 only."
     ),
+    "scripts/equal_head_convention_study.py": (
+        "ADR-0051 equal-head-convention companion: the crack_resistance_factor "
+        "knob is OFF in production and dropped from to_metadata() when None, so "
+        "it changes no config_hash and produces no campaign artifact. It carries "
+        "its own gate, which is STRONGER than anything this stage would apply: "
+        "it re-runs each committed YAML with crack_resistance_factor=None set "
+        "explicitly and refuses unless BOTH whole failure matrices are "
+        "bit-identical to the persisted sweep, and it refuses again if the "
+        "gross-head arm moves a single static cell. Running it here would add "
+        "eight full-N sweeps (~16 min) plus the 64-day sustained-peak holds to "
+        "the campaign to re-derive a gate the driver already refuses without, "
+        "and its n1e6 stage is evidence at 1e6 rather than a regenerable cache "
+        "(conventions section 10.2), pairing against the ADR-0040 ladder files "
+        "the campaign also does not produce. Same substantive ground as the "
+        "ADR-0045/0046/0048/0049/0050 companion entries above."
+    ),
     "scripts/drained_bracket_annualisation.py": (
         "ADR-0050 Phase 3 companion: re-sweeps nothing and writes nothing the "
         "campaign produces. It reads the persisted ADR-0050 arm curves, which "

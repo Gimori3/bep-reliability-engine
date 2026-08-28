@@ -27,6 +27,9 @@ established. What is pinned here:
 
 from __future__ import annotations
 
+import json
+import pathlib
+
 import numpy as np
 import pytest
 
@@ -459,3 +462,129 @@ def test_run_threads_the_factor_and_is_bit_identical_when_unset() -> None:
     # Nesting again, this time through the orchestrator's own matrices.
     assert not np.any(base.failure_matrix_tran & ~arm.failure_matrix_tran)
     assert not np.any(arm.failure_matrix_tran & ~arm.failure_matrix_stat)
+
+
+# ---------------------------------------------------------------------------
+# The committed ADR-0051 evidence record
+# ---------------------------------------------------------------------------
+
+_EVIDENCE = (
+    pathlib.Path(__file__).resolve().parents[1]
+    / "docs"
+    / "decisions"
+    / "adr0051-equal-head-convention.json"
+)
+_NOTE = (
+    pathlib.Path(__file__).resolve().parents[1]
+    / "docs"
+    / "decisions"
+    / "equal-head-convention-study.md"
+)
+
+
+def _evidence() -> dict:
+    assert _EVIDENCE.is_file(), (
+        f"tracked evidence record missing: {_EVIDENCE.name}. It moved, was "
+        "renamed or was deleted; it is not optional."
+    )
+    return json.loads(_EVIDENCE.read_text(encoding="utf-8"))
+
+
+def test_the_companion_note_is_committed() -> None:
+    assert _NOTE.is_file(), f"tracked companion note missing: {_NOTE.name}"
+
+
+def test_the_record_covers_all_four_matrix_sections_and_both_1e6_sections() -> None:
+    record = _evidence()
+    assert set(record["n1e5"]) == {"KP57.4", "KP58.8", "KP60.0", "KP62.0"}
+    assert set(record["n1e6"]) == {"KP57.4", "KP62.0"}
+    assert record["crack_resistance_factor"] == 0.0
+    assert record["published_value"] == 0.3
+
+
+def test_every_section_passed_its_gate() -> None:
+    """No equal-convention number is quotable against a drifted baseline."""
+    record = _evidence()
+    for section in record["n1e5"].values():
+        assert section["gate_status"] == "bit_identical", section["section"]
+        assert section["static_invariance"] == "exact", section["section"]
+    for section in record["n1e6"].values():
+        assert section["seed_recipe_gate"]["status"] == "reproduced"
+        for row in section["seed_recipe_gate"]["detail"]:
+            assert row["static_matches"] and row["transient_matches"], row
+
+
+def test_the_record_reproduces_the_two_pre_named_1e6_static_counts() -> None:
+    """The campaign brief named these before the run; they are the seed gate."""
+    record = _evidence()
+    expected = {("KP62.0", 46.39): 1696, ("KP57.4", 39.21): 1132}
+    for (section, stage), count in expected.items():
+        rows = record["n1e6"][section]["seed_recipe_gate"]["detail"]
+        row = next(r for r in rows if abs(r["stage_m_msl"] - stage) < 1e-9)
+        assert row["ladder_C0"] == count
+        assert row["fresh_static"] == count
+
+
+def test_the_record_shows_no_nesting_violations_at_n1e5() -> None:
+    """The continuous-time argument, as measured under the real hydrographs."""
+    for section in _evidence()["n1e5"].values():
+        assert section["nesting"]["gross_not_static_rows_total"] == 0
+        assert section["nesting"]["production_not_gross_rows_total"] == 0
+
+
+def test_the_one_sustained_peak_mismatch_is_diagnosed_as_a_timestep_artifact() -> None:
+    """A deviation is only closed once the discriminating experiment is on file.
+
+    The closed form is l_c-free and Delta t-free; a finite hold that breaches
+    where it says stall is either a real physics disagreement or a forward-Euler
+    barrier jump (ADR-0030). The timestep ladder decides, and the record must
+    carry it rather than an assurance.
+    """
+    record = _evidence()
+    mismatches = [
+        (section["section"], entry)
+        for section in record["n1e5"].values()
+        for entry in section.get("sustained_peak") or []
+        if not entry["identical"]
+    ]
+    diagnosis = record.get("sustained_peak_dt_diagnosis") or {"checks": []}
+    assert len(diagnosis["checks"]) == len(
+        mismatches
+    ), "every recorded sustained-peak mismatch needs its timestep ladder"
+    for check in diagnosis["checks"]:
+        assert check["verdict"].startswith("forward-Euler barrier jump")
+        for row in check["offending_rows"]:
+            assert row["resolves_on_refinement"]
+            assert row["raw_head_minus_H_c_m"] < 0.0
+            ladder = row["dt_ladder"]
+            assert ladder[0]["dt_s"] == 225.0 and ladder[0]["breach"]
+            assert not any(step["breach"] for step in ladder[1:])
+
+
+def test_the_record_carries_both_equal_convention_readings() -> None:
+    """Gross-vs-gross is one reading; reduced-vs-reduced is the other."""
+    record = _evidence()
+    corroboration = record["corroboration_reduced_vs_reduced"]
+    assert corroboration["KP57.4"]["available"] is True
+    assert corroboration["KP62.0"]["available"] is True
+    # Stage 6.6 never ran at the drained sections; that is stated, not omitted.
+    assert corroboration["KP58.8"]["available"] is False
+    assert corroboration["KP60.0"]["available"] is False
+
+
+def test_the_design_anchor_factors_are_the_ones_the_note_quotes() -> None:
+    """Pins the four headline numbers against silent drift in a re-run."""
+    record = _evidence()
+    expected = {
+        ("n1e6", "KP62.0", 46.39): 7.34199,
+        ("n1e6", "KP57.4", 39.21): 23.102,
+        ("n1e5", "KP58.8", 41.0): 1.87057,
+        ("n1e5", "KP60.0", 42.75): 2.11341,
+    }
+    for (stage_key, section, level), value in expected.items():
+        rows = record[stage_key][section]["levels"]
+        row = next(r for r in rows if abs(r["stage_m_msl"] - level) < 1e-9)
+        assert row["B_eq"]["ratio"] == pytest.approx(value, rel=1e-4), (
+            section,
+            level,
+        )
