@@ -1654,6 +1654,24 @@ FIGURE_DRIVERS: list[dict[str, Any]] = [
         "sources": ["results/tokachi_kp*_historical_*.h5"],
     },
     {
+        # Not swept up by the ``fragility_*.png`` glob above: this figure is
+        # named for the sub-mechanism it adds, and its sources include the
+        # Phase 2 replay, which the Phase 1 driver above does not read. The
+        # gate response factor comes from the replay and the two failure
+        # matrices from Phase 1, so both must mark it stale.
+        "label": "initiation fragility",
+        "command": [PY, "scripts/plot_initiation_fragility.py"],
+        "requires": [
+            "results/tokachi_kp62.0_historical_matrix.h5",
+            "results/phase2/tokachi_kp62.0_historical_matrix_posterior.h5",
+        ],
+        "produces": ["initiation_fragility.png"],
+        "sources": [
+            "results/tokachi_kp*_historical_*.h5",
+            "results/phase2/tokachi_kp*_historical_*_posterior.h5",
+        ],
+    },
+    {
         "label": "stage 6.6 (redraw only)",
         "command": [
             PY,
