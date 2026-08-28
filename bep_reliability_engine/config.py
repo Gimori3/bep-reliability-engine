@@ -918,6 +918,27 @@ class Config(_StrictModel):
             "sensitivity runs only — production configs never carry it set."
         ),
     )
+    crack_resistance_factor: float | None = Field(
+        default=None,
+        ge=0.0,
+        description=(
+            "ADR-0051 override of the Pol SIE 2024 Eq. (6) crack-resistance "
+            "coefficient (published 0.3) in the transient erosion driver. None "
+            "(production, and every pre-ADR-0051 config) is the published "
+            "value, bit-identical to prior behaviour; the None case is dropped "
+            "from to_metadata() so config_hash of pre-ADR-0051 snapshots is "
+            "preserved. 0.0 removes the term, giving the gross erosion head "
+            "h(t) - z_toe -- the same head convention the static Sellmeijer "
+            "comparator uses (ADR-0028), i.e. the equal-head-convention "
+            "comparison. Transient-erosion-only by construction: the "
+            "coefficient reaches neither the static comparator, nor the "
+            "uplift/heave gate heads, nor H_eq/l_c, so the static comparator "
+            "is exactly invariant under it. Non-negative: a negative "
+            "coefficient would add driving head above the gross outer level, "
+            "which no source licenses. Companion sensitivity runs only -- "
+            "production configs never carry it set."
+        ),
+    )
     toe_gradient_relief_factor: float | None = Field(
         default=None,
         gt=0.0,
@@ -1117,8 +1138,9 @@ class Config(_StrictModel):
             ``length_effect`` is dropped when None (ADR-0037),
             ``sellmeijer_model_factor`` is dropped when None (ADR-0045),
             ``prior_mean_scenario`` is dropped when None (ADR-0048),
-            ``critical_length_factor`` is dropped when None (ADR-0049) and
-            ``toe_gradient_relief_factor`` is dropped when None (ADR-0050):
+            ``critical_length_factor`` is dropped when None (ADR-0049),
+            ``toe_gradient_relief_factor`` is dropped when None (ADR-0050) and
+            ``crack_resistance_factor`` is dropped when None (ADR-0051):
             pre-ADR snapshots reconstruct to the None defaults, and dropping
             the keys keeps their :meth:`config_hash` byte-identical to what
             their persisted runs recorded — the Phase 2 replay refuses hash
@@ -1135,6 +1157,8 @@ class Config(_StrictModel):
             snapshot.pop("critical_length_factor", None)
         if snapshot.get("toe_gradient_relief_factor") is None:
             snapshot.pop("toe_gradient_relief_factor", None)
+        if snapshot.get("crack_resistance_factor") is None:
+            snapshot.pop("crack_resistance_factor", None)
         return snapshot
 
     def config_hash(self) -> str:

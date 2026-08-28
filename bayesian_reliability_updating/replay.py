@@ -399,6 +399,7 @@ def replay_event(
         model_factor_samples=run.model_factor_samples,
         critical_length_factor=config.critical_length_factor,
         toe_gradient_relief_factor=config.toe_gradient_relief_factor,
+        crack_resistance_factor=config.crack_resistance_factor,
     )
     return EventReplay(
         record=replay_rec,
@@ -461,6 +462,7 @@ def breach_times_for_rows(
             ),
             critical_length_factor=config.critical_length_factor,
             toe_gradient_relief_factor=config.toe_gradient_relief_factor,
+            crack_resistance_factor=config.crack_resistance_factor,
         )
         trajectory = result.l_trajectory
         if trajectory is None:

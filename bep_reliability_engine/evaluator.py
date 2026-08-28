@@ -74,6 +74,11 @@ uplift/heave initiation and does NOT enter either piping head; the static branch
 is entirely r_e-independent. The two piping heads differ by exactly the 0.3*D_bl
 crack loss (transient only) -- the clean head-convention component of the
 static-transient gap (spec §12, failure mode 4), r_e having dropped out of both.
+That 0.3 coefficient is a Dutch assessment-rule convention rather than a
+Sellmeijer (2011) term, so ADR-0051 makes it overridable through the
+keyword-only ``crack_resistance_factor`` (default None = the published 0.3):
+at 0.0 the transient erosion driver becomes the same gross head the static
+comparator uses, and the two limit states run on one head convention.
 
 Failure sign convention: failure is ``Z <= 0`` for both limit states (the
 boundary Z = 0 counts as failure), consistent with M5's resistance-minus-load
@@ -388,6 +393,7 @@ def evaluate_realization(
     model_factor_mp: float | None = None,
     critical_length_factor: float | None = None,
     toe_gradient_relief_factor: float | None = None,
+    crack_resistance_factor: float | None = None,
 ) -> EvaluationResult:
     """Evaluate both limit states for one realization (M8, spec §2-§4).
 
@@ -504,6 +510,20 @@ float, optional
         *physical* response factor, unrelieved; the credit belongs to a
         structure, not to the blanket-aquifer system. Works on both
         progression backends. Companion sensitivity runs only.
+    crack_resistance_factor : float, optional
+        Keyword-only override of the Pol SIE 2024 Eq. (6) crack-resistance
+        coefficient in the **transient erosion driver** (ADR-0051). ``None``
+        (default) is the published 0.3 and **bit-identical** to prior
+        behaviour. ``0.0`` removes the term, so the transient driver becomes
+        ``H_erosion = h(t) - z_toe`` — exactly the gross head the static
+        Sellmeijer comparator uses (ADR-0028), which puts both limit states on
+        one head convention (the equal-head-convention experiment). Must be
+        >= 0. The knob is **transient-erosion-only by construction**: the
+        coefficient is read once, in the M7 rate path, and reaches neither the
+        static comparator, nor the uplift/heave gate heads (which never carry
+        the crack term, ADR-0027/0028), nor ``H_eq``/``l_c`` — so the static
+        branch is exactly invariant under it. Works on both progression
+        backends. Companion sensitivity runs only.
 
     Returns
     -------
@@ -657,6 +677,7 @@ float, optional
         seepage_length_m=seepage_length_m,
         l_ini_m=l_ini,
         store_trajectory=store_trajectory,
+        crack_resistance_factor=crack_resistance_factor,
     )
     l_e_final = float(progression.l_final_m)
     z_transient = seepage_length_m - l_e_final
@@ -698,6 +719,7 @@ def evaluate_batch(
     model_factor_samples: npt.NDArray[float64] | None = None,
     critical_length_factor: float | None = None,
     toe_gradient_relief_factor: float | None = None,
+    crack_resistance_factor: float | None = None,
 ) -> tuple[npt.NDArray[np.bool_], npt.NDArray[np.bool_]]:
     """Evaluate both limit states for all N realizations at one level (M8 batch).
 
@@ -809,6 +831,18 @@ integrate_progression_numba`) — numerically equivalent to < 1e-10 but NOT
         *physical* response factor, unrelieved; the credit belongs to a
         structure, not to the blanket-aquifer system. Works on both
         progression backends. Companion sensitivity runs only.
+    crack_resistance_factor : float, optional
+        Keyword-only override of the Pol SIE 2024 Eq. (6) crack-resistance
+        coefficient in the transient erosion driver (ADR-0051). ``None``
+        (default) is the published 0.3 and **bit-identical** to prior
+        behaviour; ``0.0`` gives the gross erosion head
+        ``H_erosion = h(t) - z_toe``, the same head convention the static
+        comparator uses (ADR-0028). Must be >= 0. Transient-erosion-only by
+        construction: it reaches neither the static comparator nor the
+        uplift/heave gate heads nor ``H_eq``/``l_c``, so the static failure
+        column is exactly invariant under it. Works on both progression
+        backends (the coefficient is a kernel argument, not a baked-in
+        constant). Companion sensitivity runs only.
 
     Returns
     -------
@@ -839,6 +873,7 @@ integrate_progression_numba`) — numerically equivalent to < 1e-10 but NOT
         model_factor_samples=model_factor_samples,
         critical_length_factor=critical_length_factor,
         toe_gradient_relief_factor=toe_gradient_relief_factor,
+        crack_resistance_factor=crack_resistance_factor,
     )
     return diagnostics.failure_static, diagnostics.failure_trans
 
@@ -861,6 +896,7 @@ def evaluate_batch_diagnostics(
     model_factor_samples: npt.NDArray[float64] | None = None,
     critical_length_factor: float | None = None,
     toe_gradient_relief_factor: float | None = None,
+    crack_resistance_factor: float | None = None,
 ) -> BatchDiagnostics:
     """Evaluate all N realizations at one level, retaining diagnostics (ADR-0034).
 
@@ -1033,6 +1069,7 @@ def evaluate_batch_diagnostics(
             l_c_m=l_c,
             seepage_length_m=seepage_length,
             l_ini_m=l_ini,
+            crack_resistance_factor=crack_resistance_factor,
         )
     else:
         head_model = InstantaneousHead(
@@ -1053,6 +1090,7 @@ def evaluate_batch_diagnostics(
             l_ini_m=l_ini,
             store_trajectory=False,
             equilibrium_end_factor=equilibrium_end_factor,
+            crack_resistance_factor=crack_resistance_factor,
         )
     l_e_final = np.asarray(progression.l_final_m, dtype=np.float64)
     z_transient = seepage_length - l_e_final

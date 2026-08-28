@@ -55,11 +55,11 @@ from numpy.typing import ArrayLike, NDArray
 
 from bep_reliability_engine.constants import GAMMA_W
 from bep_reliability_engine.progression import (
-    CRACK_RESISTANCE_FACTOR,
     EQUILIBRIUM_END_FACTOR,
     POL_RATE_COEFFICIENT,
     POL_RATE_EXPONENT,
     ProgressionResult,
+    resolve_crack_resistance_factor,
 )
 
 __all__ = ["integrate_progression_numba"]
@@ -79,6 +79,7 @@ def _integrate_kernel(  # pragma: no cover - exercised via the wrapper
     l_c: NDArray[np.float64],
     length: NDArray[np.float64],
     l_ini: NDArray[np.float64],
+    crack_factor: float,
 ) -> tuple[
     NDArray[np.float64], NDArray[np.bool_], NDArray[np.bool_], NDArray[np.float64]
 ]:
@@ -108,7 +109,7 @@ def _integrate_kernel(  # pragma: no cover - exercised via the wrapper
         length_j = length[j]
 
         # Time-invariant factors, the same expressions the numpy path hoists.
-        crack_term = CRACK_RESISTANCE_FACTOR * d_bl_j
+        crack_term = crack_factor * d_bl_j
         uplift_resistance = (gamma_bl_sub[j] * d_bl_j) / GAMMA_W
         heave_resistance = gamma_bl_sub[j] / GAMMA_W
         rate_coefficient = POL_RATE_COEFFICIENT * c_e_j
@@ -194,6 +195,7 @@ def integrate_progression_numba(
     seepage_length_m: ArrayLike,
     *,
     l_ini_m: ArrayLike = 0.0,
+    crack_resistance_factor: float | None = None,
 ) -> ProgressionResult:
     """Numba-parallel forward-Euler timestepper (opt-in M7 backend, ADR-0029).
 
@@ -227,6 +229,14 @@ def integrate_progression_numba(
         Initial pipe length [m], default 0. Must satisfy ``l_ini <= L``
         (validated — the numpy path's per-step monotonicity assert catches
         this; the kernel guarantees monotonicity structurally instead).
+    crack_resistance_factor : float, optional
+        Keyword-only ADR-0051 override of the Pol SIE 2024 Eq. (6) crack
+        coefficient, resolved through the shared
+        :func:`~bep_reliability_engine.progression.resolve_crack_resistance_factor`
+        so both backends read one definition. ``None`` (default) is the
+        published 0.3; ``0.0`` gives the gross erosion head. Unlike the
+        ADR-0041 end factor, this knob **is** supported here: the coefficient
+        is a kernel argument rather than a baked-in constant.
 
     Returns
     -------
@@ -238,9 +248,10 @@ def integrate_progression_numba(
     Raises
     ------
     ValueError
-        If any input is non-finite, if ``l_ini > L`` anywhere, or if C_e is
+        If any input is non-finite, if ``l_ini > L`` anywhere, if C_e is
         negative anywhere (the kernel relies on ``dl >= 0`` being structural;
-        the numpy path enforces the same invariant with its per-step assert).
+        the numpy path enforces the same invariant with its per-step assert),
+        or if ``crack_resistance_factor`` is negative (ADR-0051).
 
     Notes
     -----
@@ -250,6 +261,7 @@ def integrate_progression_numba(
     the last ulp (module docstring; ADR-0029). First call per process pays
     one JIT compilation (cached on disk thereafter via ``cache=True``).
     """
+    crack_factor = resolve_crack_resistance_factor(crack_resistance_factor)
     h_river = np.ascontiguousarray(np.asarray(h_river_m, dtype=np.float64))
     if not np.all(np.isfinite(h_river)):
         raise ValueError(
@@ -318,6 +330,7 @@ def integrate_progression_numba(
         l_c_v,
         length_v,
         l_ini_v,
+        crack_factor,
     )
 
     return ProgressionResult(

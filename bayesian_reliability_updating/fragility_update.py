@@ -300,6 +300,7 @@ def verify_posterior_fragility_by_reevaluation(
             model_factor_samples=model_factor_accepted,
             critical_length_factor=config.critical_length_factor,
             toe_gradient_relief_factor=config.toe_gradient_relief_factor,
+            crack_resistance_factor=config.crack_resistance_factor,
         )
         flag_mismatch_static += int((col_static != retained_stat[:, i]).sum())
         flag_mismatch_trans += int((col_trans != retained_tran[:, i]).sum())

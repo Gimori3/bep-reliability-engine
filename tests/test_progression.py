@@ -971,6 +971,9 @@ def test_public_interface_and_pinned_constants() -> None:
         "equilibrium_head",
         "integrate_progression",
         "progression_rate",
+        # ADR-0051: the shared resolver both backends read for the opt-in
+        # crack-resistance override. Additive; the constant above is unchanged.
+        "resolve_crack_resistance_factor",
     }
     assert POL_RATE_COEFFICIENT == 89.0
     assert POL_RATE_EXPONENT == 0.81
@@ -1018,6 +1021,10 @@ def test_public_interface_and_pinned_constants() -> None:
             "l_ini_m",
             "store_trajectory",
             "equilibrium_end_factor",
+            # ADR-0051: the keyword-only crack-resistance override
+            # (default None -> the pinned CRACK_RESISTANCE_FACTOR,
+            # bit-identical), added in the same additive style.
+            "crack_resistance_factor",
         ),
     }
     for name, expected_params in expected_signatures.items():

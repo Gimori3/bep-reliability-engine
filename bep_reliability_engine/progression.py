@@ -28,7 +28,10 @@ them (spec §5 lists mixing as a known error):
   r_e models the intact-blanket damping and applies only to the uplift/heave
   head (Eq. (10)). The two coincide for the r_e = 1 calibration
   configurations (B25-245, S2-2, FPH). Feeds the rate kernel only, never the
-  uplift/heave gate.
+  uplift/heave gate. The 0.3 coefficient is overridable through the
+  keyword-only ``crack_resistance_factor`` (ADR-0051, default None = 0.3);
+  ``0.0`` gives the gross erosion head ``h(t) - z_toe``, the same head
+  convention the static comparator uses.
 
 Datum: all heads pivot on z_toe, the polder surface elevation at the
 landside exit point, identical to Pol's h_e (ADR-0007; physics note
@@ -106,6 +109,7 @@ __all__ = [
     "equilibrium_head",
     "integrate_progression",
     "progression_rate",
+    "resolve_crack_resistance_factor",
 ]
 
 # Regression coefficients of the Pol progression rate (SIE 2024 Eq. (5);
@@ -117,6 +121,10 @@ POL_RATE_EXPONENT: float = 0.81
 # Crack-resistance head loss over the blanket, H = dh_blanket - 0.3 * D_bl
 # (Pol SIE 2024 Eq. (6); TAW 1999; Schweckendiek et al. 2014). M7-only:
 # initiation.py is signature-guarded against ever seeing this term.
+# The coefficient is a Dutch assessment-rule convention, not a Sellmeijer
+# (2011) term: it appears nowhere in that paper. ADR-0051 makes it
+# overridable (``crack_resistance_factor``) so the two limit states can be
+# compared on one head convention; the published 0.3 stays the default.
 CRACK_RESISTANCE_FACTOR: float = 0.3
 
 # End anchor of the equilibrium curve, H_eq(L) = 0.9 * H_c (Pol SIE 2024
@@ -156,6 +164,45 @@ class ProgressionResult(NamedTuple):
     maps to t = k * dt_s (first sample at t = 0). NaN where never. This is the
     repo diagnostic, NOT [SIE24] Eq. (7)'s three-way sand-boil proxy, which
     adds an H > H_eq clause (module docstring)."""
+
+
+def resolve_crack_resistance_factor(factor: float | None) -> float:
+    """Resolve the ADR-0051 crack-resistance override to a usable coefficient.
+
+    Parameters
+    ----------
+    factor : float or None
+        ``None`` (the production default) resolves to the published
+        :data:`CRACK_RESISTANCE_FACTOR` = 0.3 of Pol SIE 2024 Eq. (6); any
+        non-negative float replaces it. ``0.0`` removes the term, leaving the
+        gross erosion head ``h(t) - z_toe`` -- the same head convention the
+        static Sellmeijer comparator uses (ADR-0051).
+
+    Returns
+    -------
+    float
+        The coefficient multiplying ``D_bl`` in the erosion driver. When
+        ``factor`` is None this is the module constant itself, so the
+        downstream expression is bit-identical to the pre-ADR-0051 code.
+
+    Raises
+    ------
+    ValueError
+        If ``factor`` is negative. A negative coefficient would *raise* the
+        erosion head above the gross head; no source licenses that, and the
+        two published readings (0.3, and 0.0 for "no crack resistance") both
+        sit at or above zero.
+    """
+    if factor is None:
+        return CRACK_RESISTANCE_FACTOR
+    value = float(factor)
+    if value < 0.0:
+        raise ValueError(
+            "crack_resistance_factor must be non-negative (got "
+            f"{factor!r}); a negative coefficient would add driving head "
+            "above the gross outer level, which no source licenses."
+        )
+    return value
 
 
 def equilibrium_head(
@@ -327,6 +374,7 @@ def integrate_progression(
     l_ini_m: ArrayLike = 0.0,
     store_trajectory: bool = False,
     equilibrium_end_factor: float | None = None,
+    crack_resistance_factor: float | None = None,
 ) -> ProgressionResult:
     """Forward-Euler timestepper for the pipe length over one event.
 
@@ -420,6 +468,17 @@ def integrate_progression(
         ``EQUILIBRIUM_END_FACTOR`` = 0.9 through the identical expression,
         bit-identical to prior behavior. Analysis-only; never a production
         setting.
+    crack_resistance_factor : float, optional
+        Keyword-only override of the crack-resistance coefficient in step (c)
+        (ADR-0051, following the same pattern). ``None`` (default) resolves to
+        the published ``CRACK_RESISTANCE_FACTOR`` = 0.3 through the identical
+        expression -- bit-identical to prior behavior. ``0.0`` removes the term
+        entirely, so the erosion driver becomes the **gross** head
+        ``H_erosion = h(t) - z_toe``, the same head convention the static
+        Sellmeijer comparator uses (ADR-0028) -- the equal-head-convention
+        experiment. Must be >= 0: a negative coefficient would *add* driving
+        head, which no source licenses. Touches the erosion driver alone; the
+        uplift/heave gate heads and H_eq are untouched by construction.
 
     Returns
     -------
@@ -453,6 +512,11 @@ def integrate_progression(
     backend (``progression_numba``, config ``timestepper.progression_backend``)
     is faster still but only equivalent to < 1e-10, not bit-identical
     (ADR-0029).
+
+    Raises
+    ------
+    ValueError
+        If ``crack_resistance_factor`` is negative (ADR-0051).
     """
     h_river = np.asarray(h_river_m, dtype=np.float64)
     n_steps = h_river.shape[0]
@@ -487,7 +551,7 @@ def integrate_progression(
     # 0029 loop that re-evaluated them every step (pinned by
     # tests/test_progression_fastpath.py against a reference loop over the
     # public kernels).
-    crack_term = CRACK_RESISTANCE_FACTOR * d_bl  # 0.3*D_bl of (c)
+    crack_term = resolve_crack_resistance_factor(crack_resistance_factor) * d_bl
     uplift_resistance = (gamma_bl_sub * d_bl) / GAMMA_W  # z_uplift resistance
     heave_resistance = gamma_bl_sub / GAMMA_W  # z_heave critical gradient
     rate_coefficient = POL_RATE_COEFFICIENT * c_e_arr  # 89*C_e of (j)
@@ -539,6 +603,8 @@ def integrate_progression(
         # Kept as its own variable and never fed to the initiation kernels
         # (spec §5). The raw outer level is h_river[k] by construction; the
         # head model's r_e/lag translation applies to the gate head alone.
+        # ADR-0051: crack_term carries the overridden coefficient; at 0.0 this
+        # line is exactly the static comparator's gross head h(t) - z_toe.
         h_erosion = (h_t - z_toe_m) - crack_term
 
         # (d, e) uplift limit state (un-reduced head) and its running latch.
