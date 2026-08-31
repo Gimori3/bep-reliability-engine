@@ -199,16 +199,31 @@ all three of its own statements say so:
 
 ### J6. What the field record says
 
+> **Corrected 2026-08-30 (citation audit pass 3).** The figures first recorded here were
+> 142 breaches, 122 overtopping, 14 national breaches, and 72 overtopped national sites
+> at 81 per cent. Those are not the figures of the document the thesis cites. The primary
+> was downloaded and read: MLIT (2020), **1st meeting, Document 2-3**, `doc2-3.pdf`, the
+> `mlit_2020_breach` bib key, gives the numbers below verbatim. The superseded figures
+> are retained in this note rather than deleted, per the repository's dated-pointer rule;
+> read them as the 3rd-meeting document's later tally, not as doc 2-3's.
+
 MLIT (2020), Technical Study Committee on River Levees after Typhoon No. 19 (Hagibis),
-3rd meeting, Document 2:
+1st meeting, Document 2-3 (`mlit_2020_breach`):
 
-- 142 breaches: overtopping 122 (86 %), erosion 12 (9 %), **seepage 2 (1 %)**, unknown 6 (4 %).
-- 14 breaches on nationally managed rivers, 128 on prefecturally managed rivers.
-- **Overtopping was confirmed at 72 nationally managed sites. 14 breached (19 %).
-  58 did not (81 %).**
+- **140 breaches: overtopping 120 (86 %), erosion 12 (9 %), seepage 2 (1 %), unknown 6
+  (4 %).** Verbatim from p. 2: 越水 120/140, 86% / 侵食 12/140 / 浸透 2/140 / 不明 6/140.
+- **12 breaches on nationally managed rivers, 128 on prefecturally managed rivers**, and
+  12 + 128 = 140. Verbatim: 国管理河川の12箇所・県管理河川の128箇所で堤防決壊が発生した.
+- **Overtopping was confirmed at 70 nationally managed sites. 12 breached (17 %). 58 did
+  not (83 %).** Verbatim: 越水が確認された箇所は国管理河川で70箇所（内、決壊は12箇所）.
+  For the prefecturally managed rivers the same page gives 236 overtopped sites of which
+  108 breached.
 
-The 81 per cent figure disposes of a deterministic "overtopping implies failure" rule as
-well, and Uemura's PhD cites it for exactly that purpose.
+The 83 per cent figure disposes of a deterministic "overtopping implies failure" rule as
+well, and Uemura's PhD cites the same record for exactly that purpose.
+
+The thesis carries 140 / 120 / 70 / 58 / 83 per cent and cites doc 2-3 for them, which is
+correct. See `citation_audit_register_2026-08-30.md`, Appendix 3 §5.
 
 ## 3. Where the thesis claim came from
 
@@ -320,6 +335,9 @@ Replace sentences 3 and 4 with:
 > \parencite{mlit_shinsui_manual_2015, uemura_iahs_2024}, a deliberately conservative
 > convention that the 2019 record contradicts at 81 per cent of the nationally managed
 > sites where overtopping was actually observed \parencite{mlit_2020}.
+
+(Superseded 2026-08-30, see the J6 correction: the figure is **83 per cent, 58 of 70**,
+and the key that carries it is `mlit_2020_breach`. The thesis as landed says 83 per cent.)
 
 And replace the closing sentence of the paragraph with:
 
@@ -478,8 +496,9 @@ belong to the embankment-piping route alone. The unqualified generalisation
 "initiation is thus attested at national scale while completion is not" was therefore
 too broad, and it was contradicted by the thesis's own Chapter 5, which validates the
 model against the **2012 Yabe River breach, a foundation-piping completion**. MLIT's
-2019 tally is consistent: seepage caused 2 of 142 breaches, so completion on the
-foundation route is rare rather than absent.
+2019 tally is consistent: seepage caused 2 of 140 breaches (corrected 2026-08-30 from
+142; see the J6 correction), so completion on the foundation route is rare rather than
+absent.
 
 The claim is now scoped in the text: initiation is attested on both routes, confirmed
 completion is rare and, on the embankment route, absent. The Yabe breach is named at the
@@ -511,7 +530,7 @@ keys, em-dash check CLEAN, CJK-in-`.tex` check CLEAN.
 | `mainmatter/1. Introduction.tex` | Paragraph 2: false claim replaced by the design-load framing plus the standard's own duration disclaimer, short variant. Line 26: the scare-quoted "safe" water-level reading becomes "a water-level reading below the design stage" |
 | `mainmatter/2. Theoretical...tex` | Paragraph 1: HWL as design load, demonstrated not presumed, the 40.8 per cent national failure rate, and the correct polarity of the binary rule. Closing sentence rescoped to "threshold judgments at a single design stage". Section on initiation without completion rescoped per Section 9. Loose "crest or the planned high water level" clause dropped at the basin-scale sentence |
 | `mainmatter/3. Study Area...tex` | "a loading Japanese practice treats as the limiting case" becomes "the load Japanese verification is carried out against" |
-| `appendix/appendix-g.tex` | Two additions: the standard's absolute-safety disclaimer with the Design Guideline's damage-record counterpart; and the hazard-mapping convention with the 2019 counter-evidence, 58 of 72 overtopped national sites not breaching. `mlit_teibou_sekkei_2007` added as the primary source for the allowable values |
+| `appendix/appendix-g.tex` | Two additions: the standard's absolute-safety disclaimer with the Design Guideline's damage-record counterpart; and the hazard-mapping convention with the 2019 counter-evidence, 58 of 70 overtopped national sites not breaching (corrected 2026-08-30 from 72; see the J6 correction). `mlit_teibou_sekkei_2007` added as the primary source for the allowable values |
 | `references.bib` | Two entries added: `mlit_teibou_sekkei_2007`, `mlit_shinsui_manual_2015` |
 
 **Citation-year note.** `mlit_teibou_sekkei_2007` carries `year = {2007}, month = {3}`,
