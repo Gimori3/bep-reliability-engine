@@ -144,12 +144,12 @@ RANKING_PANEL_ANCHORS = ("design_hwl", "transition_midpoint")
 STATISTICAL_BRACKETS = ("clopper_pearson", "mc_cov")
 
 BRACKET_LABEL = {
-    "k_aq_prior_mean": r"$k_{aq}$ prior mean",
+    "k_aq_prior_mean": r"$k_\mathrm{aq}$ prior mean",
     "cov_L": r"CoV($L$) 0.10 to 0.40",
-    "z_toe": r"$z_{toe}$ $\pm$0.3 m",
+    "z_toe": r"$z_\mathrm{toe}$ $\pm$0.3 m",
     "L_measurement": r"$L$ measurement",
     "m_p": r"$m_p$ model factor",
-    "gamma_bl_sub_prior_mean": r"$\gamma'_{bl}$ prior mean",
+    "gamma_bl_sub_prior_mean": r"$\gamma'_\mathrm{bl}$ prior mean",
     "clopper_pearson": "Clopper-Pearson (95%)",
     "mc_cov": "Monte Carlo CoV (target)",
 }
@@ -1019,7 +1019,7 @@ def figure_epistemic_ranking(
         f"its anchor ({kp57_4['stage_m_msl']:.2f} m, against a "
         f"{sections['KP57.4']['hwl_m_msl']:.2f} m HWL) carries zero\n"
         "transient failures in $10^5$, so no multiplier is defined\n"
-        "there -- a fact about the section, not a gap",
+        "there: a fact about the section, not a gap",
         transform=axes[0].transAxes,
         fontsize=8,
         color=figstyle.MUTED,
@@ -1184,7 +1184,7 @@ def figure_epistemic_ranking(
     )
     fig.suptitle(
         "Every quantified epistemic bracket as a comparable multiplicative span: "
-        r"$k_{aq}$ is the largest knob at every section and every anchor",
+        r"$k_\mathrm{aq}$ is the largest knob at every section and every anchor",
         fontsize=11.5,
         x=0.008,
         y=0.995,
@@ -1361,7 +1361,7 @@ def figure_kp57_4_bound(evidence: dict[str, Any]) -> tuple[Path, list[dict[str, 
             0.94,
             figstyle.VIOLET,
             f"A1  design HWL, {float(a1['level_m']):.2f} m MSL\n"
-            f"{int(a1['k_transient'])} transient rows in $10^6$ -- UNRESOLVED.\n"
+            f"{int(a1['k_transient'])} transient rows in $10^6$: UNRESOLVED.\n"
             f"Report the Clopper-Pearson bound:  $B \\geq$ {bound_a1:.0f}",
         ),
         (
@@ -1370,7 +1370,7 @@ def figure_kp57_4_bound(evidence: dict[str, Any]) -> tuple[Path, list[dict[str, 
             0.76,
             figstyle.VIOLET,
             f"A2  nearest grid level, {float(a2['level_m']):.2f} m MSL\n"
-            f"{int(a2['k_transient'])} transient rows -- also UNRESOLVED,  "
+            f"{int(a2['k_transient'])} transient rows: also UNRESOLVED,  "
             f"$B \\geq$ {bound_a2:.0f}",
         ),
         (
@@ -1435,7 +1435,7 @@ def figure_kp57_4_bound(evidence: dict[str, Any]) -> tuple[Path, list[dict[str, 
             mew=1.5,
             ls="none",
             ms=6.5,
-            label="unresolved -- not a point estimate",
+            label="unresolved, not a point estimate",
         ),
         plt.Line2D(
             [],
@@ -1545,13 +1545,13 @@ def figure_kp57_4_bound(evidence: dict[str, Any]) -> tuple[Path, list[dict[str, 
 #: and separate by marker fill.
 RQ4_ARM_STYLE = {
     "lambda_ac_100m": {
-        "label": r"$\lambda_{ac}$ = 100 m",
+        "label": r"$\lambda_\mathrm{ac}$ = 100 m",
         "color": figstyle.ORANGE,
         "marker": "o",
         "filled": False,
     },
     "lambda_ac_40m": {
-        "label": r"$\lambda_{ac}$ = 40 m (conservative bracket end)",
+        "label": r"$\lambda_\mathrm{ac}$ = 40 m (conservative bracket end)",
         "color": figstyle.ORANGE,
         "marker": "o",
         "filled": True,
@@ -1666,8 +1666,8 @@ def figure_rq4_brackets(slice_: dict[str, Any]) -> tuple[Path, list[dict[str, An
             ls="none",
             ms=11,
             mew=1.8,
-            label=r"production deliverable, labelled with its absolute "
-            r"$P_f$/yr (matrix $d_{70}$, posterior, $\lambda_{ac}$ = 250 m)",
+            label=r"production deliverable, labeled with its absolute "
+            r"$P_f$/yr (matrix $d_{70}$, posterior, $\lambda_\mathrm{ac}$ = 250 m)",
         )
     )
     fig.legend(
@@ -1679,9 +1679,9 @@ def figure_rq4_brackets(slice_: dict[str, Any]) -> tuple[Path, list[dict[str, An
     )
     fig.suptitle(
         "Phase 3 sensitivity brackets on the annual system failure probability, "
-        "at the four geotechnically characterised sections\n"
+        "at the four geotechnically characterized sections\n"
         r"the bulk $d_{70}$ arm reaches its floor wherever the historical number "
-        "does -- the widest factors there are floor effects, not sensitivities",
+        "does, so the widest factors there are floor effects, not sensitivities",
         fontsize=11.5,
         x=0.008,
         y=0.995,
@@ -1741,8 +1741,8 @@ def figure_rq4_brackets(slice_: dict[str, Any]) -> tuple[Path, list[dict[str, An
 #: The two arms of the ADR-0046 datum bracket. A lower toe raises the head the
 #: structure sees, so ``minus`` is the conservative end.
 ZTOE_ARMS = (
-    ("ztoe_minus0.30m", r"$z_{toe}$ $-$0.30 m", "-"),
-    ("ztoe_plus0.30m", r"$z_{toe}$ $+$0.30 m", "--"),
+    ("ztoe_minus0.30m", r"$z_\mathrm{toe}$ $-$0.30 m", "-"),
+    ("ztoe_plus0.30m", r"$z_\mathrm{toe}$ $+$0.30 m", "--"),
 )
 
 
@@ -1808,8 +1808,13 @@ def figure_epistemic_knobs(
     panels = (
         (axes[0][0], "m_p", "static", r"A  $m_p$ on the static comparator"),
         (axes[0][1], "m_p", "transient", r"B  $m_p$ on the transient limit state"),
-        (axes[1][0], "z_toe", "static", r"C  $z_{toe}$ $\pm$0.3 m, static"),
-        (axes[1][1], "z_toe", "transient", r"D  $z_{toe}$ $\pm$0.3 m, transient"),
+        (axes[1][0], "z_toe", "static", r"C  $z_\mathrm{toe}$ $\pm$0.3 m, static"),
+        (
+            axes[1][1],
+            "z_toe",
+            "transient",
+            r"D  $z_\mathrm{toe}$ $\pm$0.3 m, transient",
+        ),
     )
 
     for ax, knob, branch, title in panels:
@@ -2168,7 +2173,7 @@ def figure_peak_shortcut(slice_: dict[str, Any]) -> tuple[Path, list[dict[str, A
         ax.text(
             float(np.sqrt(replay * peak_only)),
             y + 0.26,
-            f"x{s['over_rejection_factor']:.2f}",
+            rf"$\times${s['over_rejection_factor']:.2f}",
             va="bottom",
             ha="center",
             fontsize=9.5,
@@ -2204,8 +2209,9 @@ def figure_peak_shortcut(slice_: dict[str, Any]) -> tuple[Path, list[dict[str, A
         lw=0,
         zorder=0,
         label=(
-            f"headline band: informative strata only, "
-            f"x{headline['factor_min']:.2f} to x{headline['factor_max']:.2f}"
+            "headline band: informative strata only, "
+            rf"$\times${headline['factor_min']:.2f} to "
+            rf"$\times${headline['factor_max']:.2f}"
         ),
     )
     axb.axvline(1.0, color=figstyle.BASELINE, lw=1.4, zorder=1)
@@ -2225,7 +2231,7 @@ def figure_peak_shortcut(slice_: dict[str, Any]) -> tuple[Path, list[dict[str, A
         axb.text(
             s["over_rejection_factor"] + 0.14,
             y,
-            f"x{s['over_rejection_factor']:.2f}",
+            rf"$\times${s['over_rejection_factor']:.2f}",
             va="center",
             fontsize=9.5,
             fontweight="normal" if s["small_number_regime"] else "bold",
@@ -2262,8 +2268,8 @@ def figure_peak_shortcut(slice_: dict[str, Any]) -> tuple[Path, list[dict[str, A
     fig.suptitle(
         "The peak-only reading of the 2016 survival rejects realizations the "
         "full transient replay retains:\n"
-        f"x{headline['factor_min']:.2f} (KP 58.8) and "
-        f"x{headline['factor_max']:.2f} (KP 60.0), the two strata where the "
+        rf"$\times${headline['factor_min']:.2f} (KP 58.8) and "
+        rf"$\times${headline['factor_max']:.2f} (KP 60.0), the two strata where the "
         "update is informative. Both readings are transient, on one N = $10^5$ "
         "sample.",
         fontsize=11.5,

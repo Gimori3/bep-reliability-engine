@@ -1912,12 +1912,24 @@ def draw_figure(payload: dict[str, Any], path: Path = FIGURE_PATH) -> None:
     measurements = payload.get("measurements", [])
     if not measurements:
         raise ValueError("payload carries no measurements to draw")
+    # ``csv_L_m`` is whatever the geotechnical CSV holds now, which at an
+    # adopted section is the surveyed value and not the survey it replaced.
+    # A section is adopted exactly where the 1998 reading was withdrawn, so
+    # the reference line is named from that rather than labelled "1998
+    # survey" for a number the 1998 survey never carried.
+    adopted = {
+        entry["section"]
+        for entry in payload.get("fragility", [])
+        if "withdrawn_1998" in entry.get("arms", {})
+    }
+    vintage = payload.get("csv_geometry_vintage", "1998")
     n = len(measurements)
     fig, axes = plt.subplots(3, n, figsize=(4.6 * n, 11.0), dpi=140)
     axes = np.atleast_2d(axes)
 
     for column, record in enumerate(measurements):
         label = record["section"]
+        csv_source = "adopted" if label in adopted else f"{vintage} survey"
         nominal = record["nominal_station"]
         stem = f"kp{record['kp']:.1f}".replace(".", "_")
         csv_path = PROFILE_DIR / f"{stem}_profile.csv"
@@ -1968,7 +1980,7 @@ def draw_figure(payload: dict[str, Any], path: Path = FIGURE_PATH) -> None:
             weight="bold",
         )
         ax.set_title(
-            f"{label}  (1998 survey {record['csv_L_m']:.1f} m, "
+            f"{label}  ({csv_source} {record['csv_L_m']:.1f} m, "
             f"{record['remediation_state']})",
             fontsize=11,
         )
@@ -2007,7 +2019,7 @@ def draw_figure(payload: dict[str, Any], path: Path = FIGURE_PATH) -> None:
             color="#d62728",
             ls=":",
             lw=1.6,
-            label=f"1998 survey {record['csv_L_m']:.1f} m",
+            label=f"{csv_source} {record['csv_L_m']:.1f} m",
         )
         ax.set_xlabel("chainage offset from the section [m]")
         if column == 0:

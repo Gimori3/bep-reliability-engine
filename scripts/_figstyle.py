@@ -186,7 +186,7 @@ def mark_hypothetical(
     """Shade the ADR-0024 above-crest grid extension as unattainable.
 
     KP 62.0's conditioning grid runs past the physically attainable maximum
-    stage purely to stabilise the lognormal fit. Those levels must never be
+    stage purely to stabilize the lognormal fit. Those levels must never be
     read as attainable, so every figure whose x axis crosses
     ``attainable_max_m`` shades and labels the region beyond it.
     """
@@ -199,7 +199,7 @@ def mark_hypothetical(
         ax.text(
             attainable_max_m + 0.02 * (hi - lo),
             label_y,
-            "hypothetical fit stabiliser\n(above the attainable stage)",
+            "hypothetical fit stabilizer\n(above the attainable stage)",
             transform=ax.get_xaxis_transform(),
             fontsize=8,
             color=MUTED,

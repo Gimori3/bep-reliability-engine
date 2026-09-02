@@ -73,12 +73,16 @@ def fig_timeline(results: dict) -> None:
         sharex=True,
         gridspec_kw={"hspace": 0.45},
     )
+    # The reported probability is that the endpoint is ever reached over the
+    # whole simulated window, which is not the probability of reaching it
+    # inside the observed interval; the label names the endpoint so the two
+    # cannot be read for each other.
     panels = [
-        ("full", "time to l ≥ L (modelled breach)"),
-        ("lc", "time to l ≥ l_c (point of no return)"),
+        ("full", "time to l ≥ L (modeled breach)", "P(l ≥ L)"),
+        ("lc", "time to l ≥ l_c (point of no return)", "P(l ≥ l_c)"),
     ]
     ks = [3.4e-4, 1.0e-3, 3.1e-3]
-    for ax, (lab, title) in zip(axes, panels):
+    for ax, (lab, title, reach_label) in zip(axes, panels):
         ax.axvline(obs, color=INK, lw=1.4, ls=(0, (6, 3)))
         for i, k in enumerate(ks):
             r = next(x for x in rows if abs(x["k_aq_mean"] - k) < 1e-9)
@@ -92,7 +96,12 @@ def fig_timeline(results: dict) -> None:
                 ax.plot([q25, q75], [y, y], color=c, lw=5.5, solid_capstyle="round")
                 ax.plot(q50, y, "o", ms=8, mfc=SURFACE, mec=c, mew=2.0)
             ax.text(
-                13.55, y, f"P(reach) = {p:.2f}", color=INK2, fontsize=8, va="center"
+                13.55,
+                y,
+                f"{reach_label} = {p:.2f}",
+                color=INK2,
+                fontsize=8,
+                va="center",
             )
         ax.set_yticks(range(len(ks)))
         ax.set_yticklabels([K_LABEL[k] for k in reversed(ks)], fontsize=8, color=INK2)
@@ -110,7 +119,7 @@ def fig_timeline(results: dict) -> None:
     )
     axes[1].set_xlabel(
         "hours after forced initiation at anchor A2 "
-        "(5-95% whisker, 25-75% bar, median dot)"
+        "(whisker 5 to 95, bar 25 to 75 per cent, median dot)"
     )
     fig.suptitle(
         "Yabe R7.3k forced-clock timeline test: Pol progression vs the "

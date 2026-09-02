@@ -63,7 +63,7 @@ D70_DISPLAY_NAMES: dict[str, str] = {
     "matrix": "matrix $d_{70}$",
     "bulk": "bulk $d_{70}$",
 }
-LAMBDA_AC_SYMBOL = r"$\lambda_{ac}$"
+LAMBDA_AC_SYMBOL = r"$\lambda_\mathrm{ac}$"
 INK = "#0b0b0b"
 INK_2 = "#52514e"
 MUTED = "#898781"
@@ -260,7 +260,7 @@ def fig_bep_sections(curves: dict) -> None:
                 rotation=90,
                 va="center",
             )
-        ax.set_title(key.replace("_", " ").replace("KP", "KP "))
+        ax.set_title(f"Tokachi KP {kp:.1f}")
         ax.set_xlabel("Water level h [m MSL]")
         ax.set_ylabel("P(failure | h)")
     handles, labels = axes[0, 0].get_legend_handles_labels()
@@ -346,7 +346,7 @@ def fig_climate_shift(df: pd.DataFrame) -> None:
         # on the last letter of its own legend entry.
         ax.set_ylim(top=ax.get_ylim()[1] * 12.0)
         ax.set_title(river)
-        ax.set_ylabel("Annual system P_f [1/yr]" if j == 0 else "")
+        ax.set_ylabel("Annual system $P_f$ [1/yr]" if j == 0 else "")
         ax.legend(fontsize=8.5, loc="upper left")
 
         merged = hist.merge(futu, on="kp", suffixes=("_h", "_f"))
@@ -367,9 +367,9 @@ def fig_climate_shift(df: pd.DataFrame) -> None:
         "REACH CONTEXT (not the RQ4 answer): climate shift of the annualized "
         "system failure probability over all 114 segments\n"
         f"posterior BEP, {D70_DISPLAY_NAMES['matrix']}. 110 of 114 segments "
-        "have no geotechnically characterised cross-section of their own and "
+        "have no geotechnically characterized cross-section of their own and "
         "are surface-only LOWER BOUNDS;\n"
-        "the quantified RQ4 answer is the four characterised sections, given "
+        "the quantified RQ4 answer is the four characterized sections, given "
         "separately.",
         fontsize=9.5,
         color=INK_2,
@@ -476,7 +476,7 @@ def fig_rq4_four_sections(df: pd.DataFrame) -> None:
     ax.set_xticks(x, labels)
     ax.set_ylabel("annual system $P_f$ [1/yr]")
     ax.set_title(
-        "RQ4: annual system failure probability at the four characterised "
+        "RQ4: annual system failure probability at the four characterized "
         f"sections\nposterior BEP, {D70_DISPLAY_NAMES['matrix']}, "
         f"{LAMBDA_AC_SYMBOL} = 250 m, primary surface curves",
         loc="left",
@@ -520,7 +520,7 @@ def fig_rq4_four_sections(df: pd.DataFrame) -> None:
     )
     for xi, value, top in zip(x, ratio, ratio_band[1]):
         ax2.annotate(
-            f"{value:.1f}x",
+            rf"$\times${value:.1f}",
             (xi, top),
             textcoords="offset points",
             xytext=(0, 5),
@@ -568,7 +568,7 @@ def fig_attribution(attr: dict) -> None:
             np.maximum(long_v, FLOOR),
             width * 0.9,
             color=tint,
-            label="> 24 h above toe",
+            label=r"$>$ 24 h above toe",
         )
         ax.bar(
             x + width / 2,
@@ -576,7 +576,7 @@ def fig_attribution(attr: dict) -> None:
             width * 0.9,
             color=tint,
             alpha=0.35,
-            label="<= 24 h above toe",
+            label=r"$\leq$ 24 h above toe",
         )
         ax.plot(
             x,
@@ -585,14 +585,19 @@ def fig_attribution(attr: dict) -> None:
             ls="none",
             ms=6,
             color=INK,
-            label="compound years (>= 2 excursions)",
+            label=r"compound years ($\geq$ 2 excursions)",
         )
         ax.set_yscale("log")
         ax.set_xticks(x)
-        ax.set_xticklabels([s.replace("Tokachi_", "") for s in sections])
+        # The record's node keys carry the chainage without its decimal at two
+        # sections; the thesis names every section to one, so the display name
+        # is normalised here rather than left to the key.
+        ax.set_xticklabels(
+            [f"KP {float(s.split('KP')[-1]):.1f}" for s in sections],
+        )
         ax.set_title(scen)
         ax.legend(fontsize=8.5)
-    axes[0].set_ylabel("Conditional annual system P_f within stratum")
+    axes[0].set_ylabel("Conditional annual system $P_f$ within stratum")
     fig.suptitle(
         "RQ4 attribution: duration- and compound-stratified conditional "
         f"failure probability (BEP sections, posterior, "
@@ -639,8 +644,8 @@ def fig_event_validation(df: pd.DataFrame, val: dict) -> None:
     ax.set_yscale("log")
     ax.set_xlim(*lims)
     ax.set_ylim(*lims)
-    ax.set_xlabel("Event-based annual P_f (full d4PDF ensembles)")
-    ax.set_ylabel("Curve-based annual P_f (canonical conditioning)")
+    ax.set_xlabel("Event-based annual $P_f$ (full d4PDF ensembles)")
+    ax.set_ylabel("Curve-based annual $P_f$ (canonical conditioning)")
     handles = [
         plt.Line2D(
             [], [], marker="o", ls="none", color=MECH_COLORS[m], label=MECH_LABELS[m]

@@ -100,8 +100,8 @@ QOI_KEYS = ["trans_indicator", "static_indicator", "l_fraction", "z_static"]
 QOI_LABELS = {
     "trans_indicator": "Y1: transient failure indicator",
     "static_indicator": "Y2: static failure indicator",
-    "l_fraction": "Y3: final erosion fraction l_e/L",
-    "z_static": "Y4: static margin Z_static",
+    "l_fraction": "Y3: final erosion fraction $l_e/L$",
+    "z_static": "Y4: static margin $Z_\\mathrm{static}$",
 }
 
 # Seed-stream tags (SeedSequence entropy words): the GSA draws its own stream
@@ -124,12 +124,12 @@ INPUT_COLORS = {
     "L": "#eb6834",
 }
 INPUT_TEX = {
-    "k_aq": r"$k_{aq}$",
+    "k_aq": r"$k_\mathrm{aq}$",
     "d_70": r"$d_{70}$",
-    "D_aq": r"$D_{aq}$",
-    "D_bl": r"$D_{bl}$",
-    "k_bl": r"$k_{bl}$",
-    "gamma_bl_sub": r"$\gamma'_{bl}$",
+    "D_aq": r"$D_\mathrm{aq}$",
+    "D_bl": r"$D_\mathrm{bl}$",
+    "k_bl": r"$k_\mathrm{bl}$",
+    "gamma_bl_sub": r"$\gamma'_\mathrm{bl}$",
     "C_e": r"$C_e$",
     "L": r"$L$",
 }
@@ -614,7 +614,7 @@ def _fig_indices_bars(payload: dict, slug: str) -> None:
         f"Sobol' indices at the design level h = {design['level_m']:.2f} m "
         f"MSL, {_section_label(payload['cross_section_id'])} "
         f"({payload['d70_interpretation']} $d_{{70}}$), "
-        f"R = {payload['n_replicates']} scramblings, 95% CI",
+        f"R = {payload['n_replicates']} scramblings, 95 per cent CI",
         fontsize=11,
         color=_INK,
     )
@@ -758,7 +758,7 @@ def _fig_convergence(payload: dict, slug: str) -> None:
         label = "first-order $S_i$" if which == "S" else "total-effect $S_{Ti}$"
         ax.set_title(label, fontsize=10, color=_INK)
         ax.set_xlabel("base sample N per replicate", fontsize=9, color=_INK_2)
-    axes[0].set_ylabel("Sobol' index (95% CI)", fontsize=9, color=_INK_2)
+    axes[0].set_ylabel("Sobol' index (95 per cent CI)", fontsize=9, color=_INK_2)
     drift = design["qois"]["trans_indicator"]["convergence"]
     worst_drift = max(drift["drift_S_last_two_rungs"], drift["drift_ST_last_two_rungs"])
     fig.suptitle(
@@ -807,7 +807,7 @@ def _fig_interaction_gap(payload: dict, slug: str) -> None:
     ax.set_title(
         f"Interaction involvement, transient indicator, "
         f"{_section_label(payload['cross_section_id'])} "
-        "(the $C_e \\times k_{aq}$ interaction)",
+        "(the $C_e \\times k_\\mathrm{aq}$ interaction)",
         fontsize=10,
         color=_INK,
     )
@@ -838,7 +838,7 @@ def _fig_companions(comp: dict, baseline_payload: dict) -> None:
     labels = {
         "baseline (matrix, two-population)": "baseline (matrix, indep.)",
         "bulk_d70": f"bulk $d_{{70}}$ (h={bulk_level:.1f} m, matched position)",
-        "nataf_anchor_k_aq": r"Nataf $\rho$=0.6, $k_{aq}$ full",
+        "nataf_anchor_k_aq": r"Nataf $\rho$=0.6, $k_\mathrm{aq}$ full",
         "nataf_anchor_d_70": r"Nataf $\rho$=0.6, $d_{70}$ full",
     }
     for s, (tag, rung) in enumerate(series):

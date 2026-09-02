@@ -71,7 +71,7 @@ SURFACE = "#fcfcfb"
 
 KP634_NOTE = (
     "KP 63.4 excluded by design: unconfined section, no A$_c$ blanket "
-    "(k$_{bl}$ not determined there), so the confined-blanket BEP model "
+    "(k$_\\mathrm{bl}$ not determined there), so the confined-blanket BEP model "
     "(uplift/heave gate) does not apply."
 )
 
@@ -270,7 +270,7 @@ def figure_per_section(data: dict[str, dict]) -> None:
     footnote(
         fig,
         data,
-        "Points: raw MC estimates with 95% Clopper–Pearson CIs; "
+        "Points: raw MC estimates with 95 per cent Clopper-Pearson CIs; "
         "lines: fitted lognormal deliverables.",
     )
     fig.tight_layout(rect=(0, 0.055, 1, 0.95))
@@ -322,7 +322,7 @@ def figure_comparison(data: dict[str, dict]) -> None:
                     fontweight="bold",
                 )
         ax.set_title(titles[branch], loc="left")
-        ax.set_xlabel("water level above landside toe  h − z$_{toe}$  [m]")
+        ax.set_xlabel("water level above landside toe  h − z$_\\mathrm{toe}$  [m]")
         ax.set_xlim(0.0, 8.0)
         ax.set_ylim(-0.03, 1.03)
     axes[0].set_ylabel("P(failure | h)")
@@ -357,7 +357,7 @@ def figure_comparison(data: dict[str, dict]) -> None:
     footnote(
         fig,
         data,
-        "KP 62.0 points beyond h − z$_{toe}$ ≈ 5.5 m come from the "
+        "KP 62.0 points beyond h − z$_\\mathrm{toe}$ ≈ 5.5 m come from the "
         "hypothetical fit-stabilizer grid extension (unattainable stages).",
     )
     fig.tight_layout(rect=(0, 0.075, 1, 0.94))
@@ -426,7 +426,7 @@ def figure_tail_log(data: dict[str, dict]) -> None:
         fontsize=10,
     )
     fig.suptitle(
-        "Tail view: raw MC points, 95% binomial CIs (log scale)",
+        "Tail view: raw MC points, 95 per cent binomial CIs (log scale)",
         x=0.01,
         ha="left",
         fontsize=14,

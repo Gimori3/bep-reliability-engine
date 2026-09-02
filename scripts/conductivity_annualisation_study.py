@@ -2021,7 +2021,10 @@ def render_figure(payload: dict[str, Any], out_dir: Path) -> Path:
     fig.text(
         0.5,
         -0.21,
-        "Open circles mark the production value. Both panels: four surveyed "
+        # An open marker already means the warming scenario in the right-hand
+        # legend, so the production value is named by the ring that is drawn
+        # over it, which is also the word the caption uses.
+        "Rings mark the production value. Both panels: four surveyed "
         "sections, corrected surface curves, 200 m segments.",
         ha="center",
         fontsize=8.5,

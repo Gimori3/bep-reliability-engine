@@ -787,7 +787,7 @@ def make_figure(
     ax_b.text(
         0.99,
         traj["l_c_m"],
-        " l_c",
+        r" $l_c$",
         color=muted,
         fontsize=8,
         va="bottom",
@@ -798,7 +798,7 @@ def make_figure(
     ax_b.text(
         0.99,
         traj["L_m"],
-        " L (breach)",
+        r" $L$ (breach)",
         color=muted,
         fontsize=8,
         va="bottom",
@@ -806,7 +806,7 @@ def make_figure(
         transform=ax_b.get_yaxis_transform(),
     )
     ax_b.set_xlabel("time [h]")
-    ax_b.set_ylabel("pipe length l(t) [m]")
+    ax_b.set_ylabel(r"pipe length $l(t)$ [m]")
     ax_b.set_title(
         f"(b) Worst-case trajectories at h = {traj['showcase_level_m_msl']:g} m MSL"
         f" ({_section_label(primary_id)})",
@@ -834,9 +834,10 @@ def make_figure(
             label=f"Δt = {_dt_label(dt)}",
         )
     ax_c.set_xlabel("conditioning stage h [m MSL]")
-    ax_c.set_ylabel("terminal eroded length l_e [m]")
+    ax_c.set_ylabel(r"terminal eroded length $l_e$ [m]")
     ax_c.set_title(
-        f"(c) Terminal l_e vs stage, worst-case θ ({_section_label(primary_id)})",
+        "(c) Terminal $l_e$ vs stage, worst-case "
+        rf"$\theta$ ({_section_label(primary_id)})",
         loc="left",
         fontsize=10,
     )
@@ -885,7 +886,7 @@ def make_figure(
     ax_d.text(
         0.02,
         REL_CRITERION,
-        " 1% criterion",
+        " 1 per cent criterion",
         color=muted,
         fontsize=8,
         va="bottom",
@@ -901,7 +902,7 @@ def make_figure(
     )
     ax_d.minorticks_off()
     ax_d.set_xlabel("Δt [s] (error of Δt vs Δt/2, plotted at Δt)")
-    ax_d.set_ylabel("max relative change in terminal l_e [-]")
+    ax_d.set_ylabel(r"max relative change in terminal $l_e$ [-]")
     ax_d.set_title(
         "(d) Successive-halving convergence (open markers: branch flips)",
         loc="left",
@@ -912,7 +913,8 @@ def make_figure(
 
     fig.suptitle(
         "Worst-case forward-Euler timestep stress test:\n"
-        "p99 k_aq × p99 C_e × p01 D_bl on the flashiest d4PDF rising limb",
+        r"p99 $k_\mathrm{aq}$ $\times$ p99 $C_e$ $\times$ p01 $D_\mathrm{bl}$ "
+        "on the flashiest d4PDF rising limb",
         fontsize=11,
         x=0.02,
         ha="left",

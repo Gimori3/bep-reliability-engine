@@ -1600,12 +1600,12 @@ SYNTHESIS_EVIDENCE = (
 #: an arm keeps its hue across every panel and figure.
 ARM_DISPLAY: dict[str, tuple[str, str]] = {
     "m_p": ("$m_p$ (control)", "m_p"),
-    "k_aq_field_toe": ("$k_{aq}$ field toe", "k_aq"),
-    "k_aq_field_geomean": ("$k_{aq}$ field geomean", "k_aq"),
-    "k_aq_regional_upper": ("$k_{aq}$ regional upper", "k_aq"),
-    "gamma_bl_sub_lower": (r"$\gamma'_{bl}$ lower", "gamma_bl_sub"),
-    "z_toe_plus0.30m": ("$z_{toe}$ +0.30 m", "z_toe"),
-    "z_toe_minus0.30m": ("$z_{toe}$ -0.30 m", "z_toe"),
+    "k_aq_field_toe": (r"$k_\mathrm{aq}$ field toe", "k_aq"),
+    "k_aq_field_geomean": (r"$k_\mathrm{aq}$ field geomean", "k_aq"),
+    "k_aq_regional_upper": (r"$k_\mathrm{aq}$ regional upper", "k_aq"),
+    "gamma_bl_sub_lower": (r"$\gamma'_\mathrm{bl}$ lower", "gamma_bl_sub"),
+    "z_toe_plus0.30m": (r"$z_\mathrm{toe}$ +0.30 m", "z_toe"),
+    "z_toe_minus0.30m": (r"$z_\mathrm{toe}$ -0.30 m", "z_toe"),
     "L_withdrawn_1998": ("$L$ withdrawn 1998", "L"),
     "L_dem_clean_median": ("$L$ DEM clean median", "L"),
     "L_dem_all_stations_median": ("$L$ DEM all stations", "L"),
@@ -2064,7 +2064,7 @@ def figure_epistemic_vs_statistical(evidence: dict) -> Path:
             )
             factor = (max(adequate) / min(adequate)) / (bhi / blo)
             ax.annotate(
-                f"{factor:.1f}x wider",
+                rf"{factor:.1f}$\times$ wider",
                 (max(adequate), y + 0.17),
                 textcoords="offset points",
                 xytext=(20, 0),
@@ -2080,7 +2080,7 @@ def figure_epistemic_vs_statistical(evidence: dict) -> Path:
     ax.set_xlim(1.7, 340.0)
     ax.set_xlabel("bias factor $B$ under each epistemic arm")
     ax.set_title(
-        "The epistemic band is 6 to 9x the statistical interval\n"
+        "The epistemic band is 6 to 9 times the statistical interval\n"
         "$N = 10^6$ unweighted; criterion F3 fires at KP 57.4, not at KP 62.0",
         loc="left",
     )
@@ -2098,11 +2098,11 @@ def figure_epistemic_vs_statistical(evidence: dict) -> Path:
             label=label,
         )
         for group, label in (
-            ("k_aq", "$k_{aq}$ prior mean"),
-            ("z_toe", r"$z_{toe}$ $\pm$0.30 m"),
+            ("k_aq", r"$k_\mathrm{aq}$ prior mean"),
+            ("z_toe", r"$z_\mathrm{toe}$ $\pm$0.30 m"),
             ("L", "$L$ measurement"),
             ("m_p", "$m_p$ (control)"),
-            ("gamma_bl_sub", r"$\gamma'_{bl}$ lower"),
+            ("gamma_bl_sub", r"$\gamma'_\mathrm{bl}$ lower"),
         )
     ]
     existing = ax.get_legend_handles_labels()[0]
@@ -2119,8 +2119,8 @@ def figure_epistemic_vs_statistical(evidence: dict) -> Path:
     synth = json.loads(SYNTHESIS_EVIDENCE.read_text(encoding="utf-8"))
     knobs = ["k_aq_prior_mean", "z_toe", "L_measurement", "m_p", "clopper_pearson"]
     knob_label = {
-        "k_aq_prior_mean": "$k_{aq}$\nprior mean",
-        "z_toe": "$z_{toe}$\n" + r"$\pm$0.30 m",
+        "k_aq_prior_mean": r"$k_\mathrm{aq}$" "\nprior mean",
+        "z_toe": r"$z_\mathrm{toe}$" "\n" + r"$\pm$0.30 m",
         "L_measurement": "$L$\nmeasurement",
         "m_p": "$m_p$\n(control)",
         "clopper_pearson": "Clopper-Pearson\n(statistical)",

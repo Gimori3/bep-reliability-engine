@@ -1681,8 +1681,10 @@ def figure_delta_beta_vs_stage(record: dict[str, Any]) -> Path:
         top.set_ylim(0.0, 2.6)
         bottom.set_ylim(0.8, 600.0)
         bottom.set_xlabel("conditioning water level h  [m MSL]")
-    axes[0][0].set_ylabel(r"$\Delta\beta = \beta_{trans} - \beta_{static}$")
-    axes[1][0].set_ylabel("ratio  $B = P_{f,static}/P_{f,trans}$")
+    axes[0][0].set_ylabel(
+        r"$\Delta\beta = \beta_\mathrm{trans} - \beta_\mathrm{static}$"
+    )
+    axes[1][0].set_ylabel("ratio  $B = P_{f,\mathrm{static}}/P_{f,\mathrm{trans}}$")
     fig.suptitle(
         "The same comparison under two metrics: the index difference holds, "
         "the probability ratio decays",
@@ -1928,16 +1930,23 @@ def figure_hwl_dbeta_resolved(record: dict[str, Any]) -> Path:
             va="bottom",
         )
 
+    # The design-HWL callout is a quotation of the anchor, so it reads the
+    # ``design_anchors`` entry rather than the same level's row in the stage
+    # sweep. Both are paired bootstraps of one estimand, and the anchor entry
+    # is the one the reported interval comes from; taking the sweep's own draw
+    # here printed a second interval for a number the report quotes once.
+    anchor = record["design_anchors"]["kp62_0"]
     for level, note, dy in (
         (46.39, "A1  design HWL", 0.99),
         (46.50, "A2  nearest grid level", 0.72),
     ):
         row = _find(usable, level)
+        quoted = anchor if abs(anchor["level_m_msl"] - level) < 1e-9 else row
         for axis in (ax, axz):
             axis.axvline(row["level_m_msl"], color=figstyle.BASELINE, lw=1.0, zorder=1)
         axz.annotate(
             f"{note}\n{row['level_m_msl']:.2f} m MSL\n"
-            rf"$\Delta\beta$ = {row['delta_beta']:.2f} {_ci(row['delta_beta_ci'])}"
+            rf"$\Delta\beta$ = {row['delta_beta']:.2f} {_ci(quoted['delta_beta_ci'])}"
             f"\n{row['k_transient']} transient rows, resolved\n"
             f"($B$ = {row['B']:.1f}, on which R1 and R2 are defined)",
             (0.03, dy),
@@ -1948,7 +1957,7 @@ def figure_hwl_dbeta_resolved(record: dict[str, Any]) -> Path:
             va="top",
         )
 
-    ax.set_ylabel(r"$\Delta\beta = \beta_{trans} - \beta_{static}$")
+    ax.set_ylabel(r"$\Delta\beta = \beta_\mathrm{trans} - \beta_\mathrm{static}$")
     ax.set_title(
         "KP 62.0 conventional-practice bias as an index difference\n"
         "matrix $d_{70}$, adopted $L$ = 40 m, 225 s integration grid",
@@ -1982,7 +1991,7 @@ def figure_hwl_dbeta_resolved(record: dict[str, Any]) -> Path:
     axz.set_ylim(0.62, 1.92)
     axz.set_xlabel("conditioning water level [m MSL]")
     axz.set_ylabel(r"$\Delta\beta$")
-    axz.set_title("The anchor neighbourhood, in index terms", loc="left")
+    axz.set_title("The anchor neighborhood, in index terms", loc="left")
     figstyle.mark_hypothetical(ax, attainable, label=False)
     figstyle.mark_hypothetical(axk, attainable, label_y=0.97)
     return _save(fig, "rq1_hwl_dbeta_resolved.png")
@@ -2056,7 +2065,7 @@ def figure_kp57_dbeta_bound(record: dict[str, Any]) -> Path:
             0.95,
             figstyle.VIOLET,
             f"A1  design HWL, {anchors[0]['level_m_msl']:.2f} m MSL\n"
-            f"{anchors[0]['k_transient']} transient rows in $10^6$ -- UNRESOLVED.\n"
+            f"{anchors[0]['k_transient']} transient rows in $10^6$: UNRESOLVED.\n"
             "Report the one-sided bound:  "
             rf"$\Delta\beta \geq$ {anchors[0]['delta_beta_lower_bound']:.2f}",
         ),
@@ -2066,7 +2075,7 @@ def figure_kp57_dbeta_bound(record: dict[str, Any]) -> Path:
             0.78,
             figstyle.VIOLET,
             f"A2  nearest grid level, {anchors[1]['level_m_msl']:.2f} m MSL\n"
-            f"{anchors[1]['k_transient']} transient rows -- also UNRESOLVED,  "
+            f"{anchors[1]['k_transient']} transient rows: also UNRESOLVED,  "
             rf"$\Delta\beta \geq$ {anchors[1]['delta_beta_lower_bound']:.2f}",
         ),
         (
@@ -2100,7 +2109,7 @@ def figure_kp57_dbeta_bound(record: dict[str, Any]) -> Path:
                 "shrinkB": 3,
             },
         )
-    ax.set_ylabel(r"$\Delta\beta = \beta_{trans} - \beta_{static}$")
+    ax.set_ylabel(r"$\Delta\beta = \beta_\mathrm{trans} - \beta_\mathrm{static}$")
     ax.set_ylim(0.9, 2.9)
     ax.set_title(
         "KP 57.4 at $N = 10^6$: a bound at the design water level, a resolved "
@@ -2128,7 +2137,7 @@ def figure_kp57_dbeta_bound(record: dict[str, Any]) -> Path:
                 mew=1.5,
                 ls="none",
                 ms=6.5,
-                label="unresolved -- not a point estimate",
+                label="unresolved, not a point estimate",
             ),
             plt.Line2D(
                 [],

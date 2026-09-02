@@ -61,9 +61,9 @@ COV_VAL = {
 #: time, in the same symbols the sensitivity figures already use.
 PARAM_LABEL = {
     "L": "$L$",
-    "k_aq": "$k_{aq}$",
+    "k_aq": r"$k_\mathrm{aq}$",
     "C_e": "$C_e$",
-    "D_bl": "$D_{bl}$",
+    "D_bl": r"$D_\mathrm{bl}$",
     "d_70": "$d_{70}$",
 }
 
@@ -173,8 +173,8 @@ def fig_system_and_ceiling() -> None:
         )
     ax.fill_between(lam, 0, 1, color="#D55E00", alpha=0.07)
     ax.fill_between(lam, 1, ratio.max(), color="#009E73", alpha=0.07)
-    ax.set_xlabel("$\\lambda_{ac}$ [m]")
-    ax.set_ylabel("independence over-count = $\\lambda_{ac}/200$")
+    ax.set_xlabel(r"$\lambda_\mathrm{ac}$ [m]")
+    ax.set_ylabel(r"independence over-count = $\lambda_\mathrm{ac}/200$")
     ax.set_title("Reach-scale length effect\n(>1 conservative, <1 under-counts)")
     ax.grid(alpha=0.25)
 
@@ -193,7 +193,7 @@ def fig_system_and_ceiling() -> None:
     ax.set_ylabel("annual BEP reach union")
     ax.set_title(
         "Production 4-section BEP reach union\n"
-        "(1.2-2.0 km apart: bounds within ~1.4-1.7x)"
+        r"(1.2 to 2.0 km apart: bounds within $\times$1.4 to 1.7)"
     )
     ax.legend(fontsize=8)
     ax.grid(alpha=0.25, axis="y")
@@ -221,7 +221,7 @@ def fig_system_and_ceiling() -> None:
     ax.grid(alpha=0.25, axis="y")
 
     fig.suptitle(
-        "Seepage length L at the system level (left, centre) and the "
+        "Seepage length L at the system level (left, center) and the "
         "Phase 2 ceiling (right)",
         fontsize=12,
     )
