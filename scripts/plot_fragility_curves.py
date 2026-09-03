@@ -180,15 +180,21 @@ def annotate_levels(ax, z_toe: float, hwl: float, y_text: float = 0.55) -> None:
 
 
 def run_stamp(data: dict[str, dict]) -> str:
+    """The loading conditions, in the vocabulary of the physics.
+
+    The sample seed and the ensemble member's record id are deliberately not
+    stamped: both are run identifiers, which the thesis main body excludes
+    (``docs/conventions.md`` section 9.3.1), and both are already carried by
+    the JSON sidecar beside every persisted result.
+    """
     side = data["57.4"]["sidecar"]
     dt_s = (
         side["config"]["timestepper"]["target_dt_seconds"]
         or side["hydrograph"]["native_dt_s"]
     )
     return (
-        f"Historical scenario, matrix d$_{{70}}$, N = 10$^5$ Latin hypercube "
-        f"(seed {side['lhs_seed']}), canonical d4PDF shape "
-        f"{data['57.4']['event']}, integration step Δt = {dt_s:g} s.\n"
+        f"Historical scenario, matrix d$_{{70}}$, N = 10$^5$ Latin hypercube, "
+        f"canonical d4PDF compound shape, integration step Δt = {dt_s:g} s.\n"
         f"Raw driving heads on both branches; C$_e$ field prior; "
         f"KP 62.0 at the adopted L = 40 m."
     )

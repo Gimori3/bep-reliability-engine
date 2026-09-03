@@ -357,8 +357,8 @@ def _plot(results: list[dict], n_study: int, n_replicates: int) -> None:
     p_axis = [r["schemes"]["lhs"]["mean_p_f"] for r in results]
     styles = {
         "lhs": ("o-", "tab:blue", "LHS (production sampler)"),
-        "mc": ("s--", "tab:gray", "crude MC (debug fallback)"),
-        "is": ("^-", "tab:red", "tilted IS (ADR-0029)"),
+        "mc": ("s--", "tab:gray", "crude Monte Carlo"),
+        "is": ("^-", "tab:red", "tilted importance sampling"),
     }
     for scheme, (fmt, color, label) in styles.items():
         cov = [r["schemes"][scheme]["empirical_cov"] for r in results]
@@ -367,7 +367,7 @@ def _plot(results: list[dict], n_study: int, n_replicates: int) -> None:
     ax.set_xlabel(r"transient failure probability $P_f$ (deeper tail $\rightarrow$)")
     ax.set_ylabel(r"empirical replicate CoV of $\hat{P}_f$")
     ax.set_title(
-        f"fm5 tail-variance study — KP58.8, N = {n_study:,}, "
+        f"Tail-variance study: KP 58.8, N = {n_study:,}, "
         f"R = {n_replicates} replicates"
     )
     ax.grid(True, which="both", alpha=0.3)

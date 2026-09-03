@@ -1968,10 +1968,11 @@ def figure_tilted_validation(evidence: dict) -> Path:
     fig.text(
         0.5,
         -0.02,
-        "ADR-0029 is not contradicted: the transient-side gain reproduces its "
-        "measured 3.2 to 4.1x. What fails is a new application to a different "
-        "estimand -- a proposal optimised for one branch cannot serve a ratio "
-        "between two.\nPlain-LHS references: static from the N = 1e5 sample's own "
+        "The single-branch gain is not contradicted: the transient side "
+        "reproduces its measured 3.2 to 4.1 times. What fails is a new "
+        "application to a different estimand, a tilt optimized for one branch "
+        "serving a ratio between two.\nPlain-LHS references: static from the "
+        "N = 1e5 sample's own "
         "p per level (as criterion V4 defines it); transient plain-LHS curve in "
         "the left panel from the N = 1e6 ground-truth p, where an N = 1e5 count "
         "of 0 to 4 rows makes a binomial CoV meaningless.",

@@ -534,15 +534,15 @@ def _plot(payload: dict, paths: dict[str, Path]) -> None:
         ax1.set_xscale("log")
         ax1.invert_xaxis()
     ax1.axhline(1.0, color="0.3", ls="--", lw=1.2, label="parity (no advantage)")
-    ax1.set_xlabel(rf"$P_f$ ({branch}) — deeper tail $\rightarrow$")
+    ax1.set_xlabel(rf"$P_f$ ({branch}), deeper tail $\rightarrow$")
     ax1.set_ylabel(r"variance-reduction ratio  $\mathrm{CoV_{MC}}/\mathrm{CoV_{LHS}}$")
     ax1.set_title("LHS advantage decays bulk → tail")
     ax1.grid(True, which="both", alpha=0.3)
     ax1.legend(fontsize=8)
 
     fig.suptitle(
-        f"fm5 tail-variance: LHS vs crude MC — {payload['cross_section_id']}, "
-        f"R={n_rep}",
+        "Stratified against crude sampling, "
+        f"{_section_label(payload['cross_section_id'])}, R = {n_rep} replicates",
         y=1.02,
     )
     fig.tight_layout()

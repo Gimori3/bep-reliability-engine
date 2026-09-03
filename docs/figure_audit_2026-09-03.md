@@ -10,7 +10,9 @@ the PNGs were invisible to all of them. This is the first pass to open them.
 the affected PNGs re-rendered from persisted records, copied into
 `msc-thesis/figures/`, and two figure captions corrected. No computed value was
 changed, no production sweep, Phase 2 replay or Phase 3 campaign was run, and
-no thesis prose outside those two captions was touched.
+no thesis prose outside those two captions was touched. The follow-up pass of
+section 10 extends the same authorisation to six appendix figures, which the
+sweep for two of its items reached.
 
 **Method for every regeneration.** The figure was first re-rendered from the
 committed record with the script unedited and pixel-diffed against the
@@ -102,13 +104,14 @@ section 4.
 
 Key: **N** numbers, **No** notation, **O** orthography, **H** house style,
 **C** convention consistency. `.` = pass, `X` = defect found, `X→f` = defect
-found and fixed, `!` = flagged, deliberately not changed.
+found and fixed, `!` = flagged, deliberately not changed, `!→f` = flagged
+in the first pass and fixed in the follow-up of section 10.
 
 | Figure | N | No | O | H | C | What was found |
 |---|:-:|:-:|:-:|:-:|:-:|---|
 | `study_reach_map.jpg` | . | . | . | X! | . | Ranges as `KP53.8〜KP62.0`, `KP3.2〜KP16.6` (CJK wave dash). No generator; not fixable here |
-| `adr0047_dem_seepage_length.png` | **X→f** | . | . | . | . | **Labelled the adopted 2025 lidar value 40.0 m as "1998 survey"**; the 1998 value is 47 m, as the figure's own bottom panel says. Fixed |
-| `adr0039-timestep-stress.png` | . | X→f | . | X→f | . | `k_aq`/`C_e`/`D_bl`/`l_c`/`l_e`/`l(t)` as ASCII; "1% criterion". Caption named no panel and described a plot that is not drawn (fixed, section 3) |
+| `adr0047_dem_seepage_length.png` | **X→f** | . | . | X!→f | . | **Labelled the adopted 2025 lidar value 40.0 m as "1998 survey"**; the 1998 value is 47 m, as the figure's own bottom panel says. Fixed. House style, and an inverted static/transient hue, fixed in section 10.3 |
+| `adr0039-timestep-stress.png` | . | X→f | . | X→f | . | `k_aq`/`C_e`/`D_bl`/`l_c`/`l_e`/`l(t)` as ASCII; "1% criterion"; ensemble member ids in the legend (fixed, section 10.1). Caption named no panel and described a plot that is not drawn (fixed, section 3) |
 | `validation_shikaga_m4_pattern.png` | . | . | . | . | . | clean |
 | `validation_yabe_timeline.png` | X! | X→f | X→f | X→f | . | "modelled"; `5-95%`, `25-75%`; `P(reach)` collides with a different quantity in the text (section 6) |
 | `gsa_indices_kp58_8_matrix.png` | . | X→f | . | X→f | . | `k_{aq}`, `D_{aq}`, `D_{bl}`, `k_{bl}`, `\gamma'_{bl}` italic against the caption's own upright forms; `l_e/L`, `Z_static` ASCII; "95% CI" |
@@ -116,10 +119,10 @@ found and fixed, `!` = flagged, deliberately not changed.
 | `gsa_levels_kp58_8_matrix.png` | . | X→f | . | . | . | same subscripts |
 | `epistemic_bracket_ranking.png` | . | X→f | . | X→f | ! | `k_{aq}`, `z_{toe}`, `\gamma'_{bl}`; `--` as a dash |
 | `epistemic_vs_statistical.png` | . | X→f | . | X→f | . | `k_{aq}`, `z_{toe}`, `\gamma'_{bl}`; "6 to 9x", "6.4x wider"; "criterion F3" left (section 5) |
-| `fragility_per_section.png` | . | X→f | . | X→f | ! | `k_{bl}` italic; "95% Clopper–Pearson" (en dash + `%`); run seed and member id left (section 5) |
+| `fragility_per_section.png` | . | X→f | . | X→f | ! | `k_{bl}` italic; "95% Clopper–Pearson" (en dash + `%`); run seed and member id in the stamp (fixed, section 10.1) |
 | `initiation_fragility.png` | . | . | . | . | . | clean |
-| `fragility_comparison.png` | . | X→f | . | X→f | ! | `z_{toe}`, `k_{bl}`; en dash; x-axis passes the KP 62.0 attainable maximum with no band (caption says so) |
-| `fragility_tail_log.png` | . | X→f | . | X→f | ! | `z_{toe}`, `k_{bl}`; "95% binomial CIs"; unshaded band, caption compensates (section 4) |
+| `fragility_comparison.png` | . | X→f | . | X→f | ! | `z_{toe}`, `k_{bl}`; en dash; run seed and member id in the stamp (fixed, section 10.1); x-axis passes the KP 62.0 attainable maximum with no band (caption says so) |
+| `fragility_tail_log.png` | . | X→f | . | X→f | ! | `z_{toe}`, `k_{bl}`; "95% binomial CIs"; run seed and member id in the stamp (fixed, section 10.1); unshaded band, caption compensates (section 4) |
 | `rq1_hwl_dbeta_resolved.png` | **X→f** | X→f | X→f | . | . | **`Δβ = 0.90 [0.85, 0.98]` against `[0.85, 0.97]` at six sites in the text.** `\beta_{trans}`, `\beta_{static}`; "neighbourhood"; "stabiliser" (from `_figstyle`) |
 | `rq1_kp57_4_dbeta_bound.png` | . | X→f | . | X→f | . | `\beta_{trans}`, `\beta_{static}`; three `--` dashes. Caption said the anchor is labelled with its interval on `B`; it is labelled on `Δβ` (fixed, section 3) |
 | `rq1_beta_waterfall.png` | . | . | . | . | . | clean; 0.36 / 0.00 / 0.55 and 1.01 / 0.18 / 0.37 both reconcile (section 6) |
@@ -135,7 +138,7 @@ found and fixed, `!` = flagged, deliberately not changed.
 | `phase3_rq4_four_sections.png` | . | X→f | X→f | X→f | . | `\lambda_{ac}`; "characterised"; `12.7x`, `5.5x`, `7.9x` |
 | `rq4_sensitivity_brackets.png` | . | X→f | X→f | X→f | . | `\lambda_{ac}`; "characterised", "labelled"; `--` as a dash |
 | `phase3_rq4_attribution.png` | . | X→f | . | X→f | . | `P_f` as ASCII; `>=`, `<=`; "KP60"/"KP62" tick labels lost their decimal |
-| `r10_foreshore_exhaustion.png` | . | X→f | . | . | . | `v_{lat}`, `T_{mob}` italic against the appendix's own upright forms; "kosuishiki-haba" flagged (section 5) |
+| `r10_foreshore_exhaustion.png` | . | X→f | . | X!→f | . | `v_{lat}`, `T_{mob}` italic against the appendix's own upright forms; "kosuishiki-haba" (fixed, section 10.4) |
 
 ---
 
@@ -197,6 +200,12 @@ Two observations for the owner's decision.
 
 ## 5. Found and deliberately not changed
 
+> **Amended 2026-09-03, later the same day.** The owner directed that items
+> **A**, **D**, **H** and **I** be fixed in full. They are, and section 10
+> records the work. Their entries below are kept as the finding, each with
+> its resolution appended. **B**, **C**, **E**, **F**, **G** and **J** stand
+> as written.
+
 **A. Run identifiers and a seed baked into four main-body figures.**
 `fragility_per_section`, `fragility_comparison` and `fragility_tail_log` stamp
 `seed 20260626` and `canonical d4PDF shape HPB_m064_1987`;
@@ -205,6 +214,9 @@ legend. `_figstyle`'s own house rule bans a run identifier in a main-body
 figure, and the thesis names none of these. Removing them is a provenance
 decision, not a defect fix, so it was left to the owner. All four figures write
 at a fixed canvas size, so the change would be dimension-free.
+**Fixed (section 10.1).** A fifth instance was found while fixing these four:
+`adr0031-tail-lhs-vs-crude.png` and its KP 60.0 twin, in Appendix E, printed
+the raw run identifier `tokachi_kp58.8` in their title.
 
 **B. "rows" where the captions say "realizations".** `rq1_hwl_dbeta_resolved`
 ("transient failing rows", "R1 floor = 30 rows"), `rq1_kp57_4_dbeta_bound`,
@@ -222,6 +234,13 @@ in the figure".
 `stage6_6_heq_kp57_4.png` (Appendix H) title themselves
 "H_eq-conservatism bound (ADR-0009/0041)". Outside the audited main-body set;
 the house rule is written for the main body only. Flagged.
+**Fixed (section 10.2), and the class turned out to be five figures, not two.**
+`epistemic_knobs_mp_ztoe.png` (Appendix I) named ADR-0045, ADR-0021 and
+ADR-0046; `adr0040_tilted_is_validation.png` (Appendix E) named ADR-0029;
+`adr0029-tail-cov.png` (Appendix E) named ADR-0029 and carried the
+failure-mode tag `fm5` and an **em dash**; `adr0032_aquifer_response.png`
+(Appendix E) carried the specification pointer `spec §11`; and
+`adr0031-tail-lhs-vs-crude.png` and its twin carried `fm5` and two em dashes.
 
 **E. `KP57.4` against `KP 57.4`.** The `thesis_figure_gaps` and `stage6_6`
 families render the section without the space; `_figstyle.section_label` and
@@ -249,12 +268,16 @@ has no generator in this repository and cannot be re-rendered here.
 matplotlib palette, boxed legends, all four spines, `alpha=0.3` grid. Bringing
 it onto `_figstyle` would move every element of a twelve-panel figure; out of
 scope for a labelling audit.
+**Fixed (section 10.3).** The restyle also corrected a substantive defect the
+style masked: the figure drew the **transient** branch blue and the **static**
+branch orange, the reverse of the assignment fixed for the whole thesis.
 
 **I. "OYO kosuishiki-haba" in `r10_foreshore_exhaustion.png`.** A romanised
 Japanese term that the thesis itself never uses: Chapter 8, Chapter 9 and
 Appendix I all say "high-water-bed width". The usual romanisation of 高水敷 is
 also *kosuijiki*, not *kosuishiki*. Both a redundancy and a probable
 mis-romanisation, but correcting or deleting it is a terminology decision.
+**Fixed (section 10.4):** the bracket now reads `(OYO survey)`.
 
 **J. `phase2_fragility_update_kp58_8_matrix.png`** carries "CP 95% CI". Its
 generator is `bayesian_reliability_updating/plots.py`, a package module under
@@ -473,3 +496,171 @@ the figure (`rq1_hwl_dbeta_resolved.png`, A1 callout), the equation
 (Chapter 6, `eq: kp62 bias`), Table 9.1, the Chapter 8 restatement, the
 Summary, and the two further sites in Chapter 5 and Chapter 6. Seven sites, one number, one canonical record
 (`design_anchors.kp62_0` in `docs/decisions/rq1-beta-reexpression.json`).
+
+---
+
+## 10. Follow-up pass: items A, D, H and I closed
+
+Directed by the owner after the report above was written. Same method: the
+generator was run unedited and pixel-diffed against the committed PNG first
+wherever the re-render path had not already been proved, then the edit was
+applied and the figure re-rendered. **All sixteen figures touched here keep
+their exact pixel dimensions**, and the isolated build reproduces every gate
+(section 10.6).
+
+Two of the four items turned out to be larger than the report had them. The
+audit's five standards were applied to the 30 main-body figures, so the sweep
+that found items A and D had only looked there. Re-running it over every figure
+that appears anywhere in the thesis, appendices included, found **five** more
+instances. They are fixed too, and the sweep is now clean: no rendered text in
+any figure in this document carries an ADR number, a specification pointer, a
+failure-mode tag, a run identifier, a file-format name or an em dash.
+
+### 10.1 Item A: run identifiers and the sample seed
+
+| Figure | Was | Now |
+|---|---|---|
+| `fragility_per_section.png`, `fragility_comparison.png`, `fragility_tail_log.png` (Ch. 6) | "N = 10^5 Latin hypercube (seed 20260626), canonical d4PDF shape HPB_m064_1987" | "N = 10^5 Latin hypercube, canonical d4PDF compound shape" |
+| `adr0039-timestep-stress.png` (Ch. 5) | legend "flashiest: HPB_m049_2001", "production shape: HPB_m064_1987" | "flashiest historical member", "canonical production shape" |
+| `adr0031-tail-lhs-vs-crude.png` and its KP 60.0 twin (App. E) | title "... tokachi_kp58.8, R=50" | "Stratified against crude sampling, KP 58.8, R = 50 replicates" |
+
+The last row is the fifth instance, found by the re-sweep. It is the exact case
+`_figstyle.section_label` exists to prevent: the driver imports that helper for
+its other figure and had not applied it here. "Canonical d4PDF compound shape"
+is the thesis's own phrase for the loading (Chapter 6). Nothing is lost: the
+seed and both member ids are in the JSON sidecar beside every persisted result,
+which is where run provenance belongs, and the thesis names none of them.
+
+### 10.2 Item D: ADR numbers, specification pointers and failure-mode tags
+
+| Figure | Was | Now |
+|---|---|---|
+| `stage6_6_heq_kp62_0.png`, `stage6_6_heq_kp57_4.png` (App. H) | "H_eq-conservatism bound (ADR-0009/0041)" | "H_eq-conservatism bound" |
+| `epistemic_knobs_mp_ztoe.png` (App. I) | "m_p (ADR-0045, default OFF) and the ADR-0021 surveyed exit datum +-0.3 m (ADR-0046, replay-only)"; "ADR-0045's published x1.5 to 2.5" | "the Sellmeijer model factor m_p and the surveyed exit datum +-0.3 m"; "and x1.5 to 2.5 at the two informative matrix sections alone" |
+| `adr0040_tilted_is_validation.png` (App. E) | "ADR-0029 is not contradicted ... a proposal optimised for one branch", with `--` as a dash | "The single-branch gain is not contradicted ... a tilt optimized for one branch" |
+| `adr0029-tail-cov.png` (App. E) | "fm5 tail-variance study **[em dash]** KP58.8"; legend "tilted IS (ADR-0029)", "crude MC (debug fallback)" | "Tail-variance study: KP 58.8"; "tilted importance sampling", "crude Monte Carlo" |
+| `adr0032_aquifer_response.png` (App. E) | "~1.5 h plateau (spec section 11)" | "~1.5 h plateau (flashy-river expectation)" |
+| `adr0031-tail-lhs-vs-crude.png` and twin (App. E) | "fm5 tail-variance: LHS vs crude MC **[em dash]** ..."; x-label "P_f (transient) **[em dash]** deeper tail" | "Stratified against crude sampling, ..."; "P_f (transient), deeper tail" |
+
+Three of those carried an **em dash** baked into the PNG, which the thesis
+forbids unconditionally and which no source-level check could ever have seen.
+
+Every replacement was checked against the figure's own caption so that the two
+now use one vocabulary: "crude Monte Carlo" and "the tilted importance-sampling
+estimator" are the caption's words for `adr0029-tail-cov`, "Stratified against
+crude sampling at KP 58.8" is the caption's own title for the tail comparison,
+and "the 1.5 hour plateau a flashy river would be expected to produce" is the
+caption's gloss of the line that had cited the specification.
+
+**Kept deliberately:** the pre-registered criterion tags R1, R2, F3, V2 and V4.
+They are the study's own named criteria rather than pointers into the
+repository, three main-body captions name them on purpose, and the audit's item
+C already ruled on F3.
+
+### 10.3 Item H: the DEM figure on the house style
+
+`adr0047_dem_seepage_length.png` now calls `figstyle.style()` and draws from the
+house palette. The geometry is untouched: the same 3 by 4 panel grid, the same
+`figsize` and `dpi`, the same 2576 by 1540 canvas, every mark in the same data
+position.
+
+| Element | Was | Now |
+|---|---|---|
+| **fragility bars** | transient `#1f77b4` blue, static `#ff7f0e` orange | **static `STATIC` blue, transient `TRANSIENT` red** |
+| bar legend | "trans", "static" | "transient", "static" |
+| profile line | `#333333` | `INK` |
+| riverside and landside toe | `#1f77b4` and `#d62728` | `BLUE` and `RED` |
+| crest band | `#ffd27f` at 0.45 | `YELLOW` at 0.22 |
+| clean and rejected stations | `#2ca02c` and `#999999` | `GREEN` and `MUTED` |
+| DEM median, model value | `#2ca02c` and `#d62728` | `GREEN` and `RED` |
+| station callout | `#d62728` bold | `INK_2` bold on a surface plate |
+| legends | boxed | unframed, on a surface plate where they sit over marks |
+| chrome | all four spines, `alpha=0.3` grid, white ground | top and right spines off, hairline solid grid, `SURFACE` ground |
+
+**The colour swap is the substantive part.** The figure drew the transient
+branch blue and the static branch orange, the reverse of the assignment
+`_figstyle` fixes for the whole thesis and that every fragility figure in
+Chapters 5 to 7 uses. A reader who had learned "blue is static" from the
+results chapters was reading this Chapter 3 panel backwards. The values and
+their labels were always correctly paired; only the hue was inverted.
+
+Two house devices carried the unframing without losing legibility. The two
+legends and the station callout sit over marks, so they take the same
+surface-plate treatment `_figstyle.mark_hypothetical` uses for its own label: a
+`SURFACE` patch at 0.85 alpha with no edge. That is a plate, not a frame, and
+the `legend.frameon: False` rcParam stays in force.
+
+Left alone, because they are notation rather than style and the audit's five
+standards were scoped to the main body: `T.P.` as the datum label here against
+`MSL` elsewhere (Chapter 3 is where the datum is established, so `T.P.` is
+right there), and `max |dP_f| vs production` as an ASCII y-label.
+
+### 10.4 Item I: the romanised Japanese term
+
+The `r10_foreshore_exhaustion.png` x-label, "measured high-water-bed width B_f
+[m] **(OYO kosuishiki-haba)**", now reads "**(OYO survey)**". The English
+translation of the term is "high-water-bed width", which the label already
+carried, so the bracket would have said the same thing twice; it names the
+source instead. That is also the thesis's own usage: Chapter 8, Chapter 9 and
+Appendix I all write "high-water-bed width" and none romanises it.
+
+### 10.5 Pixel-diff evidence for the follow-up
+
+All sixteen keep their exact dimensions.
+
+| Figure | size | changed px | changed region |
+|---|---:|---:|---|
+| `adr0029-tail-cov.png` | 1120x736 | 1.705% | (186, 26, 1045, 172) |
+| `adr0031-convergence-n-ladder.png` | 1152x800 | **0.000%** | untouched |
+| `adr0031-convergence-n-ladder-kp60_0_matrix.png` | 1152x800 | **0.000%** | untouched |
+| `adr0031-tail-lhs-vs-crude.png` | 1819x814 | 3.708% | (60, 16, 1802, 796) |
+| `adr0031-tail-lhs-vs-crude-kp60_0_matrix.png` | 1819x814 | 3.457% | (60, 16, 1802, 796) |
+| `adr0032_aquifer_response.png` | 1430x546 | 0.635% | (338, 55, 682, 124) |
+| `adr0039-timestep-stress.png` | 2310x1672 | 0.185% | (158, 292, 661, 353) |
+| `adr0040_tilted_is_validation.png` | 2367x974 | 0.794% | (160, 912, 2206, 932) |
+| `adr0047_dem_seepage_length.png` | 2576x1540 | 99.999% | whole canvas (restyle) |
+| `epistemic_knobs_mp_ztoe.png` | 2263x1318 | 1.370% | (18, 17, 2015, 543) |
+| `fragility_comparison.png` | 2520x1120 | 0.248% | (569, 1004, 1418, 1024) |
+| `fragility_per_section.png` | 2520x1639 | 0.170% | (569, 1525, 1418, 1545) |
+| `fragility_tail_log.png` | 2520x1639 | 0.170% | (569, 1525, 1418, 1545) |
+| `r10_foreshore_exhaustion.png` | 1840x736 | 0.464% | (169, 681, 848, 700) |
+| `stage6_6_heq_kp57_4.png` | 1224x714 | 0.679% | (350, 25, 963, 49) |
+| `stage6_6_heq_kp62_0.png` | 1224x714 | 0.700% | (350, 25, 963, 49) |
+
+Every extent but the DEM figure's is the strip of text that was edited, and
+nothing else. The DEM figure changes on every pixel because the ground colour
+moves from white to `SURFACE`; its marks are unmoved, which the unchanged
+canvas and a panel-by-panel read confirm. The two
+`adr0031-convergence-n-ladder` figures come from the same driver as the tail
+figures and are in the table to show they were re-rendered and did not move.
+
+**Two re-render paths were proved for the first time here.** `figure_heq_bound`
+touches only `result.conditioning_grid`, so it redraws from `components.levels`
+in the persisted analysis record through a two-field stand-in; that the diff is
+confined to the title strip is the proof the grid was reconstructed exactly.
+`aquifer_response_diagnostic.py` has no persisted record and recomputes, so it
+was run unedited first: the output came back byte-identical to the committed
+PNG, which is what licensed the re-render.
+
+### 10.6 The document is still unmoved
+
+Isolated build, same method, after all sixteen figures were copied across.
+
+| Gate | Expected | Measured |
+|---|---|---|
+| undefined references | 0 | **0** |
+| undefined citations | 0 | **0** |
+| multiply-defined labels | 0 | **0** |
+| citation keys | 106 | **106** |
+| labels | 387 | **387** |
+| main body pages | 99 | **99** |
+| References begins on | 100 | **100** |
+| per-chapter map | 6, 10, 12, 12, 11, 18, 12, 11, 7 | **identical** |
+| appendices A to K | 7, 8, 7, 3, 12, 4, 5, 13, 5, 7, 3 = 74 | **identical** |
+| total pages | 193 | **193** |
+| overfull hboxes | 12 or fewer | **12** |
+| worst overfull | 15.4 pt or less | **15.386 pt** |
+
+`ruff check .` clean, `black --check .` clean, `pytest -m "not slow"` 903
+passed, 7 deselected. No thesis prose changed in this pass: the follow-up is
+figures only.

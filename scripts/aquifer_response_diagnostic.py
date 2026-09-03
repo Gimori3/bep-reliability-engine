@@ -258,7 +258,13 @@ def _plot(spreads: dict[str, list[dict]], blocks: dict[str, dict]) -> None:
             label=section,
             color=colors[section],
         )
-    axes[0].axvline(1.5, color="k", ls=":", lw=1, label="~1.5 h plateau (spec §11)")
+    axes[0].axvline(
+        1.5,
+        color="k",
+        ls=":",
+        lw=1,
+        label="~1.5 h plateau (flashy-river expectation)",
+    )
     axes[0].set_xlabel("T_rise (10%->peak) [h]")
     axes[0].set_ylabel("d4PDF members")
     axes[0].set_title("Flood rising-limb time (native hourly grid)")

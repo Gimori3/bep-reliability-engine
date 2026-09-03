@@ -757,7 +757,10 @@ def make_figure(
         traj["chosen_shape"],
         color="#2a78d6",
         lw=1.6,
-        label=f"flashiest: {primary['event_selection']['chosen']['event_id']}",
+        # The ensemble member is named by what it is, not by its record id:
+        # a run identifier is implementation vocabulary the thesis excludes
+        # (conventions section 9.3.1), and the id is in the evidence JSON.
+        label="flashiest historical member",
     )
     ax_a.plot(
         t_h,
@@ -765,7 +768,7 @@ def make_figure(
         color=muted,
         lw=1.2,
         ls="--",
-        label=f"production shape: {traj['production_event_id']}",
+        label="canonical production shape",
     )
     ax_a.set_xlabel("time [h]")
     ax_a.set_ylabel("normalized stage shape [-]")

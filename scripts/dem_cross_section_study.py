@@ -77,6 +77,7 @@ import argparse
 import json
 import re
 import struct
+import sys
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -87,8 +88,12 @@ import numpy as np
 import yaml
 from numpy.typing import NDArray
 
-from bep_reliability_engine.config import Config
-from bep_reliability_engine.run import run_fragility_analysis
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+import _figstyle as figstyle  # noqa: E402
+
+from bep_reliability_engine.config import Config  # noqa: E402
+from bep_reliability_engine.run import run_fragility_analysis  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TILE_DIR = REPO_ROOT / "data/raw/geometry/FG-GML-644331-DEM5A-20250620"
@@ -1480,6 +1485,16 @@ ARM_DISPLAY_NAMES = {
     "withdrawn_1998": "withdrawn 1998 value",
 }
 
+#: House chrome for a legend that has to sit over the marks: a surface plate at
+#: high alpha and no edge, which is the device ``_figstyle.mark_hypothetical``
+#: uses for the same problem. Not a frame; the house rcParam keeps those off.
+_LEGEND_PLATE = {
+    "frameon": True,
+    "facecolor": figstyle.SURFACE,
+    "edgecolor": "none",
+    "framealpha": 0.85,
+}
+
 
 def fragility_arms_from_measurements(
     measurements: list[dict[str, Any]],
@@ -1909,6 +1924,11 @@ def draw_figure(payload: dict[str, Any], path: Path = FIGURE_PATH) -> None:
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
+    # House palette and chrome, so this figure reads as one system with
+    # the rest: the fixed categorical slots, the two limit states on
+    # their thesis-wide hues, hairline solid grid, no legend frames.
+    figstyle.style()
+
     measurements = payload.get("measurements", [])
     if not measurements:
         raise ValueError("payload carries no measurements to draw")
@@ -1939,10 +1959,10 @@ def draw_figure(payload: dict[str, Any], path: Path = FIGURE_PATH) -> None:
         if csv_path.exists():
             offsets, elevation = read_profile_csv(csv_path)
             keep = (offsets >= -160.0) & (offsets <= 160.0)
-            ax.plot(offsets[keep], elevation[keep], color="#333333", lw=1.3)
+            ax.plot(offsets[keep], elevation[keep], color=figstyle.INK, lw=1.3)
         for key, colour, marker in (
-            ("river_toe", "#1f77b4", "v"),
-            ("land_outer_toe", "#d62728", "v"),
+            ("river_toe", figstyle.BLUE, "v"),
+            ("land_outer_toe", figstyle.RED, "v"),
         ):
             ax.plot(
                 nominal[f"{key}_offset_m"],
@@ -1963,8 +1983,8 @@ def draw_figure(payload: dict[str, Any], path: Path = FIGURE_PATH) -> None:
                 if "crest_land_offset_m" in nominal
                 else nominal["crest_width_m"] / 2
             ),
-            color="#ffd27f",
-            alpha=0.45,
+            color=figstyle.YELLOW,
+            alpha=0.22,
             lw=0,
         )
         ax.annotate(
@@ -1976,18 +1996,26 @@ def draw_figure(payload: dict[str, Any], path: Path = FIGURE_PATH) -> None:
             ),
             ha="center",
             fontsize=10,
-            color="#d62728",
+            # Text wears an ink token, never a series colour, and this one
+            # sits over the profile, so it carries the surface plate too.
+            color=figstyle.INK_2,
             weight="bold",
+            bbox={
+                "facecolor": figstyle.SURFACE,
+                "edgecolor": "none",
+                "alpha": 0.85,
+                "pad": 2.0,
+            },
         )
         ax.set_title(
             f"{label}  ({csv_source} {record['csv_L_m']:.1f} m, "
             f"{record['remediation_state']})",
             fontsize=11,
+            color=figstyle.INK,
         )
         ax.set_xlabel("offset from alignment [m]  (negative = riverside)")
         if column == 0:
             ax.set_ylabel("elevation [m T.P.]")
-        ax.grid(alpha=0.3)
 
         # --- row 2: L along the levee ---
         ax = axes[1, column]
@@ -1995,28 +2023,33 @@ def draw_figure(payload: dict[str, Any], path: Path = FIGURE_PATH) -> None:
         offsets = np.asarray(window["chainage_offsets_m"], dtype=float)
         lengths = np.asarray(window["L_by_offset_m"], dtype=float)
         clean = np.asarray(window["clean_station_by_offset"], dtype=bool)
-        ax.plot(offsets, lengths, color="#bbbbbb", lw=1.0, zorder=1)
+        ax.plot(offsets, lengths, color=figstyle.BASELINE, lw=1.0, zorder=1)
         ax.plot(
-            offsets[clean], lengths[clean], "o", color="#2ca02c", ms=5, label="clean"
+            offsets[clean],
+            lengths[clean],
+            "o",
+            color=figstyle.GREEN,
+            ms=5,
+            label="clean",
         )
         ax.plot(
             offsets[~clean],
             lengths[~clean],
             "x",
-            color="#999999",
+            color=figstyle.MUTED,
             ms=6,
             label="rejected",
         )
         ax.axhline(
             window["L_median_clean_m"],
-            color="#2ca02c",
+            color=figstyle.GREEN,
             ls="--",
             lw=1.4,
             label=f"DEM median {window['L_median_clean_m']:.0f} m",
         )
         ax.axhline(
             record["csv_L_m"],
-            color="#d62728",
+            color=figstyle.RED,
             ls=":",
             lw=1.6,
             label=f"{csv_source} {record['csv_L_m']:.1f} m",
@@ -2024,8 +2057,9 @@ def draw_figure(payload: dict[str, Any], path: Path = FIGURE_PATH) -> None:
         ax.set_xlabel("chainage offset from the section [m]")
         if column == 0:
             ax.set_ylabel("picked L [m]")
-        ax.legend(fontsize=7, loc="upper left")
-        ax.grid(alpha=0.3)
+        # Both legends sit over marks, so they carry the house surface
+        # plate rather than a frame, exactly as ``mark_hypothetical`` does.
+        ax.legend(fontsize=7, loc="upper left", **_LEGEND_PLATE)
 
         # --- row 3: the fragility consequence ---
         ax = axes[2, column]
@@ -2033,20 +2067,28 @@ def draw_figure(payload: dict[str, Any], path: Path = FIGURE_PATH) -> None:
             (f for f in payload.get("fragility", []) if f["section"] == label), None
         )
         if entry is None:
-            ax.text(0.5, 0.5, "fragility stage not run", ha="center", va="center")
+            ax.text(
+                0.5,
+                0.5,
+                "fragility stage not run",
+                ha="center",
+                va="center",
+                color=figstyle.MUTED,
+            )
             ax.set_axis_off()
             continue
         names = list(entry["arms"])
         width = 0.36
         positions = np.arange(len(names))
-        for shift, branch, colour in (
-            (-width / 2, "trans", "#1f77b4"),
-            (width / 2, "static", "#ff7f0e"),
+        # STATIC is blue and TRANSIENT is red for the whole thesis; this
+        # figure had them the other way round, which reads backwards
+        # against every fragility figure in the results chapters.
+        for shift, branch, colour, name in (
+            (-width / 2, "trans", figstyle.TRANSIENT, "transient"),
+            (width / 2, "static", figstyle.STATIC, "static"),
         ):
-            values = [
-                entry["arms"][name][branch]["max_abs_delta_P_f"] for name in names
-            ]
-            ax.bar(positions + shift, values, width, label=branch, color=colour)
+            values = [entry["arms"][arm][branch]["max_abs_delta_P_f"] for arm in names]
+            ax.bar(positions + shift, values, width, label=name, color=colour)
             for x, value in zip(positions + shift, values):
                 ax.annotate(
                     f"{value:.3f}",
@@ -2054,6 +2096,7 @@ def draw_figure(payload: dict[str, Any], path: Path = FIGURE_PATH) -> None:
                     ha="center",
                     va="bottom",
                     fontsize=7,
+                    color=figstyle.INK_2,
                 )
         ax.set_xticks(positions)
         ax.set_xticklabels(
@@ -2064,8 +2107,8 @@ def draw_figure(payload: dict[str, Any], path: Path = FIGURE_PATH) -> None:
             fontsize=8,
         )
         ax.set_ylabel("max |dP_f| vs production" if column == 0 else "")
-        ax.legend(fontsize=8)
-        ax.grid(alpha=0.3, axis="y")
+        ax.legend(fontsize=8, **_LEGEND_PLATE)
+        ax.grid(axis="x", visible=False)
 
     fig.suptitle(
         "Seepage length L surveyed from the national elevation model "
@@ -2073,6 +2116,7 @@ def draw_figure(payload: dict[str, Any], path: Path = FIGURE_PATH) -> None:
         f"against the {payload.get('csv_geometry_vintage', '1998')} "
         "OYO cross-section geometry",
         fontsize=13,
+        color=figstyle.INK,
     )
     fig.tight_layout(rect=(0, 0, 1, 0.97))
     path.parent.mkdir(parents=True, exist_ok=True)

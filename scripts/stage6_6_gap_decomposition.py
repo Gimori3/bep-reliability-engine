@@ -749,7 +749,7 @@ def figure_heq_bound(
     ax.set_xlabel("conditioning stage [m MSL]", color=MUTED, fontsize=9)
     ax.set_ylabel("Delta P_f from the 0.9 H_c end anchor", color=MUTED, fontsize=9)
     ax.set_title(
-        f"{spec['label']}  H_eq-conservatism bound (ADR-0009/0041)",
+        f"{spec['label']}  H_eq-conservatism bound",
         color=INK,
         fontsize=10,
     )

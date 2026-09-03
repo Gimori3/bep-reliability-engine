@@ -1949,10 +1949,10 @@ def figure_epistemic_knobs(
         va="top",
     )
     axes[0][1].annotate(
-        r"transient maxima $\times$1.6 to 2.8 over the four sections;"
-        "\nADR-0045's published "
-        r"$\times$1.5 to 2.5 is the same quantity"
-        "\nat the two informative matrix sections",
+        r"transient maxima $\times$1.6 to 2.8 over the four sections,"
+        "\nand "
+        r"$\times$1.5 to 2.5 at the two informative"
+        "\nmatrix sections alone",
         xy=(0.025, 0.40),
         xycoords="axes fraction",
         fontsize=8,
@@ -2050,11 +2050,11 @@ def figure_epistemic_knobs(
         frameon=False,
     )
     fig.suptitle(
-        "The two accepted epistemic knobs, measured at all four matrix sections "
-        "and absent from the thesis until now\n"
-        r"$m_p$ (ADR-0045, default OFF) and the ADR-0021 surveyed exit datum "
-        r"$\pm$0.3 m (ADR-0046, replay-only), on a shared scale: both collapse "
-        "toward 1 as $P_f$ saturates",
+        "The two epistemic knobs measured at all four matrix sections, "
+        "on one shared scale\n"
+        r"the Sellmeijer model factor $m_p$ and the surveyed exit datum "
+        r"$\pm$0.3 m: both collapse toward 1 as $P_f$ saturates, and the "
+        "datum is the wider of the two at the design anchor",
         fontsize=11.5,
         x=0.008,
         y=0.995,

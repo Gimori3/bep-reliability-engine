@@ -453,7 +453,10 @@ def _make_figure(records: list[dict[str, Any]], out_path: Path) -> None:
         )
     ax_a.set_xscale("log")
     ax_a.set_yscale("log")
-    ax_a.set_xlabel("measured high-water-bed width $B_f$ [m] (OYO kosuishiki-haba)")
+    # The bracket carried the Japanese term for the quantity; the thesis
+    # romanises nothing it can translate, and "high-water-bed width" already
+    # is that translation, so the bracket names the source instead.
+    ax_a.set_xlabel("measured high-water-bed width $B_f$ [m] (OYO survey)")
     ax_a.set_ylabel(r"exposure ratio  $v_\mathrm{lat}\,T_\mathrm{mob} / B_f$  [-]")
     ax_a.set_title("(a) Exposure ratio across the retreat-rate bracket")
     ax_a.grid(alpha=0.3, which="both")
