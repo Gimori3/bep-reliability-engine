@@ -1,0 +1,228 @@
+{
+  "record": "examiner-residues-closed-2026-09-04",
+  "purpose": "Closes the three residues left open by docs/examiner_redteam_2026-09-03.md. All three are settled from committed artifacts and read-only recomputation; no engine module, config, persisted sweep or measured production value was touched, and no new sweep was run.",
+  "r1_peak_only_direction": {
+    "residue": "Chapter 6 asserted the peak-only over-rejection's DIRECTION is a property of the method, on the evidence of two conditioning events both longer than the 2016 record. The sign would reverse for a conditioning wave shorter than the survival event, and that case was untested.",
+    "verdict": "CLOSED. The premise was false: the alternate approved member is already shorter above the toe than the survival event at both informative sections, and the factor still exceeds one there.",
+    "ensemble_duration_distribution": {
+      "n_members": 3000,
+      "t50_median_h": 40.0,
+      "t50_p25_h": 32.0,
+      "t50_p75_h": 54.0,
+      "t50_min_h": 17.0,
+      "t50_max_h": 183.0,
+      "peaks_median": 1.0,
+      "peaks_mean": 1.0963333333333334,
+      "compound_fraction_pct": 9.633333333333335,
+      "adr0023_reference": {
+        "t50_median_h": 40,
+        "t50_iqr_h": [
+          32,
+          54
+        ],
+        "peaks_median": 1,
+        "peaks_mean": 1.1,
+        "compound_fraction_pct": 9.6
+      }
+    },
+    "approved_members": {
+      "production": {
+        "event_id": "HPB_m064_1987",
+        "t50_h": 55.0,
+        "t50_quantile": 0.7556666666666667,
+        "n_peaks": 2
+      },
+      "alternate": {
+        "event_id": "HPB_m067_1978",
+        "t50_h": 21.0,
+        "t50_quantile": 0.005,
+        "n_peaks": 1
+      }
+    },
+    "above_toe_hours_at_observed_peak": {
+      "kp57_4": {
+        "z_toe_m": 38.3,
+        "observed_peak_m_msl": 39.658,
+        "observed_native_dt_s": 3600.0,
+        "observed_above_toe_h": 9.0,
+        "thesis_above_toe_h": 9,
+        "members": {
+          "production": {
+            "event_id": "HPB_m064_1987",
+            "above_toe_h": 24.0,
+            "ratio_to_observed": 2.6666666666666665
+          },
+          "alternate": {
+            "event_id": "HPB_m067_1978",
+            "above_toe_h": 10.0,
+            "ratio_to_observed": 1.1111111111111112
+          }
+        }
+      },
+      "kp58_8": {
+        "z_toe_m": 38.5,
+        "observed_peak_m_msl": 40.75,
+        "observed_native_dt_s": 3600.0,
+        "observed_above_toe_h": 24.0,
+        "thesis_above_toe_h": 24,
+        "members": {
+          "production": {
+            "event_id": "HPB_m064_1987",
+            "above_toe_h": 60.0,
+            "ratio_to_observed": 2.5
+          },
+          "alternate": {
+            "event_id": "HPB_m067_1978",
+            "above_toe_h": 23.0,
+            "ratio_to_observed": 0.9583333333333334
+          }
+        }
+      },
+      "kp60_0": {
+        "z_toe_m": 40.0,
+        "observed_peak_m_msl": 42.296,
+        "observed_native_dt_s": 3600.0,
+        "observed_above_toe_h": 31.0,
+        "thesis_above_toe_h": 31,
+        "members": {
+          "production": {
+            "event_id": "HPB_m064_1987",
+            "above_toe_h": 62.0,
+            "ratio_to_observed": 2.0
+          },
+          "alternate": {
+            "event_id": "HPB_m067_1978",
+            "above_toe_h": 26.0,
+            "ratio_to_observed": 0.8387096774193549
+          }
+        }
+      },
+      "kp62_0": {
+        "z_toe_m": 44.9,
+        "observed_peak_m_msl": 45.729,
+        "observed_native_dt_s": 3600.0,
+        "observed_above_toe_h": 6.0,
+        "thesis_above_toe_h": 6,
+        "members": {
+          "production": {
+            "event_id": "HPB_m064_1987",
+            "above_toe_h": 15.0,
+            "ratio_to_observed": 2.5
+          },
+          "alternate": {
+            "event_id": "HPB_m067_1978",
+            "above_toe_h": 8.0,
+            "ratio_to_observed": 1.3333333333333333
+          }
+        }
+      }
+    },
+    "peak_only_factors_from_committed_slice": {
+      "tokachi_kp57.4_historical_matrix": {
+        "event_peak_m_msl": 39.658,
+        "f_replay_transient": 0.0006500000000000394,
+        "factor_production": 7.458584615384214,
+        "factor_alternate": 3.0715076923075273,
+        "small_number_regime": true
+      },
+      "tokachi_kp57.4_historical_bulk": {
+        "event_peak_m_msl": 39.658,
+        "f_replay_transient": 0.0,
+        "factor_production": null,
+        "factor_alternate": null,
+        "small_number_regime": false
+      },
+      "tokachi_kp58.8_historical_matrix": {
+        "event_peak_m_msl": 40.75,
+        "f_replay_transient": 0.05672999999999995,
+        "factor_production": 2.749162700511196,
+        "factor_alternate": 1.4482637052705811,
+        "small_number_regime": false
+      },
+      "tokachi_kp58.8_historical_bulk": {
+        "event_peak_m_msl": 40.75,
+        "f_replay_transient": 0.0,
+        "factor_production": null,
+        "factor_alternate": null,
+        "small_number_regime": false
+      },
+      "tokachi_kp60.0_historical_matrix": {
+        "event_peak_m_msl": 42.296,
+        "f_replay_transient": 0.03363000000000005,
+        "factor_production": 3.899454058875991,
+        "factor_alternate": 1.5678644067796552,
+        "small_number_regime": false
+      },
+      "tokachi_kp60.0_historical_bulk": {
+        "event_peak_m_msl": 42.296,
+        "f_replay_transient": 0.00022999999999995246,
+        "factor_production": 6.121043478262105,
+        "factor_alternate": 2.200347826087399,
+        "small_number_regime": true
+      },
+      "tokachi_kp62.0_historical_matrix": {
+        "event_peak_m_msl": 45.729,
+        "f_replay_transient": 0.0,
+        "factor_production": null,
+        "factor_alternate": null,
+        "small_number_regime": false
+      },
+      "tokachi_kp62.0_historical_bulk": {
+        "event_peak_m_msl": 45.729,
+        "f_replay_transient": 0.0,
+        "factor_production": null,
+        "factor_alternate": null,
+        "small_number_regime": false
+      }
+    },
+    "decisive_numbers": {
+      "kp58_8": {
+        "observed_above_toe_h": 24.0,
+        "alternate_above_toe_h": 23.0,
+        "alternate_ratio": 0.9583333333333334,
+        "production_ratio": 2.5,
+        "factor_alternate": 1.4482637052705811
+      },
+      "kp60_0": {
+        "observed_above_toe_h": 31.0,
+        "alternate_above_toe_h": 26.0,
+        "alternate_ratio": 0.8387096774193549,
+        "production_ratio": 2.0,
+        "factor_alternate": 1.5678644067796552
+      }
+    }
+  },
+  "r2_base_rate_power": {
+    "residue": "Chapter 8's '0.65 expected failures in sixty years against zero observed, probability 0.52 that none is observed' is a consistency test whose power was not stated.",
+    "verdict": "CLOSED by exact Poisson arithmetic on numbers already in the document.",
+    "years": 60.0,
+    "observed_failures": 0,
+    "one_sided_95pct_upper_bound_per_year": 0.04992887122589985,
+    "arms": {
+      "as_if_undrained_series": {
+        "annual_probability": 0.0107216,
+        "expected_in_60_y": 0.643296,
+        "p_none_observed": 0.5255573292204537,
+        "headroom_factor_to_upper_bound": 4.656848905564454
+      },
+      "berm_credited_series": {
+        "annual_probability": 0.0063699,
+        "expected_in_60_y": 0.38219400000000003,
+        "p_none_observed": 0.6823626620074297,
+        "headroom_factor_to_upper_bound": 7.838250400461521
+      }
+    },
+    "statement": "Zero observations in sixty years exclude an annual probability above 5.0e-2 per year at 95 per cent confidence and exclude nothing below it. The test therefore has power on exactly the side the objection runs on, by a factor of 4.7 over the as-if-undrained deliverable and 7.8 over the berm-credited arm."
+  },
+  "r3_decoupled_heave_gradient": {
+    "residue": "Chapter 4 justified retaining the full I_er gate partly because it 'becomes load-bearing again the moment a sensitivity analysis decouples the critical heave gradient from the Terzaghi value', a sensitivity reported nowhere.",
+    "verdict": "CLOSED as a deduction rather than a promise. Under the Terzaghi substitution i_c = gamma'_bl/gamma_w the heave threshold is a deterministic function of the same sampled gamma'_bl that sets the uplift threshold, so the two flip sign at the same instant and the latch is redundant. Any decoupling draws the gradient separately, and two independent draws cannot flip together except on a measure-zero set, so the latch binds wherever they separate. No run is needed: the conclusion follows from the independence, not from a measured magnitude.",
+    "sources": {
+      "adr_0008": "docs/decisions/0008-terzaghi-heave-gradient-collapse.md",
+      "pol_independent_gradient": "Lognormal, mu = 0.7, sigma = 0.1 (CoV 0.143), Schweckendiek et al. 2014; Pol SIE 2024 Table 2",
+      "terzaghi_inherited_cov": 0.056,
+      "thesis_site": "Appendix B, app sec: Deterministic Inputs, which already records the 0.143 against 0.056 comparison"
+    },
+    "note": "ADR-0008 makes the same forward-looking claim in its decision 2. What was missing from the thesis was not the measurement but the reason, which is structural. The direction of the consequence, Pol's sustain window and the small loss of conservatism it removes, was already stated in Chapter 4 and in ADR-0008 section 35."
+  }
+}
