@@ -664,3 +664,55 @@ Isolated build, same method, after all sixteen figures were copied across.
 `ruff check .` clean, `black --check .` clean, `pytest -m "not slow"` 903
 passed, 7 deselected. No thesis prose changed in this pass: the follow-up is
 figures only.
+
+---
+
+## 11. Addendum, 2026-09-04: the two items section 10.3 left alone are closed
+
+The owner commissioned both after the submission gate of that date
+(`msc-thesis/scratch/SUBMISSION_GATE_2026-09-04.md`, findings 3 and 12). Both
+were flagged here as notation rather than style and deliberately deferred; both
+are now fixed at source, in the drivers, and every affected figure re-rendered
+from its persisted artifact.
+
+**The datum label is unified on `m T.P.`** Section 10.3 recorded the split as
+"`T.P.` as the datum label here against `MSL` elsewhere". The thesis unified its
+running text on `m~T.P.` at 23 sites and the figures were the only place `MSL`
+survived, so a reader met "46.39 m T.P." in an equation and "46.39 m MSL" in the
+figure above it. Twenty-nine `set_xlabel` / `set_ylabel` strings and eleven
+annotation or title strings now read `m T.P.`, across thirteen drivers plus
+`bayesian_reliability_updating/plots.py`. **Only figure-visible strings were
+touched:** the dict keys (`level_m_msl`, `max_abs_delta_at_stage_m_msl`), the
+CLI help, the generated configs, the ADR text and the engine's own markdown
+reports keep `MSL`, which is what ADR-0021 calls the datum. Thirty-six tracked
+figures changed; every other figure re-rendered byte-identical, which is the
+evidence that the edit was confined to the label.
+
+**The ASCII `max |dP_f| vs production` y-label is typeset.**
+`dem_cross_section_study.py` now writes `r"max $|\Delta P_f|$ vs production"`.
+
+**Two claim corrections travelled with the re-render**, both in
+`hwl_bias_resolution.py`'s `epistemic_vs_statistical.png`:
+
+- The title read **"The epistemic band is 6 to 9x the statistical interval"**
+  with the letter `x`. It now reads "6.4 to 7.2 times". The **numbers**, not
+  only the multiplication sign, were the defect: the figure's own three
+  annotations are 6.4x, 7.2x and 6.9x, and recomputing from
+  `adr0040-hwl-bias-resolution.json` reproduces them exactly as
+  band / CI = 10.49/1.630, 9.67/1.341 and 8.15/1.186 over the arms that meet
+  R1 and R2. **The 9 admits the arms below the thirty-row floor**, which this
+  study discards elsewhere on the same ground. See the ADR addendum.
+- Provenance for anyone re-deriving it: the resolved arms at KP 62.0's design
+  HWL are `k_aq_regional_upper` 2.59 (191 600 rows), `z_toe_minus0.30m` 13.87
+  (901), `gamma_bl_sub_lower` 26.92 (63) and `m_p` 27.20 (150).
+
+**Verification, thesis side.** Isolated XeLaTeX build: 0 undefined references,
+0 undefined citations, 0 multiply-defined labels, 106 citation keys, 193 pages,
+main body 99 with References on 100, and a chapter-for-chapter and
+appendix-for-appendix page map identical to the pre-fix build with all 110
+section entries on their own pages. Overfull hboxes fall 12 to 11.
+
+**Verification, engine side.** `ruff check .` and `black --check .` clean. The
+Phase 2 redraw reproduced its rejection fractions exactly, 5.67 and 3.36 per
+cent, so no physics moved. No `Config` default, physics module, config, CSV,
+persisted sweep or evidence file was touched.

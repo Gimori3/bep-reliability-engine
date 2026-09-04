@@ -261,7 +261,7 @@ def fig_bep_sections(curves: dict) -> None:
                 va="center",
             )
         ax.set_title(f"Tokachi KP {kp:.1f}")
-        ax.set_xlabel("Water level h [m MSL]")
+        ax.set_xlabel("Water level h [m T.P.]")
         ax.set_ylabel("P(failure | h)")
     handles, labels = axes[0, 0].get_legend_handles_labels()
     fig.legend(handles, labels, loc="upper center", ncol=4, bbox_to_anchor=(0.5, 1.02))

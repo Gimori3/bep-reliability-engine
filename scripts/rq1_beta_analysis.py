@@ -1558,7 +1558,7 @@ def figure_beta_curves(record: dict[str, Any]) -> Path:
                 va="bottom",
             )
         ax.set_title(f"KP {kp}", loc="left")
-        ax.set_xlabel("conditioning water level h  [m MSL]")
+        ax.set_xlabel("conditioning water level h  [m T.P.]")
         ax.set_ylim(-4.2, 5.2)
         # Shade only where the grid genuinely runs past the attainable stage;
         # at KP 57.4 the grid stops there, so an axis margin must not be
@@ -1680,7 +1680,7 @@ def figure_delta_beta_vs_stage(record: dict[str, Any]) -> Path:
         top.set_title(f"KP {kp}", loc="left")
         top.set_ylim(0.0, 2.6)
         bottom.set_ylim(0.8, 600.0)
-        bottom.set_xlabel("conditioning water level h  [m MSL]")
+        bottom.set_xlabel("conditioning water level h  [m T.P.]")
     axes[0][0].set_ylabel(
         r"$\Delta\beta = \beta_\mathrm{trans} - \beta_\mathrm{static}$"
     )
@@ -1787,7 +1787,7 @@ def figure_beta_waterfall(record: dict[str, Any]) -> Path:
         note = "" if resolved else "  (transient count below the R1 floor)"
         ax.set_title(
             f"{record['ladder'][key]['section']} at the {label}, "
-            f"{entry['level_m_msl']:.2f} m MSL{note}",
+            f"{entry['level_m_msl']:.2f} m T.P.{note}",
             loc="left",
             fontsize=10,
         )
@@ -1945,7 +1945,7 @@ def figure_hwl_dbeta_resolved(record: dict[str, Any]) -> Path:
         for axis in (ax, axz):
             axis.axvline(row["level_m_msl"], color=figstyle.BASELINE, lw=1.0, zorder=1)
         axz.annotate(
-            f"{note}\n{row['level_m_msl']:.2f} m MSL\n"
+            f"{note}\n{row['level_m_msl']:.2f} m T.P.\n"
             rf"$\Delta\beta$ = {row['delta_beta']:.2f} {_ci(quoted['delta_beta_ci'])}"
             f"\n{row['k_transient']} transient rows, resolved\n"
             f"($B$ = {row['B']:.1f}, on which R1 and R2 are defined)",
@@ -1984,12 +1984,12 @@ def figure_hwl_dbeta_resolved(record: dict[str, Any]) -> Path:
     axk.set_yscale("log")
     axk.set_ylim(0.7, 2e8)
     axk.set_ylabel("transient\nfailing rows")
-    axk.set_xlabel("conditioning water level [m MSL]")
+    axk.set_xlabel("conditioning water level [m T.P.]")
     axk.legend(loc="upper left")
     ax.set_xlim(min(kx) - 0.4, max(kx) + 0.4)
     axz.set_xlim(46.09, 47.35)
     axz.set_ylim(0.62, 1.92)
-    axz.set_xlabel("conditioning water level [m MSL]")
+    axz.set_xlabel("conditioning water level [m T.P.]")
     axz.set_ylabel(r"$\Delta\beta$")
     axz.set_title("The anchor neighborhood, in index terms", loc="left")
     figstyle.mark_hypothetical(ax, attainable, label=False)
@@ -2064,7 +2064,7 @@ def figure_kp57_dbeta_bound(record: dict[str, Any]) -> Path:
             anchors[0]["delta_beta_lower_bound"],
             0.95,
             figstyle.VIOLET,
-            f"A1  design HWL, {anchors[0]['level_m_msl']:.2f} m MSL\n"
+            f"A1  design HWL, {anchors[0]['level_m_msl']:.2f} m T.P.\n"
             f"{anchors[0]['k_transient']} transient rows in $10^6$: UNRESOLVED.\n"
             "Report the one-sided bound:  "
             rf"$\Delta\beta \geq$ {anchors[0]['delta_beta_lower_bound']:.2f}",
@@ -2074,7 +2074,7 @@ def figure_kp57_dbeta_bound(record: dict[str, Any]) -> Path:
             anchors[1]["delta_beta_lower_bound"],
             0.78,
             figstyle.VIOLET,
-            f"A2  nearest grid level, {anchors[1]['level_m_msl']:.2f} m MSL\n"
+            f"A2  nearest grid level, {anchors[1]['level_m_msl']:.2f} m T.P.\n"
             f"{anchors[1]['k_transient']} transient rows: also UNRESOLVED,  "
             rf"$\Delta\beta \geq$ {anchors[1]['delta_beta_lower_bound']:.2f}",
         ),
@@ -2083,7 +2083,7 @@ def figure_kp57_dbeta_bound(record: dict[str, Any]) -> Path:
             quotable["delta_beta"],
             0.55,
             figstyle.INK,
-            f"quotable anchor  {quotable['level_m_msl']:.2f} m MSL\n"
+            f"quotable anchor  {quotable['level_m_msl']:.2f} m T.P.\n"
             rf"$\Delta\beta$ = {quotable['delta_beta']:.2f} "
             f"{_ci(quotable['delta_beta_ci'])}\n"
             f"on {quotable['k_transient']} transient rows, RESOLVED\n"
@@ -2192,7 +2192,7 @@ def figure_kp57_dbeta_bound(record: dict[str, Any]) -> Path:
     axk.set_yscale("log")
     axk.set_ylim(0.7, 5e9)
     axk.set_ylabel("transient\nfailing rows")
-    axk.set_xlabel("conditioning water level [m MSL]")
+    axk.set_xlabel("conditioning water level [m T.P.]")
     axk.set_xlim(min(levels) - 0.28, max(levels) + 0.28)
     axk.legend(loc="upper right", fontsize=8, ncol=2)
     fig.text(

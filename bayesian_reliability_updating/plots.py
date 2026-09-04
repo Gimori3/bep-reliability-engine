@@ -337,7 +337,7 @@ def plot_fragility_update(
             )
         ax.set_yscale("log")
         ax.set_title(label, fontsize=10, color=_INK)
-        ax.set_xlabel("conditioning stage $h_i$ [m MSL]", fontsize=9, color=_INK_2)
+        ax.set_xlabel("conditioning stage $h_i$ [m T.P.]", fontsize=9, color=_INK_2)
     axes[0].set_ylabel("$P_f\\,(h_i)$", fontsize=9, color=_INK_2)
     axes[0].legend(frameon=False, fontsize=8, loc="lower right")
     if title:
@@ -482,7 +482,7 @@ def plot_observed_record(
             textcoords="offset points",
         )
     ax.set_xlabel("days since window start", fontsize=9, color=_INK_2)
-    ax.set_ylabel("stage [m MSL]", fontsize=9, color=_INK_2)
+    ax.set_ylabel("stage [m T.P.]", fontsize=9, color=_INK_2)
     ax.legend(frameon=False, fontsize=8, loc="upper left")
     if title:
         ax.set_title(title, fontsize=10, color=_INK)
@@ -504,7 +504,7 @@ def plot_breach_times(
     t_days = np.asarray(record.t, dtype=np.float64) / 86400.0
     ax2 = ax.twinx()
     ax2.plot(t_days, record.h, color=_MUTED, linewidth=1.0, alpha=0.7)
-    ax2.set_ylabel("stage [m MSL]", fontsize=8, color=_MUTED)
+    ax2.set_ylabel("stage [m T.P.]", fontsize=8, color=_MUTED)
     ax2.tick_params(colors=_MUTED, labelsize=7)
     for spine in ("top",):
         ax2.spines[spine].set_visible(False)

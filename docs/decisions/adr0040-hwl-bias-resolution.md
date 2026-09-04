@@ -879,7 +879,7 @@ The conditions are not decoration; each is measured:
 1. **Level.** The bias falls resolvably with stage — 26.9 at 46.39 m, 21.6 at
    46.50 m, and the paired test resolves that 25 % difference over 11 cm. A figure
    without its level is meaningless at the precision now available.
-2. **Epistemic band, 6 to 9× the statistical one.** B runs from 2.59 (regional
+2. **Epistemic band, 6.4 to 7.2× the statistical one** (corrected 2026-09-04; see the addendum at the end of this note, which supersedes the "6 to 9×" this line carried). B runs from 2.59 (regional
    upper `k_aq`) through 26.9 (production) to 27–38 (the low-`k_aq` and +datum
    arms), and is indeterminate under the field-geomean conductivity where neither
    branch fails. `k_aq` dominates; `z_toe` is second; `m_p` cancels; `gamma_bl_sub`
@@ -935,7 +935,7 @@ stage. No figure from the tilted estimator may be quoted at all.
 | 7 | `production_campaign_2026-07-29.md` §12 | decision 6 **open** | **CLOSED** |
 | 8 | `adr0047-dem-seepage-length.md` §8 table row | "Stage 6.6 bias at HWL *(unresolved, 1 and 4 rows)* 21.0 → 44.7" | both entries superseded; the post-adoption value is **26.9, resolved** |
 | 9 | `architecture.md` §12 Failure-mode-4 paragraph | "the HWL figure rests on single-digit rows and is not statistically resolved"; "KP57.4 … retains ≥32× at HWL, itself a zero-row bound" | KP 62.0 **is** now resolved (26.9); KP 57.4's bound is **≥ 148** |
-| 10 | `project-notes.md` Stage 6.6 and campaign bullets | "~21× KP62.0, ≥32× KP57.4 at HWL" | as above; new bullet added |
+| 10 | local project guidance Stage 6.6 and campaign bullets | "~21× KP62.0, ≥32× KP57.4 at HWL" | as above; new bullet added |
 
 Item 9 is the only one whose prose is *wrong* rather than merely superseded, since
 KP 62.0's resolution status has flipped; the rest are numeric replacements. Items
@@ -946,7 +946,7 @@ than replacing any.
 **Fixed in this session:** items 2–3 (`stage6_6_report.md` §9), 5–7
 (`production_campaign_2026-07-29.md` §12 closure note), 9 (`architecture.md`,
 rewritten because its resolution-status claim was wrong, not merely stale), and 10
-(`project-notes.md` bullet). Items 1, 4 and 8 sit inside dated addenda that already carry
+(local project guidance bullet). Items 1, 4 and 8 sit inside dated addenda that already carry
 a forward pointer to the authoritative section, so they are left legible as
 historical record per house practice.
 
@@ -982,3 +982,45 @@ were bad practice rather than bad luck: a gate that raised *before* persisting
 (destroying the 2.5 h of evidence it was raised about — now persist-then-gate, with
 offending levels recorded), and a per-section writer that rebuilt its payload from
 scratch and so silently dropped the other section's results (now merges).
+
+
+---
+
+## Addendum, 2026-09-04: the epistemic band is 6.4 to 7.2x, not 6 to 9x
+
+Raised by the submission gate of that date
+(`msc-thesis/scratch/SUBMISSION_GATE_2026-09-04.md`, finding 8): the thesis
+quoted "6 to 9 times" at eight sites while the figure the same sentences cite,
+`epistemic_vs_statistical.png`, annotates 6.4x, 7.2x and 6.9x. A reader
+checking the figure could not find a 9 in it.
+
+**Recomputed from this note's own evidence file**, over the arms that meet the
+pre-registered R1 (at least 30 failing transient rows) and R2 (interval width
+at most a factor of two):
+
+| anchor | resolved arms | band | statistical CI | band / CI |
+|---|---:|---:|---:|---:|
+| KP 62.0, 46.39 m (A1) | 4 | 10.49 | 1.630 | **6.44** |
+| KP 62.0, 46.50 m (A2) | 4 | 9.67 | 1.341 | **7.21** |
+| KP 57.4, 39.50 m (A3) | 5 | 8.15 | 1.186 | **6.87** |
+
+At A1 the resolved arms are `k_aq_regional_upper` 2.59 on 191,600 rows,
+`z_toe_minus0.30m` 13.87 on 901, `gamma_bl_sub_lower` 26.92 on 63 and `m_p`
+27.20 on 150.
+
+**Where the 9 came from, and why it does not stand.** Section 2 above builds the
+band as "2.59 through 26.9 to 27-38", and the 27-38 arms rest on 2, 3 and 9
+failing transient rows. 2.59 to 38.0 is a factor of 14.7, which against the
+1.630 CI gives 9.0. Those arms are below the thirty-row floor this study
+discards on exactly that ground: the `m_p` negative control passes at all three
+anchors with at least 63 rows and fails at the two with at most 10, monotone in
+row count. **Quoting 9 therefore contradicts the study's own resolution
+criteria.** The swamping test's verdict is unaffected either way, 9.0 and 6.4
+both falling below the threshold of ten, so nothing downstream changes.
+
+Chapter 6 of the thesis already carried the full derivation, "2.59 to 38.0, or
+2.59 to 27.2 when restricted to adequate counts, which is 9.0 or 6.4 times the
+statistical width of 1.63", and 6.9 for KP 57.4. The defect was only in the
+compressed shorthand, which read as a range across anchors when it was two
+readings at one anchor. All eight thesis sites and the figure title now carry
+6.4 to 7.2, the reading restricted to adequate counts.

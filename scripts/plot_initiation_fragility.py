@@ -161,7 +161,7 @@ def draw(sections: list[dict], reading: str) -> plt.Figure:
         ax.set_ylim(-0.03, 1.03)
 
     for ax in axes[1]:
-        ax.set_xlabel("conditioning water level h  [m MSL]")
+        ax.set_xlabel("conditioning water level h  [m T.P.]")
     for ax in axes[:, 0]:
         ax.set_ylabel("conditional probability")
 

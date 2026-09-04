@@ -1,6 +1,6 @@
 {
  "record": "RQ1 static-vs-transient comparison in reliability-index terms",
- "generated": "2026-08-28",
+ "generated": "2026-09-04",
  "generated_by": "scripts/rq1_beta_analysis.py",
  "plan_of_record": "docs/work_packages/rq1-revision-campaign_2026-08-28.md",
  "metric": {

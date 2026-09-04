@@ -491,7 +491,7 @@ def figure_ladder(key: str, result: GapDecompositionResult, fig_dir: Path) -> Pa
             )
         ax.set_yscale("log")
         ax.set_ylim(PF_FLOOR, 1.5)
-        ax.set_xlabel("conditioning stage [m MSL]", color=MUTED, fontsize=9)
+        ax.set_xlabel("conditioning stage [m T.P.]", color=MUTED, fontsize=9)
         ax.set_title(f"{spec['label']}  {title}", color=INK, fontsize=10)
         if hwl is not None:
             ax.axvline(hwl, color=MUTED, linewidth=0.9, ls=":")
@@ -601,7 +601,7 @@ def figure_waterfall(
             )
             ax.set_title(
                 f"{spec['label']}  {LADDER_DISPLAY_NAMES[ladder_name]} ladder "
-                f"at {level_label} ({grid[i]:.2f} m MSL)",
+                f"at {level_label} ({grid[i]:.2f} m T.P.)",
                 color=INK,
                 fontsize=9,
             )
@@ -640,7 +640,7 @@ def figure_fractions(
         ax.axhline(0.0, color=NEUTRAL, linewidth=0.9)
         ax.axhline(1.0, color=GRID_COLOR, linewidth=0.9)
         ax.set_ylim(-1.0, 2.0)
-        ax.set_xlabel("conditioning stage [m MSL]", color=MUTED, fontsize=9)
+        ax.set_xlabel("conditioning stage [m T.P.]", color=MUTED, fontsize=9)
         ax.set_title(
             f"{spec['label']}  {LADDER_DISPLAY_NAMES[ladder_name]} "
             "ladder component shares",
@@ -698,7 +698,7 @@ def figure_c2c3(
 
     ax2.plot(grid, c2_only, color="#4a3aa7", linewidth=2.0)
     ax2.set_ylabel("gate-blocked fraction\nP(C2 and not C3a)", color=MUTED, fontsize=8)
-    ax2.set_xlabel("conditioning stage [m MSL]", color=MUTED, fontsize=9)
+    ax2.set_xlabel("conditioning stage [m T.P.]", color=MUTED, fontsize=9)
 
     if ladder_json is not None:
         rows = ladder_json["alpha_minus_half"]["rows"]
@@ -746,7 +746,7 @@ def figure_heq_bound(
         ax.plot(grid, delta, color=color, linewidth=2.0, label=label)
         ax.fill_between(grid, lo, hi, color=color, alpha=0.15, linewidth=0)
     ax.axhline(0.0, color=NEUTRAL, linewidth=0.9)
-    ax.set_xlabel("conditioning stage [m MSL]", color=MUTED, fontsize=9)
+    ax.set_xlabel("conditioning stage [m T.P.]", color=MUTED, fontsize=9)
     ax.set_ylabel("Delta P_f from the 0.9 H_c end anchor", color=MUTED, fontsize=9)
     ax.set_title(
         f"{spec['label']}  H_eq-conservatism bound",

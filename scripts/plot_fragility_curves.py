@@ -252,7 +252,7 @@ def figure_per_section(data: dict[str, dict]) -> None:
             )
         ax.set_title(f"KP {kp}  ·  {d['remediation']}", loc="left")
         ax.set_ylim(-0.03, 1.03)
-        ax.set_xlabel("conditioning water level h  [m MSL]")
+        ax.set_xlabel("conditioning water level h  [m T.P.]")
     for ax in axes[:, 0]:
         ax.set_ylabel("P(failure | h)")
     handles, labels = axes[0, 0].get_legend_handles_labels()
@@ -419,7 +419,7 @@ def figure_tail_log(data: dict[str, dict]) -> None:
         ax.set_yscale("log")
         ax.set_ylim(floor / 2, 1.5)
         ax.set_title(f"KP {kp}  ·  {d['remediation']}", loc="left")
-        ax.set_xlabel("conditioning water level h  [m MSL]")
+        ax.set_xlabel("conditioning water level h  [m T.P.]")
     for ax in axes[:, 0]:
         ax.set_ylabel("P(failure | h)   [log]")
     handles, labels = axes[0, 0].get_legend_handles_labels()

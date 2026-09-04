@@ -836,7 +836,7 @@ def make_figure(
             ms=2.5,
             label=f"Δt = {_dt_label(dt)}",
         )
-    ax_c.set_xlabel("conditioning stage h [m MSL]")
+    ax_c.set_xlabel("conditioning stage h [m T.P.]")
     ax_c.set_ylabel(r"terminal eroded length $l_e$ [m]")
     ax_c.set_title(
         "(c) Terminal $l_e$ vs stage, worst-case "

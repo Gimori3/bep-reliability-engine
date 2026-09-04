@@ -1389,7 +1389,7 @@ def render_figure(record: dict[str, Any]) -> Path:
         )
         drawn += 1
     ax_curve.set_yscale("log")
-    ax_curve.set_xlabel("peak stage [m MSL]")
+    ax_curve.set_xlabel("peak stage [m T.P.]")
     ax_curve.set_ylabel("transient failure probability")
     ax_curve.set_title("Conditional curves at the two informative sections")
     if drawn:

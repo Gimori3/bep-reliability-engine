@@ -2106,7 +2106,7 @@ def draw_figure(payload: dict[str, Any], path: Path = FIGURE_PATH) -> None:
             ],
             fontsize=8,
         )
-        ax.set_ylabel("max |dP_f| vs production" if column == 0 else "")
+        ax.set_ylabel(r"max $|\Delta P_f|$ vs production" if column == 0 else "")
         ax.legend(fontsize=8, **_LEGEND_PLATE)
         ax.grid(axis="x", visible=False)
 

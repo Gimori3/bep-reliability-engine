@@ -612,7 +612,7 @@ def _fig_indices_bars(payload: dict, slug: str) -> None:
     )
     fig.suptitle(
         f"Sobol' indices at the design level h = {design['level_m']:.2f} m "
-        f"MSL, {_section_label(payload['cross_section_id'])} "
+        f"T.P., {_section_label(payload['cross_section_id'])} "
         f"({payload['d70_interpretation']} $d_{{70}}$), "
         f"R = {payload['n_replicates']} scramblings, 95 per cent CI",
         fontsize=11,
@@ -706,7 +706,7 @@ def _fig_level_dependence(payload: dict, slug: str) -> None:
         _style_axis(ax)
         label = "first-order $S_i$" if which == "S" else "total-effect $S_{Ti}$"
         ax.set_title(f"{label}: transient failure indicator", fontsize=10, color=_INK)
-        ax.set_xlabel("conditioning level h [m MSL]", fontsize=9, color=_INK_2)
+        ax.set_xlabel("conditioning level h [m T.P.]", fontsize=9, color=_INK_2)
         pf = [
             _final_rung(lvl, "trans_indicator")["mean_y"] for lvl in payload["levels"]
         ]
@@ -802,7 +802,7 @@ def _fig_interaction_gap(payload: dict, slug: str) -> None:
     _direct_label_lines(ax, levels[-1], names, end_values)
     ax.axhline(0.0, color="#c3c2b7", linewidth=0.9)
     _style_axis(ax)
-    ax.set_xlabel("conditioning level h [m MSL]", fontsize=9, color=_INK_2)
+    ax.set_xlabel("conditioning level h [m T.P.]", fontsize=9, color=_INK_2)
     ax.set_ylabel(r"interaction gap $S_{Ti} - S_i$", fontsize=9, color=_INK_2)
     ax.set_title(
         f"Interaction involvement, transient indicator, "

@@ -1111,7 +1111,7 @@ def figure_epistemic_ranking(
     axc.set_yscale("log")
     axc.set_ylim(0.55, y_unbounded * 5.0)
     axc.set_xlim(min(p["stage_m_msl"] for c in curves.values() for p in c) - 0.7, 57.4)
-    axc.set_xlabel("conditioning water level [m MSL]")
+    axc.set_xlabel("conditioning water level [m T.P.]")
     axc.set_ylabel(f"span factor, {BRACKET_LABEL[largest]} bracket")
     axc.set_title("C  and the largest one has no single value", loc="left")
     figstyle.mark_hypothetical(axc, attainable_max_kp62, label=False)
@@ -1360,7 +1360,7 @@ def figure_kp57_4_bound(evidence: dict[str, Any]) -> tuple[Path, list[dict[str, 
             bound_a1,
             0.94,
             figstyle.VIOLET,
-            f"A1  design HWL, {float(a1['level_m']):.2f} m MSL\n"
+            f"A1  design HWL, {float(a1['level_m']):.2f} m T.P.\n"
             f"{int(a1['k_transient'])} transient rows in $10^6$: UNRESOLVED.\n"
             f"Report the Clopper-Pearson bound:  $B \\geq$ {bound_a1:.0f}",
         ),
@@ -1369,7 +1369,7 @@ def figure_kp57_4_bound(evidence: dict[str, Any]) -> tuple[Path, list[dict[str, 
             bound_a2,
             0.76,
             figstyle.VIOLET,
-            f"A2  nearest grid level, {float(a2['level_m']):.2f} m MSL\n"
+            f"A2  nearest grid level, {float(a2['level_m']):.2f} m T.P.\n"
             f"{int(a2['k_transient'])} transient rows: also UNRESOLVED,  "
             f"$B \\geq$ {bound_a2:.0f}",
         ),
@@ -1493,7 +1493,7 @@ def figure_kp57_4_bound(evidence: dict[str, Any]) -> tuple[Path, list[dict[str, 
     axk.set_yscale("log")
     axk.set_ylim(0.7, 4e6)
     axk.set_ylabel("transient\nfailing rows")
-    axk.set_xlabel("conditioning water level [m MSL]")
+    axk.set_xlabel("conditioning water level [m T.P.]")
     axk.set_xlim(min(levels) - 0.28, max(levels) + 0.28)
     axk.legend(loc="upper right", fontsize=8, ncol=2)
 
@@ -1928,7 +1928,7 @@ def figure_epistemic_knobs(
     for ax in axes[:, 0]:
         ax.set_ylabel("factor on the production $P_f$")
     for ax in axes[1]:
-        ax.set_xlabel("conditioning water level [m MSL]")
+        ax.set_xlabel("conditioning water level [m T.P.]")
 
     # The two numbers the inventory asks these panels to carry, marked where
     # they are measured rather than only stated in the caption.

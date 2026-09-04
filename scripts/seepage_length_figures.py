@@ -92,7 +92,7 @@ def fig_marginal() -> None:
         )
         ax.set_title(f"{label}  (L = {s['L_mean_m']:g} m)", fontsize=11)
         ax.set_ylabel("transient $P_f$")
-        ax.set_xlabel("river stage [m MSL]")
+        ax.set_xlabel("river stage [m T.P.]")
         ax.set_ylim(-0.02, 1.02)
         ax.grid(alpha=0.25)
         # zoom the shoulder where the CoV bites: mark the 0.05-0.4 band

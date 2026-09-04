@@ -1756,7 +1756,7 @@ def figure_hwl_bias(evidence: dict) -> Path:
         for axis in (ax, axz):
             axis.axvline(level, color=figstyle.BASELINE, lw=1.0, zorder=1)
         axz.annotate(
-            f"{note}\n{level:.2f} m MSL\n"
+            f"{note}\n{level:.2f} m T.P.\n"
             f"$B$ = {_num(row['ratio']):.1f} "
             f"[{_num(row['ci_lo']):.1f}, {_num(row['ci_hi']):.1f}]\n"
             f"{int(row['k_transient'])} transient rows, resolved",
@@ -1791,14 +1791,14 @@ def figure_hwl_bias(evidence: dict) -> Path:
     )
     axk.set_yscale("log")
     axk.set_ylabel("transient\nfailing rows")
-    axk.set_xlabel("conditioning water level [m MSL]")
+    axk.set_xlabel("conditioning water level [m T.P.]")
     axk.legend(loc="upper left")
 
     ax.set_xlim(min(kx) - 0.4, max(kx) + 0.4)
     axz.set_xlim(a1 - 0.30, 47.35)
     axz.set_yscale("log")
     axz.set_ylim(5.5, 400.0)
-    axz.set_xlabel("conditioning water level [m MSL]")
+    axz.set_xlabel("conditioning water level [m T.P.]")
     axz.set_ylabel("bias factor  $B$")
     axz.set_title(
         "The anchor neighbourhood: what 4 rows buy, and what $10^6$ buys",
@@ -1876,7 +1876,7 @@ def figure_tilted_validation(evidence: dict) -> Path:
     )
     ax.axvline(anchor, color=figstyle.BASELINE, lw=1.0)
     ax.set_yscale("log")
-    ax.set_xlabel("conditioning water level [m MSL]")
+    ax.set_xlabel("conditioning water level [m T.P.]")
     ax.set_ylabel("coefficient of variation of $\\hat P_f$")
     shift = tilt["ce_shift"]
     ax.set_title(
@@ -1947,7 +1947,7 @@ def figure_tilted_validation(evidence: dict) -> Path:
             color=figstyle.STATIC,
         )
     ax2.set_yscale("log")
-    ax2.set_xlabel("conditioning water level [m MSL]")
+    ax2.set_xlabel("conditioning water level [m T.P.]")
     ax2.set_ylabel("CoV under the tilt / CoV under plain LHS")
     ax2.set_title(
         "V2 and V4 fail: NOT VALIDATED for a ratio between branches\n"
@@ -1991,7 +1991,7 @@ def figure_epistemic_vs_statistical(evidence: dict) -> Path:
 
     Left: the Stage D bands on the *bias ratio* B at each anchor where the
     negative control passes, at N = 1e6, against the statistical 95 % interval
-    -- the 6 to 9x statement of criterion F3. Right: the four-section per-knob
+    -- the 6.4 to 7.2x statement of criterion F3. Right: the four-section per-knob
     ratio-of-ratios departure at design HWL from the 2026-07-30 synthesis, with
     the Clopper-Pearson width on the same multiplicative axis. ``m_p`` is the
     visible control near unity in both panels.
@@ -2081,7 +2081,7 @@ def figure_epistemic_vs_statistical(evidence: dict) -> Path:
     ax.set_xlim(1.7, 340.0)
     ax.set_xlabel("bias factor $B$ under each epistemic arm")
     ax.set_title(
-        "The epistemic band is 6 to 9 times the statistical interval\n"
+        "The epistemic band is 6.4 to 7.2 times the statistical interval\n"
         "$N = 10^6$ unweighted; criterion F3 fires at KP 57.4, not at KP 62.0",
         loc="left",
     )
