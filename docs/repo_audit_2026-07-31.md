@@ -28,7 +28,7 @@ nothing more.
 | `docs/figures/` | 52 | 6 840 KB |
 | `docs/` (top level) | 19 | 679 KB |
 | `docs/validation/` | 8 | 78 KB |
-| `docs/work packages/` | 2 | 28 KB |
+| `docs/work_packages/` | 2 | 28 KB |
 | `scripts/` | 44 | 840 KB |
 | `tests/` | 40 | 635 KB |
 | `bep_reliability_engine/` | 19 | 508 KB |
@@ -42,9 +42,8 @@ nothing more.
 | `.github/workflows/`, `.vscode/`, root | 8 | 12 KB |
 | **Total** | **371** | **15.9 MB** |
 
-`project-notes.md` sits at the repository root but is **gitignored** (`.gitignore:239` — the
-task brief said `:237`; the line has drifted by two). It is therefore absent from
-every count above and from every diff.
+A historical project notes file sits at the repository root but is excluded from
+version control. It is therefore absent from every count above and from every diff.
 
 ---
 
@@ -122,7 +121,7 @@ The manifest records SHA-256 for its stage outputs. Beyond `results/`, it hashes
 Those 12 tracked paths must not move or change content. This alone forecloses any
 `docs/decisions/` reorganisation that relocates evidence JSONs.
 
-### 2.4 Dual-write, and the `untracked-supporting-files/` blind spot
+### 2.4 Dual-write, and the untracked supporting-file blind spot
 
 Figure drivers write **both** `results/<study>/figures/` and tracked `docs/figures/`
 (`scripts/_figstyle.py::save`, pinned by `test_figstyle_save_writes_the_tracked_publication_copy`;
@@ -131,7 +130,7 @@ Figure drivers write **both** `results/<study>/figures/` and tracked `docs/figur
 fix for the human-copy failure that let the KP 62.0 set go stale twice. **Not touched
 by any proposal below.**
 
-`untracked-supporting-files/` holds 15 guides across 30+ files. **18 guide files cite
+The untracked supporting directory holds 15 guides across 30+ files. **18 guide files cite
 `docs/decisions/` paths across 132 lines.** The directory is gitignored, so no diff
 and no test covers it — a stale guide pointer is invisible. One such pointer already
 exists (§5.2).
@@ -149,8 +148,8 @@ exists (§5.2).
    `scripts/plot_validation_yabe.py:23` and `plot_validation_shikaga.py` set
    `FIG_DIR = REPO / "docs" / "figures"`. No script in the repository resolves to a
    bare root `figures/`.
-2. **Nothing reads it.** A repo-wide path scan over 371 tracked files + 30 guide files
-   + `project-notes.md` + the msc-thesis tree returns **zero** references to root `figures/`.
+2. **Nothing reads it.** A repo-wide path scan over 371 tracked files + 30 supporting files
+   + architecture and decision records + the msc-thesis tree returns **zero** references to root `figures/`.
    The seven apparent hits are all false positives: four are the *thesis's own*
    `figures/` directory (msc-thesis carries its own copies and includes them as
    `figures/...` relative to *its* root), one is
@@ -202,7 +201,7 @@ touched**.
 
 | File | Cited by | Header should point to |
 |---|---:|---|
-| `docs/close_out_2026-07-12.md` | 2 tracked, 4 guides | §3 blocker manifest superseded by `docs/phase3_report.md` §9; campaign superseded by `docs/production_campaign_2026-07-29.md` |
+| `docs/close_out_2026-07-12.md` | 2 tracked, 4 supporting files | §3 blocker manifest superseded by `docs/phase3_report.md` §9; campaign superseded by `docs/production_campaign_2026-07-29.md` |
 | `docs/phase2_interface.md` | 4 tracked | Interface as-built: `docs/phase2_report.md` + `bayesian_reliability_updating/README.md`. Carries 4 stale `results/tokachi_kp58_historical.*` paths (§5.4) |
 | `docs/work_packages/dem-seepage-length.md` | **0** | Work completed: ADR-0047 + `docs/decisions/adr0047-dem-seepage-length.md`; adoption executed 2026-07-29 |
 | `docs/pol_meeting_briefing.md` | **0** | Meeting held 2026-07-07; outcomes in `docs/validation/pol-meeting-2026-07-07-dispositions.md` and ADR-0026/0027/0028 |
@@ -218,7 +217,7 @@ renamed**.
   (`OPEN-` → `-CLOSED`, commit `08267ee`, `R100` = 100 % similarity). *Recommend
   leaving the filename alone* and adding a status header instead. Renaming it would
   require editing **ADR-0027, which guardrail 3 forbids** (§5.1), and the file is
-  already cited under its current name by 2 tracked files + 1 guide.
+  already cited under its current name by 2 tracked files + 1 supporting file.
 * **`tokoro-case-plan.md`** — a plan for a deferred case. Its two "dangling" paths
   (`scripts/validate_tokoro.py`, `docs/validation/tokoro-case.md`) are *prospective*,
   not broken. A `PLANNED — NOT EXECUTED` header converts them from apparent rot into
@@ -246,7 +245,7 @@ for that decision, un-numbered = study that changed no default — a distinction
 | Reference class | Files | Lines |
 |---|---:|---:|
 | Tracked files citing `docs/decisions` | 66 | 161 |
-| `untracked-supporting-files/` files citing it | 18 | 132 |
+| Untracked supporting files citing it | 18 | 132 |
 | **Total** | **84** | **293** |
 
 plus: **12 SHA-256-locked manifest entries** (§2.3, of which 4 are decisions JSONs),
@@ -268,9 +267,9 @@ The dated one-shot audit artifacts are a real and growing category (6 files, 281
 
 | File | Cited by |
 |---|---:|
-| `production_campaign_2026-07-29.md` | 4 tracked (incl. `test_figure_pass.py`), 1 guide |
-| `number_audit_2026-07-30.md` | 1 tracked, 1 guide |
-| `thesis_number_inventory_2026-07-30.md` | 1 tracked, 1 guide |
+| `production_campaign_2026-07-29.md` | 4 tracked (incl. `test_figure_pass.py`), 1 supporting file |
+| `number_audit_2026-07-30.md` | 1 tracked, 1 supporting file |
+| `thesis_number_inventory_2026-07-30.md` | 1 tracked, 1 supporting file |
 | `thesis_fragment_retirement_2026-07-29.md` | **0** |
 | `tokachi_basin_document_review_2026-07-27.md` | 7 tracked |
 | `tokachi_chisuishi_full_review_2026-07-27.md` | 1 tracked |
@@ -294,7 +293,7 @@ nonetheless wants the move, it must be paired with hardening
 `test_every_euler_flip_claim_carries_the_N_at_which_it_holds` to **fail** rather than
 skip on a missing path; I would not execute the move without that change.
 
-### 3.8 DOCUMENT INSTEAD — `docs/work packages/` (2 files, 0 inbound refs)
+### 3.8 DOCUMENT INSTEAD — `docs/work_packages/` (2 files, 0 inbound refs)
 
 `build_r10_tier1_foreshore_exhaustion.md` and `mine_tokachi_chisuishi_816pp.md` are the
 task briefs that produced the R10 screening indicator and the 816-page Chisuishi
@@ -340,7 +339,7 @@ what is gitignored. Purely additive; no path coupling touched.
 
 ## 4. Files nothing references (candidates, not verdicts)
 
-Determined by scanning the whole tracked tree + `untracked-supporting-files/` + `project-notes.md` +
+Determined by scanning the whole tracked tree + untracked supporting files + architecture and decision records +
 msc-thesis for each file's basename. **A zero here is a signal to check, not grounds
 to delete** — a terminal record legitimately has no inbound pointers.
 
@@ -351,7 +350,7 @@ to delete** — a terminal record legitimately has no inbound pointers.
 | `docs/pol_meeting_briefing.md` | Meeting held → MARK SUPERSEDED (§3.4) |
 | `docs/validation/reference-anchor-worksheet.md` | Superseded by `-status.md` → MARK SUPERSEDED (§3.4) |
 | `docs/thesis_fragment_retirement_2026-07-29.md` | **KEEP.** Terminal record of a closed action whose rule now lives in tracked `docs/conventions.md` §8 and `tests/test_repo_hygiene.py`. Zero inbound is correct here. |
-| `docs/work packages/*.md` ×2 | Provenance for two executed studies → KEEP (§3.8) |
+| `docs/work_packages/*.md` ×2 | Provenance for two executed studies → KEEP (§3.8) |
 | `configs/base/.gitkeep`, `configs/experiments/.gitkeep` | Inert scaffold → DELETE, optional (§3.3) |
 
 ---
@@ -381,15 +380,15 @@ number and no status. **It needs an explicit owner decision to proceed.** Flaggi
 rather than silently leaving it, because ADR-0027 is one of the load-bearing head-datum
 decisions and a reader following its own References section currently hits nothing.
 
-### 5.2 A stale `untracked-supporting-files/` pointer *(fixable, invisible to every test)*
+### 5.2 A stale untracked supporting-file pointer *(fixable, invisible to every test)*
 
 ```
-untracked-supporting-files/bep-thesis-writeup-campaign/stale-numbers.md:80
-untracked-supporting-files/bep-thesis-writeup-campaign/stale-numbers.md:81
+<untracked-supporting-files>/bep-thesis-writeup-campaign/stale-numbers.md:80
+<untracked-supporting-files>/bep-thesis-writeup-campaign/stale-numbers.md:81
     -> docs/decisions/ce-prior-study.md          (actual: adr0026-ce-prior-study.md)
 ```
 
-Exactly the failure mode the task brief warned about: `untracked-supporting-files/` is gitignored,
+Exactly the failure mode the task brief warned about: the supporting directory is gitignored,
 so this appears in no diff and no test. Two occurrences, both in the same table.
 
 ### 5.3 Stale illustrative paths in `docs/architecture.md`
@@ -485,7 +484,7 @@ is gate-coupled.
 | DELETE (`git rm`) | 11 root PNGs + 2 optional `.gitkeep` | 0 files |
 | DELETE (untracked dir) | `notebooks/notebooks/` | 0 files |
 | MARK SUPERSEDED | 8 documents (6 in `docs/`, 2 in `docs/validation/`) | 0 files (headers only, no moves) |
-| DOCUMENT INSTEAD | `docs/decisions/` grammar; the dated-audit convention; `docs/work packages/` purpose | 1 file (`docs/conventions.md`) |
+| DOCUMENT INSTEAD | `docs/decisions/` grammar; the dated-audit convention; `docs/work_packages/` purpose | 1 file (`docs/conventions.md`) |
 | MOVE / RENAME | **none proposed** | — |
 | UNCERTAIN | 2 | — |
 
@@ -503,7 +502,7 @@ against with the specific cost named in §3.6, §3.7 and §3.5.
 2. **Remove the empty untracked `notebooks/notebooks/`.** Zero coupling.
 3. **`git rm` the two `configs/` `.gitkeep` stubs** (optional).
 4. **Add the 8 superseded headers.** Content-only edits, no moves, no path coupling.
-5. **Fix the `untracked-supporting-files/` stale pointer** (§5.2) — 2 lines, invisible to CI, so it
+5. **Fix the stale pointer in the untracked supporting files** (§5.2) — 2 lines, invisible to CI, so it
    will not be caught later.
 6. **Fix `docs/architecture.md`'s two stale example paths** (§5.3) — optional.
 7. **Write the conventions additions** (§3.6, §3.7, §3.8) + the Phase 3 retention policy
@@ -512,8 +511,8 @@ against with the specific cost named in §3.6, §3.7 and §3.5.
 9. **Path-integrity gate**: `pytest` (**628 expected — measured 2026-07-31, not the 625
    of 2026-07-30**; the figure pass added three), `ruff check .`, `black --check .`,
    `python scripts/production_campaign.py` manifest/dry-run with G7 resolving, every
-   `scripts/*.py --help`, every relative path in `docs/`, ADRs, `README.md`, `project-notes.md`
-   and `untracked-supporting-files/*.md`.
+   `scripts/*.py --help`, every relative path in `docs/`, ADRs, `README.md`, architecture and decision records
+   and `<untracked-supporting-files>/*.md`.
 
 Steps 1-3 are independent and reversible. Steps 4-8 touch no path that any test, gate
 or manifest binds to.
@@ -672,7 +671,7 @@ preservation directory before knowing whether it has anything to preserve.
 | `production_campaign.py --dry-run` | Manifest path completes; all 11 stages resume as already-passed |
 | Gate G7 resolution | **52 of 52** tracked figures declared; 0 unresolved `requires`/`sources`; **0 stale**; 1 declared waiver (ADR-0032, no artifact to bind to) |
 | `scripts/*.py` | **43 of 43** compile; 20 of 20 argparse scripts print usage; 23 have no argparse and are compile-checked only (invoking them would start real work) — **superseded 2026-07-31 by section 11.6: 42 of 42 drivers now carry argparse and answer `--help` inertly** |
-| Relative paths in `docs/`, ADRs, `README.md`, `project-notes.md`, `untracked-supporting-files/*.md` | All markdown links resolve; no live reference to any removed path |
+| Relative paths in `docs/`, ADRs, `README.md`, architecture and decision records, `<untracked-supporting-files>/*.md` | All markdown links resolve; no live reference to any removed path |
 | msc-thesis | No engine-path reference broken; its `figures/` are its own copies |
 
 **Untouched, as required:** no `Config` default, no physics module, no

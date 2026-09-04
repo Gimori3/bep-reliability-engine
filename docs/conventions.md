@@ -115,10 +115,10 @@ entries for Japanese-language sources may retain the original title alongside th
 romanised form, because the original is the accurate bibliographic record of the
 source. That exception covers `references.bib` only and does not extend to any
 `.tex` file. Verified 2026-07-29: zero CJK characters in typeset msc-thesis `.tex`
-content. The check that keeps it that way is documented in `msc-thesis/project-notes.md`.
+content. The check that keeps it that way is documented in the msc-thesis project rules.
 
 **No em dashes; ranges are written "X to Y", never "X-Y" or an en dash.** See
-`msc-thesis/project-notes.md` for the full style contract (citation-key preservation,
+the msc-thesis project rules for the full style contract (citation-key preservation,
 `\label{}` preservation, minimal surgical edits, plan-and-approve for multi-chapter
 tasks). That contract is binding on any edit to that repository.
 
@@ -160,7 +160,7 @@ citations still buy nothing.
 | `<topic>-study.md`, `<topic>-synthesis.md` | An **un-numbered study**: work that produced a finding but changed no default and therefore consumed no ADR number (`seepage-length-L-study.md`, `r10-foreshore-exhaustion-screening.md`, `epistemic-bracket-synthesis.md`, `m7-pol-ode-reference-values.md`). |
 
 Do not "unify" these. The audit measured a restructure at **293 reference lines
-across 84 files** (66 tracked, 18 in the gitignored `untracked-supporting-files/` library),
+across 84 files** (66 tracked, 18 in the gitignored untracked supporting files),
 plus 12 paths whose SHA-256 is recorded in
 `results/production_campaign_manifest.json`, 16 literal path strings in gate G7's
 `FIGURE_DRIVERS`, six paths hard-coded in `tests/test_figure_pass.py`, and the

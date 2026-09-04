@@ -3,7 +3,7 @@
 Date: 2026-07-19. Status: **Accepted** — the §5 recommendations were adopted by the author
 (2026-07-19); **no production default changed, no new binding ADR**. The adopted model and
 its reporting/consistency requirements are locked into `docs/architecture.md` (§7 stochastic
-vector, §12 open-decisions, §13 single-decisions table) and the project-notes.md as-built state.
+vector, §12 open-decisions, §13 single-decisions table) and the architecture and decision records as-built state.
 Companion to **ADR-0033** (GSA — L is the top total-effect input) and **ADR-0037**
 (length effect / λ_ac). Parent decisions unchanged.
 

@@ -4,7 +4,8 @@ Pure post-processing: this driver contains no physics and evaluates no limit
 state. It reads persisted artifacts only and re-expresses estimates that are
 already on disk, so every number it prints traces to a named file.
 
-Metric (campaign decision D1, ``docs/work_packages/rq1-revision-campaign_2026-08-28.md``)::
+Metric (campaign decision D1,
+``docs/work_packages/rq1-revision-campaign_2026-08-28.md``)::
 
     beta(h) = -Phi^-1( P_f(h) )            per branch
     dbeta   = beta_transient - beta_static  (paired, shared sample)

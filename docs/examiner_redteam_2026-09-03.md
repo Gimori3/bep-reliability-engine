@@ -14,7 +14,8 @@ residues, of which R4 and R5 remain open by construction. The R1 to R3 record is
 
 **What this is.** An adversarial reading of `d:\repositories\msc-thesis` as it stands
 on 2026-09-03, after the shortening campaign closed at 99 pages and after the three
-reviewer-triage work packages of `docs/work_packages/reviewer-feedback-triage_2026-08-29.md` landed. Fifteen
+reviewer-triage work packages of
+`docs/work_packages/reviewer-feedback-triage_2026-08-29.md` landed. Fifteen
 questions a committee could actually land, ranked by the damage an unanswered version
 would do; for each, where the answer already lives, verbatim; a grade; and, where the
 grade was ANSWERED BUT BURIED or ANSWERED ONLY IN AN APPENDIX, the smallest edit that
@@ -766,7 +767,7 @@ in Ch. 7 and Ch. 8. No edit needed.
 
 ## 4. Page-count proof, and the nine restatements that paid for the additions
 
-Method of record from `msc-thesis/project-notes.md`: isolated copy of `report.tex`,
+Method of record from the msc-thesis project: isolated copy of `report.tex`,
 `tudelft-report.cls`, `references.bib`, `frontmatter/`, `mainmatter/`, `appendix/` and
 `figures/` into a scratch directory, `latexmk -xelatex` run there, extents read from the
 `\contentsline` entries of the fresh `.toc`, main body = (page of the References entry)
@@ -784,7 +785,7 @@ minus one.
 | Eight additions, all offsets | 6 | 10 | 12 | 12 | 11 | 18 | 12 | 11 | 7 | **99** | 100 |
 | **Final: plus the R1 to R3 closures** | 6 | 10 | 12 | 12 | 11 | 18 | 12 | 11 | 7 | **99** | 100 |
 
-The baseline reproduces the chapter map recorded in `msc-thesis/project-notes.md` for the
+The baseline reproduces the chapter map recorded by the msc-thesis project for the
 2026-09-02 close exactly, chapter for chapter, so the isolated build is faithful and the
 measurement can be trusted. Every build carries the same single pre-existing `undefined`
 hit in `report.log`, and the final build matches the baseline on 774 defined labels, 815

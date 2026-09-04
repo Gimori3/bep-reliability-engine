@@ -40,7 +40,7 @@ FIGS = REPO / "docs/figures"
 #: Committed 95 % hazard-sampling intervals for the RQ4 headline figure.
 INTERVALS = REPO / "docs/decisions/annualisation-hazard-sampling-uncertainty.json"
 
-# Reference palette (dataviz guide, validated set; light mode), fixed slots.
+# Reference palette (validated project set; light mode), fixed slots.
 MECH_COLORS = {
     "bep": "#2a78d6",  # slot 1 blue
     "overflow": "#008300",  # slot 2 green

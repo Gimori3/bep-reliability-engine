@@ -54,7 +54,7 @@ def save_both(fig, name: str) -> None:
 
 SECTIONS = ["57.4", "58.8", "60.0", "62.0"]
 
-# Reference palette (dataviz guide, validated set; light mode).
+# Reference palette (validated project set; light mode).
 BLUE = "#2a78d6"  # slot 1 - static branch / section 1
 AQUA = "#1baf7a"  # slot 2 - section 2
 YELLOW = "#eda100"  # slot 3 - section 3

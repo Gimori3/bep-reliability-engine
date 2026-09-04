@@ -255,7 +255,7 @@ same key names.** `saltelli_primer_2008`, `saltelli_2002`, `saltelli_2010`,
 
 **Nothing to merge.** The four mapped keys are already cited under the thesis's own key
 names; migrating the fragment keys would create duplicate entries for the same sources
-and would alter citation keys, which `msc-thesis/project-notes.md` forbids.
+and would alter citation keys, which the msc-thesis project rules forbid.
 
 `waseda_gounokawa_dataset_2025` is the only genuinely new entry. It is **not cited
 anywhere** in the thesis, so it is not needed. **Flagged, not migrated:** its DOI
@@ -283,7 +283,7 @@ not needed, since the corresponding thesis entries already exist.
    `yabegawa_2013`, `oyo_1999`, `obihiro_levee_inspection_2008`). These do typeset, in
    the bibliography. Installing an unconditional whole-document rule therefore puts the
    repository in immediate violation, and remediating it would mean editing
-   bibliography entries, which `msc-thesis/project-notes.md` places off-limits and which is
+   bibliography entries, which the msc-thesis project rules place off-limits and which is
    also a scholarly-integrity question (the Japanese title is the accurate record of a
    Japanese-language source). **This needs the owner's decision and is raised at the
    checkpoint rather than resolved here.**

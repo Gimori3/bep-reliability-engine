@@ -70,7 +70,8 @@ OUT_DIR = RESULTS_DIR / "sensitivity" / "ce_prior"
 FIG_DIR = REPO / "docs" / "figures"
 
 # The two informative matrix sections (KP58.8/KP60.0 carry the production Phase 2
-# information; see project-notes.md). Config stem -> (label, production sweep h5).
+# information; see architecture and decision records). Config stem ->
+# (label, production sweep h5).
 SECTIONS: tuple[tuple[str, str, str], ...] = (
     ("kp58_8_historical_matrix", "KP58.8", "tokachi_kp58.8_historical_matrix.h5"),
     ("kp60_0_historical_matrix", "KP60.0", "tokachi_kp60.0_historical_matrix.h5"),

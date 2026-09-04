@@ -400,7 +400,7 @@ Design details worth recording:
 
 **→ Action (this is the concrete answer to the `remediation_state` caveat).**
 The engine's `remediation_state` column is currently "a label, not physics"
-(project-notes.md; `docs/phase2_report.md` §11), which is the single most awkward
+(architecture and decision records; `docs/phase2_report.md` §11), which is the single most awkward
 caveat in the Phase 2/Phase 3 story. Table 7.1.1 tells you exactly which
 engine quantity each Japanese countermeasure changes:
 

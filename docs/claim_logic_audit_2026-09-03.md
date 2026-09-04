@@ -13,7 +13,7 @@ Every declarative claim in `mainmatter/9. Conclusions and Recommendations.tex`
 and `frontmatter/summary.tex` was traced to the passage in Chapters 5, 6, 7 or
 8 that carries it, and checked for strength match. Additionally: a full sweep
 of announced enumerations across the main body and all eleven appendices; the
-prohibited-claim register of `bep-reliability-engine/project-notes.md` checked at
+prohibited-claim register of this repository's architecture and decision records checked at
 every site; the conditionality register checked against every number it
 attaches to; and the 2026-08-29 terminology decisions checked for creep-back.
 
@@ -37,7 +37,7 @@ sections, corrected here.)
 ## 0. Integrity of the edits
 
 Verified on an isolated faithful build (sources copied to a scratch directory
-per `msc-thesis/project-notes.md`, `latexmk -xelatex` run there), baseline against
+per the msc-thesis project rules, `latexmk -xelatex` run there), baseline against
 post-edit:
 
 | Gate | Result |
@@ -248,7 +248,7 @@ clear the R1 floor at the KP 62.0 anchor are `m_p` (0.97), `gamma_bl_sub_lower`
 end is conductivity's, the **upper** end is the model factor's. Conductivity
 alone moves B by 10.4 and $\Delta\beta$ by 0.04, against the anchor's own
 statistical width of 0.12. This is the standing prohibition in
-`bep-reliability-engine/project-notes.md` ("that span is **not** conductivity's
+this repository's architecture and decision records ("that span is **not** conductivity's
 alone"). Chapters 5 and 6 both say it correctly ("the same KP~62.0 arms",
 "the defined arms span"), and so does Chapter 9's running text ("the resolved
 epistemic arms span a factor of 10.5 in $B$ ... the conductivity arm setting
@@ -371,7 +371,7 @@ anywhere in the document is section 6.4's heading moving one page inside it.
 
 **Site.** `frontmatter/summary.tex`, final paragraph.
 
-**What was wrong.** `bep-reliability-engine/project-notes.md` requires the
+**What was wrong.** This repository's architecture and decision records require the
 static-versus-transient bias to be quoted with four brackets, none of which
 cancels: conductivity, seepage length, canonical event and **critical pipe
 length**. The Summary quoted the bias figures and carried conductivity and
@@ -561,7 +561,7 @@ Two failures, both in Chapter 6, both fixed: **F1** and **F2**. The
 
 ### 4.7 Prohibited-claim register
 
-| Prohibition (`bep-reliability-engine/project-notes.md`) | Sites checked | Result |
+| Prohibition (this repository's architecture and decision records) | Sites checked | Result |
 |---|---|---|
 | Bias quoted without its four brackets | Ch. 6 register, Ch. 8 §8.1 and §8.5, Ch. 9 §9.1.1 and register, Summary | Chapter 9 clean. The Summary carried three of four and now carries four: **F14** |
 | Section ordering "reverses" in the RQ1 comparison | Every "revers*" in the document | Clean. The three live uses are the mechanism ordering under the resistant gradation (Summary, Ch. 7), the bracket-driven mechanism reversal (Ch. 7) and the median-offset-versus-deep-tail ordering (Ch. 6), all legitimate |

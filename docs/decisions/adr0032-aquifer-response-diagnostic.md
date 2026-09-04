@@ -111,7 +111,7 @@ T_rise* is divided into τ_aq:
 
 | figure | numerator τ_aq | denominator T_rise | where it appears |
 |---|---|---|---|
-| **~10×** | central (prior means) | ensemble median, 18 h = 64 800 s | this note, ADR-0032, `architecture.md` §11/§13, `project-notes.md` |
+| **~10×** | central (prior means) | ensemble median, 18 h = 64 800 s | this note, ADR-0032, `architecture.md` §11/§13, architecture and decision records |
 | **3.8–19.5×** | 90th-percentile corner | the run's own canonical event, 23 h = 82 800 s | `metadata['aquifer_response'].margin_vs_threshold`, `production_campaign_2026-07-29.md` §9.2 |
 
 The **numerator** difference is the substantive one and is pre-registered:

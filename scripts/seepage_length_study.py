@@ -55,7 +55,7 @@ FIG_DIR = REPO / "docs" / "figures"
 RQ4_CSV = REPO / "results" / "system_integration" / "phase3" / "rq4_annual.csv"
 
 # The four confined production sections (matrix interpretation is the informative
-# one; see project-notes.md). Config stem -> label.
+# one; see architecture and decision records). Config stem -> label.
 SECTIONS: tuple[tuple[str, str], ...] = (
     ("kp57_4_historical_matrix", "KP57.4"),
     ("kp58_8_historical_matrix", "KP58.8"),

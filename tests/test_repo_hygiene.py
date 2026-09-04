@@ -85,10 +85,9 @@ def test_no_thesis_source_anywhere_in_the_tracked_tree() -> None:
 def test_the_conventions_document_still_carries_the_rule() -> None:
     """The rule must survive in a *tracked* file.
 
-    ``project-notes.md`` is gitignored here (``.gitignore``), so a rule written only
-    there is machine-local and does not reach a fresh clone.
+    Untracked project notes do not reach a fresh clone.
     ``docs/conventions.md`` is tracked, which is why the rule lives there and
-    ``project-notes.md`` only points at it.
+    any local notes can only point at it.
     """
     conventions = (REPO / "docs" / "conventions.md").read_text(encoding="utf-8")
     assert "Thesis text does not live in this repository" in conventions

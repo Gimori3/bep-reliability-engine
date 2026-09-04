@@ -18,7 +18,7 @@ KP 62.0 right-bank levee and the water, but `data/processed/tokachi_bep_inputs.c
 records `foreshore_width_m = 44` and the provenance flags it "narrowest" — the pillar of
 the Study Area argument that KP 62.0 combines the thinnest blanket with the least foreland
 attenuation. Four hypotheses were on the table: (a) the OYO source is wrong, (b) the
-earlier extraction from the OYO report was wrong, (c) the 1998 value is stale
+An earlier extraction from the OYO report was wrong, (c) the 1998 value is stale
 (channel migration + 樹林化 over ~28 years), (d) 44 m is a high-water value and 200–300 m
 the normal-flow one.
 

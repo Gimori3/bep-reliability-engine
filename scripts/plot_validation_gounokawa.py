@@ -31,7 +31,7 @@ from validate_gounokawa_shimohara import EVENT_T0, load_event  # noqa: E402
 RESULTS = REPO / "results" / "validation_gounokawa" / "validation_results.json"
 FIG_DIR = REPO / "docs" / "figures"
 
-# Reference palette (dataviz guide, light mode)
+# Reference palette (project set, light mode)
 SURFACE = "#fcfcfb"
 INK = "#0b0b0b"
 INK2 = "#52514e"

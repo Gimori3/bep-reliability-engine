@@ -2,7 +2,7 @@
 
 Single source of truth for the palette and matplotlib rcParams used by the
 figure-producing drivers under ``scripts/``. The values are the validated
-light-mode reference palette of the ``dataviz`` guide; the slot **order** is the
+light-mode reference palette used by the project; the slot **order** is the
 colour-vision-deficiency safety mechanism and must not be reshuffled per figure.
 
 House rules this module encodes (they are the ones a reviewer checks):

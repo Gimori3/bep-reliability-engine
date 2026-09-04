@@ -935,7 +935,7 @@ stage. No figure from the tilted estimator may be quoted at all.
 | 7 | `production_campaign_2026-07-29.md` §12 | decision 6 **open** | **CLOSED** |
 | 8 | `adr0047-dem-seepage-length.md` §8 table row | "Stage 6.6 bias at HWL *(unresolved, 1 and 4 rows)* 21.0 → 44.7" | both entries superseded; the post-adoption value is **26.9, resolved** |
 | 9 | `architecture.md` §12 Failure-mode-4 paragraph | "the HWL figure rests on single-digit rows and is not statistically resolved"; "KP57.4 … retains ≥32× at HWL, itself a zero-row bound" | KP 62.0 **is** now resolved (26.9); KP 57.4's bound is **≥ 148** |
-| 10 | local project guidance Stage 6.6 and campaign bullets | "~21× KP62.0, ≥32× KP57.4 at HWL" | as above; new bullet added |
+| 10 | architecture and decision records Stage 6.6 and campaign bullets | "~21× KP62.0, ≥32× KP57.4 at HWL" | as above; new bullet added |
 
 Item 9 is the only one whose prose is *wrong* rather than merely superseded, since
 KP 62.0's resolution status has flipped; the rest are numeric replacements. Items
@@ -946,7 +946,7 @@ than replacing any.
 **Fixed in this session:** items 2–3 (`stage6_6_report.md` §9), 5–7
 (`production_campaign_2026-07-29.md` §12 closure note), 9 (`architecture.md`,
 rewritten because its resolution-status claim was wrong, not merely stale), and 10
-(local project guidance bullet). Items 1, 4 and 8 sit inside dated addenda that already carry
+(architecture and decision records bullet). Items 1, 4 and 8 sit inside dated addenda that already carry
 a forward pointer to the authoritative section, so they are left legible as
 historical record per house practice.
 

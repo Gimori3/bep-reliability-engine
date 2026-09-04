@@ -601,7 +601,7 @@ the two entries are not comparable as stated. The bulk companion also runs at
 **Nothing computational.** No persisted artifact, no `Config` default, no
 physics, no configs, no test. The live analysis files were already correct; what
 was stale was this report's prose and, through it, the running index in
-`project-notes.md`, whose Stage 6.6 bullet is corrected in the same pass.
+architecture and decision records, whose Stage 6.6 bullet is corrected in the same pass.
 
 **In the thesis**, the one figure that had propagated is §4.2's bulk
 `+0.40`, corrected there to `+0.61` with its stage and its sample size. The

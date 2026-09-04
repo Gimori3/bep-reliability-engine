@@ -444,7 +444,7 @@ from memory; seven candidates were found and every one was re-run or re-pinned:
 | `dem_cross_section_study.py` | re-pinned + verified | drives the **withdrawn 47.0 m** arm; reproduces 0.20106 |
 | ADR-0045 / 0046 / 0048 companions | checked, not re-run | **KP 58.8 + KP 60.0 only** — neither adopted |
 | `qa_re_halved_member.py` | checked, not re-run | KP 58.8 only |
-| Documents of record | updated | provenance §3.1/§3.2, `architecture.md` §7/§13, `phase2_report.md` §14, `phase3_report.md` §11, `stage6_6_report.md` §8, project-notes.md, msc-thesis Ch. 3 + Ch. 7 |
+| Documents of record | updated | provenance §3.1/§3.2, `architecture.md` §7/§13, `phase2_report.md` §14, `phase3_report.md` §11, `stage6_6_report.md` §8, architecture and decision records, msc-thesis Ch. 3 + Ch. 7 |
 
 Superseded artifacts retained under `results/superseded_adr0047_L47/`.
 
