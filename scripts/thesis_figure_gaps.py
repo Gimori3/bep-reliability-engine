@@ -894,10 +894,90 @@ def _bracket_order(sections: list[dict[str, Any]]) -> list[str]:
     return sorted(keys, key=lambda b: keys[b], reverse=True)
 
 
+# --------------------------------------------------------------------------- #
+# Figure 2 -- printed geometry and type                                         #
+# --------------------------------------------------------------------------- #
+#
+# The thesis places this figure at ``\textwidth`` in a 170 mm text block, so a
+# figure authored much wider than that is reduced on the page and every label
+# with it. The 15.4 in layout this replaces was reduced 2.37 times, which put
+# its tick labels at 4.4 pt and its notes at 3.4 pt against 10 pt body text and
+# 8 pt captions: nothing in it could be read in print. The fix is to author at a
+# known multiple of the printed width and to state every type size as the size
+# it will have on the page. The multiple keeps the raster fine (about 340 dots
+# per printed inch) without changing what the reader sees.
+
+#: The thesis text block, in inches: ``total={170mm,257mm}`` in the class.
+RANKING_PAGE_WIDTH_IN = 170.0 / 25.4
+#: Authored inches per printed inch. Type sizes below are printed points.
+RANKING_SCALE = 2.0
+#: Width over height of the saved image. A figure placed at ``\textwidth``
+#: costs a band of ``textwidth / aspect``, so this may never fall below the
+#: 2.571 of the layout it replaces without buying a page.
+RANKING_ASPECT = 2.555
+#: ``figstyle.save`` writes with ``bbox_inches="tight"``, which pads by this.
+RANKING_TIGHT_PAD_IN = 0.1
+
+#: Type sizes in points **on the printed page**. The floor is about 7 pt: the
+#: thesis sets body text at 10 pt and captions at 8 pt, and a figure that is
+#: read rather than glanced at has to stay within reach of its caption.
+RANKING_PT = {
+    "suptitle": 8.6,
+    "panel_title": 8.0,
+    "axis_label": 7.6,
+    "tick": 7.0,
+    "row_label": 7.0,
+    "legend": 6.8,
+    "note": 6.6,
+    "value": 6.4,
+    "inset": 6.2,
+    "marker": 3.6,
+    "marker_c": 2.2,
+}
+
+#: Column widths of the ranking layout, in printed inches, left to right. They
+#: sum to the drawn width; the row labels are written into the first one.
+RANKING_COLUMNS = {
+    "row_labels": 1.12,
+    "zoom": 1.00,
+    "break": 0.06,
+    "log": 0.60,
+    "gap_ab": 0.16,
+    "gap_bc": 0.36,
+    "right": 0.05,
+}
+#: Heights of the bands above and below the axes, in printed inches.
+RANKING_BANDS = {
+    "suptitle": 0.17,
+    "panel_title": 0.15,
+    "tick_labels": 0.13,
+    "axis_label": 0.15,
+    "note": 0.28,
+    "bottom": 0.04,
+}
+
+
+def _rpt(name: str) -> float:
+    """A printed type size in the authored units of the ranking figure."""
+    return RANKING_PT[name] * RANKING_SCALE
+
+
+def _ranking_value_label(value: float) -> str:
+    """Render a span that sits outside the near-unity zoom, for the mark itself.
+
+    Three significant figures, matching :func:`_fmt_span` so a value read off
+    the figure and the same value read out of the table source agree.
+    """
+    if value < 1000.0:
+        return f"{value:.0f}"
+    exponent = int(np.floor(np.log10(value)))
+    return rf"${value / 10.0**exponent:.2f}\times10^{{{exponent}}}$"
+
+
 def figure_epistemic_ranking(
     synthesis: dict[str, Any], attainable_max_kp62: float
 ) -> tuple[Path, list[dict[str, Any]]]:
-    """The brackets, four sections, ranked -- and the winner's stage dependence.
+    """The brackets, four sections, ranked, and the winner's stage dependence.
 
     Panels A and B are the ranking at the two anchors that carry the thesis's
     claims. Panel C takes the bracket that wins that ranking and plots its span
@@ -905,6 +985,17 @@ def figure_epistemic_ranking(
     about it that no figure showed: it spans orders of magnitude at the
     low-stage end and collapses toward unity as the conditional probability
     saturates, so no single factor for it exists.
+
+    **The span axis of panels A and B is split, and that is the design.** The
+    brackets run from 1.00 to above 1e5, and on one logarithmic axis over that
+    range every bracket near unity collapses onto the spine with the four
+    section marks on top of each other. That is exactly where the section's
+    least comfortable reading lives: whether an epistemic bracket is wider or
+    narrower than the sampling band on the same estimate is decided inside the
+    first factor of three. The near-unity segment is therefore linear and runs
+    to just past the widest statistical band, and everything above it is
+    logarithmic and carries its value beside the mark. Sections are dodged
+    within a row so four marks on one value stay four marks.
 
     Panel C carried the cancellation test until 2026-08-15, when a coherence
     audit found it drew the same quantity as the bar panel of
@@ -920,122 +1011,262 @@ def figure_epistemic_ranking(
     cancellation = {
         name: _cancellation_by_bracket(section) for name, section in sections.items()
     }
+    n_rows = len(rows_order)
+    scale = RANKING_SCALE
 
-    fig, axes = plt.subplots(1, 3, figsize=(15.4, 5.6))
+    # --- the printed layout, in printed inches ---------------------------- #
+    drawn_w = RANKING_PAGE_WIDTH_IN - 2.0 * RANKING_TIGHT_PAD_IN / scale
+    drawn_h = (
+        RANKING_PAGE_WIDTH_IN / RANKING_ASPECT - 2.0 * RANKING_TIGHT_PAD_IN / scale
+    )
+    fig = plt.figure(figsize=(drawn_w * scale, drawn_h * scale))
 
-    # A common x range keeps the two ranking panels comparable at a glance.
-    finite = []
+    col = RANKING_COLUMNS
+    panel_w = col["zoom"] + col["break"] + col["log"]
+    x_a = col["row_labels"]
+    x_b = x_a + panel_w + col["gap_ab"]
+    x_c = x_b + panel_w + col["gap_bc"]
+    w_c = drawn_w - col["right"] - x_c
+    band = RANKING_BANDS
+    y_bot = band["bottom"] + band["note"] + band["axis_label"] + band["tick_labels"]
+    y_top = drawn_h - band["suptitle"] - band["panel_title"]
+
+    def _axes(x0: float, width: float) -> plt.Axes:
+        return fig.add_axes(
+            (x0 / drawn_w, y_bot / drawn_h, width / drawn_w, (y_top - y_bot) / drawn_h)
+        )
+
+    pairs = []
+    for x0 in (x_a, x_b):
+        pairs.append(
+            (
+                _axes(x0, col["zoom"]),
+                _axes(x0 + col["zoom"] + col["break"], col["log"]),
+            )
+        )
+    axc = _axes(x_c, w_c)
+
+    # --- the two segments panels A and B share ---------------------------- #
+    finite: list[float] = []
+    statistical: list[float] = []
     for section in sections.values():
         for bracket in rows_order:
             for anchor in RANKING_PANEL_ANCHORS:
                 cell = _span_cell(section, bracket, anchor)
                 if cell["defined"] and not cell["unbounded"]:
                     finite.append(float(cell["span"]))
-    x_hi = max(finite) * 60.0
-    x_unbounded = max(finite) * 5.0
+                    if bracket in STATISTICAL_BRACKETS:
+                        statistical.append(float(cell["span"]))
+    # The split is where the comparison stops being close: a tenth past the
+    # widest sampling band, so every bracket that competes with one is inside
+    # the linear segment at full resolution.
+    split = 1.1 * max(statistical)
+    x_top_log = max(finite) * 60.0
+    #: Where an unbounded span is drawn, as a fraction of the logarithmic
+    #: segment: past every finite mark, with room left for the arrow that says
+    #: the value has no upper end.
+    x_unbounded = 0.82
 
     # "design_hwl" in the synthesis record is the nearest *grid level* to each
     # section's HWL, not the HWL itself (KP 62.0: 46.50 m against 46.39 m).
     # ADR-0040 section 2.5 established that those are resolvably different
     # levels, so the panel says which one it is drawing.
-    for ax, anchor, title in zip(
-        axes[:2],
+    for (ax_zoom, ax_log), anchor, title, x_panel in zip(
+        pairs,
         RANKING_PANEL_ANCHORS,
         ("A  at the design-level anchor", "B  at the transition midpoint"),
+        (x_a, x_b),
     ):
-        for row, bracket in enumerate(rows_order):
-            y = len(rows_order) - 1 - row
-            if bracket in STATISTICAL_BRACKETS:
-                ax.axhspan(
-                    y - 0.5, y + 0.5, color=figstyle.GRID, alpha=0.55, lw=0, zorder=0
+        for ax in (ax_zoom, ax_log):
+            ax.set_ylim(-0.62, n_rows - 0.25)
+            ax.set_yticks(list(range(n_rows))[::-1])
+            ax.set_yticks([y + 0.5 for y in range(-1, n_rows)], minor=True)
+            ax.set_yticklabels([])
+            ax.tick_params(
+                axis="y", which="both", length=0, labelsize=_rpt("row_label")
+            )
+            ax.tick_params(axis="x", labelsize=_rpt("tick"), pad=1.5 * scale)
+            ax.grid(False)
+            ax.grid(
+                True,
+                axis="y",
+                which="minor",
+                color=figstyle.GRID,
+                lw=0.7 * scale,
+                zorder=0,
+            )
+            ax.grid(True, axis="x", which="major", color=figstyle.GRID, lw=0.7 * scale)
+            for spine in ax.spines.values():
+                spine.set_linewidth(0.8 * scale)
+            for row, bracket in enumerate(rows_order):
+                if bracket in STATISTICAL_BRACKETS:
+                    ax.axhspan(
+                        n_rows - 1.5 - row,
+                        n_rows - 0.5 - row,
+                        color=figstyle.GRID,
+                        alpha=0.55,
+                        lw=0,
+                        zorder=0,
+                    )
+
+        # The unit line stands clear of the spine: every bracket that moves
+        # nothing at all sits on it, and against the spine those marks were
+        # unreadable.
+        ax_zoom.set_xlim(0.88, split)
+        ax_zoom.set_xticks([1.0, 1.5, 2.0, 2.5, 3.0])
+        ax_zoom.set_xticklabels(["1", "1.5", "2", "2.5", "3"])
+        ax_zoom.axvline(1.0, color=figstyle.BASELINE, lw=1.0 * scale, zorder=1)
+        if ax_zoom is pairs[0][0]:
+            # Both panels carry the same rows in the same order and are aligned
+            # on them, so the rows are named once and the minor-tick rules
+            # carry the eye across.
+            ax_zoom.set_yticklabels(
+                [BRACKET_LABEL[b] for b in rows_order], fontsize=_rpt("row_label")
+            )
+        ax_log.set_xscale("log")
+        ax_log.set_xlim(split, x_top_log)
+        ax_log.set_xticks([1e1, 1e3, 1e5])
+        ax_log.tick_params(axis="y", which="both", left=False)
+
+        # The break is drawn, not implied: two ticks on the facing spines say
+        # the axis is cut rather than continuous.
+        for ax, side in ((ax_zoom, 1.0), (ax_log, 0.0)):
+            for y0 in (0.0, 1.0):
+                ax.plot(
+                    [side - 0.012, side + 0.012],
+                    [y0 - 0.014, y0 + 0.014],
+                    transform=ax.transAxes,
+                    color=figstyle.BASELINE,
+                    lw=0.9 * scale,
+                    clip_on=False,
+                    zorder=6,
                 )
+
+        for row, bracket in enumerate(rows_order):
+            y = n_rows - 1 - row
+            beyond_zoom: list[tuple[float, float]] = []
+            inside_zoom: list[float] = []
+            n_defined = 0
             for name in SECTIONS:
                 cell = _span_cell(sections[name], bracket, anchor)
                 if not cell["defined"]:
                     continue
+                n_defined += 1
                 colour = figstyle.SECTION_COLORS[name]
                 marker = figstyle.SECTION_MARKERS[name]
-                y_offset = y + (SECTIONS.index(name) - 1.5) * 0.17
+                y_offset = y + (SECTIONS.index(name) - 1.5) * 0.20
                 if cell["unbounded"]:
-                    ax.plot(
+                    strip = ax_log.get_yaxis_transform()
+                    ax_log.plot(
                         [x_unbounded],
                         [y_offset],
                         marker=marker,
                         color=colour,
-                        ms=6.0,
+                        ms=_rpt("marker"),
                         mfc=figstyle.SURFACE,
-                        mew=1.5,
+                        mew=0.9 * scale,
                         ls="none",
+                        transform=strip,
                         zorder=4,
                     )
-                    ax.annotate(
+                    ax_log.annotate(
                         "",
-                        xy=(x_hi * 0.7, y_offset),
-                        xytext=(x_unbounded * 1.4, y_offset),
+                        xy=(0.985, y_offset),
+                        xytext=(x_unbounded + 0.030, y_offset),
+                        xycoords=strip,
+                        textcoords=strip,
                         arrowprops={
                             "arrowstyle": "-|>",
                             "color": colour,
-                            "lw": 1.1,
+                            "lw": 0.8 * scale,
                             "shrinkA": 0,
                             "shrinkB": 0,
+                            "mutation_scale": 5.0 * scale,
                         },
                     )
+                    continue
+                value = max(float(cell["span"]), 1.0)
+                target = ax_zoom if value < split else ax_log
+                target.plot(
+                    [value],
+                    [y_offset],
+                    marker=marker,
+                    color=colour,
+                    ms=_rpt("marker"),
+                    ls="none",
+                    zorder=4,
+                )
+                if target is ax_log:
+                    beyond_zoom.append((y_offset, value))
                 else:
-                    ax.plot(
-                        [max(float(cell["span"]), 1.0)],
-                        [y_offset],
-                        marker=marker,
-                        color=colour,
-                        ms=6.0,
-                        ls="none",
-                        zorder=4,
-                    )
-        ax.axvline(1.0, color=figstyle.BASELINE, lw=1.0)
-        ax.set_xscale("log")
-        ax.set_xlim(0.88, x_hi)
-        ax.set_ylim(-0.7, len(rows_order) - 0.3)
-        ax.set_yticks(list(range(len(rows_order)))[::-1])
-        ax.set_yticklabels([BRACKET_LABEL[b] for b in rows_order])
-        ax.set_xlabel("transient $P_f$ span factor at the anchor")
-        ax.set_title(title, loc="left")
-        ax.text(
-            x_unbounded,
-            len(rows_order) - 0.62,
-            "unbounded",
-            fontsize=8,
-            color=figstyle.MUTED,
+                    inside_zoom.append(value)
+
+            # Where every section in a row agrees to two decimals the marks are
+            # one cluster at this scale and no amount of dodging separates
+            # them, so the row states the value they share. The rule is the
+            # agreement itself, not a choice of which rows to annotate.
+            rounded = {round(v, 2) for v in inside_zoom}
+            if len(inside_zoom) == n_defined >= 3 and len(rounded) == 1:
+                ax_zoom.annotate(
+                    f"{max(inside_zoom):.2f}",
+                    xy=(max(inside_zoom), y),
+                    xytext=(4.0 * scale, 0.0),
+                    textcoords="offset points",
+                    fontsize=_rpt("value"),
+                    color=figstyle.INK_2,
+                    ha="left",
+                    va="center",
+                    zorder=5,
+                )
+
+            # Beyond the zoom the axis is coarse, so each mark carries its own
+            # number rather than being read off two decades. Where a row holds
+            # more than one, the numbers are spread across the row's own band
+            # in the order the marks sit in, which is the only place free of
+            # every other mark.
+            beyond_zoom.sort()
+            for rank, (y_offset, value) in enumerate(beyond_zoom):
+                spread = (rank - (len(beyond_zoom) - 1) / 2.0) * 0.50
+                high = np.log10(value / split) / np.log10(x_top_log / split) > 0.45
+                ax_log.annotate(
+                    _ranking_value_label(value),
+                    xy=(value, y_offset + spread),
+                    xytext=(-3.0 * scale if high else 3.0 * scale, 0.0),
+                    textcoords="offset points",
+                    fontsize=_rpt("value"),
+                    color=figstyle.INK_2,
+                    ha="right" if high else "left",
+                    va="center",
+                    annotation_clip=False,
+                    zorder=5,
+                )
+
+        ax_zoom.set_title(
+            title, loc="left", fontsize=_rpt("panel_title"), pad=2.5 * scale
+        )
+        fig.text(
+            (x_panel + panel_w / 2.0) / drawn_w,
+            (band["bottom"] + band["note"] + 0.035) / drawn_h,
+            r"transient $P_f$ span factor at the anchor",
+            fontsize=_rpt("axis_label"),
+            color=figstyle.INK_2,
             ha="center",
             va="bottom",
         )
 
-    # Footnotes sit below their axes: the plotted rows run edge to edge, so an
-    # in-panel note would land on the statistical yardstick markers.
-    kp57_4 = sections["KP57.4"]["anchors"]["design_hwl"]
-    axes[0].text(
-        0.0,
-        -0.175,
-        "the design-level anchor is the nearest grid level to\n"
-        "each section's HWL. KP 57.4 is absent from this panel:\n"
-        f"its anchor ({kp57_4['stage_m_msl']:.2f} m, against a "
-        f"{sections['KP57.4']['hwl_m_msl']:.2f} m HWL) carries zero\n"
-        "transient failures in $10^5$, so no multiplier is defined\n"
-        "there: a fact about the section, not a gap",
-        transform=axes[0].transAxes,
-        fontsize=8,
+    # The shaded band says what it is inside the panel, so the reader does not
+    # have to reach the caption to learn that two of the eight rows are not
+    # epistemic knobs at all.
+    pairs[0][0].text(
+        1.85,
+        (n_rows - 1 - rows_order.index(STATISTICAL_BRACKETS[0])) - 0.5,
+        "statistical\nyardsticks",
+        fontsize=_rpt("inset"),
         color=figstyle.MUTED,
-        ha="left",
-        va="top",
-    )
-    axes[1].text(
-        0.0,
-        -0.175,
-        "shaded rows are the two statistical yardsticks the\n"
-        "knobs are ranked against, not epistemic knobs\nthemselves",
-        transform=axes[1].transAxes,
-        fontsize=8,
-        color=figstyle.MUTED,
-        ha="left",
-        va="top",
+        ha="center",
+        va="center",
+        linespacing=1.15,
+        zorder=5,
     )
 
     # --- Panel C: the top knob has no single value, it depends on stage ------ #
@@ -1045,7 +1276,6 @@ def figure_epistemic_ranking(
     # is that the number they report is a reading off a curve, not a constant.
     # ``ordered`` is computed from the evidence, so the panel draws whichever
     # bracket the ranking actually puts first.
-    axc = axes[2]
     largest = ordered[0]
     curves = {name: _bracket_span_curve(sections[name], largest) for name in SECTIONS}
 
@@ -1061,14 +1291,14 @@ def figure_epistemic_ranking(
     for name in SECTIONS:
         colour = figstyle.SECTION_COLORS[name]
         marker = figstyle.SECTION_MARKERS[name]
-        finite = [p for p in curves[name] if p["span"] is not None]
+        finite_points = [p for p in curves[name] if p["span"] is not None]
         axc.plot(
-            [p["stage_m_msl"] for p in finite],
-            [float(p["span"]) for p in finite],
+            [p["stage_m_msl"] for p in finite_points],
+            [float(p["span"]) for p in finite_points],
             marker=marker,
             color=colour,
-            ms=3.4,
-            lw=1.4,
+            ms=_rpt("marker_c"),
+            lw=1.0 * scale,
             zorder=4,
         )
         for point in (p for p in curves[name] if p["unbounded"]):
@@ -1077,9 +1307,9 @@ def figure_epistemic_ranking(
                 [y_unbounded],
                 marker=marker,
                 color=colour,
-                ms=5.0,
+                ms=_rpt("marker_c") * 1.4,
                 mfc=figstyle.SURFACE,
-                mew=1.3,
+                mew=0.8 * scale,
                 ls="none",
                 zorder=4,
             )
@@ -1090,9 +1320,10 @@ def figure_epistemic_ranking(
                 arrowprops={
                     "arrowstyle": "-|>",
                     "color": colour,
-                    "lw": 0.8,
+                    "lw": 0.6 * scale,
                     "shrinkA": 0,
                     "shrinkB": 0,
+                    "mutation_scale": 5.0 * scale,
                 },
             )
         # A tick on the axis, not a full rule: four vertical lines across a
@@ -1102,18 +1333,36 @@ def figure_epistemic_ranking(
             [0.0, 0.055],
             transform=axc.get_xaxis_transform(),
             color=colour,
-            lw=2.2,
+            lw=1.6 * scale,
             solid_capstyle="butt",
             zorder=5,
         )
 
-    axc.axhline(1.0, color=figstyle.BASELINE, lw=1.2)
+    axc.axhline(1.0, color=figstyle.BASELINE, lw=1.0 * scale)
     axc.set_yscale("log")
     axc.set_ylim(0.55, y_unbounded * 5.0)
     axc.set_xlim(min(p["stage_m_msl"] for c in curves.values() for p in c) - 0.7, 57.4)
-    axc.set_xlabel("conditioning water level [m T.P.]")
-    axc.set_ylabel(f"span factor, {BRACKET_LABEL[largest]} bracket")
-    axc.set_title("C  and the largest one has no single value", loc="left")
+    axc.set_xlabel(
+        "conditioning water level [m T.P.]",
+        fontsize=_rpt("axis_label"),
+        labelpad=1.5 * scale,
+    )
+    axc.set_ylabel(
+        f"{BRACKET_LABEL[largest]} span factor",
+        fontsize=_rpt("axis_label"),
+        labelpad=1.5 * scale,
+    )
+    axc.set_title(
+        "C  the top knob has no single value",
+        loc="left",
+        x=-0.03,
+        fontsize=_rpt("panel_title"),
+        pad=2.5 * scale,
+    )
+    axc.tick_params(labelsize=_rpt("tick"), pad=1.5 * scale)
+    axc.grid(True, color=figstyle.GRID, lw=0.7 * scale)
+    for spine in axc.spines.values():
+        spine.set_linewidth(0.8 * scale)
     figstyle.mark_hypothetical(axc, attainable_max_kp62, label=False)
     # ``get_yaxis_transform`` takes x as an axes fraction and y in data units,
     # so the label tracks the unbounded strip whatever the finite maximum is.
@@ -1123,28 +1372,33 @@ def figure_epistemic_ranking(
         y_unbounded * 3.1,
         "unbounded",
         transform=axc.get_yaxis_transform(),
-        fontsize=8,
+        fontsize=_rpt("inset"),
         color=figstyle.MUTED,
         ha="right",
         va="bottom",
     )
-    axc.text(
-        0.0,
-        -0.175,
-        # No decade count is quoted here: the fall runs from 1.6 decades at
-        # KP 57.4, whose grid stops before saturation, to 3.9 at KP 60.0, so
-        # any single figure would be wrong for two of the four sections.
-        "The same span as panels A and B, read at every level rather than at "
-        "two anchors. It falls by\n"
-        "orders of magnitude toward the unit line as the probability "
-        "saturates, so a single factor\n"
-        "cannot be quoted. Ticks mark each section's design high water "
-        "level; shading is the\nunattainable grid extension.",
-        transform=axc.transAxes,
-        fontsize=8,
+
+    # The two ways a number goes missing are different facts, and the figure
+    # has to keep them apart without the caption's help. The anchor and the
+    # high water level are both named because they are resolvably different
+    # levels, which is why the panels say "anchor" and not "design HWL".
+    kp57_4 = sections["KP57.4"]
+    fig.text(
+        0.008,
+        (band["bottom"] + band["note"]) / drawn_h,
+        "An open mark with an arrow is an unbounded span: one arm of that "
+        "bracket reaches zero failures.\n"
+        "KP 57.4 is absent from panel A: its anchor, the "
+        f"{kp57_4['anchors']['design_hwl']['stage_m_msl']:.2f} m grid level "
+        f"nearest its {kp57_4['hwl_m_msl']:.2f} m high water level, carries "
+        "no transient\n"
+        "failure at all in $10^5$, so no span of any kind is defined there. "
+        "That is a fact about the section, not a gap in the measurement.",
+        fontsize=_rpt("note"),
         color=figstyle.MUTED,
         ha="left",
         va="top",
+        linespacing=1.35,
     )
 
     handles = [
@@ -1154,8 +1408,8 @@ def figure_epistemic_ranking(
             marker=figstyle.SECTION_MARKERS[name],
             color=figstyle.SECTION_COLORS[name],
             ls="none",
-            ms=6.5,
-            label=name,
+            ms=_rpt("marker") * 1.15,
+            label=name.replace("KP", "KP "),
         )
         for name in SECTIONS
     ]
@@ -1166,32 +1420,35 @@ def figure_epistemic_ranking(
             marker="o",
             color=figstyle.MUTED,
             ls="none",
-            ms=6.5,
+            ms=_rpt("marker") * 1.15,
             mfc=figstyle.SURFACE,
-            mew=1.5,
-            label="unbounded (an arm sits at zero failures)",
+            mew=0.9 * scale,
+            label="unbounded span",
         )
     )
-    # Below the footnotes rather than inside a panel: at three panels across,
-    # no single axes is wide enough to hold a five-entry legend without it
-    # spilling over its own tick labels.
+    # The legend shares the top band with the title rather than taking a strip
+    # of its own: the band below the panels is spent on the note, and a strip
+    # here would come straight out of the row pitch.
     fig.legend(
         handles=handles,
-        loc="upper center",
+        loc="upper right",
         ncol=5,
-        bbox_to_anchor=(0.5, -0.02),
+        bbox_to_anchor=(1.0 - col["right"] / drawn_w, 1.0 - 0.010),
         frameon=False,
+        fontsize=_rpt("legend"),
+        handletextpad=0.4,
+        columnspacing=1.0,
+        borderpad=0.0,
     )
-    fig.suptitle(
-        "Every quantified epistemic bracket as a comparable multiplicative span: "
+    fig.text(
+        0.008,
+        1.0 - 0.016,
         r"$k_\mathrm{aq}$ is the largest knob at every section and every anchor",
-        fontsize=11.5,
-        x=0.008,
-        y=0.995,
+        fontsize=_rpt("suptitle"),
+        color=figstyle.INK,
         ha="left",
         va="top",
     )
-    fig.tight_layout(rect=(0, 0, 1, 0.935))
 
     rows: list[dict[str, Any]] = []
     for bracket in rows_order:
