@@ -3,6 +3,7 @@
 [![CI](https://github.com/Gimori3/bep-reliability-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/Gimori3/bep-reliability-engine/actions/workflows/ci.yml)
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/release/python-3119/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![DOI](https://img.shields.io/badge/DOI-10.4121/8ffa1f3e--942e--4852--b02a--a259b9d6d00d-blue.svg)](https://doi.org/10.4121/8ffa1f3e-942e-4852-b02a-a259b9d6d00d)
 
 A time-dependent **backward erosion piping (BEP)** reliability engine for the
 Tokachi and Satsunai levees near Obihiro, Hokkaido, built as the computational
@@ -196,11 +197,16 @@ are left exact rather than relaxed, so the difference stays visible.
 
 ## Citing this work
 
-Please cite the software through `CITATION.cff`, which GitHub renders as a
-ready-made citation in the sidebar. A permanently archived snapshot of this
-release is being deposited at 4TU.ResearchData; once that deposit is published,
-its DOI becomes the preferred identifier and is recorded in `CITATION.cff` and
-`CHANGELOG.md`.
+Cite the **archived release**, not the repository URL. Version 1.0.0 is
+permanently archived at 4TU.ResearchData:
+
+> Rietman, G. M. (2026). *bep-reliability-engine* (Version 1.0.0) [Software].
+> 4TU.ResearchData. <https://doi.org/10.4121/8ffa1f3e-942e-4852-b02a-a259b9d6d00d>
+
+The DOI is the stable identifier: this repository is the development home and
+can be renamed or moved, the deposit cannot. `CITATION.cff` carries the same
+record in machine-readable form, and GitHub renders it as a ready-made citation
+in the sidebar.
 
 ## Licence
 

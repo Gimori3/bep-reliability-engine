@@ -18,6 +18,8 @@ here. It lives in three places, all tracked:
 
 ## [1.0.0] — 2026-09-05
 
+Archived at 4TU.ResearchData: <https://doi.org/10.4121/8ffa1f3e-942e-4852-b02a-a259b9d6d00d>
+
 The thesis-submission release. The engine, its evidence base and its
 documentation as they stood when the MSc thesis was handed in. Everything below
 this heading was developed between 2026-05-19 and 2026-09-05 on the `develop`
@@ -89,8 +91,11 @@ line; this release is the first to be published on `main`.
 * Packaging metadata corrected: the distribution no longer installs `tests` as a
   top-level package, the licence is declared as an SPDX expression, and the
   operating-system classifier no longer claims Windows only.
-* A DOI that had never been reserved was removed from `CITATION.cff`. The real
-  one is added once the 4TU.ResearchData deposit of this release is published.
+* `CITATION.cff` now carries the reserved 4TU.ResearchData DOI
+  `10.4121/8ffa1f3e-942e-4852-b02a-a259b9d6d00d`, together with the abstract,
+  keywords, licence and release date that make GitHub's citation widget useful.
+  The DOI is inactive until the deposit is published, which is why it does not
+  yet resolve; that is how a reserved DOI behaves and is not a defect.
 * `scripts/rq1_beta_analysis.py` no longer hard-codes a machine-local path for
   its optional figure mirror; set `BEP_THESIS_FIGURES` to enable it.
 * Task-brief documents under `docs/work_packages/` were retired. Their outcomes

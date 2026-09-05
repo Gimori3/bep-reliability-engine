@@ -5,8 +5,9 @@ type: software
 version: 1.0.0
 date-released: 2026-09-05
 license: MIT
+doi: "10.4121/8ffa1f3e-942e-4852-b02a-a259b9d6d00d"
 repository-code: "https://github.com/Gimori3/bep-reliability-engine"
-url: "https://github.com/Gimori3/bep-reliability-engine"
+url: "https://doi.org/10.4121/8ffa1f3e-942e-4852-b02a-a259b9d6d00d"
 
 authors:
   - family-names: "Rietman"
@@ -37,7 +38,6 @@ keywords:
   - climate change
   - Tokachi River
 
-# A permanent archived snapshot is deposited at 4TU.ResearchData. Once the
-# deposit is published, add its DOI here and in README.md, for example:
-#   doi: "10.4121/<uuid>"
-# and record the release it corresponds to in CHANGELOG.md.
+# The DOI above resolves to the permanently archived snapshot of this release at
+# 4TU.ResearchData. Cite that in preference to the GitHub URL: the repository is
+# the development home and can move, the deposit cannot.
