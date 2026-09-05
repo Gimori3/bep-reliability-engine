@@ -61,7 +61,7 @@ alongside the baseline curves.
    `Config.to_metadata()` so pre-ADR-0045 config hashes are preserved (the
    Phase 2 replay hash gate keeps passing — the ADR-0037 pattern).
 
-2. **Both-branches propagation (the project owner's chosen interpretation).**
+2. **Both-branches propagation (the author's chosen interpretation).**
    Because H_c is single-source (spec §1/§4: one M6 value feeds the static
    comparator AND anchors the transient H_eq curve), m_p multiplies H_c in
    **both** places it appears: `Z_static = m_p·H_c − (h_peak − z_toe)` and the
@@ -99,7 +99,7 @@ alongside the baseline curves.
 ## Alternatives Considered
 
 ### Textual reconciliation only (no code)
-Keep the omission; amend the thesis wording. Rejected by the project owner:
+Keep the omission; amend the thesis wording. Rejected by the author:
 the ~2× tail effect is material to the deliverables' quoted regime, and the
 factor is cheap to carry correctly.
 

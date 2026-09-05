@@ -40,7 +40,7 @@ than from direct FEM equilibrium curves) **adds further conservatism**. He
 called the simplified curve "far from perfect" and strictly tied to the specific
 cases he assessed numerically. He gave **no field-scale number**: whether the
 ≈1.95×-at-L=3m inflation persists, grows or shrinks at tens-of-metres seepage
-lengths remains the open question above. The owner is to send Pol the L=3m
+lengths remains the open question above. The author is to send Pol the L=3m
 inversion / 1.95× calculation for confirmation. This is **qualitative author
 guidance** and feeds the Sub-question 1 gap decomposition (temporal vs
 H_eq-schematization); it is not a number and does not change any code or the

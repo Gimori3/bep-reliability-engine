@@ -1,7 +1,7 @@
 # ADR-0024: Per-Branch Fragility Deliverable — Raw Tail Points with Binomial CIs Where the Transition Is Not Bracketed
 
 Date: 2026-07-03
-Status: Accepted (decision and implementation mechanics approved by the project owner, 2026-07-03; execution of the implementation is scheduled and held with all r_e-dependent work pending the ADR-0006/Mazure resolution)
+Status: Accepted (decision and implementation mechanics approved by the author, 2026-07-03; execution of the implementation is scheduled and held with all r_e-dependent work pending the ADR-0006/Mazure resolution)
 
 ## Context
 
@@ -30,7 +30,7 @@ not the site.) Separately, M9 currently *requires* a successful fit per
 branch (`fit_lognormal_fragility` raises with fewer than two interior
 points), so a branch with an empty or one-point tail can still abort assembly.
 
-## Decision (owner, 2026-07-03)
+## Decision (author, 2026-07-03)
 
 Sections whose transient (or static) transition is not bracketed by the
 conditioning grid report **raw tail points with binomial confidence
@@ -129,7 +129,7 @@ temporal mechanism, not a fitting inconvenience.
   physically meaningless, and the fitted curve there would describe the fit,
   not the levee.
 - **Report the fitted lognormal everywhere with a warning label.** Rejected:
-  the 56.6 m-vs-67 m error above is exactly the artifact the owner's decision
+  the 56.6 m-vs-67 m error above is exactly the artifact the author's decision
   removes; a label does not stop a downstream reader integrating the curve.
 - **A separate result type for tail sections.** Rejected: fragments the
   Phase 2 handoff; one `FragilityResult` with per-branch deliverable flags
@@ -154,7 +154,7 @@ practical standpoint extremely small failure probabilities carry little
 meaningful information, so presenting them as a major substantive finding may be
 unnecessary. This tempers the "intended primary presentation / substantive
 finding" language of the Decision above; the binomial-CI / raw-tail machinery is
-unaffected. Whether to soften the thesis emphasis is an owner decision. NB: the
+unaffected. Whether to soften the thesis emphasis is a decision from the author. NB: the
 ADR-0027 change (raw erosion head) raises transient P_f and may make the KP 62.0
 transition reachable, which would also bear on this framing — re-check on the
 next sweep. See `docs/validation/pol-meeting-2026-07-07-dispositions.md`,

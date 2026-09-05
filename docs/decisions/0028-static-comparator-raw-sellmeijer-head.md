@@ -51,7 +51,7 @@ artificially optimistic).
 4. **Repo precedent.** Mirrors ADR-0017: keep the baseline symmetric; make any
    asymmetry an opt-in decomposition axis.
 
-The fairness principle stated by the project owner: use Sellmeijer's model
+The fairness principle stated by the author: use Sellmeijer's model
 exactly as Sellmeijer intended and Pol's model exactly as Pol intended, or the
 static-vs-transient comparison is not a fair one.
 

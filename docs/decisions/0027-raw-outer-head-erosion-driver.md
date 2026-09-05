@@ -81,7 +81,7 @@ OPEN reference anchor #4 via its own closure criterion #2.
 Scope: **the transient erosion-driving (rate) head only.** The uplift/heave
 gate and the static comparator are unchanged.
 
-## What is NOT decided here (flagged for the owner)
+## What is NOT decided here (flagged for the author)
 
 - **The static comparator** was left r_e-attenuated by this ADR and flagged as
   a separate decision. **RESOLVED by ADR-0028 (2026-07-07):** Sellmeijer 2011

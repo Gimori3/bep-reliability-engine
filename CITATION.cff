@@ -1,11 +1,43 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
-authors:
-- family-names: "Rietman"
-  given-names: "Gijs Morten"
-  orcid: "https://orcid.org/0009-0008-9443-696X"
 title: "bep-reliability-engine"
+type: software
 version: 1.0.0
-doi: 10.4121/8ffa1f3e-942e-4852-b02a-a259b9d6d00d
-date-released: 2026-05-20
+date-released: 2026-09-05
+license: MIT
+repository-code: "https://github.com/Gimori3/bep-reliability-engine"
 url: "https://github.com/Gimori3/bep-reliability-engine"
+
+authors:
+  - family-names: "Rietman"
+    given-names: "Gijs Morten"
+    orcid: "https://orcid.org/0009-0008-9443-696X"
+    affiliation: "Delft University of Technology"
+
+abstract: >-
+  A time-dependent backward erosion piping (BEP) reliability engine for the
+  Tokachi and Satsunai levees near Obihiro, Hokkaido. It quantifies the bias
+  between the static Sellmeijer (2011) limit state and the transient Pol (2024)
+  limit state by Monte Carlo fragility analysis on a shared sample, updates the
+  resulting prior against the observed survival of the 2016 typhoon by
+  Accept-Reject Bayesian updating, and composes the result with the other levee
+  failure mechanisms into an annualised system reliability per 200 m segment
+  under a historical and a +4 K climate scenario. Built as the computational
+  evidence base for an MSc thesis in Hydraulic Engineering at Delft University
+  of Technology.
+
+keywords:
+  - backward erosion piping
+  - levee reliability
+  - flood risk
+  - Sellmeijer
+  - Monte Carlo simulation
+  - Bayesian updating
+  - fragility curves
+  - climate change
+  - Tokachi River
+
+# A permanent archived snapshot is deposited at 4TU.ResearchData. Once the
+# deposit is published, add its DOI here and in README.md, for example:
+#   doi: "10.4121/<uuid>"
+# and record the release it corresponds to in CHANGELOG.md.

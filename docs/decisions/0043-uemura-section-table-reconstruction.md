@@ -4,7 +4,7 @@ Date: 2026-07-17
 
 ## Status
 Accepted (reversible: the table is one committed CSV consumed through the
-existing `load_section_table` seam; an owner-supplied table replaces it
+existing `load_section_table` seam; an author-supplied table replaces it
 verbatim)
 
 ---
@@ -100,11 +100,11 @@ extra machinery cannot change any assignment by more than one node.
 Rejected as over-engineering; the executable length/anchor validation
 captures the same evidence.
 
-### Alternative 2: wait for the owner-supplied table (keep D2 open)
+### Alternative 2: wait for the author-supplied table (keep D2 open)
 Pros: zero interpretation.
 Cons: blocks section-level RQ3/RQ4 indefinitely while the evidence on disk
 (his own shapefile) determines the answer to within one grid step.
-Rejected; the seam remains — an owner CSV drops in verbatim.
+Rejected; the seam remains — an author CSV drops in verbatim.
 
 ---
 
@@ -115,21 +115,21 @@ rendering of it was missing. Every reconstructed boundary is doubly
 validated (polyline arc length, known assignments), the two genuinely
 ambiguous boundary nodes (Satsunai KP 4.6/4.8 split at the chain's 4.69,
 Tokachi one-step boundary tolerances) move one 0.2 km segment at most, and
-the whole table is one CSV any owner correction replaces.
+the whole table is one CSV any author correction replaces.
 
 ---
 
 ## Consequences
 
 * Section-level RQ3/RQ4 reporting (Tokachi 1–5, Satsunai 1–4) unblocks now;
-  D2 closes with the residual "owner may supply the authoritative table"
+  D2 closes with the residual "author may supply the authoritative table"
   note in the Phase 3 report manifest.
 * `load_section_table(..., allow_gaps=True)` is an interface extension;
   existing strict behaviour is the default and existing tests keep passing.
 * The within-section max rule enters `system_integration` as a small pure
   function with its own tests; dominance shares at section level are
   reported at the argmax segment.
-* Should the owner's table differ, every downstream product regenerates
+* Should the author's table differ, every downstream product regenerates
   from CSVs (`scripts/phase3_campaign.py`); nothing hard-codes the spans.
 
 ---

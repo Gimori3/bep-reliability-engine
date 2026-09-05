@@ -27,7 +27,7 @@ outer level h; r_e applies only to uplift/heave (Eq. 10), not to progression
 closure rests on Pol's printed Eq. (6) **and** his written confirmation.
 
 NOTE: this item is the r_e-on-erosion-head convention (reference anchor #4). Any
-*separate* head-datum question the owner is resolving by email is not this item
+*separate* head-datum question the author is resolving by email is not this item
 and is not affected by this closure.
 
 ---

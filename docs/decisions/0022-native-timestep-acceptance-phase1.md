@@ -1,7 +1,7 @@
 # ADR-0022: Acceptance of the Native 3600 s Timestep for Phase 1 Fragility; Phase 2 Replay at Native/2
 
 Date: 2026-07-03
-Status: Accepted (recorded at the project owner's direction, 2026-07-03 health-assessment finding 4)
+Status: Accepted (recorded at the author's direction, 2026-07-03 health-assessment finding 4)
 
 ## Context
 

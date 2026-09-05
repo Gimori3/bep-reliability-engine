@@ -16,7 +16,7 @@ the current artifacts (`results/production_campaign_manifest.json`,
 `results/system_integration/phase3/rq4_annual.csv`,
 `results/stage6_6/stage6_6_*_analysis.json`, `results/phase2/*_posterior.json`,
 `docs/decisions/*.json`) rather than against other prose. Where a number is
-reported below as a "current value" it was recomputed in this session.
+reported below as a "current value" it was recomputed in this pass.
 
 **Verdicts.**
 
@@ -174,7 +174,7 @@ and cross-checked against the eight `results/phase2/*_posterior.json` sidecars.
 | F6 | anchor-rating KP57.4 0.00 / KP58.8 10.81 / KP60.0 0.34 % | `phase2_report.md:536-537` | 0.0000 / 10.8140 / 0.3370 % | current |
 | F7 | no-initiation KP57.4 66.4 / KP58.8 99.57 / KP60.0 99.30 %, posteriors 432 and 696 rows | `phase2_report.md:544-546` | 66.389 / 99.568 / 99.304 %; n_accepted 432 and 696 | current |
 | F8 | §14 "×8.7 at design HWL (1.5e-4 → 1.3e-3)", rejection 0.00 % both KP 62.0 strata, verification exact | `phase2_report.md:691+` | matches the sidecars and the ADR-0047 record | current |
-| F9 | WBI+ peak-shortcut over-rejection 2.75 to 3.9x | `phase2_report.md` §11, architecture and decision records | unchanged by this session's work; traces to the same sidecars | current |
+| F9 | WBI+ peak-shortcut over-rejection 2.75 to 3.9x | `phase2_report.md` §11, architecture and decision records | unchanged by this pass's work; traces to the same sidecars | current |
 
 ## G. ADR-0047's stale record set (carried-forward item 5a)
 
@@ -207,7 +207,7 @@ stale copies there**, which is a gap and not a clean bill of health; see
 | H8 | GSA Sobol' indices (C_e 0.066 / 0.338, 0.163 / 0.486; interaction gap 0.66) | `5. Verification...tex:711+` | match `adr0033-gsa-study-*.json` | current |
 | H9 | Japanese-case validation numbers (0.061 / 0 / 0.0052; 0.62) | `5. Verification...tex:368+` | match `results/validation_*/validation_results.json` | current |
 | H10 | Ch. 6 and Ch. 7 bodies | both stub files | no quantitative claim exists to be stale | current (gap, see the thesis inventory) |
-| H11 | **house-rule finding, not a number:** typeset em dashes, which msc-thesis architecture and decision records forbids unconditionally | `3. Study Area...tex:23`; `5. Verification...tex:1127,1129`; `7. Discussion.tex:58,62,93,95,133,134`; `8. Conclusions...tex:24` | 10 typeset lines (comment-line rules in `appendix-a.tex` are not typeset and are not violations) | **flagged, not fixed** — prose I was not asked to touch; the owner's contract says flag rather than silently smooth |
+| H11 | **house-rule finding, not a number:** typeset em dashes, which msc-thesis architecture and decision records forbids unconditionally | `3. Study Area...tex:23`; `5. Verification...tex:1127,1129`; `7. Discussion.tex:58,62,93,95,133,134`; `8. Conclusions...tex:24` | 10 typeset lines (comment-line rules in `appendix-a.tex` are not typeset and are not violations) | **flagged, not fixed** — prose I was not asked to touch; the author's contract says flag rather than silently smooth |
 
 ## M. ADR-0032 aquifer response (added 2026-07-31)
 

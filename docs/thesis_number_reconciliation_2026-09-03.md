@@ -1,7 +1,7 @@
 # Thesis number reconciliation, 2026-09-03: the material the two earlier passes never covered
 
 **What this is.** A claim-by-claim traceability record for the quantitative
-material in `d:\repositories\msc-thesis` that neither of this repository's two
+material in `msc-thesis` that neither of this repository's two
 earlier reconciliation passes covered. It follows their method and verdict
 vocabulary exactly and is a permanent record.
 
@@ -53,7 +53,7 @@ state, at thesis commit `7fdc3ed` plus this pass's six corrections.
 | `ARITH` | Internal-arithmetic check; consistent with the other printed numbers. |
 | `ROUND` | A rounding, truncation or interval-informed restatement of an artifact number, not a copy. Recorded, not an error. |
 | `FIXED` | Diverged; corrected in the thesis on this date. |
-| `FLAG` | Not reconcilable from any artifact, or reconcilable only approximately, or a judgment call. Text left alone; listed for the owner. |
+| `FLAG` | Not reconcilable from any artifact, or reconcilable only approximately, or a judgment call. Text left alone; listed for the author. |
 | `CITED` | A literature or official-record value carried by a `\parencite`, not produced by this engine. Not verifiable here. |
 
 ---
@@ -76,8 +76,8 @@ A row may carry two verdicts, so the tag counts sum to more than the row count.
 | Untraceable to any artifact **and** not a cited value | **0** |
 
 **Two rounds, on one date.** The pass first made the two corrections of section 2
-and raised four judgment calls, leaving their text alone for an owner ruling. The
-owner ruled on the same date that all four be closed, so section 3 records each
+and raised four judgment calls, leaving their text alone for a ruling from the author. The
+author ruled on the same date that all four be closed, so section 3 records each
 as a correction rather than as an open flag. Every correction in both rounds is a
 smallest-possible edit that makes a printed claim agree with its artifact; none
 adds a number the thesis did not already carry, none touches a `\label` or a
@@ -105,7 +105,7 @@ on it.
 
 These two are the defects the trace itself turned up: a printed figure that
 disagrees with the arithmetic it is drawn from. Section 3 carries four more
-corrections, all made on the owner's ruling later the same date, none of which
+corrections, all made on the author's ruling later the same date, none of which
 changes a digit. Both corrections below are in the same paragraph of
 `mainmatter/8. Discussion.tex` (§ "The Erosion-Limited Consensus", the base-rate
 check), and both are character-count-neutral, so no line reflows and no page
@@ -152,7 +152,7 @@ moves.
   two clauses earlier ("0.65 expected failures **and** a probability of 0.52 that
   none is observed"), so the mislabel is local. Nothing in the argument turns on
   it: survival remains the modal outcome at 0.911 either way.
-* **Owner note.** If the sum was deliberate, the fix is to relabel rather than to
+* **Author note.** If the sum was deliberate, the fix is to relabel rather than to
   restore the digits, because "the failure of at least one of the four" has one
   value under the stated composition and it is 0.089.
 
@@ -168,7 +168,7 @@ both, correctly.
 ## 3. The four judgment calls, raised and then closed
 
 Each was raised as a `FLAG` in the first round, with the text left alone and the
-smallest available fix named. The owner ruled on the same date that all four be
+smallest available fix named. The author ruled on the same date that all four be
 applied, so each entry below carries its **Now** line. None of the four changes a
 number: each supplies the scope a printed number already required, or removes a
 grammatical ambiguity around one.
@@ -222,7 +222,7 @@ grammatical ambiguity around one.
 
 * **Site:** `mainmatter/7. Results - System Integration and Climate
   Sensitivity.tex:551`. The sentence predates `cb590c7`, so it fell outside this
-  pass's declared scope; 3.2 sent me to it and the owner ruled it in.
+  pass's declared scope; 3.2 sent me to it and the author ruled it in.
 * **Artifact:** `conductivity-bracket-annualisation.json`. At KP 57.4 historical
   the `k_aq_field_geomean` arm gives `p_annual_system` and `p_annual_bep` of
   exactly 0.0, and the span is undefined. At KP 60.0 historical the same arm
@@ -490,7 +490,7 @@ Scripts were session scratch files; every number they read is named here.
 `\includegraphics`. Place it or remove it.
 
 **No flag is left standing.** The four judgment calls this pass raised were all
-closed on the owner's ruling of the same date and are recorded as corrections in
+closed on the author's ruling of the same date and are recorded as corrections in
 section 3. None of them changed a number: 3.1 and 3.2 supply a scope a printed
 figure already required, 3.3 replaces a mechanism claim by the plain count it was
 standing in for, and 3.4 names a denominator the sentence left to be inferred.

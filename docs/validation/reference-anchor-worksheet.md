@@ -1,7 +1,7 @@
 # Stage 6 Reference-Anchor Extraction Worksheet
 
 > **SUPERSEDED -- COMPLETED (header added 2026-07-31; content unchanged).** This
-> is the blank extraction form: the `EXTRACT:` fields the owner was asked to fill
+> is the blank extraction form: the `EXTRACT:` fields the author was asked to fill
 > by reading the PDFs in `docs/references/`. It is retained as the record of the
 > method (what was to be read, from where, against which pass bars).
 >
@@ -14,7 +14,7 @@
 > One anchor's disposition changed the engine: anchor 4 (the head datum) closed
 > as a *discrepancy*, superseding ADR-0007 with ADR-0027/0028.
 
-Purpose: supply **owner-extracted published values** so the physics reference
+Purpose: supply **author-extracted published values** so the physics reference
 check runs against real anchors instead of repo transcriptions. Fill every
 `EXTRACT:` field by reading the named source in `docs/references/` (page
 pointers are PDF page indices, 0-based, from a text-search locate pass — the
@@ -119,7 +119,7 @@ b25_245:
   breach_observed:    EXTRACT   # did the measured pipe reach L?
   # loading: EITHER extract the printed head-step schedule (if tabulated),
   # OR confirm >=6 points of the digitized head BC 'B25-245_head-BC_Hcorr.csv'
-  # against Fig. 5(a)/(b) so its provenance becomes owner-confirmed.
+  # against Fig. 5(a)/(b) so its provenance becomes author-confirmed.
   loading_source:     EXTRACT   # "printed schedule (where)" | "digitized confirmed"
   confirmed_head_points: EXTRACT_OR_NONE   # [(t_s, H_m), ...] >= 6 points
   # scatter statement that sets the tolerance (CG24, PDF p. 5 area)
@@ -138,7 +138,7 @@ b25_245:
   reproduce this box's full breach; the gate is the rate magnitude above.
   (State this in the report, never hide it.)
 - Shape checks are retained only as secondary diagnostics once the digitized
-  curves are owner-confirmed (or dropped if you decline to confirm them).
+  curves are author-confirmed (or dropped if you decline to confirm them).
 
 ### 2.2 FPH (large-scale). Sources: CG24 Table 1 + §3.2.2 (PDF pp. 4–6), thesis Summary (PDF p. 11) + Ch. 4 (FPH test description, PDF pp. ~66–73) + p. 191 area for the 0.3 m/h statement.
 

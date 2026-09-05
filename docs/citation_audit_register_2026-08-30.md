@@ -1,5 +1,5 @@
 # Claim-level citation register (generated 2026-08-30)
-Generated from `d:\repositories\msc-thesis` at commit `b4f1669`.
+Generated from `msc-thesis` at commit `b4f1669`.
 Total citation instances: **660** across **106** distinct keys.
 
 Status meanings:
@@ -51,7 +51,7 @@ and the two agree.
 
 Commits: `1bb9698`, `62150a1` on `main`, pushed to Overleaf.
 
-## Verified against the primary source this session (claims checked and correct)
+## Verified against the primary source in this pass (claims checked and correct)
 
 | key | what was checked |
 |---|---|
@@ -95,7 +95,7 @@ Commits: `1bb9698`, `62150a1` on `main`, pushed to Overleaf.
 ## NOT individually re-verified — residual work
 
 These rest on the engine repo's own provenance documents, not on my own reading of the
-primary this session. No defect found in them, but no independent check either.
+primary in this pass. No defect found in them, but no independent check either.
 
 | key | instances | why deferred |
 |---|---|---|
@@ -165,7 +165,7 @@ tokachi_levee_committee_2017, dean_2010, saltelli/GSA set, lane_1935 (abstract o
 ## Open, not fixed
 
 - **The 34 h / 24 h high-water durations attributed to `fukuda_2025_internal`** (Ch3 §2016) are not in the 7-page secured PDF, which is a meeting note plus the current-state map plus four OYO 様式-3 sheets. The communication may have carried more. Cannot verify, cannot disprove.
-- **`fukuda_2025_internal` is dated 2025 in the bib; the meeting note is headed R8.5 = May 2026.** Owner ruling needed: the key name and every in-text year would change.
+- **`fukuda_2025_internal` is dated 2025 in the bib; the meeting note is headed R8.5 = May 2026.** Author ruling needed: the key name and every in-text year would change.
 - **Satsunai 400 to 450 m corridor / one third of levee length cutting former channels** (App A) and **"the majority of disaster causes on the Satsunai were bank erosion"** (App G) are not locatable in the Chisuishi text layer; they may live in figure-embedded text. Uncontradicted, unverified.
 - **ENW2017, mlit_design_standard_2025, nakatsugawa_2017, terzaghi1943, sellmeijer_1988, pol_thesis_2022** and the remaining 1-to-3-count keys were not individually re-verified.
 
@@ -180,7 +180,7 @@ tokachi_levee_committee_2017, dean_2010, saltelli/GSA set, lane_1935 (abstract o
 
 # Appendix 3: record of audit pass 3 (session 6f862fed, 2026-08-30)
 
-Closing pass, with a follow-up on 2026-08-31 after the owner supplied two of the
+Closing pass, with a follow-up on 2026-08-31 after the author supplied two of the
 sources listed here as unobtainable (see section 7).
 
 All 106 keys walked, all 660 instances closed, 21 defects found and fixed
@@ -307,7 +307,7 @@ majority-of-disaster-causes statement, which that history does not make (App G).
   above-toe exposure instead, 9, 24, 31 and 6 hours, recomputed here through the Phase 2
   loader and matching the Phase 2 report's table.
 - **CLOSED 2026-08-31. `fukuda_2025_internal` is headed R8.5**, top right of page 1, which is
-  May 2026. The owner confirmed the date; the entry is now `fukuda_2026_internal` with year
+  May 2026. The author confirmed the date; the entry is now `fukuda_2026_internal` with year
   2026, renamed across all 13 citation sites.
 
 ## 4. Keys whose primary was not obtained (8 after the section 7 follow-up)
@@ -317,13 +317,13 @@ that the distinction stays visible.
 
 | key | why the primary was not read | what the claims rest on instead |
 |---|---|---|
-**Updated 2026-08-31.** Two of the ten are resolved; eight remain, and the owner has
+**Updated 2026-08-31.** Two of the ten are resolved; eight remain, and the author has
 confirmed that none of the eight needs to be obtained, the substituted sources being
 adequate for the claims made.
 
 | `jice_manual_2012` | not published open-access | the MLIT Technical Standards, which name it as the related guidance, and the 2002/2007 Design Guideline, which carries `i < 0.5` and `G/W > 1` verbatim and is now co-cited |
 | ~~`ENW2017`~~ | **resolved 2026-08-31**: the statutory Bijlage III was downloaded and read | primary |
-| ~~`sellmeijer_1988`~~ | **resolved 2026-08-31**: the owner supplied the dissertation | primary |
+| ~~`sellmeijer_1988`~~ | **resolved 2026-08-31**: the author supplied the dissertation | primary |
 | `schweckendiek_2016`, `schweckendiek_2017` | Deltares reports | `hkv_2023` Appendix C, which derives the closed form and attributes it to exactly these two |
 | `pwri_4300_2015` | 58 MB, read in the 2026-08-29 calibration | that calibration's page-level record |
 | `fukuoka_tabata_2018` | not on disk | `fukuoka_2019`, which reproduces Equation (1) with attribution and defines every symbol |
@@ -356,9 +356,9 @@ corrections), 0 dangling, 0 duplicate bib keys, 158 bib entries, 52 uncited (har
 under biblatex). 373 labels, 0 duplicates, 0 dangling references. No em dashes and no CJK
 in any `.tex`. Braces balanced in every file.
 
-## 7. Follow-up, 2026-08-31: owner-supplied sources and three further corrections
+## 7. Follow-up, 2026-08-31: author-supplied sources and three further corrections
 
-The owner obtained two of the sources section 4 listed as unobtainable, confirmed the
+The author obtained two of the sources section 4 listed as unobtainable, confirmed the
 Fukuda dating, and asked that the Hagibis discrepancy be corrected in this repository.
 
 **Sellmeijer (1988), resolved at the primary.** `docs/references/TR diss 1670(1).pdf`,
@@ -389,7 +389,7 @@ factor. Two consequences:
   the load side, which is exactly the thesis's reading of its status.
 
 **Fukuda: the year corrected and the durations withdrawn.** The note is headed R8.5,
-Reiwa 8 month 5, which is May 2026; the owner confirmed it. The key is now
+Reiwa 8 month 5, which is May 2026; the author confirmed it. The key is now
 `fukuda_2026_internal` with year 2026, renamed across all 13 citation sites, and the
 entry's note records the R8.5 heading so the dating is auditable.
 
@@ -895,7 +895,7 @@ and no CJK in any `.tex`, `$`-parity unchanged.
 
 ### `ENW2017` (7)
 
-**Pass 3 (follow-up, 2026-08-31):** The owner supplied routes to the statutory instrument and it was downloaded and read: Regeling veiligheid primaire waterkeringen 2017, **Bijlage III Sterkte en veiligheid**, section 7, page 42. The three sub-mechanisms are listed in order as Opbarsten, Heave and Terugschrijdende erosie under a fault tree (Figure 7-5), and the rule is verbatim: "In de gedetailleerde toets per vak wordt de kans op falen door piping bepaald door daarvoor de kleinste van de kans op falen door een van deze drie deelmechanismen te nemen." Equation 7.8 gives the backward-erosion stability factor as the critical head over `h - h_exit - r_c D_deklaag` with `r_c = 0,3`, the exit-point resistance reduction factor, which is the statutory source of the 0.3 D_bl term Chapter 4 discusses and is now cited there. **Bibliographic defect fixed:** the entry named ENW as author of a document titled "WBI 2017: Veiligheidsbeoordeling van primaire waterkeringen". ENW advised on the WBI but did not author it; the instrument is the Minister's, published in Staatscourant 2016 nr. 65697. The entry now identifies Bijlage III. The key string is left unchanged so that no in-text citation moves; it is a legacy label, and renaming it is cosmetic and the owner's call.
+**Pass 3 (follow-up, 2026-08-31):** The author supplied routes to the statutory instrument and it was downloaded and read: Regeling veiligheid primaire waterkeringen 2017, **Bijlage III Sterkte en veiligheid**, section 7, page 42. The three sub-mechanisms are listed in order as Opbarsten, Heave and Terugschrijdende erosie under a fault tree (Figure 7-5), and the rule is verbatim: "In de gedetailleerde toets per vak wordt de kans op falen door piping bepaald door daarvoor de kleinste van de kans op falen door een van deze drie deelmechanismen te nemen." Equation 7.8 gives the backward-erosion stability factor as the critical head over `h - h_exit - r_c D_deklaag` with `r_c = 0,3`, the exit-point resistance reduction factor, which is the statutory source of the 0.3 D_bl term Chapter 4 discusses and is now cited there. **Bibliographic defect fixed:** the entry named ENW as author of a document titled "WBI 2017: Veiligheidsbeoordeling van primaire waterkeringen". ENW advised on the WBI but did not author it; the instrument is the Minister's, published in Staatscourant 2016 nr. 65697. The entry now identifies Bijlage III. The key string is left unchanged so that no in-text citation moves; it is a legacy label, and renaming it is cosmetic and the author's call.
 
 **Pass 3 (original):** The WBI 2017 document itself was not retrieved. The min rule it is cited for is verified verbatim twice: in hkv_2023, "the starting point ... is that the smallest of the three probabilities is governing and representative of the probability of STPH at a given water level. After all, STPH occurs only if all three sub-mechanisms occur", and in the Rijkswaterstaat piping handbook (December 2023), which writes P = min(P_u, P_h, P_p) and calls it "a conservative but not excessively conservative approximation ... for a parallel system". Chapter 2 now states it as an approximation and co-cites hkv_2023. Supported; primary unread.
 
@@ -943,7 +943,7 @@ and no CJK in any `.tex`, `$`-parity unchanged.
 
 ### `sellmeijer_1988` (4)
 
-**Pass 3 (follow-up, 2026-08-31):** The owner obtained the dissertation and placed it at `docs/references/TR diss 1670(1).pdf`; it was read. Chapter 4: "In reality the problem is three-dimensional, however, to achieve the primary goal ... a two-dimensional approach is presented", and "the flow is steady and is regarded as two-dimensional", which is the steady loading the thesis contrasts with its own transient one. Chapter 4 again: "piping contains two features: seepage flow and limit equilibrium of the sand. The latter must be determined both in the sandboil and in the slit", and Chapter 10 defines the critical head as the maximum of H/L over the slit length, taken at the half-length. All four instances verified at the primary; this key is no longer in the not-obtained list.
+**Pass 3 (follow-up, 2026-08-31):** The author obtained the dissertation and placed it at `docs/references/TR diss 1670(1).pdf`; it was read. Chapter 4: "In reality the problem is three-dimensional, however, to achieve the primary goal ... a two-dimensional approach is presented", and "the flow is steady and is regarded as two-dimensional", which is the steady loading the thesis contrasts with its own transient one. Chapter 4 again: "piping contains two features: seepage flow and limit equilibrium of the sand. The latter must be determined both in the sandboil and in the slit", and Chapter 10 defines the critical head as the maximum of H/L over the slit length, taken at the half-length. All four instances verified at the primary; this key is no longer in the not-obtained list.
 
 **Pass 3 (original):** The TU Delft repository copy is access-restricted and was not downloaded. The four instances describe the analytical two-dimensional grain-equilibrium critical head; that description is verified in sellmeijer_koenders_1991, the journal statement of the same model, and in van Beek and Hoffmans (2017), which records that "initially the Sellmeijer model was developed with analytical equations for 2D groundwater flow towards the pipe (Sellmeijer, 1988) for an infinitely deep aquifer". Supported; primary unread.
 
@@ -1304,7 +1304,7 @@ and no CJK in any `.tex`, `$`-parity unchanged.
 
 ### `fukuda_2025_internal` (14)
 
-**Pass 3 (follow-up, 2026-08-31):** Two changes. **The year is corrected to 2026** on the owner's confirmation, the meeting note being headed R8.5, which is Reiwa 8 month 5; the key is renamed `fukuda_2026_internal` across all 13 citation sites. **The 34 h and 24 h durations are withdrawn.** They are in no obtainable source, and they are contradicted by the thesis's own reconstruction: Chapter 4 records the Obihiro gauge peak of 38.07 m T.P. standing 0.19 m below the 38.26 m planned high-water level at KP 56.7, and Appendix D's Table places three of the four sections 0.28 to 0.66 m below their planned levels. Re-running the Phase 2 observed-event loader here gives, for the trace-anchored series, hours at or above the planned high-water level of 4, 0, 0 and 0 at KP 57.4, 58.8, 60.0 and 62.0, so neither a 34-hour nor a 24-hour high-water-level duration is possible there. The same run gives hours at or above the landside toe of 9, 24, 31 and 6, reproducing the Phase 2 report's table exactly; Chapter 3 now states that measure, which is what the paragraph's argument needs, and cites the thesis's own construction rather than the internal note.
+**Pass 3 (follow-up, 2026-08-31):** Two changes. **The year is corrected to 2026** on the author's confirmation, the meeting note being headed R8.5, which is Reiwa 8 month 5; the key is renamed `fukuda_2026_internal` across all 13 citation sites. **The 34 h and 24 h durations are withdrawn.** They are in no obtainable source, and they are contradicted by the thesis's own reconstruction: Chapter 4 records the Obihiro gauge peak of 38.07 m T.P. standing 0.19 m below the 38.26 m planned high-water level at KP 56.7, and Appendix D's Table places three of the four sections 0.28 to 0.66 m below their planned levels. Re-running the Phase 2 observed-event loader here gives, for the trace-anchored series, hours at or above the planned high-water level of 4, 0, 0 and 0 at KP 57.4, 58.8, 60.0 and 62.0, so neither a 34-hour nor a 24-hour high-water-level duration is possible there. The same run gives hours at or above the landside toe of 9, 24, 31 and 6, reproducing the Phase 2 report's table exactly; Chapter 3 now states that measure, which is what the paragraph's argument needs, and cites the thesis's own construction rather than the internal note.
 
 **Pass 3 (original):** Pass 2 rendered and read the seven pages. Re-rendered here at higher resolution. The meeting-note header and the current-state map confirm the scope (Tokachi right bank KP 53.8 to 62.8, Satsunai left bank KP 3.2 to 16.6), the 1998 P151 OUT rating on local gradient and landside slip, and the H11 to H15 countermeasures of side-berm fill and landside-toe drain. The 様式-2 sheet independently shows Class 2 side berms along the reach, which corroborates the Appendix D reading. The 34 h and 24 h durations remain absent; see the residual list. The header is dated R8.5, which is May 2026, confirming the open dating question.
 

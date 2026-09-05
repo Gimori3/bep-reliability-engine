@@ -3,7 +3,7 @@
 Date: 2026-07-18
 
 ## Status
-Accepted (project-owner decision of 2026-07-18, recorded with the evidence
+Accepted (author decision of 2026-07-18, recorded with the evidence
 that grounded it)
 
 ---
@@ -22,7 +22,7 @@ inventory found:
   both (directory timestamps October 2019: empty at the source or lost
   before delivery). Without an observed stage series the transient
   Accept-Reject replay cannot be constructed for either event, and the
-  project owner reports the missing workbooks are not easily obtainable.
+  the author reports the missing workbooks are not easily obtainable.
 - The 2011 drop DOES carry the complete H23.9 post-flood trace survey
   (six rivers, 0.2 km spacing, m MSL); the 2006 drop carries hourly
   rainfall only (no trace, no stage; every column of its `rain.xlsx` is a
@@ -89,7 +89,7 @@ Pros: would allow the full transient replay for 2011 (and possibly
 literally. Cons: the bound proves the obtainable information is at most
 0.32 percent of the prior at one stratum and exactly zero at seven,
 before shape realism shrinks it further; the effort would purchase a
-result already known to be immaterial. Rejected by the project owner on
+result already known to be immaterial. Rejected by the author on
 this evidence.
 
 ### Construct a 2011 hydrograph from an assumed shape under the trace peak

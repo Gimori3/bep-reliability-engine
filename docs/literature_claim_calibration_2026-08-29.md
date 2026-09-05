@@ -154,7 +154,7 @@ their 247 is derived from Lane's tables rather than repeated from a review.
 
 **Status: the thesis text is left unchanged at "278 cases."** It is directly supported by a
 USACE technical note, which is a citable source, and no number was substituted for it. The
-options for the owner:
+options for the author:
 
 1. Leave it. Defensible, supported by ERDC/GSL TN-14-3, but the count Lane actually
    *analysed* may be smaller than the count he *reviewed*, and the thesis says "on the
@@ -182,7 +182,7 @@ beginning "A formal seepage and slope safety evaluation", writes "fail the local
 exit-gradient check against $i_c \geq 0.5$". That is the same collision. The caption of
 `tab:oyo_1998` two paragraphs earlier writes it correctly as "$i \geq 0.5$", and so does
 the guidance sentence that follows ("absent, the local gradient $i < 0.5$"). Flagged for an
-owner decision.
+author decision.
 
 ## 7. D6: the 15 per cent gravel threshold belongs to Fukuoka, not to PWRI 4300
 
@@ -331,7 +331,7 @@ appendix now states the construction (`exp(1.96 sigma_ln) = 2.52` at
 `sigma_ln = 0.472`) and gives the full percentile span, 6.4, so the figure is reproducible
 either way.
 
-**Flag for the owner, not acted on.** Both passages compare this figure against Japanese
+**Flag for the author, not acted on.** Both passages compare this figure against Japanese
 guidance characterising ordinary measured scatter as "a factor of several to about ten"
 (`pwri_2014`), and then conclude the adopted prior is "materially narrower than this". The
 guidance figure is a **span**; 2.5 is a **half-band**. The comparable quantity is the span,
@@ -384,14 +384,14 @@ use "scatter" elsewhere ("the scatter of the measurements due to the test perfor
 "the influence of the parameters U and angularity is of the order of the scatter in the
 tests"), but never attached to the 13 per cent figure.
 
-**Flag for the owner, not acted on**, because Appendix G's wording lies outside the
+**Flag for the author, not acted on**, because Appendix G's wording lies outside the
 approved edit list: "regression scatter" should read "regression drift", a one-word change.
 The band's provenance as a borrowed tolerance, and the fact that the source gives no
 numeric tolerance for the large-scale tests, are already stated correctly there.
 
 ## 11. Style checks
 
-Both hard checks were re-run over every `.tex` file in `d:\repositories\msc-thesis` after
+Both hard checks were re-run over every `.tex` file in `msc-thesis` after
 the edits and both return clean: the em-dash scan (literal U+2014 and the `---` ligature,
 excluding `%` comment lines for the ligature form and the gitignored `scratch/`) returns
 `EMDASH CLEAN`, and the Japanese-script scan (CJK ideographs, hiragana, katakana, excluding
@@ -413,7 +413,7 @@ repository, and no Japanese script was carried into the thesis.
 | D8 | `mainmatter/8. Discussion.tex`, `appendix/appendix-e.tex` | 2.9 becomes 2.5 at both sites; the appendix now states the construction and the full span |
 | D9 | `mainmatter/5. Verification, Validation, and Global Sensitivity Analysis.tex` | the illustrating example changed from test 1 to test 2, which is the widest |
 
-Four items are flagged for an owner ruling and were deliberately not edited: the Lane
+Four items are flagged for a ruling from the author and were deliberately not edited: the Lane
 count (section 5), the Chapter 3 `$i_c \geq 0.5$` twin (section 6), the half-band versus
 span comparison in the conductivity passages (section 9), and Appendix G's "regression
 scatter" for what the source calls a drift (section 10).

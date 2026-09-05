@@ -26,7 +26,7 @@ exploration only.
    ``docs/decisions/seepage-length-L-study.md`` §2).
 
 Uemura's aggregation into Sections (Tokachi 1-5, Satsunai 1-4) is an
-owner-supplied table (ADR-0038 seam): ``load_section_table`` validates it;
+author-supplied table (ADR-0038 seam): ``load_section_table`` validates it;
 until it arrives every result is reported per segment.
 """
 
@@ -88,7 +88,7 @@ class Segment:
         inherits, or None when the segment has no defensible BEP curve
         (default ``'exact'`` policy for non-OYO segments).
     section_id : str or None
-        Uemura section identifier once the owner-supplied table is loaded;
+        Uemura section identifier once the author-supplied table is loaded;
         None until then.
     """
 

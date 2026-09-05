@@ -462,7 +462,7 @@ campaign's open decision 6.
 
 **Why.** Section 8 and campaign §6.1 both reported the design-HWL bias as *not
 statistically resolved*: 4 failing transient rows at KP 62.0 and **0** at KP 57.4
-out of 100 000. The owner chose the method — brute force at N = 1e6 first, then
+out of 100 000. The author chose the method — brute force at N = 1e6 first, then
 validate tilted importance sampling against it. Both were executed.
 
 **The KP 62.0 headline is now resolved, and the previous figure was an

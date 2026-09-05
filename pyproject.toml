@@ -1,21 +1,40 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "bep_reliability_engine"
-version = "0.0.2"
-description = "Computational Architecture: Time-Dependent BEP Reliability Engine"
+version = "1.0.0"
+description = "Time-dependent backward erosion piping reliability engine for the Tokachi and Satsunai levees"
 readme = "README.md"
 requires-python = ">=3.11,<3.12"
+license = "MIT"
+license-files = ["LICENSE"]
 
 authors = [
-    { name = "Gimori3" }
+    { name = "Gijs Rietman", email = "G.M.Rietman@student.tudelft.nl" },
+]
+
+keywords = [
+    "backward erosion piping",
+    "levee reliability",
+    "flood risk",
+    "Sellmeijer",
+    "Monte Carlo",
+    "Bayesian updating",
+    "fragility curves",
+    "geotechnical engineering",
 ]
 
 classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3.11",
-    "Operating System :: Microsoft :: Windows",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Hydrology",
+    "Typing :: Typed",
 ]
 
 dependencies = [
@@ -30,6 +49,11 @@ dependencies = [
     "tqdm>=4.66,<5.0",
     "pyyaml>=6.0,<7.0",
 ]
+
+[project.urls]
+Repository = "https://github.com/Gimori3/bep-reliability-engine"
+Documentation = "https://github.com/Gimori3/bep-reliability-engine/blob/main/docs/architecture.md"
+Changelog = "https://github.com/Gimori3/bep-reliability-engine/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
 accel = [
@@ -72,5 +96,12 @@ markers = [
 python_version = "3.11"
 ignore_missing_imports = true
 
+# The three analysis packages are the distribution; `tests` is not importable
+# machinery and must not be installed as a top-level package alongside them.
 [tool.setuptools.packages.find]
 where = ["."]
+include = [
+    "bep_reliability_engine*",
+    "bayesian_reliability_updating*",
+    "system_integration*",
+]

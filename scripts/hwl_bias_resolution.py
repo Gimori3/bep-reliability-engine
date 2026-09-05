@@ -7,7 +7,7 @@ Evidence: ``docs/decisions/adr0040-hwl-bias-resolution.json``.
 The 2026-07-29 production campaign left the headline Stage 6.6 bias unresolved at
 exactly the level the thesis most wants to quote: at design HWL the transient
 comparator rests on 4 failing rows out of 100 000 at KP 62.0 and **zero** at
-KP 57.4 (campaign report section 6.1). The owner-chosen method (decision 6,
+KP 57.4 (campaign report section 6.1). The author-chosen method (decision 6,
 option C) is executed here:
 
 * ``verify``    -- gate G-A1/G-A2: the N = 1e5 ladder still reproduces the

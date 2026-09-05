@@ -4,7 +4,7 @@ Date: 2026-07-28 (adoption decision 2026-07-29)
 
 ## Status
 
-**Accepted in part** (project-owner decision of 2026-07-29, recorded with the
+**Accepted in part** (author decision of 2026-07-29, recorded with the
 evidence that grounded it). The measurement and its method are accepted in full.
 The adoption is **partial and deliberate**:
 

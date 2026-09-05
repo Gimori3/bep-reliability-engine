@@ -425,7 +425,7 @@ on the same alternate member. Per the terms of this task, nothing was run.
 ## 5. What the thesis can be strengthened to say, with no new run
 
 **This repository holds no thesis prose (`docs/conventions.md` section 8). Nothing below
-was edited.** Targets are named by file, line and label in `d:\repositories\msc-thesis`.
+was edited.** Targets are named by file, line and label in `msc-thesis`.
 
 The three the brief names (the first two are the same paragraph, reached two ways):
 

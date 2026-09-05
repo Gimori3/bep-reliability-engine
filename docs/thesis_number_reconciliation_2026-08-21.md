@@ -1,7 +1,7 @@
 # Thesis number reconciliation, 2026-08-21
 
 **What this is.** A claim-by-claim traceability record for every quantitative
-statement in `d:\repositories\msc-thesis`, checked against this repository's
+statement in `msc-thesis`, checked against this repository's
 evidence artifacts. It is a permanent record: it says, for each claim, which
 artifact carries it, whether the printed figure reconciles, and where the
 relationship is a rounding or an interval-informed restatement rather than a
@@ -33,7 +33,7 @@ failure there is unambiguous.
 | `ARITH` | Internal-arithmetic check; consistent with the other printed numbers. |
 | `ROUND` | A rounding, truncation or interval-informed restatement of an artifact number, not a copy. Recorded, not an error. |
 | `FIXED` | Diverged; corrected in the thesis on this date. |
-| `FLAG` | Not reconcilable from any artifact, or reconcilable only approximately. Text left alone; listed for the owner. |
+| `FLAG` | Not reconcilable from any artifact, or reconcilable only approximately. Text left alone; listed for the author. |
 | `CITED` | A literature or official-record value carried by a `\parencite`, not produced by this engine. Not verifiable here. |
 
 ---
@@ -149,7 +149,7 @@ unit at which a divergence would be actionable.
   construction cannot be determined from the text. It is qualified with "about",
   and its role in both passages is a comparison against the "factor of several to
   about ten" of `pwri_2014`, which survives any of 2.5, 2.6 or 2.9. The text is
-  left unchanged. **Owner ruling needed** on which construction was meant, after
+  left unchanged. **Author ruling needed** on which construction was meant, after
   which the number should be made uniform at both sites.
 
 ### 3.2 Chapter 8's 234-hour Abashiri stage duration
@@ -526,7 +526,7 @@ no other numeric token anywhere in `frontmatter/`, `mainmatter/` or `appendix/`
 changed in value or in count except by the deliberate additions of the three
 figure migrations into Appendix G.
 
-The two items this record left awaiting an owner ruling, the "factor of about
+The two items this record left awaiting a ruling from the author, the "factor of about
 2.9" conductivity sentence at two sites and the cited 234 h Abashiri duration,
 are untouched by the campaign and remain open.
 

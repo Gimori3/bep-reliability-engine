@@ -59,7 +59,7 @@ silently faked by nearest-neighbour). An explicit `nearest` policy exists
 for sensitivity exploration and stamps itself into provenance.
 
 Uemura's aggregation of segments into Sections (Tokachi 1-5, Satsunai 1-4)
-is an **owner-supplied table** (seam, class D): `section_table.csv` with
+is an **author-supplied table** (seam, class D): `section_table.csv` with
 columns `river,bank,kp_from,kp_to,section_id`; a validating loader checks
 contiguity and coverage. Until supplied, results are reported per segment.
 
@@ -137,7 +137,7 @@ pre-calculated mechanisms (class D until supplied):
   group named — the loader is the contract.
 * **Datum note**: Uemura's curves must arrive in T.P. metres (m MSL). If
   they arrive crest-relative or in local datum, the conversion happens
-  before the CSV, by the owner, with the offset documented — the loader
+  before the CSV, by the author, with the offset documented — the loader
   deliberately refuses to guess.
 * `synthetic_stub()` generates schema-exact fake curves so every consumer
   is tested today; results computed from stubs are stamped

@@ -13,7 +13,7 @@ withdrawn L/lambda_in validity alarm, the refuted foreshore-width control on
 risk (ADR-0025 amendment) and the refuted LHS tail-variance advantage (fm5).
 Nothing in the test suite or the ADR process governed them, so nothing caught
 the drift. The rule and its rationale are recorded in ``docs/conventions.md``
-section 8: thesis text lives only in ``d:\\repositories\\msc-thesis``.
+section 8: thesis text lives only in ``msc-thesis``.
 """
 
 from __future__ import annotations
@@ -40,7 +40,7 @@ def test_no_thesis_fragments_at_the_repository_root() -> None:
     )
     assert not offenders, (
         "Thesis source reappeared at the engine repo root: "
-        f"{offenders}. Thesis text lives only in d:\\repositories\\msc-thesis "
+        f"{offenders}. Thesis text lives only in msc-thesis "
         "(docs/conventions.md section 8). Write findings to docs/ instead, and "
         "make a targeted edit to the relevant msc-thesis chapter if the thesis "
         "genuinely needs the finding."

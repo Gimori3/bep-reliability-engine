@@ -1,7 +1,7 @@
 # ADR-0023: Shape-Invariant Climate Axis — One Canonical Shape Drives Both Scenarios; Event-Derived Workbook Selection Supersedes the ADR-0020 §3 Wording
 
 Date: 2026-07-03
-Status: Accepted (design and config disposition approved by the project owner, 2026-07-03)
+Status: Accepted (design and config disposition approved by the author, 2026-07-03)
 
 ## Context
 
@@ -63,7 +63,7 @@ compound-event memory model.
    (e.g. future full-ensemble loading for the hazard work); it is simply not
    the selector for the canonical fragility shape. ADR-0020 is otherwise
    unchanged; its text is not edited (a one-line status cross-reference may
-   be added upon owner approval).
+   be added upon author approval).
 
 3. **The spec §1 (M5) elongation concern is discharged for this data drop:**
    the +4K elongation it anticipates is not present in the Tokachi band at

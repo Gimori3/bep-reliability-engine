@@ -1,7 +1,7 @@
-# Stage 6 Reference-Anchor Status (owner extractions wired / dispositioned)
+# Stage 6 Reference-Anchor Status (author extractions wired / dispositioned)
 
 Date: 2026-07-07. Analysis only — no engine physics changed, no sweep. Every
-published value below was read by the owner from `docs/references/` and
+published value below was read by the author from `docs/references/` and
 independently confirmed against the PDF print during this pass (page images
 rendered and read, not OCR-trusted). Reproduced values are live engine output.
 
@@ -153,7 +153,7 @@ tests"). **Therefore no published configuration combines an active 0.3·D_bl
 term with the r_e = 1 case where the engine and Eq. (6) coincide.** A test
 checking engine H_erosion against Eq. (6) "as written" would show the
 ADR-0007 deviation, not a validation; a test at r_e = 1 with a hand-typed
-`h − h_e − 0.3·D_bl` would relocate the self-reference the owner warned
+`h − h_e − 0.3·D_bl` would relocate the self-reference the author warned
 against. **No confident fixture was built.**
 
 **The specific question to confirm with Pol directly:** is applying r_e to the

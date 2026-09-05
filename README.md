@@ -1,14 +1,31 @@
 # bep-reliability-engine
 
+[![CI](https://github.com/Gimori3/bep-reliability-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/Gimori3/bep-reliability-engine/actions/workflows/ci.yml)
+[![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/release/python-3119/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 A time-dependent **backward erosion piping (BEP)** reliability engine for the
 Tokachi and Satsunai levees near Obihiro, Hokkaido, built as the computational
-evidence base for an MSc thesis.
+evidence base for an MSc thesis in Hydraulic Engineering at Delft University of
+Technology.
 
 It quantifies the bias between the **static** limit state (Sellmeijer 2011) and
-the **transient** one (Pol, SIE 2024) by Monte Carlo fragility analysis, updates
-the result against the observed survival of the 2016 typhoon, and composes it
-with the other levee failure mechanisms into a system reliability per 200 m
-segment under a historical and a +4K climate.
+the **transient** one (Pol, SIE 2024) by Monte Carlo fragility analysis on a
+shared sample, updates the result against the observed survival of the 2016
+typhoon, and composes it with the other levee failure mechanisms into an
+annualised system reliability per 200 m segment under a historical and a +4 K
+climate scenario.
+
+**Status.** Version 1.0.0 is the frozen state of the engine at MSc thesis
+submission (September 2026). It is published so the work can be read, checked
+and re-run; it is not under active development, and no further research
+results are expected from it.
+
+> **Reading the results.** Every headline comparison in this repository is
+> conditional, and the conditions do not cancel. The reports of record state the
+> brackets each number carries; `docs/project_log.md` records the claims that
+> were tested and withdrawn along the way. Please quote from those, not from
+> a curve read off a figure.
 
 ## Three packages, one direction of dependency
 
@@ -29,18 +46,37 @@ system_integration              Phase 3 -- multi-mechanism series composition
 consumes persisted Phase 1/2 artifacts through typed seams. **Do not introduce a
 reverse import.**
 
+### Module map
+
+| Module | File | Responsibility |
+|---|---|---|
+| M1 | `config.py` | Typed configuration, unit conversion, the configuration hash |
+| M2 | `sampling.py` | Latin hypercube sampling of the 7-dimensional prior |
+| M3 | `hydrographs.py` | d4PDF discharge ingest, H-Q stage translation, resampling |
+| M4 | `hydraulics.py` | Blanket hydraulics, finite-foreshore correction, aquifer response |
+| M5 | `initiation.py` | Uplift and heave gate |
+| M6 | `sellmeijer.py` | Critical head — **the single source for both limit states** |
+| M7 | `progression.py` | Forward-Euler pipe progression after Pol (2024) |
+| M8 | `evaluator.py` | The shared-sample evaluator; the frozen Phase 2 surface |
+| M9 | `fragility.py` | Fragility-curve assembly and bootstrap confidence bands |
+| — | `run.py` | Orchestrator. **Contains no physics** — everything goes through M8 |
+
 ## Install
 
 `pyproject.toml` is the single source of truth for dependencies. There is no
 `requirements.txt`.
 
 ```powershell
+python -m venv .venv
 .\.venv\Scripts\Activate.ps1     # Python 3.11 only (requires-python >=3.11,<3.12)
 pip install -e .[dev]            # package + dev tooling
 pip install -e .[accel]          # optional Numba backend (ADR-0029, opt-in)
 ```
 
-## The three commands
+On Linux or macOS the same commands work with `source .venv/bin/activate`; CI
+runs the test suite on Ubuntu.
+
+## Running it
 
 ```powershell
 python scripts/generate_configs.py                      # configs/ from the geotech CSV
@@ -49,38 +85,79 @@ python -m bayesian_reliability_updating results/*_historical_*.h5 --verify
 python -m system_integration                            # Phase 3 composition
 ```
 
-The whole campaign is sequenced by one idempotent, resumable driver:
+The whole campaign is sequenced by one idempotent, resumable driver, and every
+number in the thesis traces to one execution of it:
 
 ```powershell
-python scripts/production_campaign.py    # configs -> sweeps -> Phase 2 -> Stage 6.6
-                                         # -> Phase 3 -> companions -> figures (gates G1-G7)
+python scripts/production_campaign.py            # all stages, resuming
+python scripts/production_campaign.py --dry-run  # print the plan and stop
+python scripts/production_campaign.py --stage phase1
 ```
 
-PowerShell does not glob-expand arguments to external programs -- splat a
-`Get-ChildItem` array rather than passing `*.h5` literally.
+Its eleven stages run configuration generation, the 8 Phase 1 sweeps, three
+Phase 2 variants, the Stage 6.6 gap decomposition, Phase 3, the companion
+studies, the figures and the diagnostics, behind seven gates — of which **G1**
+requires the re-run sweeps to reproduce the superseded failure matrices
+bit-for-bit.
+
+> PowerShell does not glob-expand arguments to external programs. Splat a
+> `Get-ChildItem` array rather than passing `*.h5` literally.
+
+## Reproducibility
+
+The production configuration is 8 sweeps: 4 confined cross-sections
+(KP 57.4 / 58.8 / 60.0 / 62.0) × 2 grain-size interpretations, at
+N = 10⁵ realizations and Δt = 225 s, on the historical hazard scenario.
+
+* **Configurations are generated, never hand-edited.** Re-run
+  `scripts/generate_configs.py` after any change to the geotechnical CSV. The
+  geometry values are inside the configuration hash, so a hand-edited YAML is
+  detected by the Phase 2 replay gate rather than silently accepted;
+  `tests/test_configs.py` is the drift guard.
+* **Seeds are deterministic everywhere.** The configuration seed fully
+  determines the sampled matrix and, through independent seed sequences, the
+  separately drawn seepage length and model factor.
+* **Optional knobs are default-off and bit-identical when off**, and each is
+  dropped from the metadata when unset so pre-existing configuration hashes
+  survive.
+* **Nothing needs a GPU, a cluster or a licence.** A full campaign is hours, not
+  days, on one workstation.
+
+### What a fresh clone does and does not have
+
+| Present | Absent (gitignored, machine-local) |
+|---|---|
+| All source, tests, configurations and generated inputs | `results/` — 3.7 GB of persisted runs |
+| `data/processed/` — the geotechnical source of truth and event extracts | `data/raw/` — the third-party source drop |
+| `docs/decisions/*.json` — measured evidence behind every ADR | `docs/references/` — copyrighted reference PDFs |
+| `docs/figures/` — the 71 publication figures | |
+
+**The test suite passes on a fresh clone.** It runs on synthetic and committed
+fixtures throughout; the few tests that can also exercise the raw drop or a
+persisted run are guarded and skip rather than fail when it is absent, and no
+test asserts on anything untracked. Scripts behave the same way.
+`data/raw/README.md` is tracked and documents that drop's required layout,
+per-source provenance and SHA-256 manifest, so a holder of the same data can
+verify they have the right one.
 
 ## Where things live
 
 | Path | What it is |
 |---|---|
 | `docs/architecture.md` | **The authoritative implementation spec.** Implement against it; deviate only with a documented justification. |
-| `docs/decisions/` | Architecture Decision Records `NNNN-slug.md` (0001-0048), their `adrNNNN-*` companion notes and evidence JSONs, and un-numbered studies. See `docs/conventions.md` for the naming grammar. |
-| `docs/conventions.md` | Coding conventions, the thesis-text rule, the documentation and results-retention conventions. |
+| `docs/decisions/` | 51 Architecture Decision Records `NNNN-slug.md`, gap-free and all Accepted, plus `adrNNNN-*` companion notes, evidence JSONs, and un-numbered studies. `docs/conventions.md` gives the naming grammar. |
+| `docs/project_log.md` | Dated narrative of what was learned and when — including what was later withdrawn. |
 | `docs/*_report.md` | Reports of record: Phase 2, Phase 3, Stage 6.6. Later addenda are authoritative where they differ from earlier sections. |
 | `docs/*_YYYY-MM-DD.md` | Closed one-shot audit and campaign artifacts, dated in the filename. |
-| `docs/validation/` | Japanese case-validation notes and the Pol-meeting dispositions. |
-| `docs/figures/` | The 52 tracked publication figures. Written directly by their drivers and staleness-gated by G7 -- never copied by hand. |
+| `docs/validation/` | Case-validation notes against Japanese levee failures, and the model-author consultation dispositions. |
+| `docs/conventions.md` | Coding conventions, repository layout, and the results-retention policy. |
+| `docs/figures/` | The 71 tracked publication figures. Written directly by their drivers and staleness-gated — never copied by hand. |
 | `docs/tokachi_bep_inputs_provenance.md` | Per-cell audit trail for the geotechnical input CSV. |
-| `configs/` | The 8 generated run configs. **Generated, not hand-edited** -- re-run `generate_configs.py` after any CSV change. |
-| `notebooks/` | Thin drivers only. Physics never lives in notebook cells. |
+| `configs/` | The 8 generated run configurations. |
+| `data/processed/` | The geotechnical source of truth, the 2016 event extract, and the Phase 3 segment tables. |
+| `notebooks/` | Thin drivers only. Physics never lives in a notebook cell. |
 
-## Not in a fresh clone
-
-`results/`, `data/raw/`, `docs/references/` and the Uemura fragility-curve drop
-are gitignored and machine-local. Scripts that need them skip rather than fail;
-everything tracked under `docs/` is expected to be present, and tests assert it.
-
-Thesis prose lives **only** in `d:\repositories\msc-thesis`, never here
+Thesis prose lives only in the separate `msc-thesis` repository, never here
 (`docs/conventions.md` section 8, enforced by `tests/test_repo_hygiene.py`).
 
 ## Gates
@@ -88,7 +165,25 @@ Thesis prose lives **only** in `d:\repositories\msc-thesis`, never here
 CI runs exactly three checks on Python 3.11, and all three must pass:
 
 ```powershell
-ruff check .
-black --check .
-pytest
+ruff check .          # E, F, I
+black --check .       # line length 88
+pytest                # 910 tests (903 fast + 7 slow)
 ```
+
+`pytest -m "not slow"` skips the seven expensive reference-reproduction and
+timestep-convergence tests.
+
+## Citing this work
+
+Please cite the software through `CITATION.cff`, which GitHub renders as a
+ready-made citation in the sidebar. A permanently archived snapshot of this
+release is being deposited at 4TU.ResearchData; once that deposit is published,
+its DOI becomes the preferred identifier and is recorded in `CITATION.cff` and
+`CHANGELOG.md`.
+
+## Licence
+
+MIT — see [LICENSE](LICENSE). The licence covers the code and the documentation
+in this repository. It does **not** cover the third-party source data described
+in `data/raw/README.md`, none of which is redistributed here, nor the reference
+publications under `docs/references/`.

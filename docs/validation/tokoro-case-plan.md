@@ -5,7 +5,7 @@ close-out). The Japanese validation campaign (2026-07-11) deliberately
 weighted Tokoro as a *corroboration anchor* — the committee's own
 uplift-criterion result and test pits, no independent engine run
 (`_thesis_validation_japan.tex`, campaign table). This plan specifies what a
-full fourth engine case would require, so the owner can decide whether the
+full fourth engine case would require, so the author can decide whether the
 marginal evidence justifies the digitization effort.
 
 ## Source status — better than assumed
@@ -53,7 +53,7 @@ it is blocked on the *digitization effort* and two data gaps listed below.
 | Boil-site locations + cover thickness | report §5.3.1, test pits §7.2 | local (digitize) |
 | Committee seepage-analysis heads/gradients at boil sites | report §5.3.2 | local (digitize; resolution unknown — may be figure-only) |
 | Foundation stratigraphy + k values at sites | report §5.3 / §2.1.2 | local (digitize; completeness unknown) |
-| 2016 stage hydrograph at the nearest Tokoro gauge (太茶苗 or equivalent) | NOT in repo | **class D — owner must supply** (same workbook family as the 2016 Tokachi drop, event window 2016-08-17 to 09-05) |
+| 2016 stage hydrograph at the nearest Tokoro gauge (太茶苗 or equivalent) | NOT in repo | **class D — author must supply** (same workbook family as the 2016 Tokachi drop, event window 2016-08-17 to 09-05) |
 | d70 / grain-size at boil sites | report §5.3 (if present) | unknown until digitization |
 
 ## Effort estimate and recommendation

@@ -1,7 +1,7 @@
 # Thesis number reconciliation, 2026-08-30: the reliability-index block
 
 **What this is.** A claim-by-claim traceability record for the block of material
-added to `d:\repositories\msc-thesis` by the supervisor-directed campaign of
+added to `msc-thesis` by the supervisor-directed campaign of
 2026-08-28 to 2026-08-29, which the 2026-08-21 pass
 (`docs/thesis_number_reconciliation_2026-08-21.md`) predates and therefore never
 covered. It follows that pass's method and verdict vocabulary exactly, and it is
@@ -49,7 +49,7 @@ everything outside this block.
 | `ARITH` | Internal-arithmetic check; consistent with the other printed numbers. |
 | `ROUND` | A rounding, truncation or interval-informed restatement of an artifact number, not a copy. Recorded, not an error. |
 | `FIXED` | Diverged; corrected in the thesis on this date. |
-| `FLAG` | Not reconcilable from any artifact, or reconcilable only approximately. Text left alone; listed for the owner. |
+| `FLAG` | Not reconcilable from any artifact, or reconcilable only approximately. Text left alone; listed for the author. |
 | `CITED` | A literature or official-record value carried by a `\parencite`, not produced by this engine. Not verifiable here. |
 
 ---
@@ -233,7 +233,7 @@ re-running the engine; none changes a measured value.
 
 ## 3. Internal-arithmetic checks
 
-Script: `scratchpad/final_checks.py` of this session, reading only
+Script: a throwaway `final_checks.py` of this pass, retained nowhere, reading only
 `docs/decisions/rq1-beta-reexpression.json` and
 `docs/decisions/adr0051-equal-head-convention.json`. All six requested checks
 were run. Result: **no failures.**
@@ -264,7 +264,7 @@ Two further arithmetic relations were checked and hold:
 
 ## 4. Whole-document consistency gates
 
-Scripts: `scratchpad/gates.py`, `gates2.py`, `cites.py` of this session, over
+Scripts: throwaway `gates.py`, `gates2.py` and `cites.py` of this pass, retained nowhere, over
 all 23 tracked `.tex` files, skipping the gitignored `scratch/`. All five
 requested gates pass, plus one added.
 
@@ -279,7 +279,7 @@ requested gates pass, plus one added.
 
 ### Cross-chapter headline-number consistency
 
-Built by grepping, not from memory (`scratchpad/headline.py`, 21 anchor
+Built by grepping, not from memory (a throwaway `headline.py`, 21 anchor
 patterns swept across `frontmatter/`, `mainmatter/` and `appendix/`). Every
 headline quantity of the new block that appears in more than one chapter now
 carries the same value at every site:
@@ -498,7 +498,7 @@ corrections of section 2.
 
 ---
 
-## 8. Residuals needing an owner ruling
+## 8. Residuals needing a ruling from the author
 
 **One.**
 

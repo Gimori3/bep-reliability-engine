@@ -594,7 +594,7 @@ production numbers above supersede them wherever they differ.
 ## 12. EVENT-SET CLOSURE (2026-07-18; resolves section 10)
 
 The section 10 flag is resolved: **the Phase 2 posterior conditions on
-the 2016 event alone**, by project-owner decision of 2026-07-18, grounded
+the 2016 event alone**, by author decision of 2026-07-18, grounded
 in ADR-0044. The 2011 and 2006 agency drops arrived
 (`data/processed/2011_event/`, `data/processed/2006_event/`) but their
 gauge stage/discharge directories are empty in both, the missing

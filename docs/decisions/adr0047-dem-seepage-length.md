@@ -3,7 +3,7 @@
 Date: 2026-07-28. Status: **evidence for ADR-0047**
 (`docs/decisions/0047-dem-surveyed-seepage-length.md`). **No input value changed in
 this pass** — `data/processed/tokachi_bep_inputs.csv` and `configs/*.yaml` are
-read-only to this study, and adoption is deferred to an explicit project-owner
+read-only to this study, and adoption is deferred to an explicit author
 decision (ADR-0047 Decision 5). **That decision has since been taken (2026-07-29):
 KP 62.0 was adopted, `L_m` 47.0 → 40.0 m, and KP 57.4 / 58.8 / 60.0 were held —
 see §7 Close-out, which governs where it differs from §§1–6.**
@@ -567,7 +567,7 @@ fragility prior wants the latter. They happen to agree in magnitude here.
 
 ## 6. Recommendation
 
-The measurement is recorded; **the adoption decision is the project owner's** and
+The measurement is recorded; **the adoption decision is the author's** and
 is deliberately left open (ADR-0047 Decision 5). Two results from §4.1b and §4.5
 change the shape of that decision relative to a plain "carry it as a bracket":
 

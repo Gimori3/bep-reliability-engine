@@ -3,7 +3,7 @@
 Supporting analysis for ADR-0025 (KP 62.0 foreland confinement). Companion
 to `adr0006-leakage-boundary-ratios.md` (§5.3) and the ADR-0006 amendment.
 
-> Provenance note: §§1–4 record the owner's read of the OYO transverse sheet
+> Provenance note: §§1–4 record the author's read of the OYO transverse sheet
 > as delivered on 2026-07-05. §5 (repo reconciliation, same day) records an
 > independent re-render of `docs/references/R062.000.pdf` at high zoom plus
 > the 様式-4/-5/-6 sheets, which **corroborates the central conclusion**
@@ -92,7 +92,7 @@ response to the ADR-0025(a) instruction. Corroborations and corrections:
    evidence of an open foreland**; §4's "would be the expected signature of
    Model 4B" lean, and any earlier use of i_v = 0.97 as pro-open evidence,
    are corrected accordingly.
-4. **Disposition (owner, 2026-07-05, ADR-0025):** on this evidence the
+4. **Disposition (author, 2026-07-05, ADR-0025):** on this evidence the
    §4 "bracket until data arrive" recommendation was superseded by option
    iii — the **blanketed foreland is adopted as the KP 62.0 baseline**, and
    the open-entry end (r_e ≈ 0.45, +37%) is recorded as an

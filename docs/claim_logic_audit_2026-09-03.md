@@ -1,7 +1,7 @@
 # Claim-logic audit, 2026-09-03: does every conclusion follow, at the strength stated?
 
 **What this is.** A claim-by-claim audit of the *internal logic* of
-`d:\repositories\msc-thesis`: whether each declarative claim in Chapter 9 and
+`msc-thesis`: whether each declarative claim in Chapter 9 and
 the Summary follows from what the thesis itself measured, at the strength
 stated. It is not an arithmetic pass; `docs/thesis_number_reconciliation_2026-09-03.md`
 and its two predecessors cover value-versus-artifact traceability, and this
@@ -21,12 +21,12 @@ attaches to; and the 2026-08-29 terminology decisions checked for creep-back.
 strength. `FIXED` = a defect found and repaired by the smallest edit that
 repairs the logic. Findings F1 to F12 were repaired under the original brief,
 which forbade adding or removing a number; F13 to F15 needed that restriction
-lifted and were repaired after the owner lifted it.
+lifted and were repaired after the author lifted it.
 
 **Result in one line.** Fifteen defects found, at seventeen sites, and **all
 fifteen fixed**. Twelve were repaired under the original brief; three (F13, F14
 and F15 below) were handed off in the first draft of this record and closed on
-the owner's authorisation of 2026-09-03, which lifted the no-new-number
+the author's authorisation of 2026-09-03, which lifted the no-new-number
 restriction. The record keeps the two rounds numbered separately so they stay
 legible. The document builds to the same chapter map. (The first draft of this
 paragraph said twelve found and ten fixed; that was a miscount of its own
@@ -299,11 +299,11 @@ every anchor.
 
 ---
 
-## 2. Findings fixed after the owner lifted the no-new-number restriction (F13 to F15)
+## 2. Findings fixed after the author lifted the no-new-number restriction (F13 to F15)
 
 These three were handed off in the first draft of this record because each
 needed a number restored, a number added, or a scope decision the original
-brief reserved to the owner. The owner authorised all three on 2026-09-03 and
+brief reserved to the author. The author authorised all three on 2026-09-03 and
 they are now closed.
 
 ### F13. Chapter 9 quoted 6.0 and 3.9 for the crack-reduced comparator, and no results chapter reported them

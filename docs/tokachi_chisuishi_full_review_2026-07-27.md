@@ -60,7 +60,7 @@ Six findings justify the pass. In order of consequence:
    full-scale levee-breach experimental channel has run overflow and erosion
    experiments for 15 years and **never a seepage experiment**.
 
-One Class C escalation (§3), **closed 2026-07-28** by the project owner in favour
+One Class C escalation (§3), **closed 2026-07-28** by the author in favour
 of the recommendation (retain the gauge-table discharges 6,334 / 4,750 m³/s, with
 the discrepancy footnoted). No engine change; no open Class C items remain.
 
@@ -557,7 +557,7 @@ recommend against silently preferring the newer-looking summary table — the
 predecessor review's own retracted over-reading (§1.4) is the cautionary
 precedent for treating a more official-looking presentation as authoritative.
 
-**5. DECIDED 2026-07-28 — project owner approved the recommendation.** The
+**5. DECIDED 2026-07-28 — the author approved the recommendation.** The
 gauge-table values **6,334 m³/s (2016) and 4,750 m³/s (1981) are retained**, with
 the Ch3 footnote recording the p71 discrepancy. No further edit was required: the
 thesis already carried these values, and the footnote as written states the

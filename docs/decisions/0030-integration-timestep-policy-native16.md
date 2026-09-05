@@ -131,5 +131,5 @@ the sharper diagnostic and is adopted below.
   ADR-0010 (`peak` verbatim), spec §11 (convergence criterion), §12 failure
   mode 3 (Euler overshoot on steep limbs — realized here as overshoot across
   the H_eq barrier).
-- Measurement scripts (session scratchpad, 2026-07-10): dt ladder + trans-not-
+- Measurement scripts (throwaway measurement scripts, 2026-07-10): dt ladder + trans-not-
   static counts; numbers reproduced in this ADR's Evidence table.

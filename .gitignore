@@ -221,7 +221,10 @@ __marimo__/
 .streamlit/secrets.toml
 
 # Project Specific Customizations
-data/raw/
+#   data/raw/ is a third-party source drop that is not redistributed; its
+#   layout, provenance and SHA-256 manifest are tracked in data/raw/README.md.
+data/raw/*
+!data/raw/README.md
 results/
 *.h5
 .ipynb_checkpoints/

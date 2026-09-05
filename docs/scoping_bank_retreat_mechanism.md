@@ -8,7 +8,7 @@ reported — indicator `system_integration/foreshore_exhaustion.py`, driver
 `docs/decisions/r10-foreshore-exhaustion-screening.md`, figure
 `docs/figures/r10_foreshore_exhaustion.png`, tests
 `tests/test_foreshore_exhaustion.py`. **Tier 2 and Tier 3 are declined by the
-project owner**; Tier 2 remains available and would need ADR-0047 first.
+the author**; Tier 2 remains available and would need ADR-0047 first.
 No ADR was consumed: the indicator adds no mechanism to the Phase 3
 composition (structurally pinned by test) and every Phase 3 artifact is
 byte-identical after the work.

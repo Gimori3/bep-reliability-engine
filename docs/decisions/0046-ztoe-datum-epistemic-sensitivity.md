@@ -72,7 +72,7 @@ anchoring asymmetry or the Phase 2 propagation, and the full re-run costs
 seconds per section. Kept only as the *check* inside the companion script.
 
 ### Nothing (documentation-only caveat)
-Rejected by the project owner: the datum enters the h_2016 anchoring, so the
+Rejected by the author: the datum enters the h_2016 anchoring, so the
 sensitivity must propagate through the Bayesian updating and be reported
 with numbers.
 

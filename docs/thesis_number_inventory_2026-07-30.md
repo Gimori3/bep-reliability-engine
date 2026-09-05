@@ -16,7 +16,7 @@ project has produced about *results* has no home yet.
 **How to read the columns.** *Chapter / section* names the existing `\label` the
 number belongs under, so a drafter can place it without re-deciding the structure.
 *Figure* says whether a figure already exists (all paths relative to
-`d:\repositories\bep-reliability-engine\docs\figures\`; the thesis repo's own
+`this repository\docs\figures\`; the thesis repo's own
 `figures/` directory would need the file copied in, or the path pointed at it).
 
 **Count: 47 numbers or number-groups awaiting a home**, of which **29 already have
@@ -140,7 +140,7 @@ rather than re-deriving.
 
 ## 6. System integration and climate sensitivity (Ch. 7, all four sections)
 
-**Owner decision 5 of the 2026-07-29 campaign scopes RQ3 and RQ4 to the four
+**Author decision 5 of the 2026-07-29 campaign scopes RQ3 and RQ4 to the four
 geotechnically characterised sections.** The 114-segment distribution is **reach
 context**, because 110 of 114 segments carry `bep_source = None` under the
 production `exact` policy and are surface-only lower bounds. Any draft must keep

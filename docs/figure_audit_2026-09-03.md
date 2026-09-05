@@ -157,7 +157,7 @@ The rest are true of what their figure draws.
    the figure. Changed to `$\Delta\beta$`.
 
 Two further caption/figure tensions were found and **left alone**, because the
-caption is deliberate and the resolution is the owner's call:
+caption is deliberate and the resolution is the author's call:
 
 3. `fig: fragility per section` and `fig: fragility tail log` label KP 58.8 and
    KP 60.0 **"drained"** on the panel while the caption says both are
@@ -184,7 +184,7 @@ maximum. Reported, not changed, per the brief.
 | `stage6_6_fractions_kp62_0.png` | 56.5 m | **none** | states it |
 | `phase3_system_fragility_bep_sections.png` | 56.5 m | **51.47 m** | states both |
 
-Two observations for the owner's decision.
+Two observations for the author's decision.
 
 * `fragility_comparison.png` plots four sections on a **relative** axis
   (`h − z_toe`), so a single band would be read as applying to all four when
@@ -200,7 +200,7 @@ Two observations for the owner's decision.
 
 ## 5. Found and deliberately not changed
 
-> **Amended 2026-09-03, later the same day.** The owner directed that items
+> **Amended 2026-09-03, later the same day.** The author directed that items
 > **A**, **D**, **H** and **I** be fixed in full. They are, and section 10
 > records the work. Their entries below are kept as the finding, each with
 > its resolution appended. **B**, **C**, **E**, **F**, **G** and **J** stand
@@ -212,7 +212,7 @@ Two observations for the owner's decision.
 `adr0039-timestep-stress` names `HPB_m049_2001` and `HPB_m064_1987` in its
 legend. `_figstyle`'s own house rule bans a run identifier in a main-body
 figure, and the thesis names none of these. Removing them is a provenance
-decision, not a defect fix, so it was left to the owner. All four figures write
+decision, not a defect fix, so it was left to the author. All four figures write
 at a fixed canvas size, so the change would be dimension-free.
 **Fixed (section 10.1).** A fifth instance was found while fixing these four:
 `adr0031-tail-lhs-vs-crude.png` and its KP 60.0 twin, in Appendix E, printed
@@ -501,7 +501,7 @@ Summary, and the two further sites in Chapter 5 and Chapter 6. Seven sites, one 
 
 ## 10. Follow-up pass: items A, D, H and I closed
 
-Directed by the owner after the report above was written. Same method: the
+Directed by the author after the report above was written. Same method: the
 generator was run unedited and pixel-diffed against the committed PNG first
 wherever the re-render path had not already been proved, then the edit was
 applied and the figure re-rendered. **All sixteen figures touched here keep
@@ -669,7 +669,7 @@ figures only.
 
 ## 11. Addendum, 2026-09-04: the two items section 10.3 left alone are closed
 
-The owner commissioned both after the submission gate of that date
+The author commissioned both after the submission gate of that date
 (`msc-thesis/scratch/SUBMISSION_GATE_2026-09-04.md`, findings 3 and 12). Both
 were flagged here as notation rather than style and deliberately deferred; both
 are now fixed at source, in the drivers, and every affected figure re-rendered

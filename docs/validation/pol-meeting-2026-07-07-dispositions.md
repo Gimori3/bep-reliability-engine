@@ -17,7 +17,7 @@ against existing decision records.
 | 2a | Use `C_e ~ Lognormal(0.055, 0.043)` for field reliability | **REQUIRES-CHANGE → implemented** | **ADR-0026**; configs regenerated; drift guard re-pinned. Derivation of 0.055 supplied in the 2026-07-08 email (see below). |
 | 2b | B25-245 is 0.010 or 0.014 | **RESOLVED (email 2026-07-08)** | Pol: correct value is **0.010** ("Dit moet inderdaad 0.01 zijn"); Fig. 5 caption's 0.014 is the error. Matches the repo's existing `B25_C_E = 0.010`. No code change. |
 | 2c | C_e absorbing laminar-vs-turbulent uncertainty legitimate? | RECORD-CONFIRMATION (corrective) | Pol: **not** legitimate; Sellmeijer's ~12% model factor nominally covers it (debatable). C_e stays stochastic on intrinsic-uncertainty grounds. Recorded in ADR-0026. |
-| 3 | 0.9·H_c conservatism at field scale | RECORD-CONFIRMATION (qualitative) | ADR-0009 author-confirmation section; no number, no code. Owner to send Pol the L=3m/1.95× calc. |
+| 3 | 0.9·H_c conservatism at field scale | RECORD-CONFIRMATION (qualitative) | ADR-0009 author-confirmation section; no number, no code. Author to send Pol the L=3m/1.95× calc. |
 | 4 | k_aq–d_70 decoupling is the only viable option | RECORD-CONFIRMATION | ADR-0012 author-confirmation stub. |
 | 5 | Use α = −1/3 (2D; thin blankets); 3D → Discussion | RECORD-CONFIRMATION | ADR-0017 author-confirmation stub; confirms the default, −1/2 stays Discussion-only. |
 | 6 | l_c 2D-vs-3D under-prediction is a known limitation; stay 2D | RECORD-CONFIRMATION | ADR-0009 note (Discussion); no 3D-calibrated form exists. |
@@ -33,7 +33,7 @@ against existing decision records.
   **Material effect:** transient P_f rises at damped sections (erosion head
   ~×1/r_e; KP 62.0 r_e≈0.33 → ~3×), the static–transient gap and the ADR-0024
   KP 62.0 finding may shift.
-- **ADR-0028 (engine physics; follow-up decision, owner-approved 2026-07-07).**
+- **ADR-0028 (engine physics; follow-up decision, author-approved 2026-07-07).**
   The static Sellmeijer comparator also uses the raw gross head
   `H_c − (h_peak − z_toe)` — Sellmeijer 2011 defines H_c as the "critical
   hydraulic head across structure" (gross, no r_e), read directly from the paper.
@@ -64,14 +64,14 @@ against existing decision records.
   little is known about recovery, so zero recovery is a realistic assumption,
   *especially for peaks so close together*. Noted at architecture §13.
 
-## Still open (owner action, not Pol-blocked)
+## Still open (author action, not Pol-blocked)
 
 - **3**: field-scale behaviour of the 0.9·H_c conservatism — Pol gave
-  qualitative guidance (ADR-0009) but no number; awaiting the owner sending him
+  qualitative guidance (ADR-0009) but no number; awaiting the author sending him
   the L=3m inversion / 1.95× calc.
 
 ## Not covered by this meeting
 
-Any separate head-*datum* question the owner is resolving with Pol by email is
+Any separate head-*datum* question the author is resolving with Pol by email is
 distinct from reference anchor #4 (the r_e-on-erosion-head convention closed
 here) and is unaffected by these dispositions.

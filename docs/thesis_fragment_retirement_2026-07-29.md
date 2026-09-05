@@ -27,8 +27,8 @@ staged rather than written because Chapter 7 is deliberately unwritten.
 
 
 Date: 2026-07-29
-Engine repo: `d:\repositories\bep-reliability-engine` (branch `feature/tokachi-chisuishi-review`, clean at audit time)
-Thesis repo: `d:\repositories\msc-thesis` (4 uncommitted chapter mods present at audit time; read from disk, not from memory)
+Engine repo: this repository (branch `feature/tokachi-chisuishi-review`, clean at audit time)
+Thesis repo: `msc-thesis` (4 uncommitted chapter mods present at audit time; read from disk, not from memory)
 
 Companion to `scratch/MANIFEST.md` (the fact manifest). This document answers only the
 three-way disposition question for the seven `_thesis_*` files; MANIFEST remains the
@@ -285,7 +285,7 @@ not needed, since the corresponding thesis entries already exist.
    repository in immediate violation, and remediating it would mean editing
    bibliography entries, which the msc-thesis project rules place off-limits and which is
    also a scholarly-integrity question (the Japanese title is the accurate record of a
-   Japanese-language source). **This needs the owner's decision and is raised at the
+   Japanese-language source). **This needs the author's decision and is raised at the
    checkpoint rather than resolved here.**
 
 2. **Ch. 3 L314** still reads "combined with the foreshore-width variation of

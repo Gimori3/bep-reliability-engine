@@ -90,7 +90,7 @@ The rules below prevent a recurrence. `tests/test_repo_hygiene.py` enforces the
 first one.
 
 **No `.tex`, `.bib` or thesis-prose file is ever created in this repository.** The
-sole authoritative thesis is `d:\repositories\msc-thesis`.
+sole authoritative thesis is `msc-thesis`.
 
 **Findings reach the thesis by a targeted edit to the relevant msc-thesis chapter,
 made only when the finding is genuinely needed there.** Do not stage thesis prose
@@ -140,7 +140,7 @@ be.** The measured costs are in the audit, sections 3.6 and 3.7.
   dated addendum section stating it is **authoritative where it differs**, rather
   than rewriting the body (`phase2_report.md` sections 11 to 14 are the pattern).
 * **Dated `docs/<name>_YYYY-MM-DD.md` are closed one-shot artifacts** -- a
-  campaign, an audit, a document review. They are frozen records of a session and
+  campaign, an audit, a document review. They are frozen records of one pass and
   are never updated in place; a later pass writes a new dated file and supersedes
   the old one by pointer.
 
@@ -155,7 +155,7 @@ citations still buy nothing.
 
 | Grammar | Meaning |
 |---|---|
-| `NNNN-slug.md` | A numbered **decision** (ADR). 0001 to 0048, gap-free. Superseded ADRs stay in place with their Status line updated; they are never deleted or renamed. |
+| `NNNN-slug.md` | A numbered **decision** (ADR). 0001 to 0051, gap-free. Superseded ADRs stay in place with their Status line updated; they are never deleted or renamed. |
 | `adrNNNN-slug.md` / `.json` | **Evidence for** the ADR of that number: a companion analysis note, an evidence JSON, or both. Note the grammar differs from the ADR's own filename (lowercase `adr` prefix, no separating dash). |
 | `<topic>-study.md`, `<topic>-synthesis.md` | An **un-numbered study**: work that produced a finding but changed no default and therefore consumed no ADR number (`seepage-length-L-study.md`, `r10-foreshore-exhaustion-screening.md`, `epistemic-bracket-synthesis.md`, `m7-pol-ode-reference-values.md`). |
 

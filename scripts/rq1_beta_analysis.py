@@ -4,8 +4,8 @@ Pure post-processing: this driver contains no physics and evaluates no limit
 state. It reads persisted artifacts only and re-expresses estimates that are
 already on disk, so every number it prints traces to a named file.
 
-Metric (campaign decision D1,
-``docs/work_packages/rq1-revision-campaign_2026-08-28.md``)::
+Metric (campaign decision D1, pre-registered in
+``docs/decisions/0051-crack-resistance-factor-equal-head-convention.md``)::
 
     beta(h) = -Phi^-1( P_f(h) )            per branch
     dbeta   = beta_transient - beta_static  (paired, shared sample)
@@ -33,7 +33,8 @@ Outputs::
     docs/decisions/rq1-beta-reexpression.json    complete machine-readable record
     docs/decisions/rq1-beta-reexpression.csv     flat long-format table
     docs/rq1_beta_reexpression_2026-08-28.md     tables of record (numbers brief)
-    docs/figures/rq1_*.png                       five figures (+ msc-thesis copy)
+    docs/figures/rq1_*.png                       five figures (mirrored to
+                                                 $BEP_THESIS_FIGURES if set)
 
 Usage (repo root, venv active)::
 
@@ -60,6 +61,7 @@ import argparse
 import csv
 import hashlib
 import json
+import os
 import sys
 from datetime import date
 from pathlib import Path
@@ -89,7 +91,13 @@ STAGE66_DIR = RESULTS / "stage6_6"
 DOCS = REPO_ROOT / "docs"
 DECISIONS = DOCS / "decisions"
 CANONICAL = DECISIONS / "canonical-shape-sensitivity.json"
-THESIS_FIGURES = Path("d:/repositories/msc-thesis/figures")
+#: Optional mirror directory for the five RQ1 figures. The thesis text lives in a
+#: separate repository (docs/conventions.md section 8); set BEP_THESIS_FIGURES to
+#: its ``figures/`` directory to have this driver drop a copy there as well.
+#: Unset -- the default, and the only state a fresh clone has -- writes nothing
+#: outside this repository.
+_THESIS_FIGURES_ENV = os.environ.get("BEP_THESIS_FIGURES", "").strip()
+THESIS_FIGURES = Path(_THESIS_FIGURES_ENV) if _THESIS_FIGURES_ENV else None
 
 BRIEF_MD = DOCS / "rq1_beta_reexpression_2026-08-28.md"
 RECORD_JSON = DECISIONS / "rq1-beta-reexpression.json"
@@ -1483,7 +1491,7 @@ def write_markdown(record: dict[str, Any], path: Path) -> None:
 # --------------------------------------------------------------------------- #
 def _save(fig: plt.Figure, name: str) -> Path:
     out = figstyle.save(fig, name)
-    if THESIS_FIGURES.is_dir():
+    if THESIS_FIGURES is not None and THESIS_FIGURES.is_dir():
         (THESIS_FIGURES / name).write_bytes(out.read_bytes())
     return out
 
@@ -2219,7 +2227,9 @@ def build_record(n_replicates: int) -> dict[str, Any]:
         "record": "RQ1 static-vs-transient comparison in reliability-index terms",
         "generated": date.today().isoformat(),
         "generated_by": "scripts/rq1_beta_analysis.py",
-        "plan_of_record": "docs/work_packages/rq1-revision-campaign_2026-08-28.md",
+        "plan_of_record": (
+            "docs/decisions/0051-crack-resistance-factor-equal-head-convention.md"
+        ),
         "metric": {
             "beta": "-Phi^-1(P_f)",
             "delta_beta": "beta_transient - beta_static",

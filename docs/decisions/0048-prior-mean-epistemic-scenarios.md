@@ -239,7 +239,7 @@ config hashes and the Phase 2 replay gate are all unaffected; the full suite is 
 **Not done, deliberately.** No production re-sweep; no Phase 2 or Phase 3 re-run under a
 scenario; no change to `d70_m`, `D_bl_m` or `z_toe`. Whether the k_aq bracket should
 propagate to the Phase 3 annualized numbers is left open — it would multiply the campaign
-by the number of scenarios and is a project-owner call.
+by the number of scenarios and is the author's call.
 
 ---
 

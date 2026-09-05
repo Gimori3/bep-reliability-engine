@@ -2,7 +2,7 @@
  "record": "RQ1 static-vs-transient comparison in reliability-index terms",
  "generated": "2026-09-04",
  "generated_by": "scripts/rq1_beta_analysis.py",
- "plan_of_record": "docs/work_packages/rq1-revision-campaign_2026-08-28.md",
+ "plan_of_record": "docs/decisions/0051-crack-resistance-factor-equal-head-convention.md",
  "metric": {
   "beta": "-Phi^-1(P_f)",
   "delta_beta": "beta_transient - beta_static",

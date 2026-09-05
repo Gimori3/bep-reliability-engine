@@ -24,7 +24,7 @@ column                  contract
 Within each (river, bank, kp, mechanism, scenario) group the stages must be
 strictly increasing, ``p_f`` non-decreasing, and at least two samples must
 exist. Any datum conversion (crest-relative, local datum) happens before the
-CSV, by the data owner — the loader refuses to guess (ADR-0038).
+CSV, by the data supplier — the loader refuses to guess (ADR-0038).
 """
 
 from __future__ import annotations

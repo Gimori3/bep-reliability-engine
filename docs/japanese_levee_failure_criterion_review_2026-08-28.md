@@ -519,7 +519,7 @@ point of the claim, so Chapter 2 and Chapter 5 no longer disagree.
 
 ## 11. What was applied, 2026-08-28
 
-Approved in full by the owner, including the short Introduction variant. Applied to
+Approved in full by the author, including the short Introduction variant. Applied to
 `msc-thesis` in one commit. Verified: no undefined citations (157 bib entries,
 105 keys used), all 261 cross-references resolve against 360 labels, no duplicate bib
 keys, em-dash check CLEAN, CJK-in-`.tex` check CLEAN.

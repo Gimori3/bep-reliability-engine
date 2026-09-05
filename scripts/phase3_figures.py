@@ -381,7 +381,7 @@ def fig_climate_shift(df: pd.DataFrame) -> None:
 def fig_rq4_four_sections(df: pd.DataFrame) -> None:
     """RQ4 headline: the four characterised sections, historical vs +4K.
 
-    Owner decision 5 of the 2026-07-29 campaign scopes RQ3/RQ4 to the four
+    Author decision 5 of the 2026-07-29 campaign scopes RQ3/RQ4 to the four
     geotechnically characterised sections, because the other 110 segments carry
     no BEP source and are surface-only lower bounds. This is therefore the
     figure that answers RQ4; ``phase3_climate_shift.png`` is reach context.

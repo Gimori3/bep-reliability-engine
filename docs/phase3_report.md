@@ -446,13 +446,13 @@ duration strata everywhere (figure `phase3_rq4_attribution.png`).
   (former residual (i)) is **resolved 2026-07-21** (ADR-0042 decision 9
   amended): the primary adopts the dimensionally-correct USACE conversion on
   dimensional grounds, with the as-received conversion retained as a labeled
-  `scour_script_k` companion; no owner confirmation is pursued (the author
+  `scour_script_k` companion; no author confirmation is pursued (the author
   disclaimed hydraulics expertise and deferred the unit question, and the
   channel was judged unproductive). Residual: (ii) if his final curve tables
   ever materialize, they drop into the same contract CSV and everything
   regenerates in minutes.
 * **D2 — CLOSED** by ADR-0043 reconstruction (validated against his own
-  geometry and assignments). Residual: an owner-supplied authoritative
+  geometry and assignments). Residual: an author-supplied authoritative
   table replaces one committed CSV verbatim.
 * **D7 — CLOSED 2026-07-22.** `Uncertainty_HQrelation.xlsx` arrived
   (gitignored, machine-local under `data/raw/`) and is the direct

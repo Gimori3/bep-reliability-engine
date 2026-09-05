@@ -1046,10 +1046,10 @@ reach. **No CSV cell is changed by them** — see 8.6 for why that restraint is 
 
 Cross-section position is decisive for how each log may be read, and is **not** recorded
 on the logs themselves (`調査位置` is blank on all six). The positions below were
-confirmed by the project owner (2026-07-28) and are the load-bearing premise of
+confirmed by the author (2026-07-28) and are the load-bearing premise of
 everything in this section.
 
-| Borehole | Campaign | Collar (m T.P.) | Depth (m) | Position (owner-confirmed) |
+| Borehole | Campaign | Collar (m T.P.) | Depth (m) | Position (author-confirmed) |
 |---|---|---|---|---|
 | H25TK-B4 | 2013/14 | 38.85 | 16.00 | **Floodplain, ~300 m riverward of the levee**, KP 58.80 |
 | H25TK-B5 | 2013/14 | 40.55 | 50.00 | **Floodplain, ~300 m riverward of the levee**, KP 61.00 |
@@ -1104,7 +1104,7 @@ make them unusually relevant:
 | KP1.8R-2 | **landside toe** | `5.15E-02` | 5.15e-4 |
 | KP2.1L-2 | **riverside** | `8.61E-03` | 8.61e-5 |
 
-**Units are not printed on either log.** cm/s is adopted, confirmed by the project owner
+**Units are not printed on either log.** cm/s is adopted, confirmed by the author
 (2026-07-28) on the same grounds used to propose it: Japanese practice reports 透水係数 in
 cm/s, and read as m/s the values would be 5 cm/s and 0.9 cm/s — clean open-framework
 gravel, flatly inconsistent with logs describing a fine-sand matrix with ~30% gravel and

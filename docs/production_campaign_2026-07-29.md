@@ -699,7 +699,7 @@ containment claim was sound and that the residue is purely documentary.
 
 ## 12. Open item — decision 6 — **CLOSED 2026-07-30**
 
-> **Closure note (2026-07-30).** The owner supplied the method — brute force at
+> **Closure note (2026-07-30).** The author supplied the method — brute force at
 > N = 1e6 at KP 62.0, then validate tilted importance sampling against it, then
 > apply the validated estimator at KP 57.4 — and it was executed under a written
 > pre-registration: `docs/decisions/adr0040-hwl-bias-resolution.md`, driver

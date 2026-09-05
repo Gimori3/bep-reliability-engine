@@ -11,7 +11,7 @@ This supersedes the earlier national-river-dataset and plan-view estimates
 (which mis-scaled distances and mis-oriented the bank); the chainage register
 is chainage-native and matches the model's own coordinate system.
 
-> Provenance note: §§1–3 record the owner's findings as delivered on
+> Provenance note: §§1–3 record the author's findings as delivered on
 > 2026-07-05, computed against the **pre-correction D_bl leakage lengths**
 > (λ_in = 181/179/120/39 m). §4 (repo reconciliation) restates the
 > thresholds with the corrected-D_bl λ_in (102/117/87/39 m); **every verdict

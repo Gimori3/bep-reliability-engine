@@ -2,7 +2,7 @@
 
 **What this is.** Twelve questions the committee is most likely to press, each with
 the answer the document can actually carry and the evidence that carries it. It is
-written for the defence of `d:\repositories\msc-thesis` as it stands on 2026-08-22,
+written for the defence of `msc-thesis` as it stands on 2026-08-22,
 after the whole-document submission gate of the same date.
 
 **Scope and honesty rules.** Every answer below is traceable to a named section,

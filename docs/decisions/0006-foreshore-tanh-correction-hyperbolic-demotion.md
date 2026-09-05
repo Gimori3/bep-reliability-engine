@@ -90,7 +90,7 @@ heterogeneity — the motivation for Decision 1, which stands unchanged.
 
 ## Hinterland extents L₃ — resolved per section (2026-07-05, HDB facility register)
 
-The owner's site resolution (companion note
+The author's site resolution (companion note
 `adr0006-hinterland-l3-resolution.md`; primary source the Hokkaido
 Development Bureau chainage-native facility register, right bank KP 53–66)
 established, against the corrected-D_bl thresholds (λ_in = 102/117/87/39 m,

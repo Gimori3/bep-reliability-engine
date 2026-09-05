@@ -1,7 +1,7 @@
 # ADR-0025: KP 62.0 Foreland Confinement — Blanketed Baseline Adopted; Open-Entry Recorded as an Evidence-Disfavored, On-Demand Sensitivity
 
 Date: 2026-07-05 (amended 2026-07-28)
-Status: Accepted (owner decision 2026-07-05, option iii: blanketed baseline with logged
+Status: Accepted (author decision 2026-07-05, option iii: blanketed baseline with logged
 sensitivity; the B-7/様式-5 read below is the converging evidence). **Amended 2026-07-28:
 the logged on-demand sensitivity has been EXECUTED — it is no longer pending, and it no
 longer depends on foreshore ground truth arriving.** The decision below (blanketed
@@ -89,7 +89,7 @@ OYO's own blanketed schematization; no positive evidence of absence); the
 open end is not excluded by hard data (no foreshore boring) but is
 evidence-disfavored.
 
-## Decision (owner, 2026-07-05 — option iii)
+## Decision (author, 2026-07-05 — option iii)
 
 **The blanketed foreland is the KP 62.0 baseline.** The engine's current
 treatment (ADR-0005 proxy + ADR-0006 tanh, r_e ≈ 0.330 at the prior means)
@@ -195,7 +195,7 @@ values for the reasons in the companion note §7.
   ADR-0006 (amended 2026-07-05; its Open Item is resolved by this record),
   ADR-0021 (KP 62.0 governing-section context).
 - Companion notes: `adr0025-kp62-foreland-read.md` (the OYO sheet read:
-  owner's read §§1–4 + repo reconciliation §5),
+  author's read §§1–4 + repo reconciliation §5),
   `adr0025-foreshore-width-and-sensitivity.md` (2026-07-28: B_f source
   verification, the 高水敷幅 definition, and the executed sensitivity;
   evidence `adr0025-foreshore-sensitivity.json`),

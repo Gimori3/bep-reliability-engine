@@ -7,7 +7,7 @@ Date: **2026-07-28**. Status: **executed, Tier 1 only**.
 is consumed: this is a study, and the new code is unwired from the composition
 by construction and by test. Tiers 2 (a probabilistic retreat fragility joining
 the Phase 3 series system) and 3 (morphodynamic coupling) are **declined by the
-project owner**; Tier 2 would require ADR-0047 before any code.
+the author**; Tier 2 would require ADR-0047 before any code.
 
 Driver: `scripts/foreshore_exhaustion_study.py` → evidence JSON
 `docs/decisions/r10-foreshore-exhaustion-screening.json`, figure
@@ -332,7 +332,7 @@ retreat rate", never "will this levee fail".
 ## References
 
 - Scoping note `docs/scoping_bank_retreat_mechanism.md` (Tier definitions; the
-  owner's Tier 1 / decline decision).
+  author's Tier 1 / decline decision).
 - `docs/decisions/adr0025-foreshore-width-and-sensitivity.md` — the B_f
   definition (高水敷幅 = USACE $L_1$), the 4/4 verbatim source verification, the
   MLIT 2008 corroboration, the OYO-retention decision, and the KP 62.0

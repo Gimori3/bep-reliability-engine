@@ -5,7 +5,7 @@ Parent record: `docs/examiner_redteam_2026-09-03.md`, Section 3.
 
 **What this is.** The red-team pass of 2026-09-03 answered fourteen of its fifteen
 attacks on the page and left three residues that it judged unclosable from existing
-evidence. The owner asked for those three to be pursued. All three close. **None needed a
+evidence. The author asked for those three to be pursued. All three close. **None needed a
 new sweep, a new module, a config field or an ADR**: two were settled by read-only
 recomputation against committed artifacts and one by a deduction the repository had
 already written down but the thesis had not.

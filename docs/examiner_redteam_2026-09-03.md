@@ -12,10 +12,10 @@ residues, of which R4 and R5 remain open by construction. The R1 to R3 record is
 `docs/decisions/examiner-residues-closed-2026-09-04.md`.
 
 
-**What this is.** An adversarial reading of `d:\repositories\msc-thesis` as it stands
+**What this is.** An adversarial reading of `msc-thesis` as it stands
 on 2026-09-03, after the shortening campaign closed at 99 pages and after the three
-reviewer-triage work packages of
-`docs/work_packages/reviewer-feedback-triage_2026-08-29.md` landed. Fifteen
+reviewer-triage work packages of 2026-08-29 landed
+(verdicts and execution recorded in `docs/project_log.md`, entry of that date). Fifteen
 questions a committee could actually land, ranked by the damage an unanswered version
 would do; for each, where the answer already lives, verbatim; a grade; and, where the
 grade was ANSWERED BUT BURIED or ANSWERED ONLY IN AN APPENDIX, the smallest edit that
@@ -355,7 +355,7 @@ duration quartile"; HPB median t50 40 h [32 to 54]; compound fraction 9.6 per ce
 It cost Chapter 4 a page on first measurement and was paid for by cuts C1 to C5 of
 Section 4. **The 55-hour half-amplitude width and the two-peak structure of this member were
 already printed in Appendix H; what is new is the comparison against the ensemble, so the
-owner should confirm the quartile and the one-in-ten fraction against ADR-0023 before
+author should confirm the quartile and the one-in-ten fraction against ADR-0023 before
 submission.** This is the only statement the thesis gained in this pass that it did not
 previously make somewhere.
 
@@ -618,7 +618,7 @@ seepage-length bracket and reported as not cancelling in the comparison.
 
 ## 2. Edits taken
 
-**All eight additions are in the document, at zero page cost.** The owner authorised
+**All eight additions are in the document, at zero page cost.** The author authorised
 offsetting concision on 2026-09-04; the three that had been priced at a page each were
 paid for out of six measured restatements in the same two chapters. The main body stands
 at 99 pages with References on 100, chapter for chapter identical to the pre-edit
@@ -695,7 +695,7 @@ tables".
 
 ## 3. Residue
 
-**R1 to R3 were closed on 2026-09-04**, on the owner's instruction to pursue them. Full
+**R1 to R3 were closed on 2026-09-04**, on the author's instruction to pursue them. Full
 record: `docs/decisions/examiner-residues-closed-2026-09-04.md` and its JSON. None needed a
 new sweep, module, config field or ADR. Summaries below; R4 and R5 stay open by construction.
 

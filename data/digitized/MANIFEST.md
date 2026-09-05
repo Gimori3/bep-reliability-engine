@@ -2,7 +2,7 @@
 
 Manual digitization of figures for thesis test-configuration assignment. Each dataset was extracted from the publisher PDFs (rendered at 400 DPI), axis-calibrated against detected tick marks / gridlines, and verified against an overlay (see `verification_overlays/`).
 
-> **Repository note (added on commit, 2026-06-13).** Digitized manually by the project owner against his copies of the publisher PDFs; added to the repository under `data/digitized/` as reference data for the M7 validation tests (see `docs/decisions/m7-pol-ode-reference-values.md` §5C for usage rules and caveats). The `verification_overlays/` referenced above are kept local-only and are not committed. Two typos in the original manifest were corrected on commit: the CG24 author list (was "Pol, Pol et al."), and `i_up,c` → `i_tip,c` in two FPH table rows.
+> **Repository note (added on commit, 2026-06-13).** Digitized manually by the author against his copies of the publisher PDFs; added to the repository under `data/digitized/` as reference data for the M7 validation tests (see `docs/decisions/m7-pol-ode-reference-values.md` §5C for usage rules and caveats). The `verification_overlays/` referenced above are kept local-only and are not committed. Two typos in the original manifest were corrected on commit: the CG24 author list (was "Pol, Pol et al."), and `i_up,c` → `i_tip,c` in two FPH table rows.
 
 ## Sources
 
@@ -36,7 +36,7 @@ Digitization error is approximately 1-2% of the relevant axis range (pixel/anti-
 
 ## Key caveats
 
-- **Fig.5(a) head profile** (`*_DO-NOT-USE.csv`): included for completeness only and flagged per your instruction not to use these.
+- **Fig.5(a) head profile** (`*_DO-NOT-USE.csv`): included for completeness only and flagged per the author's instruction not to use these.
 - **Fig.6(b) FPH**: the blue (exit 13 mm, w/a=700) and gray (exit 13 mm, w/a=350) model curves overlap almost exactly and are delivered as a single band file. The x-axis right border is t = 42 h (the 40 h tick is interior), which is accounted for in the calibration.
 - **Fig.10 (L=3 m, S2-2)**: H = 0.157 m and Hc = 0.143 m are constant scalar parameters (not plotted curves); the only plotted line is l(t) plus a horizontal dashed critical length l_c = 1.36 m. Breach (l = L = 3 m) at t = 3.25e4 s.
 - **SIE Fig.3 simplified relation**: equals SIE Eq.(11)/(13) analytically (piecewise-linear through ~(0,0)-(0.4,1)-(1,0.9)); the CSV is the digitized trace of that line.

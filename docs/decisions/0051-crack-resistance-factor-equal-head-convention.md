@@ -105,7 +105,8 @@ Production configs never carry it set.
 
 ### Pre-registration (recorded before the measurement was run)
 
-Registered from the campaign plan `docs/work_packages/rq1-revision-campaign_2026-08-28.md` §4.
+Registered from the RQ1 revision campaign plan of record (2026-08-28) §4,
+whose expectations are reproduced verbatim below so this ADR is self-contained.
 Deviation from any of these is a finding to be run down, not adjusted away.
 
 1. **E1** — the static branch is bit-identical to the persisted production sweep
@@ -271,4 +272,5 @@ KP 62.0 as 7 to 8 and KP 57.4 as a band of roughly 5 to 23.
 - TAW (1999), Technical report on sand boils (piping), Tech. Rep. TAW99-26,
   Rijkswaterstaat — the rule's cited origin; **not held in `docs/references/`**,
   so its own text is unverified here.
-- `docs/work_packages/rq1-revision-campaign_2026-08-28.md` §4 (the pre-registered expectations).
+- RQ1 revision campaign plan of record, 2026-08-28, §4 — the pre-registered
+  expectations, reproduced in full in the Pre-registration section above.

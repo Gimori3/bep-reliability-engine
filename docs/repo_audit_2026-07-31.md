@@ -3,11 +3,19 @@
 **Status:** Phase 1 deliverable (read-only inventory and proposal), **approved and
 executed 2026-07-31**. Sections 1 to 8 below record the tree *as audited*, before
 execution, and are left unedited so the measurements that justified each verdict
-stay legible. What was actually done, with three owner amendments, is recorded in
+stay legible. What was actually done, with three author amendments, is recorded in
 section 11 at the end of this document and in the commit series it names.
 
 When this document was produced it was strictly read-only: no file outside it was
 created, moved, renamed or deleted while producing it.
+
+> **Superseded in one respect, 2026-09-05 (v1.0.0).** Section 3.8 and the
+> verdict tables below rule KEEP on `docs/work_packages/`. That directory was
+> retired when the repository was prepared for publication: the briefs were
+> task plans whose outcomes are all carried by the ADRs, companion notes and
+> reports they commissioned, and the pre-registered expectations the ADRs cite
+> are reproduced inside those ADRs. The measurements and verdicts recorded here
+> are otherwise unedited and describe the tree as it stood on 2026-07-31.
 
 **Baseline.** Working tree verified clean before any inspection
 (`git status --porcelain` returned 0 lines). Branch `feature/tokachi-chisuishi-review`,
@@ -15,7 +23,7 @@ HEAD `88d55ddab1412790e4a88afaa819ac7f8e926bec`. 371 tracked files, 15.9 MB trac
 
 **Scope note.** Per the task guardrails this audit never touches `data/`,
 `docs/references/`, `results/`, `.git/`, any numbered ADR or evidence JSON. Where a
-finding lands inside one of those, it is recorded here as a flag for the owner and
+finding lands inside one of those, it is recorded here as a flag for the author and
 nothing more.
 
 ---
@@ -281,14 +289,14 @@ it disables a guard installed one day ago to close a hole that had gone unnotice
 across five documents — and the suite stays green, so nothing tells you.
 
 The cost is not merely the 13 inbound citations; it is that the *cheapest* mitigation
-(update the test's constant) is also the one a future session will forget, because the
+(update the test's constant) is also the one a later reader will forget, because the
 failure mode gives no signal. The dated-filename convention (`<topic>_<YYYY-MM-DD>.md`)
 already sorts these together in a directory listing and already distinguishes them from
 the six documents of record.
 
 **Recommendation: state the two-category convention in `docs/conventions.md`** — that
 undated `docs/*.md` are documents of record and dated `docs/*_YYYY-MM-DD.md` are
-closed one-shot artifacts — and leave the files where they are. If the owner
+closed one-shot artifacts — and leave the files where they are. If the author
 nonetheless wants the move, it must be paired with hardening
 `test_every_euler_flip_claim_carries_the_N_at_which_it_holds` to **fail** rather than
 skip on a missing path; I would not execute the move without that change.
@@ -376,7 +384,7 @@ The file was renamed to `docs/validation/head-datum-re-convention-CLOSED.md` in 
 **This is a genuine defect and I cannot fix it under the stated guardrails** —
 guardrail 3 forbids touching any numbered ADR "at all". It is a two-line pointer
 correction inside ADR-0027's Context and References sections, changing no decision, no
-number and no status. **It needs an explicit owner decision to proceed.** Flagging it
+number and no status. **It needs an explicit author decision to proceed.** Flagging it
 rather than silently leaving it, because ADR-0027 is one of the load-bearing head-datum
 decisions and a reader following its own References section currently hits nothing.
 
@@ -427,7 +435,7 @@ work. Covered by the status header in §3.5.
 
 ---
 
-## 6. Flags — items I may not touch, recorded for the owner
+## 6. Flags — items I may not touch, recorded for the author
 
 ### 6.1 `data/processed/2006_event/` — undocumented where a reader will look
 
@@ -442,9 +450,9 @@ in `docs/tokachi_bep_inputs_provenance.md` (zero hits for "2006").
 The real asymmetry is narrower and more actionable than "undocumented": its two
 sibling event directories each carry a **tracked** README —
 `data/processed/2011_event/README.md` and `data/processed/2016_event/README.md` — and
-`2006_event/` does not. A future session that opens the tree before reading ADR-0044
+`2006_event/` does not. A later reader who opens the tree before reading ADR-0044
 sees two documented event drops and one bare directory of empty Japanese-named folders.
-**Recommend the owner add `data/processed/2006_event/README.md`** (three lines: drop
+**Recommend the author add `data/processed/2006_event/README.md`** (three lines: drop
 received, stage record empty, closed by ADR-0044). I have not created it.
 
 ### 6.2 A docstring/code mismatch in `tests/test_repo_hygiene.py`
@@ -471,7 +479,7 @@ is gate-coupled.
 
 | Item | What is unresolved |
 |---|---|
-| ADR-0027's two dangling pointers (§5.1) | Whether guardrail 3 may be relaxed for a two-line pointer fix that changes no decision. **Owner decision required.** |
+| ADR-0027's two dangling pointers (§5.1) | Whether guardrail 3 may be relaxed for a two-line pointer fix that changes no decision. **Author decision required.** |
 | `results/superseded_*` retention | 15 directories exist (the brief said 13 — two more were created 2026-07-31 during the figure pass). 11 of 15 are **completely empty**. Whether the empty ones are a `production_campaign.py` defect (creating a preservation directory before knowing there is anything to preserve) or intended provenance markers is **not established**; I did not read the preservation code path closely enough to assert either. Phase 3 proposal treats them conservatively. |
 
 ---
@@ -556,7 +564,7 @@ Proposed policy:
   comparison are not otherwise recoverable.
 * **The 11 empty directories — safe to remove at any time**, but see §7: whether they
   are a driver defect or intentional markers is unresolved, so the policy should record
-  the observation and defer the removal to the owner rather than assume.
+  the observation and defer the removal to the author rather than assume.
 * **Rule going forward:** a `superseded_*` directory is retained until the artifact that
   superseded it has been quoted in a defended chapter, then for one further campaign
   cycle.
@@ -817,7 +825,7 @@ review). The pre-sweep claim that no inbound reference to §4.6 existed was
 **wrong by one**: `system_integration/segments.py`'s `KASUMI_TEI_CSV` comment
 cites it, and was updated with the heading — comment text only, no code. A fifth
 of the same class was found on the line directly above R8 and closed in the same
-pass on the owner's authorisation: register item **R7's "provenance §4.4" → §6.4**
+pass on the author's authorisation: register item **R7's "provenance §4.4" → §6.4**
 (the Chiyoda regional band, whose own text recommends exactly the ADR-0046-pattern
 bounding scenario R7 names). Correct and deliberately not
 touched: `tokachi_chisuishi_full_review_2026-07-27.md`'s §4.3/§4.6 (internal to
@@ -923,7 +931,7 @@ of who depends on the artifacts the campaign produces. Its result was passed to
 `gates.note`, never `gates.check`. G6's only assertion was that every companion
 which *runs* completes. So a hit that was neither run nor excluded would be
 written into the manifest as `UNCLASSIFIED -- investigate` and could not fail
-anything. **Three accumulated across four sessions.**
+anything. **Three accumulated across four earlier passes.**
 
 **Enumeration reproduced before anything was changed** (17 hits / 5 covered /
 9 excluded / 3 unclassified / 4 run-but-unmatched) — every figure in the brief
@@ -951,7 +959,7 @@ after the change).
 Question (a) — *should this RUN as a campaign companion?* — was answered first in
 each case, since an exclusion is only correct once that answer is genuinely no.
 All three answered no, and **none of them on cost**; the runtimes are recorded
-below so the owner can overrule.
+below so the author can overrule.
 
 | Hit | (a) Run it? | (b) What actually excludes it |
 |---|---|---|

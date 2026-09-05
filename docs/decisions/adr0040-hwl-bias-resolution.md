@@ -9,7 +9,7 @@ production sweep replaced. Everything here *adds* artifacts.
 
 **Parent decision:** the 2026-07-29 production campaign's decision 6 ("design-HWL bias
 resolution method") arrived as an unfilled placeholder and was recorded as an open item
-(`docs/production_campaign_2026-07-29.md` §12). The project owner has since chosen the
+(`docs/production_campaign_2026-07-29.md` §12). The author has since chosen the
 method: **brute-force N = 1e6 at KP 62.0 first, use it as ground truth to validate tilted
 importance sampling, then apply the validated estimator at KP 57.4.**
 
@@ -943,7 +943,7 @@ KP 62.0's resolution status has flipped; the rest are numeric replacements. Item
 because every production sweep runs at N = 1e5 and this study added arms rather
 than replacing any.
 
-**Fixed in this session:** items 2–3 (`stage6_6_report.md` §9), 5–7
+**Fixed in this pass:** items 2–3 (`stage6_6_report.md` §9), 5–7
 (`production_campaign_2026-07-29.md` §12 closure note), 9 (`architecture.md`,
 rewritten because its resolution-status claim was wrong, not merely stale), and 10
 (architecture and decision records bullet). Items 1, 4 and 8 sit inside dated addenda that already carry

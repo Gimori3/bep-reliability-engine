@@ -5,7 +5,7 @@ consumers of the persisted production sweeps. Until 2026-08-10 it reached the
 manifest only through ``gates.note``, and G6's sole assertion was that every
 companion which *runs* completes -- so a hit that was neither run nor excluded
 was recorded as ``UNCLASSIFIED -- investigate`` and could never fail anything.
-Three accumulated that way across four sessions
+Three accumulated that way across four earlier passes
 (`docs/repo_audit_2026-07-31.md` section 12.9).
 
 This is the third instance of one class. The first two closures were the 13

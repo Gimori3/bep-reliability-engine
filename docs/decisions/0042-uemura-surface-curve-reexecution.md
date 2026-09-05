@@ -225,7 +225,7 @@ received" with consistent hydraulic boundary conditions across mechanisms.
    hydraulic-engineering expertise in direct discussion and deferred the unit
    question to the student, so "used as received" no longer outweighs
    dimensional correctness for the student's own model; (c) an
-   owner-confirmation email was judged unlikely to resolve it (slow,
+   author-confirmation email was judged unlikely to resolve it (slow,
    limited-English channel; prior unreliable answers). The thesis therefore
    implements the models **as cited** (Dean 2010; USACE) with
    dimensionally-consistent SI units, presents the corrected result as

@@ -4,7 +4,7 @@ Supporting analysis for the ADR-0006 resolution (the r_e / Mazure
 schematization question; input to the Pol consultation). Companion to the
 2026-07-04 r_e source-provenance report.
 
-> Provenance note: §§1–4 below record the owner's analysis as delivered on
+> Provenance note: §§1–4 below record the author's analysis as delivered on
 > 2026-07-04, authored **without repo access**; its own caveats 1–4 flag the
 > unverified points. §5 (added 2026-07-04, with repo access) reconciles the
 > numbers against the current geotech CSV and the engine's naming convention
@@ -139,7 +139,7 @@ the ambiguity, any wiring must avoid bare L_in/L_out entirely:
 
 ## 6. Hinterland extents resolved (2026-07-05, HDB facility register)
 
-The §2 open item is closed by the owner's follow-up analysis
+The §2 open item is closed by the author's follow-up analysis
 (`adr0006-hinterland-l3-resolution.md`; Hokkaido Development Bureau
 chainage-native facility register, right bank KP 53–66), read against the
 §5.1 corrected thresholds (3·λ_in ≈ 307/350/262/116 m):
