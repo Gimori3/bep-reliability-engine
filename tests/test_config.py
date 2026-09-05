@@ -20,6 +20,7 @@ k_bl ~ 2e-6 m/s, d_70 ~ 2e-4 m, gamma_bl_sub ~ 6.9 kN/m^3, C_e ~ 0.014.
 import copy
 import json
 import math
+from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
@@ -27,6 +28,19 @@ from pydantic import ValidationError
 from bep_reliability_engine.bank_heights import load_hwl
 from bep_reliability_engine.config import MAX_COV, Config, Geometry
 from bep_reliability_engine.sampling import PARAM_NAMES, MarginalSpec
+
+# The official 2019 bank-height tables live in the untracked data/raw drop
+# (ADR-0018), so the tests that read the genuine files skip on a clone without
+# it. The validation and error-path tests below need no file and stay
+# unguarded.
+_BANK_HEIGHT_DIR = Path(__file__).resolve().parents[1] / "data" / "raw" / "geometry"
+requires_bank_height_csvs = pytest.mark.skipif(
+    not (
+        (_BANK_HEIGHT_DIR / "BankHeight_TokachiRiv_2019.csv").exists()
+        and (_BANK_HEIGHT_DIR / "BankHeight_SatsunaiRiv_2019.csv").exists()
+    ),
+    reason="2019 bank-height CSVs (untracked data/raw) not present",
+)
 
 
 def _valid_config_dict() -> dict:
@@ -344,6 +358,7 @@ def test_geometry_hwl_is_required_and_positive() -> None:
             Config.model_validate(bad)
 
 
+@requires_bank_height_csvs
 def test_load_hwl_reads_known_tokachi_values() -> None:
     """The loader returns the official 2019 HWL for known grid KPs [m MSL].
 
@@ -356,6 +371,7 @@ def test_load_hwl_reads_known_tokachi_values() -> None:
     assert load_hwl("Tokachi", 62.0) == pytest.approx(46.39)
 
 
+@requires_bank_height_csvs
 def test_load_hwl_selects_the_correct_river_file() -> None:
     """The same KP resolves against the requested river's file, not the other's."""
     tokachi = load_hwl("Tokachi", 10.0)
@@ -371,6 +387,7 @@ def test_load_hwl_unknown_river_is_rejected() -> None:
         load_hwl("Chiyoda", 10.0)
 
 
+@requires_bank_height_csvs
 def test_load_hwl_off_grid_kp_is_a_strict_error() -> None:
     """An off-grid KP is rejected (strict match, ADR-0018), naming neighbours."""
     with pytest.raises(ValueError) as excinfo:

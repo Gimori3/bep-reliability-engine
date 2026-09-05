@@ -556,6 +556,16 @@ def test_kasumi_tei_register_and_the_single_production_coincidence() -> None:
     }
     assert per_river == {"Tokachi": 13, "Satsunai": 13, "Otofuke": 8}
 
+
+@requires_rating_csvs
+def test_kasumi_tei_coincidence_is_the_single_bep_free_segment() -> None:
+    """The coincidence half of the audit, which needs the segment registry.
+
+    Split from the register test above so that the register's own counts,
+    which read only the tracked CSV, still run on a clone without the
+    untracked data/raw drop.
+    """
+    register = load_kasumi_tei()
     registry = build_registry()
     hits = kasumi_tei_coincidences(registry)
     assert len(hits) == 1

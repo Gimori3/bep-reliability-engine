@@ -67,8 +67,9 @@ line; this release is the first to be published on `main`.
 
 ### Evidence and reproducibility
 
-* 910 tests, all passing; continuous integration runs `ruff check`,
-  `black --check` and `pytest` on Python 3.11.
+* 919 tests, all passing; continuous integration runs `ruff check`,
+  `black --check` and `pytest` on Python 3.11, on `windows-latest` — the
+  platform every persisted result was produced on.
 * One idempotent, resumable driver, `scripts/production_campaign.py`, sequences
   the whole campaign from configuration generation through to figures behind
   seven gates.
@@ -95,6 +96,14 @@ line; this release is the first to be published on `main`.
 * Task-brief documents under `docs/work_packages/` were retired. Their outcomes
   are carried by the ADRs, companion notes and reports they commissioned, and
   the pre-registered expectations cited by ADR-0051 are reproduced inside it.
+* Continuous integration, red since 2026-07-02, is green again. Twelve tests
+  read the untracked `data/raw` drop without the skip guard the rest of the
+  suite uses, so they errored on any clone without it; they are guarded now,
+  and where a test mixed tracked and untracked sources the untracked half was
+  split into its own guarded test rather than losing the tracked half. The
+  runner moved from `ubuntu-latest` to `windows-latest`, the platform of
+  record; the Linux last-bit difference that motivated the move is disclosed
+  in the README under **Platform** and no assertion was relaxed for it.
 
 ## [0.0.1] — 2026-05-20
 

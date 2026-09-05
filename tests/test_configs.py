@@ -153,6 +153,14 @@ def _hwl_2019(river: str, kp: float) -> float:
     raise AssertionError(f"KP {kp} not found in {path.name}")
 
 
+requires_bank_height_csvs = pytest.mark.skipif(
+    not (
+        (_BANK_HEIGHT_DIR / "BankHeight_TokachiRiv_2019.csv").exists()
+        and (_BANK_HEIGHT_DIR / "BankHeight_SatsunaiRiv_2019.csv").exists()
+    ),
+    reason="2019 bank-height CSVs (untracked data/raw) not present",
+)
+
 _CSV_BY_KP = _csv_rows_by_kp()
 # Glob EVERYTHING in configs/ (not just "kp*.yaml"): a stray or legacy file
 # must fail the guard, not silently escape it (2026-07-03 health assessment:
@@ -220,8 +228,9 @@ def test_config_matches_csv_and_thesis_priors(path: Path) -> None:
     expected_l_cov = 0.15 if kp == "60.0" else 0.20
     assert cfg.seepage_length_cov == pytest.approx(expected_l_cov)
 
-    # --- (4) HWL equals the official 2019 bank-height value (ADR-0018) --------
-    assert cfg.geometry.HWL == pytest.approx(_hwl_2019(row["river"], float(kp)))
+    # --- (4) HWL is cross-checked against the 2019 table in its own test ------
+    # That table lives in the untracked data/raw drop, so the check is split
+    # out below rather than costing this whole guard a skip on a fresh clone.
 
     # --- (5) z_toe is the ADR-0021 landside-toe elevation [m MSL] -------------
     # One value serves as both the head-translation datum and the exit
@@ -300,6 +309,24 @@ def test_config_matches_csv_and_thesis_priors(path: Path) -> None:
     assert (
         cfg.length_effect.segment_length_m == 200.0
     ), f"{path.name}: segment_length_m != 200.0 (Uemura segment grid)"
+
+
+@requires_bank_height_csvs
+@pytest.mark.parametrize("path", _CONFIG_PATHS, ids=lambda p: p.name)
+def test_config_hwl_matches_the_2019_bank_height_table(path: Path) -> None:
+    """Item (4) of the drift guard: HWL is the official 2019 value (ADR-0018).
+
+    Split out of ``test_config_matches_csv_and_thesis_priors`` because it is
+    the one check there that reads the untracked ``data/raw`` drop, and a
+    fresh clone must not lose the other forty assertions to its absence. The
+    table is re-read here directly rather than through
+    ``bank_heights.load_hwl``, so the generator and the guard do not share a
+    reader.
+    """
+    cfg = Config.from_yaml(path)
+    kp = cfg.segment_id.removeprefix("KP")  # "KP62.0" -> "62.0"
+    row = _CSV_BY_KP[kp]
+    assert cfg.geometry.HWL == pytest.approx(_hwl_2019(row["river"], float(kp)))
 
 
 @pytest.mark.parametrize("path", _CONFIG_PATHS, ids=lambda p: p.name)

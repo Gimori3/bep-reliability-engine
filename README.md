@@ -73,8 +73,8 @@ pip install -e .[dev]            # package + dev tooling
 pip install -e .[accel]          # optional Numba backend (ADR-0029, opt-in)
 ```
 
-On Linux or macOS the same commands work with `source .venv/bin/activate`; CI
-runs the test suite on Ubuntu.
+On Linux or macOS the same commands work with `source .venv/bin/activate`.
+See **Platform** below for the one respect in which the platform matters.
 
 ## Running it
 
@@ -162,16 +162,37 @@ Thesis prose lives only in the separate `msc-thesis` repository, never here
 
 ## Gates
 
-CI runs exactly three checks on Python 3.11, and all three must pass:
+CI runs exactly three checks on Python 3.11 on `windows-latest`, and all three
+must pass:
 
 ```powershell
 ruff check .          # E, F, I
 black --check .       # line length 88
-pytest                # 910 tests (903 fast + 7 slow)
+pytest                # 919 tests (912 fast + 7 slow)
 ```
 
 `pytest -m "not slow"` skips the seven expensive reference-reproduction and
 timestep-convergence tests.
+
+## Platform
+
+The code is ordinary Python and runs anywhere Python 3.11 and the pinned
+dependencies do. **Windows is nonetheless the platform of record**: every
+persisted result, every figure and every number in the thesis was produced
+there, and CI runs on `windows-latest` so it reproduces that environment.
+
+One consequence is worth stating plainly. The vectorized `evaluate_batch` path
+and the scalar `evaluate_realization` loop are bit-identical on the platform of
+record, and the headline gate that pins this,
+`tests/test_run.py::test_orchestration_matches_reference_loop`, holds on Linux
+as well. But four finer-grained diagnostics comparisons — in
+`test_evaluator_batch_diagnostics.py`, `test_gsa_qoi.py` and
+`test_model_factor.py` — assert exact equality on individual floats, and on
+Linux those differ in the last representable bit (about 1 part in 10^16). That
+is the ordinary consequence of numpy taking different SIMD and libm paths for
+arrays than for scalars; it is far below any reported precision and changes no
+failure indicator, but it means those four tests fail on a Linux runner. They
+are left exact rather than relaxed, so the difference stays visible.
 
 ## Citing this work
 

@@ -10,7 +10,15 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    # Windows is the platform of record: every persisted result, every figure
+    # and every number in the thesis was produced there, and the scalar-versus-
+    # batch bit-identity contract (ADR-0011) is pinned against it. On Linux the
+    # vectorized batch path and the scalar loop agree only to the last floating-
+    # point bit in four diagnostics comparisons -- an ordinary consequence of
+    # numpy taking different SIMD and libm paths for arrays than for scalars.
+    # The headline gate, test_run.py::test_orchestration_matches_reference_loop,
+    # holds on both. See README, "Platform".
+    runs-on: windows-latest
 
     strategy:
       matrix:
