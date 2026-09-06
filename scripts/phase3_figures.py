@@ -251,28 +251,45 @@ def fig_bep_sections(curves: dict) -> None:
         h_max = _max_attainable_stage("Tokachi", kp)
         if stage[-1] > h_max:
             ax.axvspan(h_max, stage[-1], color=GRID, alpha=0.45, zorder=0)
+            # Horizontal and centred in the band. At the band's left edge the
+            # overflow curve is still rising at two sections and used to run
+            # straight through the label; at the centre every curve has
+            # saturated. The plate is insurance, not the fix.
             ax.text(
-                h_max + 0.1,
+                0.5 * (h_max + stage[-1]),
                 0.5,
-                "beyond max attainable\nstage (+4K ensemble)",
+                "beyond max\nattainable stage\n(+4K ensemble)",
                 fontsize=7.5,
                 color=MUTED,
-                rotation=90,
+                ha="center",
                 va="center",
+                linespacing=1.35,
+                zorder=6,
+                bbox={
+                    "facecolor": SURFACE,
+                    "edgecolor": "none",
+                    "alpha": 0.85,
+                    "pad": 2.0,
+                },
             )
         ax.set_title(f"Tokachi KP {kp:.1f}")
         ax.set_xlabel("Water level h [m T.P.]")
         ax.set_ylabel("P(failure | h)")
     handles, labels = axes[0, 0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc="upper center", ncol=4, bbox_to_anchor=(0.5, 1.02))
-    fig.suptitle(
+    # Title, legend and panels stacked with the least space that keeps them
+    # three distinct bands rather than one block.
+    fig.legend(handles, labels, loc="upper center", ncol=4, bbox_to_anchor=(0.5, 0.955))
+    fig.text(
+        0.5,
+        0.997,
         "Composed three-mechanism segment fragility at the BEP sections "
         f"(posterior, {D70_DISPLAY_NAMES['matrix']})",
-        y=1.07,
-        fontsize=11,
-        color=INK_2,
+        ha="center",
+        va="top",
+        fontsize=17,
+        color=INK,
     )
-    fig.tight_layout()
+    fig.tight_layout(rect=(0, 0, 1, 0.915))
     fig.savefig(
         FIGS / "phase3_system_fragility_bep_sections.png",
         dpi=160,
@@ -558,6 +575,7 @@ def fig_attribution(attr: dict) -> None:
     sections = list(attr.keys())
     fig, axes = plt.subplots(1, 2, figsize=(12.0, 4.8), sharey=True)
     width = 0.38
+    tallest = 0.0
     for ax, scen, tint in zip(axes, ("historical", "+4K"), ("#2a78d6", "#e34948")):
         x = np.arange(len(sections))
         long_v = [attr[s][scen]["p_f_long_loading"] for s in sections]
@@ -596,16 +614,49 @@ def fig_attribution(attr: dict) -> None:
             [f"KP {float(s.split('KP')[-1]):.1f}" for s in sections],
         )
         ax.set_title(scen)
-        ax.legend(fontsize=8.5)
+        tallest = max(tallest, max(long_v), max(short_v), max(comp_v))
+
+    axes[0].set_ylim(top=tallest * 2.6)
     axes[0].set_ylabel("Conditional annual system $P_f$ within stratum")
     fig.suptitle(
         "RQ4 attribution: duration- and compound-stratified conditional "
         f"failure probability (BEP sections, posterior, "
         f"{D70_DISPLAY_NAMES['matrix']})",
-        fontsize=11,
+        fontsize=15,
         color=INK_2,
     )
     fig.tight_layout()
+
+    # The legends slide left from the right-hand spine until no legend label
+    # touches a bar, and no further. The rows are of different lengths and sit
+    # at different heights, so which bar a given row can reach is not a thing
+    # to judge by eye: every label's rectangle is compared with every bar's,
+    # and the shared anchor steps left until nothing intersects. This runs
+    # after the layout is final, because the search is only as good as the
+    # geometry it measures. The axis limits stay where the bars put them, so
+    # it costs no headroom.
+    def _place(anchor: float) -> float:
+        """Place both legends and return the centre of the icon column [px]."""
+        for ax in axes:
+            ax.legend(fontsize=8.5, loc="upper right", bbox_to_anchor=(anchor, 0.99))
+        fig.canvas.draw()
+        renderer = fig.canvas.get_renderer()
+        boxes = [
+            handle.get_window_extent(renderer)
+            for handle in axes[0].get_legend().legend_handles
+        ]
+        return 0.5 * (min(b.x0 for b in boxes) + max(b.x1 for b in boxes))
+
+    # The legends sit with their icon column centred under the panel title.
+    # The anchor that puts it there is solved rather than tuned: the icon
+    # centre moves linearly with the anchor, so two placements fix the line
+    # and the third lands on the axis centre, which is where a centred title
+    # sits. Both panels are the same width, so one anchor serves both.
+    target = axes[0].transAxes.transform((0.5, 0.5))[0]
+    high, low = 1.0, 0.9
+    centre_high, centre_low = _place(high), _place(low)
+    slope = (centre_low - centre_high) / (low - high)
+    _place(low + (target - centre_low) / slope)
     fig.savefig(FIGS / "phase3_rq4_attribution.png", dpi=160, bbox_inches="tight")
     plt.close(fig)
 

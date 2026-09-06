@@ -188,6 +188,9 @@ def fig_system_and_ceiling() -> None:
     ax.bar(x - 0.18, ind, 0.36, label="independent (production)", color="#009E73")
     ax.bar(x + 0.18, com, 0.36, label="comonotone (full corr.)", color="#0072B2")
     ax.set_yscale("log")
+    # A log bar chart autoscales to the data, which cut the top off the
+    # tallest bar and left the legend standing on it.
+    ax.set_ylim(min(min(ind), min(com)) / 2.2, max(max(ind), max(com)) * 4.0)
     ax.set_xticks(x)
     ax.set_xticklabels([k.split("/")[0] for k in keys])
     ax.set_ylabel("annual BEP reach union")

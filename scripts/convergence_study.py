@@ -475,7 +475,10 @@ def _plot(payload: dict, paths: dict[str, Path]) -> None:
         f"({payload['d70_interpretation']} $d_{{70}}$), Latin hypercube sampling"
     )
     ax.grid(True, which="both", alpha=0.3)
-    ax.legend(fontsize=8, loc="lower left")
+    # Every series falls from upper left to lower right, so the lower left is
+    # the one corner the data actually occupies: the legend was covering the
+    # shallowest ladder and the whole reference slope.
+    ax.legend(fontsize=8, loc="upper right", framealpha=0.9, edgecolor="0.85")
     fig.tight_layout()
     _savefig_both(fig, paths["fig_conv"], paths["tracked_fig_conv"])
     plt.close(fig)

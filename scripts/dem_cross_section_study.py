@@ -1987,13 +1987,17 @@ def draw_figure(payload: dict[str, Any], path: Path = FIGURE_PATH) -> None:
             alpha=0.22,
             lw=0,
         )
+        # Anchored a fixed fraction above the frame rather than a fixed
+        # drop below the landside toe: the old datum landed on the profile
+        # itself at two of the four sections.
         ax.annotate(
             f"nominal station L = {nominal['L_m']:.0f} m",
             xy=(
                 (nominal["river_toe_offset_m"] + nominal["land_outer_toe_offset_m"])
                 / 2,
-                nominal["land_outer_toe_elev_m_tp"] - 1.2,
+                0.04,
             ),
+            xycoords=("data", "axes fraction"),
             ha="center",
             fontsize=10,
             # Text wears an ink token, never a series colour, and this one
@@ -2007,6 +2011,9 @@ def draw_figure(payload: dict[str, Any], path: Path = FIGURE_PATH) -> None:
                 "pad": 2.0,
             },
         )
+        # A clear strip under the profile for the caption above.
+        lo, hi = ax.get_ylim()
+        ax.set_ylim(lo - 0.13 * (hi - lo), hi)
         ax.set_title(
             f"{label}  ({csv_source} {record['csv_L_m']:.1f} m, "
             f"{record['remediation_state']})",
@@ -2057,9 +2064,11 @@ def draw_figure(payload: dict[str, Any], path: Path = FIGURE_PATH) -> None:
         ax.set_xlabel("chainage offset from the section [m]")
         if column == 0:
             ax.set_ylabel("picked L [m]")
-        # Both legends sit over marks, so they carry the house surface
-        # plate rather than a frame, exactly as ``mark_hypothetical`` does.
-        ax.legend(fontsize=7, loc="upper left", **_LEGEND_PLATE)
+        # A plate keeps a legend readable but still hides what is behind it,
+        # so the panel is given the headroom the legend needs instead.
+        lo, hi = ax.get_ylim()
+        ax.set_ylim(lo, hi + 0.34 * (hi - lo))
+        ax.legend(fontsize=7, loc="upper left", ncol=2, **_LEGEND_PLATE)
 
         # --- row 3: the fragility consequence ---
         ax = axes[2, column]
@@ -2107,7 +2116,10 @@ def draw_figure(payload: dict[str, Any], path: Path = FIGURE_PATH) -> None:
             fontsize=8,
         )
         ax.set_ylabel(r"max $|\Delta P_f|$ vs production" if column == 0 else "")
-        ax.legend(fontsize=8, **_LEGEND_PLATE)
+        # Same reason as row 2: the legend used to stand on a bar.
+        lo, hi = ax.get_ylim()
+        ax.set_ylim(lo, hi + 0.30 * (hi - lo))
+        ax.legend(fontsize=8, loc="upper left", **_LEGEND_PLATE)
         ax.grid(axis="x", visible=False)
 
     fig.suptitle(

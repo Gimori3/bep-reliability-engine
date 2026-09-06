@@ -89,7 +89,9 @@ def main() -> None:
     ax.set_yticks(range(len(rows)))
     ax.set_yticklabels([r[0] for r in reversed(rows)], fontsize=8, color=INK2)
     ax.set_ylim(-0.6, len(rows) - 0.4)
-    ax.set_xlim(0.8, 3.2)
+    # The longest row label needs room inside the frame; at the old limit it
+    # ran into the figure margin and finished flush with the canvas edge.
+    ax.set_xlim(0.8, 3.6)
     ax.grid(axis="y", visible=False)
     ax.set_xlabel(
         "hydraulic-translation factor: instantaneous Mazure head / 2D-FEM "

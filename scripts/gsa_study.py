@@ -880,7 +880,11 @@ def _fig_companions(comp: dict, baseline_payload: dict) -> None:
         )
         for s, (tag, _) in enumerate(series)
     ]
-    ax.legend(handles=legend_handles, frameon=False, fontsize=8, loc="upper right")
+    # Upper right is the seepage-length group, the tallest in the figure, and
+    # the legend stood on all four of its bars. The middle of the axis carries
+    # the four small inputs, so the legend clears every bar there without the
+    # panel needing extra headroom.
+    ax.legend(handles=legend_handles, frameon=False, fontsize=8, loc="upper center")
     fig.tight_layout()
     _save(fig, "gsa_companions")
 

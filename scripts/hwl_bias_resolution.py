@@ -1938,13 +1938,17 @@ def figure_tilted_validation(evidence: dict) -> Path:
         hit = [y for x, y in infl if abs(x - level) < 1e-9]
         if not hit:
             continue
+        # The curve climbs steeply here, so a label offset up and to the right
+        # is overtaken by the line within its own width. Below the curve is
+        # empty at every level, so the labels hang there instead.
         ax2.annotate(
             f"{hit[0]:,.0f}x worse" if hit[0] >= 10 else f"{hit[0]:.2f}x worse",
             (level, hit[0]),
             textcoords="offset points",
-            xytext=(8, 8),
+            xytext=(9, -10),
             fontsize=9,
             color=figstyle.STATIC,
+            va="top",
         )
     ax2.set_yscale("log")
     ax2.set_xlabel("conditioning water level [m T.P.]")
@@ -1998,6 +2002,9 @@ def figure_epistemic_vs_statistical(evidence: dict) -> Path:
     """
     stage_d = evidence["stages"]["D_epistemic"]["sections"]
     colors = _bracket_colors()
+    # The panel's own right-hand limit, named once so the width labels can
+    # be kept on the part of the axis a reader can see.
+    X_MAX = 340.0
     fig, axes = plt.subplots(1, 2, figsize=(14.2, 6.0), gridspec_kw={"wspace": 0.34})
 
     # --- panel 1: the band on B itself, at the anchor --------------------------
@@ -2031,6 +2038,7 @@ def figure_epistemic_vs_statistical(evidence: dict) -> Path:
         )
         ax.plot([b0], [y - 0.15], "|", color=figstyle.SURFACE, ms=13, mew=2.0, zorder=4)
         adequate: list[float] = []
+        drawn: list[float] = []
         for arm in section["arms"]:
             cell = arm["anchors"].get(anchor_key)
             if cell is None:
@@ -2051,6 +2059,7 @@ def figure_epistemic_vs_statistical(evidence: dict) -> Path:
                 ls="none",
                 zorder=5,
             )
+            drawn.append(b)
             if k >= R1_MIN_ROWS:
                 adequate.append(b)
         if adequate:
@@ -2064,11 +2073,18 @@ def figure_epistemic_vs_statistical(evidence: dict) -> Path:
                 label=(r"epistemic band, arms with $k \geq 30$" if not ticks else None),
             )
             factor = (max(adequate) / min(adequate)) / (bhi / blo)
+            # The band spans the adequate arms only, but every arm is drawn,
+            # and the widest of those sits further right: anchoring the label
+            # on the band's own end put it on top of a marker. One arm at
+            # KP 57.4 lands beyond the axis, where an annotation anchored on
+            # it is clipped away entirely, so the anchor is the rightmost arm
+            # the axis actually shows.
+            on_axis = [b for b in drawn if b <= X_MAX] or [max(adequate)]
             ax.annotate(
                 rf"{factor:.1f}$\times$ wider",
-                (max(adequate), y + 0.17),
+                (max(on_axis), y + 0.17),
                 textcoords="offset points",
-                xytext=(20, 0),
+                xytext=(22, 0),
                 fontsize=9,
                 color=figstyle.INK,
                 va="center",
@@ -2078,7 +2094,7 @@ def figure_epistemic_vs_statistical(evidence: dict) -> Path:
     ax.set_yticks(range(len(ticks)), ticks, fontsize=9)
     ax.set_xscale("log")
     ax.set_ylim(len(ticks) - 0.5, -0.65)
-    ax.set_xlim(1.7, 340.0)
+    ax.set_xlim(1.7, X_MAX)
     ax.set_xlabel("bias factor $B$ under each epistemic arm")
     ax.set_title(
         "The epistemic band is 6.4 to 7.2 times the statistical interval\n"
@@ -2163,20 +2179,10 @@ def figure_epistemic_vs_statistical(evidence: dict) -> Path:
     )
     ax2.legend(loc="upper right", ncol=2, title="section", fontsize=9)
     ax2.grid(axis="x", visible=False)
-    fig.text(
-        0.5,
-        -0.14,
-        "A resolved confidence interval on $B$ alone would be false precision: the "
-        "epistemic band is the wider statement and must be quoted with it.\n"
-        "Right-panel bars are drawn from 1.0; 'n/d' marks a section where the "
-        "quantity is undefined at design HWL (no transient failures, so no ratio). "
-        "Arms driving a branch to exactly zero are omitted, not plotted as a "
-        "convenient finite number.",
-        ha="center",
-        va="top",
-        fontsize=9,
-        color=figstyle.INK_2,
-    )
+    # The two-line note that used to hang below the panels now lives in the
+    # thesis caption, where it is set at caption size and can be read. Its
+    # band, and the empty strip above it, come off the figure's height; the
+    # panels themselves are untouched.
     return figstyle.save(
         fig, "epistemic_vs_statistical.png", mirror=OUT_DIR / "figures"
     )
