@@ -372,7 +372,7 @@ def figure_comparison(data: dict[str, dict]) -> None:
 
 
 def figure_tail_log(data: dict[str, dict]) -> None:
-    fig, axes = plt.subplots(2, 2, figsize=(12.6, 8.2), sharey=True)
+    fig, axes = plt.subplots(2, 2, figsize=(12.6, 7.28), sharey=True)
     floor = 1.0 / 100000  # N = 1e5: one failure in the sample
     for ax, kp in zip(axes.ravel(), SECTIONS):
         d = data[kp]
@@ -416,6 +416,22 @@ def figure_tail_log(data: dict[str, dict]) -> None:
                 zorder=4,
             )
         annotate_levels(ax, d["z_toe"], d["hwl"], y_text=0.02)
+        if kp == "62.0":
+            # The same grid extension the per-section view shades. It is a fit
+            # stabilizer, never attainable loading, and the two views of one
+            # section must not disagree about which stages are reachable.
+            attainable_top = d["hwl"] + 4.0
+            ax.axvspan(attainable_top, grid.max(), color=GRID, alpha=0.55, zorder=1)
+            # Centred on the band it names, so the caption sits wholly inside
+            # the shading rather than straddling its left edge.
+            ax.annotate(
+                "fit-stabilizer levels\n(above max attainable stage)",
+                xy=(0.5 * (attainable_top + grid.max()), 0.06),
+                xycoords=("data", "axes fraction"),
+                ha="center",
+                color=INK_2,
+                fontsize=8.5,
+            )
         ax.set_yscale("log")
         ax.set_ylim(floor / 2, 1.5)
         ax.set_title(f"KP {kp}  ·  {d['remediation']}", loc="left")
@@ -431,21 +447,25 @@ def figure_tail_log(data: dict[str, dict]) -> None:
         ncols=2,
         fontsize=10,
     )
-    fig.suptitle(
+    # A figure-level text rather than a suptitle: tight_layout reserves a
+    # suptitle band far taller than the title, and that band is the white
+    # space that stood between the title row and the panels.
+    fig.text(
+        0.01,
+        0.99,
         "Tail view: raw MC points, 95 per cent binomial CIs (log scale)",
-        x=0.01,
         ha="left",
+        va="top",
         fontsize=14,
         fontweight="bold",
         color=INK,
     )
-    footnote(
-        fig,
-        data,
-        f"Raw-point floor at 1/N = {floor:.0e}; fitted-curve tails below the "
-        "lowest plotted point are extrapolation beyond the MC evidence.",
-    )
-    fig.tight_layout(rect=(0, 0.055, 1, 0.95))
+    # The four stamped lines that used to run under the panels now live in the
+    # thesis caption, where they are set at caption size and can be read. The
+    # band they occupied comes off the figure's height rather than going to
+    # the panels: the figure is shorter by exactly that band, and each panel
+    # keeps the height it had.
+    fig.tight_layout(rect=(0, 0.004, 1, 0.965))
     save_both(fig, "fragility_tail_log.png")
     plt.close(fig)
 

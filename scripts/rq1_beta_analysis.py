@@ -1781,7 +1781,7 @@ def _beta_waterfall(ax: plt.Axes, entry: dict[str, Any]) -> None:
 def figure_beta_waterfall(record: dict[str, Any]) -> Path:
     """The additive dbeta ladder at the design and top attainable levels."""
     figstyle.style()
-    fig, axes = plt.subplots(2, 2, figsize=(11.4, 8.0))
+    fig, axes = plt.subplots(2, 2, figsize=(11.4, 6.97))
     picks = (
         ("kp62_0", 46.39, "design flood level"),
         ("kp62_0", 50.50, "top attainable level"),
@@ -1809,28 +1809,24 @@ def figure_beta_waterfall(record: dict[str, Any]) -> Path:
             fontsize=9,
             color=figstyle.INK,
         )
-    fig.suptitle(
+    # A figure-level text rather than a suptitle: tight_layout reserves a
+    # band for a suptitle that is three times the title's own height, and the
+    # gap between the title and the panels is what that band becomes.
+    fig.text(
+        0.01,
+        0.99,
         "Where the static-to-transient index difference comes from",
-        x=0.01,
+        va="top",
         ha="left",
         fontsize=14,
         fontweight="bold",
         color=figstyle.INK,
     )
-    fig.text(
-        0.01,
-        0.005,
-        "N = 10$^6$ comparator ladder, matrix d$_{70}$. $\\beta$ telescopes, so "
-        "the three steps sum exactly to the total; no share-of-gap denominator "
-        "is involved. Bars carry 95 % paired-bootstrap intervals.\nThe "
-        "KP 57.4 design panel rests on two failing transient realizations in "
-        "10$^6$ and is shown for its shape only; the quotable statement there "
-        "is the one-sided bound.",
-        fontsize=8,
-        color=figstyle.MUTED,
-        va="bottom",
-    )
-    fig.tight_layout(rect=(0, 0.06, 1, 0.94))
+    # The two stamped lines that used to run under the panels now live in the
+    # thesis caption, where they are set at caption size and can be read. The
+    # band they occupied comes off the figure's height, not into the panels,
+    # which keep the size they had.
+    fig.tight_layout(rect=(0, 0.006, 1, 0.965))
     return _save(fig, "rq1_beta_waterfall.png")
 
 
@@ -1947,7 +1943,7 @@ def figure_hwl_dbeta_resolved(record: dict[str, Any]) -> Path:
     anchor = record["design_anchors"]["kp62_0"]
     for level, note, dy in (
         (46.39, "A1  design HWL", 0.99),
-        (46.50, "A2  nearest grid level", 0.72),
+        (46.50, "A2  nearest grid level", 0.63),
     ):
         row = _find(usable, level)
         quoted = anchor if abs(anchor["level_m_msl"] - level) < 1e-9 else row
@@ -1996,8 +1992,12 @@ def figure_hwl_dbeta_resolved(record: dict[str, Any]) -> Path:
     axk.set_xlabel("conditioning water level [m T.P.]")
     axk.legend(loc="upper left")
     ax.set_xlim(min(kx) - 0.4, max(kx) + 0.4)
-    axz.set_xlim(46.09, 47.35)
-    axz.set_ylim(0.62, 1.92)
+    # The two callout blocks need clear sky above the curve, but the old range
+    # gave them two thirds of the panel and left the data in a strip along the
+    # bottom. Tightened so the neighborhood the panel exists to show is
+    # readable, with the left margin widened for the superseded-record label.
+    axz.set_xlim(45.98, 47.35)
+    axz.set_ylim(0.64, 1.62)
     axz.set_xlabel("conditioning water level [m T.P.]")
     axz.set_ylabel(r"$\Delta\beta$")
     axz.set_title("The anchor neighborhood, in index terms", loc="left")
@@ -2116,6 +2116,11 @@ def figure_kp57_dbeta_bound(record: dict[str, Any]) -> Path:
                 "color": figstyle.MUTED,
                 "lw": 0.9,
                 "shrinkB": 3,
+                # Straight leaders from three stacked blocks to three anchors
+                # that share one narrow band of the axis cross each other and
+                # rule through the text below them. An elbow keeps each leader
+                # horizontal until it is clear of every block, then drops.
+                "connectionstyle": "angle,angleA=0,angleB=90,rad=0",
             },
         )
     ax.set_ylabel(r"$\Delta\beta = \beta_\mathrm{trans} - \beta_\mathrm{static}$")
@@ -2170,9 +2175,11 @@ def figure_kp57_dbeta_bound(record: dict[str, Any]) -> Path:
     )
     total_flips = sum(flips.values())
     for level_key, count in flips.items():
+        # At y = 1.5 on this log axis the marker straddles the frame and the
+        # count reads below it, half outside the panel. Lift both clear.
         axk.plot(
             [float(level_key)],
-            [1.5],
+            [4.0],
             marker="v",
             color=figstyle.CRITICAL,
             ms=6.5,
@@ -2181,9 +2188,9 @@ def figure_kp57_dbeta_bound(record: dict[str, Any]) -> Path:
         )
         axk.annotate(
             f"{count}",
-            (float(level_key), 1.5),
+            (float(level_key), 4.0),
             textcoords="offset points",
-            xytext=(7, -3),
+            xytext=(8, 0),
             fontsize=7.5,
             color=figstyle.CRITICAL,
             ha="left",

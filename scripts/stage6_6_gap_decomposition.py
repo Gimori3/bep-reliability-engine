@@ -103,14 +103,14 @@ SECTIONS: dict[str, dict] = {
         "bulk_config": "configs/kp62_0_historical_bulk.yaml",
         "production_h5": "results/tokachi_kp62.0_historical_matrix.h5",
         "attainable_max_m": 50.5,
-        "label": "KP62.0",
+        "label": "KP 62.0",
     },
     "kp57_4": {
         "config": "configs/kp57_4_historical_matrix.yaml",
         "bulk_config": "configs/kp57_4_historical_bulk.yaml",
         "production_h5": "results/tokachi_kp57.4_historical_matrix.h5",
         "attainable_max_m": 43.25,
-        "label": "KP57.4",
+        "label": "KP 57.4",
     },
 }
 
@@ -647,7 +647,20 @@ def figure_fractions(
             color=INK,
             fontsize=10,
         )
-        ax.legend(fontsize=8, framealpha=0.9)
+        # At KP 62.0 the temporal-net share comes down through 2.0 in the
+        # upper right, so the legend stood on it there and moves below the
+        # axis on a plate. At KP 57.4 the shares reach 2.0 further left and
+        # the default placement is legible, so that figure keeps it.
+        if key == "kp62_0":
+            ax.legend(
+                fontsize=8,
+                loc="lower right",
+                facecolor=SURFACE,
+                edgecolor="none",
+                framealpha=0.85,
+            )
+        else:
+            ax.legend(fontsize=8, framealpha=0.9)
     axes[0].set_ylabel(
         "component share of total gap (where resolved)", color=MUTED, fontsize=9
     )
@@ -711,12 +724,16 @@ def figure_c2c3(
             )
             for r in subset
         )
+        # The upper left is the rising limb at KP 62.0, which this box
+        # covered. The right half below the saturated curve is empty at
+        # both sections and leaves the legend its own corner.
         ax1.text(
-            0.02,
-            0.97,
+            0.98,
+            0.62,
             text,
             transform=ax1.transAxes,
             fontsize=7,
+            ha="right",
             va="top",
             color=INK,
             bbox=dict(facecolor=SURFACE, edgecolor=GRID_COLOR),

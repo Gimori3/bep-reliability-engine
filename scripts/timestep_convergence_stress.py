@@ -773,7 +773,7 @@ def make_figure(
     ax_a.set_xlabel("time [h]")
     ax_a.set_ylabel("normalized stage shape [-]")
     ax_a.set_title("(a) Selected flashiest d4PDF member", loc="left", fontsize=10)
-    ax_a.legend(frameon=False, fontsize=8, loc="upper left")
+    ax_a.legend(frameon=False, fontsize=8, loc="upper right")
 
     # (b) trajectories -------------------------------------------------------
     for dt_key, tr in traj["by_dt"].items():
@@ -816,7 +816,15 @@ def make_figure(
         loc="left",
         fontsize=10,
     )
-    ax_b.legend(frameon=False, fontsize=8, loc="upper left")
+    # Nudged right and down from the axes corner so the jump at t = 12 h
+    # falls in the gap between the line samples and the entry text, and the
+    # block of entries sits between the two flat branches that bracket it.
+    ax_b.legend(
+        frameon=False,
+        fontsize=8,
+        loc="upper left",
+        bbox_to_anchor=(0.016, 0.982),
+    )
 
     # (c) terminal l_e vs level ----------------------------------------------
     grid_block = primary["refined_grid"] or primary["production_grid"]
@@ -844,7 +852,7 @@ def make_figure(
         loc="left",
         fontsize=10,
     )
-    ax_c.legend(frameon=False, fontsize=8, loc="upper left")
+    ax_c.legend(frameon=False, fontsize=8, loc="lower right")
 
     # (d) convergence --------------------------------------------------------
     for color, (section_id, block) in zip(section_colors, sections.items()):
@@ -886,12 +894,16 @@ def make_figure(
                 zorder=4,
             )
     ax_d.axhline(REL_CRITERION, color=muted, lw=0.9, ls="--")
+    # Both ladders cross this line on their way down, and at the left of the
+    # panel they climb straight through the label. The right end of the line
+    # is clear of both.
     ax_d.text(
-        0.02,
+        0.985,
         REL_CRITERION,
-        " 1 per cent criterion",
+        "1 per cent criterion ",
         color=muted,
         fontsize=8,
+        ha="right",
         va="bottom",
         transform=ax_d.get_yaxis_transform(),
     )
@@ -914,15 +926,19 @@ def make_figure(
     ax_d.legend(frameon=False, fontsize=8, loc="upper right")
     ax_d.invert_xaxis()
 
+    # One line, set as large as the canvas allows, with the band above the
+    # panels cut to what the line itself needs.
     fig.suptitle(
-        "Worst-case forward-Euler timestep stress test:\n"
+        "Worst-case forward-Euler timestep stress test: "
         r"p99 $k_\mathrm{aq}$ $\times$ p99 $C_e$ $\times$ p01 $D_\mathrm{bl}$ "
         "on the flashiest d4PDF rising limb",
-        fontsize=11,
+        fontsize=13,
         x=0.02,
+        y=0.995,
+        va="top",
         ha="left",
     )
-    fig.tight_layout(rect=(0, 0, 1, 0.95))
+    fig.tight_layout(rect=(0, 0, 1, 1.0))
     figure_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(figure_path, dpi=220)
     plt.close(fig)

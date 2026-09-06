@@ -2018,9 +2018,11 @@ def render_figure(payload: dict[str, Any], out_dir: Path) -> Path:
         fontsize=12.5,
         y=1.005,
     )
+    # The footnote used to hang 21 per cent of the figure height below the
+    # canvas, and the tight bounding box then kept all of that empty band.
     fig.text(
         0.5,
-        -0.21,
+        -0.05,
         # An open marker already means the warming scenario in the right-hand
         # legend, so the production value is named by the ring that is drawn
         # over it, which is also the word the caption uses.

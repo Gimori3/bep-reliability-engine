@@ -1840,7 +1840,7 @@ def figure_rq4_brackets(slice_: dict[str, Any]) -> tuple[Path, list[dict[str, An
     by_section = {s["section"]: s for s in slice_["sections"]}
     # Both panels share one x range: comparing a bracket between climates is the
     # question, and two independent log axes would silently rescale it.
-    fig, axes = plt.subplots(1, 2, figsize=(13.4, 5.4), sharey=True, sharex=True)
+    fig, axes = plt.subplots(1, 2, figsize=(13.4, 4.97), sharey=True, sharex=True)
 
     rows: list[dict[str, Any]] = []
     for ax, scenario, title in zip(
@@ -1884,7 +1884,9 @@ def figure_rq4_brackets(slice_: dict[str, Any]) -> tuple[Path, list[dict[str, An
                 f"{entry['baseline']['p_annual_system']:.2e}/yr",
                 (1.0, y),
                 textcoords="offset points",
-                xytext=(-6, -21),
+                # Halfway to the next row reads as belonging to that row; the
+                # label has to stay in its own row's half of the gap.
+                xytext=(-6, -13),
                 fontsize=8,
                 color=figstyle.INK_2,
                 ha="right",
@@ -1934,18 +1936,21 @@ def figure_rq4_brackets(slice_: dict[str, Any]) -> tuple[Path, list[dict[str, An
         bbox_to_anchor=(0.5, -0.012),
         frameon=False,
     )
-    fig.suptitle(
-        "Phase 3 sensitivity brackets on the annual system failure probability, "
-        "at the four geotechnically characterized sections\n"
-        r"the bulk $d_{70}$ arm reaches its floor wherever the historical number "
-        "does, so the widest factors there are floor effects, not sensitivities",
-        fontsize=11.5,
-        x=0.008,
-        y=0.995,
-        ha="left",
+    # A figure-level text, not a suptitle: tight_layout reserves a band for a
+    # suptitle far taller than the title itself, and that band is the white
+    # space that used to sit between the title and the panels.
+    # One title line at the size the main-body figures use. What the second
+    # line said, that a bulk arm already sitting on its floor gives a width
+    # which is a floor effect and not a sensitivity, is in the thesis caption.
+    fig.text(
+        0.5,
+        0.99,
+        "Sensitivity brackets on the annual system failure probability",
+        fontsize=18,
+        ha="center",
         va="top",
     )
-    fig.tight_layout(rect=(0, 0.10, 1, 0.935))
+    fig.tight_layout(rect=(0, 0.10, 1, 0.90))
 
     for name in SECTIONS:
         for entry in by_section[name]["scenarios"]:

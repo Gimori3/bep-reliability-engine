@@ -397,7 +397,7 @@ def _make_figure(records: list[dict[str, Any]], out_path: Path) -> None:
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
-    fig, (ax_a, ax_b) = plt.subplots(1, 2, figsize=(11.5, 4.6))
+    fig, (ax_a, ax_b) = plt.subplots(1, 2, figsize=(11.5, 4.28))
 
     widths = np.asarray([r["foreshore_width_m"] for r in records], dtype=float)
     order = np.argsort(widths)
@@ -429,6 +429,10 @@ def _make_figure(records: list[dict[str, Any]], out_path: Path) -> None:
                     f"{CASE_DISPLAY_NAMES[case]}"
                 ),
             )
+    # Eight series cross this panel, so every piece of text in it sits on a
+    # plate: the exhaustion line and the section names were being ruled
+    # through by whichever series happened to pass.
+    plate = {"facecolor": "white", "edgecolor": "none", "alpha": 0.82, "pad": 1.2}
     ax_a.axhline(1.0, color="crimson", linewidth=1.4)
     ax_a.text(
         0.98,
@@ -439,6 +443,8 @@ def _make_figure(records: list[dict[str, Any]], out_path: Path) -> None:
         ha="right",
         fontsize=8,
         transform=ax_a.get_yaxis_transform(),
+        bbox=plate,
+        zorder=6,
     )
     for record in records:
         ratio = record["event_2016"]["thresholds"]["z_mob"]["rates"]["central"][
@@ -450,9 +456,17 @@ def _make_figure(records: list[dict[str, Any]], out_path: Path) -> None:
             textcoords="offset points",
             xytext=(4, 5),
             fontsize=8,
+            bbox=plate,
+            zorder=6,
         )
     ax_a.set_xscale("log")
     ax_a.set_yscale("log")
+    # The widest section is the last point on the axis, so its name ran off
+    # the frame; the legend needs its own corner for the same reason.
+    x_lo, x_hi = ax_a.get_xlim()
+    ax_a.set_xlim(x_lo, x_hi * 1.6)
+    y_lo, y_hi = ax_a.get_ylim()
+    ax_a.set_ylim(y_lo / 3.2, y_hi)
     # The bracket carried the Japanese term for the quantity; the thesis
     # romanises nothing it can translate, and "high-water-bed width" already
     # is that translation, so the bracket names the source instead.
@@ -508,12 +522,19 @@ def _make_figure(records: list[dict[str, Any]], out_path: Path) -> None:
     ax_b.grid(alpha=0.3, which="both")
     ax_b.legend(fontsize=7.5, loc="upper right")
 
-    fig.suptitle(
-        "Foreshore-exhaustion screening indicator: order-of-magnitude only, "
-        "not a probability",
-        fontsize=9.5,
+    # A figure-level text rather than a suptitle: tight_layout reserves a band
+    # for a suptitle several times the title's own height, and that band is the
+    # white space between the title and the panels. The extra horizontal
+    # padding keeps the right panel's axis label off the left panel's frame.
+    fig.text(
+        0.5,
+        0.99,
+        "Foreshore-exhaustion screening indicator",
+        fontsize=14,
+        ha="center",
+        va="top",
     )
-    fig.tight_layout(rect=(0, 0, 1, 0.95))
+    fig.tight_layout(rect=(0, 0, 1, 0.955), w_pad=4.5)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_path, dpi=160)
     plt.close(fig)

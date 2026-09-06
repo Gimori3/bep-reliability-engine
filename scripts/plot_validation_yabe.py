@@ -105,14 +105,17 @@ def fig_timeline(results: dict) -> None:
             )
         ax.set_yticks(range(len(ks)))
         ax.set_yticklabels([K_LABEL[k] for k in reversed(ks)], fontsize=8, color=INK2)
-        ax.set_ylim(-0.6, len(ks) - 0.4)
+        # A clear strip above the top row for the observed-interval callout,
+        # which used to be drawn outside the frame, over the panel title.
+        ax.set_ylim(-0.6, len(ks) + 0.05)
         ax.set_xlim(0, 16.5)
         ax.grid(axis="y", visible=False)
         ax.set_title(title, fontsize=9, color=INK2, loc="left")
     axes[0].annotate(
         "observed: initiation (07:00)\n→ breach (13:20) = 6.3 h",
         xy=(obs, 2.55),
-        xytext=(7.6, 2.35),
+        xytext=(7.6, 2.98),
+        va="top",
         color=INK,
         fontsize=8,
         arrowprops={"arrowstyle": "-", "color": BASELINE, "lw": 0.8},
@@ -174,12 +177,14 @@ def fig_discrimination(results: dict) -> None:
     ax.set_xlim(1.5e-6, 3)
     ax.set_yticks(range(len(order)))
     ax.set_yticklabels(list(reversed(order)), fontsize=9, color=INK2)
-    ax.set_ylim(-0.6, len(order) - 0.2)
+    # The legend used to sit in the same column as the top row's two marks,
+    # close enough to read as a fourth site. This is its own band.
+    ax.set_ylim(-0.6, len(order) + 0.30)
     ax.grid(axis="y", visible=False)
     ax.set_xlabel("probability under the site prior (N = 10⁵ LHS)")
     ax.plot([], [], "o", ms=8, mfc=BLUE, mec=SURFACE, label="P(transient breach)")
     ax.plot([], [], "s", ms=7, mfc=YELLOW, mec=SURFACE, label="P(static H_c exceeded)")
-    ax.legend(loc="upper right", bbox_to_anchor=(1.0, 1.02), frameon=False, fontsize=8)
+    ax.legend(loc="upper right", bbox_to_anchor=(1.0, 1.0), frameon=False, fontsize=8)
     ax.set_title(
         "Yabe 2012 three-site discrimination: transient race condition vs "
         "static comparator",

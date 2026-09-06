@@ -96,19 +96,24 @@ def fig_hydrograph(results: dict) -> None:
     ax.text(
         times[10],
         obs_hi + 0.25,
-        "observed onset stage 19.5-19.9",
+        "observed onset stage 19.5 to 19.9",
         color=INK2,
         fontsize=8,
     )
     w0 = dt.datetime(2018, 7, 7, 5, 30)
     w1 = dt.datetime(2018, 7, 7, 5, 54)
     ax.axvspan(w0, w1, color="#0b0b0b", alpha=0.18, lw=0)
+    # Along the foot of the panel: at mid-height this caption sat on the
+    # recession limb, and the shaded window it names runs the full height of
+    # the axis, so it can be labelled anywhere along it.
     ax.annotate(
-        "eyewitness window\n05:30-05:54",
-        xy=(w1, 13.6),
-        xytext=(dt.datetime(2018, 7, 7, 14), 13.4),
+        "eyewitness window\n05:30 to 05:54",
+        xy=(w1, 5.6),
+        xytext=(dt.datetime(2018, 7, 7, 15), 4.35),
         color=INK2,
         fontsize=8,
+        va="bottom",
+        ha="left",
         arrowprops={"arrowstyle": "-", "color": BASELINE, "lw": 0.8},
     )
 
@@ -118,7 +123,8 @@ def fig_hydrograph(results: dict) -> None:
     ax.text(
         times[10],
         q50 + 0.22,
-        f"predicted onset (hybrid): median {q50:.1f}, 5-95% " f"{q05:.1f}-{q95:.1f}",
+        f"predicted onset (hybrid): median {q50:.1f}, "
+        f"5 to 95 per cent {q05:.1f} to {q95:.1f}",
         color="#006300",
         fontsize=8,
     )
@@ -128,7 +134,7 @@ def fig_hydrograph(results: dict) -> None:
     ax.text(
         times[10],
         pre2018 + 0.2,
-        "largest pre-2018 stage (1999) - no ejecta ever observed",
+        "largest pre-2018 stage (1999), no ejecta ever observed",
         color=MUTED,
         fontsize=8,
     )
@@ -192,17 +198,26 @@ def fig_onset_intervals(results: dict) -> None:
         ax.set_title(f"L = {L:.0f} m", fontsize=9, color=INK2, loc="left")
 
     axes[0].annotate(
-        "observed 2018 onset\n(6.6-7.0 over ground;\n6.2-6.6 paper datum)",
+        "observed 2018 onset\n(6.6 to 7.0 over ground;\n6.2 to 6.6 paper datum)",
         xy=(obs_g[0], 3.4),
         xytext=(8.6, 2.6),
         color=INK2,
         fontsize=8,
         arrowprops={"arrowstyle": "-", "color": BASELINE, "lw": 0.8},
     )
-    axes[1].text(0.5, -0.5, "1999 no-ejecta bound (4.2 m)", color=MUTED, fontsize=8)
+    axes[1].text(
+        0.5,
+        -0.5,
+        "1999 no-ejecta bound (4.2 m)",
+        color=MUTED,
+        fontsize=8,
+        bbox={"facecolor": SURFACE, "edgecolor": "none", "alpha": 0.9, "pad": 1.5},
+        zorder=6,
+    )
+    # One line ran off the canvas and lost its closing bracket.
     axes[1].set_xlabel(
-        "predicted onset head over hinterland ground, dH [m]  "
-        "(5-95% whisker, 25-75% bar, median dot)"
+        "predicted onset head over hinterland ground, dH [m]\n"
+        "(5 to 95 per cent whisker, 25 to 75 per cent bar, median dot)"
     )
     axes[1].set_xlim(0, 24)
     fig.suptitle(
