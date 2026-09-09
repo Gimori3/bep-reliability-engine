@@ -83,7 +83,9 @@ Pearson r on (ln grain-size, ln k); 95% CI via Fisher z; OLS slope of ln k on ln
 | pair | r | r² | p | 95% CI | slope |
 |------|----:|----:|----:|--------|------:|
 | ln k vs ln d60 | **−0.50** | 0.25 | 0.32 | [−0.93, +0.53] | −0.53 |
-| ln k vs ln d10 | **+0.11** | 0.01 | 0.84 | [−0.77, +0.84] | +0.09 |
+| ln k vs ln d10 | **+0.10** | 0.01 | 0.84 | [−0.77, +0.84] | +0.09 |
+
+*Corrected 2026-09-09: the d10 row read **+0.11** until that date. Recomputing Pearson r on this table's own six in-scope pairs gives +0.1049, which is +0.10 to two decimals, and that is what `scripts/plot_kaq_d70_scatter.py` now derives and renders. The published figure had carried +0.10 throughout, so nothing downstream moves; the conclusion, that the pooled correlation is indistinguishable from zero, is unchanged either way.*
 
 **Pooled incl. KP63.4 (N=8, sensitivity):** d60 r=−0.51 (p=0.19); d10 r=−0.11
 (p=0.80). Adding the two out-of-scope points does not change the picture.

@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -36,6 +37,10 @@ import numpy as np
 from bep_reliability_engine.fragility import FragilityResult, LognormFragility
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
+
+import _figstyle as fs  # noqa: E402
+
 RESULTS_DIR = REPO_ROOT / "results"
 FIGURES_DIR = RESULTS_DIR / "figures"
 #: Tracked publication copy. ``results/`` is gitignored, so a figure that
@@ -48,11 +53,23 @@ def save_both(fig, name: str) -> None:
     """Write the study-local copy and the tracked publication copy."""
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
     PUB_FIGURES_DIR.mkdir(parents=True, exist_ok=True)
-    fig.savefig(FIGURES_DIR / name, dpi=200)
-    fig.savefig(PUB_FIGURES_DIR / name, dpi=200)
+    fig.savefig(FIGURES_DIR / name, dpi=200, bbox_inches="tight")
+    fig.savefig(PUB_FIGURES_DIR / name, dpi=200, bbox_inches="tight")
 
 
 SECTIONS = ["57.4", "58.8", "60.0", "62.0"]
+
+#: Authored width of every figure in this driver, and the ``width=`` fraction
+#: of ``\textwidth`` it is placed at, so the house type scale can be derived.
+FIGURE_WIDTH_IN = 12.6
+SCALE = fs.scale_for(FIGURE_WIDTH_IN, 1.0)
+
+#: Top of the physically attainable stage range, per section (ADR-0024). The
+#: shaded grid extension starts here. Read from the recorded value rather than
+#: from ``HWL + 4.0``: the two differ by 0.11 m at KP 62.0, which put a tenth of
+#: a metre of attainable stage inside the hypothetical band and disagreed with
+#: the caption's own figure of 50.5 m.
+ATTAINABLE_MAX_M = {"57.4": 43.25, "58.8": 42.75, "60.0": 44.25, "62.0": 50.5}
 
 # Reference palette (validated project set; light mode).
 BLUE = "#2a78d6"  # slot 1 - static branch / section 1
@@ -77,32 +94,8 @@ KP634_NOTE = (
 
 
 def style() -> None:
-    plt.rcParams.update(
-        {
-            "font.family": "sans-serif",
-            "font.sans-serif": ["Segoe UI", "DejaVu Sans", "Arial"],
-            "figure.facecolor": SURFACE,
-            "axes.facecolor": SURFACE,
-            "savefig.facecolor": SURFACE,
-            "axes.edgecolor": BASELINE,
-            "axes.labelcolor": INK_2,
-            "axes.titlecolor": INK,
-            "xtick.color": MUTED,
-            "ytick.color": MUTED,
-            "xtick.labelcolor": INK_2,
-            "ytick.labelcolor": INK_2,
-            "grid.color": GRID,
-            "grid.linewidth": 0.8,
-            "axes.grid": True,
-            "axes.axisbelow": True,
-            "axes.spines.top": False,
-            "axes.spines.right": False,
-            "legend.frameon": False,
-            "font.size": 10.5,
-            "axes.titlesize": 12,
-            "axes.labelsize": 10.5,
-        }
-    )
+    """The house rcParams at this driver's printed-type scale."""
+    fs.style(SCALE)
 
 
 def load_all() -> dict[str, dict]:
@@ -163,7 +156,7 @@ def annotate_levels(ax, z_toe: float, hwl: float, y_text: float = 0.55) -> None:
         xytext=(3, 0),
         textcoords="offset points",
         color=MUTED,
-        fontsize=8.5,
+        fontsize=fs.pt("annotation", SCALE),
         rotation=90,
         va="center",
     )
@@ -173,47 +166,14 @@ def annotate_levels(ax, z_toe: float, hwl: float, y_text: float = 0.55) -> None:
         xytext=(3, 0),
         textcoords="offset points",
         color=INK_2,
-        fontsize=8.5,
+        fontsize=fs.pt("annotation", SCALE),
         rotation=90,
         va="center",
     )
 
 
-def run_stamp(data: dict[str, dict]) -> str:
-    """The loading conditions, in the vocabulary of the physics.
-
-    The sample seed and the ensemble member's record id are deliberately not
-    stamped: both are run identifiers, which the thesis main body excludes
-    (``docs/conventions.md`` section 9.3.1), and both are already carried by
-    the JSON sidecar beside every persisted result.
-    """
-    side = data["57.4"]["sidecar"]
-    dt_s = (
-        side["config"]["timestepper"]["target_dt_seconds"]
-        or side["hydrograph"]["native_dt_s"]
-    )
-    return (
-        f"Historical scenario, matrix d$_{{70}}$, N = 10$^5$ Latin hypercube, "
-        f"canonical d4PDF compound shape, integration step Δt = {dt_s:g} s.\n"
-        f"Raw driving heads on both branches; C$_e$ field prior; "
-        f"KP 62.0 at the adopted L = 40 m."
-    )
-
-
-def footnote(fig, data: dict[str, dict], extra: str) -> None:
-    """Three short stamped lines; wrapped manually so nothing clips."""
-    fig.text(
-        0.01,
-        0.005,
-        run_stamp(data) + "\n" + KP634_NOTE + "\n" + extra,
-        fontsize=8,
-        color=MUTED,
-        va="bottom",
-    )
-
-
 def figure_per_section(data: dict[str, dict]) -> None:
-    fig, axes = plt.subplots(2, 2, figsize=(12.6, 8.2), sharey=True)
+    fig, axes = plt.subplots(2, 2, figsize=(FIGURE_WIDTH_IN, 8.2), sharey=True)
     for ax, kp in zip(axes.ravel(), SECTIONS):
         d = data[kp]
         r = d["result"]
@@ -240,55 +200,41 @@ def figure_per_section(data: dict[str, dict]) -> None:
         )
         annotate_levels(ax, d["z_toe"], d["hwl"])
         if kp == "62.0":
-            attainable_top = d["hwl"] + 4.0
+            attainable_top = ATTAINABLE_MAX_M[kp]
             ax.axvspan(attainable_top, grid.max(), color=GRID, alpha=0.55, zorder=1)
+            # Centred on the band it names, so the note reads as the band's
+            # label rather than as an annotation of the curve beside it.
             ax.annotate(
                 "fit-stabilizer levels\n(above max attainable stage)",
-                xy=(0.985, 0.42),
-                xycoords="axes fraction",
-                ha="right",
+                xy=(0.5 * (attainable_top + grid.max()), 0.42),
+                xycoords=("data", "axes fraction"),
+                ha="center",
+                va="center",
                 color=INK_2,
-                fontsize=8.5,
+                fontsize=fs.pt("annotation", SCALE),
             )
-        ax.set_title(f"KP {kp}  ·  {d['remediation']}", loc="left")
+        fs.panel_title(ax, f"KP {kp}  ·  {d['remediation']}", scale=SCALE)
         ax.set_ylim(-0.03, 1.03)
         ax.set_xlabel("conditioning water level h  [m T.P.]")
     for ax in axes[:, 0]:
         ax.set_ylabel("P(failure | h)")
     handles, labels = axes[0, 0].get_legend_handles_labels()
-    fig.legend(
-        handles,
-        labels,
-        loc="upper right",
-        bbox_to_anchor=(0.99, 1.0),
-        ncols=2,
-        fontsize=10,
-    )
-    fig.suptitle(
-        "Backward erosion piping fragility, Tokachi right bank "
-        "(static vs transient limit state)",
-        x=0.01,
-        ha="left",
-        fontsize=14,
-        fontweight="bold",
-        color=INK,
-    )
-    footnote(
+    fs.legend_below(fig, handles, labels, scale=SCALE)
+    fs.title(
         fig,
-        data,
-        "Points: raw MC estimates with 95 per cent Clopper-Pearson CIs; "
-        "lines: fitted lognormal deliverables.",
+        "Prior fragility at the four cross-sections",
+        scale=SCALE,
     )
-    fig.tight_layout(rect=(0, 0.055, 1, 0.95))
+    fs.layout(fig, scale=SCALE, legend_rows=1)
     save_both(fig, "fragility_per_section.png")
     plt.close(fig)
 
 
 def figure_comparison(data: dict[str, dict]) -> None:
-    fig, axes = plt.subplots(1, 2, figsize=(12.6, 5.6), sharey=True)
+    fig, axes = plt.subplots(1, 2, figsize=(FIGURE_WIDTH_IN, 5.6), sharey=True)
     titles = {
-        "static": "Static limit state: Sellmeijer 2011 (raw gross head)",
-        "transient": "Transient limit state: Pol 2024 (raw erosion head)",
+        "static": "Static limit state, raw gross head",
+        "transient": "Transient limit state, raw erosion head",
     }
     for ax, branch in zip(axes, ("static", "transient")):
         for kp in SECTIONS:
@@ -312,22 +258,7 @@ def figure_comparison(data: dict[str, dict]) -> None:
                 alpha=0.85,
                 linestyle="none",
             )
-            # Direct label only the well-separated KP 62.0 curve; the three
-            # clustered sections are identified by the figure legend (their
-            # labels would collide inline).
-            if kp == "62.0" and curve is not None:
-                idx = int(np.searchsorted(curve[1], 0.70))
-                idx = min(idx, curve[0].size - 1)
-                ax.annotate(
-                    f"KP {kp}",
-                    xy=(curve[0][idx] - d["z_toe"], 0.70),
-                    xytext=(8, -2),
-                    textcoords="offset points",
-                    color=color,
-                    fontsize=9.5,
-                    fontweight="bold",
-                )
-        ax.set_title(titles[branch], loc="left")
+        fs.panel_title(ax, titles[branch], scale=SCALE)
         ax.set_xlabel("water level above landside toe  h − z$_\\mathrm{toe}$  [m]")
         ax.set_xlim(0.0, 8.0)
         ax.set_ylim(-0.03, 1.03)
@@ -345,34 +276,19 @@ def figure_comparison(data: dict[str, dict]) -> None:
         )
         for kp in SECTIONS
     ]
-    fig.legend(
-        handles=handles,
-        loc="upper right",
-        bbox_to_anchor=(0.99, 1.0),
-        ncols=4,
-        fontsize=10,
-    )
-    fig.suptitle(
-        "Cross-section comparison: load excess above the landside toe",
-        x=0.01,
-        ha="left",
-        fontsize=14,
-        fontweight="bold",
-        color=INK,
-    )
-    footnote(
+    fs.legend_below(fig, handles, [h.get_label() for h in handles], scale=SCALE)
+    fs.title(
         fig,
-        data,
-        "KP 62.0 points beyond h − z$_\\mathrm{toe}$ ≈ 5.5 m come from the "
-        "hypothetical fit-stabilizer grid extension (unattainable stages).",
+        "The four cross-sections on a common load-excess axis",
+        scale=SCALE,
     )
-    fig.tight_layout(rect=(0, 0.075, 1, 0.94))
+    fs.layout(fig, scale=SCALE, legend_rows=1)
     save_both(fig, "fragility_comparison.png")
     plt.close(fig)
 
 
 def figure_tail_log(data: dict[str, dict]) -> None:
-    fig, axes = plt.subplots(2, 2, figsize=(12.6, 7.28), sharey=True)
+    fig, axes = plt.subplots(2, 2, figsize=(FIGURE_WIDTH_IN, 7.28), sharey=True)
     floor = 1.0 / 100000  # N = 1e5: one failure in the sample
     for ax, kp in zip(axes.ravel(), SECTIONS):
         d = data[kp]
@@ -420,7 +336,7 @@ def figure_tail_log(data: dict[str, dict]) -> None:
             # The same grid extension the per-section view shades. It is a fit
             # stabilizer, never attainable loading, and the two views of one
             # section must not disagree about which stages are reachable.
-            attainable_top = d["hwl"] + 4.0
+            attainable_top = ATTAINABLE_MAX_M[kp]
             ax.axvspan(attainable_top, grid.max(), color=GRID, alpha=0.55, zorder=1)
             # Centred on the band it names, so the caption sits wholly inside
             # the shading rather than straddling its left edge.
@@ -430,42 +346,22 @@ def figure_tail_log(data: dict[str, dict]) -> None:
                 xycoords=("data", "axes fraction"),
                 ha="center",
                 color=INK_2,
-                fontsize=8.5,
+                fontsize=fs.pt("annotation", SCALE),
             )
         ax.set_yscale("log")
         ax.set_ylim(floor / 2, 1.5)
-        ax.set_title(f"KP {kp}  ·  {d['remediation']}", loc="left")
+        fs.panel_title(ax, f"KP {kp}  ·  {d['remediation']}", scale=SCALE)
         ax.set_xlabel("conditioning water level h  [m T.P.]")
     for ax in axes[:, 0]:
         ax.set_ylabel("P(failure | h)   [log]")
     handles, labels = axes[0, 0].get_legend_handles_labels()
-    fig.legend(
-        handles,
-        labels,
-        loc="upper right",
-        bbox_to_anchor=(0.99, 1.0),
-        ncols=2,
-        fontsize=10,
+    fs.legend_below(fig, handles, labels, scale=SCALE)
+    fs.title(
+        fig,
+        "The fragility tails on a logarithmic axis",
+        scale=SCALE,
     )
-    # A figure-level text rather than a suptitle: tight_layout reserves a
-    # suptitle band far taller than the title, and that band is the white
-    # space that stood between the title row and the panels.
-    fig.text(
-        0.01,
-        0.99,
-        "Tail view: raw MC points, 95 per cent binomial CIs (log scale)",
-        ha="left",
-        va="top",
-        fontsize=14,
-        fontweight="bold",
-        color=INK,
-    )
-    # The four stamped lines that used to run under the panels now live in the
-    # thesis caption, where they are set at caption size and can be read. The
-    # band they occupied comes off the figure's height rather than going to
-    # the panels: the figure is shorter by exactly that band, and each panel
-    # keeps the height it had.
-    fig.tight_layout(rect=(0, 0.004, 1, 0.965))
+    fs.layout(fig, scale=SCALE, legend_rows=1)
     save_both(fig, "fragility_tail_log.png")
     plt.close(fig)
 

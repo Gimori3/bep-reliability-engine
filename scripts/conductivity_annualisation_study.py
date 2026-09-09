@@ -1808,12 +1808,23 @@ def render_figure(payload: dict[str, Any], out_dir: Path) -> Path:
 
     fs = figstyle
     fs.style()
+    scale = fs.scale_for(14.4, 1.0)
+    # Legacy body sizes here on purpose: this panel pair carries a legend
+    # outside the axes and eight long series labels, and the printed-point
+    # body scale collides with both. The title is at the house printed size.
+    fs.style()
     fig, (ax_left, ax_right) = plt.subplots(1, 2, figsize=(14.4, 5.4))
 
     sections = payload["sections"]
     labels = [_label(kp) for kp in BEP_KPS]
     scenario_marker = {"historical": "o", "+4K": "D"}
-    scenario_name = {"historical": "historical climate", "+4K": "4 K warming"}
+    # The plus sign was missing here, so an axis label named the wrong
+    # scenario. The thesis sets the warming case with its sign at every
+    # one of its thirty-three sites.
+    scenario_name = {
+        "historical": "historical climate",
+        "+4K": "+4 K warming",
+    }
 
     # --- left: annual system probability, baseline against the bracket -------
     x_positions = {label: i for i, label in enumerate(labels)}
@@ -2012,27 +2023,14 @@ def render_figure(payload: dict[str, Any], out_dir: Path) -> Path:
         loc="center left", bbox_to_anchor=(1.015, 0.5), fontsize=8.8, handlelength=2.4
     )
 
-    fig.suptitle(
-        "Aquifer conductivity carried through to annual probability, "
-        "matrix grain size, prior fragility",
-        fontsize=12.5,
-        y=1.005,
+    # The stamped line under the panels moved to the thesis caption on
+    # 2026-09-09, with every other in-figure footnote in the document.
+    fs.title(
+        fig,
+        "The conductivity bracket carried through to annual probability",
+        scale=scale,
     )
-    # The footnote used to hang 21 per cent of the figure height below the
-    # canvas, and the tight bounding box then kept all of that empty band.
-    fig.text(
-        0.5,
-        -0.05,
-        # An open marker already means the warming scenario in the right-hand
-        # legend, so the production value is named by the ring that is drawn
-        # over it, which is also the word the caption uses.
-        "Rings mark the production value. Both panels: four surveyed "
-        "sections, corrected surface curves, 200 m segments.",
-        ha="center",
-        fontsize=8.5,
-        color=fs.MUTED,
-    )
-    fig.tight_layout()
+    fs.layout(fig, scale=scale)
     return fs.save(fig, FIGURE_NAME["matrix"], mirror=out_dir / "figures")
 
 
@@ -2053,6 +2051,8 @@ def render_both_d70_figure(
 
     fs = figstyle
     fs.style()
+    scale = fs.scale_for(15.2, 1.0)
+    fs.style(scale)
     fig, axes = plt.subplots(2, 4, figsize=(15.2, 7.4), sharey="row", sharex="col")
 
     labels = [_label(kp) for kp in BEP_KPS]
@@ -2129,11 +2129,14 @@ def render_both_d70_figure(
                 # legend entry instead.
                 ax.set_facecolor("#fbeeee")
             if row == 0:
-                ax.set_title(label, fontsize=10.5)
+                fs.panel_title(ax, label, scale=scale)
             if row == 1:
-                ax.set_xlabel("conductivity [m/s]", fontsize=9)
+                ax.set_xlabel("conductivity [m/s]", fontsize=fs.pt("axis_label", scale))
             if col == 0:
-                ax.set_ylabel(f"{scenario_name[scenario]}\npiping share", fontsize=9.5)
+                ax.set_ylabel(
+                    f"{scenario_name[scenario]}\npiping share",
+                    fontsize=fs.pt("axis_label", scale),
+                )
 
     handles = [
         plt.Line2D(
@@ -2182,29 +2185,14 @@ def render_both_d70_figure(
             label="tinted panel: piping is a lower bound",
         ),
     ]
-    fig.legend(
-        handles=handles,
-        loc="upper center",
-        bbox_to_anchor=(0.5, 0.095),
-        ncol=3,
-        fontsize=9.0,
+    fs.legend_below(fig, handles, [h.get_label() for h in handles], scale=scale, ncol=5)
+    # The three-line note under the legend moved to the thesis caption.
+    fs.title(
+        fig,
+        "Which mechanism leads across the conductivity bracket",
+        scale=scale,
     )
-    fig.suptitle(
-        "Which mechanism leads, across the conductivity bracket, under both "
-        "grain-size readings",
-        fontsize=12.5,
-    )
-    fig.text(
-        0.5,
-        0.012,
-        "Above the line piping leads; below it overflow does. The two readings "
-        "move the same piping contribution in opposite directions, so raising "
-        "conductivity can restore a lead the bulk reading removes.",
-        ha="center",
-        fontsize=8.5,
-        color=fs.MUTED,
-    )
-    fig.tight_layout(rect=(0, 0.135, 1, 1))
+    fs.layout(fig, scale=scale, legend_rows=1)
     return fs.save(fig, FIGURE_NAME["bulk"], mirror=out_dir / "figures")
 
 

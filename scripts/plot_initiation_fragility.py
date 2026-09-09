@@ -124,6 +124,8 @@ def load_section(kp: str, reading: str) -> dict:
 
 def draw(sections: list[dict], reading: str) -> plt.Figure:
     """Render the two-by-two small-multiple panel."""
+    scale = figstyle.scale_for(7.1, 0.92)
+    figstyle.style(scale)
     fig, axes = plt.subplots(2, 2, figsize=(7.1, 5.2), sharey=True)
 
     for ax, data in zip(axes.ravel(), sections):
@@ -156,7 +158,7 @@ def draw(sections: list[dict], reading: str) -> plt.Figure:
             label="transient piping",
         )
 
-        ax.set_title(f"KP {kp}", loc="left", fontsize=11)
+        figstyle.panel_title(ax, f"KP {kp}", scale=scale)
         ax.set_xlim(max(data["z_toe"], stage[0]), top)
         ax.set_ylim(-0.03, 1.03)
 
@@ -171,34 +173,15 @@ def draw(sections: list[dict], reading: str) -> plt.Figure:
         plt.Line2D([], [], color=figstyle.INK_2, lw=1.0, ls=(0, (1, 1.6))),
     ]
     labels += ["design level", "2016 peak"]
-    fig.legend(
-        handles,
-        labels,
-        loc="lower center",
-        ncol=5,
-        bbox_to_anchor=(0.5, -0.035),
-        columnspacing=1.6,
-        handlelength=1.9,
+    figstyle.legend_below(fig, handles, labels, scale=scale, ncol=5)
+    # The run conditions and the attainable-stage note moved to the thesis
+    # caption on 2026-09-09.
+    figstyle.title(
+        fig,
+        "The gate and the two piping branches on one realization set",
+        scale=scale,
     )
-    fig.suptitle(
-        "The three sub-mechanism probabilities on one realization set",
-        fontsize=12,
-        fontweight="bold",
-        color=figstyle.INK,
-        x=0.012,
-        y=0.995,
-        ha="left",
-    )
-    fig.text(
-        0.012,
-        -0.055,
-        f"Historical scenario, {reading} d$_{{70}}$ reading, N = 10$^5$; "
-        "every panel stops at the highest attainable stage.",
-        fontsize=8,
-        color=figstyle.MUTED,
-        ha="left",
-    )
-    fig.tight_layout(rect=(0, 0.02, 1, 0.96))
+    figstyle.layout(fig, scale=scale, legend_rows=1)
     return fig
 
 

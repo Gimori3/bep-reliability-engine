@@ -28,6 +28,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import sys
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -35,6 +36,10 @@ import numpy as np
 import pandas as pd
 
 REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO / "scripts"))
+
+import _figstyle as fs  # noqa: E402
+
 P3 = REPO / "results/system_integration/phase3"
 FIGS = REPO / "docs/figures"
 #: Committed 95 % hazard-sampling intervals for the RQ4 headline figure.
@@ -72,6 +77,40 @@ BASELINE = "#c3c2b7"
 SURFACE = "#fcfcfb"
 
 FLOOR = 1e-7  # display floor for log axes (zero -> below-floor marker)
+
+#: The two climate scenarios, from the house palette. Until 2026-09-09 these
+#: were the static/transient blue and red, which a reader of Chapter 6 has
+#: learned as the two limit states.
+SCEN_COLORS = fs.CLIMATE_COLORS
+#: How each scenario is written in rendered text: the thesis sets the warming
+#: case ``$+4$\,K``, and "+4K" without its space had spread across six figures.
+SCEN_LABELS = fs.CLIMATE_LABELS
+
+#: Authored width and placement fraction per figure, for the printed type
+#: scale (``docs/conventions.md`` section 9.3.2).
+WIDTH_IN = {
+    "dominance": 12.5,
+    "sections": 11.5,
+    "climate": 12.5,
+    "rq4": 12.4,
+    "attribution": 12.0,
+    "event": 6.8,
+}
+PLACEMENT = {
+    "dominance": 1.0,
+    "sections": 1.0,
+    "climate": 1.0,
+    "rq4": 1.0,
+    "attribution": 1.0,
+    "event": 0.80,
+}
+
+
+def _scale(key: str) -> float:
+    """This figure's authored points per printed point, and set the rcParams."""
+    value = fs.scale_for(WIDTH_IN[key], PLACEMENT[key])
+    fs.style(value)
+    return value
 
 
 def style() -> None:
@@ -166,14 +205,35 @@ def _hazard_intervals(df: pd.DataFrame) -> dict:
 
 def fig_dominance_profile(df: pd.DataFrame) -> None:
     base = _primary(df)
+    scale = _scale("dominance")
     fig, axes = plt.subplots(
-        2, 2, figsize=(12.5, 7.6), sharey=True, gridspec_kw={"hspace": 0.42}
+        2,
+        2,
+        figsize=(WIDTH_IN["dominance"], 7.6),
+        sharey=True,
+        gridspec_kw={"hspace": 0.42},
     )
     for i, river in enumerate(("Tokachi", "Satsunai")):
         for j, scenario in enumerate(("historical", "+4K")):
             ax = axes[i, j]
             sub = base[(base.river == river) & (base.scenario == scenario)]
             sub = sub.sort_values("kp")
+            # The system curve goes down first, as a wide pale halo. Drawn on
+            # top as a heavy dark stroke it hid the overflow branch it
+            # coincides with almost everywhere, which is the branch that
+            # governs 110 of the 114 segments.
+            sysv = np.maximum(sub.p_annual_system.to_numpy(float), FLOOR)
+            ax.plot(
+                sub.kp,
+                sysv,
+                "-",
+                color=INK,
+                lw=5.0,
+                alpha=0.16,
+                solid_capstyle="round",
+                zorder=1,
+                label="System",
+            )
             for mech in ("overflow", "fluvial_scour", "bep"):
                 col = f"p_annual_{mech}"
                 vals = pd.to_numeric(sub[col], errors="coerce")
@@ -192,28 +252,27 @@ def fig_dominance_profile(df: pd.DataFrame) -> None:
                     lw=1.4,
                     ms=7 if mech == "bep" else 5,
                     mfc="none" if mech == "bep" else None,
+                    zorder=3,
                     label=MECH_LABELS[mech],
                 )
-            sysv = np.maximum(sub.p_annual_system.to_numpy(float), FLOOR)
-            ax.plot(sub.kp, sysv, "-", color=INK, lw=2.0, alpha=0.75, label="System")
             ax.set_yscale("log")
             ax.set_ylim(FLOOR, 1.0)
-            ax.set_title(f"{river}, {scenario}")
+            fs.panel_title(ax, f"{river}, {SCEN_LABELS[scenario]}", scale=scale)
             ax.set_xlabel("KP [km]")
             if j == 0:
                 ax.set_ylabel("Annual failure probability [1/yr]")
     handles, labels = axes[0, 0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc="upper center", ncol=4, bbox_to_anchor=(0.5, 1.02))
-    fig.suptitle(
-        "Annualized per-mechanism failure probability along the study reaches\n"
-        f"(posterior BEP, {D70_DISPLAY_NAMES['matrix']}, "
-        f"{LAMBDA_AC_SYMBOL} = 250 m; values at the display "
-        f"floor {FLOOR:g} are exact zeros)",
-        y=1.10,
-        fontsize=11,
-        color=INK_2,
+    wanted = ("Overflow", "Fluvial scour", MECH_LABELS["bep"], "System")
+    order = [labels.index(v) for v in wanted]
+    fs.legend_below(
+        fig, [handles[i] for i in order], [labels[i] for i in order], scale=scale
     )
-    fig.tight_layout()
+    fs.title(
+        fig,
+        "Annual failure probability of each mechanism along the two reaches",
+        scale=scale,
+    )
+    fs.layout(fig, scale=scale, legend_rows=1)
     fig.savefig(FIGS / "phase3_dominance_profile.png", dpi=160, bbox_inches="tight")
     plt.close(fig)
 
@@ -232,7 +291,8 @@ def _max_attainable_stage(river: str, kp: float) -> float:
 def fig_bep_sections(curves: dict) -> None:
     keys = [f"Tokachi_KP{s}" for s in ("57.4", "58.8", "60", "62")]
     kps = (57.4, 58.8, 60.0, 62.0)
-    fig, axes = plt.subplots(2, 2, figsize=(11.5, 7.8), sharey=True)
+    scale = _scale("sections")
+    fig, axes = plt.subplots(2, 2, figsize=(WIDTH_IN["sections"], 7.8), sharey=True)
     for ax, key, kp in zip(axes.ravel(), keys, kps):
         entry = curves[key]
         stage = np.asarray(entry["stage_m_msl"])
@@ -258,8 +318,8 @@ def fig_bep_sections(curves: dict) -> None:
             ax.text(
                 0.5 * (h_max + stage[-1]),
                 0.5,
-                "beyond max\nattainable stage\n(+4K ensemble)",
-                fontsize=7.5,
+                "beyond max\nattainable stage\n(+4 K ensemble)",
+                fontsize=fs.pt("small", scale),
                 color=MUTED,
                 ha="center",
                 va="center",
@@ -272,24 +332,17 @@ def fig_bep_sections(curves: dict) -> None:
                     "pad": 2.0,
                 },
             )
-        ax.set_title(f"Tokachi KP {kp:.1f}")
+        fs.panel_title(ax, f"Tokachi KP {kp:.1f}", scale=scale)
         ax.set_xlabel("Water level h [m T.P.]")
         ax.set_ylabel("P(failure | h)")
     handles, labels = axes[0, 0].get_legend_handles_labels()
-    # Title, legend and panels stacked with the least space that keeps them
-    # three distinct bands rather than one block.
-    fig.legend(handles, labels, loc="upper center", ncol=4, bbox_to_anchor=(0.5, 0.955))
-    fig.text(
-        0.5,
-        0.997,
-        "Composed three-mechanism segment fragility at the BEP sections "
-        f"(posterior, {D70_DISPLAY_NAMES['matrix']})",
-        ha="center",
-        va="top",
-        fontsize=17,
-        color=INK,
+    fs.legend_below(fig, handles, labels, scale=scale)
+    fs.title(
+        fig,
+        "Composed three-mechanism fragility at the four cross-sections",
+        scale=scale,
     )
-    fig.tight_layout(rect=(0, 0, 1, 0.915))
+    fs.layout(fig, scale=scale, legend_rows=1)
     fig.savefig(
         FIGS / "phase3_system_fragility_bep_sections.png",
         dpi=160,
@@ -300,11 +353,16 @@ def fig_bep_sections(curves: dict) -> None:
 
 def fig_climate_shift(df: pd.DataFrame) -> None:
     base = _primary(df)
+    scale = _scale("climate")
+    # ``sharey="row"`` on 2026-09-09: the two reaches were drawn side by side
+    # on different vertical scales, which invites a comparison of heights that
+    # do not correspond. The reach comparison is the figure's whole purpose.
     fig, axes = plt.subplots(
         2,
         2,
-        figsize=(12.5, 7.2),
+        figsize=(WIDTH_IN["climate"], 7.2),
         sharex="col",
+        sharey="row",
         gridspec_kw={"height_ratios": [2.2, 1.0], "hspace": 0.12},
     )
     for j, river in enumerate(("Tokachi", "Satsunai")):
@@ -316,7 +374,7 @@ def fig_climate_shift(df: pd.DataFrame) -> None:
             hist.kp,
             np.maximum(hist.p_annual_system.to_numpy(float), FLOOR),
             ".-",
-            color="#2a78d6",
+            color=SCEN_COLORS["historical"],
             lw=1.5,
             ms=5,
             label="historical (HPB, 3000 yr)",
@@ -325,10 +383,10 @@ def fig_climate_shift(df: pd.DataFrame) -> None:
             futu.kp,
             np.maximum(futu.p_annual_system.to_numpy(float), FLOOR),
             ".-",
-            color="#e34948",
+            color=SCEN_COLORS["+4K"],
             lw=1.5,
             ms=5,
-            label="+4K (HFB, 5400 yr)",
+            label="+4 K (HFB, 5400 yr)",
         )
         # ADR-0037 lambda bracket at the BEP sections (posterior, matrix).
         brack = df[
@@ -338,7 +396,8 @@ def fig_climate_shift(df: pd.DataFrame) -> None:
             & (df.surface_variant == "primary")
             & (df.lambda_ac_m == 40.0)
         ]
-        for scen, color in (("historical", "#2a78d6"), ("+4K", "#e34948")):
+        for scen in ("historical", "+4K"):
+            color = SCEN_COLORS[scen]
             b = brack[brack.scenario == scen].sort_values("kp")
             bep_nodes = b[b.mechanisms.str.contains("bep")]
             if len(bep_nodes):
@@ -351,9 +410,7 @@ def fig_climate_shift(df: pd.DataFrame) -> None:
                     mfc="none",
                     color=color,
                     label=(
-                        f"{LAMBDA_AC_SYMBOL} = 40 m bracket"
-                        if scen == "historical"
-                        else None
+                        f"{LAMBDA_AC_SYMBOL} = 40 m bracket, " f"{SCEN_LABELS[scen]}"
                     ),
                 )
         ax.set_yscale("log")
@@ -362,9 +419,10 @@ def fig_climate_shift(df: pd.DataFrame) -> None:
         # strikes through its text: the 40 m bracket triangle at KP 57.4 sat
         # on the last letter of its own legend entry.
         ax.set_ylim(top=ax.get_ylim()[1] * 12.0)
-        ax.set_title(river)
+        fs.panel_title(ax, river, scale=scale)
         ax.set_ylabel("Annual system $P_f$ [1/yr]" if j == 0 else "")
-        ax.legend(fontsize=8.5, loc="upper left")
+        if j == 0:
+            key_handles, key_labels = ax.get_legend_handles_labels()
 
         merged = hist.merge(futu, on="kp", suffixes=("_h", "_f"))
         ratio = np.where(
@@ -374,23 +432,15 @@ def fig_climate_shift(df: pd.DataFrame) -> None:
         )
         axr.plot(merged.kp, ratio, ".-", color=INK_2, lw=1.3, ms=4)
         axr.set_yscale("log")
-        axr.set_ylabel("+4K / historical" if j == 0 else "")
+        axr.set_ylabel("+4 K / historical" if j == 0 else "")
         axr.set_xlabel("KP [km]")
-    # Caption, not decoration: 110 of the 114 segments carry bep_source None
-    # under the production `exact` policy, so this distribution is reach context
-    # and its surface-only segments are lower bounds. The quantified answer to
-    # RQ4 is the four-section figure (fig_rq4_four_sections), not this one.
-    fig.suptitle(
-        "REACH CONTEXT (not the RQ4 answer): climate shift of the annualized "
-        "system failure probability over all 114 segments\n"
-        f"posterior BEP, {D70_DISPLAY_NAMES['matrix']}. 110 of 114 segments "
-        "have no geotechnically characterized cross-section of their own and "
-        "are surface-only LOWER BOUNDS;\n"
-        "the quantified RQ4 answer is the four characterized sections, given "
-        "separately.",
-        fontsize=9.5,
-        color=INK_2,
+    fs.legend_below(fig, key_handles, key_labels, scale=scale, ncol=2)
+    fs.title(
+        fig,
+        "Climate shift of the annual system failure probability, " "all 114 segments",
+        scale=scale,
     )
+    fs.layout(fig, scale=scale, legend_rows=2)
     fig.savefig(FIGS / "phase3_climate_shift.png", dpi=160, bbox_inches="tight")
     plt.close(fig)
 
@@ -420,10 +470,11 @@ def fig_rq4_four_sections(df: pd.DataFrame) -> None:
     sections = sorted(bep.kp.unique())
     labels = [f"KP {kp:.1f}" for kp in sections]
 
+    scale = _scale("rq4")
     fig, axes = plt.subplots(
         1,
         2,
-        figsize=(12.4, 5.4),
+        figsize=(WIDTH_IN["rq4"], 5.4),
         gridspec_kw={"width_ratios": [1.35, 1.0], "wspace": 0.28},
     )
 
@@ -432,10 +483,8 @@ def fig_rq4_four_sections(df: pd.DataFrame) -> None:
     x = np.arange(len(sections), dtype=float)
     width = 0.34
     headroom = 0.0
-    for offset, scenario, color in (
-        (-width / 2, "historical", "#2a78d6"),
-        (+width / 2, "+4K", "#e34948"),
-    ):
+    for offset, scenario in ((-width / 2, "historical"), (+width / 2, "+4K")):
+        color = SCEN_COLORS[scenario]
         rows = bep[bep.scenario == scenario].set_index("kp").loc[sections]
         total = rows.p_annual_system.to_numpy(float)
         bep_part = rows.p_annual_bep.to_numpy(float)
@@ -455,7 +504,7 @@ def fig_rq4_four_sections(df: pd.DataFrame) -> None:
             color=color,
             alpha=0.30,
             lw=0,
-            label=f"{scenario}: system (all mechanisms)",
+            label=f"{SCEN_LABELS[scenario]}: system (all mechanisms)",
         )
         ax.bar(
             x + offset,
@@ -463,7 +512,7 @@ def fig_rq4_four_sections(df: pd.DataFrame) -> None:
             width=width * 0.9,
             color=color,
             lw=0,
-            label=f"{scenario}: BEP contribution",
+            label=f"{SCEN_LABELS[scenario]}: BEP contribution",
         )
         ax.errorbar(
             x + offset,
@@ -485,19 +534,14 @@ def fig_rq4_four_sections(df: pd.DataFrame) -> None:
                 textcoords="offset points",
                 xytext=(0, 5),
                 ha="center",
-                fontsize=8,
+                fontsize=fs.pt("small", scale),
                 color=INK_2,
             )
         headroom = max(headroom, float(band[1].max()))
     ax.set_yscale("log")
     ax.set_xticks(x, labels)
     ax.set_ylabel("annual system $P_f$ [1/yr]")
-    ax.set_title(
-        "RQ4: annual system failure probability at the four characterized "
-        f"sections\nposterior BEP, {D70_DISPLAY_NAMES['matrix']}, "
-        f"{LAMBDA_AC_SYMBOL} = 250 m, primary surface curves",
-        loc="left",
-    )
+    fs.panel_title(ax, "Annual system failure probability", scale=scale)
     ax.set_ylim(top=headroom * 12.0)
     ax.plot(
         [],
@@ -508,7 +552,7 @@ def fig_rq4_four_sections(df: pd.DataFrame) -> None:
         markersize=7,
         label="95 per cent flood-ensemble sampling interval",
     )
-    ax.legend(fontsize=8.5, ncol=2, loc="upper left")
+    key_handles, key_labels = ax.get_legend_handles_labels()
     ax.grid(axis="x", visible=False)
 
     # --- panel 2: the climate ratio, the number the thesis quotes --------------
@@ -547,36 +591,30 @@ def fig_rq4_four_sections(df: pd.DataFrame) -> None:
         )
     ax2.axhline(1.0, color=BASELINE, lw=1.2)
     ax2.set_xticks(x, labels)
-    ax2.set_ylabel("+4K / historical annual system $P_f$")
+    ax2.set_ylabel("+4 K / historical annual system $P_f$")
     ax2.set_ylim(0, float(ratio_band[1].max()) * 1.18)
-    ax2.set_title(
-        "Climate ratio per section, with its 95 per cent sampling interval\n"
-        "KP 58.8 carries the highest absolute risk and the lowest ratio; the "
-        "two outer sections are not distinguishable",
-        loc="left",
-    )
+    fs.panel_title(ax2, "Climate ratio per section", scale=scale)
     ax2.grid(axis="x", visible=False)
-    fig.text(
-        0.5,
-        -0.045,
-        "Intervals are flood-ensemble sampling only: the fragility curves are "
-        "held fixed, so this is not the total uncertainty. The aquifer "
-        "conductivity range is far wider and does not cancel in the ratio.",
-        ha="center",
-        va="top",
-        fontsize=8.5,
-        color=INK_2,
+    fs.legend_below(fig, key_handles, key_labels, scale=scale, ncol=3)
+    fs.title(
+        fig,
+        "Annual system failure probability and the climate ratio, "
+        "four cross-sections",
+        scale=scale,
     )
+    fs.layout(fig, scale=scale, legend_rows=2)
     fig.savefig(FIGS / "phase3_rq4_four_sections.png", dpi=160, bbox_inches="tight")
     plt.close(fig)
 
 
 def fig_attribution(attr: dict) -> None:
     sections = list(attr.keys())
-    fig, axes = plt.subplots(1, 2, figsize=(12.0, 4.8), sharey=True)
+    scale = _scale("attribution")
+    fig, axes = plt.subplots(1, 2, figsize=(WIDTH_IN["attribution"], 4.8), sharey=True)
     width = 0.38
     tallest = 0.0
-    for ax, scen, tint in zip(axes, ("historical", "+4K"), ("#2a78d6", "#e34948")):
+    for ax, scen in zip(axes, ("historical", "+4K")):
+        tint = SCEN_COLORS[scen]
         x = np.arange(len(sections))
         long_v = [attr[s][scen]["p_f_long_loading"] for s in sections]
         short_v = [attr[s][scen]["p_f_short_loading"] for s in sections]
@@ -613,58 +651,29 @@ def fig_attribution(attr: dict) -> None:
         ax.set_xticklabels(
             [f"KP {float(s.split('KP')[-1]):.1f}" for s in sections],
         )
-        ax.set_title(scen)
+        fs.panel_title(ax, SCEN_LABELS[scen], scale=scale)
         tallest = max(tallest, max(long_v), max(short_v), max(comp_v))
 
     axes[0].set_ylim(top=tallest * 2.6)
-    axes[0].set_ylabel("Conditional annual system $P_f$ within stratum")
-    fig.suptitle(
-        "RQ4 attribution: duration- and compound-stratified conditional "
-        f"failure probability (BEP sections, posterior, "
-        f"{D70_DISPLAY_NAMES['matrix']})",
-        fontsize=15,
-        color=INK_2,
+    axes[0].set_ylabel("Conditional annual $P_f$ in stratum")
+    handles, labels = axes[0].get_legend_handles_labels()
+    fs.legend_below(fig, handles, labels, scale=scale)
+    fs.title(
+        fig,
+        "Duration and compound stratification of the annual probability",
+        scale=scale,
     )
-    fig.tight_layout()
-
-    # The legends slide left from the right-hand spine until no legend label
-    # touches a bar, and no further. The rows are of different lengths and sit
-    # at different heights, so which bar a given row can reach is not a thing
-    # to judge by eye: every label's rectangle is compared with every bar's,
-    # and the shared anchor steps left until nothing intersects. This runs
-    # after the layout is final, because the search is only as good as the
-    # geometry it measures. The axis limits stay where the bars put them, so
-    # it costs no headroom.
-    def _place(anchor: float) -> float:
-        """Place both legends and return the centre of the icon column [px]."""
-        for ax in axes:
-            ax.legend(fontsize=8.5, loc="upper right", bbox_to_anchor=(anchor, 0.99))
-        fig.canvas.draw()
-        renderer = fig.canvas.get_renderer()
-        boxes = [
-            handle.get_window_extent(renderer)
-            for handle in axes[0].get_legend().legend_handles
-        ]
-        return 0.5 * (min(b.x0 for b in boxes) + max(b.x1 for b in boxes))
-
-    # The legends sit with their icon column centred under the panel title.
-    # The anchor that puts it there is solved rather than tuned: the icon
-    # centre moves linearly with the anchor, so two placements fix the line
-    # and the third lands on the axis centre, which is where a centred title
-    # sits. Both panels are the same width, so one anchor serves both.
-    target = axes[0].transAxes.transform((0.5, 0.5))[0]
-    high, low = 1.0, 0.9
-    centre_high, centre_low = _place(high), _place(low)
-    slope = (centre_low - centre_high) / (low - high)
-    _place(low + (target - centre_low) / slope)
+    fs.layout(fig, scale=scale, legend_rows=1)
     fig.savefig(FIGS / "phase3_rq4_attribution.png", dpi=160, bbox_inches="tight")
     plt.close(fig)
 
 
 def fig_event_validation(df: pd.DataFrame, val: dict) -> None:
     base = _primary(df)
-    fig, ax = plt.subplots(figsize=(6.8, 6.2))
+    scale = _scale("event")
+    fig, ax = plt.subplots(figsize=(WIDTH_IN["event"], 6.2))
     markers = {"historical": "o", "+4K": "s"}
+    floor_count = 0
     for key, node in val["nodes"].items():
         river, kp_s = key.split("_KP")
         kp = float(kp_s)
@@ -680,16 +689,33 @@ def fig_event_validation(df: pd.DataFrame, val: dict) -> None:
             ):
                 curve_v = float(pd.to_numeric(row[f"p_annual_{mech}"]).iloc[0])
                 event_v = float(node[scen][colkey])
+                if max(event_v, FLOOR) <= FLOOR and max(curve_v, FLOOR) <= FLOOR:
+                    floor_count += 1
+                # Fewer than ten engaged events is the small-count regime the
+                # caption names; an open marker says which comparisons it is
+                # rather than leaving the reader to take the caption on trust.
+                engaged = int(
+                    node[scen].get(
+                        "n_overflow_active" if mech == "overflow" else "n_scour_active",
+                        0,
+                    )
+                )
                 ax.plot(
                     max(event_v, FLOOR),
                     max(curve_v, FLOOR),
                     markers[scen],
                     color=MECH_COLORS[mech],
+                    mfc=MECH_COLORS[mech] if engaged >= 10 else SURFACE,
                     ms=7,
-                    mec=SURFACE,
-                    mew=0.8,
+                    mec=MECH_COLORS[mech] if engaged < 10 else SURFACE,
+                    mew=1.1 if engaged < 10 else 0.8,
+                    zorder=3,
                 )
-    lims = (FLOOR, 1.0)
+    # The floor row sat exactly on the axis corner, so both of its markers were
+    # cut in half by the spines and eighteen scour comparisons rendered as a
+    # quarter of one square. The limits now carry a decade of padding below the
+    # floor, and the stack says how many results it holds.
+    lims = (FLOOR / 4.0, 1.0)
     ax.plot(lims, lims, "-", color=BASELINE, lw=1.0, zorder=0)
     ax.set_xscale("log")
     ax.set_yscale("log")
@@ -697,22 +723,53 @@ def fig_event_validation(df: pd.DataFrame, val: dict) -> None:
     ax.set_ylim(*lims)
     ax.set_xlabel("Event-based annual $P_f$ (full d4PDF ensembles)")
     ax.set_ylabel("Curve-based annual $P_f$ (canonical conditioning)")
-    handles = [
-        plt.Line2D(
-            [], [], marker="o", ls="none", color=MECH_COLORS[m], label=MECH_LABELS[m]
+    if floor_count:
+        ax.annotate(
+            f"{floor_count} comparisons\nat the display floor",
+            xy=(FLOOR, FLOOR),
+            xytext=(14, 10),
+            textcoords="offset points",
+            fontsize=fs.pt("small", scale),
+            color=MUTED,
+            ha="left",
+            va="bottom",
         )
-        for m in ("overflow", "fluvial_scour")
-    ] + [
-        plt.Line2D([], [], marker=mk, ls="none", color=INK_2, label=sc)
-        for sc, mk in markers.items()
-    ]
-    ax.legend(handles=handles, fontsize=8.5)
-    ax.set_title(
-        "Surface mechanisms: canonical-shape curves vs event-based re-execution\n"
-        "(9 section-representative nodes; diagonal = agreement)",
-        fontsize=10.5,
+    handles = (
+        [
+            plt.Line2D(
+                [],
+                [],
+                marker="o",
+                ls="none",
+                color=MECH_COLORS[m],
+                label=MECH_LABELS[m],
+            )
+            for m in ("overflow", "fluvial_scour")
+        ]
+        + [
+            plt.Line2D([], [], marker=mk, ls="none", color=INK_2, label=SCEN_LABELS[sc])
+            for sc, mk in markers.items()
+        ]
+        + [
+            plt.Line2D(
+                [],
+                [],
+                marker="o",
+                ls="none",
+                mfc=SURFACE,
+                mec=INK_2,
+                color=INK_2,
+                label="fewer than ten engaged events",
+            )
+        ]
     )
-    fig.tight_layout()
+    fs.legend_below(fig, handles, [h.get_label() for h in handles], scale=scale, ncol=3)
+    fs.title(
+        fig,
+        "Curve-based against event-based annual probability",
+        scale=scale,
+    )
+    fs.layout(fig, scale=scale, legend_rows=2)
     fig.savefig(
         FIGS / "phase3_event_based_validation.png", dpi=160, bbox_inches="tight"
     )

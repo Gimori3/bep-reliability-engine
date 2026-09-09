@@ -1974,21 +1974,24 @@ FIGURE_DRIVERS: list[dict[str, Any]] = [
     },
     # ---- declaration only (no plot-only path); see the module note above ---- #
     {
-        "label": "ADR-0012 k_aq-d70 scatter (declaration only)",
-        "command": None,
+        "label": "ADR-0012 k_aq-d70 scatter",
+        "command": [PY, "scripts/plot_kaq_d70_scatter.py"],
         "redraw": (
-            "no producing script exists in this repository. The scatter was "
-            "drawn externally on 2026-07-02 by the analysis that became "
-            "docs/decisions/adr0012-kaq-d70-analysis.md, performed without repo "
-            "access (its own provenance note, section 0, says so). A trip here "
-            "means the paired-specimen table changed and the figure has to be "
-            "redrawn by hand."
+            "reads the paired-specimen table out of "
+            "docs/decisions/adr0012-kaq-d70-analysis.md and redraws. Until "
+            "2026-09-09 no producing script existed: the scatter had been drawn "
+            "externally on 2026-07-02 by the analysis that became that note, "
+            "without repository access, and a trip here meant redrawing it by "
+            "hand. That is what it cost, in a figure review: a beheaded point "
+            "label, two labels across the right spine, two specimens sharing "
+            "one label, and none of the house style."
         ),
         "requires": ["docs/decisions/adr0012-kaq-d70-analysis.md"],
         "produces": ["adr0012-kaq-d70-scatter.png"],
         # The figure depicts the 8 OYO paired records, which exist nowhere as
         # data: they are transcribed into section 1 of the note, from the
-        # gitignored 1999 OYO form-4 soil-test PDFs. The note IS the artifact.
+        # gitignored 1999 OYO form-4 soil-test PDFs. The note IS the artifact,
+        # and the driver reads it rather than restating its numbers.
         "sources": ["docs/decisions/adr0012-kaq-d70-analysis.md"],
     },
     {

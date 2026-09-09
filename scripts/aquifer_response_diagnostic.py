@@ -245,30 +245,41 @@ def _plot(spreads: dict[str, list[dict]], blocks: dict[str, dict]) -> None:
     import matplotlib
 
     matplotlib.use("Agg")
+    import _figstyle as fs
     import matplotlib.pyplot as plt
 
-    fig, axes = plt.subplots(1, 2, figsize=(11, 4.2))
-    colors = {"KP58.8": "#1b6ca8", "KP60.0": "#c8553d"}
+    scale = fs.scale_for(11.0, 1.0)
+    fs.style(scale)
+    # ``wspace`` opened on 2026-09-09 at the owner's direction; the two panels
+    # stood shoulder to shoulder.
+    fig, axes = plt.subplots(1, 2, figsize=(11.0, 4.6), gridspec_kw={"wspace": 0.26})
+    colors = {"KP58.8": fs.AQUA, "KP60.0": fs.YELLOW}
     for section, spread in spreads.items():
         rise_h = np.array([m["rising_limb_s"] for m in spread]) / 3600.0
+        # A filled step and an outline, not two translucent fills: the two
+        # distributions nearly coincide, so overlaying them painted almost the
+        # whole panel in the brown their overlap produces, a colour with no
+        # legend entry, while the two legend colours survived only in slivers.
+        histtype = "stepfilled" if section == "KP58.8" else "step"
         axes[0].hist(
             rise_h,
             bins=np.arange(0, rise_h.max() + 2) - 0.5,
-            alpha=0.55,
-            label=section,
+            histtype=histtype,
+            alpha=0.55 if histtype == "stepfilled" else 1.0,
+            lw=1.6,
+            label=section.replace("KP", "KP "),
             color=colors[section],
         )
     axes[0].axvline(
         1.5,
-        color="k",
+        color=fs.INK_2,
         ls=":",
         lw=1,
-        label="~1.5 h plateau (flashy-river expectation)",
+        label="1.5 h plateau, the flashy-river expectation",
     )
-    axes[0].set_xlabel("T_rise (10%->peak) [h]")
-    axes[0].set_ylabel("d4PDF members")
-    axes[0].set_title("Flood rising-limb time (native hourly grid)")
-    axes[0].legend(fontsize=8)
+    axes[0].set_xlabel(r"rising-limb time $T_\mathrm{rise}$, 10 per cent to peak [h]")
+    axes[0].set_ylabel("ensemble members")
+    fs.panel_title(axes[0], "Flood rising-limb time", scale=scale)
 
     labels = list(blocks)
     x = np.arange(len(labels))
@@ -276,29 +287,40 @@ def _plot(spreads: dict[str, list[dict]], blocks: dict[str, dict]) -> None:
         x - 0.2,
         [blocks[s]["pi_central"] for s in labels],
         0.35,
-        label="central θ",
-        color="#4c9f70",
+        label=r"at the prior means",
+        color=fs.AQUA,
     )
     axes[1].bar(
         x + 0.2,
         [blocks[s]["pi_corner90"] for s in labels],
         0.35,
-        label="90th-pct-τ corner",
-        color="#e0a458",
+        label=r"at the 90th-percentile response-time corner",
+        color=fs.YELLOW,
     )
     axes[1].axhline(
-        PI_THRESHOLD, color="r", ls="--", lw=1.2, label=f"Pi* = {PI_THRESHOLD}"
+        PI_THRESHOLD,
+        color=fs.CRITICAL,
+        ls="--",
+        lw=1.2,
+        label=rf"activation threshold $\Pi^{{*}}$ = {PI_THRESHOLD}",
     )
     axes[1].set_xticks(x)
-    axes[1].set_xticklabels(labels)
-    axes[1].set_ylabel("Pi = tau_aq / T_rise")
-    axes[1].set_title(f"Time-constant ratio at S_s = {S_S_DRIVER:.0e} 1/m")
-    axes[1].legend(fontsize=8)
+    axes[1].set_xticklabels([s.replace("KP", "KP ") for s in labels])
+    axes[1].set_ylabel(r"response ratio $\Pi = \tau_\mathrm{aq} / T_\mathrm{rise}$")
+    fs.panel_title(axes[1], "Time-constant ratio", scale=scale)
 
-    fig.tight_layout()
+    h0, l0 = axes[0].get_legend_handles_labels()
+    h1, l1 = axes[1].get_legend_handles_labels()
+    fs.legend_below(fig, h0 + h1, l0 + l1, scale=scale, ncol=3)
+    fs.title(
+        fig,
+        "The aquifer-response screen at KP 58.8 and KP 60.0",
+        scale=scale,
+    )
+    fs.layout(fig, scale=scale, legend_rows=2)
     out = REPO / "docs" / "figures" / "adr0032_aquifer_response.png"
     out.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out, dpi=130)
+    fig.savefig(out, dpi=130, bbox_inches="tight")
     print(f"\nfigure -> {out.relative_to(REPO)}")
 
 
