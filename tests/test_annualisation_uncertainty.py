@@ -123,17 +123,23 @@ def test_the_note_leads_with_the_scope_rather_than_footnoting_it() -> None:
     assert "hazard-sampling uncertainty only" in text.lower()
 
 
-def test_the_figure_renders_the_scope_and_not_just_the_intervals() -> None:
-    """Text baked into a PNG cannot be fixed in the thesis repository.
+def test_the_figure_carries_no_footnote_and_the_scope_survives_in_the_record() -> None:
+    """Conventions section 9.3.2: the qualification lives in the caption now.
 
-    The RQ4 headline figure is a main-body figure. Its intervals would read as
-    total uncertainty without the qualification, and conventions section 9.3.1
-    is the reason that qualification has to be right here rather than in a
-    caption.
+    Until 2026-09-09 this figure stamped the interval's scope under its panels,
+    and the test pinned that string. The owner then ruled that no figure in the
+    thesis carries a footnote, because the stamped lines printed at about 4 pt
+    against 10 pt body text and mostly restated the caption. The obligation is
+    unchanged, only its home: the qualification is written into the caption
+    from the evidence record, so what this test guards is that the driver stamps
+    nothing and that the record still carries the sentence the caption needs.
     """
     source = _require(FIGURE_DRIVER).read_text(encoding="utf-8")
-    assert "held fixed, so this is not the total uncertainty" in source
-    assert "conductivity range is far wider" in source
+    assert "fig.text(" not in source, "conventions 9.3.2: no stamped footnote"
+    scope = _evidence()["scope"]
+    statement = scope["statement"].lower()
+    assert "not" in statement and "total uncertainty" in statement
+    assert "conductivity" in statement
     _require(FIGURE)
 
 

@@ -250,6 +250,70 @@ publication entry, so a scenario cannot be mistaken for the baseline on either a
 Chapters 1 to 9, and an ADR pointer in an appendix figure has been judged acceptable.
 If one of those figures is ever promoted to the main body, it comes into scope.
 
+### 9.3.2 One title, one legend, no footnote, and type in printed points
+
+Adopted 2026-09-09 at the owner's direction, after a figure-by-figure review
+found that the titles of the sixty-three thesis figures were written and placed
+six different ways, that a dozen carried a stamped footnote under the panels in
+type smaller than anything else in the document, and that several carried both
+a legend and a duplicate set of in-plot series labels.
+
+**T1. One title, at the top, bold, centred.** It *names* what the figure shows:
+a noun phrase, not a sentence and not a finding. Run conditions, estimator
+descriptions, sample sizes, verification results and caveats are the caption's
+work. A caption can be revised in the thesis repository; a rendered title
+cannot, which is the same argument as section 9.3.1.
+
+**T2. Panel titles are one step below the figure title and regular weight.**
+Centred over their own axes, except that a panel carrying a letter is
+left-aligned so the letter starts the line.
+
+**T3. No figure carries a footnote, stamp or note block.** Everything those
+lines said belongs in the caption or the body text. This is absolute: the
+review found footnote type printing between 3.8 and 4.3 pt against 10 pt body,
+and most of it restated the caption.
+
+**T4. Series identity comes from the legend.** No in-plot labels duplicating
+it. The legend sits below the panels, centred, unframed, in one row where the
+entries fit. Endpoint labels were removed rather than repaired: a label set
+that only marks the visible curves silently drops the series running underneath
+another, which is exactly the series a reader cannot otherwise find.
+
+**T5. The band between the title and the panels is one title height.**
+:func:`_figstyle.layout` measures the panels after ``tight_layout`` and sets the
+gap in inches, because a fixed ``y`` leaves a band whose depth depends on
+whatever else sits above the panels.
+
+**T6. Type is specified in points on the printed page.** A figure authored
+*W* inches wide and placed at *f* of ``\textwidth`` is reduced by
+*f* x 6.693 / *W*, and so is every type size in it. ``_figstyle.PRINT_PT``
+holds the sizes as they are meant to print, ``_figstyle.scale_for`` returns the
+multiplier, and ``_figstyle.style(scale)`` sets the rcParams from both. The
+floor is 7 pt. Before this rule the reviewed figures printed their tick labels
+between 3.6 and 5.6 pt.
+
+The helpers are :func:`_figstyle.title`, :func:`_figstyle.panel_title`,
+:func:`_figstyle.legend_below`, :func:`_figstyle.layout`, :func:`_figstyle.pt`
+and :func:`_figstyle.scale_for`. ``style()`` with no argument keeps the
+pre-2026-09-09 sizes, so a driver that has not been converted is unchanged;
+passing a scale opts it in.
+
+Two palette entries were fixed at the same time. ``CLIMATE_COLORS`` gives the
+historical and +4 K scenarios violet and orange: until this date the Phase 3
+figures painted them in the static and transient blue and red, so a reader who
+had learned that pair as the two limit states in Chapter 6 met it carrying a
+different meaning in Chapter 7. ``CLIMATE_LABELS`` fixes how the warming case
+is written, after "+4K" and "4 K warming" had both spread through the drivers
+against the thesis's own ``$+4$\,K``.
+
+**Conversion status at the time of writing.** Thirty-three of the fifty-eight
+raster figures follow this section: ``gsa_study``, ``plot_fragility_curves``,
+``phase3_figures``, ``thesis_figure_gaps``, ``convergence_study``,
+``plot_initiation_fragility``, ``tail_variance_study``,
+``aquifer_response_diagnostic`` and ``conductivity_annualisation_study``. The
+remainder still carry their pre-2026-09-09 titles and are listed in the
+close-out note for the campaign.
+
 ### 9.4 A test may only skip on something that is genuinely optional
 
 `pytest.skip` / `skipif` is correct for a gitignored machine-local artifact

@@ -351,14 +351,19 @@ def _plot(results: list[dict], n_study: int, n_replicates: int) -> None:
     import matplotlib
 
     matplotlib.use("Agg")
+    import _figstyle as fs
     import matplotlib.pyplot as plt
 
+    scale = fs.scale_for(7.0, 0.75)
+    fs.style(scale)
     fig, ax = plt.subplots(figsize=(7.0, 4.6))
     p_axis = [r["schemes"]["lhs"]["mean_p_f"] for r in results]
+    # House categorical slots; this figure pre-dated ``_figstyle`` and was
+    # drawn in matplotlib's defaults.
     styles = {
-        "lhs": ("o-", "tab:blue", "LHS (production sampler)"),
-        "mc": ("s--", "tab:gray", "crude Monte Carlo"),
-        "is": ("^-", "tab:red", "tilted importance sampling"),
+        "lhs": ("o-", fs.BLUE, "stratified (production sampler)"),
+        "mc": ("s--", fs.MUTED, "crude Monte Carlo"),
+        "is": ("^-", fs.ORANGE, "tilted importance sampling"),
     }
     for scheme, (fmt, color, label) in styles.items():
         cov = [r["schemes"][scheme]["empirical_cov"] for r in results]
@@ -366,15 +371,17 @@ def _plot(results: list[dict], n_study: int, n_replicates: int) -> None:
     ax.invert_xaxis()
     ax.set_xlabel(r"transient failure probability $P_f$ (deeper tail $\rightarrow$)")
     ax.set_ylabel(r"empirical replicate CoV of $\hat{P}_f$")
-    ax.set_title(
-        f"Tail-variance study: KP 58.8, N = {n_study:,}, "
-        f"R = {n_replicates} replicates"
-    )
     ax.grid(True, which="both", alpha=0.3)
-    ax.legend()
-    fig.tight_layout()
+    handles, labels = ax.get_legend_handles_labels()
+    fs.legend_below(fig, handles, labels, scale=scale, ncol=2)
+    fs.title(
+        fig,
+        "Replicate variability of three estimators, KP 58.8",
+        scale=scale,
+    )
+    fs.layout(fig, scale=scale, legend_rows=2)
     OUTPUT_FIGURE.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(OUTPUT_FIGURE, dpi=160)
+    fig.savefig(OUTPUT_FIGURE, dpi=160, bbox_inches="tight")
     print(f"wrote {OUTPUT_FIGURE}")
 
 

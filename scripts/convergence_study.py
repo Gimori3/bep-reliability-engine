@@ -61,6 +61,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
+import _figstyle as fs  # noqa: E402
 from _figstyle import section_label as _section_label  # noqa: E402
 
 from bep_reliability_engine.config import Config  # noqa: E402
@@ -435,9 +436,14 @@ def _plot(payload: dict, paths: dict[str, Path]) -> None:
     target = payload["cov_target"]
     n_rep = payload["n_replicates"]
     levels = payload["levels"]
-    colors = ["#1f77b4", "#2ca02c", "#d62728", "#9467bd", "#8c564b"]
+    # House categorical slots. These four figures pre-dated ``_figstyle`` and
+    # were drawn in matplotlib's defaults, so their series carried colours that
+    # appear nowhere else in the thesis.
+    colors = [fs.BLUE, fs.AQUA, fs.YELLOW, fs.VIOLET, fs.MAGENTA]
 
     # ---- Figure 1: Objective 1 — empirical CoV (LHS) vs N -----------------
+    ladder_scale = fs.scale_for(7.2, 0.9)
+    fs.style(ladder_scale)
     fig, ax = plt.subplots(figsize=(7.2, 5.0))
     n_all = np.array(payload["n_ladder"], dtype=float)
     for i, lvl in enumerate(levels):
@@ -454,7 +460,7 @@ def _plot(payload: dict, paths: dict[str, Path]) -> None:
             covs,
             "o-",
             color=color,
-            label=rf"$h={lvl['level_m']:.2f}$ m, $P_f\approx${p_ref:.1e}",
+            label=rf"$h={lvl['level_m']:.2f}$ m T.P., $P_f\approx${p_ref:.1e}",
         )
     # 1/sqrt(N) reference anchored to the shallowest level's first point.
     anchor = levels[0]["rungs"][0]
@@ -470,21 +476,26 @@ def _plot(payload: dict, paths: dict[str, Path]) -> None:
     ax.axhline(target, color="0.4", ls="--", lw=1.2, label=f"{target:.0%} target")
     ax.set_xlabel("realizations $N$")
     ax.set_ylabel(rf"empirical CoV of $\hat{{P}}_f$ ({branch}), $R={n_rep}$ replicates")
-    ax.set_title(
-        f"Estimator convergence, {_section_label(payload['cross_section_id'])} "
-        f"({payload['d70_interpretation']} $d_{{70}}$), Latin hypercube sampling"
-    )
     ax.grid(True, which="both", alpha=0.3)
-    # Every series falls from upper left to lower right, so the lower left is
-    # the one corner the data actually occupies: the legend was covering the
-    # shallowest ladder and the whole reference slope.
-    ax.legend(fontsize=8, loc="upper right", framealpha=0.9, edgecolor="0.85")
-    fig.tight_layout()
+    handles, labels = ax.get_legend_handles_labels()
+    fs.legend_below(fig, handles, labels, scale=ladder_scale, ncol=3)
+    fs.title(
+        fig,
+        "Estimator convergence, " f"{_section_label(payload['cross_section_id'])}",
+        scale=ladder_scale,
+    )
+    fs.layout(fig, scale=ladder_scale, legend_rows=2)
     _savefig_both(fig, paths["fig_conv"], paths["tracked_fig_conv"])
     plt.close(fig)
 
     # ---- Figure 2: Objective 2 — LHS vs crude MC, bulk -> tail ------------
-    fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(11.5, 5.0))
+    tail_scale = fs.scale_for(11.5, 1.0)
+    fs.style(tail_scale)
+    # ``wspace`` opened on 2026-09-09: the two panels stood shoulder to
+    # shoulder and the right panel's y label ran into the left panel's ticks.
+    fig, (ax0, ax1) = plt.subplots(
+        1, 2, figsize=(11.5, 5.0), gridspec_kw={"wspace": 0.30}
+    )
     for i, lvl in enumerate(levels):
         color = colors[i % len(colors)]
         p_ref = lvl["p_f_ref"][branch]
@@ -500,12 +511,20 @@ def _plot(payload: dict, paths: dict[str, Path]) -> None:
                 cov_c.append(cc)
         ax0.loglog(ns_l, cov_l, "o-", color=color, label=rf"$P_f\approx${p_ref:.1e}")
         ax0.loglog(ns_c, cov_c, "s--", color=color, alpha=0.7)
-    ax0.axhline(target, color="0.4", ls=":", lw=1.0)
+    # Named rather than left unexplained: this is the study's pre-registered
+    # acceptance target and it is the one rule in the panel a reader asks about.
+    ax0.axhline(
+        target,
+        color=fs.MUTED,
+        ls=":",
+        lw=1.0,
+        label=f"{target:.0%} acceptance target",
+    )
     ax0.set_xlabel("realizations $N$")
     ax0.set_ylabel(rf"empirical CoV of $\hat{{P}}_f$ ({branch})")
-    ax0.set_title("LHS (solid ●) vs crude MC (dashed ■)")
+    fs.panel_title(ax0, "Stratified (solid) against crude (dashed)", scale=tail_scale)
     ax0.grid(True, which="both", alpha=0.3)
-    ax0.legend(fontsize=8, title="conditioning level")
+    tail_handles, tail_labels = ax0.get_legend_handles_labels()
 
     # Right panel: variance-reduction ratio MC/LHS vs P_f, one point per level.
     # The ratio is N-invariant in expectation, so the ladder mean per level is
@@ -539,16 +558,23 @@ def _plot(payload: dict, paths: dict[str, Path]) -> None:
     ax1.axhline(1.0, color="0.3", ls="--", lw=1.2, label="parity (no advantage)")
     ax1.set_xlabel(rf"$P_f$ ({branch}), deeper tail $\rightarrow$")
     ax1.set_ylabel(r"variance-reduction ratio  $\mathrm{CoV_{MC}}/\mathrm{CoV_{LHS}}$")
-    ax1.set_title("LHS advantage decays bulk → tail")
+    fs.panel_title(ax1, "The advantage from bulk to tail", scale=tail_scale)
     ax1.grid(True, which="both", alpha=0.3)
-    ax1.legend(fontsize=8)
-
-    fig.suptitle(
-        "Stratified against crude sampling, "
-        f"{_section_label(payload['cross_section_id'])}, R = {n_rep} replicates",
-        y=1.02,
+    extra_handles, extra_labels = ax1.get_legend_handles_labels()
+    fs.legend_below(
+        fig,
+        tail_handles + extra_handles,
+        tail_labels + extra_labels,
+        scale=tail_scale,
+        ncol=4,
     )
-    fig.tight_layout()
+    fs.title(
+        fig,
+        "Stratified against crude sampling, "
+        f"{_section_label(payload['cross_section_id'])}",
+        scale=tail_scale,
+    )
+    fs.layout(fig, scale=tail_scale, legend_rows=2)
     _savefig_both(
         fig, paths["fig_tail"], paths["tracked_fig_tail"], bbox_inches="tight"
     )

@@ -55,6 +55,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
+import _figstyle as fs  # noqa: E402
 from _figstyle import section_label as _section_label  # noqa: E402
 
 from bep_reliability_engine.config import Config  # noqa: E402
@@ -540,21 +541,47 @@ def run_companions(
 
 
 # ---------------------------------------------------------------------------
-# Figures (dataviz method: fixed per-input colors, thin marks, hairline grid,
-# direct labels for the low-contrast hues, one axis per panel)
+# Figures. House style, ``docs/conventions.md`` section 9.3.2: one bold centred
+# title in printed points, panel titles a step below it, series identity from a
+# single-row legend under the panels, and no in-plot series labels.
+#
+# Every figure here is authored wider than it is printed, so each one carries
+# its own ``scale`` and every type size is written as a printed point size
+# multiplied by it. That is what makes a tick label the same size on this
+# figure as on any other in the thesis.
 # ---------------------------------------------------------------------------
-def _style_axis(ax):
+#: ``width=`` fraction of ``\textwidth`` each figure is placed at in the thesis.
+_PLACEMENT = {
+    "indices": 1.0,
+    "levels": 1.0,
+    "convergence": 1.0,
+    "interaction": 0.72,
+    "companions": 1.0,
+}
+
+
+def _style_axis(ax, scale: float = 1.0):
     ax.set_axisbelow(True)
     ax.grid(True, axis="both", color=_GRID, linewidth=0.7)
     for spine in ("top", "right"):
         ax.spines[spine].set_visible(False)
     for spine in ("left", "bottom"):
         ax.spines[spine].set_color("#c3c2b7")
-    ax.tick_params(colors=_MUTED, labelsize=8)
+    ax.tick_params(colors=_MUTED, labelsize=fs.pt("tick", scale))
 
 
 def _final_rung(payload_level: dict, qoi: str) -> dict:
     return payload_level["qois"][qoi]["rungs"][-1]
+
+
+#: Panel titles as they are rendered. ``QOI_LABELS`` is the evidence record's
+#: own schema and keeps its Y-numbers; a panel title says what the quantity is.
+QOI_PANEL_TITLES = {
+    "trans_indicator": "Transient failure indicator",
+    "static_indicator": "Static failure indicator",
+    "l_fraction": "Final erosion fraction $l_e/L$",
+    "z_static": "Static margin $Z_\\mathrm{static}$",
+}
 
 
 def _fig_indices_bars(payload: dict, slug: str) -> None:
@@ -563,7 +590,9 @@ def _fig_indices_bars(payload: dict, slug: str) -> None:
 
     names = payload["input_names"]
     design = payload["levels"][min(1, len(payload["levels"]) - 1)]
-    fig, axes = plt.subplots(2, 2, figsize=(11.0, 7.6), sharey=True)
+    width_in = 11.0
+    scale = fs.scale_for(width_in, _PLACEMENT["indices"])
+    fig, axes = plt.subplots(2, 2, figsize=(width_in, 7.6), sharey=True)
     y_pos = np.arange(len(names))[::-1]
     for ax, key in zip(axes.ravel(), QOI_KEYS):
         rung = _final_rung(design, key)
@@ -589,89 +618,68 @@ def _fig_indices_bars(payload: dict, slug: str) -> None:
             xerr=s_err,
             error_kw={"ecolor": _INK_2, "elinewidth": 0.9, "capsize": 2},
         )
+        # An exact structural zero and a missing bar render identically, and
+        # four rows of each static panel are structural zeros: the static limit
+        # state has no exposure to C_e, D_bl, k_bl or the blanket unit weight.
+        # A tick at the origin says the row was measured and came out zero.
+        for row, (s_value, st_value) in enumerate(zip(s, st)):
+            if max(abs(float(s_value)), abs(float(st_value))) < 1e-12:
+                ax.plot(
+                    [0.0],
+                    [y_pos[row]],
+                    marker="|",
+                    color=_MUTED,
+                    ms=fs.pt("tick", scale) * 0.9,
+                    mew=1.3,
+                    ls="none",
+                    zorder=5,
+                )
         ax.set_yticks(y_pos)
-        ax.set_yticklabels([INPUT_TEX[n] for n in names], fontsize=10)
+        ax.set_yticklabels([INPUT_TEX[n] for n in names], fontsize=fs.pt("tick", scale))
         ax.axvline(0.0, color="#c3c2b7", linewidth=0.9)
-        _style_axis(ax)
+        _style_axis(ax, scale)
         mean_y = rung["mean_y"]
         extra = f"  ($P_f$ = {mean_y:.3f})" if "indicator" in key else ""
-        ax.set_title(QOI_LABELS[key] + extra, fontsize=10, color=_INK)
-        ax.set_xlabel("Sobol' index", fontsize=9, color=_INK_2)
+        fs.panel_title(ax, QOI_PANEL_TITLES[key] + extra, scale=scale)
+        ax.set_xlabel("Sobol' index", fontsize=fs.pt("axis_label", scale), color=_INK_2)
     # Shared S/ST legend (solid = S, translucent = ST), neutral ink.
     from matplotlib.patches import Patch
 
-    fig.legend(
-        handles=[
-            Patch(facecolor=_INK_2, label="first-order $S_i$"),
-            Patch(facecolor=_INK_2, alpha=0.45, label="total-effect $S_{Ti}$"),
-        ],
-        loc="lower center",
-        ncol=2,
-        frameon=False,
-        fontsize=9,
+    handles = [
+        Patch(facecolor=_INK_2, label="first-order $S_i$"),
+        Patch(facecolor=_INK_2, alpha=0.45, label="total-effect $S_{Ti}$"),
+    ]
+    fs.legend_below(fig, handles, [h.get_label() for h in handles], scale=scale)
+    fs.title(
+        fig,
+        "Sobol' indices at the design level, "
+        f"{_section_label(payload['cross_section_id'])}",
+        scale=scale,
     )
-    fig.suptitle(
-        f"Sobol' indices at the design level h = {design['level_m']:.2f} m "
-        f"T.P., {_section_label(payload['cross_section_id'])} "
-        f"({payload['d70_interpretation']} $d_{{70}}$), "
-        f"R = {payload['n_replicates']} scramblings, 95 per cent CI",
-        fontsize=11,
-        color=_INK,
-    )
-    fig.tight_layout(rect=(0, 0.04, 1, 0.97))
+    fs.layout(fig, scale=scale, legend_rows=1)
     _save(fig, f"gsa_indices_{slug}")
 
 
-def _spread_label_positions(values: list[float], sep: float) -> list[float]:
-    """Nudge overlapping end-label y-positions apart (ascending stacking)."""
-    values = np.asarray(values, dtype=float)
-    out = values.copy()
-    order = np.argsort(values)
-    floor = -np.inf
-    for idx in order:
-        out[idx] = max(out[idx], floor + sep)
-        floor = out[idx]
-    return out.tolist()
+def _series_legend(fig, names, *, scale: float, ncol: int | None = None) -> None:
+    """One figure legend naming every input in its fixed colour, below the panels.
 
-
-def _direct_label_lines(ax, x_end: float, names, end_values, *, min_value=0.03):
-    """Right-edge direct labels for the lines that carry visible signal.
-
-    Labels below ``min_value`` are omitted (the figure legend still names
-    every series); collisions are resolved by vertical stacking.
+    The house style carries series identity here and nowhere else. Endpoint
+    labels in the plot were removed on 2026-09-09: two of the eight inputs run
+    under other lines at every level, so a label set that only marks the visible
+    curves silently drops exactly the series a reader cannot otherwise find.
     """
-    keep = [(n, v) for n, v in zip(names, end_values) if abs(v) >= min_value]
-    if not keep:
-        return
-    y_min, y_max = ax.get_ylim()
-    spread = _spread_label_positions([v for _, v in keep], sep=0.035 * (y_max - y_min))
-    for (name, _), y in zip(keep, spread):
-        ax.annotate(
-            INPUT_TEX[name],
-            (x_end, y),
-            xytext=(6, 0),
-            textcoords="offset points",
-            fontsize=9,
-            color=INPUT_COLORS[name],
-            va="center",
-        )
-
-
-def _series_legend(fig, names, **kwargs) -> None:
-    """One figure-level legend naming every input in its fixed color."""
     from matplotlib.lines import Line2D
 
     handles = [
         Line2D([0], [0], color=INPUT_COLORS[n], lw=2.4, label=INPUT_TEX[n])
         for n in names
     ]
-    fig.legend(
-        handles=handles,
-        loc=kwargs.pop("loc", "lower center"),
-        ncol=kwargs.pop("ncol", len(names)),
-        frameon=False,
-        fontsize=9,
-        **kwargs,
+    fs.legend_below(
+        fig,
+        handles,
+        [h.get_label() for h in handles],
+        scale=scale,
+        ncol=ncol if ncol is not None else len(names),
     )
 
 
@@ -681,7 +689,9 @@ def _fig_level_dependence(payload: dict, slug: str) -> None:
 
     names = payload["input_names"]
     levels = [lvl["level_m"] for lvl in payload["levels"]]
-    fig, axes = plt.subplots(1, 2, figsize=(11.0, 4.9), sharey=True)
+    width_in = 11.0
+    scale = fs.scale_for(width_in, _PLACEMENT["levels"])
+    fig, axes = plt.subplots(1, 2, figsize=(width_in, 5.3), sharey=True)
     for ax, which in zip(axes, ("S", "ST")):
         end_values = []
         for j, name in enumerate(names):
@@ -702,30 +712,34 @@ def _fig_level_dependence(payload: dict, slug: str) -> None:
             ax.plot(levels, vals, "o", color=color, markersize=4.5)
             ax.fill_between(levels, lo, hi, color=color, alpha=0.12, lw=0)
             end_values.append(vals[-1])
-        _direct_label_lines(ax, levels[-1], names, end_values)
-        _style_axis(ax)
-        label = "first-order $S_i$" if which == "S" else "total-effect $S_{Ti}$"
-        ax.set_title(f"{label}: transient failure indicator", fontsize=10, color=_INK)
-        ax.set_xlabel("conditioning level h [m T.P.]", fontsize=9, color=_INK_2)
+        _style_axis(ax, scale)
+        label = "First-order $S_i$" if which == "S" else "Total-effect $S_{Ti}$"
+        fs.panel_title(ax, f"{label}: transient failure indicator", scale=scale)
+        ax.set_xlabel(
+            "conditioning level h [m T.P.]",
+            fontsize=fs.pt("axis_label", scale),
+            color=_INK_2,
+        )
         pf = [
             _final_rung(lvl, "trans_indicator")["mean_y"] for lvl in payload["levels"]
         ]
         sec = ax.secondary_xaxis("top")
         sec.set_xticks(levels)
-        sec.set_xticklabels([f"{p:.2g}" for p in pf], fontsize=7)
+        sec.set_xticklabels([f"{p:.2g}" for p in pf], fontsize=fs.pt("small", scale))
         sec.tick_params(colors=_MUTED, length=0)
-        sec.set_xlabel("$P_f$(h)", fontsize=8, color=_MUTED)
+        sec.set_xlabel("$P_f$(h)", fontsize=fs.pt("small", scale), color=_MUTED)
         sec.spines["top"].set_visible(False)
-    axes[0].set_ylabel("Sobol' index", fontsize=9, color=_INK_2)
-    fig.suptitle(
-        f"Index rotation along the conditioning axis, "
-        f"{_section_label(payload['cross_section_id'])} "
-        "(a warmer climate moves rightward along this axis)",
-        fontsize=11,
-        color=_INK,
+    axes[0].set_ylabel(
+        "Sobol' index", fontsize=fs.pt("axis_label", scale), color=_INK_2
     )
-    _series_legend(fig, names)
-    fig.tight_layout(rect=(0, 0.06, 1, 0.95))
+    fs.title(
+        fig,
+        "Index rotation along the conditioning axis, "
+        f"{_section_label(payload['cross_section_id'])}",
+        scale=scale,
+    )
+    _series_legend(fig, names, scale=scale)
+    fs.layout(fig, scale=scale, legend_rows=1, extra_top_in=0.16 * scale)
     _save(fig, f"gsa_levels_{slug}")
 
 
@@ -739,7 +753,9 @@ def _fig_convergence(payload: dict, slug: str) -> None:
     n_vals = [r["n_base"] for r in rungs]
     final_st = np.array(rungs[-1]["ST_mean"])
     top = list(np.argsort(final_st)[::-1][:4])
-    fig, axes = plt.subplots(1, 2, figsize=(11.0, 4.7), sharex=True)
+    width_in = 11.0
+    scale = fs.scale_for(width_in, _PLACEMENT["convergence"])
+    fig, axes = plt.subplots(1, 2, figsize=(width_in, 5.0), sharex=True)
     for ax, which in zip(axes, ("S", "ST")):
         end_values, end_names = [], []
         for j in top:
@@ -753,23 +769,27 @@ def _fig_convergence(payload: dict, slug: str) -> None:
             end_values.append(vals[-1])
             end_names.append(name)
         ax.set_xscale("log", base=2)
-        _direct_label_lines(ax, n_vals[-1], end_names, end_values, min_value=0.0)
-        _style_axis(ax)
-        label = "first-order $S_i$" if which == "S" else "total-effect $S_{Ti}$"
-        ax.set_title(label, fontsize=10, color=_INK)
-        ax.set_xlabel("base sample N per replicate", fontsize=9, color=_INK_2)
-    axes[0].set_ylabel("Sobol' index (95 per cent CI)", fontsize=9, color=_INK_2)
-    drift = design["qois"]["trans_indicator"]["convergence"]
-    worst_drift = max(drift["drift_S_last_two_rungs"], drift["drift_ST_last_two_rungs"])
-    fig.suptitle(
-        f"Convergence ladder, transient indicator at h = "
-        f"{design['level_m']:.2f} m, {_section_label(payload['cross_section_id'])} "
-        f"(last-two-rungs drift {worst_drift:.3f})",
-        fontsize=11,
-        color=_INK,
+        _style_axis(ax, scale)
+        label = "First-order $S_i$" if which == "S" else "Total-effect $S_{Ti}$"
+        fs.panel_title(ax, label, scale=scale)
+        ax.set_xlabel(
+            "base sample N per replicate",
+            fontsize=fs.pt("axis_label", scale),
+            color=_INK_2,
+        )
+    axes[0].set_ylabel(
+        "Sobol' index (95 per cent CI)",
+        fontsize=fs.pt("axis_label", scale),
+        color=_INK_2,
     )
-    _series_legend(fig, [names[j] for j in top], ncol=4)
-    fig.tight_layout(rect=(0, 0.06, 1, 0.94))
+    fs.title(
+        fig,
+        "Convergence of the leading indices, "
+        f"{_section_label(payload['cross_section_id'])}",
+        scale=scale,
+    )
+    _series_legend(fig, [names[j] for j in top], scale=scale, ncol=4)
+    fs.layout(fig, scale=scale, legend_rows=1)
     _save(fig, f"gsa_convergence_{slug}")
 
 
@@ -779,7 +799,9 @@ def _fig_interaction_gap(payload: dict, slug: str) -> None:
 
     names = payload["input_names"]
     levels = [lvl["level_m"] for lvl in payload["levels"]]
-    fig, ax = plt.subplots(figsize=(7.4, 5.0))
+    width_in = 7.4
+    scale = fs.scale_for(width_in, _PLACEMENT["interaction"])
+    fig, ax = plt.subplots(figsize=(width_in, 5.0))
     end_values = []
     for j, name in enumerate(names):
         gap = [
@@ -799,20 +821,26 @@ def _fig_interaction_gap(payload: dict, slug: str) -> None:
             alpha=1.0 if emphasize else 0.55,
         )
         end_values.append(gap[-1])
-    _direct_label_lines(ax, levels[-1], names, end_values)
     ax.axhline(0.0, color="#c3c2b7", linewidth=0.9)
-    _style_axis(ax)
-    ax.set_xlabel("conditioning level h [m T.P.]", fontsize=9, color=_INK_2)
-    ax.set_ylabel(r"interaction gap $S_{Ti} - S_i$", fontsize=9, color=_INK_2)
-    ax.set_title(
-        f"Interaction involvement, transient indicator, "
-        f"{_section_label(payload['cross_section_id'])} "
-        "(the $C_e \\times k_\\mathrm{aq}$ interaction)",
-        fontsize=10,
-        color=_INK,
+    _style_axis(ax, scale)
+    ax.set_xlabel(
+        "conditioning level h [m T.P.]",
+        fontsize=fs.pt("axis_label", scale),
+        color=_INK_2,
     )
-    _series_legend(fig, names, ncol=4)
-    fig.tight_layout(rect=(0, 0.10, 1, 1))
+    ax.set_ylabel(
+        r"interaction gap $S_{Ti} - S_i$",
+        fontsize=fs.pt("axis_label", scale),
+        color=_INK_2,
+    )
+    fs.title(
+        fig,
+        "Interaction involvement of each input, "
+        f"{_section_label(payload['cross_section_id'])}",
+        scale=scale,
+    )
+    _series_legend(fig, names, scale=scale, ncol=len(names))
+    fs.layout(fig, scale=scale, legend_rows=1)
     _save(fig, f"gsa_interaction_{slug}")
 
 
@@ -829,7 +857,9 @@ def _fig_companions(comp: dict, baseline_payload: dict) -> None:
         run = comp["runs"][tag]
         series.append((tag, _final_rung(run["level"], "trans_indicator")))
 
-    fig, ax = plt.subplots(figsize=(10.5, 4.8))
+    width_in = 10.5
+    scale = fs.scale_for(width_in, _PLACEMENT["companions"])
+    fig, ax = plt.subplots(figsize=(width_in, 5.1))
     x = np.arange(len(names), dtype=float)
     width = 0.19
     hatches = [None, "//", None, "\\\\"]
@@ -837,7 +867,7 @@ def _fig_companions(comp: dict, baseline_payload: dict) -> None:
     bulk_level = comp.get("bulk_companion_level_m", BULK_COMPANION_LEVEL)
     labels = {
         "baseline (matrix, two-population)": "baseline (matrix, indep.)",
-        "bulk_d70": f"bulk $d_{{70}}$ (h={bulk_level:.1f} m, matched position)",
+        "bulk_d70": f"bulk $d_{{70}}$ (h={bulk_level:.1f} m T.P., matched)",
         "nataf_anchor_k_aq": r"Nataf $\rho$=0.6, $k_\mathrm{aq}$ full",
         "nataf_anchor_d_70": r"Nataf $\rho$=0.6, $d_{70}$ full",
     }
@@ -858,16 +888,14 @@ def _fig_companions(comp: dict, baseline_payload: dict) -> None:
             label=labels[tag],
         )
     ax.set_xticks(x)
-    ax.set_xticklabels([INPUT_TEX[n] for n in names], fontsize=10)
-    _style_axis(ax)
-    ax.set_ylabel(r"total-effect $S_{Ti}$ (Y1)", fontsize=9, color=_INK_2)
-    ax.set_title(
-        f"Companion runs (baseline and Nataf at h = "
-        f"{comp['design_level_m']:.2f} m): ranking robustness "
-        "(bars grouped per input; shade and hatch distinguish the cases)",
-        fontsize=10,
-        color=_INK,
+    ax.set_xticklabels([INPUT_TEX[n] for n in names], fontsize=fs.pt("tick", scale))
+    _style_axis(ax, scale)
+    ax.set_ylabel(
+        r"total-effect $S_{Ti}$, transient indicator",
+        fontsize=fs.pt("axis_label", scale),
+        color=_INK_2,
     )
+    fs.title(fig, "Ranking robustness across the companion runs", scale=scale)
     from matplotlib.patches import Patch
 
     legend_handles = [
@@ -880,19 +908,24 @@ def _fig_companions(comp: dict, baseline_payload: dict) -> None:
         )
         for s, (tag, _) in enumerate(series)
     ]
-    # Upper right is the seepage-length group, the tallest in the figure, and
-    # the legend stood on all four of its bars. The middle of the axis carries
-    # the four small inputs, so the legend clears every bar there without the
-    # panel needing extra headroom.
-    ax.legend(handles=legend_handles, frameon=False, fontsize=8, loc="upper center")
-    fig.tight_layout()
+    # The legend moved out of the panel and under it on 2026-09-09: the house
+    # style keeps series identity below the figure, and four case labels this
+    # long need the full width anyway.
+    fs.legend_below(
+        fig,
+        legend_handles,
+        [h.get_label() for h in legend_handles],
+        scale=scale,
+        ncol=2,
+    )
+    fs.layout(fig, scale=scale, legend_rows=2)
     _save(fig, "gsa_companions")
 
 
 def _save(fig, name: str) -> None:
     for path in _fig_paths(name):
         path.parent.mkdir(parents=True, exist_ok=True)
-        fig.savefig(path, dpi=160, facecolor="white")
+        fig.savefig(path, dpi=160, facecolor="white", bbox_inches="tight")
         print(f"wrote {path.relative_to(REPO_ROOT)}")
     import matplotlib.pyplot as plt
 

@@ -715,6 +715,28 @@ def canonical_event() -> dict[str, Any]:
 # --------------------------------------------------------------------------- #
 # serialisation                                                               #
 # --------------------------------------------------------------------------- #
+def _unjsonable(obj: Any) -> Any:
+    """Invert :func:`_jsonable` for the redraw path.
+
+    The record stores a non-finite float as its own name, so ``inf`` comes back
+    as the string ``"inf"``. Every figure builder reads floats, so the strings
+    have to become floats again before a redraw; anything else that happens to
+    be a string is left alone.
+    """
+    if isinstance(obj, dict):
+        return {k: _unjsonable(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_unjsonable(v) for v in obj]
+    if isinstance(obj, str) and obj in ("inf", "-inf", "nan"):
+        return float(obj)
+    return obj
+
+
+def load_record(path: Path = None) -> dict[str, Any]:
+    """Read the committed record back, ready for the figure builders."""
+    return _unjsonable(json.loads((path or RECORD_JSON).read_text(encoding="utf-8")))
+
+
 def _jsonable(obj: Any) -> Any:
     """JSON-safe rendering; non-finite floats become their string names."""
     if isinstance(obj, dict):
@@ -1502,7 +1524,8 @@ def _finite_rows(rows: Sequence[dict[str, Any]], key: str) -> list[dict[str, Any
 
 def figure_beta_curves(record: dict[str, Any]) -> Path:
     """Production fragility comparison on a reliability-index axis."""
-    figstyle.style()
+    scale = figstyle.scale_for(12.6, 1.0)
+    figstyle.style(scale)
     fig, axes = plt.subplots(2, 2, figsize=(12.6, 8.2), sharey=True)
     for ax, kp in zip(axes.ravel(), SECTIONS):
         stratum = record["production"][f"tokachi_kp{kp}_historical_matrix"]
@@ -1566,7 +1589,7 @@ def figure_beta_curves(record: dict[str, Any]) -> Path:
                 color=colour,
                 va="bottom",
             )
-        ax.set_title(f"KP {kp}", loc="left")
+        figstyle.panel_title(ax, f"KP {kp}", scale=scale)
         ax.set_xlabel("conditioning water level h  [m T.P.]")
         ax.set_ylim(-4.2, 5.2)
         # Shade only where the grid genuinely runs past the attainable stage;
@@ -1590,34 +1613,20 @@ def figure_beta_curves(record: dict[str, Any]) -> Path:
     for ax in axes[:, 0]:
         ax.set_ylabel(r"reliability index  $\beta = -\Phi^{-1}(P_f)$")
     handles, labels = axes[0, 0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc="upper right", bbox_to_anchor=(0.99, 1.0), ncols=2)
-    fig.suptitle(
-        "Backward erosion piping fragility on a reliability-index axis",
-        x=0.01,
-        ha="left",
-        fontsize=14,
-        fontweight="bold",
-        color=figstyle.INK,
+    figstyle.legend_below(fig, handles, labels, scale=scale)
+    figstyle.title(
+        fig,
+        "Fragility of the four cross-sections on a reliability-index axis",
+        scale=scale,
     )
-    fig.text(
-        0.01,
-        0.005,
-        "Historical scenario, matrix d$_{70}$, N = 10$^5$ Latin hypercube. Points "
-        "are raw Monte Carlo estimates; bars are the 95 % Clopper-Pearson "
-        "intervals mapped through $\\beta = -\\Phi^{-1}(P_f)$.\nLevels at which a "
-        "branch has zero or all realizations failing have an infinite $\\beta$ "
-        "and are omitted; the bound they support is tabulated instead.",
-        fontsize=8,
-        color=figstyle.MUTED,
-        va="bottom",
-    )
-    fig.tight_layout(rect=(0, 0.055, 1, 0.95))
+    figstyle.layout(fig, scale=scale, legend_rows=1)
     return _save(fig, "rq1_beta_curves.png")
 
 
 def figure_delta_beta_vs_stage(record: dict[str, Any]) -> Path:
     """dbeta against stage, with the ratio's decay underneath it."""
-    figstyle.style()
+    scale = figstyle.scale_for(14.6, 1.0)
+    figstyle.style(scale)
     fig, axes = plt.subplots(
         2,
         4,
@@ -1686,36 +1695,26 @@ def figure_delta_beta_vs_stage(record: dict[str, Any]) -> Path:
             color=figstyle.INK_2,
             va="bottom",
         )
-        top.set_title(f"KP {kp}", loc="left")
+        figstyle.panel_title(top, f"KP {kp}", scale=scale)
         top.set_ylim(0.0, 2.6)
         bottom.set_ylim(0.8, 600.0)
-        bottom.set_xlabel("conditioning water level h  [m T.P.]")
+        # Four panels across a text-width figure cannot each carry the
+        # long form of this label without the four running together.
+        bottom.set_xlabel("h  [m T.P.]")
     axes[0][0].set_ylabel(
         r"$\Delta\beta = \beta_\mathrm{trans} - \beta_\mathrm{static}$"
     )
     axes[1][0].set_ylabel("ratio  $B = P_{f,\mathrm{static}}/P_{f,\mathrm{trans}}$")
-    fig.suptitle(
-        "The same comparison under two metrics: the index difference holds, "
-        "the probability ratio decays",
-        x=0.01,
-        ha="left",
-        fontsize=14,
-        fontweight="bold",
-        color=figstyle.INK,
+    # The stamped line, which carried the run conditions, the bootstrap band
+    # and the warning about the two vertical scales, is the caption's sentence
+    # now. So is the description of the bottom row, which the caption used to
+    # send the reader to two other figures for.
+    figstyle.title(
+        fig,
+        "The index difference and the probability ratio against stage",
+        scale=scale,
     )
-    fig.text(
-        0.01,
-        0.005,
-        "Attainable stages only, matrix d$_{70}$, N = 10$^5$. Shaded band: 95 % "
-        "paired-bootstrap interval on $\\Delta\\beta$ over the shared "
-        "realization set. Note the different vertical scales: the top row is "
-        "linear over a range of about 1.4, the bottom row logarithmic over "
-        "nearly three decades.",
-        fontsize=8,
-        color=figstyle.MUTED,
-        va="bottom",
-    )
-    fig.tight_layout(rect=(0, 0.05, 1, 0.93))
+    figstyle.layout(fig, scale=scale)
     return _save(fig, "rq1_delta_beta_vs_stage.png")
 
 
@@ -1780,7 +1779,8 @@ def _beta_waterfall(ax: plt.Axes, entry: dict[str, Any]) -> None:
 
 def figure_beta_waterfall(record: dict[str, Any]) -> Path:
     """The additive dbeta ladder at the design and top attainable levels."""
-    figstyle.style()
+    scale = figstyle.scale_for(11.4, 1.0)
+    figstyle.style(scale)
     fig, axes = plt.subplots(2, 2, figsize=(11.4, 6.97))
     picks = (
         ("kp62_0", 46.39, "design flood level"),
@@ -1809,30 +1809,19 @@ def figure_beta_waterfall(record: dict[str, Any]) -> Path:
             fontsize=9,
             color=figstyle.INK,
         )
-    # A figure-level text rather than a suptitle: tight_layout reserves a
-    # band for a suptitle that is three times the title's own height, and the
-    # gap between the title and the panels is what that band becomes.
-    fig.text(
-        0.01,
-        0.99,
+    figstyle.title(
+        fig,
         "Where the static-to-transient index difference comes from",
-        va="top",
-        ha="left",
-        fontsize=14,
-        fontweight="bold",
-        color=figstyle.INK,
+        scale=scale,
     )
-    # The two stamped lines that used to run under the panels now live in the
-    # thesis caption, where they are set at caption size and can be read. The
-    # band they occupied comes off the figure's height, not into the panels,
-    # which keep the size they had.
-    fig.tight_layout(rect=(0, 0.006, 1, 0.965))
+    figstyle.layout(fig, scale=scale)
     return _save(fig, "rq1_beta_waterfall.png")
 
 
 def figure_hwl_dbeta_resolved(record: dict[str, Any]) -> Path:
     """KP 62.0 design-level index difference: N = 10^5 against N = 10^6."""
-    figstyle.style()
+    scale = figstyle.scale_for(13.4, 1.0)
+    figstyle.style(scale)
     rows = record["grids"]["kp62_0"]
     small = record["grids_n100000"]["kp62_0"]
     attainable = record["production"]["tokachi_kp62.0_historical_matrix"][
@@ -1963,10 +1952,10 @@ def figure_hwl_dbeta_resolved(record: dict[str, Any]) -> Path:
         )
 
     ax.set_ylabel(r"$\Delta\beta = \beta_\mathrm{trans} - \beta_\mathrm{static}$")
-    ax.set_title(
-        "KP 62.0 conventional-practice bias as an index difference\n"
-        "matrix $d_{70}$, adopted $L$ = 40 m, 225 s integration grid",
-        loc="left",
+    figstyle.title(
+        fig,
+        "The design-level index difference at KP 62.0, resolved",
+        scale=scale,
     )
     ax.legend(loc="lower right")
     ax.tick_params(labelbottom=False)
@@ -2008,7 +1997,8 @@ def figure_hwl_dbeta_resolved(record: dict[str, Any]) -> Path:
 
 def figure_kp57_dbeta_bound(record: dict[str, Any]) -> Path:
     """KP 57.4: a one-sided index bound at the design level, resolved above it."""
-    figstyle.style()
+    scale = figstyle.scale_for(10.6, 1.0)
+    figstyle.style(scale)
     rows = [r for r in record["grids"]["kp57_4"] if r["k_transient"] > 0]
     fig, (ax, axk) = plt.subplots(
         2,
@@ -2125,11 +2115,10 @@ def figure_kp57_dbeta_bound(record: dict[str, Any]) -> Path:
         )
     ax.set_ylabel(r"$\Delta\beta = \beta_\mathrm{trans} - \beta_\mathrm{static}$")
     ax.set_ylim(0.9, 2.9)
-    ax.set_title(
-        "KP 57.4 at $N = 10^6$: a bound at the design water level, a resolved "
-        "value one grid step above it\n"
-        "matrix $d_{70}$, brute force throughout",
-        loc="left",
+    figstyle.title(
+        fig,
+        "The index difference at KP 57.4: a bound and a resolved anchor",
+        scale=scale,
     )
     ax.legend(
         handles=[
@@ -2211,18 +2200,8 @@ def figure_kp57_dbeta_bound(record: dict[str, Any]) -> Path:
     axk.set_xlabel("conditioning water level [m T.P.]")
     axk.set_xlim(min(levels) - 0.28, max(levels) + 0.28)
     axk.legend(loc="upper right", fontsize=8, ncol=2)
-    fig.text(
-        0.01,
-        0.002,
-        "The resolution criteria R1 and R2 stay defined on the probability "
-        "ratio $B$, exactly as pre-registered; $\\beta$ is a monotone "
-        "re-expression of the same estimates and intervals, so a level "
-        "resolved on $B$ is resolved on $\\Delta\\beta$.",
-        fontsize=8,
-        color=figstyle.MUTED,
-        va="bottom",
-    )
-    fig.tight_layout(rect=(0, 0.035, 1, 1))
+    # The note on the resolution criteria is the caption's sentence now.
+    figstyle.layout(fig, scale=scale)
     return _save(fig, "rq1_kp57_4_dbeta_bound.png")
 
 
@@ -2289,6 +2268,16 @@ def build_record(n_replicates: int) -> dict[str, Any]:
     return record
 
 
+#: Every figure this driver publishes, in the order the thesis uses them.
+FIGURE_BUILDERS = (
+    figure_beta_curves,
+    figure_delta_beta_vs_stage,
+    figure_beta_waterfall,
+    figure_hwl_dbeta_resolved,
+    figure_kp57_dbeta_bound,
+)
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument(
@@ -2300,7 +2289,21 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--no-figures", action="store_true", help="write tables only, skip the figures"
     )
+    parser.add_argument(
+        "--plot-only",
+        action="store_true",
+        help=(
+            "redraw the figures from the committed record and exit. Writes no "
+            "record, runs no bootstrap."
+        ),
+    )
     args = parser.parse_args(argv)
+
+    if args.plot_only:
+        record = load_record()
+        for builder in FIGURE_BUILDERS:
+            print(f"wrote {builder(record).relative_to(REPO_ROOT)}")
+        return 0
 
     record = build_record(args.bootstrap)
     DECISIONS.mkdir(parents=True, exist_ok=True)
@@ -2314,13 +2317,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     print(f"wrote {BRIEF_MD.relative_to(REPO_ROOT)}")
 
     if not args.no_figures:
-        for builder in (
-            figure_beta_curves,
-            figure_delta_beta_vs_stage,
-            figure_beta_waterfall,
-            figure_hwl_dbeta_resolved,
-            figure_kp57_dbeta_bound,
-        ):
+        for builder in FIGURE_BUILDERS:
             path = builder(record)
             print(f"wrote {path.relative_to(REPO_ROOT)}")
     return 0

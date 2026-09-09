@@ -60,8 +60,16 @@ _GRID = "#e1e0d9"
 _REJECT = "#e34948"
 _ACCEPT = "#898781"
 _PRIOR = "#52514e"
+# The two limit states carry the thesis-wide pair, static blue and transient
+# red. Until 2026-09-09 this module had them the other way round: the transient
+# posterior was drawn in the static blue and the static posterior in KP 60.0's
+# section yellow, so a reader arriving from Chapter 6's fragility figures read
+# the panels backwards until they reached the panel titles.
+_POSTERIOR_TRANSIENT = "#e34948"
+_POSTERIOR_STATIC = "#2a78d6"
+#: The generic posterior hue, for the run-local diagnostics that show one
+#: posterior rather than the two limit states side by side.
 _POSTERIOR = "#2a78d6"
-_POSTERIOR_STATIC = "#eda100"
 
 _MAX_SCATTER_POINTS = 20000
 
@@ -256,22 +264,24 @@ def plot_fragility_update(
         which runs are promoted; see ``pipeline.PUBLICATION_FIGURES``.
     """
     fig, axes = plt.subplots(1, 2, figsize=(11.0, 4.6), sharey=True)
+    # Static first, transient second, which is the order every other paired
+    # figure in the thesis uses.
     panels = (
         (
-            "Transient (Pol 2024)",
-            prior_trans,
-            posterior.P_f_trans_post_raw,
-            posterior.binomial_ci["transient"],
-            posterior.bootstrap_bands["transient"],
-            _POSTERIOR,
-        ),
-        (
-            "Static (Sellmeijer 2011)",
+            "Static limit state",
             prior_static,
             posterior.P_f_static_post_raw,
             posterior.binomial_ci["static"],
             posterior.bootstrap_bands["static"],
             _POSTERIOR_STATIC,
+        ),
+        (
+            "Transient limit state",
+            prior_trans,
+            posterior.P_f_trans_post_raw,
+            posterior.binomial_ci["transient"],
+            posterior.bootstrap_bands["transient"],
+            _POSTERIOR_TRANSIENT,
         ),
     )
     floor = 0.5 / max(posterior.n_accepted, 2)
@@ -311,7 +321,7 @@ def plot_fragility_update(
             linewidth=0,
             elinewidth=0.9,
             capsize=2,
-            label="posterior (CP 95% CI)",
+            label="posterior, 95 per cent exact interval",
         )
         if z_toe_m is not None:
             ax.axvline(z_toe_m, color="#c3c2b7", linewidth=0.9)
@@ -321,7 +331,10 @@ def plot_fragility_update(
                 fontsize=7,
                 color=_MUTED,
                 rotation=90,
-                xytext=(2, 4),
+                # Back against its own rule: at +2 points it stood three pixels
+                # from the neighbouring posterior error bar and touched it at
+                # printed size, while sitting well clear of the line it labels.
+                xytext=(-8, 4),
                 textcoords="offset points",
             )
         if event_peak_m is not None:
@@ -335,13 +348,31 @@ def plot_fragility_update(
                 xytext=(2, 4),
                 textcoords="offset points",
             )
+        # The floor row is a display device, not a measurement: a marker on it
+        # is an exact zero. Neither the figure nor its caption said so, and a
+        # reader had every reason to take it for a probability of about 5e-6.
+        ax.axhline(floor, color="#c3c2b7", lw=0.9, zorder=1)
         ax.set_yscale("log")
         ax.set_title(label, fontsize=10, color=_INK)
         ax.set_xlabel("conditioning stage $h_i$ [m T.P.]", fontsize=9, color=_INK_2)
     axes[0].set_ylabel("$P_f\\,(h_i)$", fontsize=9, color=_INK_2)
-    axes[0].legend(frameon=False, fontsize=8, loc="lower right")
+    handles, labels = axes[0].get_legend_handles_labels()
+    handles.append(
+        plt.Line2D([], [], color="#c3c2b7", lw=0.9, label="display floor, exact zero")
+    )
+    labels.append("display floor, exact zero")
+    fig.legend(
+        handles,
+        labels,
+        loc="upper center",
+        bbox_to_anchor=(0.5, 0.02),
+        ncol=4,
+        frameon=False,
+        fontsize=8,
+    )
     if title:
-        fig.suptitle(title, fontsize=11, color=_INK)
+        fig.suptitle(title, fontsize=12, fontweight="bold", color=_INK, y=0.995)
+    fig.tight_layout(rect=(0, 0.10, 1, 0.965))
     return _save(fig, path, publication_path)
 
 
@@ -355,7 +386,7 @@ def plot_decomposition(
         (
             "transient_only_reject",
             "survives static, FAILS transient\n(marginal transient information)",
-            _POSTERIOR,
+            _POSTERIOR_TRANSIENT,
         ),
         ("static_only_reject", "fails static, survives transient", _POSTERIOR_STATIC),
         ("both_reject", "fails both", _REJECT),

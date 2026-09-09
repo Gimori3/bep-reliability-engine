@@ -552,16 +552,29 @@ def test_phase2_figures_only_defaults_off_and_never_persists() -> None:
 # --------------------------------------------------------------------------- #
 
 
-def test_the_reach_distribution_figure_is_captioned_as_context_not_the_answer() -> None:
+def test_the_reach_distribution_figure_does_not_claim_to_answer_the_question() -> None:
     """110 of 114 segments have no BEP source and are surface-only lower bounds.
 
     Campaign decision 5 scopes RQ3/RQ4 to the four characterised sections, so
     the 114-segment distribution must never be presented as the RQ4 result.
+
+    Until 2026-09-09 the figure shouted that qualification in its own title,
+    in capitals, and this test pinned the string. Conventions section 9.3.2
+    then moved every such sentence to the caption, where it is set at caption
+    size and can be revised. What survives here is the half the engine can
+    still check: the four-section answer figure exists, and the reach figure's
+    own title claims nothing about the sub-question.
     """
     source = (REPO / "scripts" / "phase3_figures.py").read_text(encoding="utf-8")
     assert "fig_rq4_four_sections" in source
-    assert "REACH CONTEXT (not the RQ4 answer)" in source
-    assert "110 of 114" in source
+    assert "def fig_climate_shift" in source
+    title_line = next(
+        line
+        for line in source.splitlines()
+        if "Climate shift of the annual system failure probability" in line
+    )
+    assert "RQ4" not in title_line
+    assert "answer" not in title_line.lower()
 
 
 def test_no_guard_in_this_file_skips_on_a_tracked_path() -> None:
