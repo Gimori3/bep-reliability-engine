@@ -400,6 +400,16 @@ right panel, and the two groups move further apart. 6.5's two superseded-estimat
 labels are lowered again so that each label's bottom line sits level with the
 marker it belongs to, measured on the render rather than judged by eye.
 
+**The round-4 ruling, 2026-09-11: 62 of 63 approved.** 5.8 and 8.1 are approved
+and in the report. 6.5 came back once more: its two anchor callouts are now boxed,
+moved from the top left to the top right of the right-hand panel, and each is
+joined to the conditioning level it describes by a leader. The leader takes its x
+from that level in data coordinates and its y from a fraction of the panel height,
+so it lands on its own line whatever the axis limits do and the two leaders do not
+cross; the arrow terminates exactly at the target rather than being shrunk back
+from it, which is what makes it touch the line by construction rather than by
+adjustment.
+
 Standing exceptions: 6.5 keeps its small upper-left legend, 6.12 uses separate
 legends beneath its two panels, 5.7 retains its compact printed-point table with
 a 7 pt floor, and H.3/H.4 keep the shared legend below because their top-right

@@ -1932,9 +1932,21 @@ def figure_hwl_dbeta_resolved(record: dict[str, Any]) -> Path:
     # is the one the reported interval comes from; taking the sweep's own draw
     # here printed a second interval for a number the report quotes once.
     anchor = record["design_anchors"]["kp62_0"]
-    for level, note, dy in (
-        (46.39, "A1  design HWL", 0.99),
-        (46.50, "A2  nearest grid level", 0.74),
+    # Each callout is a box in the top right, with a leader to the vertical
+    # line it describes. The leader's tip takes its x from the anchor level in
+    # data coordinates, so it lands on that line whatever the axis limits do,
+    # and its y from a fraction of the panel height, set so the two leaders do
+    # not cross. The upper right of this panel is clear: the curve and both
+    # superseded estimates sit in its lower third.
+    callout_box = {
+        "facecolor": figstyle.SURFACE,
+        "edgecolor": figstyle.BASELINE,
+        "boxstyle": "round,pad=0.45",
+        "linewidth": 0.8,
+    }
+    for level, note, dy, y_tip in (
+        (46.39, "A1  design HWL", 0.985, 0.66),
+        (46.50, "A2  nearest grid level", 0.68, 0.44),
     ):
         row = _find(usable, level)
         quoted = anchor if abs(anchor["level_m_msl"] - level) < 1e-9 else row
@@ -1945,12 +1957,27 @@ def figure_hwl_dbeta_resolved(record: dict[str, Any]) -> Path:
             rf"$\Delta\beta$ = {row['delta_beta']:.2f} {_ci(quoted['delta_beta_ci'])}"
             f"\n{row['k_transient']} transient failures\n"
             f"$B$ = {row['B']:.1f}, resolved",
-            (0.03, dy),
-            xycoords="axes fraction",
+            xy=(row["level_m_msl"], y_tip),
+            xycoords=("data", "axes fraction"),
+            xytext=(0.955, dy),
+            textcoords="axes fraction",
             fontsize=figstyle.pt("small", scale),
             color=figstyle.INK,
-            ha="left",
+            ha="right",
             va="top",
+            bbox=callout_box,
+            arrowprops={
+                "arrowstyle": "-|>",
+                "color": figstyle.MUTED,
+                "lw": 0.9,
+                # No shrink at the tip: the arrow is meant to touch the line
+                # it names, and its x is that line's own coordinate, so
+                # terminating exactly at the target puts it there by
+                # construction rather than by adjustment.
+                "shrinkB": 0.0,
+                "mutation_scale": 11,
+            },
+            zorder=7,
         )
 
     ax.set_ylabel(r"$\Delta\beta = \beta_\mathrm{trans} - \beta_\mathrm{static}$")
