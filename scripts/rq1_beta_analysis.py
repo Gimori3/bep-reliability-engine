@@ -1914,7 +1914,10 @@ def figure_hwl_dbeta_resolved(record: dict[str, Any]) -> Path:
             rf"$\Delta\beta = {row['delta_beta']:.2f}$",
             (row["level_m_msl"], row["delta_beta"]),
             textcoords="offset points",
-            xytext=((-8, 8) if i == 0 else (10, 12)),
+            # Lowered from (8, 12) at the author's request: the upper label
+            # was running into the anchor block above it. The offsets keep
+            # each label clear of its own 6 pt marker.
+            xytext=((-8, 3) if i == 0 else (10, 6)),
             fontsize=figstyle.pt("small", scale),
             color=figstyle.RED,
             ha="right" if i == 0 else "left",
