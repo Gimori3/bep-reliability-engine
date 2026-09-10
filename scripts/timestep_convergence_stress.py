@@ -712,7 +712,9 @@ def make_figure(
     import matplotlib
 
     matplotlib.use("Agg")
+    import _figstyle as fs
     import matplotlib.pyplot as plt
+    from matplotlib.lines import Line2D
 
     ink = "#0b0b0b"
     ink2 = "#52514e"
@@ -720,7 +722,6 @@ def make_figure(
     grid = "#e1e0d9"
     baseline = "#c3c2b7"
     surface = "#fcfcfb"
-    section_colors = ["#2a78d6", "#1baf7a"]
 
     plt.rcParams.update(
         {
@@ -741,12 +742,14 @@ def make_figure(
             "axes.facecolor": surface,
         }
     )
+    scale = fs.scale_for(10.5, 0.95)
+    fs.style(scale)
 
     sections = payload["sections"]
     primary_id = payload["primary_section"]
     primary = sections[primary_id]
 
-    fig, axes = plt.subplots(2, 2, figsize=(10.5, 7.6))
+    fig, axes = plt.subplots(2, 2, figsize=(10.5, 9.0))
     ax_a, ax_b, ax_c, ax_d = axes.flat
 
     # (a) shapes ------------------------------------------------------------
@@ -760,7 +763,7 @@ def make_figure(
         # The ensemble member is named by what it is, not by its record id:
         # a run identifier is implementation vocabulary the thesis excludes
         # (conventions section 9.3.1), and the id is in the evidence JSON.
-        label="flashiest historical member",
+        label="flashiest member",
     )
     ax_a.plot(
         t_h,
@@ -768,12 +771,11 @@ def make_figure(
         color=muted,
         lw=1.2,
         ls="--",
-        label="canonical production shape",
+        label="production shape",
     )
     ax_a.set_xlabel("time [h]")
     ax_a.set_ylabel("normalized stage shape [-]")
-    ax_a.set_title("(a) Selected flashiest d4PDF member", loc="left", fontsize=10)
-    ax_a.legend(frameon=False, fontsize=8, loc="upper right")
+    fs.panel_title(ax_a, "Hydrograph shapes", letter="A", scale=scale)
 
     # (b) trajectories -------------------------------------------------------
     for dt_key, tr in traj["by_dt"].items():
@@ -792,7 +794,7 @@ def make_figure(
         traj["l_c_m"],
         r" $l_c$",
         color=muted,
-        fontsize=8,
+        fontsize=fs.pt("annotation", scale),
         va="bottom",
         ha="right",
         transform=ax_b.get_yaxis_transform(),
@@ -803,28 +805,14 @@ def make_figure(
         traj["L_m"],
         r" $L$ (breach)",
         color=muted,
-        fontsize=8,
+        fontsize=fs.pt("annotation", scale),
         va="bottom",
         ha="right",
         transform=ax_b.get_yaxis_transform(),
     )
     ax_b.set_xlabel("time [h]")
     ax_b.set_ylabel(r"pipe length $l(t)$ [m]")
-    ax_b.set_title(
-        f"(b) Worst-case trajectories at h = {traj['showcase_level_m_msl']:g} m MSL"
-        f" ({_section_label(primary_id)})",
-        loc="left",
-        fontsize=10,
-    )
-    # Nudged right and down from the axes corner so the jump at t = 12 h
-    # falls in the gap between the line samples and the entry text, and the
-    # block of entries sits between the two flat branches that bracket it.
-    ax_b.legend(
-        frameon=False,
-        fontsize=8,
-        loc="upper left",
-        bbox_to_anchor=(0.016, 0.982),
-    )
+    fs.panel_title(ax_b, "Pipe-length trajectories", letter="B", scale=scale)
 
     # (c) terminal l_e vs level ----------------------------------------------
     grid_block = primary["refined_grid"] or primary["production_grid"]
@@ -846,16 +834,11 @@ def make_figure(
         )
     ax_c.set_xlabel("conditioning stage h [m T.P.]")
     ax_c.set_ylabel(r"terminal eroded length $l_e$ [m]")
-    ax_c.set_title(
-        "(c) Terminal $l_e$ vs stage, worst-case "
-        rf"$\theta$ ({_section_label(primary_id)})",
-        loc="left",
-        fontsize=10,
-    )
-    ax_c.legend(frameon=False, fontsize=8, loc="lower right")
+    fs.panel_title(ax_c, "Terminal eroded length", letter="C", scale=scale)
 
     # (d) convergence --------------------------------------------------------
-    for color, (section_id, block) in zip(section_colors, sections.items()):
+    for section_id, block in sections.items():
+        color = fs.SECTION_COLORS[_section_label(section_id).replace(" ", "")]
         grid_block = block["refined_grid"] or block["production_grid"]
         pairs = grid_block["metrics"]["pairs"]
         xs, ys, flips = [], [], []
@@ -902,7 +885,7 @@ def make_figure(
         REL_CRITERION,
         "1 per cent criterion ",
         color=muted,
-        fontsize=8,
+        fontsize=fs.pt("small", scale),
         ha="right",
         va="bottom",
         transform=ax_d.get_yaxis_transform(),
@@ -913,34 +896,28 @@ def make_figure(
     ax_d.set_xticks(tick_dts)
     ax_d.set_xticklabels(
         ["3600", "1800", "900", "450", "225", "112.5", "56.25", "28.125"],
-        fontsize=8,
+        fontsize=fs.pt("tick", scale),
+        rotation=45,
+        ha="right",
     )
     ax_d.minorticks_off()
-    ax_d.set_xlabel("Δt [s] (error of Δt vs Δt/2, plotted at Δt)")
-    ax_d.set_ylabel(r"max relative change in terminal $l_e$ [-]")
-    ax_d.set_title(
-        "(d) Successive-halving convergence (open markers: branch flips)",
-        loc="left",
-        fontsize=10,
-    )
-    ax_d.legend(frameon=False, fontsize=8, loc="upper right")
+    ax_d.set_xlabel("integration step Δt [s]")
+    ax_d.set_ylabel(r"max relative change in $l_e$ [-]")
+    fs.panel_title(ax_d, "Successive-halving convergence", letter="D", scale=scale)
     ax_d.invert_xaxis()
 
-    # One line, set as large as the canvas allows, with the band above the
-    # panels cut to what the line itself needs.
-    fig.suptitle(
-        "Worst-case forward-Euler timestep stress test: "
-        r"p99 $k_\mathrm{aq}$ $\times$ p99 $C_e$ $\times$ p01 $D_\mathrm{bl}$ "
-        "on the flashiest d4PDF rising limb",
-        fontsize=13,
-        x=0.02,
-        y=0.995,
-        va="top",
-        ha="left",
+    fs.title(fig, "Integration-step convergence under rapid loading", scale=scale)
+    legend = {}
+    for ax in axes.flat:
+        handles, labels = ax.get_legend_handles_labels()
+        legend.update(zip(labels, handles))
+    legend["branch changes"] = Line2D(
+        [], [], marker="o", ls="none", mfc=surface, mec=ink2
     )
-    fig.tight_layout(rect=(0, 0, 1, 1.0))
+    fs.legend_below(fig, list(legend.values()), list(legend), scale=scale, ncol=3)
+    fs.layout(fig, scale=scale, legend_rows=(len(legend) + 2) // 3)
     figure_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(figure_path, dpi=220)
+    fig.savefig(figure_path, dpi=220, bbox_inches="tight")
     plt.close(fig)
     print(f"figure written: {figure_path}", flush=True)
 

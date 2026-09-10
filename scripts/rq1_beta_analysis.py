@@ -1833,7 +1833,7 @@ def figure_hwl_dbeta_resolved(record: dict[str, Any]) -> Path:
         2,
         width_ratios=[1.55, 1.0],
         height_ratios=[2.5, 1.0],
-        hspace=0.14,
+        hspace=0.42,
         wspace=0.22,
     )
     ax = fig.add_subplot(gs[0, 0])
@@ -1852,7 +1852,7 @@ def figure_hwl_dbeta_resolved(record: dict[str, Any]) -> Path:
                 color=figstyle.BLUE,
                 alpha=0.20,
                 lw=0,
-                label="95 % paired interval, $N = 10^6$" if legend else None,
+                label="95% paired interval" if legend else None,
             )
         axis.plot(
             [r["level_m_msl"] for r in usable],
@@ -1863,8 +1863,8 @@ def figure_hwl_dbeta_resolved(record: dict[str, Any]) -> Path:
             zorder=3,
         )
         for marker, keep, text in (
-            ("o", True, "$N = 10^6$, resolved (R1 and R2 met on $B$)"),
-            ("x", False, "$N = 10^6$, not resolved"),
+            ("o", True, "$N = 10^6$: resolved"),
+            ("x", False, "$N = 10^6$: unresolved"),
         ):
             sub = [r for r in usable if bool(r["resolved"]) is keep]
             if not sub:
@@ -1907,18 +1907,15 @@ def figure_hwl_dbeta_resolved(record: dict[str, Any]) -> Path:
                 lw=1.6,
                 capsize=4,
                 zorder=5,
-                label=(
-                    "$N = 10^5$ record (superseded)"
-                    if (axis is ax and i == 0)
-                    else None
-                ),
+                label=("$N = 10^5$: superseded" if (axis is ax and i == 0) else None),
             )
         axz.annotate(
-            f"{row['delta_beta']:.2f} on {row['k_transient']} rows",
+            f"{row['k_transient']} failures\n"
+            rf"$\Delta\beta = {row['delta_beta']:.2f}$",
             (row["level_m_msl"], row["delta_beta"]),
             textcoords="offset points",
             xytext=((-8, 8) if i == 0 else (10, 12)),
-            fontsize=8.5,
+            fontsize=figstyle.pt("small", scale),
             color=figstyle.RED,
             ha="right" if i == 0 else "left",
             va="bottom",
@@ -1932,7 +1929,7 @@ def figure_hwl_dbeta_resolved(record: dict[str, Any]) -> Path:
     anchor = record["design_anchors"]["kp62_0"]
     for level, note, dy in (
         (46.39, "A1  design HWL", 0.99),
-        (46.50, "A2  nearest grid level", 0.63),
+        (46.50, "A2  nearest grid level", 0.74),
     ):
         row = _find(usable, level)
         quoted = anchor if abs(anchor["level_m_msl"] - level) < 1e-9 else row
@@ -1941,11 +1938,11 @@ def figure_hwl_dbeta_resolved(record: dict[str, Any]) -> Path:
         axz.annotate(
             f"{note}\n{row['level_m_msl']:.2f} m T.P.\n"
             rf"$\Delta\beta$ = {row['delta_beta']:.2f} {_ci(quoted['delta_beta_ci'])}"
-            f"\n{row['k_transient']} transient rows, resolved\n"
-            f"($B$ = {row['B']:.1f}, on which R1 and R2 are defined)",
+            f"\n{row['k_transient']} transient failures\n"
+            f"$B$ = {row['B']:.1f}, resolved",
             (0.03, dy),
             xycoords="axes fraction",
-            fontsize=8.5,
+            fontsize=figstyle.pt("small", scale),
             color=figstyle.INK,
             ha="left",
             va="top",
@@ -1954,10 +1951,18 @@ def figure_hwl_dbeta_resolved(record: dict[str, Any]) -> Path:
     ax.set_ylabel(r"$\Delta\beta = \beta_\mathrm{trans} - \beta_\mathrm{static}$")
     figstyle.title(
         fig,
-        "The design-level index difference at KP 62.0, resolved",
+        "Design-level index difference at KP 62.0",
         scale=scale,
     )
-    ax.legend(loc="lower right")
+    ax.legend(
+        loc="upper left",
+        fontsize=figstyle.pt("small", scale),
+        frameon=True,
+        facecolor=figstyle.SURFACE,
+        edgecolor="none",
+        framealpha=0.96,
+    )
+    figstyle.panel_title(ax, "Index difference across stages", scale=scale)
     ax.tick_params(labelbottom=False)
     ax.set_ylim(0.0, 2.6)
 
@@ -1979,7 +1984,8 @@ def figure_hwl_dbeta_resolved(record: dict[str, Any]) -> Path:
     axk.set_ylim(0.7, 2e8)
     axk.set_ylabel("transient\nfailing rows")
     axk.set_xlabel("conditioning water level [m T.P.]")
-    axk.legend(loc="upper left")
+    axk.legend(loc="upper left", fontsize=figstyle.pt("small", scale))
+    figstyle.panel_title(axk, "Transient failure counts", scale=scale)
     ax.set_xlim(min(kx) - 0.4, max(kx) + 0.4)
     # The two callout blocks need clear sky above the curve, but the old range
     # gave them two thirds of the panel and left the data in a strip along the
@@ -1989,9 +1995,10 @@ def figure_hwl_dbeta_resolved(record: dict[str, Any]) -> Path:
     axz.set_ylim(0.64, 1.62)
     axz.set_xlabel("conditioning water level [m T.P.]")
     axz.set_ylabel(r"$\Delta\beta$")
-    axz.set_title("The anchor neighborhood, in index terms", loc="left")
+    figstyle.panel_title(axz, "Anchor neighbourhood", scale=scale)
     figstyle.mark_hypothetical(ax, attainable, label=False)
-    figstyle.mark_hypothetical(axk, attainable, label_y=0.97)
+    figstyle.mark_hypothetical(axk, attainable, label=False)
+    figstyle.layout(fig, scale=scale)
     return _save(fig, "rq1_hwl_dbeta_resolved.png")
 
 

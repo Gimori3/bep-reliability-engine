@@ -73,6 +73,19 @@ _POSTERIOR = "#2a78d6"
 
 _MAX_SCATTER_POINTS = 20000
 
+# Publication sizes mirror scripts/_figstyle.PRINT_PT and its measured bands.
+# The package must not import a driver module. Keep this small display-only
+# table in sync; a test compares it against the driver house style.
+_FRAGILITY_PRINT_PT = {
+    "title": 11.0,
+    "panel_title": 9.0,
+    "axis_label": 8.5,
+    "legend": 8.5,
+    "tick": 8.0,
+    "annotation": 8.0,
+    "small": 7.0,
+}
+
 
 def _style(ax: plt.Axes) -> None:
     ax.grid(True, axis="both", color=_GRID, linewidth=0.7)
@@ -263,7 +276,10 @@ def plot_fragility_update(
         section 9.3). None (default) writes only ``path``. The caller decides
         which runs are promoted; see ``pipeline.PUBLICATION_FIGURES``.
     """
-    fig, axes = plt.subplots(1, 2, figsize=(11.0, 4.6), sharey=True)
+    width, height = 11.0, 4.9
+    scale = width / (0.95 * (483.69687 / 72.27))
+    points = {key: value * scale for key, value in _FRAGILITY_PRINT_PT.items()}
+    fig, axes = plt.subplots(1, 2, figsize=(width, height), sharey=True)
     # Static first, transient second, which is the order every other paired
     # figure in the thesis uses.
     panels = (
@@ -287,6 +303,7 @@ def plot_fragility_update(
     floor = 0.5 / max(posterior.n_accepted, 2)
     for ax, (label, prior, post, ci, band, color) in zip(axes, panels):
         _style(ax)
+        ax.tick_params(labelsize=points["tick"], colors=_INK_2)
         ax.plot(
             grid,
             np.maximum(prior, floor),
@@ -294,7 +311,7 @@ def plot_fragility_update(
             color=_PRIOR,
             markersize=3.5,
             linewidth=1.4,
-            label="prior (Phase 1)",
+            label="prior",
         )
         lo, hi = band
         ax.fill_between(
@@ -327,25 +344,27 @@ def plot_fragility_update(
             ax.axvline(z_toe_m, color="#c3c2b7", linewidth=0.9)
             ax.annotate(
                 "toe",
-                (z_toe_m, floor),
-                fontsize=7,
+                (z_toe_m, 0.97),
+                xycoords=ax.get_xaxis_transform(),
+                fontsize=points["annotation"],
                 color=_MUTED,
                 rotation=90,
-                # Back against its own rule: at +2 points it stood three pixels
-                # from the neighbouring posterior error bar and touched it at
-                # printed size, while sitting well clear of the line it labels.
-                xytext=(-8, 4),
+                # Above the floor-row error bars, which otherwise touch the
+                # label once it is enlarged to its printed-page type size.
+                xytext=(-4 * scale, 0),
                 textcoords="offset points",
+                ha="right",
+                va="top",
             )
         if event_peak_m is not None:
             ax.axvline(event_peak_m, color=_REJECT, linewidth=1.1, linestyle="--")
             ax.annotate(
                 "2016 peak",
                 (event_peak_m, floor),
-                fontsize=7,
+                fontsize=points["annotation"],
                 color=_REJECT,
                 rotation=90,
-                xytext=(2, 4),
+                xytext=(2 * scale, 4 * scale),
                 textcoords="offset points",
             )
         # The floor row is a display device, not a measurement: a marker on it
@@ -353,26 +372,59 @@ def plot_fragility_update(
         # reader had every reason to take it for a probability of about 5e-6.
         ax.axhline(floor, color="#c3c2b7", lw=0.9, zorder=1)
         ax.set_yscale("log")
-        ax.set_title(label, fontsize=10, color=_INK)
-        ax.set_xlabel("conditioning stage $h_i$ [m T.P.]", fontsize=9, color=_INK_2)
-    axes[0].set_ylabel("$P_f\\,(h_i)$", fontsize=9, color=_INK_2)
-    handles, labels = axes[0].get_legend_handles_labels()
-    handles.append(
-        plt.Line2D([], [], color="#c3c2b7", lw=0.9, label="display floor, exact zero")
-    )
-    labels.append("display floor, exact zero")
-    fig.legend(
+        ax.set_title(label, fontsize=points["panel_title"], color=_INK)
+        ax.set_xlabel(
+            "conditioning stage $h_i$ [m T.P.]",
+            fontsize=points["axis_label"],
+            color=_INK_2,
+        )
+    axes[0].set_ylabel("$P_f\\,(h_i)$", fontsize=points["axis_label"], color=_INK_2)
+    handles = [
+        plt.Line2D([], [], color=_PRIOR, marker="o", lw=1.4),
+        plt.Line2D([], [], color=_INK, marker="s", ls="none"),
+        plt.Rectangle((0, 0), 1, 1, color=_MUTED, alpha=0.15, lw=0),
+        plt.Line2D([], [], color="#c3c2b7", lw=0.9),
+    ]
+    key = fig.legend(
         handles,
-        labels,
+        [
+            "prior",
+            "posterior, 95% exact interval",
+            "posterior bootstrap band",
+            "display floor: exact zero",
+        ],
         loc="upper center",
-        bbox_to_anchor=(0.5, 0.02),
-        ncol=4,
+        ncol=2,
         frameon=False,
-        fontsize=8,
+        fontsize=points["legend"],
+        borderaxespad=0,
     )
-    if title:
-        fig.suptitle(title, fontsize=12, fontweight="bold", color=_INK, y=0.995)
-    fig.tight_layout(rect=(0, 0.10, 1, 0.965))
+    heading = fig.suptitle(
+        title or "Prior and posterior fragility",
+        fontsize=points["title"],
+        fontweight="bold",
+        color=_INK,
+    )
+    fig.tight_layout(
+        rect=(
+            0,
+            4 * points["legend"] / 72 / height,
+            1,
+            1 - 1.55 * points["title"] / 72 / height,
+        )
+    )
+    fig.canvas.draw()
+    renderer = fig.canvas.get_renderer()
+    boxes = [
+        ax.get_tightbbox(renderer).transformed(fig.transFigure.inverted())
+        for ax in axes
+    ]
+    heading.set_y(max(box.y1 for box in boxes) + 0.55 * points["title"] / 72 / height)
+    heading.set_va("bottom")
+    key.set_bbox_to_anchor(
+        (0.5, min(box.y0 for box in boxes) - 0.75 * points["legend"] / 72 / height),
+        transform=fig.transFigure,
+    )
     return _save(fig, path, publication_path)
 
 

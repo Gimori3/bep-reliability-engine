@@ -926,10 +926,10 @@ RANKING_PT = {
     "axis_label": 7.6,
     "tick": 7.0,
     "row_label": 7.0,
-    "legend": 6.8,
-    "note": 6.6,
-    "value": 6.4,
-    "inset": 6.2,
+    "legend": 7.0,
+    "note": 7.0,
+    "value": 7.0,
+    "inset": 7.0,
     "marker": 3.6,
     "marker_c": 2.2,
 }
@@ -942,7 +942,7 @@ RANKING_COLUMNS = {
     "break": 0.06,
     "log": 0.60,
     "gap_ab": 0.16,
-    "gap_bc": 0.36,
+    "gap_bc": 0.48,
     "right": 0.05,
 }
 #: Heights of the bands above and below the axes, in printed inches.
@@ -1377,9 +1377,10 @@ def figure_epistemic_ranking(
         labelpad=1.5 * scale,
     )
     axc.set_title(
-        "C  the top bracket has no single value",
+        "C  Leading bracket across stages",
         loc="left",
-        x=-0.03,
+        # Keep the title's figure coordinate while the axes move right.
+        x=(-0.03 * (w_c + 0.12) - 0.12) / w_c,
         fontsize=_rpt("panel_title"),
         pad=2.5 * scale,
     )
@@ -1391,7 +1392,7 @@ def figure_epistemic_ranking(
     axc.text(
         attainable_max_kp62 + 0.3,
         0.985,
-        "above the\nattainable stage",
+        "above the\nattainable\nstage",
         transform=axc.get_xaxis_transform(),
         fontsize=_rpt("inset"),
         color=figstyle.MUTED,
@@ -1399,22 +1400,7 @@ def figure_epistemic_ranking(
         va="top",
         linespacing=1.25,
     )
-    # ``get_yaxis_transform`` takes x as an axes fraction and y in data units,
-    # so the label tracks the unbounded strip whatever the finite maximum is.
-    # It sits above the arrow tips, the one band clear of every mark.
-    # Left-hand side. At the right it landed inside the shaded band, which
-    # means the grid extension above the attainable stage, so the one grey
-    # word near that band named something else entirely.
-    axc.text(
-        0.015,
-        y_unbounded * 3.1,
-        "unbounded",
-        transform=axc.get_yaxis_transform(),
-        fontsize=_rpt("inset"),
-        color=figstyle.MUTED,
-        ha="left",
-        va="bottom",
-    )
+    # The unbounded markers are identified once in the shared legend.
 
     handles = [
         plt.Line2D(
@@ -1457,7 +1443,7 @@ def figure_epistemic_ranking(
     fig.text(
         0.5,
         1.0 - 0.010,
-        "The aquifer conductivity is the largest bracket at every anchor",
+        "Epistemic bracket spans at four cross-sections",
         fontsize=_rpt("suptitle"),
         fontweight="bold",
         color=figstyle.INK,
@@ -1823,7 +1809,7 @@ RQ4_ARM_STYLE = {
         "filled": False,
     },
     "lambda_ac_40m": {
-        "label": r"$\lambda_\mathrm{ac}$ = 40 m (conservative bracket end)",
+        "label": r"$\lambda_\mathrm{ac}$ = 40 m",
         "color": figstyle.ORANGE,
         "marker": "o",
         "filled": True,
@@ -1835,7 +1821,7 @@ RQ4_ARM_STYLE = {
         "filled": True,
     },
     "prior_bep": {
-        "label": "prior BEP curves (no 2016 update)",
+        "label": "prior piping curves",
         "color": figstyle.MAGENTA,
         "marker": "D",
         "filled": True,
@@ -1857,6 +1843,7 @@ def figure_rq4_brackets(slice_: dict[str, Any]) -> tuple[Path, list[dict[str, An
     # question, and two independent log axes would silently rescale it.
     width_in = 13.4
     scale = figstyle.scale_for(width_in, 1.0)
+    figstyle.style(scale)
     fig, axes = plt.subplots(1, 2, figsize=(width_in, 4.97), sharey=True, sharex=True)
 
     rows: list[dict[str, Any]] = []
@@ -1904,7 +1891,7 @@ def figure_rq4_brackets(slice_: dict[str, Any]) -> tuple[Path, list[dict[str, An
                 # Halfway to the next row reads as belonging to that row; the
                 # label has to stay in its own row's half of the gap.
                 xytext=(-6, -13),
-                fontsize=8,
+                fontsize=figstyle.pt("small", scale),
                 color=figstyle.INK_2,
                 ha="right",
                 va="center",
@@ -1942,12 +1929,11 @@ def figure_rq4_brackets(slice_: dict[str, Any]) -> tuple[Path, list[dict[str, An
             ls="none",
             ms=11,
             mew=1.8,
-            label=r"production deliverable, labeled with its absolute "
-            r"$P_f$/yr (matrix $d_{70}$, posterior, $\lambda_\mathrm{ac}$ = 250 m)",
+            label=r"production (absolute $P_f$/yr)",
         )
     )
     figstyle.legend_below(
-        fig, handles, [h.get_label() for h in handles], scale=scale, ncol=2
+        fig, handles, [h.get_label() for h in handles], scale=scale, ncol=3
     )
     figstyle.title(
         fig,
@@ -2070,6 +2056,7 @@ def figure_epistemic_knobs(
     # finding, and per-panel autoscaling would hide it.
     width_in = 13.6
     scale = figstyle.scale_for(width_in, 1.0)
+    figstyle.style(scale)
     fig, axes = plt.subplots(2, 2, figsize=(width_in, 7.6), sharex=True, sharey=True)
     rows: list[dict[str, Any]] = []
 
@@ -2188,13 +2175,11 @@ def figure_epistemic_knobs(
         ax.axhline(1.0, color=figstyle.BASELINE, lw=1.0)
         ax.set_yscale("log")
         ax.set_ylim(3e-3, 4e2)
-        ax.set_title(title, loc="left")
-        figstyle.mark_hypothetical(
-            ax, attainable_max_kp62, label=(ax is axes[0][1]), label_y=0.97
-        )
+        figstyle.panel_title(ax, title[3:], letter=title[0], scale=scale)
+        figstyle.mark_hypothetical(ax, attainable_max_kp62, label=False)
 
     for ax in axes[:, 0]:
-        ax.set_ylabel("factor on the production $P_f$")
+        ax.set_ylabel("probability ratio")
     for ax in axes[1]:
         ax.set_xlabel("conditioning water level [m T.P.]")
 
@@ -2204,30 +2189,7 @@ def figure_epistemic_knobs(
     # measured at two sections and at its own stage: the whole point of the
     # anchors marked below is that "the shoulder" names different stages in
     # different records.
-    axes[0][0].annotate(
-        r"$m_p$ raises the static branch $\times$3.0 to 6.0 at the deepest"
-        "\nreachable level, falling through "
-        r"$\times$1.3 to 1.7 at the marked"
-        "\nrising limb, to within 2 % of 1 above the transition midpoint",
-        xy=(0.025, 0.40),
-        xycoords="axes fraction",
-        fontsize=8,
-        color=figstyle.INK_2,
-        ha="left",
-        va="top",
-    )
-    axes[0][1].annotate(
-        r"transient maxima $\times$1.6 to 2.8 over the four sections,"
-        "\nand "
-        r"$\times$1.5 to 2.5 at the two informative"
-        "\nmatrix sections alone",
-        xy=(0.025, 0.40),
-        xycoords="axes fraction",
-        fontsize=8,
-        color=figstyle.INK_2,
-        ha="left",
-        va="top",
-    )
+    # Numerical interpretation of the branches is retained in Appendix I.
     kp62 = sections_syn["KP62.0"]
     hwl_stage = kp62["anchors"]["design_hwl"]["stage_m_msl"]
     hwl_index = kp62["grid_m_msl"].index(hwl_stage)
@@ -2246,28 +2208,12 @@ def figure_epistemic_knobs(
         xytext=(hwl_stage, lo),
         arrowprops={
             "arrowstyle": "<|-|>",
-            "color": figstyle.INK,
-            "lw": 1.4,
+            "color": figstyle.RED,
+            "lw": 2.2,
             "shrinkA": 0,
             "shrinkB": 0,
         },
         zorder=6,
-    )
-    axes[1][1].annotate(
-        f"span $\\times${span['span_trans']:.0f} at KP 62.0's design-level anchor\n"
-        f"({hwl_stage:.2f} m T.P., the nearest grid level to its "
-        f"{kp62['hwl_m_msl']:.2f} m HWL,\n"
-        f"{kp62['anchors']['design_hwl']['n_failures_trans_baseline']} failing rows): "
-        r"the second-largest bracket there,"
-        "\n"
-        r"ahead of $L$ at $\times$15",
-        xy=(hwl_stage, hi),
-        xytext=(hwl_stage - 0.7, 1.6e2),
-        fontsize=figstyle.pt("small", scale),
-        color=figstyle.INK,
-        ha="right",
-        va="top",
-        arrowprops={"arrowstyle": "-", "color": figstyle.MUTED, "lw": 0.9},
     )
 
     handles = [
@@ -2296,7 +2242,7 @@ def figure_epistemic_knobs(
             marker="o",
             ls="none",
             ms=6.5,
-            label=r"rising limb (baseline transient $P_f$ $10^{-4}$ to $10^{-3}$)",
+            label="rising limb",
         ),
         plt.Line2D(
             [],
@@ -2307,10 +2253,10 @@ def figure_epistemic_knobs(
             mew=1.5,
             ls="none",
             ms=6.5,
-            label=r"transition midpoint (baseline transient $P_f$ $\approx$ 0.5)",
+            label="transition midpoint",
         ),
     ]
-    figstyle.legend_below(
+    key = figstyle.legend_below(
         fig, handles, [h.get_label() for h in handles], scale=scale, ncol=4
     )
     # The second title line, which said that both brackets collapse toward one
@@ -2318,10 +2264,51 @@ def figure_epistemic_knobs(
     # at the design anchor, is the caption's sentence now.
     figstyle.title(
         fig,
-        "The model factor and the surveyed exit datum, four cross-sections",
+        "Model-factor and exit-datum sensitivity",
         scale=scale,
     )
     figstyle.layout(fig, scale=scale, legend_rows=2)
+    # Preserve both shared ranges while closing the empty column gutter.
+    for left, right in axes:
+        a, b = left.get_position(), right.get_position()
+        half_gap = max(0.0, (b.x0 - a.x1 - 0.035) / 2)
+        left.set_position([a.x0, a.y0, a.width + half_gap, a.height])
+        right.set_position([b.x0 - half_gap, b.y0, b.width + half_gap, b.height])
+    from matplotlib.legend_handler import HandlerPatch
+    from matplotlib.patches import FancyArrowPatch
+
+    def legend_arrow(legend, orig_handle, xdescent, ydescent, width, height, fontsize):
+        return FancyArrowPatch(
+            (0, height / 2),
+            (width, height / 2),
+            arrowstyle="<|-|>",
+            mutation_scale=fontsize,
+            color=figstyle.RED,
+            lw=2.2,
+        )
+
+    fig.canvas.draw()
+    bottom = (
+        key.get_window_extent(fig.canvas.get_renderer())
+        .transformed(fig.transFigure.inverted())
+        .y0
+    )
+    arrow = FancyArrowPatch((0, 0), (1, 0), color=figstyle.RED)
+    fig.legend(
+        [arrow],
+        [
+            f"exit-datum span ×{span['span_trans']:.0f} at KP 62.0, "
+            f"{hwl_stage:.2f} m T.P.\n"
+            f"(nearest grid level to HWL {kp62['hwl_m_msl']:.2f} m; "
+            f"{kp62['anchors']['design_hwl']['n_failures_trans_baseline']} failures):\n"
+            "second-largest bracket at this anchor, ahead of L at ×15"
+        ],
+        handler_map={FancyArrowPatch: HandlerPatch(patch_func=legend_arrow)},
+        loc="upper center",
+        bbox_to_anchor=(0.5, bottom - 0.025),
+        frameon=False,
+        fontsize=figstyle.pt("legend", scale),
+    )
     return figstyle.save(fig, "epistemic_knobs_mp_ztoe.png", mirror=MIRROR), rows
 
 
@@ -2362,8 +2349,9 @@ def figure_peak_shortcut(slice_: dict[str, Any]) -> tuple[Path, list[dict[str, A
     headline = slice_["headline"]
     width_in = 13.4
     scale = figstyle.scale_for(width_in, 1.0)
+    figstyle.style(scale)
     fig, (ax, axb) = plt.subplots(
-        1, 2, figsize=(width_in, 5.7), gridspec_kw={"width_ratios": [1.45, 1.0]}
+        1, 2, figsize=(width_in, 7.0), gridspec_kw={"width_ratios": [1.45, 1.0]}
     )
 
     # --- Panel A: the gap, per stratum -------------------------------------- #
@@ -2376,9 +2364,9 @@ def figure_peak_shortcut(slice_: dict[str, Any]) -> tuple[Path, list[dict[str, A
             ax.text(
                 floor * 1.35,
                 y,
-                "0 and 0; no factor defined",
+                "both zero; no factor",
                 va="center",
-                fontsize=8.5,
+                fontsize=figstyle.pt("small", scale),
                 color=figstyle.MUTED,
                 style="italic",
             )
@@ -2420,16 +2408,16 @@ def figure_peak_shortcut(slice_: dict[str, Any]) -> tuple[Path, list[dict[str, A
             y,
             f"{peak_only:.3f}",
             va="center",
-            fontsize=8,
+            fontsize=figstyle.pt("small", scale),
             color=SHORTCUT,
         )
         ax.text(
-            replay * 0.77,
-            y,
+            replay,
+            y - 0.17,
             f"{replay:.3f}",
-            va="center",
-            ha="right",
-            fontsize=8,
+            va="top",
+            ha="center",
+            fontsize=figstyle.pt("small", scale),
             color=REPLAY,
         )
         ax.text(
@@ -2438,7 +2426,7 @@ def figure_peak_shortcut(slice_: dict[str, Any]) -> tuple[Path, list[dict[str, A
             rf"$\times${s['over_rejection_factor']:.2f}",
             va="bottom",
             ha="center",
-            fontsize=9.5,
+            fontsize=figstyle.pt("small", scale),
             color=figstyle.INK,
             fontweight="bold",
         )
@@ -2449,12 +2437,13 @@ def figure_peak_shortcut(slice_: dict[str, Any]) -> tuple[Path, list[dict[str, A
     ax.set_yticks(ypos)
     ax.set_yticklabels(
         [
-            f"{s['section']}  {s['d70']}" + ("  *" if s["small_number_regime"] else "")
+            f"{s['section'].replace('KP', 'KP ')}  {s['d70']}"
+            + ("  *" if s["small_number_regime"] else "")
             for s in strata
         ]
     )
-    ax.set_xlabel("share of the N = $10^5$ prior sample rejected [%], log scale")
-    ax.set_title("A  the same 2016 survival read two ways, per stratum", loc="left")
+    ax.set_xlabel("prior sample rejected [%]")
+    figstyle.panel_title(ax, "Survival-based rejection", scale=scale, letter="A")
     # Upper right: the only quadrant no mark or annotation reaches (the top two
     # rows carry the smallest values, so their right half is empty).
     # The key moved out of the panel on 2026-09-09. At "upper right" its
@@ -2474,7 +2463,7 @@ def figure_peak_shortcut(slice_: dict[str, Any]) -> tuple[Path, list[dict[str, A
         lw=0,
         zorder=0,
         label=(
-            "headline band: informative strata only, "
+            "informative strata only:\n"
             rf"$\times${headline['factor_min']:.2f} to "
             rf"$\times${headline['factor_max']:.2f}"
         ),
@@ -2498,7 +2487,7 @@ def figure_peak_shortcut(slice_: dict[str, Any]) -> tuple[Path, list[dict[str, A
             y,
             rf"$\times${s['over_rejection_factor']:.2f}",
             va="center",
-            fontsize=9.5,
+            fontsize=figstyle.pt("small", scale),
             fontweight="normal" if s["small_number_regime"] else "bold",
             color=figstyle.MUTED if s["small_number_regime"] else figstyle.INK,
         )
@@ -2507,7 +2496,7 @@ def figure_peak_shortcut(slice_: dict[str, Any]) -> tuple[Path, list[dict[str, A
         1.06,
         -0.62,
         "agreement",
-        fontsize=8,
+        fontsize=figstyle.pt("small", scale),
         color=figstyle.MUTED,
         va="center",
         ha="left",
@@ -2518,29 +2507,49 @@ def figure_peak_shortcut(slice_: dict[str, Any]) -> tuple[Path, list[dict[str, A
     # axis on the two widest bars.
     axb.set_yticklabels(
         [
-            f"{s['section']}  {s['d70']}\n{s['n_rejected_replay']:,} rejected rows"
+            f"{s['section'].replace('KP', 'KP ')}  {s['d70']}\n"
+            f"{s['n_rejected_replay']:,} rejected rows"
             + ("  *" if s["small_number_regime"] else "")
             for s in defined
         ],
-        fontsize=9,
+        fontsize=figstyle.pt("small", scale),
     )
     axb.set_ylim(-0.9, len(defined) - 0.35)
     axb.set_xlim(0, 10.6)
-    axb.set_xlabel("over-rejection factor, peak-only / replay [-]")
-    figstyle.panel_title(
-        axb, "How much the shortcut over-rejects", scale=scale, letter="B"
-    )
-    axb.legend(loc="lower right", fontsize=figstyle.pt("legend", scale))
+    axb.set_xlabel("peak-only / replay [-]")
+    figstyle.panel_title(axb, "Over-rejection factor", scale=scale, letter="B")
 
     # The headline factors, the mechanism paragraph and the small-number
     # note all moved to the thesis caption on 2026-09-09.
-    figstyle.legend_below(fig, key_handles, key_labels, scale=scale, ncol=2)
     figstyle.title(
         fig,
         "The cost of a peak-only reading of the 2016 survival",
         scale=scale,
     )
-    figstyle.layout(fig, scale=scale, legend_rows=1)
+    figstyle.layout(fig, scale=scale, legend_rows=2)
+    fig.canvas.draw()
+    renderer = fig.canvas.get_renderer()
+    bottom = (
+        min(
+            panel.get_tightbbox(renderer).transformed(fig.transFigure.inverted()).y0
+            for panel in (ax, axb)
+        )
+        - 0.045
+    )
+    for panel, handles, labels in (
+        (ax, key_handles, key_labels),
+        (axb, *axb.get_legend_handles_labels()),
+    ):
+        bounds = panel.get_position()
+        fig.legend(
+            handles,
+            labels,
+            ncol=1,
+            loc="upper center",
+            bbox_to_anchor=((bounds.x0 + bounds.x1) / 2, bottom),
+            frameon=False,
+            fontsize=figstyle.pt("legend", scale),
+        )
 
     rows = [
         {

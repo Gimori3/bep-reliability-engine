@@ -211,7 +211,7 @@ def fig_dominance_profile(df: pd.DataFrame) -> None:
         2,
         figsize=(WIDTH_IN["dominance"], 7.6),
         sharey=True,
-        gridspec_kw={"hspace": 0.42},
+        gridspec_kw={"hspace": 0.42, "wspace": 0.08},
     )
     for i, river in enumerate(("Tokachi", "Satsunai")):
         for j, scenario in enumerate(("historical", "+4K")):
@@ -363,7 +363,7 @@ def fig_climate_shift(df: pd.DataFrame) -> None:
         figsize=(WIDTH_IN["climate"], 7.2),
         sharex="col",
         sharey="row",
-        gridspec_kw={"height_ratios": [2.2, 1.0], "hspace": 0.12},
+        gridspec_kw={"height_ratios": [2.2, 1.0], "hspace": 0.12, "wspace": 0.08},
     )
     for j, river in enumerate(("Tokachi", "Satsunai")):
         ax, axr = axes[0, j], axes[1, j]
@@ -655,7 +655,7 @@ def fig_attribution(attr: dict) -> None:
         tallest = max(tallest, max(long_v), max(short_v), max(comp_v))
 
     axes[0].set_ylim(top=tallest * 2.6)
-    axes[0].set_ylabel("Conditional annual $P_f$ in stratum")
+    axes[0].set_ylabel("Conditional annual $P_f$")
     handles, labels = axes[0].get_legend_handles_labels()
     fs.legend_below(fig, handles, labels, scale=scale)
     fs.title(

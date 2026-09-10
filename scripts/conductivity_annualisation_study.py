@@ -2185,14 +2185,15 @@ def render_both_d70_figure(
             label="tinted panel: piping is a lower bound",
         ),
     ]
-    fs.legend_below(fig, handles, [h.get_label() for h in handles], scale=scale, ncol=5)
+    # Column-major filling puts the lower-bound key on the second row.
+    fs.legend_below(fig, handles, [h.get_label() for h in handles], scale=scale, ncol=3)
     # The three-line note under the legend moved to the thesis caption.
     fs.title(
         fig,
         "Which mechanism leads across the conductivity bracket",
         scale=scale,
     )
-    fs.layout(fig, scale=scale, legend_rows=1)
+    fs.layout(fig, scale=scale, legend_rows=2)
     return fs.save(fig, FIGURE_NAME["bulk"], mirror=out_dir / "figures")
 
 

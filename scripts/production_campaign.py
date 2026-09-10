@@ -1821,18 +1821,11 @@ FIGURE_DRIVERS: list[dict[str, Any]] = [
         ],
     },
     {
-        # Inventory rows 4.3, 4.4 and 5.1. These four are rendered by the Phase
-        # 2 package itself through the ``pipeline.PUBLICATION_FIGURES`` dual-write
-        # seam, not by a script under scripts/. ``--figures-only`` recomputes the
-        # posterior in memory from its Phase 1 parent and writes NO artifact --
-        # the persisted posteriors, whose SHA-256 this campaign's manifest
-        # records, are asserted byte-identical across it.
-        #
-        # It is the slowest redraw path here (about 5.7 min for the two strata,
-        # because the seam sits downstream of a full 1e5-row replay). Declaring
-        # it declaration-only would have been cheaper and wrong: a real plot-only
-        # path exists, so the four figures can be kept unconditionally fresh
-        # rather than merely watched.
+        # The marginal diagnostics need the accepted sample and therefore keep
+        # the full in-memory replay. It writes figures but no posterior evidence.
+        # The next entry redraws the two fragility updates directly from their
+        # persisted posteriors, and runs last so those publication copies use
+        # the fast, metadata-driven path.
         "label": "Phase-2 posterior diagnostics (figures-only)",
         "command": [
             PY,
@@ -1853,8 +1846,6 @@ FIGURE_DRIVERS: list[dict[str, Any]] = [
         "produces": [
             "phase2_marginals_kp58_8_matrix.png",
             "phase2_marginals_kp60_0_matrix.png",
-            "phase2_fragility_update_kp58_8_matrix.png",
-            "phase2_fragility_update_kp60_0_matrix.png",
         ],
         # What the figures depict: the Phase 1 parents they are recomputed from,
         # the persisted posteriors a reader compares them against, and the
@@ -1868,6 +1859,32 @@ FIGURE_DRIVERS: list[dict[str, Any]] = [
             "results/phase2/tokachi_kp60.0_historical_matrix_posterior.json",
             "data/processed/2016_event/stage_hourly_Tokachi_201608.csv",
             "data/processed/2016_event/flood_trace_2016.csv",
+        ],
+    },
+    {
+        # This runs after the replay-based marginal diagnostics above so its
+        # persisted-posterior rendering is the publication copy of record.
+        "label": "Phase-2 persisted fragility update (draw only)",
+        "command": [PY, "scripts/plot_persisted_fragility_update.py"],
+        "requires": [
+            "results/phase2/tokachi_kp58.8_historical_matrix_posterior.h5",
+            "results/phase2/tokachi_kp60.0_historical_matrix_posterior.h5",
+            "results/phase2/tokachi_kp58.8_historical_matrix_posterior.json",
+            "results/phase2/tokachi_kp60.0_historical_matrix_posterior.json",
+            "results/tokachi_kp58.8_historical_matrix.json",
+            "results/tokachi_kp60.0_historical_matrix.json",
+        ],
+        "produces": [
+            "phase2_fragility_update_kp58_8_matrix.png",
+            "phase2_fragility_update_kp60_0_matrix.png",
+        ],
+        "sources": [
+            "results/phase2/tokachi_kp58.8_historical_matrix_posterior.h5",
+            "results/phase2/tokachi_kp60.0_historical_matrix_posterior.h5",
+            "results/phase2/tokachi_kp58.8_historical_matrix_posterior.json",
+            "results/phase2/tokachi_kp60.0_historical_matrix_posterior.json",
+            "results/tokachi_kp58.8_historical_matrix.json",
+            "results/tokachi_kp60.0_historical_matrix.json",
         ],
     },
     {
@@ -1995,12 +2012,8 @@ FIGURE_DRIVERS: list[dict[str, Any]] = [
         "sources": ["docs/decisions/adr0012-kaq-d70-analysis.md"],
     },
     {
-        "label": "ADR-0029 tail-variance study (declaration only)",
-        "command": None,
-        "redraw": (
-            "scripts/tail_variance_study.py has no plot-only path; re-running "
-            "it is a full KP 58.8 replicate sweep with tilted-IS estimation."
-        ),
+        "label": "ADR-0029 tail-variance study",
+        "command": [PY, "scripts/tail_variance_study.py", "--figures-only"],
         "requires": ["docs/decisions/adr0029-tail-cov-study.json"],
         "produces": ["adr0029-tail-cov.png"],
         "sources": ["docs/decisions/adr0029-tail-cov-study.json"],
@@ -2088,13 +2101,8 @@ FIGURE_DRIVERS: list[dict[str, Any]] = [
         "sources": ["results/sensitivity/ce_prior/phase2_survival_sensitivity.json"],
     },
     {
-        "label": "R10 foreshore-exhaustion screening (declaration only)",
-        "command": None,
-        "redraw": (
-            "scripts/foreshore_exhaustion_study.py renders only as a side "
-            "effect of a full run (--no-figure suppresses it); the campaign "
-            "runs it that way as a bit-identity companion."
-        ),
+        "label": "R10 foreshore-exhaustion screening",
+        "command": [PY, "scripts/foreshore_exhaustion_study.py", "--figures-only"],
         "requires": ["docs/decisions/r10-foreshore-exhaustion-screening.json"],
         "produces": ["r10_foreshore_exhaustion.png"],
         "sources": ["docs/decisions/r10-foreshore-exhaustion-screening.json"],

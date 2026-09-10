@@ -20,6 +20,7 @@ import json
 import sys
 from pathlib import Path
 
+import _figstyle as fs
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
@@ -48,7 +49,7 @@ LABEL = {
     "framework_gravel": "framework gravel",
     "single_soil_sand": "single-soil sand",
     "composite": "composite",
-    "hybrid_gravel_pressure": "hybrid (gravel M4 / sand M6-M7)",
+    "hybrid_gravel_pressure": "hybrid: gravel hydraulics,\nsand resistance and erosion",
 }
 
 plt.rcParams.update(
@@ -88,72 +89,46 @@ def fig_hydrograph(results: dict) -> None:
     pre2018 = results["observed"]["pre2018_max_site_stage_m"]
     z_toe = 12.9
 
-    fig, ax = plt.subplots(figsize=(7.4, 3.6), dpi=160)
-    ax.plot(times, h, color="#2a78d6", lw=2.0, solid_capstyle="round")
+    scale = fs.scale_for(9.8, 1.0)
+    fs.style(scale)
+    fig, ax = plt.subplots(figsize=(9.8, 5.8), dpi=160)
+    ax.plot(times, h, color=fs.BLUE, lw=2.0, solid_capstyle="round", label="site stage")
 
     # observed onset: stage band + eyewitness time window
-    ax.axhspan(obs_lo, obs_hi, color="#0b0b0b", alpha=0.10, lw=0)
-    ax.text(
-        times[10],
-        obs_hi + 0.25,
-        "observed onset stage 19.5 to 19.9",
-        color=INK2,
-        fontsize=8,
+    ax.axhspan(
+        obs_lo, obs_hi, color=INK, alpha=0.10, lw=0, label="observed onset stage"
     )
     w0 = dt.datetime(2018, 7, 7, 5, 30)
     w1 = dt.datetime(2018, 7, 7, 5, 54)
-    ax.axvspan(w0, w1, color="#0b0b0b", alpha=0.18, lw=0)
-    # Along the foot of the panel: at mid-height this caption sat on the
-    # recession limb, and the shaded window it names runs the full height of
-    # the axis, so it can be labelled anywhere along it.
-    ax.annotate(
-        "eyewitness window\n05:30 to 05:54",
-        xy=(w1, 5.6),
-        xytext=(dt.datetime(2018, 7, 7, 15), 4.35),
-        color=INK2,
-        fontsize=8,
-        va="bottom",
-        ha="left",
-        arrowprops={"arrowstyle": "-", "color": BASELINE, "lw": 0.8},
-    )
+    ax.axvspan(w0, w1, color=INK, alpha=0.18, lw=0, label="eyewitness time window")
 
     # predicted onset band (hybrid schematization, L = 150 m)
-    ax.axhspan(q05, q95, color="#008300", alpha=0.12, lw=0)
-    ax.axhline(q50, color="#008300", lw=1.6, ls=(0, (6, 3)))
-    ax.text(
-        times[10],
-        q50 + 0.22,
-        f"predicted onset (hybrid): median {q50:.1f}, "
-        f"5 to 95 per cent {q05:.1f} to {q95:.1f}",
-        color="#006300",
-        fontsize=8,
+    ax.axhspan(
+        q05,
+        q95,
+        color=fs.GREEN,
+        alpha=0.12,
+        lw=0,
+        label="predicted 5th to 95th percentile",
+    )
+    ax.axhline(
+        q50, color=fs.GREEN, lw=1.6, ls=(0, (6, 3)), label="predicted median (hybrid)"
     )
 
     # 1999 no-ejecta bound and ground level
-    ax.axhline(pre2018, color=MUTED, lw=1.0, ls=(0, (2, 3)))
-    ax.text(
-        times[10],
-        pre2018 + 0.2,
-        "largest pre-2018 stage (1999), no ejecta ever observed",
-        color=MUTED,
-        fontsize=8,
+    ax.axhline(
+        pre2018, color=MUTED, lw=1.0, ls=(0, (2, 3)), label="1999 no-ejecta maximum"
     )
-    ax.axhline(z_toe, color=BASELINE, lw=1.0)
-    ax.text(times[10], z_toe + 0.2, "hinterland ground 12.9", color=MUTED, fontsize=8)
+    ax.axhline(z_toe, color=BASELINE, lw=1.0, label="hinterland ground")
 
     ax.set_ylabel("site stage [m T.P.]")
-    ax.set_title(
-        "Gounokawa Shimohara, July 2018: site stage vs observed and "
-        "predicted sand-boil onset",
-        fontsize=9.5,
-        color=INK,
-        loc="left",
-        pad=10,
-    )
+    fs.title(fig, "Stage and sand-boil onset at Gounokawa Shimohara", scale=scale)
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %d"))
     ax.set_ylim(4, 22.5)
     ax.grid(axis="x", visible=False)
-    fig.tight_layout()
+    handles, labels = ax.get_legend_handles_labels()
+    fs.legend_below(fig, handles, labels, scale=scale, ncol=3)
+    fs.layout(fig, scale=scale, legend_rows=3)
     out = FIG_DIR / "validation_gounokawa_hydrograph_2018.png"
     fig.savefig(out, bbox_inches="tight")
     plt.close(fig)
@@ -165,19 +140,20 @@ def fig_onset_intervals(results: dict) -> None:
     obs_p = results["observed"]["onset_dh_paper_band_m"]
     bound = results["observed"]["pre2018_no_ejecta_dh_bound_m"]
     order = list(SLOT)
+    scale = fs.scale_for(10.2, 1.0)
+    fs.style(scale)
 
     fig, axes = plt.subplots(
         2,
         1,
-        figsize=(7.4, 4.2),
+        figsize=(10.2, 7.0),
         dpi=160,
         sharex=True,
-        gridspec_kw={"hspace": 0.35},
     )
     for ax, L in zip(axes, (150.0, 75.0)):
         rows = {r["schematization"]: r for r in results["tier2"] if r["L_m"] == L}
-        ax.axvspan(*obs_g, color="#0b0b0b", alpha=0.13, lw=0)
-        ax.axvspan(*obs_p, color="#0b0b0b", alpha=0.06, lw=0)
+        ax.axvspan(*obs_g, color=INK, alpha=0.13, lw=0, label="observed: ground datum")
+        ax.axvspan(*obs_p, color=INK, alpha=0.06, lw=0, label="observed: paper datum")
         ax.axvline(bound, color=MUTED, lw=1.0, ls=(0, (2, 3)))
         for i, name in enumerate(order):
             r = rows[name]
@@ -190,44 +166,36 @@ def fig_onset_intervals(results: dict) -> None:
             ax.plot([q25, q75], [y, y], color=c, lw=5.5, solid_capstyle="round")
             ax.plot(q50, y, "o", ms=8, mfc=SURFACE, mec=c, mew=2.0)
         ax.set_yticks(range(len(order)))
-        ax.set_yticklabels(
-            [LABEL[n] for n in reversed(order)], fontsize=8.5, color=INK2
-        )
-        ax.set_ylim(-0.6, len(order) - 0.4)
+        ax.set_yticklabels([LABEL[n] for n in reversed(order)], color=INK2)
+        ax.set_ylim(-1.0, len(order) - 0.4)
         ax.grid(axis="y", visible=False)
-        ax.set_title(f"L = {L:.0f} m", fontsize=9, color=INK2, loc="left")
+        fs.panel_title(ax, f"$L = {L:.0f}$ m", scale=scale)
 
-    axes[0].annotate(
-        "observed 2018 onset\n(6.6 to 7.0 over ground;\n6.2 to 6.6 paper datum)",
-        xy=(obs_g[0], 3.4),
-        xytext=(8.6, 2.6),
-        color=INK2,
-        fontsize=8,
-        arrowprops={"arrowstyle": "-", "color": BASELINE, "lw": 0.8},
-    )
-    axes[1].text(
-        0.5,
-        -0.5,
+    axes[1].annotate(
         "1999 no-ejecta bound (4.2 m)",
+        xy=(bound, 0),
+        xycoords=axes[1].get_xaxis_transform(),
+        xytext=(9.0, -0.52),
+        textcoords="data",
+        va="center",
+        arrowprops={"arrowstyle": "->", "color": MUTED, "lw": 1.0},
         color=MUTED,
-        fontsize=8,
-        bbox={"facecolor": SURFACE, "edgecolor": "none", "alpha": 0.9, "pad": 1.5},
+        fontsize=fs.pt("annotation", scale),
         zorder=6,
     )
     # One line ran off the canvas and lost its closing bracket.
-    axes[1].set_xlabel(
-        "predicted onset head over hinterland ground, dH [m]\n"
-        "(5 to 95 per cent whisker, 25 to 75 per cent bar, median dot)"
-    )
+    axes[1].set_xlabel(r"predicted onset head over hinterland ground, $\Delta h$ [m]")
     axes[1].set_xlim(0, 24)
-    fig.suptitle(
-        "Predicted sand-boil onset head by aquifer schematization vs "
-        "observation (2018 virgin state)",
-        fontsize=9.5,
-        color=INK,
-        x=0.02,
-        ha="left",
-    )
+    handles, labels = axes[0].get_legend_handles_labels()
+    handles += [
+        plt.Line2D([], [], color=INK2, lw=2),
+        plt.Line2D([], [], color=INK2, lw=5.5),
+        plt.Line2D([], [], color=INK2, marker="o", mfc=SURFACE, ls="none"),
+    ]
+    labels += ["5th to 95th percentile", "25th to 75th percentile", "median"]
+    fs.legend_below(fig, handles, labels, scale=scale, ncol=3)
+    fs.title(fig, "Predicted sand-boil onset by aquifer schematization", scale=scale)
+    fs.layout(fig, scale=scale, legend_rows=2)
     out = FIG_DIR / "validation_gounokawa_onset_intervals.png"
     fig.savefig(out, bbox_inches="tight")
     plt.close(fig)

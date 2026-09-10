@@ -1913,43 +1913,30 @@ FIGURE_PATH = REPO_ROOT / "docs" / "figures" / "adr0047_dem_seepage_length.png"
 
 
 def draw_figure(payload: dict[str, Any], path: Path = FIGURE_PATH) -> None:
-    """Three-row summary figure from an evidence payload.
-
-    Row 1: the four picked cross-sections with crest band and toes marked.
-    Row 2: L along the levee over the chainage window, clean stations solid.
-    Row 3: DEM-vs-CSV L, and the measured fragility effect where it was run.
-    """
+    """One row per section: profile, along-levee length and fragility effect."""
     import matplotlib
 
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
+    from matplotlib.lines import Line2D
+    from matplotlib.patches import Patch
 
     # House palette and chrome, so this figure reads as one system with
     # the rest: the fixed categorical slots, the two limit states on
     # their thesis-wide hues, hairline solid grid, no legend frames.
-    figstyle.style()
+    scale = figstyle.scale_for(18.4, 1.0)
+    figstyle.style(scale)
 
     measurements = payload.get("measurements", [])
     if not measurements:
         raise ValueError("payload carries no measurements to draw")
-    # ``csv_L_m`` is whatever the geotechnical CSV holds now, which at an
-    # adopted section is the surveyed value and not the survey it replaced.
-    # A section is adopted exactly where the 1998 reading was withdrawn, so
-    # the reference line is named from that rather than labelled "1998
-    # survey" for a number the 1998 survey never carried.
-    adopted = {
-        entry["section"]
-        for entry in payload.get("fragility", [])
-        if "withdrawn_1998" in entry.get("arms", {})
-    }
-    vintage = payload.get("csv_geometry_vintage", "1998")
     n = len(measurements)
-    fig, axes = plt.subplots(3, n, figsize=(4.6 * n, 11.0), dpi=140)
-    axes = np.atleast_2d(axes)
+    fig, axes = plt.subplots(n, 3, figsize=(18.4, 4.7 * n), dpi=140)
+    # Keep the metric-first indexing below while giving each section a row.
+    axes = np.atleast_2d(axes).T
 
     for column, record in enumerate(measurements):
         label = record["section"]
-        csv_source = "adopted" if label in adopted else f"{vintage} survey"
         nominal = record["nominal_station"]
         stem = f"kp{record['kp']:.1f}".replace(".", "_")
         csv_path = PROFILE_DIR / f"{stem}_profile.csv"
@@ -1961,8 +1948,8 @@ def draw_figure(payload: dict[str, Any], path: Path = FIGURE_PATH) -> None:
             keep = (offsets >= -160.0) & (offsets <= 160.0)
             ax.plot(offsets[keep], elevation[keep], color=figstyle.INK, lw=1.3)
         for key, colour, marker in (
-            ("river_toe", figstyle.BLUE, "v"),
-            ("land_outer_toe", figstyle.RED, "v"),
+            ("river_toe", figstyle.INK_2, "v"),
+            ("land_outer_toe", figstyle.INK_2, "^"),
         ):
             ax.plot(
                 nominal[f"{key}_offset_m"],
@@ -1983,7 +1970,7 @@ def draw_figure(payload: dict[str, Any], path: Path = FIGURE_PATH) -> None:
                 if "crest_land_offset_m" in nominal
                 else nominal["crest_width_m"] / 2
             ),
-            color=figstyle.YELLOW,
+            color=figstyle.MUTED,
             alpha=0.22,
             lw=0,
         )
@@ -1991,7 +1978,7 @@ def draw_figure(payload: dict[str, Any], path: Path = FIGURE_PATH) -> None:
         # drop below the landside toe: the old datum landed on the profile
         # itself at two of the four sections.
         ax.annotate(
-            f"nominal station L = {nominal['L_m']:.0f} m",
+            f"nominal L = {nominal['L_m']:.0f} m",
             xy=(
                 (nominal["river_toe_offset_m"] + nominal["land_outer_toe_offset_m"])
                 / 2,
@@ -1999,11 +1986,11 @@ def draw_figure(payload: dict[str, Any], path: Path = FIGURE_PATH) -> None:
             ),
             xycoords=("data", "axes fraction"),
             ha="center",
-            fontsize=10,
+            fontsize=figstyle.pt("small", scale),
             # Text wears an ink token, never a series colour, and this one
             # sits over the profile, so it carries the surface plate too.
             color=figstyle.INK_2,
-            weight="bold",
+            weight="normal",
             bbox={
                 "facecolor": figstyle.SURFACE,
                 "edgecolor": "none",
@@ -2014,15 +2001,11 @@ def draw_figure(payload: dict[str, Any], path: Path = FIGURE_PATH) -> None:
         # A clear strip under the profile for the caption above.
         lo, hi = ax.get_ylim()
         ax.set_ylim(lo - 0.13 * (hi - lo), hi)
-        ax.set_title(
-            f"{label}  ({csv_source} {record['csv_L_m']:.1f} m, "
-            f"{record['remediation_state']})",
-            fontsize=11,
-            color=figstyle.INK,
+        figstyle.panel_title(
+            ax, f"{label.replace('KP', 'KP ')}: cross-section", scale=scale
         )
-        ax.set_xlabel("offset from alignment [m]  (negative = riverside)")
-        if column == 0:
-            ax.set_ylabel("elevation [m T.P.]")
+        ax.set_xlabel("offset from alignment [m]")
+        ax.set_ylabel("elevation [m T.P.]")
 
         # --- row 2: L along the levee ---
         ax = axes[1, column]
@@ -2035,9 +2018,9 @@ def draw_figure(payload: dict[str, Any], path: Path = FIGURE_PATH) -> None:
             offsets[clean],
             lengths[clean],
             "o",
-            color=figstyle.GREEN,
+            color=figstyle.INK_2,
             ms=5,
-            label="clean",
+            label="clean station",
         )
         ax.plot(
             offsets[~clean],
@@ -2045,30 +2028,25 @@ def draw_figure(payload: dict[str, Any], path: Path = FIGURE_PATH) -> None:
             "x",
             color=figstyle.MUTED,
             ms=6,
-            label="rejected",
+            label="rejected station",
         )
         ax.axhline(
             window["L_median_clean_m"],
-            color=figstyle.GREEN,
+            color=figstyle.INK_2,
             ls="--",
             lw=1.4,
-            label=f"DEM median {window['L_median_clean_m']:.0f} m",
+            label="clean-station median",
         )
         ax.axhline(
             record["csv_L_m"],
-            color=figstyle.RED,
+            color=figstyle.MUTED,
             ls=":",
             lw=1.6,
-            label=f"{csv_source} {record['csv_L_m']:.1f} m",
+            label="production length",
         )
-        ax.set_xlabel("chainage offset from the section [m]")
-        if column == 0:
-            ax.set_ylabel("picked L [m]")
-        # A plate keeps a legend readable but still hides what is behind it,
-        # so the panel is given the headroom the legend needs instead.
-        lo, hi = ax.get_ylim()
-        ax.set_ylim(lo, hi + 0.34 * (hi - lo))
-        ax.legend(fontsize=7, loc="upper left", ncol=2, **_LEGEND_PLATE)
+        ax.set_xlabel("chainage offset [m]")
+        ax.set_ylabel("picked L [m]")
+        figstyle.panel_title(ax, "Length along the levee", scale=scale)
 
         # --- row 3: the fragility consequence ---
         ax = axes[2, column]
@@ -2093,8 +2071,8 @@ def draw_figure(payload: dict[str, Any], path: Path = FIGURE_PATH) -> None:
         # figure had them the other way round, which reads backwards
         # against every fragility figure in the results chapters.
         for shift, branch, colour, name in (
-            (-width / 2, "trans", figstyle.TRANSIENT, "transient"),
-            (width / 2, "static", figstyle.STATIC, "static"),
+            (-width / 2, "static", figstyle.STATIC, "static"),
+            (width / 2, "trans", figstyle.TRANSIENT, "transient"),
         ):
             values = [entry["arms"][arm][branch]["max_abs_delta_P_f"] for arm in names]
             ax.bar(positions + shift, values, width, label=name, color=colour)
@@ -2104,35 +2082,40 @@ def draw_figure(payload: dict[str, Any], path: Path = FIGURE_PATH) -> None:
                     (x, value),
                     ha="center",
                     va="bottom",
-                    fontsize=7,
+                    fontsize=figstyle.pt("small", scale),
                     color=figstyle.INK_2,
                 )
         ax.set_xticks(positions)
         ax.set_xticklabels(
             [
-                f"{ARM_DISPLAY_NAMES.get(n, n)}\nL={entry['arms'][n]['L_m']:.0f} m"
+                f"{ARM_DISPLAY_NAMES.get(n, n).replace(' ', chr(10), 1)}"
+                f"\nL={entry['arms'][n]['L_m']:.0f} m"
                 for n in names
             ],
-            fontsize=8,
+            fontsize=figstyle.pt("small", scale),
         )
-        ax.set_ylabel(r"max $|\Delta P_f|$ vs production" if column == 0 else "")
+        ax.set_ylabel(r"max $|\Delta P_f|$")
+        figstyle.panel_title(ax, "Change from production", scale=scale)
         # Same reason as row 2: the legend used to stand on a bar.
         lo, hi = ax.get_ylim()
         ax.set_ylim(lo, hi + 0.30 * (hi - lo))
-        ax.legend(fontsize=8, loc="upper left", **_LEGEND_PLATE)
         ax.grid(axis="x", visible=False)
 
-    fig.suptitle(
-        "Seepage length L surveyed from the national elevation model "
-        f"(GSI DEM5A {payload.get('dem_source', '').split('devDate ')[-1]}) "
-        f"against the {payload.get('csv_geometry_vintage', '1998')} "
-        "OYO cross-section geometry",
-        fontsize=13,
-        color=figstyle.INK,
-    )
-    fig.tight_layout(rect=(0, 0, 1, 0.97))
+    figstyle.title(fig, "Surveyed seepage length and fragility", scale=scale)
+    handles = [
+        Line2D([], [], marker="v", ls="none", color=figstyle.INK_2),
+        Line2D([], [], marker="^", ls="none", color=figstyle.INK_2),
+        Patch(facecolor=figstyle.MUTED, alpha=0.22),
+    ]
+    labels = ["riverside toe", "landside toe", "crest"]
+    for ax in (axes[1, 0], axes[2, 0]):
+        h, lab = ax.get_legend_handles_labels()
+        handles.extend(h)
+        labels.extend(lab)
+    figstyle.legend_below(fig, handles, labels, scale=scale, ncol=3)
+    figstyle.layout(fig, scale=scale, legend_rows=3)
     path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(path)
+    fig.savefig(path, bbox_inches="tight")
     plt.close(fig)
 
 
