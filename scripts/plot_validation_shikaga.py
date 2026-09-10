@@ -13,6 +13,7 @@ import argparse
 import json
 from pathlib import Path
 
+import _figstyle as fs
 import matplotlib.pyplot as plt
 
 REPO = Path(__file__).resolve().parents[1]
@@ -71,7 +72,9 @@ def main() -> None:
     # adjudication of overclaim flag 2): a shaded band reads as a
     # measurement, and the Tokachi position is engineering judgment along a
     # four-point pattern; it is argued in the notes/thesis text instead.
-    fig, ax = plt.subplots(figsize=(7.4, 3.0), dpi=160)
+    scale = fs.scale_for(8.5, 0.85)
+    fs.style(scale)
+    fig, ax = plt.subplots(figsize=(8.5, 4.5), dpi=160)
     ax.axvline(1.0, color=INK, lw=1.2, ls=(0, (6, 3)))
     for i, (label, (lo, hi), conf) in enumerate(rows):
         y = len(rows) - 1 - i
@@ -84,27 +87,36 @@ def main() -> None:
             ax.plot(
                 lo, y, "o", ms=9, mfc=SURFACE if open_marker else BLUE, mec=BLUE, mew=2
             )
-            txt = f"{lo:.2f}" + ("  (datum uncertain)" if open_marker else "")
-        ax.text(hi + 0.09, y, txt, color=INK2, fontsize=8, va="center")
+            txt = f"{lo:.2f}"
+        ax.text(
+            hi + 0.09,
+            y,
+            txt,
+            color=INK2,
+            fontsize=fs.pt("annotation", scale),
+            va="center",
+        )
     ax.set_yticks(range(len(rows)))
-    ax.set_yticklabels([r[0] for r in reversed(rows)], fontsize=8, color=INK2)
+    ax.set_yticklabels([r[0] for r in reversed(rows)], color=INK2)
     ax.set_ylim(-0.6, len(rows) - 0.4)
     # The longest row label needs room inside the frame; at the old limit it
     # ran into the figure margin and finished flush with the canvas edge.
-    ax.set_xlim(0.8, 3.6)
+    ax.set_xlim(0.8, 3.25)
     ax.grid(axis="y", visible=False)
-    ax.set_xlabel(
-        "hydraulic-translation factor: instantaneous Mazure head / 2D-FEM "
-        "peak toe overpressure  [-]"
+    ax.set_xlabel("hydraulic-translation factor")
+    handles = [
+        plt.Line2D([], [], marker="o", color=BLUE, ls="none"),
+        plt.Line2D([], [], marker="o", color=BLUE, mfc=SURFACE, lw=3),
+        plt.Line2D([], [], marker="o", color=BLUE, mfc=SURFACE, ls="none"),
+    ]
+    fs.legend_below(
+        fig,
+        handles,
+        ["point comparison", "bracketed comparison", "exit datum uncertain"],
+        scale=scale,
     )
-    ax.set_title(
-        "Hydraulic-translation over-prediction vs calibrated FEMs "
-        "across the Japanese cases",
-        fontsize=9.5,
-        color=INK,
-        loc="left",
-        pad=10,
-    )
+    fs.title(fig, "Hydraulic translation at the FEM-anchored sites", scale=scale)
+    fs.layout(fig, scale=scale, legend_rows=1)
     out = FIG_DIR / "validation_shikaga_m4_pattern.png"
     fig.savefig(out, bbox_inches="tight")
     plt.close(fig)

@@ -1825,7 +1825,9 @@ def figure_tilted_validation(evidence: dict) -> Path:
     anchor = _num(val["V4_detail"]["anchor_m"])
     spec = SECTIONS["kp62_0"]
 
-    fig, axes = plt.subplots(1, 2, figsize=(12.2, 5.4), gridspec_kw={"wspace": 0.24})
+    scale = figstyle.scale_for(12.2, 1.0)
+    figstyle.style(scale)
+    fig, axes = plt.subplots(1, 2, figsize=(12.2, 5.4))
 
     # --- panel 1: the CoV of each branch, tilted vs plain LHS ------------------
     ax = axes[0]
@@ -1878,14 +1880,7 @@ def figure_tilted_validation(evidence: dict) -> Path:
     ax.set_yscale("log")
     ax.set_xlabel("conditioning water level [m T.P.]")
     ax.set_ylabel("coefficient of variation of $\\hat P_f$")
-    shift = tilt["ce_shift"]
-    ax.set_title(
-        "The tilt helps one branch and hurts the other\n"
-        f"KP 62.0, N = {tilt['n_samples']:,}, CE shift "
-        f"$k_{{aq}}$ {_num(shift['k_aq']):.2f} / $C_e$ {_num(shift['C_e']):.2f}",
-        loc="left",
-    )
-    ax.legend(loc="lower left", ncol=2)
+    figstyle.panel_title(ax, "Estimator variability", scale=scale)
 
     # --- panel 2: the same tilt, expressed as what it does to each branch ------
     # One axis, one reference at 1.0: above it the tilt costs precision, below
@@ -1901,7 +1896,7 @@ def figure_tilted_validation(evidence: dict) -> Path:
         lw=2.0,
         ms=5.0,
         mfc=figstyle.SURFACE,
-        label="static branch, per level: the tilt COSTS precision",
+        label="static CoV ratio",
     )
     ax2.axhline(1.0, color=figstyle.BASELINE, lw=1.2)
     ax2.axvline(anchor, color=figstyle.BASELINE, lw=1.0)
@@ -1923,16 +1918,16 @@ def figure_tilted_validation(evidence: dict) -> Path:
         mew=2.0,
         mfc=figstyle.SURFACE,
         ls="none",
-        label=f"transient branch at the anchor: {gain:.2f}x BETTER (criterion V4)",
+        label="transient CoV ratio at design HWL",
     )
     ax2.annotate(
         f"{gain:.2f}x better",
         (anchor, 1.0 / gain),
-        textcoords="offset points",
-        xytext=(10, -4),
-        fontsize=9,
+        xytext=(48.2, 0.07),
+        arrowprops={"arrowstyle": "->", "color": figstyle.TRANSIENT, "lw": 0.8},
+        fontsize=figstyle.pt("annotation", scale),
         color=figstyle.TRANSIENT,
-        va="top",
+        va="center",
     )
     for level in (anchor, 52.0):
         hit = [y for x, y in infl if abs(x - level) < 1e-9]
@@ -1946,45 +1941,27 @@ def figure_tilted_validation(evidence: dict) -> Path:
             (level, hit[0]),
             textcoords="offset points",
             xytext=(9, -10),
-            fontsize=9,
+            fontsize=figstyle.pt("annotation", scale),
             color=figstyle.STATIC,
             va="top",
         )
     ax2.set_yscale("log")
     ax2.set_xlabel("conditioning water level [m T.P.]")
-    ax2.set_ylabel("CoV under the tilt / CoV under plain LHS")
-    ax2.set_title(
-        "V2 and V4 fail: NOT VALIDATED for a ratio between branches\n"
-        f"Kish $n_{{eff}}$ = {_num(val['V4_detail']['n_eff']):.0f} against the "
-        f"pre-registered floor of {_num(val['V4_detail']['n_eff_floor']):.0f}"
-        f"; transient gain {gain:.2f}x",
-        loc="left",
-    )
-    ax2.legend(loc="upper left")
-    ax2.set_ylim(top=max(y for _, y in infl) * 30.0)
+    ax2.set_ylabel("tilted CoV / plain-LHS CoV")
+    figstyle.panel_title(ax2, "Relative estimator variability", scale=scale)
+    ax2.set_ylim(bottom=0.025, top=max(y for _, y in infl) * 30.0)
     xlo = min(min(x for x, _ in infl), min(x for x, _ in plain_t)) - 0.3
     xhi = max(max(x for x, _ in infl), max(x for x, _ in plain_t)) + 0.3
     for axis in (ax, ax2):
         axis.set_xlim(xlo, xhi)
-        figstyle.mark_hypothetical(
-            axis, spec["attainable_max_m"], label=axis is ax2, label_y=0.06
-        )
-    fig.text(
-        0.5,
-        -0.02,
-        "The single-branch gain is not contradicted: the transient side "
-        "reproduces its measured 3.2 to 4.1 times. What fails is a new "
-        "application to a different estimand, a tilt optimized for one branch "
-        "serving a ratio between two.\nPlain-LHS references: static from the "
-        "N = 1e5 sample's own "
-        "p per level (as criterion V4 defines it); transient plain-LHS curve in "
-        "the left panel from the N = 1e6 ground-truth p, where an N = 1e5 count "
-        "of 0 to 4 rows makes a binomial CoV meaningless.",
-        ha="center",
-        va="top",
-        fontsize=9,
-        color=figstyle.INK_2,
+        figstyle.mark_hypothetical(axis, spec["attainable_max_m"], label=False)
+    handles, labels = ax.get_legend_handles_labels()
+    more_handles, more_labels = ax2.get_legend_handles_labels()
+    figstyle.legend_below(
+        fig, handles + more_handles, labels + more_labels, scale=scale, ncol=3
     )
+    figstyle.title(fig, "Plain and tilted sampling at KP 62.0", scale=scale)
+    figstyle.layout(fig, scale=scale, legend_rows=2)
     return figstyle.save(
         fig, "adr0040_tilted_is_validation.png", mirror=OUT_DIR / "figures"
     )
@@ -2005,7 +1982,9 @@ def figure_epistemic_vs_statistical(evidence: dict) -> Path:
     # The panel's own right-hand limit, named once so the width labels can
     # be kept on the part of the axis a reader can see.
     X_MAX = 340.0
-    fig, axes = plt.subplots(1, 2, figsize=(14.2, 6.0), gridspec_kw={"wspace": 0.34})
+    scale = figstyle.scale_for(14.2, 1.0)
+    figstyle.style(scale)
+    fig, axes = plt.subplots(1, 2, figsize=(14.2, 6.8))
 
     # --- panel 1: the band on B itself, at the anchor --------------------------
     # Only anchors whose m_p control passed are drawn: the control is monotone in
@@ -2070,37 +2049,30 @@ def figure_epistemic_vs_statistical(evidence: dict) -> Path:
                 color=figstyle.MUTED,
                 lw=1.6,
                 zorder=2,
-                label=(r"epistemic band, arms with $k \geq 30$" if not ticks else None),
+                label=(
+                    "epistemic band,\n" r"arms with $k \geq 30$" if not ticks else None
+                ),
             )
             factor = (max(adequate) / min(adequate)) / (bhi / blo)
-            # The band spans the adequate arms only, but every arm is drawn,
-            # and the widest of those sits further right: anchoring the label
-            # on the band's own end put it on top of a marker. One arm at
-            # KP 57.4 lands beyond the axis, where an annotation anchored on
-            # it is clipped away entirely, so the anchor is the rightmost arm
-            # the axis actually shows.
-            on_axis = [b for b in drawn if b <= X_MAX] or [max(adequate)]
+            # Keep the width label inside its panel on a separate row below
+            # the marks; an off-axis arm must not push text into the gutter.
             ax.annotate(
                 rf"{factor:.1f}$\times$ wider",
-                (max(on_axis), y + 0.17),
-                textcoords="offset points",
-                xytext=(22, 0),
-                fontsize=9,
+                (0.97, y + 0.35),
+                xycoords=ax.get_yaxis_transform(),
+                fontsize=figstyle.pt("annotation", scale),
                 color=figstyle.INK,
+                ha="right",
                 va="center",
                 zorder=8,
             )
         ticks.append(title)
-    ax.set_yticks(range(len(ticks)), ticks, fontsize=9)
+    ax.set_yticks(range(len(ticks)), ticks)
     ax.set_xscale("log")
     ax.set_ylim(len(ticks) - 0.5, -0.65)
     ax.set_xlim(1.7, X_MAX)
     ax.set_xlabel("bias factor $B$ under each epistemic arm")
-    ax.set_title(
-        "The epistemic band is 6.4 to 7.2 times the statistical interval\n"
-        "$N = 10^6$ unweighted; criterion F3 fires at KP 57.4, not at KP 62.0",
-        loc="left",
-    )
+    figstyle.panel_title(ax, "Uncertainty in the bias factor", scale=scale)
     ax.grid(axis="y", visible=False)
     marker_handles = [
         plt.Line2D(
@@ -2123,24 +2095,17 @@ def figure_epistemic_vs_statistical(evidence: dict) -> Path:
         )
     ]
     existing = ax.get_legend_handles_labels()[0]
-    ax.legend(
-        handles=marker_handles + list(existing),
-        loc="upper center",
-        bbox_to_anchor=(0.5, -0.14),
-        ncol=4,
-        fontsize=8.5,
-    )
 
     # --- panel 2: per-knob ratio-of-ratios departure, four sections ------------
     ax2 = axes[1]
     synth = json.loads(SYNTHESIS_EVIDENCE.read_text(encoding="utf-8"))
     knobs = ["k_aq_prior_mean", "z_toe", "L_measurement", "m_p", "clopper_pearson"]
     knob_label = {
-        "k_aq_prior_mean": r"$k_\mathrm{aq}$" "\nprior mean",
-        "z_toe": r"$z_\mathrm{toe}$" "\n" + r"$\pm$0.30 m",
-        "L_measurement": "$L$\nmeasurement",
-        "m_p": "$m_p$\n(control)",
-        "clopper_pearson": "Clopper-Pearson\n(statistical)",
+        "k_aq_prior_mean": r"$k_\mathrm{aq}$",
+        "z_toe": r"$z_\mathrm{toe}$",
+        "L_measurement": "$L$",
+        "m_p": "$m_p$",
+        "clopper_pearson": "Exact\ninterval",
     }
     width = 0.19
     for si, section in enumerate(synth["sections"]):
@@ -2152,7 +2117,7 @@ def figure_epistemic_vs_statistical(evidence: dict) -> Path:
                 ax2.annotate(
                     "n/d",
                     (x, 1.04),
-                    fontsize=7.5,
+                    fontsize=figstyle.pt("small", scale),
                     color=figstyle.MUTED,
                     ha="center",
                     va="bottom",
@@ -2166,18 +2131,20 @@ def figure_epistemic_vs_statistical(evidence: dict) -> Path:
                 bottom=1.0,
                 color=figstyle.SECTION_COLORS.get(label, figstyle.MUTED),
                 lw=0,
-                label=label if ki == 0 else None,
+                label=label.replace("KP", "KP ") if ki == 0 else None,
             )
     ax2.axhline(1.0, color=figstyle.BASELINE, lw=1.2)
     ax2.set_yscale("log")
-    ax2.set_xticks(range(len(knobs)), [knob_label[k] for k in knobs], fontsize=9)
-    ax2.set_ylabel(r"max resolved $\rho$ departure factor   (1.0 = cancels exactly)")
-    ax2.set_title(
-        "Only $m_p$ cancels in the static-vs-transient ratio\n"
-        "paired-bootstrap ratio-of-ratios, four matrix sections, $N = 10^5$",
-        loc="left",
+    ax2.set_xticks(range(len(knobs)), [knob_label[k] for k in knobs])
+    ax2.set_ylabel(r"resolved $\rho$ departure factor")
+    figstyle.panel_title(ax2, "Cancellation across the two criteria", scale=scale)
+    section_handles, _ = ax2.get_legend_handles_labels()
+    handles = marker_handles + list(existing) + section_handles
+    figstyle.legend_below(
+        fig, handles, [h.get_label() for h in handles], scale=scale, ncol=4
     )
-    ax2.legend(loc="upper right", ncol=2, title="section", fontsize=9)
+    figstyle.title(fig, "Epistemic and statistical uncertainty", scale=scale)
+    figstyle.layout(fig, scale=scale, legend_rows=3)
     ax2.grid(axis="x", visible=False)
     # The two-line note that used to hang below the panels now lives in the
     # thesis caption, where it is set at caption size and can be read. Its

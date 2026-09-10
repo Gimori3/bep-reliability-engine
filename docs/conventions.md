@@ -306,13 +306,62 @@ different meaning in Chapter 7. ``CLIMATE_LABELS`` fixes how the warming case
 is written, after "+4K" and "4 K warming" had both spread through the drivers
 against the thesis's own ``$+4$\,K``.
 
-**Conversion status at the time of writing.** Thirty-three of the fifty-eight
-raster figures follow this section: ``gsa_study``, ``plot_fragility_curves``,
-``phase3_figures``, ``thesis_figure_gaps``, ``convergence_study``,
-``plot_initiation_fragility``, ``tail_variance_study``,
-``aquifer_response_diagnostic`` and ``conductivity_annualisation_study``. The
-remainder still carry their pre-2026-09-09 titles and are listed in the
-close-out note for the campaign.
+**Conversion and review status, 2026-09-10, after the round-2 ruling.** The
+thesis inventory contains 58 raster plots, four typeset diagrams and one
+author-managed map. Round 1 approved 25 raster plots and the unchanged map;
+those 25 plots and their caption repairs are in the thesis. Round 2 revised
+the other 33 raster plots and presented all four diagrams as isolated drawing
+proofs. The previously unconverted DEM, timestep, field-validation,
+gap-decomposition, seepage-length and foreshore plots now use printed sizes,
+measured title placement and tight saves. The posterior-fragility package
+keeps a small documented copy of the printed-size table rather than importing
+from the driver directory; a test checks agreement with ``_figstyle``.
+Approval remains an individual figure decision, not a blanket compliance
+claim.
+
+**The round-2 ruling: 54 of 63 approved, 9 changed, the mechanism palette
+accepted.** Twenty-eight further plots were approved (1.1, 2.1, 3.2, 4.1, 5.7,
+6.4, 6.8, 6.11, 6.12, 6.13, 7.3, 7.5, 7.6, E.2, E.3, E.7, G.3, H.1 to H.8,
+H.10, H.11, I.1), taking the approved set to 54. Nine were sent back: 2.2, 5.1,
+5.2, 5.3, 5.8, 6.5, 8.1, G.1 and G.2. **Six of those nine are reversions rather
+than refinements** (5.1, 5.2, 5.3, 8.1, G.1, G.2), the author having asked for
+the pre-round-2 composition back with only the general figure title in house
+style. That makes two deliberate departures from T6: restored, 5.1 prints its
+body type at 5.4 pt and 8.1 its panel-A legend at 3.1 pt, both below the 7 pt
+floor. Neither is silently reinstated. Each is re-presented beside a
+floor-lifted variant carrying the measured sizes, so the trade is the author's
+to make and not the drafter's. It is also a departure from T1 at three of them,
+the restored 5.1, 5.3 and G.2 titles carrying run conditions rather than a plain
+noun phrase. The nine are outstanding at this commit and are round 3's work.
+
+Standing exceptions: 6.5 keeps its small upper-left legend, 6.12 uses separate
+legends beneath its two panels, 5.7 retains its compact printed-point table with
+a 7 pt floor, and H.3/H.4 keep the shared legend below because their top-right
+regions carry curves. **Round 2's separate claim that 5.8 needs three legend rows
+is superseded**: the author ruled for two legends, one under each panel, which is
+the arrangement already accepted for 6.12, so 5.8 is no longer an exception of its
+own.
+
+**The mechanism palette is settled.** ``MECHANISM_COLORS`` gives piping a dark
+teal, overflow a brown and fluvial scour a plum, with a line style and marker
+each, so the three mechanisms separate in greyscale and for a colour-blind
+reader. Until this ruling ``phase3_figures.MECH_COLORS`` painted piping in the
+static limit state's blue and overflow in KP 62.0's green, so both hues carried a
+second meaning the reader had already learned elsewhere. The trio re-opens the
+three figures that draw it, 7.1, H.9 and H.10, all of which were approved in
+their old colours and go back for a separate ruling; they stay in the thesis in
+the old colours until that ruling arrives. The information audit is
+``docs/figure_text_audit_round2_2026-09-09.md``.
+
+The round-1 and round-2 review artifacts are HTML pages of embedded images, a few
+megabytes each, and are deliberately **not tracked**: the durable record is the
+author's rulings, which are reproduced in the project log, and the drivers and
+figures themselves.
+
+The four typeset drawings are outside ``FIGURE_DRIVERS``' PNG inventory.
+``scripts/generate_annotated_cross_section.py --output <external-path.tex>``
+owns the cross-section source and refuses to write TeX inside this repository.
+It does not compile a document. The thesis remains an Overleaf mirror.
 
 ### 9.4 A test may only skip on something that is genuinely optional
 

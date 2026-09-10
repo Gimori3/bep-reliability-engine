@@ -39,6 +39,7 @@ default remains the reference engine). Results go to
 Run from the repository root::
 
     python scripts/tail_variance_study.py [--n 10000] [--replicates 40]
+    python scripts/tail_variance_study.py --figures-only
 """
 
 from __future__ import annotations
@@ -108,7 +109,16 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--n", type=int, default=10_000, help="operating N")
     parser.add_argument("--replicates", type=int, default=40)
+    parser.add_argument(
+        "--figures-only",
+        action="store_true",
+        help="redraw the committed evidence without sampling or changing its record",
+    )
     args = parser.parse_args()
+    if args.figures_only:
+        record = json.loads(OUTPUT_JSON.read_text(encoding="utf-8"))
+        _plot(record["levels"], record["n_study"], record["n_replicates"])
+        return
     n_study, n_replicates = args.n, args.replicates
 
     cfg = Config.from_yaml(CONFIG_PATH)

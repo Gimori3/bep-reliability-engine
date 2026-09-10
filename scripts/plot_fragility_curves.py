@@ -18,7 +18,7 @@ Usage (repo root, venv active)::
 
     python scripts/plot_fragility_curves.py
 
-The KP 63.4 exclusion note is stamped on the figures: the section is
+The KP 63.4 exclusion is recorded in the thesis captions: the section is
 unconfined with no A_c blanket (k_bl undefined in the geotech table), so the
 confined-blanket BEP model does not apply (generate_configs.py, provenance
 3.1/3.5) — a data/mechanism gap, not an oversight.
@@ -147,7 +147,14 @@ def draw_branch(ax, grid, raw, ci, fit, color, marker, label) -> None:
     )
 
 
-def annotate_levels(ax, z_toe: float, hwl: float, y_text: float = 0.55) -> None:
+def annotate_levels(
+    ax,
+    z_toe: float,
+    hwl: float,
+    y_text: float = 0.55,
+    *,
+    hwl_y_axes: float | None = None,
+) -> None:
     ax.axvline(z_toe, color=MUTED, lw=1.1, ls=(0, (4, 2, 1, 2)), zorder=2)
     ax.axvline(hwl, color=INK_2, lw=1.1, ls=(0, (5, 3)), zorder=2)
     ax.annotate(
@@ -162,13 +169,14 @@ def annotate_levels(ax, z_toe: float, hwl: float, y_text: float = 0.55) -> None:
     )
     ax.annotate(
         "HWL",
-        xy=(hwl, y_text),
+        xy=(hwl, y_text if hwl_y_axes is None else hwl_y_axes),
+        xycoords="data" if hwl_y_axes is None else ("data", "axes fraction"),
         xytext=(3, 0),
         textcoords="offset points",
         color=INK_2,
         fontsize=fs.pt("annotation", SCALE),
         rotation=90,
-        va="center",
+        va="center" if hwl_y_axes is None else "top",
     )
 
 
@@ -331,7 +339,13 @@ def figure_tail_log(data: dict[str, dict]) -> None:
                 linestyle="none",
                 zorder=4,
             )
-        annotate_levels(ax, d["z_toe"], d["hwl"], y_text=0.02)
+        annotate_levels(
+            ax,
+            d["z_toe"],
+            d["hwl"],
+            y_text=0.02,
+            hwl_y_axes=0.985 if kp in ("57.4", "62.0") else None,
+        )
         if kp == "62.0":
             # The same grid extension the per-section view shades. It is a fit
             # stabilizer, never attainable loading, and the two views of one
@@ -341,7 +355,7 @@ def figure_tail_log(data: dict[str, dict]) -> None:
             # Centred on the band it names, so the caption sits wholly inside
             # the shading rather than straddling its left edge.
             ax.annotate(
-                "fit-stabilizer levels\n(above max attainable stage)",
+                "fit-stabilizer levels\n(above max\nattainable stage)",
                 xy=(0.5 * (attainable_top + grid.max()), 0.06),
                 xycoords=("data", "axes fraction"),
                 ha="center",

@@ -21,6 +21,7 @@ from pathlib import Path
 import matplotlib
 
 matplotlib.use("Agg")
+import _figstyle as fs
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -154,28 +155,30 @@ def fig_marginal_ratio() -> None:
 def fig_system_and_ceiling() -> None:
     sysd = json.loads((REC / "system_correlation.json").read_text())
     ceil = json.loads((REC / "phase2_ceiling.json").read_text())
-    fig, axes = plt.subplots(1, 3, figsize=(14, 4.6))
+    scale = fs.scale_for(14, 1.0)
+    fs.style(scale)
+    fig, axes = plt.subplots(1, 3, figsize=(14, 4.6), gridspec_kw={"wspace": 0.42})
 
     # Panel A: independence over-count ratio vs lambda_ac.
     ax = axes[0]
     lam = np.linspace(20, 400, 200)
     ratio = lam / sysd["segment_spacing_m"]
-    ax.plot(lam, ratio, color="#0072B2", lw=2)
+    ax.plot(lam, ratio, color=fs.INK, lw=2)
     ax.axhline(1.0, color="#000000", lw=0.8, alpha=0.5)
     for name, lval in (("40 m", 40), ("100 m", 100), ("250 m", 250)):
-        ax.plot([lval], [lval / 200.0], "o", color="#D55E00")
+        ax.plot([lval], [lval / 200.0], "o", color=fs.INK)
         ax.annotate(
             name,
             (lval, lval / 200.0),
             textcoords="offset points",
             xytext=(4, 6),
-            fontsize=8,
+            fontsize=fs.pt("annotation", scale),
         )
     ax.fill_between(lam, 0, 1, color="#D55E00", alpha=0.07)
     ax.fill_between(lam, 1, ratio.max(), color="#009E73", alpha=0.07)
     ax.set_xlabel(r"$\lambda_\mathrm{ac}$ [m]")
-    ax.set_ylabel(r"independence over-count = $\lambda_\mathrm{ac}/200$")
-    ax.set_title("Reach-scale length effect\n(>1 conservative, <1 under-counts)")
+    ax.set_ylabel(r"independence ratio $\lambda_\mathrm{ac}/200$")
+    fs.panel_title(ax, "Reach-scale dependence", scale=scale, letter="A")
     ax.grid(alpha=0.25)
 
     # Panel B: production 4-node reach union — independent vs comonotone.
@@ -185,20 +188,16 @@ def fig_system_and_ceiling() -> None:
     x = np.arange(len(keys))
     ind = [b[k]["reach_union_independent"] for k in keys]
     com = [b[k]["reach_union_comonotone"] for k in keys]
-    ax.bar(x - 0.18, ind, 0.36, label="independent (production)", color="#009E73")
-    ax.bar(x + 0.18, com, 0.36, label="comonotone (full corr.)", color="#0072B2")
+    ax.bar(x - 0.18, ind, 0.36, label="independent (production)", color=fs.INK_2)
+    ax.bar(x + 0.18, com, 0.36, label="fully correlated", color=fs.BASELINE)
     ax.set_yscale("log")
     # A log bar chart autoscales to the data, which cut the top off the
     # tallest bar and left the legend standing on it.
     ax.set_ylim(min(min(ind), min(com)) / 2.2, max(max(ind), max(com)) * 4.0)
     ax.set_xticks(x)
-    ax.set_xticklabels([k.split("/")[0] for k in keys])
+    ax.set_xticklabels([fs.CLIMATE_LABELS[k.split("/")[0]] for k in keys])
     ax.set_ylabel("annual BEP reach union")
-    ax.set_title(
-        "Production 4-section BEP reach union\n"
-        r"(1.2 to 2.0 km apart: bounds within $\times$1.4 to 1.7)"
-    )
-    ax.legend(fontsize=8)
+    fs.panel_title(ax, "Reach probability", scale=scale, letter="B")
     ax.grid(alpha=0.25, axis="y")
 
     # Panel C: Phase 2 ceiling — prior vs posterior L marginal & theta shifts.
@@ -211,26 +210,29 @@ def fig_system_and_ceiling() -> None:
         shifts = [s["L_mean_change_pct"]] + [
             s["theta_marginal_shift"][p]["mean_change_pct"] for p in params[1:]
         ]
-        ax.bar(np.arange(len(params)) + j * width, shifts, width, label=lab)
+        ax.bar(
+            np.arange(len(params)) + j * width,
+            shifts,
+            width,
+            label=lab.replace("KP", "KP "),
+            color=fs.SECTION_COLORS[lab],
+        )
     ax.axhline(0, color="#000000", lw=0.8)
     ax.set_xticks(np.arange(len(params)) + width * (len(labels) - 1) / 2)
     ax.set_xticklabels([PARAM_LABEL[p] for p in params])
     ax.set_ylabel("posterior mean shift [%]")
-    ax.set_title(
-        "Phase 2: 2016 survival barely moves L\n"
-        "(filters $\\theta$, not the geometric L)"
-    )
-    ax.legend(fontsize=8)
+    fs.panel_title(ax, "Posterior mean shifts", scale=scale, letter="C")
     ax.grid(alpha=0.25, axis="y")
 
-    fig.suptitle(
-        "Seepage length L at the system level (left, center) and the "
-        "Phase 2 ceiling (right)",
-        fontsize=12,
+    handles, labels = axes[1].get_legend_handles_labels()
+    extra_handles, extra_labels = axes[2].get_legend_handles_labels()
+    fs.legend_below(fig, handles + extra_handles, labels + extra_labels, scale=scale)
+    fs.title(
+        fig, "Seepage length, reach probability and survival updating", scale=scale
     )
-    fig.tight_layout(rect=(0, 0, 1, 0.93))
+    fs.layout(fig, scale=scale, legend_rows=1)
     out = FIG / "seepage_length_system_and_ceiling.png"
-    fig.savefig(out, dpi=140)
+    fig.savefig(out, dpi=160, bbox_inches="tight")
     plt.close(fig)
     print("wrote", out)
 

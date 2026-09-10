@@ -945,18 +945,33 @@ def test_the_promoted_phase_2_figures_are_committed_and_declared() -> None:
     for name in sorted(PHASE2_PUBLICATION_FIGURES):
         assert _require(FIGURES / name).stat().st_size > 0
 
-    (entry,) = [
+    (marginals,) = [
         driver
         for driver in FIGURE_DRIVERS
         if driver["label"].startswith("Phase-2 posterior diagnostics")
     ]
-    assert set(entry["produces"]) == PHASE2_PUBLICATION_FIGURES
-    assert not any("*" in pattern for pattern in entry["produces"])
-    assert "--figures-only" in entry["command"], (
+    (fragility,) = [
+        driver
+        for driver in FIGURE_DRIVERS
+        if driver["label"].startswith("Phase-2 persisted fragility update")
+    ]
+    assert (
+        set(marginals["produces"]) | set(fragility["produces"])
+        == PHASE2_PUBLICATION_FIGURES
+    )
+    assert set(marginals["produces"]).isdisjoint(fragility["produces"])
+    assert not any(
+        "*" in pattern
+        for entry in (marginals, fragility)
+        for pattern in entry["produces"]
+    )
+    assert "--figures-only" in marginals["command"], (
         "the redraw path must be the read-only one: the persisted posteriors "
         "are SHA-256-recorded in the campaign manifest"
     )
-    assert entry["sources"], "these figures must be bound to what they depict"
+    assert fragility["command"][1:] == ["scripts/plot_persisted_fragility_update.py"]
+    for entry in (marginals, fragility):
+        assert entry["sources"], "these figures must be bound to what they depict"
 
 
 def test_the_seam_promotes_exactly_the_two_informative_matrix_strata() -> None:

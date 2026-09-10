@@ -485,7 +485,9 @@ def _plot(payload: dict, paths: dict[str, Path]) -> None:
         scale=ladder_scale,
     )
     fs.layout(fig, scale=ladder_scale, legend_rows=2)
-    _savefig_both(fig, paths["fig_conv"], paths["tracked_fig_conv"])
+    _savefig_both(
+        fig, paths["fig_conv"], paths["tracked_fig_conv"], bbox_inches="tight"
+    )
     plt.close(fig)
 
     # ---- Figure 2: Objective 2 — LHS vs crude MC, bulk -> tail ------------

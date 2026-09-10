@@ -45,8 +45,10 @@ from pathlib import Path
 import matplotlib
 
 matplotlib.use("Agg")
+import _figstyle as fs
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.patches import Patch
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
@@ -80,8 +82,8 @@ def _write_figure(fig, fig_dir: Path, name: str) -> Path:
     fig_dir.mkdir(parents=True, exist_ok=True)
     PUB_FIG_DIR.mkdir(parents=True, exist_ok=True)
     path = fig_dir / name
-    fig.savefig(path, dpi=170, facecolor=SURFACE)
-    fig.savefig(PUB_FIG_DIR / name, dpi=170, facecolor=SURFACE)
+    fig.savefig(path, dpi=170, facecolor=SURFACE, bbox_inches="tight")
+    fig.savefig(PUB_FIG_DIR / name, dpi=170, facecolor=SURFACE, bbox_inches="tight")
     plt.close(fig)
     return path
 
@@ -91,6 +93,12 @@ def _write_figure(fig, fig_dir: Path, name: str) -> Path:
 #: whose endpoint is the production gap, and a main-body thesis figure names it
 #: for that rather than for the implementation.
 LADDER_DISPLAY_NAMES = {"physics": "physics", "engine": "production"}
+STEP_DISPLAY_NAMES = {
+    "head_convention": "head convention",
+    "dimensional": "dimensional",
+    "initiation_gate": "initiation gate",
+    "temporal_net": "temporal net",
+}
 
 
 # Section registry (ADR-0040): matrix d70 is the primary decomposition run;
@@ -140,7 +148,7 @@ PF_FLOOR = 1e-6  # display floor for log-scale fragility axes
 def _apply_style(ax) -> None:
     ax.set_facecolor(SURFACE)
     ax.grid(True, which="major", color=GRID_COLOR, linewidth=0.7)
-    ax.tick_params(colors=MUTED, labelsize=8)
+    ax.tick_params(colors=MUTED)
     for spine in ax.spines.values():
         spine.set_color(NEUTRAL)
 
@@ -475,12 +483,14 @@ def figure_ladder(key: str, result: GapDecompositionResult, fig_dir: Path) -> Pa
     cis = result.binomial_cis()
     hwl = result.metadata.get("hwl_m")
     attainable = result.metadata.get("attainable_max_m")
+    scale = fs.scale_for(11, 1.0)
+    fs.style(scale)
 
-    fig, axes = plt.subplots(1, 2, figsize=(11, 4.6), sharey=True)
+    fig, axes = plt.subplots(1, 2, figsize=(11, 5.4), sharey=True)
     fig.patch.set_facecolor(SURFACE)
     panels = (
-        ("Physics ladder (endpoint alpha = -1/2)", ("C0", "C1", "C2", "C3a", "C4a")),
-        ("Production ladder (alpha = -1/3)", ("C0", "C1", "C3b", "C4b")),
+        (r"Physics ladder ($\alpha=-1/2$)", ("C0", "C1", "C2", "C3a", "C4a")),
+        (r"Production ladder ($\alpha=-1/3$)", ("C0", "C1", "C3b", "C4b")),
     )
     for ax, (title, ids) in zip(axes, panels):
         _apply_style(ax)
@@ -491,8 +501,8 @@ def figure_ladder(key: str, result: GapDecompositionResult, fig_dir: Path) -> Pa
             )
         ax.set_yscale("log")
         ax.set_ylim(PF_FLOOR, 1.5)
-        ax.set_xlabel("conditioning stage [m T.P.]", color=MUTED, fontsize=9)
-        ax.set_title(f"{spec['label']}  {title}", color=INK, fontsize=10)
+        ax.set_xlabel("conditioning stage [m T.P.]")
+        fs.panel_title(ax, title, scale=scale)
         if hwl is not None:
             ax.axvline(hwl, color=MUTED, linewidth=0.9, ls=":")
             ax.text(
@@ -500,7 +510,7 @@ def figure_ladder(key: str, result: GapDecompositionResult, fig_dir: Path) -> Pa
                 0.03,
                 " HWL",
                 color=MUTED,
-                fontsize=8,
+                fontsize=fs.pt("annotation", scale),
                 ha="left",
                 transform=ax.get_xaxis_transform(),
             )
@@ -511,13 +521,18 @@ def figure_ladder(key: str, result: GapDecompositionResult, fig_dir: Path) -> Pa
                 0.40,
                 "hypothetical\n(above the\nattainable stage)",
                 color=MUTED,
-                fontsize=7,
+                fontsize=fs.pt("small", scale),
                 ha="center",
                 transform=ax.get_xaxis_transform(),
             )
-        ax.legend(fontsize=8, framealpha=0.9, loc="lower right")
-    axes[0].set_ylabel("P_f per event (raw, CP 95% bands)", color=MUTED, fontsize=9)
-    fig.tight_layout()
+    axes[0].set_ylabel(r"event probability $P_f$")
+    fs.title(fig, f"Comparator fragility at {spec['label']}", scale=scale)
+    legend = {}
+    for ax in axes:
+        handles, labels = ax.get_legend_handles_labels()
+        legend.update(zip(labels, handles))
+    fs.legend_below(fig, list(legend.values()), list(legend), scale=scale, ncol=4)
+    fs.layout(fig, scale=scale, legend_rows=2)
     return _write_figure(fig, fig_dir, f"stage6_6_ladder_{key}.png")
 
 
@@ -556,10 +571,13 @@ def _waterfall(ax, names, deltas, cis, start_value, start_name, end_name) -> Non
     )
     ax.set_xticks(positions)
     ax.set_xticklabels(
-        [start_name, *(n.replace("_", " ") for n in names), end_name],
-        rotation=25,
+        [
+            start_name,
+            *(STEP_DISPLAY_NAMES[n].replace(" ", "\n") for n in names),
+            end_name,
+        ],
+        rotation=30,
         ha="right",
-        fontsize=8,
     )
 
 
@@ -576,7 +594,9 @@ def figure_waterfall(
         ("physics", PHYSICS_LADDER_STEPS, "C4a"),
         ("engine", ENGINE_LADDER_STEPS, "C4b"),
     )
-    fig, axes = plt.subplots(2, 2, figsize=(11, 7.6))
+    scale = fs.scale_for(11, 1.0)
+    fs.style(scale)
+    fig, axes = plt.subplots(2, 2, figsize=(11, 8.4))
     fig.patch.set_facecolor(SURFACE)
     p_f = result.p_f()
     comp = analysis["components"]
@@ -599,14 +619,22 @@ def figure_waterfall(
             _waterfall(
                 ax, names, deltas, cis, float(p_f["C0"][i]), "C0 (static)", endpoint
             )
-            ax.set_title(
-                f"{spec['label']}  {LADDER_DISPLAY_NAMES[ladder_name]} ladder "
-                f"at {level_label} ({grid[i]:.2f} m T.P.)",
-                color=INK,
-                fontsize=9,
+            level_title = "HWL" if col == 0 else "upper stage"
+            fs.panel_title(
+                ax,
+                f"{LADDER_DISPLAY_NAMES[ladder_name].capitalize()}: {level_title}",
+                scale=scale,
             )
-            ax.set_ylabel("P_f per event", color=MUTED, fontsize=8)
-    fig.tight_layout()
+            ax.set_ylabel(r"event probability $P_f$")
+    fs.title(fig, f"Gap decomposition at {spec['label']}", scale=scale)
+    fs.legend_below(
+        fig,
+        [Patch(facecolor=c) for c in (NEUTRAL, fs.BLUE, fs.RED)],
+        ["endpoint probability", "probability decrease", "probability increase"],
+        scale=scale,
+        ncol=3,
+    )
+    fs.layout(fig, scale=scale, legend_rows=1)
     return _write_figure(fig, fig_dir, f"stage6_6_waterfall_{key}.png")
 
 
@@ -617,7 +645,9 @@ def figure_fractions(
     spec = SECTIONS[key]
     grid = result.conditioning_grid
     comp = analysis["components"]
-    fig, axes = plt.subplots(1, 2, figsize=(11, 4.2), sharey=True)
+    scale = fs.scale_for(11, 1.0)
+    fs.style(scale)
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4.8), sharey=True)
     fig.patch.set_facecolor(SURFACE)
     step_colors = {
         "head_convention": "#1baf7a",
@@ -635,36 +665,19 @@ def figure_fractions(
                 fraction,
                 color=step_colors[name],
                 linewidth=2.0,
-                label=name.replace("_", " "),
+                label=STEP_DISPLAY_NAMES[name],
             )
         ax.axhline(0.0, color=NEUTRAL, linewidth=0.9)
         ax.axhline(1.0, color=GRID_COLOR, linewidth=0.9)
         ax.set_ylim(-1.0, 2.0)
-        ax.set_xlabel("conditioning stage [m T.P.]", color=MUTED, fontsize=9)
-        ax.set_title(
-            f"{spec['label']}  {LADDER_DISPLAY_NAMES[ladder_name]} "
-            "ladder component shares",
-            color=INK,
-            fontsize=10,
+        ax.set_xlabel("conditioning stage [m T.P.]")
+        fs.panel_title(
+            ax, f"{LADDER_DISPLAY_NAMES[ladder_name].capitalize()} ladder", scale=scale
         )
-        # At KP 62.0 the temporal-net share comes down through 2.0 in the
-        # upper right, so the legend stood on it there and moves below the
-        # axis on a plate. At KP 57.4 the shares reach 2.0 further left and
-        # the default placement is legible, so that figure keeps it.
-        if key == "kp62_0":
-            ax.legend(
-                fontsize=8,
-                loc="lower right",
-                facecolor=SURFACE,
-                edgecolor="none",
-                framealpha=0.85,
-            )
-        else:
-            ax.legend(fontsize=8, framealpha=0.9)
-    axes[0].set_ylabel(
-        "component share of total gap (where resolved)", color=MUTED, fontsize=9
-    )
-    fig.tight_layout()
+    axes[0].set_ylabel("share of total gap")
+    fs.title(fig, f"Gap component shares at {spec['label']}", scale=scale)
+    fs.legend_below(fig, scale=scale, ncol=4)
+    fs.layout(fig, scale=scale, legend_rows=1)
     return _write_figure(fig, fig_dir, f"stage6_6_fractions_{key}.png")
 
 
@@ -680,6 +693,8 @@ def figure_c2c3(
     p_f = result.p_f()
     cis = result.binomial_cis()
     c2_only = np.mean(result.comparators["C2"] & ~result.comparators["C3a"], axis=0)
+    scale = fs.scale_for(7.2, 0.8)
+    fs.style(scale)
 
     fig, (ax1, ax2) = plt.subplots(
         2, 1, figsize=(7.2, 6.4), sharex=True, height_ratios=[2.2, 1.0]
@@ -701,44 +716,17 @@ def figure_c2c3(
     )
     ax1.set_yscale("log")
     ax1.set_ylim(PF_FLOOR, 1.5)
-    ax1.set_ylabel("P_f per event", color=MUTED, fontsize=9)
-    ax1.set_title(
-        f"{spec['label']}  C2 vs C3a: exact nesting, gap = initiation gate",
-        color=INK,
-        fontsize=10,
-    )
-    ax1.legend(fontsize=8, framealpha=0.9, loc="lower right")
+    ax1.set_ylabel(r"event probability $P_f$")
+    fs.panel_title(ax1, "Comparator probabilities", scale=scale)
 
     ax2.plot(grid, c2_only, color="#4a3aa7", linewidth=2.0)
-    ax2.set_ylabel("gate-blocked fraction\nP(C2 and not C3a)", color=MUTED, fontsize=8)
-    ax2.set_xlabel("conditioning stage [m T.P.]", color=MUTED, fontsize=9)
-
-    if ladder_json is not None:
-        rows = ladder_json["alpha_minus_half"]["rows"]
-        top_level = max(r["level_m"] for r in rows)
-        subset = [r for r in rows if r["level_m"] == top_level]
-        text = "ODE hold-ladder vs analytic (level {:.2f}):\n".format(top_level)
-        text += "\n".join(
-            "{:>5.0f} h: missing {:d}, excess {:d}".format(
-                r["hours"], r["analytic_not_ode"], r["ode_not_analytic"]
-            )
-            for r in subset
-        )
-        # The upper left is the rising limb at KP 62.0, which this box
-        # covered. The right half below the saturated curve is empty at
-        # both sections and leaves the legend its own corner.
-        ax1.text(
-            0.98,
-            0.62,
-            text,
-            transform=ax1.transAxes,
-            fontsize=7,
-            ha="right",
-            va="top",
-            color=INK,
-            bbox=dict(facecolor=SURFACE, edgecolor=GRID_COLOR),
-        )
-    fig.tight_layout()
+    ax2.set_ylabel("P(C2 and not C3a)")
+    ax2.set_xlabel("conditioning stage [m T.P.]")
+    fs.panel_title(ax2, "Gate-blocked fraction", scale=scale)
+    # The sustained-duration convergence table belongs in the appendix text.
+    fs.title(fig, f"Initiation-gate effect at {spec['label']}", scale=scale)
+    fs.legend_below(fig, scale=scale, ncol=1)
+    fs.layout(fig, scale=scale, legend_rows=2)
     return _write_figure(fig, fig_dir, f"stage6_6_c2c3_{key}.png")
 
 
@@ -749,12 +737,14 @@ def figure_heq_bound(
     spec = SECTIONS[key]
     grid = result.conditioning_grid
     comp = analysis["components"]["auxiliary"]
+    scale = fs.scale_for(7.2, 0.8)
+    fs.style(scale)
     fig, ax = plt.subplots(figsize=(7.2, 4.2))
     fig.patch.set_facecolor(SURFACE)
     _apply_style(ax)
     for name, color, label in (
-        ("heq_conservatism_engine", "#e34948", "alpha = -1/3 (C4b - C4c)"),
-        ("heq_conservatism_physics", "#eb6834", "alpha = -1/2 (C4a - C4d)"),
+        ("heq_conservatism_engine", "#e34948", r"$\alpha=-1/3$ (C4b − C4c)"),
+        ("heq_conservatism_physics", "#eb6834", r"$\alpha=-1/2$ (C4a − C4d)"),
     ):
         block = comp[name]
         delta = np.asarray(block["delta"], dtype=float)
@@ -763,15 +753,11 @@ def figure_heq_bound(
         ax.plot(grid, delta, color=color, linewidth=2.0, label=label)
         ax.fill_between(grid, lo, hi, color=color, alpha=0.15, linewidth=0)
     ax.axhline(0.0, color=NEUTRAL, linewidth=0.9)
-    ax.set_xlabel("conditioning stage [m T.P.]", color=MUTED, fontsize=9)
-    ax.set_ylabel("Delta P_f from the 0.9 H_c end anchor", color=MUTED, fontsize=9)
-    ax.set_title(
-        f"{spec['label']}  H_eq-conservatism bound",
-        color=INK,
-        fontsize=10,
-    )
-    ax.legend(fontsize=8, framealpha=0.9)
-    fig.tight_layout()
+    ax.set_xlabel("conditioning stage [m T.P.]")
+    ax.set_ylabel(r"$\Delta P_f$ from the $0.9H_c$ end anchor")
+    fs.title(fig, f"Equivalent-head bound at {spec['label']}", scale=scale)
+    fs.legend_below(fig, scale=scale, ncol=2)
+    fs.layout(fig, scale=scale, legend_rows=1)
     return _write_figure(fig, fig_dir, f"stage6_6_heq_{key}.png")
 
 
