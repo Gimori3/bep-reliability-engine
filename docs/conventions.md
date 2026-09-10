@@ -332,7 +332,25 @@ floor. Neither is silently reinstated. Each is re-presented beside a
 floor-lifted variant carrying the measured sizes, so the trade is the author's
 to make and not the drafter's. It is also a departure from T1 at three of them,
 the restored 5.1, 5.3 and G.2 titles carrying run conditions rather than a plain
-noun phrase. The nine are outstanding at this commit and are round 3's work.
+noun phrase.
+
+**Round 3 executed all nine (2026-09-10).** Six were restored to their
+pre-round-2 code path and given a house title and nothing else; 2.2, 5.8 and 6.5
+kept their round-2 drawing and took the refinement asked for. Two shared drivers
+were reverted **in part**, because a whole-file revert would have un-approved a
+figure: ``plot_validation_yabe`` also writes G.3 and ``foreshore_exhaustion_study``
+had gained the redraw path that 8.1 is now rebuilt with. G.3 and E.7, the two
+approved figures sharing a driver with a reverted one, were re-rendered and
+compared byte for byte against their approved copies.
+
+**One measurement changed how the titles were set, and it generalises.** These
+drivers save with ``bbox_inches="tight"``, so a title wider than the panels
+becomes the saved canvas's width, and the figure is then reduced further at a
+fixed placement: a one-line house title took G.1 from 7.33 to 8.56 in and its
+body type from 8.2 to 7.0 pt, G.2 from 7.6 to 6.6 pt, and 5.2 from 6.7 to 5.4 pt.
+**A title set at the house size that is wider than its own figure defeats
+itself.** Three titles are therefore set on two lines, two of them (5.2, G.1) at
+no request, and each figure now prints at or above the size it had before.
 
 Standing exceptions: 6.5 keeps its small upper-left legend, 6.12 uses separate
 legends beneath its two panels, 5.7 retains its compact printed-point table with

@@ -96,6 +96,37 @@ CLIMATE_COLORS = {"historical": VIOLET, "+4K": ORANGE}
 #: "+4K" and "4 K warming", the second of which drops the sign altogether.
 CLIMATE_LABELS = {"historical": "historical", "+4K": "+4 K"}
 
+#: The three failure mechanisms composed in Phase 3, fixed for the whole
+#: thesis. Until 2026-09-10 ``phase3_figures`` painted piping in the static
+#: limit state's blue and overflow in KP 62.0's green, so both hues carried a
+#: second meaning for a reader who had met them in Chapter 6, and blue carried
+#: three across the document. Teal, brown and plum belong to no other series.
+MECHANISM_COLORS = {
+    "bep": "#006b70",  # dark teal
+    "overflow": "#a85c16",  # brown
+    "fluvial_scour": "#a04a86",  # plum
+}
+
+#: The secondary channel, and it is load-bearing rather than decorative: the
+#: brown and the plum have almost the same relative luminance (107 against
+#: 107 on a 0 to 255 scale, against the teal's 76), so a greyscale print or a
+#: colour-blind reader separates overflow from scour by dash pattern and
+#: marker, not by hue. A figure that draws the trio uses one of these
+#: alongside the colour wherever its marks can carry one.
+MECHANISM_LINESTYLES = {
+    "bep": "none",  # isolated nodes, never a connecting line
+    "overflow": (0, (5, 1.6)),
+    "fluvial_scour": (0, (1.4, 1.4)),
+}
+MECHANISM_MARKERS = {"bep": "o", "overflow": "s", "fluvial_scour": "^"}
+
+#: Rendered names for the three mechanisms.
+MECHANISM_LABELS = {
+    "bep": "BEP (posterior transient)",
+    "overflow": "Overflow",
+    "fluvial_scour": "Fluvial scour",
+}
+
 # --- sequential blue ramp (magnitude only) ------------------------------------
 SEQ_BLUE = ("#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#256abf", "#184f95")
 
