@@ -370,3 +370,24 @@ mechanics are in `docs/conventions.md`.
   them; separating them by column against their own markers showed both sitting
   6.5 px high at the first attempt, which is 3.2 pt at this figure's resolution,
   and the offset was corrected by exactly that.
+
+  **The round-4 ruling, 2026-09-11.** 5.8 and 8.1 approved and copied into the
+  thesis, taking the campaign to 62 of 63. 6.5 came back for a third look: the
+  two anchor callouts are boxed, moved to the top right of the right-hand panel,
+  and each joined by a leader to the conditioning level it names. **The leader's
+  tip is placed by construction, not by adjustment**, which is the transferable
+  part: its x is the anchor level in data coordinates, the same value the
+  vertical line is drawn at, its y is a fraction of the panel height chosen so
+  the two leaders do not cross, and the arrow terminates exactly at that point
+  rather than being shrunk back from it. A tip positioned that way lands on its
+  line whatever the axis limits later become, and needs no measurement to
+  confirm; the first attempt used the default shrink and stopped visibly short
+  of both lines.
+
+  **A caution on measuring a figure by colour.** The check written to confirm
+  the leader tips searched for the muted grey the leaders are drawn in, and that
+  grey is also the tick labels, the axis text and the spines, so it reported
+  every leader as stopping short by margins that were pure noise. Where a
+  construction can be made exact, prefer it to a measurement of the render;
+  where a measurement is genuinely needed, as with 6.5's label alignment in the
+  preceding round, key it on something the rest of the figure does not share.
