@@ -812,7 +812,10 @@ def make_figure(
     ax_b.set_xlabel("time [h]")
     ax_b.set_ylabel(r"pipe length $l(t)$ [m]")
     ax_b.set_title(
-        f"(b) Worst-case trajectories at h = {traj['showcase_level_m_msl']:g} m MSL"
+        # The datum is written m T.P. throughout the report, including in its
+        # figures. Panel (c) already did; this panel named the same quantity
+        # m MSL, so one figure carried two labels for one datum.
+        f"(b) Worst-case trajectories at h = {traj['showcase_level_m_msl']:g} m T.P."
         f" ({_section_label(primary_id)})",
         loc="left",
         fontsize=10,

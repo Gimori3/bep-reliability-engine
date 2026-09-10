@@ -289,3 +289,52 @@ mechanics are in `docs/conventions.md`.
   The three round-1 repairs and the three round-2 source corrections were
   re-checked at every site, not only in the caption. One line-ending-only diff
   was restored rather than committed, and one review artifact was left untracked.
+
+  **Second pass, 2026-09-11, on the author's instruction to close every open
+  point.** The floor is now met at ten of the twelve reviewed figures, and the
+  two that are not are decided rather than outstanding. **The move that closed
+  8.1 generalises and is the finding to keep:** its panel-A key was four assumed
+  rates by two loading cases set at 6.2 authored points, printing at 3.1, the
+  smallest text in the report; the caption already listed the rates, so the key
+  moved there in full and the legend went. That freed the panel, and with it
+  freed every remaining size rose to the floor without the collisions the
+  floor-lifted variant had shown, taking the figure from 3.1 pt to 7.0 with the
+  drawing itself untouched. **Text that has to be small to fit inside a figure is
+  usually text a caption can hold at caption size**, which is the same lesson the
+  tight-bounding-box measurement taught from the other direction. Two collisions
+  surfaced once the type was at the floor and both were fixed: two section names
+  that ran together, and the bracket label, which moved to the foot of its band.
+
+  Three further figures reached the floor by raising a single number, the size of
+  their in-plot annotations (5.2, 5.3, G.2). That moves no position, limit, label
+  or colour, so a restored drawing stays restored. **5.1 stays at 4.9 pt by the
+  author's own instruction**, with the floor-lifted build kept as the evidence for
+  why; the route to the floor there is the 8.1 move, its panel titles stating run
+  conditions the caption now carries verbatim, but it means editing subfigure
+  titles, which was ruled out. **2.2 stays at 5.0 pt after the 7 pt version was
+  built and rejected on inspection**, four separate collisions in a dense typeset
+  drawing; that one is a re-layout, not a size change.
+
+  **Three defects the restores had reinstated are repaired.** 5.1 was naming one
+  datum two ways, ``m MSL`` in one panel title and ``m T.P.`` in another, which an
+  earlier campaign had unified and round 2 had hidden by deleting the string
+  rather than fixing it. 5.3 had come back with ``3.4e-4`` for its conductivities
+  and an underscored ``l_c``, and G.2 with ``dH`` for a head difference; all three
+  are now set as the report writes them, with the author's wording untouched.
+  The Chapter 5 caption lost the sentence its restored title duplicates and had
+  its panel letters brought into line with the figure's own.
+
+  **H.9 gained the second channel it could not carry.** Both of its mark channels
+  were already spoken for, shape carrying the climate scenario and fill carrying
+  whether ten or more events engaged the mechanism, so the mechanism took a shape
+  *family* instead of a single shape: overflow round then square, fluvial scour
+  triangular then diamond. Both earlier readings survive unchanged and the legend
+  is one entry shorter, naming the four combinations directly instead of leaving
+  two keys to be crossed.
+
+  **The save-survival mechanism is now verified in a real browser, not argued.**
+  The previous pass could only check it at markup level. A headless browser now
+  loads the page, types into two note boxes through the page's own input handler,
+  rules on two entries and serialises its own DOM, which is the tree a save
+  writes: both notes come back inside their textareas, both rulings come back on
+  their data attributes, and the ten unruled entries stay empty.

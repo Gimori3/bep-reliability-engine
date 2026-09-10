@@ -352,6 +352,33 @@ body type from 8.2 to 7.0 pt, G.2 from 7.6 to 6.6 pt, and 5.2 from 6.7 to 5.4 pt
 itself.** Three titles are therefore set on two lines, two of them (5.2, G.1) at
 no request, and each figure now prints at or above the size it had before.
 
+**The floor was then closed, on the author's instruction, at every figure where
+it could be (2026-09-11).** Ten of the twelve reviewed figures now print their
+smallest text at or above 7 pt. The move that did it at 8.1 is the one worth
+keeping: its eight-entry key was four assumed rates by two loading cases, the
+caption already listed the rates, so **the key moved into the caption in full and
+the legend went**, which freed the panel and let every remaining size rise. 8.1
+went from 3.1 pt, the smallest text in the report, to 7.0. Three more figures
+(5.2, 5.3, G.2) reached the floor by raising one number each, the size of their
+in-plot annotations, which moves no position, limit, label or colour and so
+leaves a restored drawing restored.
+
+**Two remain below the floor and both are decided rather than outstanding.**
+5.1 prints at 4.9 pt because the author asked for that composition and the
+floor-lifted build of it collides; the route to the floor there is the 8.1 move,
+its panel titles stating run conditions the caption now carries verbatim, but it
+means editing subfigure titles, which the author ruled out. 2.2 prints at 5.0 pt,
+which is LaTeX's own ``\tiny`` at a 10 pt base rather than a reduction artefact:
+the 7 pt version was built and read, and the drawing does not survive it (the
+panel (a) axis title runs into its tick labels, the two pipe-dimension labels
+merge, the high-water-bed label is struck through by the piezometric line and the
+embankment, and the low-water-channel box lands on the channel). Reverted.
+
+**A caption may carry a figure's key, and it is often the better place.** Both
+this and the earlier tight-bounding-box finding say the same thing: text that
+must be small to fit inside a figure is usually text the caption can hold at
+caption size, where it is read once rather than squinted at.
+
 Standing exceptions: 6.5 keeps its small upper-left legend, 6.12 uses separate
 legends beneath its two panels, 5.7 retains its compact printed-point table with
 a 7 pt floor, and H.3/H.4 keep the shared legend below because their top-right

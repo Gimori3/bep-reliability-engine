@@ -54,10 +54,13 @@ plt.rcParams.update(
     }
 )
 
+# The wording is the author's restored wording. Only the notation is set:
+# the report writes a conductivity as a power of ten and a symbol as maths,
+# and "3.4e-4" is neither.
 K_LABEL = {
-    3.4e-4: "central k (case 2/4)\n3.4e-4 m/s",
-    1.0e-3: "intermediate\n1.0e-3 m/s",
-    3.1e-3: "coarse trench-As (case 3/5)\n3.1e-3 m/s",
+    3.4e-4: "central $k$ (case 2/4)\n" r"$3.4\times10^{-4}$ m/s",
+    1.0e-3: "intermediate\n" r"$1.0\times10^{-3}$ m/s",
+    3.1e-3: "coarse trench-As (case 3/5)\n" r"$3.1\times10^{-3}$ m/s",
 }
 K_COLOR = {3.4e-4: BLUE, 1.0e-3: AQUA, 3.1e-3: YELLOW}
 
@@ -78,9 +81,11 @@ def fig_timeline(results: dict) -> None:
     # whole simulated window, which is not the probability of reaching it
     # inside the observed interval; the label names the endpoint so the two
     # cannot be read for each other.
+    # Same words as the restored version; the symbols are set as maths, so
+    # the critical length no longer prints as an underscored name.
     panels = [
-        ("full", "time to l ≥ L (modeled breach)", "P(l ≥ L)"),
-        ("lc", "time to l ≥ l_c (point of no return)", "P(l ≥ l_c)"),
+        ("full", r"time to $l \geq L$ (modeled breach)", r"$P(l \geq L)$"),
+        ("lc", r"time to $l \geq l_c$ (point of no return)", r"$P(l \geq l_c)$"),
     ]
     ks = [3.4e-4, 1.0e-3, 3.1e-3]
     for ax, (lab, title, reach_label) in zip(axes, panels):
@@ -101,11 +106,13 @@ def fig_timeline(results: dict) -> None:
                 y,
                 f"{reach_label} = {p:.2f}",
                 color=INK2,
-                fontsize=8,
+                fontsize=9.05,
                 va="center",
             )
         ax.set_yticks(range(len(ks)))
-        ax.set_yticklabels([K_LABEL[k] for k in reversed(ks)], fontsize=8, color=INK2)
+        ax.set_yticklabels(
+            [K_LABEL[k] for k in reversed(ks)], fontsize=9.05, color=INK2
+        )
         # A clear strip above the top row for the observed-interval callout,
         # which used to be drawn outside the frame, over the panel title.
         ax.set_ylim(-0.6, len(ks) + 0.05)
@@ -118,7 +125,7 @@ def fig_timeline(results: dict) -> None:
         xytext=(7.6, 2.98),
         va="top",
         color=INK,
-        fontsize=8,
+        fontsize=9.05,
         arrowprops={"arrowstyle": "-", "color": BASELINE, "lw": 0.8},
     )
     axes[1].set_xlabel(
