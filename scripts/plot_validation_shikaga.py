@@ -86,9 +86,9 @@ def main() -> None:
                 lo, y, "o", ms=9, mfc=SURFACE if open_marker else BLUE, mec=BLUE, mew=2
             )
             txt = f"{lo:.2f}" + ("  (datum uncertain)" if open_marker else "")
-        ax.text(hi + 0.09, y, txt, color=INK2, fontsize=8, va="center")
+        ax.text(hi + 0.09, y, txt, color=INK2, fontsize=9.1, va="center")
     ax.set_yticks(range(len(rows)))
-    ax.set_yticklabels([r[0] for r in reversed(rows)], fontsize=8, color=INK2)
+    ax.set_yticklabels([r[0] for r in reversed(rows)], fontsize=9.1, color=INK2)
     ax.set_ylim(-0.6, len(rows) - 0.4)
     # The longest row label needs room inside the frame; at the old limit it
     # ran into the figure margin and finished flush with the canvas edge.

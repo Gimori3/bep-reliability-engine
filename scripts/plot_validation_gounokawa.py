@@ -226,12 +226,14 @@ def fig_onset_intervals(results: dict) -> None:
         va="center",
         arrowprops={"arrowstyle": "->", "color": MUTED, "lw": 1.0},
         color=MUTED,
-        fontsize=8,
+        fontsize=8.1,
         zorder=6,
     )
     # One line ran off the canvas and lost its closing bracket.
+    # The report writes the head difference as a symbol, not as the letters
+    # dH. Wording and layout are the restored ones.
     axes[1].set_xlabel(
-        "predicted onset head over hinterland ground, dH [m]\n"
+        r"predicted onset head over hinterland ground, $\Delta h$ [m]" + "\n"
         "(5 to 95 per cent whisker, 25 to 75 per cent bar, median dot)"
     )
     axes[1].set_xlim(0, 24)

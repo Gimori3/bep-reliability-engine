@@ -671,7 +671,14 @@ def fig_event_validation(df: pd.DataFrame, val: dict) -> None:
     base = _primary(df)
     scale = _scale("event")
     fig, ax = plt.subplots(figsize=(WIDTH_IN["event"], 6.2))
-    markers = {"historical": "o", "+4K": "s"}
+    # Shape carries the mechanism as a family and the scenario as the member
+    # within it, so the mechanism survives greyscale: overflow is round then
+    # square, fluvial scour triangular then diamond. Fill still carries
+    # whether ten or more events engaged the mechanism.
+    markers = {
+        "overflow": {"historical": "o", "+4K": "s"},
+        "fluvial_scour": {"historical": "^", "+4K": "D"},
+    }
     floor_count = 0
     for key, node in val["nodes"].items():
         river, kp_s = key.split("_KP")
@@ -702,7 +709,7 @@ def fig_event_validation(df: pd.DataFrame, val: dict) -> None:
                 ax.plot(
                     max(event_v, FLOOR),
                     max(curve_v, FLOOR),
-                    markers[scen],
+                    markers[mech][scen],
                     color=MECH_COLORS[mech],
                     mfc=MECH_COLORS[mech] if engaged >= 10 else SURFACE,
                     ms=7,
@@ -733,35 +740,31 @@ def fig_event_validation(df: pd.DataFrame, val: dict) -> None:
             ha="left",
             va="bottom",
         )
-    handles = (
-        [
-            plt.Line2D(
-                [],
-                [],
-                marker="o",
-                ls="none",
-                color=MECH_COLORS[m],
-                label=MECH_LABELS[m],
-            )
-            for m in ("overflow", "fluvial_scour")
-        ]
-        + [
-            plt.Line2D([], [], marker=mk, ls="none", color=INK_2, label=SCEN_LABELS[sc])
-            for sc, mk in markers.items()
-        ]
-        + [
-            plt.Line2D(
-                [],
-                [],
-                marker="o",
-                ls="none",
-                mfc=SURFACE,
-                mec=INK_2,
-                color=INK_2,
-                label="fewer than ten engaged events",
-            )
-        ]
-    )
+    # The four combinations are named directly rather than split into two
+    # separate keys, so nothing has to be inferred by crossing them.
+    handles = [
+        plt.Line2D(
+            [],
+            [],
+            marker=markers[m][sc],
+            ls="none",
+            color=MECH_COLORS[m],
+            label=f"{MECH_LABELS[m]}, {SCEN_LABELS[sc]}",
+        )
+        for m in ("overflow", "fluvial_scour")
+        for sc in ("historical", "+4K")
+    ] + [
+        plt.Line2D(
+            [],
+            [],
+            marker="o",
+            ls="none",
+            mfc=SURFACE,
+            mec=INK_2,
+            color=INK_2,
+            label="open mark: fewer than ten engaged events",
+        )
+    ]
     fs.legend_below(fig, handles, [h.get_label() for h in handles], scale=scale, ncol=3)
     fs.title(
         fig,
