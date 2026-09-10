@@ -227,3 +227,65 @@ mechanics are in `docs/conventions.md`.
   out; the round-3 artifact mirrors every keystroke into the element's text
   content and the ruling onto a data attribute, and is verified by saving and
   reopening the page before it is handed over.
+
+  **Round 3 executed, 2026-09-10.** All nine changes are made and the approved
+  palette is applied. Twenty-five approved figures and every caption and
+  body-text hunk are in the thesis and pushed; the nine changed figures are
+  **not**, and neither is the recolour, both pending a ruling. The one exception
+  is the annotated cross-section, whose unapproved round-2 version a concurrent
+  session had already committed and pushed, so it is fixed in place rather than
+  left carrying a drawing the author had asked to change.
+
+  **The transferable measurement of this round concerns tight bounding boxes.**
+  These drivers save with ``bbox_inches="tight"``, so the saved canvas takes the
+  width of its widest content. A general title set at the house printed size is
+  routinely wider than the panels it sits over, and it then *becomes* that width;
+  because the figure is placed at a fixed fraction of the text block, everything
+  in it is reduced further as a result. Measured on three figures: a one-line
+  house title took G.1 from 7.33 to 8.56 in and its body type from 8.2 pt down to
+  7.0, G.2 from 7.6 to 6.6, and 5.2 from 6.7 to 5.4. **So a title applied to fix
+  the type scale was silently degrading it.** Breaking those three titles onto two
+  lines restored every figure to at or above the size it had before, and two of
+  the three breaks were not requested. The author had already specified the same
+  remedy for 5.1 and 5.3 on the grounds that the title would not fit; the
+  measurement shows the rule is general and is about width, not about fitting.
+
+  **The two floor departures were delivered with their alternative rendered, not
+  argued.** 5.1 restores at 4.9 pt of annotation type and 8.1 at 3.1 pt of legend.
+  Each is presented beside a variant holding the same composition with every
+  authored size raised until the smallest prints at exactly 7 pt, the saved width
+  pinned to the authored width so the reduction cannot drift. **Both variants
+  fail, and that is the finding**: at 7 pt the restored compositions collide,
+  8.1's eight-entry legend swallowing its own panel and 5.1's panel titles
+  clipping at the canvas edge. The floor is unreachable at these compositions
+  without re-composing, which is what the conversion did and what the author
+  rejected. A third route exists for 8.1 and is offered rather than taken: its
+  panel-A key is four rates by two cases and the caption already lists the rates,
+  so moving the key into the caption removes the smallest text without touching
+  the drawing.
+
+  **Three findings the restores surfaced, none of them acted on unilaterally.**
+  5.1 prints ``m MSL`` in one panel title and ``m T.P.`` in another for the same
+  quantity, a datum inconsistency an earlier campaign had unified and round 2 had
+  hidden by deleting the string rather than fixing it; the author's instruction
+  was explicitly not to touch subfigure titles, so it is flagged. 5.3's restore
+  brings back e-notation and unset mathematics in its labels. And the
+  cross-section's own smallest text prints at 5.0 pt, which is LaTeX's ``\tiny``
+  at a 10 pt base rather than a reduction artefact.
+
+  **The mechanism palette is applied and re-opens exactly three figures.** The
+  reference scan confirmed the trio is drawn in one place only, so 7.1, H.9 and
+  H.10 are the whole scope. The dash patterns are load-bearing rather than
+  decorative: the approved brown and plum have almost identical relative
+  luminance, 107 and 107 on a 0 to 255 scale against the teal's 76, so hue alone
+  does not separate overflow from scour in greyscale. **H.9 is the one figure
+  that cannot carry the second channel** and needs its own decision: marker shape
+  there already encodes the climate scenario and marker fill already encodes
+  whether the mechanism is engaged.
+
+  **The text audit was verified rather than repeated.** Of its 257 rows, 87 name
+  a thesis destination; all 11 attached to the nine changed figures were checked
+  in full and a 30-row sample of the rest spans all six thesis files. Zero misses.
+  The three round-1 repairs and the three round-2 source corrections were
+  re-checked at every site, not only in the caption. One line-ending-only diff
+  was restored rather than committed, and one review artifact was left untracked.

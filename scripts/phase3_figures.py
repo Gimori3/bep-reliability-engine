@@ -45,17 +45,11 @@ FIGS = REPO / "docs/figures"
 #: Committed 95 % hazard-sampling intervals for the RQ4 headline figure.
 INTERVALS = REPO / "docs/decisions/annualisation-hazard-sampling-uncertainty.json"
 
-# Reference palette (validated project set; light mode), fixed slots.
-MECH_COLORS = {
-    "bep": "#2a78d6",  # slot 1 blue
-    "overflow": "#008300",  # slot 2 green
-    "fluvial_scour": "#e87ba4",  # slot 3 magenta
-}
-MECH_LABELS = {
-    "bep": "BEP (posterior transient)",
-    "overflow": "Overflow",
-    "fluvial_scour": "Fluvial scour",
-}
+# The mechanism palette is the shared one, beside the section and climate
+# palettes, so the three hues cannot drift apart between figures.
+MECH_COLORS = fs.MECHANISM_COLORS
+MECH_LABELS = fs.MECHANISM_LABELS
+MECH_LINESTYLES = fs.MECHANISM_LINESTYLES
 
 #: Rendered names for the ``rq4_annual.csv`` record vocabulary. ``d70`` and
 #: ``lambda_ac_m`` are the annual table's own column names and are never
@@ -243,12 +237,15 @@ def fig_dominance_profile(df: pd.DataFrame) -> None:
                 shown = np.maximum(vals[mask].to_numpy(float), FLOOR)
                 # BEP exists only at the four isolated OYO nodes — markers
                 # only, never a connecting line implying reach continuity.
-                fmt = "o" if mech == "bep" else ".-"
+                fmt = "o" if mech == "bep" else "."
                 ax.plot(
                     sub.kp[mask],
                     shown,
                     fmt,
                     color=MECH_COLORS[mech],
+                    # The dash pattern is the second channel: overflow and
+                    # scour are all but identical in luminance.
+                    ls=MECH_LINESTYLES[mech],
                     lw=1.4,
                     ms=7 if mech == "bep" else 5,
                     mfc="none" if mech == "bep" else None,
@@ -301,6 +298,8 @@ def fig_bep_sections(curves: dict) -> None:
                 stage,
                 entry["per_mechanism"][mech],
                 color=MECH_COLORS[mech],
+                # The dash pattern is the second channel; see _figstyle.
+                ls="-" if mech == "bep" else MECH_LINESTYLES[mech],
                 lw=1.6,
                 label=MECH_LABELS[mech],
             )
