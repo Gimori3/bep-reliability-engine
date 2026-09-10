@@ -397,11 +397,8 @@ def _make_figure(records: list[dict[str, Any]], out_path: Path) -> None:
     matplotlib.use("Agg")
     import _figstyle as fs
     import matplotlib.pyplot as plt
-    from matplotlib.lines import Line2D
 
-    scale = fs.scale_for(11.5, 0.85)
-    fs.style(scale)
-    fig, (ax_a, ax_b) = plt.subplots(1, 2, figsize=(11.5, 6.5))
+    fig, (ax_a, ax_b) = plt.subplots(1, 2, figsize=(11.5, 4.28))
 
     widths = np.asarray([r["foreshore_width_m"] for r in records], dtype=float)
     order = np.argsort(widths)
@@ -428,6 +425,10 @@ def _make_figure(records: list[dict[str, Any]], out_path: Path) -> None:
                 color=color,
                 markersize=5,
                 linewidth=1.2,
+                label=(
+                    f"{RATE_DISPLAY_NAMES.get(name, name)} ({rate:g} m/h), "
+                    f"{CASE_DISPLAY_NAMES[case]}"
+                ),
             )
     # Eight series cross this panel, so every piece of text in it sits on a
     # plate: the exhaustion line and the section names were being ruled
@@ -441,11 +442,24 @@ def _make_figure(records: list[dict[str, Any]], out_path: Path) -> None:
         color="crimson",
         va="bottom",
         ha="right",
-        fontsize=fs.pt("small", scale),
+        fontsize=8,
         transform=ax_a.get_yaxis_transform(),
         bbox=plate,
         zorder=6,
     )
+    for record in records:
+        ratio = record["event_2016"]["thresholds"]["z_mob"]["rates"]["central"][
+            "exposure_ratio"
+        ]
+        ax_a.annotate(
+            record["section"],
+            (record["foreshore_width_m"], ratio),
+            textcoords="offset points",
+            xytext=(4, 5),
+            fontsize=8,
+            bbox=plate,
+            zorder=6,
+        )
     ax_a.set_xscale("log")
     ax_a.set_yscale("log")
     # The widest section is the last point on the axis, so its name ran off
@@ -457,10 +471,11 @@ def _make_figure(records: list[dict[str, Any]], out_path: Path) -> None:
     # The bracket carried the Japanese term for the quantity; the thesis
     # romanises nothing it can translate, and "high-water-bed width" already
     # is that translation, so the bracket names the source instead.
-    ax_a.set_xlabel("high-water-bed width $B_f$ [m]")
-    ax_a.set_ylabel("exposure ratio [-]")
-    fs.panel_title(ax_a, "Exposure ratio", letter="A", scale=scale)
+    ax_a.set_xlabel("measured high-water-bed width $B_f$ [m] (OYO survey)")
+    ax_a.set_ylabel(r"exposure ratio  $v_\mathrm{lat}\,T_\mathrm{mob} / B_f$  [-]")
+    ax_a.set_title("(a) Exposure ratio across the retreat-rate bracket")
     ax_a.grid(alpha=0.3, which="both")
+    ax_a.legend(fontsize=6.2, ncol=2, loc="lower left")
 
     for record in records:
         levels = record["conditioning_grid"]["levels"]
@@ -474,11 +489,7 @@ def _make_figure(records: list[dict[str, Any]], out_path: Path) -> None:
             crit[finite],
             "-",
             linewidth=1.5,
-            color=fs.SECTION_COLORS[record["section"].replace(" ", "")],
-            label=(
-                f"{record['section'].replace('KP', 'KP ')} "
-                f"($B_f$ = {record['foreshore_width_m']:g} m)"
-            ),
+            label=f"{record['section']}  ($B_f$ = {record['foreshore_width_m']:g} m)",
         )
         event_crit = record["event_2016"]["thresholds"]["z_mob"][
             "critical_retreat_rate_m_per_h"
@@ -495,11 +506,14 @@ def _make_figure(records: list[dict[str, Any]], out_path: Path) -> None:
     lo = min(RETREAT_RATE_BRACKET_M_PER_H.values())
     hi = max(RETREAT_RATE_BRACKET_M_PER_H.values())
     ax_b.axhspan(lo, hi, color="0.82", alpha=0.55, zorder=0)
+    # At the left of the band this label sat under the curves. The author
+    # asked in round 1 for it to move to the right and clear of them; that
+    # request was never withdrawn, so it survives the restore.
     ax_b.text(
         0.98,
         3.0 * (lo * hi) ** 0.5,
-        "assumed\nretreat-rate\nbracket",
-        fontsize=fs.pt("small", scale),
+        "assumed retreat-rate bracket",
+        fontsize=8,
         color="0.25",
         va="center",
         ha="right",
@@ -507,30 +521,25 @@ def _make_figure(records: list[dict[str, Any]], out_path: Path) -> None:
     )
     ax_b.axvline(0.0, color="0.35", linewidth=1.0, linestyle=":")
     ax_b.set_yscale("log")
-    ax_b.set_xlabel("stage relative to design HWL [m]")
-    ax_b.set_ylabel("critical retreat rate [m/h]")
-    fs.panel_title(ax_b, "Rate for bed exhaustion", letter="B", scale=scale)
+    ax_b.set_xlabel("conditioning stage relative to the design HWL [m]")
+    ax_b.set_ylabel(r"critical retreat rate  $v^{*} = B_f / T_\mathrm{mob}$  [m/h]")
+    ax_b.set_title("(b) Rate needed to exhaust the bed ($\\star$ = 2016 event)")
     ax_b.grid(alpha=0.3, which="both")
+    ax_b.legend(fontsize=7.5, loc="upper right")
 
-    handles = [Line2D([], [], color=color, lw=1.5) for color in colors]
-    labels = [
-        f"{rate:g} m/h" + (" (2011 account)" if name == "narrative_2011" else "")
-        for name, rate in RETREAT_RATE_BRACKET_M_PER_H.items()
-    ]
-    handles.extend(
-        [
-            Line2D([], [], color=fs.INK_2, marker="o", ls="-"),
-            Line2D([], [], color=fs.INK_2, marker="s", ls="--"),
-            Line2D([], [], color=fs.INK_2, marker="*", ls="none", ms=11),
-        ]
-    )
-    labels.extend(["2016 event (A)", "design HWL (A)", "2016 peak (B)"])
-    h, lab = ax_b.get_legend_handles_labels()
-    handles.extend(h)
-    labels.extend(lab)
-    fs.title(fig, "Foreshore-exhaustion screening", scale=scale)
-    fs.legend_below(fig, handles, labels, scale=scale, ncol=3)
-    fs.layout(fig, scale=scale, legend_rows=4)
+    # This used to be a figure-level text rather than a suptitle, because
+    # ``tight_layout`` reserves a band for a suptitle several times the
+    # title's own height and that band became the white space above the
+    # panels. ``layout`` measures the panels once they are placed and sets
+    # the gap in inches instead, so the title can be a real one. The
+    # horizontal padding still keeps the right panel's y-axis label off the
+    # left panel's frame; it is cut from 4.5 to 3.0 at the author's request
+    # to close the gap between the two panels, which is the smallest value
+    # that leaves that clearance.
+    scale = fs.scale_for(11.5, 0.85)
+    fs.title(fig, "Foreshore-exhaustion screening indicator", scale=scale)
+    fig.tight_layout(w_pad=3.0)
+    fs.layout(fig, scale=scale)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_path, dpi=160, bbox_inches="tight")
     plt.close(fig)

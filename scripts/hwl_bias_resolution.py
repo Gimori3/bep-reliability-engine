@@ -2139,12 +2139,63 @@ def figure_epistemic_vs_statistical(evidence: dict) -> Path:
     ax2.set_ylabel(r"resolved $\rho$ departure factor")
     figstyle.panel_title(ax2, "Cancellation across the two criteria", scale=scale)
     section_handles, _ = ax2.get_legend_handles_labels()
-    handles = marker_handles + list(existing) + section_handles
-    figstyle.legend_below(
-        fig, handles, [h.get_label() for h in handles], scale=scale, ncol=4
+    # Two legends, one under each panel, rather than one consolidated block:
+    # the section hues belong to the right panel alone, and read as part of
+    # the left panel's bracket key when the two are run together. The same
+    # arrangement is already accepted for 6.12.
+    left_handles = marker_handles + list(existing)
+    left_legend = fig.legend(
+        left_handles,
+        [h.get_label() for h in left_handles],
+        loc="upper center",
+        bbox_to_anchor=(0.5, 0.0),
+        ncol=4,
+        frameon=False,
+        fontsize=figstyle.pt("legend", scale),
+        handlelength=1.9,
+        handletextpad=0.6,
+        columnspacing=1.7,
+        borderaxespad=0.0,
+    )
+    # matplotlib fills a legend column by column, so this order puts KP 60.0
+    # and KP 62.0 on the upper row and KP 57.4 and KP 58.8 beneath them, which
+    # is the two-by-two block the author asked for.
+    by_label = {h.get_label(): h for h in section_handles}
+    right_order = ["KP 60.0", "KP 57.4", "KP 62.0", "KP 58.8"]
+    right_handles = [by_label[k] for k in right_order if k in by_label]
+    if len(right_handles) != len(section_handles):  # an unexpected label set
+        right_handles = list(section_handles)
+    right_legend = fig.legend(
+        right_handles,
+        [h.get_label() for h in right_handles],
+        loc="upper center",
+        bbox_to_anchor=(0.5, 0.0),
+        ncol=2,
+        frameon=False,
+        fontsize=figstyle.pt("legend", scale),
+        handlelength=1.9,
+        handletextpad=0.6,
+        columnspacing=1.7,
+        borderaxespad=0.0,
     )
     figstyle.title(fig, "Epistemic and statistical uncertainty", scale=scale)
-    figstyle.layout(fig, scale=scale, legend_rows=3)
+    figstyle.layout(fig, scale=scale, legend_rows=2)
+    # ``layout`` places the first legend against the measured panels; both are
+    # then set on that same measured baseline, each under its own panel and
+    # nudged outwards as asked.
+    fig.canvas.draw()
+    renderer = fig.canvas.get_renderer()
+    inv = fig.transFigure.inverted()
+    panel_bottom = min(
+        ax_i.get_tightbbox(renderer).transformed(inv).y0 for ax_i in (ax, ax2)
+    )
+    gap = (figstyle.pt("legend", scale) / 72.0) * 0.75 / float(fig.get_size_inches()[1])
+    left_legend.set_bbox_to_anchor(
+        (0.25, panel_bottom - gap), transform=fig.transFigure
+    )
+    right_legend.set_bbox_to_anchor(
+        (0.83, panel_bottom - gap), transform=fig.transFigure
+    )
     ax2.grid(axis="x", visible=False)
     # The two-line note that used to hang below the panels now lives in the
     # thesis caption, where it is set at caption size and can be read. Its

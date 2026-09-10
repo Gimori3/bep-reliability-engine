@@ -55,9 +55,9 @@ plt.rcParams.update(
 )
 
 K_LABEL = {
-    3.4e-4: "central $k$ (case 2/4)\n" r"$3.4\times10^{-4}$ m/s",
-    1.0e-3: "intermediate\n" r"$1.0\times10^{-3}$ m/s",
-    3.1e-3: "coarse trench-As (case 3/5)\n" r"$3.1\times10^{-3}$ m/s",
+    3.4e-4: "central k (case 2/4)\n3.4e-4 m/s",
+    1.0e-3: "intermediate\n1.0e-3 m/s",
+    3.1e-3: "coarse trench-As (case 3/5)\n3.1e-3 m/s",
 }
 K_COLOR = {3.4e-4: BLUE, 1.0e-3: AQUA, 3.1e-3: YELLOW}
 
@@ -65,23 +65,22 @@ K_COLOR = {3.4e-4: BLUE, 1.0e-3: AQUA, 3.1e-3: YELLOW}
 def fig_timeline(results: dict) -> None:
     rows = [r for r in results["timeline_test"] if r["anchor"].startswith("A2")]
     obs = rows[0]["observed_interval_h"]
-    scale = fs.scale_for(9.0, 0.90)
-    fs.style(scale)
 
     fig, axes = plt.subplots(
         2,
         1,
-        figsize=(9.0, 6.5),
+        figsize=(7.4, 4.4),
         dpi=160,
         sharex=True,
+        gridspec_kw={"hspace": 0.45},
     )
     # The reported probability is that the endpoint is ever reached over the
     # whole simulated window, which is not the probability of reaching it
     # inside the observed interval; the label names the endpoint so the two
     # cannot be read for each other.
     panels = [
-        ("full", r"Time to $l \geq L$ (modeled breach)", r"$P(l \geq L)$"),
-        ("lc", r"Time to $l \geq l_c$ (point of no return)", r"$P(l \geq l_c)$"),
+        ("full", "time to l ≥ L (modeled breach)", "P(l ≥ L)"),
+        ("lc", "time to l ≥ l_c (point of no return)", "P(l ≥ l_c)"),
     ]
     ks = [3.4e-4, 1.0e-3, 3.1e-3]
     for ax, (lab, title, reach_label) in zip(axes, panels):
@@ -98,41 +97,50 @@ def fig_timeline(results: dict) -> None:
                 ax.plot([q25, q75], [y, y], color=c, lw=5.5, solid_capstyle="round")
                 ax.plot(q50, y, "o", ms=8, mfc=SURFACE, mec=c, mew=2.0)
             ax.text(
-                14.0,
+                13.55,
                 y,
                 f"{reach_label} = {p:.2f}",
                 color=INK2,
-                fontsize=fs.pt("annotation", scale),
+                fontsize=8,
                 va="center",
             )
         ax.set_yticks(range(len(ks)))
-        ax.set_yticklabels([K_LABEL[k] for k in reversed(ks)], color=INK2)
+        ax.set_yticklabels([K_LABEL[k] for k in reversed(ks)], fontsize=8, color=INK2)
         # A clear strip above the top row for the observed-interval callout,
         # which used to be drawn outside the frame, over the panel title.
-        ax.set_ylim(-0.6, len(ks) - 0.4)
-        ax.set_xlim(0, 18.5)
+        ax.set_ylim(-0.6, len(ks) + 0.05)
+        ax.set_xlim(0, 16.5)
         ax.grid(axis="y", visible=False)
-        fs.panel_title(ax, title, scale=scale)
-    axes[1].set_xlabel("hours after forced initiation")
-    fs.legend_below(
-        fig,
-        [
-            plt.Line2D([], [], color=INK2, lw=2),
-            plt.Line2D([], [], color=INK2, lw=5.5),
-            plt.Line2D([], [], color=INK2, marker="o", mfc=SURFACE, ls="none"),
-            plt.Line2D([], [], color=INK, ls="--", lw=1.4),
-        ],
-        [
-            "5th to 95th percentile",
-            "25th to 75th percentile",
-            "median",
-            "observed interval: 6.33 h",
-        ],
-        scale=scale,
-        ncol=2,
+        ax.set_title(title, fontsize=9, color=INK2, loc="left")
+    axes[0].annotate(
+        "observed: initiation (07:00)\n→ breach (13:20) = 6.3 h",
+        xy=(obs, 2.55),
+        xytext=(7.6, 2.98),
+        va="top",
+        color=INK,
+        fontsize=8,
+        arrowprops={"arrowstyle": "-", "color": BASELINE, "lw": 0.8},
     )
-    fs.title(fig, "Yabe R7.3k: progression times", scale=scale)
-    fs.layout(fig, scale=scale, legend_rows=2)
+    axes[1].set_xlabel(
+        "hours after forced initiation at anchor A2 "
+        "(whisker 5 to 95, bar 25 to 75 per cent, median dot)"
+    )
+    # House style reaches the general figure title only; the two panel
+    # titles, the callout and every type size are the restored ones, at the
+    # author's explicit direction. The line breaks immediately after "test:",
+    # as asked. At 7.4 in placed at 0.90 of the text block this figure reduces
+    # by 0.814, so its 9 pt body type prints at 7.3 pt, above the floor. The
+    # title states the comparison rather than naming the figure, which is the
+    # T1 departure the author chose in asking for this string back.
+    scale = fs.scale_for(7.4, 0.90)
+    fs.title(
+        fig,
+        "Yabe R7.3k forced-clock timeline test:\n"
+        "Pol progression vs the observed breach interval",
+        scale=scale,
+    )
+    # Two title lines, so one extra line height is reserved above the panels.
+    fs.layout(fig, scale=scale, extra_top_in=fs.pt("title", scale) / 72.0)
     out = FIG_DIR / "validation_yabe_timeline.png"
     fig.savefig(out, bbox_inches="tight")
     plt.close(fig)

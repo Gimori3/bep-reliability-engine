@@ -180,7 +180,7 @@ A(r"]")
 # register rotated node text, so without this the picture reserves a box ~18 mm
 # narrower than its own ink and the float spills into the left margin.
 A(r"\path (-10.5,-20) (157,93.5);")
-A(r"\node[font=\sffamily\small\bfseries, anchor=south] at (77.75,98)")
+A(r"\node[font=\sffamily\small\bfseries, anchor=south] at (77.75,96)")
 A(r" {Levee cross-section and piezometric head};")
 
 gnd = sample(X_LEFT, X_RIGHT, 300, ground)
@@ -282,11 +282,14 @@ A(
     r" {sand boil at the exit;\\$z_\mathrm{toe} = 44.90$~m T.P.};"
 )
 A(rf"\draw[lead] (exit.south west) -- {pB(40.9, 45.10)};")
+# The callout sits to the right of the point it indicates, so its leader
+# runs down and to the left. It stops short of x = 97 so that the confining
+# blanket's own leader, which drops through x = 103, stays clear of it.
 A(
-    rf"\node[callout, anchor=south west] at {pB(65.0, 45.62)}"
+    rf"\node[callout, anchor=south west] (piez) at {pB(76.0, 45.62)}"
     r" {piezometric head (panel a)};"
 )
-A(rf"\draw[lead] ({X(62.0):.2f},{YB(45.52):.2f}) -- {pB(64.0, 45.22)};")
+A(rf"\draw[lead] (piez.south west) -- {pB(64.0, 45.22)};")
 
 # ---- D_aq
 xd = 99.0
@@ -309,8 +312,12 @@ A(
     r" node[midway, below=0.3mm, tny] {remaining path $L - l$};"
 )
 
-A(rf"\node[tny, anchor=west] at ({X(-69.0):.2f},{YB(48.45):.2f}) {{river side}};")
-A(rf"\node[tny, anchor=east] at ({X(X_RIGHT):.2f},{YB(49.65):.2f}) {{land side}};")
+# Both markings sit inside the grey impervious base, at its vertical
+# centre, so they are at the same height as each other: the band runs
+# from z = 33.30 to z = 34.45 and Z_SIDE_LABEL is the midpoint.
+Z_SIDE_LABEL = 0.5 * (Z_FRAME_BOT + Z_BASE)
+A(rf"\node[tny, anchor=west] at {pB(X_LEFT + 2.5, Z_SIDE_LABEL)} {{river side}};")
+A(rf"\node[tny, anchor=east] at {pB(X_RIGHT - 2.5, Z_SIDE_LABEL)} {{land side}};")
 
 # ==========================================================================
 # Dimension band, below panel B
