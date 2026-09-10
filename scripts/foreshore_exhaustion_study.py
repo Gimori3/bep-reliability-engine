@@ -398,22 +398,7 @@ def _make_figure(records: list[dict[str, Any]], out_path: Path) -> None:
     import _figstyle as fs
     import matplotlib.pyplot as plt
 
-    # Every size here is authored so that it prints at or above the 7 pt floor.
-    # The figure is 11.5 in wide and placed at 0.85 of the text block, so it is
-    # reduced by about 0.50 on the page and the floor is 14.3 authored points.
-    # The canvas is taller than it was to give that larger type its room; height
-    # does not enter the reduction, only width does.
-    plt.rcParams.update(
-        {
-            "font.size": 14.3,
-            "axes.titlesize": 14.3,
-            "axes.labelsize": 14.3,
-            "legend.fontsize": 14.3,
-            "xtick.labelsize": 14.3,
-            "ytick.labelsize": 14.3,
-        }
-    )
-    fig, (ax_a, ax_b) = plt.subplots(1, 2, figsize=(11.5, 6.6))
+    fig, (ax_a, ax_b) = plt.subplots(1, 2, figsize=(11.5, 4.28))
 
     widths = np.asarray([r["foreshore_width_m"] for r in records], dtype=float)
     order = np.argsort(widths)
@@ -440,6 +425,10 @@ def _make_figure(records: list[dict[str, Any]], out_path: Path) -> None:
                 color=color,
                 markersize=5,
                 linewidth=1.2,
+                label=(
+                    f"{RATE_DISPLAY_NAMES.get(name, name)} ({rate:g} m/h), "
+                    f"{CASE_DISPLAY_NAMES[case]}"
+                ),
             )
     # Eight series cross this panel, so every piece of text in it sits on a
     # plate: the exhaustion line and the section names were being ruled
@@ -453,15 +442,11 @@ def _make_figure(records: list[dict[str, Any]], out_path: Path) -> None:
         color="crimson",
         va="bottom",
         ha="right",
-        fontsize=14.3,
+        fontsize=8,
         transform=ax_a.get_yaxis_transform(),
         bbox=plate,
         zorder=6,
     )
-    # KP 57.4 and KP 58.8 are close in bed width and closer still in exposure
-    # ratio, so a single common offset ran the two names together. Each is
-    # placed on its own side of its point instead.
-    label_offsets = {"KP57.4": (2, 9), "KP58.8": (2, -16)}
     for record in records:
         ratio = record["event_2016"]["thresholds"]["z_mob"]["rates"]["central"][
             "exposure_ratio"
@@ -470,8 +455,8 @@ def _make_figure(records: list[dict[str, Any]], out_path: Path) -> None:
             record["section"],
             (record["foreshore_width_m"], ratio),
             textcoords="offset points",
-            xytext=label_offsets.get(record["section"], (4, 5)),
-            fontsize=14.3,
+            xytext=(4, 5),
+            fontsize=8,
             bbox=plate,
             zorder=6,
         )
@@ -490,10 +475,7 @@ def _make_figure(records: list[dict[str, Any]], out_path: Path) -> None:
     ax_a.set_ylabel(r"exposure ratio  $v_\mathrm{lat}\,T_\mathrm{mob} / B_f$  [-]")
     ax_a.set_title("(a) Exposure ratio across the retreat-rate bracket")
     ax_a.grid(alpha=0.3, which="both")
-    # The eight-entry key that used to sit here printed at 3.1 pt, the smallest
-    # text in the thesis. It was four assumed rates by two loading cases, and
-    # the caption already named the rates; it now carries the whole key, which
-    # is where a reader can actually read it. Nothing else in the panel moved.
+    ax_a.legend(fontsize=6.2, ncol=2, loc="lower left")
 
     for record in records:
         levels = record["conditioning_grid"]["levels"]
@@ -529,9 +511,9 @@ def _make_figure(records: list[dict[str, Any]], out_path: Path) -> None:
     # request was never withdrawn, so it survives the restore.
     ax_b.text(
         0.98,
-        lo * 1.35,
+        3.0 * (lo * hi) ** 0.5,
         "assumed retreat-rate bracket",
-        fontsize=14.3,
+        fontsize=8,
         color="0.25",
         va="center",
         ha="right",
@@ -543,9 +525,7 @@ def _make_figure(records: list[dict[str, Any]], out_path: Path) -> None:
     ax_b.set_ylabel(r"critical retreat rate  $v^{*} = B_f / T_\mathrm{mob}$  [m/h]")
     ax_b.set_title("(b) Rate needed to exhaust the bed ($\\star$ = 2016 event)")
     ax_b.grid(alpha=0.3, which="both")
-    # Four short entries, one per surveyed section: this key stays in the
-    # panel, at the same printed size as everything else.
-    ax_b.legend(loc="upper right")
+    ax_b.legend(fontsize=7.5, loc="upper right")
 
     # This used to be a figure-level text rather than a suptitle, because
     # ``tight_layout`` reserves a band for a suptitle several times the
@@ -553,12 +533,12 @@ def _make_figure(records: list[dict[str, Any]], out_path: Path) -> None:
     # panels. ``layout`` measures the panels once they are placed and sets
     # the gap in inches instead, so the title can be a real one. The
     # horizontal padding still keeps the right panel's y-axis label off the
-    # left panel's frame; it is cut from 4.5 to 3.0 at the author's request
-    # to close the gap between the two panels, which is the smallest value
-    # that leaves that clearance.
+    # left panel's frame. It is cut from 4.5 to 4.0: 3.0 was tried and the
+    # author asked for less of a reduction than that, so this is the smaller
+    # step and nothing else about the drawing moves with it.
     scale = fs.scale_for(11.5, 0.85)
     fs.title(fig, "Foreshore-exhaustion screening indicator", scale=scale)
-    fig.tight_layout(w_pad=3.0)
+    fig.tight_layout(w_pad=4.0)
     fs.layout(fig, scale=scale)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_path, dpi=160, bbox_inches="tight")

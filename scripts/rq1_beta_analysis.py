@@ -1914,10 +1914,12 @@ def figure_hwl_dbeta_resolved(record: dict[str, Any]) -> Path:
             rf"$\Delta\beta = {row['delta_beta']:.2f}$",
             (row["level_m_msl"], row["delta_beta"]),
             textcoords="offset points",
-            # Lowered from (8, 12) at the author's request: the upper label
-            # was running into the anchor block above it. The offsets keep
-            # each label clear of its own 6 pt marker.
-            xytext=((-8, 3) if i == 0 else (10, 6)),
+            # Lowered twice at the author's request. The second lowering puts
+            # the label's bottom line level with the marker it belongs to:
+            # the text is anchored by the bottom of its box, and the last
+            # line's centre sits about 0.35 of the type size above that, so
+            # the offset is that much below the marker.
+            xytext=((-8, -8.2) if i == 0 else (10, -8.2)),
             fontsize=figstyle.pt("small", scale),
             color=figstyle.RED,
             ha="right" if i == 0 else "left",

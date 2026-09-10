@@ -338,3 +338,35 @@ mechanics are in `docs/conventions.md`.
   rules on two entries and serialises its own DOM, which is the tree a save
   writes: both notes come back inside their textareas, both rulings come back on
   their data attributes, and the ten unruled entries stay empty.
+
+  **The round-3 ruling, 2026-09-11.** Nine of the twelve approved, taking the
+  campaign to 60 of 63; the nine are copied into the thesis. Three changed:
+  5.8, 6.5 and 8.1.
+
+  **8.1 reverses the preceding entry's own finding, and that is worth recording
+  rather than tidying away.** The caption-as-key move took the smallest text in
+  the report from 3.1 pt to 7.0 and left the drawing untouched, and it is still
+  the wrong change, because it was not the change asked for: the instruction had
+  been to restore the drawing and apply the house title alone. The key is back in
+  the panel, the caption has given its sentence back, and the figure prints at
+  3.1 pt again by the author's decision. **The generalisable part survives and
+  the application of it does not.** A caption is often the better home for a
+  figure's key; whether to move it there is not a drafter's call to make inside
+  an instruction that said to change one thing. The floor is now met at seven of
+  the twelve reviewed figures, and every figure that misses it misses it by a
+  recorded decision.
+
+  Two smaller lessons from the same ruling. **A gap reduction has a magnitude,
+  not just a direction**: 4.5 to 3.0 was read as too much and 4.0 was wanted, so
+  "slightly" is worth quantifying back to the author rather than guessed at.
+  And **an arrangement request is about lines, not columns**: 5.8's legend was
+  asked for as three lines on the left and four on the right, which is a
+  statement about how many rows each block occupies, and the way to get it is to
+  choose the column count that produces those rows.
+
+  **6.5's labels were aligned by measurement, not by eye.** The request was that
+  each label's bottom line sit at the same height as the marker it is connected
+  to. The two labels overlap in height, so a row-band split of the red ink merges
+  them; separating them by column against their own markers showed both sitting
+  6.5 px high at the first attempt, which is 3.2 pt at this figure's resolution,
+  and the offset was corrected by exactly that.
