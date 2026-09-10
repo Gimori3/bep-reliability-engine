@@ -2143,13 +2143,15 @@ def figure_epistemic_vs_statistical(evidence: dict) -> Path:
     # the section hues belong to the right panel alone, and read as part of
     # the left panel's bracket key when the two are run together. The same
     # arrangement is already accepted for 6.12.
+    # Seven entries over three columns, which is the three lines the
+    # consolidated legend gave them.
     left_handles = marker_handles + list(existing)
     left_legend = fig.legend(
         left_handles,
         [h.get_label() for h in left_handles],
         loc="upper center",
         bbox_to_anchor=(0.5, 0.0),
-        ncol=4,
+        ncol=3,
         frameon=False,
         fontsize=figstyle.pt("legend", scale),
         handlelength=1.9,
@@ -2157,11 +2159,10 @@ def figure_epistemic_vs_statistical(evidence: dict) -> Path:
         columnspacing=1.7,
         borderaxespad=0.0,
     )
-    # matplotlib fills a legend column by column, so this order puts KP 60.0
-    # and KP 62.0 on the upper row and KP 57.4 and KP 58.8 beneath them, which
-    # is the two-by-two block the author asked for.
+    # The four sections stand as four lines, in the ascending order their bars
+    # are drawn in.
     by_label = {h.get_label(): h for h in section_handles}
-    right_order = ["KP 60.0", "KP 57.4", "KP 62.0", "KP 58.8"]
+    right_order = ["KP 57.4", "KP 58.8", "KP 60.0", "KP 62.0"]
     right_handles = [by_label[k] for k in right_order if k in by_label]
     if len(right_handles) != len(section_handles):  # an unexpected label set
         right_handles = list(section_handles)
@@ -2170,7 +2171,7 @@ def figure_epistemic_vs_statistical(evidence: dict) -> Path:
         [h.get_label() for h in right_handles],
         loc="upper center",
         bbox_to_anchor=(0.5, 0.0),
-        ncol=2,
+        ncol=1,
         frameon=False,
         fontsize=figstyle.pt("legend", scale),
         handlelength=1.9,
@@ -2179,7 +2180,8 @@ def figure_epistemic_vs_statistical(evidence: dict) -> Path:
         borderaxespad=0.0,
     )
     figstyle.title(fig, "Epistemic and statistical uncertainty", scale=scale)
-    figstyle.layout(fig, scale=scale, legend_rows=2)
+    # The taller of the two blocks is the four-line section key.
+    figstyle.layout(fig, scale=scale, legend_rows=4)
     # ``layout`` places the first legend against the measured panels; both are
     # then set on that same measured baseline, each under its own panel and
     # nudged outwards as asked.
@@ -2190,11 +2192,13 @@ def figure_epistemic_vs_statistical(evidence: dict) -> Path:
         ax_i.get_tightbbox(renderer).transformed(inv).y0 for ax_i in (ax, ax2)
     )
     gap = (figstyle.pt("legend", scale) / 72.0) * 0.75 / float(fig.get_size_inches()[1])
+    # Further apart than the first attempt, as asked: the bracket key sits
+    # under the left panel and the section key under the right one.
     left_legend.set_bbox_to_anchor(
-        (0.25, panel_bottom - gap), transform=fig.transFigure
+        (0.30, panel_bottom - gap), transform=fig.transFigure
     )
     right_legend.set_bbox_to_anchor(
-        (0.83, panel_bottom - gap), transform=fig.transFigure
+        (0.88, panel_bottom - gap), transform=fig.transFigure
     )
     ax2.grid(axis="x", visible=False)
     # The two-line note that used to hang below the panels now lives in the

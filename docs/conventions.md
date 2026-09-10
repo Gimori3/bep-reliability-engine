@@ -379,6 +379,27 @@ this and the earlier tight-bounding-box finding say the same thing: text that
 must be small to fit inside a figure is usually text the caption can hold at
 caption size, where it is read once rather than squinted at.
 
+**The round-3 ruling, 2026-09-11: 60 of 63 approved, three changed.** Nine of
+the twelve reviewed figures were approved, taking the approved set to 60, and
+they are in the report. Three came back: 5.8, 6.5 and 8.1.
+
+**The 8.1 ruling reverses this section's own preceding paragraph, and the
+reversal is the record.** The author asked for the restored drawing back, legend
+included, with the house title and a smaller reduction of the panel gap than had
+been made, and for nothing else to change. So the eight-entry key returns to the
+panel, the caption gives its sentence back, and the figure prints its smallest
+text at 3.1 pt again. **The caption-as-key move was a sound piece of typography
+and it was still the wrong change**, because it was not the change asked for.
+The 7 pt floor is therefore met at seven of the twelve reviewed figures rather
+than ten, and where it is not met the reason is now recorded as an authorial
+decision in every case. A house rule is a default, and the author overrides it.
+
+5.8 keeps the round-2 arrangement with two differences only: its seven bracket
+entries stay three lines, its four section entries stand as four lines under the
+right panel, and the two groups move further apart. 6.5's two superseded-estimate
+labels are lowered again so that each label's bottom line sits level with the
+marker it belongs to, measured on the render rather than judged by eye.
+
 Standing exceptions: 6.5 keeps its small upper-left legend, 6.12 uses separate
 legends beneath its two panels, 5.7 retains its compact printed-point table with
 a 7 pt floor, and H.3/H.4 keep the shared legend below because their top-right
