@@ -410,6 +410,27 @@ cross; the arrow terminates exactly at the target rather than being shrunk back
 from it, which is what makes it touch the line by construction rather than by
 adjustment.
 
+**Campaign closed, 2026-09-11: 63 of 63 approved.** Five rounds. Every figure the
+report includes is byte-identical to the copy the engine draws, verified by
+walking every ``includegraphics`` in the report and comparing digests: 58 raster
+figures, zero drift, zero missing. The four remaining images are the three
+institutional logos and the author-managed study-reach map, none of which this
+repository produces.
+
+**Where the rules stand after five rounds of use.** T1 to T5 held everywhere.
+T6, the 7 pt printed floor, is met at every figure except two, and both misses
+are recorded authorial decisions rather than defects: the timestep stress figure
+at 4.9 pt, whose composition the author chose and whose floor-lifted build
+collides, and the foreshore figure at 3.1 pt, whose eight-entry key the author
+asked to keep in the panel. The annotated cross-section prints at 5.0 pt, which
+is the document's own ``\tiny`` rather than a reduction artefact; its 7 pt
+version was built, read and reverted.
+
+**The floor is a default and the author overrides it.** That is the rule's
+standing, and it is worth stating plainly here so that a later session does not
+read a sub-floor figure as an oversight and quietly "fix" it. Each of the three
+carries its reason in the driver beside the size.
+
 Standing exceptions: 6.5 keeps its small upper-left legend, 6.12 uses separate
 legends beneath its two panels, 5.7 retains its compact printed-point table with
 a 7 pt floor, and H.3/H.4 keep the shared legend below because their top-right

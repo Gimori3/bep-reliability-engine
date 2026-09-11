@@ -164,6 +164,14 @@ A(r"\definecolor{xsGuide}{RGB}{148, 148, 152}")
 A(r"\begin{tikzpicture}[")
 A(r"    x=1mm, y=1mm, font=\sffamily\scriptsize,")
 A(r"    lbl/.style   = {inner sep=1pt, outer sep=0pt},")
+# ``\tiny`` is 5 pt at the report's 10 pt base. Unlike the raster figures
+# this drawing is typeset rather than reduced, so 5 pt is its true printed
+# size and is below the 7 pt floor of conventions section 9.3.2. Raising
+# ``tny`` to ``\scriptsize`` was built and read: the panel (a) axis title
+# runs into its own tick labels, the two pipe-dimension labels merge, the
+# high-water-bed label is struck through by the piezometric line and the
+# embankment, and the low-water-channel box lands on the channel. Reaching
+# the floor here is a re-layout of the drawing, not a size change.
 A(r"    tny/.style   = {inner sep=1pt, outer sep=0pt, font=\sffamily\tiny},")
 A(r"    callout/.style = {tny, draw=xsLine, line width=0.25pt,")
 A(r"                       fill=white, rounded corners=0.6mm, inner sep=1.5pt,")
