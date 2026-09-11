@@ -475,6 +475,14 @@ def _make_figure(records: list[dict[str, Any]], out_path: Path) -> None:
     ax_a.set_ylabel(r"exposure ratio  $v_\mathrm{lat}\,T_\mathrm{mob} / B_f$  [-]")
     ax_a.set_title("(a) Exposure ratio across the retreat-rate bracket")
     ax_a.grid(alpha=0.3, which="both")
+    # 6.2 authored points, which prints at 3.1 on the page: this figure
+    # is 11.5 in wide placed at 0.85 of the text block, so it is reduced
+    # by about a half. That is below the 7 pt floor of conventions
+    # section 9.3.2 and it is deliberate. The key was moved into the
+    # caption to remove it, which took the figure to 7.0 pt with the
+    # drawing untouched, and the author asked for the key back in the
+    # panel. Do not read this as an oversight and do not quietly raise
+    # it; the floor is a default and this one is overridden.
     ax_a.legend(fontsize=6.2, ncol=2, loc="lower left")
 
     for record in records:

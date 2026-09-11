@@ -391,3 +391,51 @@ mechanics are in `docs/conventions.md`.
   construction can be made exact, prefer it to a measurement of the render;
   where a measurement is genuinely needed, as with 6.5's label alignment in the
   preceding round, key it on something the rest of the figure does not share.
+
+  **Campaign closed, 2026-09-11: 63 of 63 approved, over five rounds.** The
+  close-out gate is a drift check rather than a count: every ``includegraphics``
+  in the report resolved against both trees and compared by digest, giving 58
+  raster figures byte-identical to the engine's copies, zero drifted and zero
+  missing. The other four images are the three institutional logos and the
+  author-managed study-reach map. **Five stale PNGs sit in the report's figures
+  directory that nothing includes**, one of them the raster the annotated
+  cross-section used before it became a TikZ drawing; they are reported and left,
+  since deleting tracked files in that repository was never part of this work.
+
+  **What the campaign actually taught, beyond the six rules.** Three findings
+  generalise and one correction matters more than any of them.
+
+  *A house rule is a default and the author overrides it.* The 7 pt floor is met
+  everywhere except three figures, and all three misses are recorded decisions
+  with their reason written beside the size in the driver. A later session must
+  not read a sub-floor figure here as an oversight.
+
+  *Text that must be small to fit inside a figure is usually text a caption can
+  hold at caption size.* Moving the foreshore key out took the smallest text in
+  the report from 3.1 pt to 7.0 with the drawing untouched. **It was still the
+  wrong change, because it was not the change asked for**, and it was taken back.
+  Both halves of that are the lesson: the technique is sound and reaching for it
+  inside an instruction to change one thing is not.
+
+  *A tight bounding box makes the authored width and the saved width differ*, so
+  a title set at the house size can be wider than its own panels, become the
+  saved canvas width, and shrink everything on the page. Measured on three
+  figures, a one-line house title cost between 1.0 and 1.3 printed points. Break
+  the title instead.
+
+  *Prefer an exact construction to a measurement of the render.* The leaders on
+  the design-level gap figure land on their lines because their x is the same
+  data value the lines are drawn at, which cannot drift; the check written to
+  verify them by colour instead reported pure noise, the leaders' grey being the
+  axis chrome's grey as well. Where a measurement is unavoidable, key it on
+  something the rest of the figure does not share, as the label-alignment check
+  did on red.
+
+  **On process.** Nine of the author's notes were lost in round 2 to a textarea's
+  value not serialising; every review page since mirrors each keystroke into the
+  element's text content and each ruling onto a data attribute, and that is now
+  verified in a real browser rather than argued from the markup. Approvals were
+  landed in the thesis round by round and changed figures held back, so the report
+  never carried a rendering nobody had ruled on, with one exception recorded at
+  the time: the annotated cross-section, which a concurrent session had already
+  pushed.
