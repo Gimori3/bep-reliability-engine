@@ -1153,6 +1153,34 @@ COMPANION_EXCLUSIONS: dict[str, str] = {
         "the campaign also does not produce. Same substantive ground as the "
         "ADR-0045/0046/0048/0049/0050 companion entries above."
     ),
+    "scripts/foreland_credit_bracket_study.py": (
+        "ADR-0052 foreland seepage-length credit: the foreland_seepage_credit "
+        "knob is OFF in production and dropped from to_metadata() when None, so "
+        "it changes no config_hash and produces no campaign artifact. It carries "
+        "its own gate, which is STRONGER than anything this stage would apply: "
+        "it re-runs each committed YAML with foreland_seepage_credit=None set "
+        "explicitly and refuses unless BOTH whole failure matrices are "
+        "bit-identical to the persisted sweep, and it refuses again if any arm "
+        "CREATES a failure on either branch (a raised H_c can only remove "
+        "them). Running it here would add twelve full-N sweeps plus four "
+        "fine-grid sustained-peak scans (~1.5 h) to the campaign to re-derive a "
+        "gate the driver already refuses without. Note this knob is NOT "
+        "single-branch -- H_c is single-source, so both columns move -- which is "
+        "why its gate asserts the direction rather than static invariance. Same "
+        "substantive ground as the ADR-0045/0046/0048/0049/0050/0051 companion "
+        "entries above."
+    ),
+    "scripts/foreland_credit_annualisation.py": (
+        "ADR-0052 Phase 3 propagation: re-runs no sweep and evaluates no limit "
+        "state. It reads the ADR-0052 arm sweeps that the bracket study above "
+        "produced (gitignored, and deliberately not campaign artifacts) and "
+        "imports the composition and annualisation from "
+        "scripts/conductivity_annualisation_study.py, which the campaign also "
+        "does not run. Its own gate 1 is the same EXACT reproduction of "
+        "rq4_annual.csv that the conductivity study applies, so there is nothing "
+        "here a companion hash gate would add. Same substantive ground as the "
+        "conductivity-annualisation entry."
+    ),
     "scripts/rq1_beta_analysis.py": (
         "RQ1 reliability-index re-expression: pure post-processing that "
         "evaluates no limit state, loads no Config and therefore has no "
