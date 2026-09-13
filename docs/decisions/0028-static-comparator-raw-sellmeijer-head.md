@@ -79,6 +79,39 @@ transient crack-reduced) are raw and differ by exactly `0.3·D_bl`.
   introduces no new one. A partial-r_e schematization would deviate from both
   calibrations and is out of scope.
 
+  > **Amended 2026-09-13 (ADR-0052). The sentence "Raw-static inherits a
+  > simplification Pol already made; it introduces no new one" is wrong on both
+  > premises and is superseded; the paragraph is kept as written, per the
+  > repository rule that a superseded statement is marked, never deleted.**
+  >
+  > Neither source *made* this simplification, because neither source has a
+  > riverside blanket to simplify away. Pol (2022) thesis p. 158, verbatim, on
+  > the assumptions behind Eq. 7.13: "This solution is based on horizontal flow
+  > in a leaky aquifer, vertical flow (leakage) through the blanket, an
+  > infinitely long polder blanket and **no riverside blanket**". Sellmeijer
+  > (2011) Fig. 1 likewise shows the river in direct contact with the sand at
+  > the riverside dike toe. A text search of `pol_sie_2024.pdf` over its whole
+  > 18-page text layer returns **zero** hits for "riverside blanket",
+  > "riverside", "foreshore" and "foreland"; its 21 "blanket" hits are all the
+  > polder or landside blanket ("polder blanket thickness", "blanket uplift").
+  >
+  > So the foreland entry length is **this repository's own addition**
+  > (ADR-0005/0006), not an inheritance. What follows is not that ADR-0028 is
+  > wrong — a gross head over the under-levee `L` is Sellmeijer's own
+  > calibration geometry, and this ADR's decision stands unchanged — but that
+  > the *justification* offered here does not hold, and that the engine
+  > therefore carries an asymmetry of its own making: the foreland entry
+  > resistance reaches the uplift and heave gate through `r_e` and reaches
+  > neither piping load, while `L` in the Sellmeijer rule is the under-levee
+  > path only. At the prior means that declined entry resistance is 29 to 43
+  > per cent of the total series resistance.
+  >
+  > TR Zandmeevoerende Wellen (1999) §4.4.2 permits crediting it
+  > ("**mag** ... in rekening worden gebracht"), so declining it is a
+  > recognised conservative simplification rather than an omission. ADR-0052
+  > adds the opt-in credit and measures the bracket; the production baseline is
+  > unchanged.
+
 ## Consequences
 
 - **Static P_f rises (branch more conservative).** At damped sections the static
