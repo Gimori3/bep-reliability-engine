@@ -267,3 +267,39 @@ def test_window_closure_flags_a_loaded_window_end() -> None:
     closure = window_closure_diagnostic(record, 2.0)
     assert closure["closed"] is False
     assert closure["hours_after_last_exceedance"] == 0.0
+
+
+# ---------------------------------------------------------------------------
+# The Obihiro gauge node (corrected 2026-09-13 from KP 56.6 to KP 56.73)
+# ---------------------------------------------------------------------------
+#: The Obihiro station's OWN rating, from the station register
+#: ``data/raw/Uncertainty_HQrelation.xlsx`` sheet ``TokachiRiv._Obihiro``
+#: (``point = "Obihiro"``, ``KP = 56.73``, ``HQ_a = 135.36``,
+#: ``HQ_b = -32.62``), the same workbook ADR-0042 decision 6 takes the rating
+#: error from. The KP 56.6 row of the rating CSV is (140.33, -32.49) and
+#: belongs to the design *reference point*, not to the gauge.
+_OBIHIRO_GAUGE_KP = 56.73
+_OBIHIRO_GAUGE_RATING = (135.36, -32.62)
+
+
+def test_the_2016_source_uses_the_obihiro_station_node_not_the_grid_node() -> None:
+    """Guards the 2026-09-13 correction against a silent revert to 56.6."""
+    assert default_2016_source().gauge_kp == _OBIHIRO_GAUGE_KP
+
+
+@requires_rating
+def test_the_gauge_node_carries_the_station_registers_own_rating() -> None:
+    """The node must select the station's rating, not the reference point's.
+
+    This is what makes the correction checkable rather than asserted: the
+    coefficients at the chosen node have to be the ones the station register
+    records for Obihiro.
+    """
+    from bep_reliability_engine.hydrographs import load_rating_coefficients
+
+    coefficients = load_rating_coefficients(_RATING_CSV)
+    a_kp, b_kp = coefficients[default_2016_source().gauge_kp]
+    assert (a_kp, b_kp) == pytest.approx(_OBIHIRO_GAUGE_RATING)
+    # And it is genuinely a different node from the 0.2 km survey grid point
+    # the earlier reading used, so a revert cannot pass this test silently.
+    assert coefficients[56.6] != pytest.approx(_OBIHIRO_GAUGE_RATING)

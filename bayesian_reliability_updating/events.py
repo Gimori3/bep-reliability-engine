@@ -17,7 +17,8 @@ Phase 1 M3 machinery verbatim, so datum handling and unit conversion happen
 in exactly one place:
 
 1. The observed stage series at the reference gauge (Obihiro, Tokachi
-   KP 56.6 for 2016, hourly, m MSL) is inverted through the gauge's own
+   KP 56.73 for 2016 -- corrected from 56.6 on 2026-09-13, see
+   :func:`default_2016_source`; hourly, m MSL) is inverted through the gauge's own
    Eq. 4.19 rating, ``Q_eq(t) = a_g * (h_obs(t) + b_g)^2``, giving the
    rating-equivalent discharge. This is exact: pushing ``Q_eq`` back
    through the gauge rating reproduces the observed series bit for bit.
@@ -165,11 +166,37 @@ def default_2016_source(
 ) -> ObservedEventSource:
     """The built-in August 2016 consecutive-typhoon event (ADR-0035).
 
-    Reference gauge: Obihiro (帯広), Tokachi KP 56.6, the ADR-0019 section 4
-    validation-anchor station, 0.8 to 5.4 km downstream of the four study
-    sections with no major tributary in between (the Satsunai and Otofuke
-    confluences bracket the reach outside it, matching the d4PDF band
-    KP 056.20 to 061.80 that Phase 1 itself uses for these sections).
+    Reference gauge: Obihiro (帯広), Tokachi **KP 56.73**, 0.8 to 5.4 km
+    downstream of the four study sections with no major tributary in between
+    (the Satsunai and Otofuke confluences bracket the reach outside it,
+    matching the d4PDF band KP 056.20 to 061.80 that Phase 1 itself uses for
+    these sections).
+
+    **Corrected 2026-09-13 from KP 56.6.** ADR-0035 and ADR-0019 section 4 both
+    name the station "Obihiro (KP 56.6)", but 56.6 is a node of the regular
+    0.2 km survey grid -- the design *reference point*, which the thesis
+    (`appendix-c.tex`) distinguishes from the gauge: "The Obihiro gauge lies
+    0.1 km upstream at KP 56.7". The station's own node is the off-grid 56.73
+    row of `HQrelation_TokachiRiv_2017.csv`. The decisive evidence is a primary
+    station register, not an inference from the off-grid spacing:
+    `data/raw/Uncertainty_HQrelation.xlsx` (the ADR-0042 decision 6 source)
+    carries a sheet `TokachiRiv._Obihiro` whose first data row reads
+    `point = "Obihiro"`, `KP = 56.73`, with that station's own rating
+    `HQ_a = 135.36`, `HQ_b = -32.62` -- **exactly** the KP 56.73 row of the
+    committed rating CSV, and not the KP 56.6 row (140.33, -32.49). Phase 3
+    already read it this way (`system_integration/segments.py`,
+    `docs/phase3_report.md`); Phase 2 did not.
+
+    What the correction moves, measured 2026-09-13 over all four matrix strata
+    at N = 1e5 (`docs/foreland_credit_bracket_2026-09-13.md` section 7):
+    under the production `trace_right` anchoring the peak is pinned by the
+    surveyed trace, so the **static** rejection column is *exactly* unchanged
+    and the transient rejection moves by at most 0.161 percentage points
+    (KP 58.8: 5.673 to 5.512 per cent); the marginal transient-not-static count
+    stays exactly 0 at every section. Under the unanchored `anchor='rating'`
+    sensitivity it moves a great deal more, because there the gauge rating sets
+    the peak outright: 0.00 / 10.81 / 0.34 / 0.05 becomes
+    0.00 / 6.08 / 0.10 / 0.01 per cent.
 
     Parameters
     ----------
@@ -186,7 +213,9 @@ def default_2016_source(
         event_id="typhoon_201608",
         river="Tokachi",
         gauge_station="obihiro",
-        gauge_kp=56.6,
+        # KP 56.73, not the 56.6 survey-grid node: see the docstring. The
+        # station register Uncertainty_HQrelation.xlsx pins it.
+        gauge_kp=56.73,
         stage_csv=processed / "stage_hourly_Tokachi_201608.csv",
         trace_csv=processed / "flood_trace_2016.csv",
         description=(
@@ -296,9 +325,12 @@ def read_flood_traces(csv_path: str | Path, river: str) -> dict[float, FloodTrac
 
 # Largest tolerable low-flow excursion below the flood-rating datum before
 # the series is treated as being on the wrong vertical datum outright. The
-# 2016 Obihiro record dips at most 0.82 m below the 2017 rating datum during
-# the pre-typhoon low-flow weeks (the flood rating from non-uniform flow
-# computation has no validity at low flow); a wrong-datum series (for
+# 2016 Obihiro record dips at most 0.95 m below the 2017 rating datum at the
+# KP 56.73 gauge node during the pre-typhoon low-flow weeks (371 of 744
+# hourly samples; it was 0.82 m and 354 samples at the KP 56.6 grid node used
+# before the 2026-09-13 correction, the difference being the 0.13 m higher
+# datum term -b = 32.62 against 32.49). The flood rating from non-uniform
+# flow computation has no validity at low flow; a wrong-datum series (for
 # example a gauge-local zero instead of MSL) would sit tens of metres off.
 _MAX_SUBDATUM_EXCURSION_M: float = 2.0
 
@@ -317,8 +349,9 @@ def inverse_rating_discharge(
     Low-flow handling: readings BELOW the rating datum are floored to zero
     discharge. The Eq. 4.19 coefficients come from non-uniform flow
     computation of flood profiles (ADR-0019) and have no validity at low
-    flow; the 2016 Obihiro record sits up to 0.82 m below the datum during
-    the pre-typhoon weeks. Floored samples translate to the target
+    flow; the 2016 Obihiro record sits up to 0.95 m below the datum during
+    the pre-typhoon weeks (0.82 m at the KP 56.6 node used before the
+    2026-09-13 gauge correction). Floored samples translate to the target
     section's own rating datum, which lies several metres below every
     study section's landside toe, so they are hydraulically inert for BEP.
     An excursion beyond :data:`_MAX_SUBDATUM_EXCURSION_M` still raises: a
