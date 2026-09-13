@@ -377,6 +377,40 @@ class BatchDiagnostics:
     heave_occurred: npt.NDArray[np.bool_]
 
 
+def _resolve_foreland_credit(
+    foreland_seepage_credit: float | None,
+    lambda_out_eff: float | npt.NDArray[float64],
+) -> float | npt.NDArray[float64] | None:
+    """Additive seepage-length credit handed to M6 (ADR-0052).
+
+    Returns ``None`` -- the bit-identical no-credit path -- when the knob is
+    off, and ``phi * lambda_out_eff`` otherwise. ``lambda_out_eff`` is
+    stochastic (it depends on the sampled ``k_aq`` and ``D_aq``, and through
+    the tanh on the measured foreshore width), so the credit is resolved
+    **per realization**, never precomputed once (spec Property 3). Under the
+    ADR-0025 ``foreland_open`` sensitivity ``lambda_out_eff`` is already zero,
+    so the credit is zero too: no foreland blanket, no displaced entry point.
+
+    Raises
+    ------
+    ValueError
+        If the fraction is outside ``[0, 1]``. TR Zandmeevoerende Wellen
+        (1999) §4.4.2 licenses exactly the tanh displacement ``L'_v``, so a
+        fraction above 1 would credit more length than the source permits and
+        a negative one would credit a shortening it never mentions.
+    """
+    if foreland_seepage_credit is None:
+        return None
+    fraction = float(foreland_seepage_credit)
+    if not 0.0 <= fraction <= 1.0:
+        raise ValueError(
+            "foreland_seepage_credit must lie in [0, 1] (ADR-0052: the "
+            "fraction of the TR Zandmeevoerende Wellen 1999 §4.4.2 entry-point "
+            f"displacement that is credited); got {foreland_seepage_credit!r}."
+        )
+    return fraction * lambda_out_eff
+
+
 def evaluate_realization(
     theta_row: npt.NDArray[float64],
     hydrograph: HydrographRecord,
@@ -394,6 +428,7 @@ def evaluate_realization(
     critical_length_factor: float | None = None,
     toe_gradient_relief_factor: float | None = None,
     crack_resistance_factor: float | None = None,
+    foreland_seepage_credit: float | None = None,
 ) -> EvaluationResult:
     """Evaluate both limit states for one realization (M8, spec §2-§4).
 
@@ -524,6 +559,22 @@ float, optional
         the crack term, ADR-0027/0028), nor ``H_eq``/``l_c`` — so the static
         branch is exactly invariant under it. Works on both progression
         backends. Companion sensitivity runs only.
+    foreland_seepage_credit : float, optional
+        Keyword-only foreland seepage-length credit (ADR-0052): the fraction
+        in ``[0, 1]`` of this realization's own ``lambda_out_eff`` added to
+        the seepage length **the Sellmeijer rule is evaluated at**,
+        ``L_eff = L + phi * lambda_out_eff``. ``None`` (default, and
+        production) declines the credit and is **bit-identical** to prior
+        behaviour. TR Zandmeevoerende Wellen (1999) §4.4.2 permits exactly
+        this displacement of the theoretical entry point, by the same tanh
+        §4.4.1 gives ``lambda_out_eff``; the permission is optional, so
+        declining it is a recognised conservative simplification. The credit
+        reaches ``H_c`` and nothing else — ``l_c``, the traverse length, the
+        ``Z_transient = L - l_e`` criterion, the ``L`` in the Eq. (5) rate
+        denominator and the ``L`` in ``r_e`` keep the physical under-levee
+        length. Both branches read the raised ``H_c`` (single-source
+        contract), so unlike ADR-0049/0050 the static branch is **not**
+        invariant under it. Companion sensitivity runs only.
 
     Returns
     -------
@@ -571,6 +622,30 @@ float, optional
     gamma_bl_sub_knpm3 = float(theta_row[5])
     c_e = float(theta_row[6])
 
+    lambda_in_m = float(leakage_length_in(k_aq_mps, d_aq_m, d_bl_m, k_bl_mps))
+    lambda_out_eff_m = float(
+        leakage_length_out(
+            k_aq_mps,
+            d_aq_m,
+            geometry["D_fore"],
+            geometry["k_fore"],
+            geometry["foreshore_width"],
+        )
+    )
+    if foreland_open:
+        # ADR-0025 open-entry sensitivity: the USACE Case 7a x1 = 0 bound
+        # (river head applied directly at the riverside toe). The measured
+        # geometry['foreshore_width'] is never mutated — only the entry
+        # length used by this evaluation is zeroed.
+        lambda_out_eff_m = 0.0
+
+    # ADR-0052: the optional TR Zandmeevoerende Wellen 1999 §4.4.2 foreland
+    # credit is resolved here, from this realization's own lambda_out_eff, and
+    # reaches H_c alone. None (production) leaves M6 bit-identical.
+    seepage_length_credit_m = _resolve_foreland_credit(
+        foreland_seepage_credit, lambda_out_eff_m
+    )
+
     # --- Shared preamble (spec §3 steps 1-3; §4): computed exactly once and
     # consumed by both branches. H_c is the single source: the same value
     # feeds the static comparison and anchors the transient H_eq curve below
@@ -591,6 +666,7 @@ float, optional
         geometry,
         **sell_kwargs,
         critical_length_factor=critical_length_factor,
+        seepage_length_credit_m=seepage_length_credit_m,
     )
     h_c_m = float(sellmeijer.H_c)  # static (canonical) H_c
     l_c_m = float(sellmeijer.l_c)  # scale-exponent independent; shared
@@ -608,6 +684,7 @@ float, optional
                 theta_row,
                 geometry,
                 **{**sell_kwargs, "alpha_exponent": alpha_exponent_transient},
+                seepage_length_credit_m=seepage_length_credit_m,
             ).H_c
         )
 
@@ -618,22 +695,6 @@ float, optional
         h_c_m = h_c_m * float(model_factor_mp)
         h_c_transient_m = h_c_transient_m * float(model_factor_mp)
 
-    lambda_in_m = float(leakage_length_in(k_aq_mps, d_aq_m, d_bl_m, k_bl_mps))
-    lambda_out_eff_m = float(
-        leakage_length_out(
-            k_aq_mps,
-            d_aq_m,
-            geometry["D_fore"],
-            geometry["k_fore"],
-            geometry["foreshore_width"],
-        )
-    )
-    if foreland_open:
-        # ADR-0025 open-entry sensitivity: the USACE Case 7a x1 = 0 bound
-        # (river head applied directly at the riverside toe). The measured
-        # geometry['foreshore_width'] is never mutated — only the entry
-        # length used by this evaluation is zeroed.
-        lambda_out_eff_m = 0.0
     # r_e is stochastic (four sampled variables) and lives in the per-realization
     # path -- never precomputed once (spec Property 3). It drives ONLY the
     # transient uplift/heave gate (ADR-0027/ADR-0028); the static branch is
@@ -720,6 +781,7 @@ def evaluate_batch(
     critical_length_factor: float | None = None,
     toe_gradient_relief_factor: float | None = None,
     crack_resistance_factor: float | None = None,
+    foreland_seepage_credit: float | None = None,
 ) -> tuple[npt.NDArray[np.bool_], npt.NDArray[np.bool_]]:
     """Evaluate both limit states for all N realizations at one level (M8 batch).
 
@@ -843,6 +905,29 @@ integrate_progression_numba`) — numerically equivalent to < 1e-10 but NOT
         column is exactly invariant under it. Works on both progression
         backends (the coefficient is a kernel argument, not a baked-in
         constant). Companion sensitivity runs only.
+    foreland_seepage_credit : float, optional
+        Keyword-only foreland seepage-length credit (ADR-0052), the fraction
+        in ``[0, 1]`` of this realization's own ``lambda_out_eff`` that is
+        added to the seepage length **the Sellmeijer rule is evaluated at**:
+        ``L_eff = L + phi * lambda_out_eff``. ``None`` (default, and
+        production) declines the credit and is **bit-identical** to prior
+        behaviour. TR Zandmeevoerende Wellen (1999) §4.4.2 permits exactly
+        this: a foreland displaces the theoretical entry point riverward by
+        ``L'_v = lambda * tanh(L_v / lambda)`` -- the same tanh §4.4.1 gives
+        ``lambda_out_eff`` -- and that increase in seepage length "mag in
+        rekening worden gebracht" in Sellmeijer's rule. The credit is
+        permissive, so declining it is a recognised conservative
+        simplification and stays the production baseline. It reaches ``H_c``
+        and nothing else: ``l_c``, the traverse length, the
+        ``Z_transient = L - l_e`` criterion, the ``L`` in the Eq. (5) rate
+        denominator and the ``L`` in ``r_e`` all keep the physical
+        under-levee length. ``lambda_out_eff`` is stochastic, so the credit
+        is resolved per realization, never once (spec Property 3); under
+        ``foreland_open`` it is identically zero. Both branches see the
+        raised ``H_c`` (single-source contract), so unlike ADR-0049/0050 the
+        static branch is **not** invariant under it. Works on both
+        progression backends (the scaling happens upstream of the M7 kernel).
+        Companion sensitivity runs only.
 
     Returns
     -------
@@ -874,6 +959,7 @@ integrate_progression_numba`) — numerically equivalent to < 1e-10 but NOT
         critical_length_factor=critical_length_factor,
         toe_gradient_relief_factor=toe_gradient_relief_factor,
         crack_resistance_factor=crack_resistance_factor,
+        foreland_seepage_credit=foreland_seepage_credit,
     )
     return diagnostics.failure_static, diagnostics.failure_trans
 
@@ -897,6 +983,7 @@ def evaluate_batch_diagnostics(
     critical_length_factor: float | None = None,
     toe_gradient_relief_factor: float | None = None,
     crack_resistance_factor: float | None = None,
+    foreland_seepage_credit: float | None = None,
 ) -> BatchDiagnostics:
     """Evaluate all N realizations at one level, retaining diagnostics (ADR-0034).
 
@@ -963,6 +1050,25 @@ def evaluate_batch_diagnostics(
         # l_c become per-realization in L (every M6 term broadcasts).
         geometry_for_hc = {**geometry, "L": seepage_length}
 
+    lambda_in = leakage_length_in(k_aq_mps, d_aq_m, d_bl_m, k_bl_mps)
+    lambda_out_eff = leakage_length_out(
+        k_aq_mps,
+        d_aq_m,
+        geometry["D_fore"],
+        geometry["k_fore"],
+        geometry["foreshore_width"],
+    )
+    if foreland_open:
+        # ADR-0025 open-entry sensitivity: x1 = 0 for every realization,
+        # identical to the scalar path; the measured geometry is untouched.
+        lambda_out_eff = np.zeros_like(lambda_out_eff)
+
+    # ADR-0052: per-realization foreland credit, exactly as the scalar path
+    # resolves it; None (production) leaves M6 bit-identical.
+    seepage_length_credit_m = _resolve_foreland_credit(
+        foreland_seepage_credit, lambda_out_eff
+    )
+
     # --- Shared preamble (vectorized), forwarding Sellmeijer overrides only when
     # set (None -> M6 default), exactly as the scalar path does.
     sell_kwargs: dict[str, float] = {}
@@ -979,6 +1085,7 @@ def evaluate_batch_diagnostics(
         geometry_for_hc,
         **sell_kwargs,
         critical_length_factor=critical_length_factor,
+        seepage_length_credit_m=seepage_length_credit_m,
     )
     h_c = np.asarray(sellmeijer.H_c, dtype=np.float64)  # static H_c
     l_c = np.asarray(sellmeijer.l_c, dtype=np.float64)  # scale-independent; shared
@@ -993,6 +1100,7 @@ def evaluate_batch_diagnostics(
                 theta,
                 geometry_for_hc,
                 **{**sell_kwargs, "alpha_exponent": alpha_exponent_transient},
+                seepage_length_credit_m=seepage_length_credit_m,
             ).H_c,
             dtype=np.float64,
         )
@@ -1013,18 +1121,6 @@ def evaluate_batch_diagnostics(
         h_c = h_c * model_factor
         h_c_transient = h_c_transient * model_factor
 
-    lambda_in = leakage_length_in(k_aq_mps, d_aq_m, d_bl_m, k_bl_mps)
-    lambda_out_eff = leakage_length_out(
-        k_aq_mps,
-        d_aq_m,
-        geometry["D_fore"],
-        geometry["k_fore"],
-        geometry["foreshore_width"],
-    )
-    if foreland_open:
-        # ADR-0025 open-entry sensitivity: x1 = 0 for every realization,
-        # identical to the scalar path; the measured geometry is untouched.
-        lambda_out_eff = np.zeros_like(lambda_out_eff)
     # r_e is stochastic (four sampled variables, plus L when L is sampled) and
     # drives ONLY the transient uplift/heave gate (ADR-0027/ADR-0028); the
     # static branch is r_e-independent. The shared theta feeds both branches.

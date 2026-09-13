@@ -58,6 +58,7 @@ __all__ = [
     "compute_critical_head",
     "compute_critical_head_vectorized",
     "compute_critical_pipe_length",
+    "resolve_effective_seepage_length",
 ]
 
 # --- Physical constants ----------------------------------------------------
@@ -283,6 +284,64 @@ def _factor_Fg(
     return f_g
 
 
+def resolve_effective_seepage_length(
+    seepage_length_m: float | npt.NDArray[np.float64],
+    seepage_length_credit_m: float | npt.NDArray[np.float64] | None,
+) -> float | npt.NDArray[np.float64]:
+    """Seepage length the Sellmeijer rule is evaluated at (ADR-0052).
+
+    Returns ``L + credit`` when a foreland seepage-length credit is supplied,
+    and ``L`` itself -- the same object, so the caller's arithmetic is
+    **bit-identical** to pre-ADR-0052 behaviour -- when it is ``None``.
+
+    Parameters
+    ----------
+    seepage_length_m : float or ndarray
+        The physical under-levee seepage length L [m], scalar or per
+        realization.
+    seepage_length_credit_m : float or ndarray or None
+        Additive credit [m] on the seepage length used by the Sellmeijer
+        rule, from TR Zandmeevoerende Wellen (1999) §4.4.2: a foreland
+        blanket displaces the theoretical entry point riverward by
+        ``L'_v = lambda * tanh(L_v / lambda)``, and that increase "mag in
+        rekening worden gebracht" in Sellmeijer's rule. ``None`` (default,
+        and production) declines the credit -- the recognised conservative
+        simplification. Must be non-negative: §4.4.2 licenses an *increase*
+        in seepage length, never a decrease.
+
+    Returns
+    -------
+    float or ndarray
+        ``L_eff`` for the critical-head evaluation.
+
+    Raises
+    ------
+    ValueError
+        If any credit is negative or non-finite.
+
+    Notes
+    -----
+    The credit reaches **H_c only**. The critical pipe length l_c, the
+    traverse length, the ``Z_transient = L - l_e`` criterion, the L in the
+    Eq. (5) rate denominator and the L in r_e all stay on the physical
+    under-levee L: §4.4.2 credits Sellmeijer's *rule*, it does not assert
+    that the pipe is longer.
+    """
+    if seepage_length_credit_m is None:
+        return seepage_length_m
+    credit = np.asarray(seepage_length_credit_m, dtype=np.float64)
+    if not np.all(np.isfinite(credit)) or np.any(credit < 0.0):
+        raise ValueError(
+            "seepage_length_credit_m must be finite and non-negative (ADR-0052; "
+            "TR Zandmeevoerende Wellen 1999 §4.4.2 licenses an increase in "
+            f"seepage length, never a decrease); got {seepage_length_credit_m!r}."
+        )
+    effective = np.asarray(seepage_length_m, dtype=np.float64) + credit
+    if effective.ndim == 0:
+        return float(effective)
+    return effective
+
+
 def compute_critical_head(
     theta_row: npt.NDArray[np.float64],
     geometry: dict,
@@ -292,6 +351,7 @@ def compute_critical_head(
     relative_density: float = D_R_MEAN,
     *,
     critical_length_factor: float | None = None,
+    seepage_length_credit_m: float | npt.NDArray[np.float64] | None = None,
 ) -> SellmeijerResult:
     """Critical head H_c and critical pipe length l_c, one realization.
 
@@ -344,6 +404,14 @@ def compute_critical_head(
         published formula, bit-identical to pre-ADR-0049 behaviour. H_c is
         untouched either way: l_c is scale-independent and enters only the
         M7 equilibrium curve, so this knob never reaches the static branch.
+    seepage_length_credit_m : float or ndarray, optional
+        Keyword-only additive foreland seepage-length credit [m] (ADR-0052),
+        forwarded to :func:`resolve_effective_seepage_length`. ``None``
+        (default, and production) evaluates the rule at the physical
+        under-levee ``geometry['L']`` and is **bit-identical** to
+        pre-ADR-0052 behaviour. When set, H_c alone is evaluated at
+        ``L_eff = L + credit``; ``l_c`` keeps the physical L, so the
+        transient traverse geometry is untouched.
 
     Returns
     -------
@@ -373,19 +441,24 @@ def compute_critical_head(
     r_e-translated load head.
     """
     seepage_length_m = geometry["L"]
+    # ADR-0052: the Sellmeijer rule may be evaluated at a credited seepage
+    # length; l_c and every transient length below stay on the physical L.
+    rule_length_m = resolve_effective_seepage_length(
+        seepage_length_m, seepage_length_credit_m
+    )
     k_aq_mps = float(theta_row[_PARAM_NAMES.index("k_aq")])
     d_70_m = float(theta_row[_PARAM_NAMES.index("d_70")])
     D_aq_m = float(theta_row[_PARAM_NAMES.index("D_aq")])
 
     h_c = (
-        seepage_length_m
+        rule_length_m
         * _factor_Fr(
             gamma_p_sub_kn_m3,
             theta_repose_rad=theta_repose_rad,
             relative_density=relative_density,
         )
-        * _factor_Fs(d_70_m, k_aq_mps, seepage_length_m, alpha_exponent)
-        * _factor_Fg(D_aq_m, seepage_length_m)
+        * _factor_Fs(d_70_m, k_aq_mps, rule_length_m, alpha_exponent)
+        * _factor_Fg(D_aq_m, rule_length_m)
     )
     # "not (h_c > 0)" instead of "h_c <= 0" so that NaN from pathological
     # theta values is rejected as well.
@@ -412,6 +485,7 @@ def compute_critical_head_vectorized(
     relative_density: float = D_R_MEAN,
     *,
     critical_length_factor: float | None = None,
+    seepage_length_credit_m: float | npt.NDArray[np.float64] | None = None,
 ) -> SellmeijerResult:
     """Critical head H_c and critical pipe length l_c for all N
     realizations at once.
@@ -448,6 +522,12 @@ def compute_critical_head_vectorized(
         length (ADR-0049); see :func:`compute_critical_head`. ``None``
         (default) is the published formula, bit-identical to pre-ADR-0049
         behaviour.
+    seepage_length_credit_m : float or ndarray, optional
+        Keyword-only additive foreland seepage-length credit [m] (ADR-0052);
+        see :func:`compute_critical_head`. ``None`` (default, and
+        production) is bit-identical to pre-ADR-0052 behaviour. A ``(N,)``
+        array credits each realization its own ``lambda_out_eff``, which is
+        stochastic and must never be precomputed once (spec Property 3).
 
     Returns
     -------
@@ -477,19 +557,23 @@ def compute_critical_head_vectorized(
     skipping here.
     """
     seepage_length_m = geometry["L"]
+    # ADR-0052: see the scalar twin. l_c below keeps the physical L.
+    rule_length_m = resolve_effective_seepage_length(
+        seepage_length_m, seepage_length_credit_m
+    )
     k_aq_mps = theta_matrix[:, _PARAM_NAMES.index("k_aq")]
     d_70_m = theta_matrix[:, _PARAM_NAMES.index("d_70")]
     D_aq_m = theta_matrix[:, _PARAM_NAMES.index("D_aq")]
 
     h_c = (
-        seepage_length_m
+        rule_length_m
         * _factor_Fr(
             gamma_p_sub_kn_m3,
             theta_repose_rad=theta_repose_rad,
             relative_density=relative_density,
         )
-        * _factor_Fs(d_70_m, k_aq_mps, seepage_length_m, alpha_exponent)
-        * _factor_Fg(D_aq_m, seepage_length_m)
+        * _factor_Fs(d_70_m, k_aq_mps, rule_length_m, alpha_exponent)
+        * _factor_Fg(D_aq_m, rule_length_m)
     )
     # isfinite & (> 0) in one mask: rejects NaN, +/-Inf and non-positive
     # rows alike (a bare "h_c <= 0" comparison would miss NaN and +Inf).

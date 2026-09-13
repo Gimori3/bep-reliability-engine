@@ -301,6 +301,7 @@ def verify_posterior_fragility_by_reevaluation(
             critical_length_factor=config.critical_length_factor,
             toe_gradient_relief_factor=config.toe_gradient_relief_factor,
             crack_resistance_factor=config.crack_resistance_factor,
+            foreland_seepage_credit=config.foreland_seepage_credit,
         )
         flag_mismatch_static += int((col_static != retained_stat[:, i]).sum())
         flag_mismatch_trans += int((col_trans != retained_tran[:, i]).sum())
