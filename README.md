@@ -169,7 +169,7 @@ must pass:
 ```powershell
 ruff check .          # E, F, I
 black --check .       # line length 88
-pytest                # 919 tests (912 fast + 7 slow)
+pytest                # 960 tests (953 fast + 7 slow)
 ```
 
 `pytest -m "not slow"` skips the seven expensive reference-reproduction and
