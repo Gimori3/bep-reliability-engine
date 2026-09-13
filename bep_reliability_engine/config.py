@@ -939,6 +939,29 @@ class Config(_StrictModel):
             "production configs never carry it set."
         ),
     )
+    foreland_seepage_credit: float | None = Field(
+        default=None,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "ADR-0052 foreland seepage-length credit, the fraction in [0, 1] "
+            "of each realization's own lambda_out_eff added to the seepage "
+            "length the Sellmeijer rule is evaluated at (L_eff = L + phi * "
+            "lambda_out_eff). None (production, and every pre-ADR-0052 "
+            "config) declines the credit, bit-identical to prior behaviour; "
+            "the None case is dropped from to_metadata() so config_hash of "
+            "pre-ADR-0052 snapshots is preserved. 1.0 is the full TR "
+            "Zandmeevoerende Wellen 1999 §4.4.2 credit, which states that the "
+            "entry-point displacement L'_v = lambda * tanh(L_v / lambda) 'mag "
+            "in rekening worden gebracht' in Sellmeijer's rule. The credit "
+            "reaches H_c alone -- l_c, the traverse length, Z_transient and "
+            "the Eq. (5) rate denominator keep the physical under-levee L -- "
+            "but H_c is single-source, so BOTH branches move and neither is "
+            "invariant. Bounded above at 1: §4.4.2 licenses exactly that "
+            "displacement and no more. Companion sensitivity runs only -- "
+            "production configs never carry it set."
+        ),
+    )
     toe_gradient_relief_factor: float | None = Field(
         default=None,
         gt=0.0,
@@ -1140,7 +1163,8 @@ class Config(_StrictModel):
             ``prior_mean_scenario`` is dropped when None (ADR-0048),
             ``critical_length_factor`` is dropped when None (ADR-0049),
             ``toe_gradient_relief_factor`` is dropped when None (ADR-0050) and
-            ``crack_resistance_factor`` is dropped when None (ADR-0051):
+            ``crack_resistance_factor`` is dropped when None (ADR-0051) and
+            ``foreland_seepage_credit`` is dropped when None (ADR-0052):
             pre-ADR snapshots reconstruct to the None defaults, and dropping
             the keys keeps their :meth:`config_hash` byte-identical to what
             their persisted runs recorded — the Phase 2 replay refuses hash
@@ -1159,6 +1183,8 @@ class Config(_StrictModel):
             snapshot.pop("toe_gradient_relief_factor", None)
         if snapshot.get("crack_resistance_factor") is None:
             snapshot.pop("crack_resistance_factor", None)
+        if snapshot.get("foreland_seepage_credit") is None:
+            snapshot.pop("foreland_seepage_credit", None)
         return snapshot
 
     def config_hash(self) -> str:

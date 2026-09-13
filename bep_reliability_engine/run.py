@@ -289,6 +289,14 @@ class _EvalSettings:
         bit-identical to prior behaviour; 0.0 gives the gross erosion head
         ``h(t) - z_toe``, the static comparator's own head convention.
         Transient-erosion-only: the static column is unchanged by construction.
+    foreland_seepage_credit : float or None
+        ADR-0052 foreland seepage-length credit, from
+        ``config.foreland_seepage_credit``: the fraction of each realization's
+        own ``lambda_out_eff`` added to the seepage length the Sellmeijer rule
+        is evaluated at. None (production, and every pre-ADR-0052 config)
+        declines the TR Zandmeevoerende Wellen 1999 §4.4.2 credit and is
+        bit-identical to prior behaviour. Unlike the three knobs above this one
+        is **not** single-branch: H_c is single-source, so both columns move.
     """
 
     l_ini_m: float
@@ -303,6 +311,7 @@ class _EvalSettings:
     critical_length_factor: float | None = None
     toe_gradient_relief_factor: float | None = None
     crack_resistance_factor: float | None = None
+    foreland_seepage_credit: float | None = None
 
 
 # ============================================================================
@@ -494,6 +503,7 @@ def _evaluate_level(
         critical_length_factor=settings.critical_length_factor,
         toe_gradient_relief_factor=settings.toe_gradient_relief_factor,
         crack_resistance_factor=settings.crack_resistance_factor,
+        foreland_seepage_credit=settings.foreland_seepage_credit,
     )
     return level_index, col_static, col_trans
 
@@ -1202,6 +1212,7 @@ def run_fragility_analysis(
         critical_length_factor=config.critical_length_factor,
         toe_gradient_relief_factor=config.toe_gradient_relief_factor,
         crack_resistance_factor=config.crack_resistance_factor,
+        foreland_seepage_credit=config.foreland_seepage_credit,
     )
     grid = np.asarray(config.mc.conditioning_grid, dtype=np.float64)
     n_levels = int(grid.size)
