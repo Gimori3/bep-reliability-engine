@@ -55,7 +55,43 @@ Per-section records are built by the reusable loader
 `bayesian_reliability_updating.events` as follows:
 
 1. **Gauge assignment**: one reference gauge per reach, Obihiro (KP 56.6)
-   for all four Tokachi sections. This mirrors the Phase 1 d4PDF band
+   for all four Tokachi sections.
+
+   > **Amended 2026-09-13 (ADR-0052 session). The node is KP 56.73, not
+   > KP 56.6; the superseded value is kept above per the repository rule.**
+   > KP 56.6 is a node of the regular 0.2 km survey grid and is the design
+   > *reference point*, which the thesis distinguishes from the station
+   > (`appendix-c.tex`: "The Obihiro gauge lies 0.1 km upstream at KP 56.7").
+   > The decisive evidence is a **primary station register**, not an inference
+   > from the off-grid spacing: `data/raw/Uncertainty_HQrelation.xlsx` (the
+   > ADR-0042 decision 6 source) carries a sheet `TokachiRiv._Obihiro` whose
+   > first data row reads `point = "Obihiro"`, `KP = 56.73`, with that
+   > station's own rating `HQ_a = 135.36`, `HQ_b = -32.62` — **exactly** the
+   > KP 56.73 row of the committed rating CSV, and not the KP 56.6 row
+   > (140.33, -32.49). Phase 3 already read it this way
+   > (`system_integration/segments.py`, `docs/phase3_report.md`); Phase 2 did
+   > not. `bayesian_reliability_updating.events.default_2016_source` now uses
+   > 56.73, pinned by two tests in `tests/test_phase2_events.py`.
+   >
+   > **What it moves, measured over all four matrix strata at N = 1e5**
+   > (`docs/foreland_credit_bracket_2026-09-13.md` §7). Under the production
+   > `trace_right` anchoring the surveyed trace pins the peak, so the
+   > **static** rejection column is *exactly* unchanged and the transient
+   > rejection moves by at most 0.161 percentage points (KP 58.8 5.673 to
+   > 5.512 per cent; KP 57.4 0.065 to 0.063; KP 60.0 3.363 to 3.244; KP 62.0
+   > 0.000 both). The marginal transient-not-static count stays exactly 0 at
+   > every section, so decision 5's headline is unaffected. Under the
+   > unanchored `anchor='rating'` sensitivity it moves much more, the gauge
+   > rating setting the peak outright: 0.00 / 10.81 / 0.34 / 0.05 becomes
+   > 0.00 / 6.08 / 0.10 / 0.01 per cent.
+   >
+   > **The committed Phase 2 artifacts and the committed
+   > `phase2-survival-update-per-stratum.csv` were produced at KP 56.6 and
+   > have NOT been regenerated.** They stamp `gauge_kp: 56.6` in their own
+   > provenance, so the difference is visible in the artifact rather than
+   > latent, and regenerating them would move two printed thesis numbers
+   > without changing any conclusion — an author's decision, recorded here as
+   > a bounded open item rather than taken unilaterally. This mirrors the Phase 1 d4PDF band
    structure exactly: the band workbook KP 056.20 to 061.80 that drives
    these sections in Phase 1 carries one discharge series for the whole
    reach, and the Obihiro gauge sits inside that band (the Satsunai and
@@ -76,7 +112,9 @@ Per-section records are built by the reusable loader
    (`normalize_stage_shape`). The unanchored translation stays available
    as `anchor='rating'` (sensitivity), plus `anchor='trace_left'`.
 4. **Low-flow flooring**: gauge readings below the flood-rating datum
-   (up to 0.82 m during the pre-typhoon weeks; the rating has no
+   (up to 0.82 m during the pre-typhoon weeks — **0.95 m at the corrected
+   KP 56.73 node, whose datum term is 0.13 m higher; see the amendment to
+   decision 1**; the rating has no
    validity at low flow) invert to zero discharge; an excursion beyond
    2.0 m still raises as a datum error. Floored samples translate to the
    section's own rating datum, several metres below every landside toe,
