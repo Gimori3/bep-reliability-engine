@@ -330,22 +330,56 @@ The 56.6 column reproduces the published anchor-construction bracket exactly
 (0.00 / 10.81 / 0.34 / 0.05). **At the corrected node it is 0.00 / 6.08 / 0.10 /
 0.01 per cent.** The bracket stays one-sided in the same direction and narrows.
 
-### 7.3 Open item, bounded and dated
+### 7.3 Regenerated, 2026-09-14
 
-**The committed Phase 2 artifacts (`results/phase2/`, `results/phase2_anchor_rating/`)
-and the committed `docs/decisions/phase2-survival-update-per-stratum.csv` were
-produced at KP 56.6 and have NOT been regenerated.** They stamp
-`"gauge_kp": 56.6` in their own event-chain provenance, so the difference is
-visible in the artifact rather than latent, and
-`tests/test_thesis_figure_gaps.py` still guards the published figures against
-the committed CSV.
+**Superseding the 2026-09-13 text of this section, which recorded the artifacts
+as deliberately not regenerated.** On the author's instruction the pipeline was
+re-run at the corrected node the next day, on the ADR-0047 principle that
+governs this repository: *adopt where wrong, hold where merely old.* KP 56.6 is
+wrong rather than old — ADR-0035 decision 2 exists so that the inverse-then-
+forward composition "reproduces the observed series exactly at the gauge", and
+inverting an Obihiro stage series through a different station's coefficients
+does not do that. The engine's published source is what a reader regenerates
+from, so leaving the default at a node the artifacts no longer matched would
+have made the thesis unreproducible from its own engine.
 
-Regenerating them would move two printed thesis numbers — the KP 58.8 production
-rejection 5.67 to 5.51 per cent, and the anchor-rating bracket 10.81 to 6.08 per
-cent — **without changing any conclusion**, since the static column is exactly
-invariant and the marginal transient rejection stays exactly 0 at every stratum.
-That is an author's decision about a finished document, recorded here as a
-bounded open item rather than taken unilaterally.
+Re-run through `scripts/production_campaign.py --stage phase2_baseline
+phase2_anchor_rating phase2_no_initiation phase3 --force`, plus
+`scripts/thesis_figure_gaps.py all`, `scripts/ztoe_sensitivity_study.py` and
+`scripts/annualisation_uncertainty_study.py`. **Every gate passed**: `--verify`
+exact (zero flag mismatches) in every stratum, every posterior replaying the
+current Phase 1 hash, marginal transient rejection exactly 0 in all eight
+strata, and the Phase 3 row set unchanged in shape.
+
+What moved, measured rather than predicted:
+
+* **Phase 2 baseline**: the three matrix transient rejections in §7.2 above,
+  and nothing else. The static column is exactly invariant at all eight strata;
+  all four bulk strata are unchanged.
+* **Phase 2 `anchor='rating'`**: 0.00 / 10.81 / 0.34 / 0.05 to
+  **0.00 / 6.08 / 0.10 / 0.01** per cent.
+* **Phase 2 `no_breach_no_initiation`: exactly unchanged** (66.389 / 99.568 /
+  99.304 / 39.552 per cent). That criterion is dominated by the uplift-and-heave
+  latch, which the gauge does not reach.
+* **Peak-only over-rejection**: the numerators are read at the *surveyed trace*
+  peak, which the correction leaves untouched, so only the denominators move.
+  The factors go 2.75 to **2.83** (KP 58.8) and 3.90 to **4.04** (KP 60.0), and
+  the alternate-member factors 1.45 / 1.57 to **1.49 / 1.63**.
+* **The ±0.3 m exit-datum band at KP 58.8**: 1.68 to 12.99 per cent becomes
+  **1.63 to 12.73** per cent.
+* **Phase 3**: 30 of 2280 rows move, all posterior-side at the four BEP
+  sections, the largest by 0.38 per cent. Five of the eight rows of the thesis's
+  annual table change by one unit in the third significant figure; KP 62.0 is
+  untouched in every column, because its Phase 2 rejection is 0.00 per cent and
+  its posterior therefore *is* its prior.
+
+**No conclusion changes anywhere.** One qualitative statement did: the
+anchor-rating effect was described as "roughly twice as high at KP 58.8 and ten
+times lower at KP 60.0" and is now a tenth higher and about thirty times lower.
+One sentence was deleted rather than restated: Chapter 6 had flagged that the
+KP 58.8 peak-only factor "coincides numerically" with that section's
+design-level static-to-transient ratio and called the agreement accidental. At
+2.83 against 2.75 the coincidence no longer exists.
 
 One derived fact also moved and has been corrected in place: the 2016 Obihiro
 record's low-flow excursion below the flood-rating datum is **0.95 m over 371 of

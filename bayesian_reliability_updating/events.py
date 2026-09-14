@@ -198,6 +198,14 @@ def default_2016_source(
     the peak outright: 0.00 / 10.81 / 0.34 / 0.05 becomes
     0.00 / 6.08 / 0.10 / 0.01 per cent.
 
+    **The production artifacts were regenerated at this node on 2026-09-14**
+    (campaign stages ``phase2_baseline``, ``phase2_anchor_rating``,
+    ``phase2_no_initiation`` and ``phase3``, plus the committed evidence
+    slices, the figures, the ADR-0046 z_toe companion and the hazard-sampling
+    uncertainty study), so ``results/phase2*`` now stamps ``gauge_kp: 56.73``
+    and the thesis numbers were updated to match. Every campaign gate passed;
+    the ``no_breach_no_initiation`` variant came back exactly unchanged.
+
     Parameters
     ----------
     processed_dir : str or pathlib.Path

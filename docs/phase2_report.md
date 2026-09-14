@@ -736,3 +736,51 @@ numbers are bit-for-bit the section 11 values.
 
 Superseded artifacts are retained under `results/superseded_adr0047_L47/` (Phase 1
 sweeps, Phase 2 posteriors, Stage 6.6) for as long as they are useful for comparison.
+
+
+---
+
+## Addendum, 2026-09-14 — the Obihiro gauge node corrected, and everything here re-run
+
+**Authoritative over the body above where they differ** (the convention this
+report is read under). `bayesian_reliability_updating.events` selected the gauge
+rating at Tokachi **KP 56.6**, a node of the regular 0.2 km survey grid. The
+Obihiro station's own node is the off-grid **KP 56.73** row of
+`HQrelation_TokachiRiv_2017.csv`. The evidence is a primary station register,
+not an inference from the spacing: `data/raw/Uncertainty_HQrelation.xlsx` — the
+ADR-0042 decision 6 source — carries a sheet `TokachiRiv._Obihiro` whose first
+data row reads `point = "Obihiro"`, `KP = 56.73`, with that station's own rating
+`HQ_a = 135.36`, `HQ_b = -32.62`, exactly the KP 56.73 row of the committed
+rating CSV and not the KP 56.6 row (140.33, -32.49). See ADR-0035 decision 1's
+amendment and `docs/foreland_credit_bracket_2026-09-13.md` section 7.
+
+Re-run with `scripts/production_campaign.py --stage phase2_baseline
+phase2_anchor_rating phase2_no_initiation phase3 --force`, plus
+`scripts/thesis_figure_gaps.py all`, `scripts/ztoe_sensitivity_study.py` and
+`scripts/annualisation_uncertainty_study.py`. **Every gate passed**: `--verify`
+exact (zero flag mismatches) in every stratum, every posterior replaying the
+current Phase 1 hash, and marginal transient rejection exactly 0 in all eight
+strata.
+
+| quantity | body value | corrected |
+|---|---|---|
+| transient rejection, KP 57.4 matrix | 0.065 % | **0.063 %** |
+| transient rejection, KP 58.8 matrix | 5.673 % | **5.512 %** |
+| transient rejection, KP 60.0 matrix | 3.363 % | **3.244 %** |
+| transient rejection, KP 62.0 matrix and all four bulk strata | unchanged | unchanged |
+| static rejection, all eight strata | unchanged | **exactly invariant** |
+| `anchor='rating'` bracket | 0.00 / 10.81 / 0.34 / 0.05 % | **0.00 / 6.08 / 0.10 / 0.01 %** |
+| `no_breach_no_initiation` | 66.389 / 99.568 / 99.304 / 39.552 % | **exactly unchanged** |
+| peak-only over-rejection, canonical member | 2.75 / 3.90 | **2.83 / 4.04** |
+| peak-only over-rejection, alternate member | 1.45 / 1.57 | **1.49 / 1.63** |
+| ±0.3 m exit-datum band, KP 58.8 | 1.68 to 12.99 % | **1.63 to 12.73 %** |
+
+**No conclusion in this report changes.** The static column is exactly invariant
+because the surveyed trace pins the peak; the marginal transient rejection stays
+exactly zero, so the nesting result is untouched; and the `no_breach_no_initiation`
+variant does not move at all, being dominated by the uplift-and-heave latch the
+gauge does not reach. Section 11.1's prose factors 2.75 and 3.90 are superseded
+by 2.83 and 4.04 above.
+
+Superseded artifacts are retained under `results/superseded_gauge56p6_*/` and
+`results/superseded_20260914T122311/`.
