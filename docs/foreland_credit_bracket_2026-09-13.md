@@ -267,6 +267,53 @@ produced. It does **not** refute the published result, which takes the
 conservative side of a permissive choice; it states what that choice is worth.
 **The dominance claim must not be quoted without it.**
 
+
+### 6.2 The posterior side, and why it is the same
+
+**Added 2026-09-14.** Section 6.1 above annualises the **prior** side. The
+published RQ3 and RQ4 headline does not: `scripts/phase3_campaign.py` defaults
+to `bep_source = posterior`, and the thesis's KP 58.8 historical
+7.45e-3 is the posterior row of `rq4_annual.csv` (the prior row is 8.47e-3). So
+the prior-side table qualified numbers the thesis does not print, and the
+like-for-like comparison had to be measured on the side the claim lives on.
+
+It was, through `scripts/foreland_credit_annualisation.py --side posterior`
+after replaying all eight ADR-0052 arms through the ordinary Phase 2 CLI. Gate 1
+(the baseline pass reproduces `rq4_annual.csv` field for field, 228 rows x 20
+fields) and gate 3 (220 non-BEP rows bit-identical across every arm) both
+passed.
+
+**The arm values are bit-for-bit identical to the prior side at all 8 of 8
+cells.** That is not a coincidence and it is the finding:
+
+> **Under the credit, the 2016 survival record rejects nothing.** All eight arm
+> replays return `accepted 100,000 of 100,000 rows (rejection 0.00%)` — both
+> arms, all four sections. The credited `H_c` is so far above the observed
+> loading that no realization fails under it, so the posterior *is* the prior
+> and the survival constraint carries no information at all.
+
+Only the *baseline* differs between the two sides, because only the baseline is
+actually filtered by the 2016 record. The consequence for the headline is
+therefore that the RQ3 verdict is **unchanged** on the side that matters:
+
+| section | baseline (posterior) | half credit | full credit |
+|---|---|---|---|
+| KP 57.4 | 1.000 | 0.000 | 0.000 |
+| KP 58.8 | 0.974 | 0.043 | 0.000 |
+| KP 60.0 | 1.000 | 1.000 | 0.000 |
+| KP 62.0 | 0.812 | 0.407 | 0.059 |
+
+Full credit leaves **0 of 8** section-and-climate cells inside the published
+81-to-100-per-cent band, exactly as on the prior side. §6.1's conclusion stands;
+what changes is that it now rests on the comparison the thesis actually makes.
+
+There is a second-order point worth keeping. The credit and the 2016 update
+both push in the same direction — both remove failing realizations — but they
+cannot compound, because the credit removes the very realizations the update
+would have rejected. A study that credited the foreland *and* claimed the
+survival constraint as additional evidence would be counting the same evidence
+twice. Here it is measured to be exactly zero the second time.
+
 ---
 
 ## 7. The Obihiro gauge node, corrected from KP 56.6 to KP 56.73
@@ -391,9 +438,74 @@ wrong-datum guard.
 
 ## 8. Scope not covered
 
-- **The bulk d70 reading was not run.** `scripts/foreland_credit_bracket_study.py
-  --reading bulk` would need another twelve full-N sweeps; it did not fit this
-  session. An omission of scope, stated, not a finding.
-- The Phase 3 propagation is **prior-side** only. The posterior side would need
-  the arms replayed through the 2016 update first, as
-  `scripts/conductivity_posterior_replay.py` does for the conductivity bracket.
+- ~~The bulk d70 reading was not run.~~ **Closed 2026-09-14**: it is §9.
+- ~~The Phase 3 propagation is prior-side only.~~ **Closed 2026-09-14**: the
+  posterior side is measured in §6.2, and it is the side the published headline
+  lives on. The arms reject 0.00 per cent under the 2016 record, so the two
+  sides agree bit-for-bit on every arm.
+
+---
+
+## 9. The bulk d70 reading
+
+**Added 2026-09-14**, closing §8's stated omission. Twelve further full-N
+sweeps, `python scripts/foreland_credit_bracket_study.py --reading bulk`;
+evidence `docs/decisions/adr0052-foreland-credit-companion-bulk.json`. **All
+four gates passed bit-identical** against the persisted bulk production sweeps.
+
+`kappa` is identical to the matrix reading at every section (3.481 / 3.734 /
+3.099 / 1.683), which is expected and worth stating: the credit is
+`phi * lambda_out_eff`, and `lambda_out_eff` depends on `k_aq`, `D_aq` and the
+foreshore geometry, not on `d_70`. The two readings differ only in where the
+baseline curves sit, not in how far the credit moves them.
+
+### 9.1 Design level
+
+Failing realizations of 1e5 at each section's design HWL grid point:
+
+| section | baseline static / transient | half credit | full credit |
+|---|---|---|---|
+| KP 57.4 | 0 / 0 | 0 / 0 | 0 / 0 |
+| KP 58.8 | 1 / 0 | 0 / 0 | 0 / 0 |
+| KP 60.0 | 9 264 / 1 054 | 0 / 0 | 0 / 0 |
+| KP 62.0 | 0 / 0 | 0 / 0 | 0 / 0 |
+
+The matrix conclusion carries over: under either credit the design level holds
+**0 failing realizations of 1e5 on both branches at all four sections**. Under
+bulk it is a weaker statement, because three of the four baselines are already
+at or near zero — only KP 60.0 has a design-level population to remove.
+
+### 9.2 Cancellation
+
+`rho > 1` at **every level where it resolves: 18 of 18**, range 1.13 to 12.25.
+So the direction is the same as under matrix and P3 holds again.
+
+**P2 fails under bulk, and the reason is resolution rather than physics.** Of
+21 evaluated levels only 18 resolve; at three levels (KP 62.0, half credit) the
+95 % interval covers unity. That does **not** demonstrate cancellation at those
+levels — it means the bulk baseline carries too few failing realizations there
+for the test to exclude it either way. Stated the other way round: under bulk
+the bracket is measured over a much smaller resolvable window (18 levels
+against the matrix reading's 101), because the bulk curves sit far lower.
+
+P1, P3 and P5 hold as under matrix; P4 fails again, and more emphatically --
+the observed order is KP 60.0 > KP 62.0 > KP 57.4 = KP 58.8 (the last two
+having no resolvable level at all), against a `kappa` order of KP 58.8 >
+KP 57.4 > KP 60.0 > KP 62.0. This is the second independent confirmation that
+the displacement of the ratio is set by where the baseline curves sit, not by
+the size of the input's own perturbation.
+
+### 9.3 Stage displacement
+
+Under bulk the sustained-peak bound is pushed so far that the credited curve
+often leaves even the extended scan range: the median crossing is undefined
+under full credit at KP 57.4, KP 58.8 and KP 62.0, and under half credit at
+KP 58.8. Where both crossings exist, the full-credit shift at the 1e-3 anchor
+is **+8.59 m** (KP 57.4), **+6.06 m** (KP 60.0) and **+5.25 m** (KP 62.0),
+against the matrix reading's +3.76, +3.12 and +1.60 m. The credit is worth
+*more* stage under bulk, not less, because the bulk curves are flatter in the
+band the bound crosses.
+
+**These are displacements of an indicator, never attainable stages**, and under
+bulk several of them sit above the top of the scan, which is itself well above
+any attainable level.
