@@ -42,6 +42,7 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
+import pathlib
 import sys
 import time
 from pathlib import Path
@@ -77,9 +78,20 @@ _COND = _load_conductivity_module()
 BEP_KPS = _COND.BEP_KPS
 
 ARM_DIR = REPO_ROOT / "results" / "sensitivity" / "adr0052_foreland_credit"
-JSON_OUT = (
-    REPO_ROOT / "docs" / "decisions" / "adr0052-foreland-credit-annualisation.json"
-)
+#: This study's own arm posteriors, written by the ordinary Phase 2 CLI. Same
+#: shape as the conductivity study's POSTERIOR_ARM_DIR.
+POSTERIOR_ARM_DIR = ARM_DIR / "phase2"
+
+
+def json_out(side: str) -> pathlib.Path:
+    suffix = "" if side == "prior" else "-posterior"
+    return (
+        REPO_ROOT
+        / "docs"
+        / "decisions"
+        / f"adr0052-foreland-credit-annualisation{suffix}.json"
+    )
+
 
 #: The arms, and the ``foreland_seepage_credit`` each sweep must record.
 ARMS: dict[str, float] = {"credit_half": 0.5, "credit_full": 1.0}
@@ -93,7 +105,15 @@ def _stem(kp: float) -> str:
 
 
 def _arm_sweep(kp: float, arm: str) -> Path:
+    """The Phase 1 arm sweep. Always Phase 1, whichever side is under test."""
     return ARM_DIR / f"{_stem(kp)}_{arm}.h5"
+
+
+def _arm_curve_path(kp: float, arm: str, side: str) -> Path:
+    """The artifact an arm's BEP curve is read from, per side."""
+    if side == "prior":
+        return _arm_sweep(kp, arm)
+    return POSTERIOR_ARM_DIR / f"{_stem(kp)}_{arm}_posterior.h5"
 
 
 def _gate_two(kp: float, arm: str) -> float | None:
@@ -138,18 +158,32 @@ def _section_rows(rows, kp: float, scenario: str) -> dict[str, Any]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--arms", nargs="*", default=list(ARMS), choices=list(ARMS))
+    parser.add_argument(
+        "--side",
+        choices=("prior", "posterior"),
+        default="prior",
+        help=(
+            "Which side of the 2016 survival update to annualise. 'prior' "
+            "(default) reproduces the 2026-09-13 record. 'posterior' is the "
+            "side the published RQ3/RQ4 headline lives on "
+            "(phase3_campaign.py defaults to bep_source=posterior), so it is "
+            "the like-for-like comparison for those numbers; it requires the "
+            "arm posteriors under results/sensitivity/adr0052_foreland_credit/"
+            "phase2/."
+        ),
+    )
     args = parser.parse_args(argv)
 
     started = time.time()
     campaign = _COND._load_campaign_module()
     print("building registry, surface curves and node hazard ...", flush=True)
-    context = _COND.build_context(campaign, "matrix", "prior")
+    context = _COND.build_context(campaign, "matrix", args.side)
 
-    print("baseline pass (gate 1) ...", flush=True)
+    print(f"baseline pass, {args.side} side (gate 1) ...", flush=True)
     baseline_rows, _cov, _drv = _COND.annualise_variant(
-        campaign, context, context["baseline_curves"], "matrix", "prior"
+        campaign, context, context["baseline_curves"], "matrix", args.side
     )
-    gate1 = _COND.gate_one(baseline_rows, "matrix", "prior")
+    gate1 = _COND.gate_one(baseline_rows, "matrix", args.side)
     print(
         f"  gate 1 passed: {gate1['rows_compared']} rows x "
         f"{gate1['fields_compared']} fields reproduce "
@@ -165,7 +199,9 @@ def main(argv: list[str] | None = None) -> int:
         curves = {}
         for kp in BEP_KPS:
             arm_credits[arm][_COND._label(kp)] = _gate_two(kp, arm)
-            curves[kp] = load_bep_curve(_arm_sweep(kp, arm), branch="transient")
+            curves[kp] = load_bep_curve(
+                _arm_curve_path(kp, arm, args.side), branch="transient"
+            )
             if float(curves[kp].datum_m) != float(
                 context["baseline_curves"][kp].datum_m
             ):
@@ -174,7 +210,7 @@ def main(argv: list[str] | None = None) -> int:
                     "the arm would not be composed against the same exposure."
                 )
         arm_rows[arm], _c, _d = _COND.annualise_variant(
-            campaign, context, curves, "matrix", "prior"
+            campaign, context, curves, "matrix", args.side
         )
     gate3 = _gate_three(baseline_rows, arm_rows)
     print(
@@ -276,6 +312,7 @@ def main(argv: list[str] | None = None) -> int:
             "No sweep re-run, no hazard workbook streamed, no production value "
             "changed."
         ),
+        "side": args.side,
         "arms": {arm: ARMS[arm] for arm in args.arms},
         "arm_credit_recorded": arm_credits,
         "gates": {"gate_1_reproduces_production": gate1, "gate_3_non_bep": gate3},
@@ -285,8 +322,9 @@ def main(argv: list[str] | None = None) -> int:
     }
     # The conductivity study writes its payload unrounded; this one follows it
     # rather than introducing a second convention for the same kind of record.
-    JSON_OUT.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-    print(f"\nWrote {JSON_OUT.relative_to(REPO_ROOT)}")
+    out = json_out(args.side)
+    out.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    print(f"\nWrote {out.relative_to(REPO_ROOT)}")
     for entry in sections:
         arms = "  ".join(
             f"{arm}: {entry['arms'][arm]['p_annual_system']:.3e} "

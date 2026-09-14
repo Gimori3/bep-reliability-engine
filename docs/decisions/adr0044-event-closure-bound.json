@@ -15,10 +15,10 @@
       "bound_reject_fraction": 0.0,
       "bound_static_reject_fraction": 0.0,
       "bound_initiation_fraction": 0.0,
-      "reject_2016_count": 65,
+      "reject_2016_count": 63,
       "marginal_beyond_2016_count": 0,
       "marginal_beyond_2016_fraction": 0.0,
-      "runtime_seconds": 0.0
+      "runtime_seconds": 0.1
     },
     {
       "stratum": "tokachi_kp57.4_historical_bulk",
@@ -34,7 +34,7 @@
       "reject_2016_count": 0,
       "marginal_beyond_2016_count": 0,
       "marginal_beyond_2016_fraction": 0.0,
-      "runtime_seconds": 0.0
+      "runtime_seconds": 0.1
     },
     {
       "stratum": "tokachi_kp58.8_historical_matrix",
@@ -47,10 +47,10 @@
       "bound_reject_fraction": 0.0,
       "bound_static_reject_fraction": 3e-05,
       "bound_initiation_fraction": 0.00064,
-      "reject_2016_count": 5673,
+      "reject_2016_count": 5512,
       "marginal_beyond_2016_count": 0,
       "marginal_beyond_2016_fraction": 0.0,
-      "runtime_seconds": 96.9
+      "runtime_seconds": 215.8
     },
     {
       "stratum": "tokachi_kp58.8_historical_bulk",
@@ -66,7 +66,7 @@
       "reject_2016_count": 0,
       "marginal_beyond_2016_count": 0,
       "marginal_beyond_2016_fraction": 0.0,
-      "runtime_seconds": 99.1
+      "runtime_seconds": 232.9
     },
     {
       "stratum": "tokachi_kp60.0_historical_matrix",
@@ -79,10 +79,10 @@
       "bound_reject_fraction": 0.00908,
       "bound_static_reject_fraction": 0.07421,
       "bound_initiation_fraction": 0.50708,
-      "reject_2016_count": 3363,
-      "marginal_beyond_2016_count": 316,
-      "marginal_beyond_2016_fraction": 0.00316,
-      "runtime_seconds": 98.2
+      "reject_2016_count": 3244,
+      "marginal_beyond_2016_count": 326,
+      "marginal_beyond_2016_fraction": 0.00326,
+      "runtime_seconds": 200.8
     },
     {
       "stratum": "tokachi_kp60.0_historical_bulk",
@@ -98,7 +98,7 @@
       "reject_2016_count": 23,
       "marginal_beyond_2016_count": 0,
       "marginal_beyond_2016_fraction": 0.0,
-      "runtime_seconds": 104.3
+      "runtime_seconds": 207.1
     },
     {
       "stratum": "tokachi_kp62.0_historical_matrix",
@@ -114,7 +114,7 @@
       "reject_2016_count": 0,
       "marginal_beyond_2016_count": 0,
       "marginal_beyond_2016_fraction": 0.0,
-      "runtime_seconds": 0.0
+      "runtime_seconds": 0.1
     },
     {
       "stratum": "tokachi_kp62.0_historical_bulk",
@@ -130,7 +130,7 @@
       "reject_2016_count": 0,
       "marginal_beyond_2016_count": 0,
       "marginal_beyond_2016_fraction": 0.0,
-      "runtime_seconds": 0.0
+      "runtime_seconds": 0.1
     }
   ]
 }
