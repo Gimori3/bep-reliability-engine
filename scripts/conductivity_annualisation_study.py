@@ -331,7 +331,15 @@ def _arm_curve_path(kp: float, arm: str, d70: str, side: str) -> Path:
 #: upward conductivity arm because it is linear in the rejected-row count.
 #: ``scripts/conductivity_posterior_replay.py`` carries the full argument and the
 #: bit-identity measurement that backs it.
-_PHASE2_SETTINGS_EXEMPT = frozenset({"output_dir", "trace_breach_times"})
+#: ``overwrite`` added 2026-09-14: it reaches exactly one place,
+#: ``pipeline._guard_no_overwrite(paths, settings.overwrite)``, which is a
+#: pre-flight check on whether the OUTPUT PATHS may be replaced. It is read
+#: before any replay runs and never again, so it cannot touch the acceptance
+#: rule, the accepted mask or the posterior. It became load-bearing when the
+#: arm posteriors were regenerated at the corrected Obihiro gauge node
+#: (ADR-0035 decision 1's amendment), which required replacing files the
+#: production run had written fresh.
+_PHASE2_SETTINGS_EXEMPT = frozenset({"output_dir", "trace_breach_times", "overwrite"})
 
 #: The exemption's own evidence, carried into the record so a later reader does
 #: not have to take it on trust. Measured once, 2026-08-21, on the worst-case

@@ -596,3 +596,45 @@ caveat of §2.8.
    two spans, and a table states both completely. A second conductivity figure
    would prove what the existing pair already proves with one arm moved.
 6. **Appendix C's study register** gains a row for this companion.
+
+
+---
+
+## Addendum, 2026-09-14 — re-measured at the corrected Obihiro gauge node
+
+All 32 arm posteriors were replayed and both readings re-analysed after the
+Obihiro gauge node was corrected from KP 56.6 to KP 56.73 (ADR-0035 decision
+1's amendment; `docs/foreland_credit_bracket_2026-09-13.md` section 7). Gate 1
+passed unchanged: the baseline pass still reproduces `rq4_annual.csv` field for
+field over all 228 published rows.
+
+**Every verdict in the body above survives.** P6 (ordering verdicts unchanged)
+still holds at 8 of 8 cells; P5 and P7 still fail, exactly as they did before,
+and P7's largest shift moves only 0.4216 to 0.4211. No mechanism ordering moves
+at any of the 16 section-by-climate-by-reading cells.
+
+The quantities that move, at the precision this note and the thesis quote them:
+
+| quantity | body value | corrected |
+|---|---|---|
+| matrix span narrowing, KP 58.8 historical | ÷1.96 | **÷1.95** |
+| matrix span narrowing, KP 60.0 historical | ÷2.81 | **÷2.79** |
+| matrix span narrowing, both sections, +4K | ÷1.49 and ÷1.97 | unchanged |
+| regional-upper rejection, KP 58.8 / KP 60.0 | 65.5 / 86.9 % | **65.0 / 86.5 %** |
+| production rejection, same two | 5.7 / 3.4 % | **5.5 / 3.2 %** |
+| upper-over-baseline rejection ratio | 11.6 to 25.8 | **11.8 to 26.7** |
+| worst conductivity downward-arm move | 2.8 % | **2.7 %** |
+| post-update spans | 94 and 1.6e5 | unchanged |
+| bulk reading | ≤1 % except KP 60.0 +4K (÷1.53) | unchanged at this precision |
+
+The direction is worth stating because it is not obvious: the *ratio* of
+upper-arm to baseline rejection goes **up** (11.6 to 11.8, 25.8 to 26.7) even
+though both rejections fall, because the baseline falls proportionally further.
+The correction leaves the top arm's fall (49 to 64 per cent) unchanged.
+
+One gate was widened to run this, and the reason is recorded at its definition:
+`_PHASE2_SETTINGS_EXEMPT` now exempts `overwrite`, which reaches only
+`pipeline._guard_no_overwrite` — a pre-flight check on whether output paths may
+be replaced, read before any replay runs and never again. It became
+load-bearing because regenerating the arms required replacing files the
+production run had written fresh.
