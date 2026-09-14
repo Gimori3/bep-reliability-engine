@@ -50,7 +50,7 @@
       "hours_above_0.90_ratio_alt_over_prod": 0.5
     }
   },
-  "updated": "2026-08-10T22:47:59",
+  "updated": "2026-09-14T18:12:20",
   "phase1": {
     "note": "Both arms share one prior sample, so every difference is physical and the bootstrap interval is paired over shared row indices. Gate 1 asserts each baseline against its persisted production sweep; gate 2 asserts the raw static probabilities exactly equal between arms.",
     "gates": {
@@ -3154,13 +3154,13 @@
         "section": "KP57.4",
         "d70": "matrix",
         "event_peak_m_msl": 39.658,
-        "f_replay_transient": 0.0006500000000000394,
+        "f_replay_transient": 0.0006300000000000194,
         "f_replay_is_shape_invariant": true,
         "f_peak_only_production": 0.004848080000000033,
         "f_peak_only_alternate": 0.001996480000000014,
-        "factor_production": 7.458584615384214,
-        "factor_alternate": 3.0715076923075273,
-        "n_rejected_replay": 65,
+        "factor_production": 7.695365079364895,
+        "factor_alternate": 3.1690158730157973,
+        "n_rejected_replay": 63,
         "small_number_regime": true
       },
       {
@@ -3182,13 +3182,13 @@
         "section": "KP58.8",
         "d70": "matrix",
         "event_peak_m_msl": 40.75,
-        "f_replay_transient": 0.05672999999999995,
+        "f_replay_transient": 0.05511999999999995,
         "f_replay_is_shape_invariant": true,
         "f_peak_only_production": 0.15596,
         "f_peak_only_alternate": 0.08216,
-        "factor_production": 2.749162700511196,
-        "factor_alternate": 1.4482637052705811,
-        "n_rejected_replay": 5673,
+        "factor_production": 2.829462989840351,
+        "factor_alternate": 1.4905660377358505,
+        "n_rejected_replay": 5512,
         "small_number_regime": false
       },
       {
@@ -3210,13 +3210,13 @@
         "section": "KP60.0",
         "d70": "matrix",
         "event_peak_m_msl": 42.296,
-        "f_replay_transient": 0.03363000000000005,
+        "f_replay_transient": 0.032440000000000024,
         "f_replay_is_shape_invariant": true,
         "f_peak_only_production": 0.13113863999999978,
         "f_peak_only_alternate": 0.05272727999999988,
-        "factor_production": 3.899454058875991,
-        "factor_alternate": 1.5678644067796552,
-        "n_rejected_replay": 3363,
+        "factor_production": 4.042498150431556,
+        "factor_alternate": 1.6253785450061604,
+        "n_rejected_replay": 3244,
         "small_number_regime": false
       },
       {
@@ -3267,10 +3267,10 @@
         "tokachi_kp58.8_historical_matrix",
         "tokachi_kp60.0_historical_matrix"
       ],
-      "factor_production_min": 2.749162700511196,
-      "factor_production_max": 3.899454058875991,
-      "factor_alternate_min": 1.4482637052705811,
-      "factor_alternate_max": 1.5678644067796552,
+      "factor_production_min": 2.829462989840351,
+      "factor_production_max": 4.042498150431556,
+      "factor_alternate_min": 1.4905660377358505,
+      "factor_alternate_max": 1.6253785450061604,
       "n_not_defined": 4
     }
   },

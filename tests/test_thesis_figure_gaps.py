@@ -363,34 +363,41 @@ def test_the_peak_shortcut_slice_still_reproduces_from_the_live_artifacts() -> N
 # --------------------------------------------------------------------------- #
 
 
-def test_the_peak_shortcut_reproduces_the_published_2_75_and_3_90() -> None:
-    """``docs/phase2_report.md`` section 11.1 is the published statement.
+def test_the_peak_shortcut_reproduces_the_published_2_83_and_4_04() -> None:
+    """``docs/phase2_report.md`` section 11.1 plus its 2026-09-14 addendum.
 
-    It reports the peak-only reading against the replay at production N: KP 58.8
-    15.6 % against 5.67 % (factor 2.75) and KP 60.0 13.1 % against 3.36 %
-    (3.90). Those are the two informative strata and they are the scope of the
-    "2.75 to 3.9x" claim, so the slice's headline band must be exactly them.
+    The peak-only reading against the replay at production N: KP 58.8 15.6 %
+    against 5.51 % (factor 2.83) and KP 60.0 13.1 % against 3.24 % (4.04).
+    Those are the two informative strata and they are the scope of the claim,
+    so the slice's headline band must be exactly them.
+
+    **Values corrected 2026-09-14** with the Obihiro gauge node (ADR-0035
+    decision 1's amendment: KP 56.73, the station's own rating, not the KP 56.6
+    survey-grid node). The peak-only *numerators* are read at the surveyed
+    trace peak, which the correction leaves untouched, so 15.6 and 13.1 are
+    unchanged and only the replay denominators moved. The superseded factors
+    were 2.75 and 3.90 against denominators 5.67 and 3.36.
     """
     record = _read(_require(PEAK_SHORTCUT_SLICE))
     by_stratum = {s["stratum"]: s for s in record["strata"]}
 
     kp58_8 = by_stratum["tokachi_kp58.8_historical_matrix"]
     assert kp58_8["f_peak_only_transient"] * 100 == pytest.approx(15.6, abs=0.05)
-    assert kp58_8["f_replay_transient"] * 100 == pytest.approx(5.67, abs=0.005)
-    assert kp58_8["over_rejection_factor"] == pytest.approx(2.75, abs=0.005)
+    assert kp58_8["f_replay_transient"] * 100 == pytest.approx(5.512, abs=0.005)
+    assert kp58_8["over_rejection_factor"] == pytest.approx(2.83, abs=0.005)
 
     kp60_0 = by_stratum["tokachi_kp60.0_historical_matrix"]
     assert kp60_0["f_peak_only_transient"] * 100 == pytest.approx(13.1, abs=0.05)
-    assert kp60_0["f_replay_transient"] * 100 == pytest.approx(3.36, abs=0.005)
-    assert kp60_0["over_rejection_factor"] == pytest.approx(3.90, abs=0.005)
+    assert kp60_0["f_replay_transient"] * 100 == pytest.approx(3.244, abs=0.005)
+    assert kp60_0["over_rejection_factor"] == pytest.approx(4.04, abs=0.005)
 
     headline = record["headline"]
     assert set(headline["informative_strata"]) == {
         "tokachi_kp58.8_historical_matrix",
         "tokachi_kp60.0_historical_matrix",
     }
-    assert headline["factor_min"] == pytest.approx(2.75, abs=0.005)
-    assert headline["factor_max"] == pytest.approx(3.90, abs=0.005)
+    assert headline["factor_min"] == pytest.approx(2.83, abs=0.005)
+    assert headline["factor_max"] == pytest.approx(4.04, abs=0.005)
 
 
 def test_the_shortcut_over_rejects_wherever_the_comparison_is_defined() -> None:
@@ -524,9 +531,13 @@ def test_the_per_stratum_rejection_figures_are_the_published_ones() -> None:
         for row in _rows(FIGURE_TO_CSV["phase2_survival_update.png"])
         if row["run"] == "baseline"
     }
-    assert rows[("KP57.4", "matrix")] == pytest.approx(0.065, abs=5e-4)
-    assert rows[("KP58.8", "matrix")] == pytest.approx(5.673, abs=5e-4)
-    assert rows[("KP60.0", "matrix")] == pytest.approx(3.363, abs=5e-4)
+    # Corrected 2026-09-14 with the Obihiro gauge node (ADR-0035 decision 1's
+    # amendment). Superseded: 0.065, 5.673, 3.363. The static column and every
+    # bulk stratum are exactly invariant under the correction, so only these
+    # three move.
+    assert rows[("KP57.4", "matrix")] == pytest.approx(0.063, abs=5e-4)
+    assert rows[("KP58.8", "matrix")] == pytest.approx(5.512, abs=5e-4)
+    assert rows[("KP60.0", "matrix")] == pytest.approx(3.244, abs=5e-4)
     assert rows[("KP62.0", "matrix")] == 0.0
     assert rows[("KP57.4", "bulk")] == 0.0
     assert rows[("KP58.8", "bulk")] == 0.0

@@ -1,6 +1,6 @@
 {
  "record": "Phase 3 RQ4 sensitivity brackets at the four BEP sections",
- "generated": "2026-08-02T01:48:19",
+ "generated": "2026-09-14T17:42:00",
  "generated_by": "scripts/thesis_figure_gaps.py extract",
  "note": "Committed slice of results/system_integration/phase3/rq4_annual.csv (2280 rows, gitignored), restricted to the four geotechnically characterised sections -- the scope campaign decision 5 sets for RQ3/RQ4. The baseline arm is the production deliverable: matrix d70, posterior BEP source, lambda_ac = 250 m, primary surface variant. Ratios are computed here; every P_f is copied verbatim. The recorded SHA-256 identifies which CSV this was cut from; the gate is that re-extracting from the live artifact reproduces this record's `sections` block exactly.",
  "baseline_arm": {
@@ -11,7 +11,7 @@
  },
  "source": {
   "path": "results/system_integration/phase3/rq4_annual.csv",
-  "sha256": "019efc3fa214f813043edad7f37b3ae5602c3468aa6b21b51f3a20ddf70002a4",
+  "sha256": "e84b25a129cfe833bde7c9663410d52dfac78f60a578783cdcabb492a1b0d4c9",
   "gitignored": true,
   "n_rows_total": 2280
  },
@@ -23,28 +23,28 @@
      "scenario": "historical",
      "n_years": 3000,
      "baseline": {
-      "p_annual_system": 0.0007529504488451719,
-      "p_annual_bep": 0.0007529504488451719,
+      "p_annual_system": 0.0007529745057681502,
+      "p_annual_bep": 0.0007529745057681502,
       "share_bep": 1.0,
       "bep_clamped_above_grid": false
      },
      "arms": [
       {
        "arm": "lambda_ac_100m",
-       "p_annual_system": 0.0013434014037219453,
-       "p_annual_bep": 0.0013434014037219453,
+       "p_annual_system": 0.001343440477239195,
+       "p_annual_bep": 0.001343440477239195,
        "share_bep": 1.0,
-       "ratio_system_to_baseline": 1.7841830173318443,
-       "ratio_bep_to_baseline": 1.7841830173318443,
+       "ratio_system_to_baseline": 1.784177906353786,
+       "ratio_bep_to_baseline": 1.784177906353786,
        "bep_clamped_above_grid": false
       },
       {
        "arm": "lambda_ac_40m",
-       "p_annual_system": 0.002535359977877313,
-       "p_annual_bep": 0.002535359977877313,
+       "p_annual_system": 0.002535419134305309,
+       "p_annual_bep": 0.002535419134305309,
        "share_bep": 1.0,
-       "ratio_system_to_baseline": 3.3672335035670526,
-       "ratio_bep_to_baseline": 3.3672335035670526,
+       "ratio_system_to_baseline": 3.367204486848848,
+       "ratio_bep_to_baseline": 3.367204486848848,
        "bep_clamped_above_grid": false
       },
       {
@@ -52,8 +52,8 @@
        "p_annual_system": 2.074058746414729e-06,
        "p_annual_bep": 2.074058746414729e-06,
        "share_bep": 1.0,
-       "ratio_system_to_baseline": 0.0027545753503378477,
-       "ratio_bep_to_baseline": 0.0027545753503378477,
+       "ratio_system_to_baseline": 0.0027544873438960183,
+       "ratio_bep_to_baseline": 0.0027544873438960183,
        "bep_clamped_above_grid": true
       },
       {
@@ -61,8 +61,8 @@
        "p_annual_system": 0.0007547863728584468,
        "p_annual_bep": 0.0007547863728584468,
        "share_bep": 1.0,
-       "ratio_system_to_baseline": 1.0024383065526965,
-       "ratio_bep_to_baseline": 1.0024383065526965,
+       "ratio_system_to_baseline": 1.0024062794642008,
+       "ratio_bep_to_baseline": 1.0024062794642008,
        "bep_clamped_above_grid": false
       }
      ]
@@ -71,28 +71,28 @@
      "scenario": "+4K",
      "n_years": 5400,
      "baseline": {
-      "p_annual_system": 0.009531136967007517,
-      "p_annual_bep": 0.009483949453045582,
-      "share_bep": 0.9123231549452225,
+      "p_annual_system": 0.009531319729506616,
+      "p_annual_bep": 0.009484134792543604,
+      "share_bep": 0.9123247181094944,
       "bep_clamped_above_grid": false
      },
      "arms": [
       {
        "arm": "lambda_ac_100m",
-       "p_annual_system": 0.014030302141745573,
-       "p_annual_bep": 0.014027237242981935,
-       "share_bep": 0.938988252577879,
-       "ratio_system_to_baseline": 1.4720491574417753,
-       "ratio_bep_to_baseline": 1.4790501902640747,
+       "p_annual_system": 0.01403053940953727,
+       "p_annual_bep": 0.01402747482295423,
+       "share_bep": 0.9389892228742361,
+       "ratio_system_to_baseline": 1.4720458244729928,
+       "ratio_bep_to_baseline": 1.4790463368342874,
        "bep_clamped_above_grid": false
       },
       {
        "arm": "lambda_ac_40m",
-       "p_annual_system": 0.02069903654550493,
-       "p_annual_bep": 0.020699031135016234,
-       "share_bep": 0.9578243948122023,
-       "ratio_system_to_baseline": 2.1717279498926128,
-       "ratio_bep_to_baseline": 2.182532840089015,
+       "p_annual_system": 0.020699322250383533,
+       "p_annual_bep": 0.020699316840888392,
+       "share_bep": 0.9578249523966144,
+       "ratio_system_to_baseline": 2.171716282510546,
+       "ratio_bep_to_baseline": 2.1825203135200195,
        "bep_clamped_above_grid": false
       },
       {
@@ -100,8 +100,8 @@
        "p_annual_system": 0.001215482719636291,
        "p_annual_bep": 0.0005672769561485688,
        "share_bep": 0.3836292517978925,
-       "ratio_system_to_baseline": 0.12752756820552913,
-       "ratio_bep_to_baseline": 0.05981442214102048,
+       "ratio_system_to_baseline": 0.12752512287185752,
+       "ratio_bep_to_baseline": 0.05981325324420316,
        "bep_clamped_above_grid": true
       },
       {
@@ -109,8 +109,8 @@
        "p_annual_system": 0.009542470043173192,
        "p_annual_bep": 0.009495307767275725,
        "share_bep": 0.9124188487881759,
-       "ratio_system_to_baseline": 1.001189058158004,
-       "ratio_bep_to_baseline": 1.0011976354667829,
+       "ratio_system_to_baseline": 1.0011698604162922,
+       "ratio_bep_to_baseline": 1.0011780700060173,
        "bep_clamped_above_grid": false
       }
      ]
@@ -124,28 +124,28 @@
      "scenario": "historical",
      "n_years": 3000,
      "baseline": {
-      "p_annual_system": 0.007419538025861581,
-      "p_annual_bep": 0.007337441136926019,
-      "share_bep": 0.9741019217609156,
+      "p_annual_system": 0.0074451770306702405,
+      "p_annual_bep": 0.0073632188269890575,
+      "share_bep": 0.9741902475663473,
       "bep_clamped_above_grid": false
      },
      "arms": [
       {
        "arm": "lambda_ac_100m",
-       "p_annual_system": 0.011654065315516651,
-       "p_annual_bep": 0.011609686616878924,
-       "share_bep": 0.9834746584058938,
-       "ratio_system_to_baseline": 1.5707265432019055,
-       "ratio_bep_to_baseline": 1.5822527772594492,
+       "p_annual_system": 0.011694204877187421,
+       "p_annual_bep": 0.011649952293965087,
+       "share_bep": 0.9835308342083291,
+       "ratio_system_to_baseline": 1.5707087728086795,
+       "ratio_bep_to_baseline": 1.582182000521767,
        "bep_clamped_above_grid": false
       },
       {
        "arm": "lambda_ac_40m",
-       "p_annual_system": 0.018747722871590166,
-       "p_annual_bep": 0.018730346065366416,
-       "share_bep": 0.9896922908786752,
-       "ratio_system_to_baseline": 2.5268046078129127,
-       "ratio_bep_to_baseline": 2.552708187477657,
+       "p_annual_system": 0.01881324144698561,
+       "p_annual_bep": 0.018795942855602883,
+       "share_bep": 0.9897278946856848,
+       "ratio_system_to_baseline": 2.5269031709366856,
+       "ratio_bep_to_baseline": 2.5526801928945058,
        "bep_clamped_above_grid": false
       },
       {
@@ -153,8 +153,8 @@
        "p_annual_system": 0.00019887555820912014,
        "p_annual_bep": 3.983552526292708e-06,
        "share_bep": 0.020011685842466365,
-       "ratio_system_to_baseline": 0.026804304731092212,
-       "ratio_bep_to_baseline": 0.0005429075957073497,
+       "ratio_system_to_baseline": 0.026711998571673546,
+       "ratio_bep_to_baseline": 0.0005410069454531815,
        "bep_clamped_above_grid": true
       },
       {
@@ -162,8 +162,8 @@
        "p_annual_system": 0.00846694925456121,
        "p_annual_bep": 0.008389875497708863,
        "share_bep": 0.9772767820760168,
-       "ratio_system_to_baseline": 1.1411693322480143,
-       "ratio_bep_to_baseline": 1.143433431511487,
+       "ratio_system_to_baseline": 1.1372394799588783,
+       "ratio_bep_to_baseline": 1.139430416892774,
        "bep_clamped_above_grid": false
       }
      ]
@@ -172,28 +172,28 @@
      "scenario": "+4K",
      "n_years": 5400,
      "baseline": {
-      "p_annual_system": 0.0409128184765685,
-      "p_annual_bep": 0.04044800138011904,
-      "share_bep": 0.9411466886382553,
+      "p_annual_system": 0.04100684741974899,
+      "p_annual_bep": 0.04054286077793307,
+      "share_bep": 0.9412763032615569,
       "bep_clamped_above_grid": false
      },
      "arms": [
       {
        "arm": "lambda_ac_100m",
-       "p_annual_system": 0.05897665893750867,
-       "p_annual_bep": 0.05878003031547964,
-       "share_bep": 0.9587443290763269,
-       "ratio_system_to_baseline": 1.4415203140132147,
-       "ratio_bep_to_baseline": 1.4532245923125175,
+       "p_annual_system": 0.059110120224445985,
+       "p_annual_bep": 0.05891411944172783,
+       "share_bep": 0.9588343620125188,
+       "ratio_system_to_baseline": 1.4414695092112448,
+       "ratio_bep_to_baseline": 1.453131779832221,
        "bep_clamped_above_grid": false
       },
       {
        "arm": "lambda_ac_40m",
-       "p_annual_system": 0.08456374310435459,
-       "p_annual_bep": 0.08450487393162362,
-       "share_bep": 0.9709383317629614,
-       "ratio_system_to_baseline": 2.0669253855679917,
-       "ratio_bep_to_baseline": 2.089222484381129,
+       "p_annual_system": 0.08474349542117501,
+       "p_annual_bep": 0.08468495128422432,
+       "share_bep": 0.9709983373767106,
+       "ratio_system_to_baseline": 2.0665693842234347,
+       "ratio_bep_to_baseline": 2.0887759190963946,
        "bep_clamped_above_grid": false
       },
       {
@@ -201,8 +201,8 @@
        "p_annual_system": 0.0027090843786673658,
        "p_annual_bep": 0.00026812957381632755,
        "share_bep": 0.09584649508195113,
-       "ratio_system_to_baseline": 0.06621602909657537,
-       "ratio_bep_to_baseline": 0.00662899437963623,
+       "ratio_system_to_baseline": 0.0660641953510102,
+       "ratio_bep_to_baseline": 0.006613484314413916,
        "bep_clamped_above_grid": true
       },
       {
@@ -210,8 +210,8 @@
        "p_annual_system": 0.044616565137658055,
        "p_annual_bep": 0.0441806502877034,
        "share_bep": 0.94584972224615,
-       "ratio_system_to_baseline": 1.090527780754356,
-       "ratio_bep_to_baseline": 1.0922826537832109,
+       "ratio_system_to_baseline": 1.0880271941161372,
+       "ratio_bep_to_baseline": 1.0897270059381288,
        "bep_clamped_above_grid": false
       }
      ]
@@ -225,28 +225,28 @@
      "scenario": "historical",
      "n_years": 3000,
      "baseline": {
-      "p_annual_system": 0.0018017845066762934,
-      "p_annual_bep": 0.0018017845066762934,
+      "p_annual_system": 0.001808554195076605,
+      "p_annual_bep": 0.001808554195076605,
       "share_bep": 1.0,
       "bep_clamped_above_grid": false
      },
      "arms": [
       {
        "arm": "lambda_ac_100m",
-       "p_annual_system": 0.003210920074607464,
-       "p_annual_bep": 0.003210920074607464,
+       "p_annual_system": 0.003222374175234228,
+       "p_annual_bep": 0.003222374175234228,
        "share_bep": 1.0,
-       "ratio_system_to_baseline": 1.782077747205501,
-       "ratio_bep_to_baseline": 1.782077747205501,
+       "ratio_system_to_baseline": 1.781740455445814,
+       "ratio_bep_to_baseline": 1.781740455445814,
        "bep_clamped_above_grid": false
       },
       {
        "arm": "lambda_ac_40m",
-       "p_annual_system": 0.006064144692139995,
-       "p_annual_bep": 0.006064144692139995,
+       "p_annual_system": 0.006083662093542196,
+       "p_annual_bep": 0.006083662093542196,
        "share_bep": 1.0,
-       "ratio_system_to_baseline": 3.3656326101540137,
-       "ratio_bep_to_baseline": 3.3656326101540137,
+       "ratio_system_to_baseline": 3.3638262597292585,
+       "ratio_bep_to_baseline": 3.3638262597292585,
        "bep_clamped_above_grid": false
       },
       {
@@ -254,8 +254,8 @@
        "p_annual_system": 6.914576779640289e-05,
        "p_annual_bep": 6.914576779640289e-05,
        "share_bep": 1.0,
-       "ratio_system_to_baseline": 0.03837626949293417,
-       "ratio_bep_to_baseline": 0.03837626949293417,
+       "ratio_system_to_baseline": 0.03823262138598732,
+       "ratio_bep_to_baseline": 0.03823262138598732,
        "bep_clamped_above_grid": false
       },
       {
@@ -263,8 +263,8 @@
        "p_annual_system": 0.0020250317468853943,
        "p_annual_bep": 0.0020250317468853943,
        "share_bep": 1.0,
-       "ratio_system_to_baseline": 1.1239034076394183,
-       "ratio_bep_to_baseline": 1.1239034076394183,
+       "ratio_system_to_baseline": 1.1196964693665814,
+       "ratio_bep_to_baseline": 1.1196964693665814,
        "bep_clamped_above_grid": false
       }
      ]
@@ -273,28 +273,28 @@
      "scenario": "+4K",
      "n_years": 5400,
      "baseline": {
-      "p_annual_system": 0.014175099867898966,
-      "p_annual_bep": 0.014172922003054545,
-      "share_bep": 0.9983772493128567,
+      "p_annual_system": 0.01421122545417364,
+      "p_annual_bep": 0.014209050759257477,
+      "share_bep": 0.9983813687341951,
       "bep_clamped_above_grid": false
      },
      "arms": [
       {
        "arm": "lambda_ac_100m",
-       "p_annual_system": 0.022802274568983764,
-       "p_annual_bep": 0.022802064423308524,
-       "share_bep": 0.9989907382449802,
-       "ratio_system_to_baseline": 1.6086147386250138,
-       "ratio_bep_to_baseline": 1.6088470971895723,
+       "p_annual_system": 0.022858838376817056,
+       "p_annual_bep": 0.022858628845106685,
+       "share_bep": 0.9989932331817233,
+       "ratio_system_to_baseline": 1.6085057865367782,
+       "ratio_bep_to_baseline": 1.6087372219579015,
        "bep_clamped_above_grid": false
       },
       {
        "arm": "lambda_ac_40m",
-       "p_annual_system": 0.0375770219595846,
-       "p_annual_bep": 0.03757702173762321,
-       "share_bep": 0.9993873280389265,
-       "ratio_system_to_baseline": 2.6509176167909616,
-       "ratio_bep_to_baseline": 2.6513249511656536,
+       "p_annual_system": 0.03766553203113114,
+       "p_annual_bep": 0.037665531810814966,
+       "share_bep": 0.9993887668741633,
+       "ratio_system_to_baseline": 2.650407042840158,
+       "ratio_bep_to_baseline": 2.6508126720762912,
        "bep_clamped_above_grid": false
       },
       {
@@ -302,8 +302,8 @@
        "p_annual_system": 0.001615179400190394,
        "p_annual_bep": 0.001602755250945974,
        "share_bep": 0.9858305952258037,
-       "ratio_system_to_baseline": 0.11394483391599526,
-       "ratio_bep_to_baseline": 0.11308573141096441,
+       "ratio_system_to_baseline": 0.11365518092713378,
+       "ratio_bep_to_baseline": 0.11279819307435068,
        "bep_clamped_above_grid": false
       },
       {
@@ -311,8 +311,8 @@
        "p_annual_system": 0.015340647327771224,
        "p_annual_bep": 0.015338550378454741,
        "share_bep": 0.9985003827014789,
-       "ratio_system_to_baseline": 1.082224991057154,
-       "ratio_bep_to_baseline": 1.082243335223956,
+       "ratio_system_to_baseline": 1.0794739255414378,
+       "ratio_bep_to_baseline": 1.0794915605788356,
        "bep_clamped_above_grid": false
       }
      ]
