@@ -629,6 +629,14 @@ def test_m_p_is_the_only_bracket_that_cancels_in_the_ratio() -> None:
     from that comparison on purpose: ADR-0028 keeps it out of the static branch
     entirely, so its rho near 1 is inertness, not cancellation, and treating it
     as a second canceller would be the same category error.
+
+    ``alpha_exponent`` is excluded for that same reason rather than a new one.
+    The span the ranking draws for it is the transient branch moved from -1/3
+    to -1/2 against a static comparator held at -1/3, so the static branch is
+    exactly invariant under it and a rho near 1 would again be inertness. It
+    carries no cancellation record at all, its arms being ladder comparators
+    rather than companion sweeps, so the loop below never reaches it; the pin
+    is here so that adding it to the set stays a deliberate act.
     """
     from thesis_figure_gaps import (
         COMMON_MODE_BRACKET,
@@ -637,7 +645,7 @@ def test_m_p_is_the_only_bracket_that_cancels_in_the_ratio() -> None:
     )
 
     assert COMMON_MODE_BRACKET == "m_p"
-    assert SINGLE_BRANCH_BRACKETS == {"gamma_bl_sub_prior_mean"}
+    assert SINGLE_BRANCH_BRACKETS == {"gamma_bl_sub_prior_mean", "alpha_exponent"}
 
     for section in _read(_require(SYNTHESIS))["sections"]:
         worst = _cancellation_by_bracket(section)
