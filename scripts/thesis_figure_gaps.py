@@ -83,6 +83,20 @@ ZTOE_COMPANION = DECISIONS / "adr0046-ztoe-companion.json"
 #: Source of truth for ADR-0024's ``attainable_max_m``; read, never duplicated.
 STAGE66_KP62 = DECISIONS / "adr0040-stage6-6-kp62_0-analysis.json"
 
+#: The comparator ladders, which are the only measurement of the scale-exponent
+#: bracket. It was run at two of the four sections, so the alpha row of the
+#: ranking carries two section marks rather than four; that is coverage, not a
+#: missing number, and the caption says so.
+ALPHA_LADDERS = {
+    "KP62.0": STAGE66_KP62,
+    "KP57.4": DECISIONS / "adr0040-stage6-6-kp57_4-analysis.json",
+}
+#: The ladder comparators the alpha bracket's two arms are read from: the
+#: production transient branch at alpha = -1/3 and the calibrated alternative at
+#: alpha = -1/2. Both are transient, so the span is on the same axis, and the
+#: same baseline, as every other bracket in the ranking.
+ALPHA_ARMS = ("C4b", "C4a")
+
 SECTIONS = ("KP57.4", "KP58.8", "KP60.0", "KP62.0")
 
 #: The eight production strata, in the order the campaign reports them.
@@ -149,6 +163,10 @@ BRACKET_LABEL = {
     "z_toe": r"$z_\mathrm{toe}$ $\pm$0.3 m",
     "L_measurement": r"$L$ measurement",
     "m_p": r"$m_p$ model factor",
+    # Kept no wider than the CoV(L) row: this figure is placed at \textwidth,
+    # so a longer row label widens the authored figure and shrinks every
+    # printed type size with it.
+    "alpha_exponent": r"$\alpha$ $-1/2$, transient",
     "gamma_bl_sub_prior_mean": r"$\gamma'_\mathrm{bl}$ prior mean",
     "clopper_pearson": "Clopper-Pearson (95%)",
     "mc_cov": "Monte Carlo CoV (target)",
@@ -165,7 +183,11 @@ CANCELLATION_ARM_EXCLUSIONS = {"L_dem_all_stations_median"}
 #: ADR-0028 separated the static limit state from the uplift/heave gate, and
 #: gamma'_bl enters only the gate: its static ratio is exactly 1.000 at every
 #: level. It must never be read as a second common-mode knob beside m_p.
-SINGLE_BRANCH_BRACKETS = {"gamma_bl_sub_prior_mean"}
+#: ``alpha_exponent`` joins it for a different reason: the span drawn here is the
+#: transient branch moved from -1/3 to -1/2 against a static comparator held at
+#: -1/3, which is the one-branch reading. Applied to both branches the exponent
+#: is a different quantity, and neither reading is a cancellation claim.
+SINGLE_BRANCH_BRACKETS = {"gamma_bl_sub_prior_mean", "alpha_exponent"}
 
 #: The only bracket that cancels, and why it is the only one. ADR-0045 section 2
 #: applies m_p to the single-source H_c in BOTH its uses (static comparator and
@@ -788,7 +810,20 @@ def _span_cell(section: dict[str, Any], bracket: str, anchor: str) -> dict[str, 
     """
     anchor_record = section["anchors"][anchor]
     defined = anchor_record["n_failures_trans_baseline"] > 0
-    raw = section["brackets"][bracket]["span"].get(anchor, {}).get("span_trans")
+    record = section["brackets"].get(bracket)
+    if record is None:
+        # Not measured at this section. A third state beside the two below: the
+        # knob has no arms here at all, so the row simply carries no mark for
+        # this section rather than an unbounded or an undefined one.
+        return {
+            "defined": False,
+            "unbounded": False,
+            "span": None,
+            "stage_m_msl": anchor_record["stage_m_msl"],
+            "p_f_trans_baseline": anchor_record["P_f_trans_baseline"],
+            "n_failures_trans_baseline": anchor_record["n_failures_trans_baseline"],
+        }
+    raw = record["span"].get(anchor, {}).get("span_trans")
     return {
         "defined": defined,
         "unbounded": defined and raw is None,
@@ -868,6 +903,82 @@ def _cancellation_by_bracket(section: dict[str, Any]) -> dict[str, dict[str, Any
     return worst
 
 
+def _alpha_bracket(section: dict[str, Any], ladder_path: Path) -> dict[str, Any]:
+    """The scale-exponent bracket at one section, on the ranking's own axis.
+
+    Every other bracket in this figure is a multiplicative span of conditional
+    *transient* failure probability about the production baseline. The exponent
+    is measured by the comparator ladder rather than by a companion sweep, so
+    its two arms are read from the ladder: ``C4b`` is the production transient
+    branch at alpha = -1/3 and ``C4a`` the calibrated alternative at -1/2.
+
+    **The gate that makes the two records comparable** is that ``C4b`` must
+    reproduce the synthesis record's own transient baseline curve at every stage
+    the two grids share. They are independent artifacts of the same production
+    sweep, so an exact match is the check that the span is about the same
+    baseline as the rest of the ranking; a mismatch would mean the ladder and
+    the synthesis were run against different production sweeps and the row would
+    not belong on this axis at all.
+    """
+    ladder = json.loads(ladder_path.read_text(encoding="utf-8"))
+    levels = ladder["components"]["levels"]
+    p_f = {c: dict(zip(levels, v)) for c, v in ladder["p_f"].items()}
+
+    shared = 0
+    for stage, base in zip(section["grid_m_msl"], section["P_f_trans_baseline_curve"]):
+        arm = p_f[ALPHA_ARMS[0]].get(stage)
+        if arm is None:
+            continue
+        shared += 1
+        if abs(arm - float(base)) > 1e-12:
+            raise SystemExit(
+                f"{section['section']}: the comparator ladder's {ALPHA_ARMS[0]} "
+                f"is {arm} at {stage} m where the epistemic synthesis records a "
+                f"transient baseline of {base}. The two records are not on the "
+                "same production sweep, so the scale-exponent span is not "
+                "comparable with the other brackets and must not be drawn."
+            )
+    if not shared:
+        raise SystemExit(
+            f"{section['section']}: ladder and synthesis grids do not meet"
+        )
+
+    span: dict[str, Any] = {}
+    for anchor, record in section["anchors"].items():
+        stage = record["stage_m_msl"]
+        arms = [p_f[c].get(stage) for c in ALPHA_ARMS]
+        if any(a is None for a in arms) or record["n_failures_trans_baseline"] == 0:
+            continue
+        lo, hi = min(arms), max(arms)
+        span[anchor] = {
+            "span_trans": None if lo <= 0.0 else hi / lo,
+            "ratio_min": 1.0,
+            "ratio_max": None if lo <= 0.0 else hi / lo,
+            "P_f_trans_baseline": record["P_f_trans_baseline"],
+        }
+    return {"arms": list(ALPHA_ARMS), "span": span, "n_levels_gated": shared}
+
+
+def _with_alpha_bracket(synthesis: dict[str, Any]) -> dict[str, Any]:
+    """A copy of the synthesis carrying the scale-exponent bracket.
+
+    Copied rather than mutated in place because the same record is handed to
+    ``figure_epistemic_knobs``, which ranks nothing and must not acquire a row.
+    """
+    out = dict(synthesis)
+    out["sections"] = []
+    for section in synthesis["sections"]:
+        ladder = ALPHA_LADDERS.get(section["section"])
+        if ladder is None or not ladder.exists():
+            out["sections"].append(section)
+            continue
+        patched = dict(section)
+        patched["brackets"] = dict(section["brackets"])
+        patched["brackets"]["alpha_exponent"] = _alpha_bracket(section, ladder)
+        out["sections"].append(patched)
+    return out
+
+
 def _bracket_order(sections: list[dict[str, Any]]) -> list[str]:
     """Rank the epistemic brackets by how far they move transient P_f.
 
@@ -875,8 +986,16 @@ def _bracket_order(sections: list[dict[str, Any]]) -> list[str]:
     cells, largest finite span) over the two anchors the thesis quotes, so the
     ordering the figure asserts is the one the evidence supports.
     """
+    # The union, not the first section's keys: a bracket measured at only some
+    # sections (the scale exponent) still earns a row.
+    every: list[str] = []
+    for section in sections:
+        for bracket in section["brackets"]:
+            if bracket not in every:
+                every.append(bracket)
+
     keys: dict[str, tuple[int, float]] = {}
-    for bracket in sections[0]["brackets"]:
+    for bracket in every:
         if bracket in STATISTICAL_BRACKETS:
             continue
         unbounded, finite = 0, 0.0
@@ -1007,6 +1126,7 @@ def figure_epistemic_ranking(
     them stays in this figure's own table source, in the ``cancellation_arm``
     and ``max_resolved_departure_factor`` columns built below.
     """
+    synthesis = _with_alpha_bracket(synthesis)
     sections = {s["section"]: s for s in synthesis["sections"]}
     ordered = _bracket_order(synthesis["sections"])
     rows_order = ordered + list(STATISTICAL_BRACKETS)
@@ -1475,9 +1595,13 @@ def figure_epistemic_ranking(
                         "p_f_trans_baseline": cell["p_f_trans_baseline"],
                         "n_failures_trans_baseline": cell["n_failures_trans_baseline"],
                         "span_trans": (
-                            "not_defined"
-                            if not cell["defined"]
-                            else _fmt_span(cell["span"])
+                            "not_measured"
+                            if bracket not in sections[name]["brackets"]
+                            else (
+                                "not_defined"
+                                if not cell["defined"]
+                                else _fmt_span(cell["span"])
+                            )
                         ),
                         "moves_both_branches": bracket not in SINGLE_BRANCH_BRACKETS,
                         "cancellation_arm": record.get("arm", ""),

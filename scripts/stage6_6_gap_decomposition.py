@@ -489,7 +489,7 @@ def figure_ladder(key: str, result: GapDecompositionResult, fig_dir: Path) -> Pa
     fig, axes = plt.subplots(1, 2, figsize=(11, 5.4), sharey=True)
     fig.patch.set_facecolor(SURFACE)
     panels = (
-        (r"Physics ladder ($\alpha=-1/2$)", ("C0", "C1", "C2", "C3a", "C4a")),
+        (r"Physics ladder ($\alpha=-1/2$)", ("C0", "C0b", "C1", "C2", "C3a", "C4a")),
         (r"Production ladder ($\alpha=-1/3$)", ("C0", "C1", "C3b", "C4b")),
     )
     for ax, (title, ids) in zip(axes, panels):
