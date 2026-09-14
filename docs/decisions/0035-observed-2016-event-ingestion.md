@@ -85,13 +85,28 @@ Per-section records are built by the reusable loader
    > rating setting the peak outright: 0.00 / 10.81 / 0.34 / 0.05 becomes
    > 0.00 / 6.08 / 0.10 / 0.01 per cent.
    >
-   > **The committed Phase 2 artifacts and the committed
-   > `phase2-survival-update-per-stratum.csv` were produced at KP 56.6 and
-   > have NOT been regenerated.** They stamp `gauge_kp: 56.6` in their own
-   > provenance, so the difference is visible in the artifact rather than
-   > latent, and regenerating them would move two printed thesis numbers
-   > without changing any conclusion — an author's decision, recorded here as
-   > a bounded open item rather than taken unilaterally. This mirrors the Phase 1 d4PDF band
+   > **Regenerated 2026-09-14** (superseding this amendment's own first text,
+   > which recorded the artifacts as deliberately left at the old node). The
+   > decision followed the ADR-0047 principle: adopt where wrong, hold where
+   > merely old. KP 56.6 is wrong rather than old, because decision 2 above
+   > exists so the inverse-then-forward composition reproduces the observed
+   > series *at the gauge*, and a different station's coefficients do not do
+   > that; and because the engine's published source is what a reader
+   > regenerates from, so a default that no longer matched the artifacts would
+   > have made the thesis unreproducible from its own engine.
+   >
+   > `phase2_baseline`, `phase2_anchor_rating`, `phase2_no_initiation` and
+   > `phase3` were re-run through the campaign with `--force`, together with
+   > the committed evidence slices and figures, the ADR-0046 z_toe companion
+   > and the hazard-sampling uncertainty study. **Every gate passed**, including
+   > `--verify` exact in every stratum and marginal transient rejection exactly
+   > 0 in all eight. The `no_breach_no_initiation` variant is **exactly
+   > unchanged** (66.389 / 99.568 / 99.304 / 39.552 per cent), being dominated
+   > by the uplift-and-heave latch the gauge does not reach. Phase 3 moves 30
+   > of 2280 rows, all posterior-side at the four BEP sections, by at most
+   > 0.38 per cent. No conclusion changes. The full account, with every
+   > before-and-after value, is `docs/foreland_credit_bracket_2026-09-13.md`
+   > section 7. This mirrors the Phase 1 d4PDF band
    structure exactly: the band workbook KP 056.20 to 061.80 that drives
    these sections in Phase 1 carries one discharge series for the whole
    reach, and the Obihiro gauge sits inside that band (the Satsunai and

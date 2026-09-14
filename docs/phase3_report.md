@@ -863,3 +863,39 @@ the upward arm keeps 34 470 and 13 119 rows, **below the 50 % headroom floor**, 
 those two posterior curves carry degraded tail resolution. The direction is
 unaffected, since the arm can only fall further, but the two most heavily
 narrowed cells are the two carrying that caveat.
+
+
+---
+
+## Addendum, 2026-09-14 — Phase 3 re-run after the Obihiro gauge correction
+
+**Authoritative over the body above where they differ.** The Phase 2 posteriors
+this chapter's system numbers are composed from were regenerated at the
+corrected Obihiro gauge node (KP 56.73, not KP 56.6; see `phase2_report.md`'s
+addendum of the same date and ADR-0035 decision 1). `phase3` was re-run through
+the campaign with `--force`; gate G4 passed and the `rq4_annual.csv` row set is
+unchanged in shape.
+
+**30 of 2280 rows move**, all of them posterior-side at the four BEP sections,
+and the largest change is **0.38 per cent**. The prior-side rows are untouched,
+and KP 62.0 is untouched in every column — its Phase 2 rejection is 0.00 per
+cent, so its posterior *is* its prior and the gauge cannot reach it.
+
+At the precision this report and the thesis quote, five of the eight
+matrix/posterior/250 m/primary rows change by one unit in the third significant
+figure:
+
+| section | scenario | annual system, body | corrected |
+|---|---|---|---|
+| KP 57.4 | +4K | 9.53 [7.50, 11.6] e-3 | 9.53 **[7.51, 11.6]** e-3 |
+| KP 58.8 | historical | 7.42 [5.39, 9.66] e-3 | **7.45 [5.41, 9.69]** e-3 |
+| KP 58.8 | +4K | 4.09 [3.65, 4.54] e-2 | **4.10 [3.66, 4.55]** e-2 |
+| KP 60.0 | historical | 1.80 [1.13, 2.55] e-3 | **1.81 [1.13, 2.56]** e-3 |
+| KP 60.0 | +4K | 1.42 [1.20, 1.64] e-2 | 1.42 **[1.20, 1.65]** e-2 |
+
+Every mechanism share is unchanged at three significant figures, so **no
+dominance statement, ordering or climate ratio in this report moves.** The
+intervals are the hazard-sampling ones of
+`annualisation-hazard-sampling-uncertainty.json`, re-run on the corrected
+curves; that study re-sweeps nothing and its pre-registered verdicts are
+unchanged.
