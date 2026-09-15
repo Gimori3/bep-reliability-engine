@@ -1,0 +1,3032 @@
+{
+  "date": "2026-09-15",
+  "baseline_engine": "782086650d82481e20fd8aaf17faa43caf40c0d6",
+  "baseline_thesis": "4f676f3cd8bd69e39c625b1c055c2cb73f8be6b9",
+  "thesis_concurrent_commit": "7d34f421fd45cfedadaeef54b4b5acfcb9caeb1c",
+  "contract": "instantaneous_samples_left_euler_v1",
+  "primary_station_workbook_sha256": "94d573d1d278a8ebeff0bb0f61a65560adcbc30bdef79f36bbaacd1d5e75cdf6",
+  "phase1_endpoint_proof": {
+    "artifact": "docs/decisions/adr0053-phase1-endpoint-evidence.json",
+    "sha256": "6ba2d45eecded46c05f7e5c793a7dd8d9c153eaf870ad4fbd03965e463468d38",
+    "arms": 149,
+    "conditioning_records": 4432
+  },
+  "production_replay": [
+    {
+      "path": "results\\phase2\\tokachi_kp57.4_historical_bulk_posterior.h5",
+      "n": 100000,
+      "all_diagnostics_equal": true,
+      "breach_rows": [],
+      "breach_times_s": [],
+      "record_sha256": "b9c76e4feb3dc67a87bff395ffeb009b229efa8f164b11f535e9ecbac3ece46b"
+    },
+    {
+      "path": "results\\phase2\\tokachi_kp57.4_historical_matrix_posterior.h5",
+      "n": 100000,
+      "all_diagnostics_equal": true,
+      "breach_rows": [
+        828,
+        23039,
+        48665,
+        80205,
+        99777
+      ],
+      "breach_times_s": [
+        2605275.0,
+        2607750.0,
+        2606175.0,
+        2607750.0,
+        2605275.0
+      ],
+      "record_sha256": "b9c76e4feb3dc67a87bff395ffeb009b229efa8f164b11f535e9ecbac3ece46b"
+    },
+    {
+      "path": "results\\phase2\\tokachi_kp58.8_historical_bulk_posterior.h5",
+      "n": 100000,
+      "all_diagnostics_equal": true,
+      "breach_rows": [],
+      "breach_times_s": [],
+      "record_sha256": "520e663845aa394fa508250e65c77885f4bffa3de226575c7757059a61964a05"
+    },
+    {
+      "path": "results\\phase2\\tokachi_kp58.8_historical_matrix_posterior.h5",
+      "n": 100000,
+      "all_diagnostics_equal": true,
+      "breach_rows": [
+        2,
+        23958,
+        49077,
+        74107,
+        99980
+      ],
+      "breach_times_s": [
+        2603475.0,
+        2607525.0,
+        2610675.0,
+        2610000.0,
+        2608200.0
+      ],
+      "record_sha256": "520e663845aa394fa508250e65c77885f4bffa3de226575c7757059a61964a05"
+    },
+    {
+      "path": "results\\phase2\\tokachi_kp60.0_historical_bulk_posterior.h5",
+      "n": 100000,
+      "all_diagnostics_equal": true,
+      "breach_rows": [
+        828,
+        16600,
+        54124,
+        67187,
+        99777
+      ],
+      "breach_times_s": [
+        2608200.0,
+        2602125.0,
+        2606625.0,
+        2611350.0,
+        2610000.0
+      ],
+      "record_sha256": "6c63efefe54518276c85a6b42836aaf8a413ac5966eaaa6ac62d082dc0c0afce"
+    },
+    {
+      "path": "results\\phase2\\tokachi_kp60.0_historical_matrix_posterior.h5",
+      "n": 100000,
+      "all_diagnostics_equal": true,
+      "breach_rows": [
+        2,
+        23171,
+        48009,
+        73692,
+        99980
+      ],
+      "breach_times_s": [
+        2609100.0,
+        2611125.0,
+        2603250.0,
+        2610450.0,
+        2616750.0
+      ],
+      "record_sha256": "6c63efefe54518276c85a6b42836aaf8a413ac5966eaaa6ac62d082dc0c0afce"
+    },
+    {
+      "path": "results\\phase2\\tokachi_kp62.0_historical_bulk_posterior.h5",
+      "n": 100000,
+      "all_diagnostics_equal": true,
+      "breach_rows": [],
+      "breach_times_s": [],
+      "record_sha256": "30e221ceab337aa1d90f1207ecabb3927561bf335e98c91e6a8cd2492879a125"
+    },
+    {
+      "path": "results\\phase2\\tokachi_kp62.0_historical_matrix_posterior.h5",
+      "n": 100000,
+      "all_diagnostics_equal": true,
+      "breach_rows": [],
+      "breach_times_s": [],
+      "record_sha256": "30e221ceab337aa1d90f1207ecabb3927561bf335e98c91e6a8cd2492879a125"
+    }
+  ],
+  "stress_endpoint_proof": [
+    {
+      "section": "tokachi_kp58.8",
+      "levels": 51,
+      "max_final": 37.86603182429693,
+      "toe": 38.5,
+      "stage_hashes": [
+        "423efa98ffa13840bdacee7f9c2e36493e244bbfee8db8cd6a61d4886d6a8d39",
+        "cc34347fcdaa239ed0c8dbb5dc0f8939915c7961358cb55f04e876e13fd3e0a0",
+        "f5ee39cec7272eed66264c641376cc8a639fe2e6ddda4cdb26263364123399f4",
+        "292e815a8b6208c394fd395479251edb8af6e1cf435e8c68bec20c3effe9353c",
+        "f412041ad639b265549c9d47978f34007acb11c6ae1fd819d2671890bafd6fd6",
+        "b45bcda7d77590b0c6a5ba833fcfab341e2f48d72ca53c5c66ecf7281e379b2f",
+        "fb06bed97488f6373f0f9c71b0a80c0d8a9c04a13a1a4219b88acefea59ab3eb",
+        "126ad7adf1cf076fcebd69f449c84361810010832212e5cce7b83db42a9db3c4",
+        "9bf3690ef1e3000c444b3751db8569054dab0106260818b0780e52f87d401993",
+        "8b9265b14d7ba6559d49f8451002f7ffad0e90fc581da6728a1798351a2fe6b2",
+        "177b4607328874312f440c25008edfe1fc2a2a02db8414c06a4a02f02399600d",
+        "91f8397f0aecfbf09e99448398b166dd89780484082f6ac4084ea044ec30cba6",
+        "88c3852a34fdf2416a795d99cc1f5fbb4bb5aba911eb46cc0351e1d8ee347237",
+        "3041b0634d333f98877b2470ae4bda4ba40a9f3292f70fa8d5963530d31d671d",
+        "8c42f5cfa12425418b95dc82a71bacb81454fc9ac3546b6e2c1d8f9661713111",
+        "8b5c4e1d41f0d517e1b2d09b07e6c50dfd5d870d409d2714b4e3fcc85fbd95f2",
+        "e482536598fdf4a0d3ec7ab94d5be55472c8adc224b09ce12391970981d6e5bd",
+        "1faecb52c54cf7c75c57ace14a8371722e8a15559d066b1a4e4ae2520cbf5f4d",
+        "956542b0519aca20452ae145bbd2f1c6212550f5786f500024445c0e5bd56941",
+        "2895b91467f7fea23a3dfa757bb077442f7f7461275682d4186ae6dd35d9335b",
+        "5bbb5ab06574b37ebe7399d18eae6d3dad9f04b9b4d8b6ce5505f8d40a07351b",
+        "c182e46a140ce01152b947ca9415d780088a4ee1a337fa57f26cfb720e00937d",
+        "bf670b4a41d7adc9e2417461160a330ca7f0bf5f7c8d6fa735cfbf0a1b9a2437",
+        "f2b5d979ea16d7dd72ff3eaed4dea6385ef89d86a2092508f2d284a1a4f2cefa",
+        "f3fe1a1bfa64de1bb4cd213a18fceb3cd527048d9296af29495a0a54a551dc40",
+        "1fbb016bf5a85013ff94c2c08090af8514aac6331e6c7882010ab7862b798fad",
+        "a1824feb71e3de2ae7c0f31bf7560b148edf5a1a9cb1dd5bc99d0d0143379ea3",
+        "83175b12730f058bc972af7b51f3bb205b6b35d55bc07b00045b13d71cb82e39",
+        "d125f064e6fde0a52c207b3a1ac385b2db40c405ef730ca7c950cb75f9524b58",
+        "fff041c341bca71b35f926d38b7a1897ddb80e6de576637856a3c8ba02f37be6",
+        "017c43385b920740836ead2e6302d7b693e20e212ae0840a37bae223a892bced",
+        "03bf7f2a2b5f8a13a2179125f43c5f09454dd5f8657eaaaecb50fb828a1cc0e6",
+        "25db759c0e3549f8fe19fba5442849a1cbdb1afce9f4c0d7fa63d29568ebdfe5",
+        "8afc6786440915a0706b5b0e5d608f38c7871cd9b9f39fe5929ad6b16cb16e78",
+        "eab3ab9b86718587f83cec2c71e24a16d63f232c6f3d423bb0033a32f4a83d22",
+        "b3381f8d533016b445a66b3f7cddb9901877c8ddeea879502213deddf5e5243b",
+        "aadd14face554b06b4dee7569ec5dbcdf4d34c764349463749ab3c04cf51df74",
+        "7bf657ae6d0a108b02806b48a6ce5f0e510085b96cc8627bff5006617588e2ee",
+        "fc294f3cafcb47fd27ce85ba2ea05c6f6c2bbaa3e5101a0e2f75166a20f570a8",
+        "3ac6a3c7ef46759c5d0738df6b58a4f2d3a0dfecc9e21e16433df9376790eb4b",
+        "9a95b56087114c6785ca2b8a6efa5d4a74abf00835e7128bb7217b086e0f72a8",
+        "8e65eef12a94e2d4eebe5183b1f2db9caa7a124d417ba1a23ea13220af45966d",
+        "cf8e47d5e05ca766c9137dd1da80e0d06d1392ea0dd7027c3681f9613aa28a50",
+        "291d384028eb8209771faa7475b111cce1ed0a1afb5d6e0c1ef9b40598333ec3",
+        "88d419e853db82d381765b58b28a6b4cebaf874200016b3ee8febb8078d8a126",
+        "9502aca37ed4593afa0d8b6b0d990175acb42dbc2cc780f540a98956fc046af8",
+        "389fddf60b43bfb8cf8836bf68118204c182622b044c69333d2b0be2a170c90d",
+        "b02eaf8e7e7dc6db067a45385dea0919579c6b8fd80f742a4932f40460bd5ba7",
+        "cf35e11c31f4141c05806eafa7582ab8868b366b70dd4bdfb96d2f0999468fd2",
+        "e8e8f1309595db7e5a05c945d848bad196107e096266b8b32410ff7525871593",
+        "2e5edb558a96d9d566a0eaeff3ba460ea817a97654e62bf41d7f362ab75f22e7"
+      ]
+    },
+    {
+      "section": "tokachi_kp57.4",
+      "levels": 45,
+      "max_final": 36.11477398068962,
+      "toe": 38.3,
+      "stage_hashes": [
+        "6a23920f1e60b985bdf4133e99d189b3ecc9bd66a17840ad55267033f9c980fe",
+        "83c3d9395658c3279408d963872bfb35298fbeecbd71b01ead233d6f8036fa2d",
+        "740a5f806df1c53b7d392ff9df019cb9a81bba5034676e95dd261a3b436e0a90",
+        "97a771968020e3620db6f898ecb1727120afb10050fbe4cda907ce462667ab44",
+        "1a80a246ac85c776bd0b76581765b9a0b301260f2ee676b824f162a83f7905d6",
+        "cb52aafc443aba5aafd10b0a3c6d2138ebf12a7f51bc6142b2bf004968bb1e53",
+        "85aab912d595c4e207621718cc812914d1ce00674c3d0d4af15a3a99c099b400",
+        "9b9aab2018860efe1684f00b75219a71a1671cc5a7379f2b1db6a95f09e6ca68",
+        "0c398b833e1bf228159a1d260a4a366c5bfb5c08c27a8015563d0bb5c374819e",
+        "614bd446fc1b363c6fc9a1ab186e6a40548e98149bc3d8f89bd7715c905fe302",
+        "b5994ea9424851e6c9ddad553fb45eafb9fb9a58a07f352272a5f25c3da453fb",
+        "9925eff3b0dab3b7823a55b3e55849170bc9fdbb0c8d1852909a2267f1687b2a",
+        "0c37d03c7e6ed07ee79a1bc3bf737dc8a39d369523655c80b6284fdc3e2a5625",
+        "cfb234d50df468d9d6d12a6e41eb2a1f44c30bda8cd1398f917b24decf8a49fc",
+        "2017eba6e2e46f10c31fdf9427ea6efbd5529de5ddea5b46d4632d8ec051172a",
+        "3e0abba4b18e8c4c1eb970551d0f5155a3c6cdac274da6002d981f170a3e8cf2",
+        "ebffdaca73c86cb6ff794f79a995211150cf1163dee80a57297ce877b65601c6",
+        "7e2d6dfdec953cfee91a10d6ad1e41df1dbce4cb70b342250c7acf6a246689c3",
+        "04e6af3a8dcdd032c23c08fdc54a9e53b7b67902c7ed6ac46d8e9c01d57742a4",
+        "d3836d1a26220dfcbf72198c3668205595b997d4a78281c73e846d7306431dbe",
+        "c1c8ccc29f52ea2d1c565f9ee619c16e55e2f2787aee62821638e3a57f5c0716",
+        "3d220a87aae989132ce872491a3d09ea2db342f2ed2823a853e21a09daf68746",
+        "5c585170a27f851735196721cc677d84086a133aaeb3ea3d017370500dd0233f",
+        "292950d3cc01da37174b1206340c48e04920c7ee57f90f6de68ba06af56f868a",
+        "3c2abcde1bfe07317f8baa98dc59b1507199195e827cbcf3ddfc459279fcd874",
+        "25acd59b9d8eb9cce505e7c35f6b4ce68f190516072e8af26858343bc8ea72f9",
+        "69618b2f58984be3d890160676c65e42f907697507cfe4b01447f677a55f0927",
+        "2b5ed67de93d47c125b14c654b6ce790baee16992d9e31fa01e6464058d06314",
+        "350881fef90a53b3de969f4a935a23cc9b06b8d61e79792342f9efd079bd39ea",
+        "f814fed6b21aa5a92ab7cfdd2b7ce02a362ce0a8633b6fe79aefa8471a7c4fbc",
+        "49e62d409a5936425c233d7d591768ca7a9267abf60e883c7ff66aa691531fef",
+        "8845a8d6a8b0e21c5d4408ac689d5955b21b5e3abb1e5e39eb67cedd71794273",
+        "e51ef0e8f1318c7a754a1ca4df3bcdffe5a1641aafb5464b19df11e2b0e39f19",
+        "4057e6114797d1b5b71dd4b52c23e99b0e8f6ba3e4005e640602313047ef367b",
+        "d75401a0d9bbd74b9fabac16cf3714c3bdab6df3f268436656275fa642b4fac9",
+        "414b255f2ff8fe028ced4984224321f10d4b7b358138a1758f8e2eab320621da",
+        "d1de8eec07fc894c23ef78f601790cc31da826286e0a0b08a8e89b67f55b315f",
+        "49dc756ba6a9cb10fe26a859defbe1055afeec49906f3a3289f656d845bce4b8",
+        "5c46e411ac12f60a81e3636a90176825be951ac6ececca5e244678d027019c70",
+        "749e69c5d100a86f6414fab0ad13717b92c8cd84676742d440016427c01aef85",
+        "f171572969ece25f499e1b5efcb8a152c801a91c3934829a3658c4f1b4a9e03c",
+        "65a55587da21e5f1a13421a72858910992a2c534348193006fa7ccc126a1436a",
+        "cb601cd6575741933c24dd243f8d8b3462816605176d39a9c1d9f05c9d04eca6",
+        "c52d1e1e0869527886e07c60f60fbd892c99c7707b5cd9bc3437d3252d36b461",
+        "bada432b4145a671ea612f7da0be4e012d432b9a8fd5600eee2353fa131bf637"
+      ]
+    }
+  ],
+  "clock_transformations": [
+    {
+      "path": "results\\phase2\\tokachi_kp57.4_historical_bulk_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "0a6eda1a5657eae045356dd768ae78d3c9ef39ef81e6dd58e9b170db6b418928",
+      "old_sidecar_sha256": "9d6977408603677f24b40ee520a3c7783650c0f3f6a88d95cac69a588be69fb5",
+      "changes": {
+        "events/typhoon_201608_kp57.4/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "b9c76e4feb3dc67a87bff395ffeb009b229efa8f164b11f535e9ecbac3ece46b",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "0a6eda1a5657eae045356dd768ae78d3c9ef39ef81e6dd58e9b170db6b418928",
+      "new_sidecar_sha256": "d86665e018430cbce5c259a1453fc7cafd01699c1e470f6a655ce2a5a54313f7",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "bffd4080d759e3e9b6367d4b3a56b408176e336a6a1ca1f7e6e0321f86f44a9d"
+    },
+    {
+      "path": "results\\phase2\\tokachi_kp57.4_historical_matrix_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "e2f8f4f02ff3736a3f4d36340d9619c1af5a88cffee9c0b3dd4cb62b79498751",
+      "old_sidecar_sha256": "a963310b7193d2185f5ff4fd3d3eabffc75e817f200b6415388306b7be100bbe",
+      "changes": {
+        "events/typhoon_201608_kp57.4/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "b9c76e4feb3dc67a87bff395ffeb009b229efa8f164b11f535e9ecbac3ece46b",
+          "finite_count": 63
+        }
+      },
+      "new_h5_sha256": "150427bc9dc0957359379e99219b3d5320b8531573e7f6cd4924076a83706973",
+      "new_sidecar_sha256": "c6b166164c9927a8715d81905316bf7f240af78f10e66440352fb7ef782c651a",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "122c35c5569ccd85244d919fd0ba2da96b1d34ef58dd4b5ab9bec124b03ea631"
+    },
+    {
+      "path": "results\\phase2\\tokachi_kp58.8_historical_bulk_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "18e018de2cb4255df6b1ce589771ba6133e5a4ea5de5a0b03417be93643bc4ec",
+      "old_sidecar_sha256": "83d09579f723197c218a2b2a923cba2f1ca53e58d9302ea8cbf993f2c52ffe59",
+      "changes": {
+        "events/typhoon_201608_kp58.8/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "520e663845aa394fa508250e65c77885f4bffa3de226575c7757059a61964a05",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "18e018de2cb4255df6b1ce589771ba6133e5a4ea5de5a0b03417be93643bc4ec",
+      "new_sidecar_sha256": "1577061d45155880119e716b724a4fab74acc8283344f42e1a7f0d797f53aefd",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "95d21a3c3357d16027b71f5ba4841fe9719a9580e9225afb759c5d495af94ce7"
+    },
+    {
+      "path": "results\\phase2\\tokachi_kp58.8_historical_matrix_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "642addffa1218be3f51c39383a1272a1e90908f23da971efffd1001be36cb11c",
+      "old_sidecar_sha256": "8a73a9867a96f78fd0f3a6830ea4f6389ef2ea5837ba00977d40e0cfb947a3d2",
+      "changes": {
+        "events/typhoon_201608_kp58.8/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "520e663845aa394fa508250e65c77885f4bffa3de226575c7757059a61964a05",
+          "finite_count": 5512
+        }
+      },
+      "new_h5_sha256": "e93ef285b94001f17a4e5977f6cef5d6f989d65fe32617f206a087e6a90f1ac1",
+      "new_sidecar_sha256": "d1b410d0b95f6627efba3d1d4260ae960bc506506052bc8a9a3e207cef7ad085",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "39cd3c3ea172784b93f9288157d39bb17ed6ee33307ec925b50dc265436cf063"
+    },
+    {
+      "path": "results\\phase2\\tokachi_kp60.0_historical_bulk_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "815dc8d45ed705e30f59ed50481f577d9010581880ca9e2424bc3e628487d13b",
+      "old_sidecar_sha256": "109cd5945b69d59e4b6918d06142f58c0454ace32b942c4a17e7e3428d562248",
+      "changes": {
+        "events/typhoon_201608_kp60/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "6c63efefe54518276c85a6b42836aaf8a413ac5966eaaa6ac62d082dc0c0afce",
+          "finite_count": 23
+        }
+      },
+      "new_h5_sha256": "f7b83783fd5608f3959dee66fe54402d211dcdfdf0ea0e18114aeff10030e74c",
+      "new_sidecar_sha256": "4b2a74a6606270ee68ccf881f6927db92d4d1eb9540eb9fa2c8a3970fac83632",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "6dc724edd7c8e254b054c81d92ea136223fa38b9c6e1199659655e1feeaf746b"
+    },
+    {
+      "path": "results\\phase2\\tokachi_kp60.0_historical_matrix_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "be2563755e0c22f0bbfb2f14631590a6af2257ce4886bced4df75f2654955ca3",
+      "old_sidecar_sha256": "2d123d1f6dbb78f6e6574a693d03fc2378958a8e835b6ecfc8de7861bab7b60b",
+      "changes": {
+        "events/typhoon_201608_kp60/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "6c63efefe54518276c85a6b42836aaf8a413ac5966eaaa6ac62d082dc0c0afce",
+          "finite_count": 3244
+        }
+      },
+      "new_h5_sha256": "6d1a8899b51f1e68ea5b34d4381fb41661bbe8563210f55b6bbebd82e357d6ed",
+      "new_sidecar_sha256": "3b4f3733aa6e199da85b50976fc5c4cbda1c9f65fd525445aeaf87c34496e680",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "fbea02efd0e49a6f55062d4fbfa4128ecc9f857c7907712e7a504e9edd6f338f"
+    },
+    {
+      "path": "results\\phase2\\tokachi_kp62.0_historical_bulk_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "3781d68068f31d63fb4b3cbcebf29974cdf8f2721daba3ff35d08a50f3eeb10a",
+      "old_sidecar_sha256": "be03903e8ae8dd8620ade4b041d8365660fcc3087463b1eac3dc4f567cf707d4",
+      "changes": {
+        "events/typhoon_201608_kp62/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "30e221ceab337aa1d90f1207ecabb3927561bf335e98c91e6a8cd2492879a125",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "3781d68068f31d63fb4b3cbcebf29974cdf8f2721daba3ff35d08a50f3eeb10a",
+      "new_sidecar_sha256": "99ac7ea1fc3ea5667eff6f0d63caf90db7c636fe3dbe31d2262f2bdff14811d6",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "df0e1228f081fc8a459bcfb14696f76d4a7888c2ae1618f29ff237c70d9ebaf1"
+    },
+    {
+      "path": "results\\phase2\\tokachi_kp62.0_historical_matrix_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "18658e5b4fa02a9588972670220f45895db1ae2c274342b4e25a240ec2e7512e",
+      "old_sidecar_sha256": "35901b05fc51fab0d22333fb6936c386c19147ea97f23019bedfa13b4a6cb268",
+      "changes": {
+        "events/typhoon_201608_kp62/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "30e221ceab337aa1d90f1207ecabb3927561bf335e98c91e6a8cd2492879a125",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "18658e5b4fa02a9588972670220f45895db1ae2c274342b4e25a240ec2e7512e",
+      "new_sidecar_sha256": "a09fbf7388256a0c5e7f3e99a3c414a5c75181bfba890837363fe98a43e401c6",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "e8989aeb6f6475a3f863954155a89d97cb4a5f95560f0c4dc17a015777762e05"
+    },
+    {
+      "path": "results\\phase2_anchor_rating\\tokachi_kp57.4_historical_matrix_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "9de7e1bcfa4a2361ce34209a984da5ffa2e3963c865d40554f20c371aef0f9da",
+      "old_sidecar_sha256": "606311a1734ce3e9a641ea98a77f7bf2b57bb36418e0993f0bbc0889179e8dce",
+      "changes": {
+        "events/typhoon_201608_kp57.4/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "ad566136c34e45d9081599e87b68ac7b1d119a8ecc974969169be2bf82167f7a",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "9de7e1bcfa4a2361ce34209a984da5ffa2e3963c865d40554f20c371aef0f9da",
+      "new_sidecar_sha256": "907b54f4400f3de673c66cd241408d68281b3531fa2d1b02762c5ef7992d0116",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "c61ff56595a26e6b16d962f38c83e11521ff36bcf9d668c361e94bc08999c369"
+    },
+    {
+      "path": "results\\phase2_anchor_rating\\tokachi_kp58.8_historical_matrix_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "a0454a9c9955b62e87f399219920ad34d139475f7c003e79371f9d00e27eac4d",
+      "old_sidecar_sha256": "099f11a3d3d47a67c385704544e07d369dd9727ecc9a4bb8002d02084d7fe9a3",
+      "changes": {
+        "events/typhoon_201608_kp58.8/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "e28c18def31503ed24764a6288735ed1673cf29dd1c6ad3f39d5f9c0e7ce62db",
+          "finite_count": 6082
+        }
+      },
+      "new_h5_sha256": "7c1371d183522a8df2ed898d0275787430724c20b027d8d99dffcc8452974188",
+      "new_sidecar_sha256": "d3068c05d40654df79177daaf7bf617086a653a94ffaa083e7242332bb2b73cd",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "7e1f9e6da67190fcb2f14de14f9cd74deca797b5f9708fbdb8b3364858ba46c3"
+    },
+    {
+      "path": "results\\phase2_anchor_rating\\tokachi_kp60.0_historical_matrix_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "636bff8f372163745f10b6dedac4bf75a17cf3467e648cd9745fca96c152e346",
+      "old_sidecar_sha256": "a97928efc3c1f01d1b798f7111398055a12ce1b54d39f0149d95dbcea44000ff",
+      "changes": {
+        "events/typhoon_201608_kp60/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "47a09a97b071373a152c0578b0ebbdacefe7789bcc8d22b1fb938415ac743660",
+          "finite_count": 102
+        }
+      },
+      "new_h5_sha256": "fdfe10acc9ccbdd1412caf2fecdf4815398efa323913fd5763d4aae1a5795807",
+      "new_sidecar_sha256": "bed584a0af9a36e24785bb62cf949e739ae0135e324470eba350a9323e04196c",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "bf88460b1e4c8b7242a98e43dc35eee03a036e1894c239003c0eea4a2db2d285"
+    },
+    {
+      "path": "results\\phase2_anchor_rating\\tokachi_kp62.0_historical_matrix_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "9f3d702757677309e1bac983a60cfc9f3737aff7fd053c418ba1c56bc36ec13f",
+      "old_sidecar_sha256": "8b5d908e30e74e729fd6380ba8a5fe0dab05a5680601ae872508aee4fc19ad11",
+      "changes": {
+        "events/typhoon_201608_kp62/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "9467651945c6be419f7d5e39977d72b4e6dcbf1758b4f68a594407ce307637e4",
+          "finite_count": 9
+        }
+      },
+      "new_h5_sha256": "0ce77503ccb7306fb8ce69e02f19edb142ba57062d056893a3358f883fe54f69",
+      "new_sidecar_sha256": "93441d3b63c1bfccea7236737f4ab97c975fd2dcb718c1d199babf563bdae2b3",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "8eb11d6ef1339ae9534acfee5818a0cc6dcdffc05f1d39014689154332606561"
+    },
+    {
+      "path": "results\\phase2_no_initiation\\tokachi_kp57.4_historical_matrix_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "ed17f76c1baf767c23c8ef3f606aecdf9940d7d4359494a2d00e90e5d2b2953b",
+      "old_sidecar_sha256": "e310d44d24af5840e44fad6a64c4cabc9e5aefabbedab1efd71c05753fc1f942",
+      "changes": {
+        "events/typhoon_201608_kp57.4/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "b9c76e4feb3dc67a87bff395ffeb009b229efa8f164b11f535e9ecbac3ece46b",
+          "finite_count": 63
+        }
+      },
+      "new_h5_sha256": "9485cb156cb472c2a4491d6e2524a5602e80818408d46da0a36e7346718e9be6",
+      "new_sidecar_sha256": "d1758ef000a159b7ca2acf43d44b0d63466b44f2c220200cbd3da04d0b18ae5f",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "35b3125df1ddfabc1434dc1f0069f68a9a2043a2fd4da9ed0c5c4574e4637cdc"
+    },
+    {
+      "path": "results\\phase2_no_initiation\\tokachi_kp58.8_historical_matrix_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "b6b53d3c84ad31ceb4b7013f9d66207b5613d9964a826552c4e9422d9805fce2",
+      "old_sidecar_sha256": "2674005703d711d1fc13267c64a6bb488f23f7d6fb57b2e8e903e452ac2c77bf",
+      "changes": {
+        "events/typhoon_201608_kp58.8/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "520e663845aa394fa508250e65c77885f4bffa3de226575c7757059a61964a05",
+          "finite_count": 5512
+        }
+      },
+      "new_h5_sha256": "86a2dd643124838d501c01fe6eeb1b05f722e120588081b741124c6533a1b67c",
+      "new_sidecar_sha256": "322b3bcf6ef495a51a5681d822920de52d0b9b2c3577354055fb19236eb60e6b",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "4ddd31d1254c3e101fd6fb5b977ff21b5884488ca3620d0d121b71b3145dabb0"
+    },
+    {
+      "path": "results\\phase2_no_initiation\\tokachi_kp60.0_historical_matrix_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "7b478998f4e063079122d99187c134b148b48587d45f5d6aad6b5b9052624bf4",
+      "old_sidecar_sha256": "27bf0fa0b99b027517cbb91228fd5431b11b9873e1121163f7792979190e47bb",
+      "changes": {
+        "events/typhoon_201608_kp60/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "6c63efefe54518276c85a6b42836aaf8a413ac5966eaaa6ac62d082dc0c0afce",
+          "finite_count": 3244
+        }
+      },
+      "new_h5_sha256": "9c90ffd813639d4232d007976897b56f4744fa793147ef8892eb5da7d002e189",
+      "new_sidecar_sha256": "c72817df38fa0be3933e6260e14ce8babce8c5deb040b554f4da4104b05e3221",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "73bdf000e4181f6bd9fc5a080de78b939be0e4c5f743b37d7d62e44562ebf25b"
+    },
+    {
+      "path": "results\\phase2_no_initiation\\tokachi_kp62.0_historical_matrix_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "aeb89c62d493573f73cc708a9389951e65ca360d7306789f42a2132dc4a0a072",
+      "old_sidecar_sha256": "3be1fd33ce2c607ec0fdcdf6e065ce962412a34bcaaff16a1e38a8d39617a3d6",
+      "changes": {
+        "events/typhoon_201608_kp62/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "30e221ceab337aa1d90f1207ecabb3927561bf335e98c91e6a8cd2492879a125",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "aeb89c62d493573f73cc708a9389951e65ca360d7306789f42a2132dc4a0a072",
+      "new_sidecar_sha256": "bc5fa4e040229af818ef1319727e0b3954764addf92e66e5c1e926cbc228af3f",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "a256f2e57dc5ea70682f85fb0266f5b681658fbe4bf8d64e3e846c13672a262b"
+    },
+    {
+      "path": "results\\sensitivity\\adr0046_ztoe\\phase2\\tokachi_kp58.8_historical_matrix_ztoe_minus0.30m_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "1c3aa9e1b83c0fda65faa42fc89b8b0298bd282b33c164e134e41e8b7f119099",
+      "old_sidecar_sha256": "403c9121a78c1809eb62767f23810343f21b87f10618563fbb0d272bbf8e1072",
+      "changes": {
+        "events/typhoon_201608_kp58.8/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "520e663845aa394fa508250e65c77885f4bffa3de226575c7757059a61964a05",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "1c3aa9e1b83c0fda65faa42fc89b8b0298bd282b33c164e134e41e8b7f119099",
+      "new_sidecar_sha256": "52b1cfb8aa9cde93fbb1f9788ad5975b357ab44af0656f4b17e670b9aadac4c7",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "51dda1d547976678538d864f203fe0e2f624f1b7a44a199521cdac7a795ea932"
+    },
+    {
+      "path": "results\\sensitivity\\adr0046_ztoe\\phase2\\tokachi_kp58.8_historical_matrix_ztoe_plus0.30m_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "215e01c090a7bcf4ff6fb4098c922ab2515160251d2c5c3bdf37f81ce8d66a03",
+      "old_sidecar_sha256": "db95e0c88bf457cb192e43a19b81b84fb28b78719735b59e9e1c16e1ffd56f73",
+      "changes": {
+        "events/typhoon_201608_kp58.8/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "520e663845aa394fa508250e65c77885f4bffa3de226575c7757059a61964a05",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "215e01c090a7bcf4ff6fb4098c922ab2515160251d2c5c3bdf37f81ce8d66a03",
+      "new_sidecar_sha256": "ad0b00422b41cf6561dc5e9869bde3e6762c4ebc9ca83894bf07f22767c3b5d2",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "2c941ff2e0c4c1277d43b8bb9d9dee69983ea8f3924ef72f371f61319cb4ed92"
+    },
+    {
+      "path": "results\\sensitivity\\adr0046_ztoe\\phase2\\tokachi_kp60.0_historical_matrix_ztoe_minus0.30m_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "fa51ed582df9141f27f5f0a69e4351716045d76147f1ac492128b567568aa4ad",
+      "old_sidecar_sha256": "f0c894a41e121ce473a05ad50629b0be5f66656f396e8292702ab69c246a9d84",
+      "changes": {
+        "events/typhoon_201608_kp60/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "6c63efefe54518276c85a6b42836aaf8a413ac5966eaaa6ac62d082dc0c0afce",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "fa51ed582df9141f27f5f0a69e4351716045d76147f1ac492128b567568aa4ad",
+      "new_sidecar_sha256": "8892a24ad83e8ae747479b2e3e4e617c106b402073f5f7392bd65d4b91e6ebe8",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "8ad775f271eeaa74f62f0ae6dac621ce7a0f52838ada9d25ce7d82e0a0a3e3c9"
+    },
+    {
+      "path": "results\\sensitivity\\adr0046_ztoe\\phase2\\tokachi_kp60.0_historical_matrix_ztoe_plus0.30m_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "6b03db9af78451e5dd73e4ddf5f55761b04c36b46ca814979a7a2d8764e351a1",
+      "old_sidecar_sha256": "34bab027e297fae4f13c6ca5185c3ade5ee56abe36d31706515a3d0a67412549",
+      "changes": {
+        "events/typhoon_201608_kp60/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "6c63efefe54518276c85a6b42836aaf8a413ac5966eaaa6ac62d082dc0c0afce",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "6b03db9af78451e5dd73e4ddf5f55761b04c36b46ca814979a7a2d8764e351a1",
+      "new_sidecar_sha256": "b3f51f881ea045da3c2d8404682f72481cd6ac23c903447cf164fc481fd572f4",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "cf9b29115f969370716296e1b0f29f2efc6cfadc1c8ec3f66337fbb109d8de1d"
+    },
+    {
+      "path": "results\\sensitivity\\adr0050_drained_bracket\\phase2\\tokachi_kp58.8_historical_bulk_berm_only_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "151c2c7a2d31112be3ab321721f203bd2e652b6501841469736394f124279e59",
+      "old_sidecar_sha256": "b9d2f6e0abf635def60408a2aa21141afcd76667906d20673e4c28b6c497779d",
+      "changes": {
+        "events/typhoon_201608_kp58.8/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "520e663845aa394fa508250e65c77885f4bffa3de226575c7757059a61964a05",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "151c2c7a2d31112be3ab321721f203bd2e652b6501841469736394f124279e59",
+      "new_sidecar_sha256": "faa306d6b8fb8924ecd021c8c22b9514f1e320b59dd97f4348389a6dab9d7f20",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "039391550788aabccdb387348b60f361f9b1d40595cd752e792753ea35b2f3b3"
+    },
+    {
+      "path": "results\\sensitivity\\adr0050_drained_bracket\\phase2\\tokachi_kp58.8_historical_bulk_joint_0.20_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "e4ef2f533fee5dce68317c5381410a587181464a8b71cc7e114e0faf9124da65",
+      "old_sidecar_sha256": "51c4a35d5c657e3b449cedb9a9132c5535c1504a2f5557435bc1e8f96dcfba34",
+      "changes": {
+        "events/typhoon_201608_kp58.8/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "520e663845aa394fa508250e65c77885f4bffa3de226575c7757059a61964a05",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "e4ef2f533fee5dce68317c5381410a587181464a8b71cc7e114e0faf9124da65",
+      "new_sidecar_sha256": "7e8b0570681e08566cbf391e59daf143b46eb27556b503dbbe2af99aa3f3450f",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "bd40a6c057ca7ec5838d22fe0f0e187349ceb395797282e5c234fc7f42e57ace"
+    },
+    {
+      "path": "results\\sensitivity\\adr0050_drained_bracket\\phase2\\tokachi_kp58.8_historical_bulk_joint_0.40_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "8457fe56c2a7cfb793050d0f3461f7214215407044f16c29d57f4e7fbeadb917",
+      "old_sidecar_sha256": "58c7fe8a04188456a13c78d95b2235ee74a5976a56c4655ba482d582774c46ed",
+      "changes": {
+        "events/typhoon_201608_kp58.8/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "520e663845aa394fa508250e65c77885f4bffa3de226575c7757059a61964a05",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "8457fe56c2a7cfb793050d0f3461f7214215407044f16c29d57f4e7fbeadb917",
+      "new_sidecar_sha256": "95df296c7d48a50b6757c9426a17aefc349c9c100ba4413c82dff4732045e890",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "31dc70a5e5a7c984ae40cc4ed42e6c0c474d54126888c3006d933a544b38f40a"
+    },
+    {
+      "path": "results\\sensitivity\\adr0050_drained_bracket\\phase2\\tokachi_kp58.8_historical_bulk_joint_0.60_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "595090521b7ff3a6cebf096c31d4ae088f4b7c98340522298e2f6e085ff235be",
+      "old_sidecar_sha256": "831cdad6c697bd71075fb5199b5bb568cff4adb03877e56b0d125e1f4d2fdb79",
+      "changes": {
+        "events/typhoon_201608_kp58.8/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "520e663845aa394fa508250e65c77885f4bffa3de226575c7757059a61964a05",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "595090521b7ff3a6cebf096c31d4ae088f4b7c98340522298e2f6e085ff235be",
+      "new_sidecar_sha256": "97d635727ef3b279f8001c87f6f63fba069b738190d1f77af847509cd66b2e32",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "930b0941effbd7f9f25dc994ab566ffc7e649c411aab77826a8dc1fe99f71540"
+    },
+    {
+      "path": "results\\sensitivity\\adr0050_drained_bracket\\phase2\\tokachi_kp58.8_historical_bulk_joint_0.80_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "88a8e47bc4bdebdfb96c01b9483155bd9531b37b45b92e019e50e5723c90f924",
+      "old_sidecar_sha256": "88deff34b672f85ced5e129fa10fbb05354925c0cafb238d29280fb9be5e9811",
+      "changes": {
+        "events/typhoon_201608_kp58.8/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "520e663845aa394fa508250e65c77885f4bffa3de226575c7757059a61964a05",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "88a8e47bc4bdebdfb96c01b9483155bd9531b37b45b92e019e50e5723c90f924",
+      "new_sidecar_sha256": "02fe0df22f8ed05f9df703ce5fc0402ee62d413ccfcf167126ed387a306a4d73",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "11b4fb38e2509f361f276318aa97eb837ead94e495e1514a9507205fca1be452"
+    },
+    {
+      "path": "results\\sensitivity\\adr0050_drained_bracket\\phase2\\tokachi_kp58.8_historical_matrix_berm_only_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "0974fb98f15c9d32aa07d5ed8aa1b20b242f82b993d26eae333b38f69cf1219c",
+      "old_sidecar_sha256": "d7b72ea9bbfd6ca39e5fb86e6e10ff2073439d4abf99ec0baf2447071a6bcd71",
+      "changes": {
+        "events/typhoon_201608_kp58.8/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "520e663845aa394fa508250e65c77885f4bffa3de226575c7757059a61964a05",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "0974fb98f15c9d32aa07d5ed8aa1b20b242f82b993d26eae333b38f69cf1219c",
+      "new_sidecar_sha256": "bacec894b2dac894f153c9952af53571987f783c56c1b381fb7d1ab0d1c17fa7",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "d809c91f819b24f687e34f6e6b56675a7e9b4ea7c20272952e0016bf95a93613"
+    },
+    {
+      "path": "results\\sensitivity\\adr0050_drained_bracket\\phase2\\tokachi_kp58.8_historical_matrix_joint_0.20_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "5a108602d8214493103220b231f1aaed4dfbebf57609756a3e22f51de5b0905b",
+      "old_sidecar_sha256": "fae502ce3accaf2a997eb2d3ca4d94b6be286b223a97576d137438dd1769f96a",
+      "changes": {
+        "events/typhoon_201608_kp58.8/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "520e663845aa394fa508250e65c77885f4bffa3de226575c7757059a61964a05",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "5a108602d8214493103220b231f1aaed4dfbebf57609756a3e22f51de5b0905b",
+      "new_sidecar_sha256": "c69bbfdf5f8ec847a58b8b6c2551eb0d9292b04fc794953781f9e6e88e4dd5fa",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "0fd38d3edf4cab02e789f4bc9a63ede8082aadfa07be130acf030bc0404eb045"
+    },
+    {
+      "path": "results\\sensitivity\\adr0050_drained_bracket\\phase2\\tokachi_kp58.8_historical_matrix_joint_0.40_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "e130006d859ac6c6afc211ebbf56a9eb971756f8ef1158a4235c9e06aee72146",
+      "old_sidecar_sha256": "596bdf8386cca4427fb4c418640cc95864c6f328de547a38a0e05e432f51954d",
+      "changes": {
+        "events/typhoon_201608_kp58.8/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "520e663845aa394fa508250e65c77885f4bffa3de226575c7757059a61964a05",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "e130006d859ac6c6afc211ebbf56a9eb971756f8ef1158a4235c9e06aee72146",
+      "new_sidecar_sha256": "1fbd682046d9ba7ae8f4bcd05baad1dce6f1e8ff4c9e590da74d88ba1bebad30",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "5e71168b422febf9c1c2f60b49a72cea4e1e8a32a89a32879820f93d7885ecb6"
+    },
+    {
+      "path": "results\\sensitivity\\adr0050_drained_bracket\\phase2\\tokachi_kp58.8_historical_matrix_joint_0.60_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "d04dbfb750da856f8f15a0debf26729bfb82a03edb1ca929c19319cdc4bcf241",
+      "old_sidecar_sha256": "c1d8c1758af2e33f56d3c05ae8bed394653931bbe391f487d03b1c4ebfc0469d",
+      "changes": {
+        "events/typhoon_201608_kp58.8/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "520e663845aa394fa508250e65c77885f4bffa3de226575c7757059a61964a05",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "d04dbfb750da856f8f15a0debf26729bfb82a03edb1ca929c19319cdc4bcf241",
+      "new_sidecar_sha256": "eabe56eb139f3f304c7b12268114a3bca79f23fd90acae163f1b16263bc4116c",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "fd105cd8410341753a09e31680b11bd2ed396a8f525214acd0fa71b88bed8860"
+    },
+    {
+      "path": "results\\sensitivity\\adr0050_drained_bracket\\phase2\\tokachi_kp58.8_historical_matrix_joint_0.80_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "388ce5dd4d22f61ec89efc671f9119eb0ca79bf87efa7e8f0220f744efac9348",
+      "old_sidecar_sha256": "6a65f19f02ad7867e5985ea2f8c695b8b9a5a3bf5d04e8b0600a096bf793637e",
+      "changes": {
+        "events/typhoon_201608_kp58.8/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "520e663845aa394fa508250e65c77885f4bffa3de226575c7757059a61964a05",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "388ce5dd4d22f61ec89efc671f9119eb0ca79bf87efa7e8f0220f744efac9348",
+      "new_sidecar_sha256": "1e8345702cdbda40e292dce086bfddf8c04175805dd2efd6f01feeb5e470b937",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "31c782b3ae823570249131471efa2ded3b97b68a038d3027fa30ab7c4bfd0ae6"
+    },
+    {
+      "path": "results\\sensitivity\\adr0050_drained_bracket\\phase2\\tokachi_kp60.0_historical_bulk_berm_only_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "aa50a99aa0d4a0e455e69d06ca7e88645d3bcb1b9f5864cc6f18cfce386de6e8",
+      "old_sidecar_sha256": "ab2c092cb305805fd718562165664840000eba8366ebaaab7ba865465082ad5d",
+      "changes": {
+        "events/typhoon_201608_kp60/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "6c63efefe54518276c85a6b42836aaf8a413ac5966eaaa6ac62d082dc0c0afce",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "aa50a99aa0d4a0e455e69d06ca7e88645d3bcb1b9f5864cc6f18cfce386de6e8",
+      "new_sidecar_sha256": "bc323f02a3758d97b14e92f040ddb4c4c2f23bdfe29508f4e0aad6ceb628db99",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "6f2b846500aa0f743891c54ff3280d9fc5fdf91df61517dc16ac7de91294e074"
+    },
+    {
+      "path": "results\\sensitivity\\adr0050_drained_bracket\\phase2\\tokachi_kp60.0_historical_bulk_joint_0.20_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "559d3435e55328ea43f1409f986eada0cbef3a7dad1a6c6ac1e219904b445333",
+      "old_sidecar_sha256": "715cf7529c4aeea8ab3586207a0ed43dac5a0f45194607495b3ce12db678c2bf",
+      "changes": {
+        "events/typhoon_201608_kp60/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "6c63efefe54518276c85a6b42836aaf8a413ac5966eaaa6ac62d082dc0c0afce",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "559d3435e55328ea43f1409f986eada0cbef3a7dad1a6c6ac1e219904b445333",
+      "new_sidecar_sha256": "50bdf4405ceadcdb5ca1f216debf6427bda285b46876d107c8b8c6665e1a4603",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "eb9fbf1a61b5ddad0db68ddd6677a99691eeaf74cc715a5a761c9b221489caab"
+    },
+    {
+      "path": "results\\sensitivity\\adr0050_drained_bracket\\phase2\\tokachi_kp60.0_historical_bulk_joint_0.40_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "5595119aeddbc006368da6f8107a40b8f5b299f5aeb2055edb97c19caa75f989",
+      "old_sidecar_sha256": "80d287658c1abcb51274569aa8b5bc9db670f9b47f2677ab57f2146175520ce0",
+      "changes": {
+        "events/typhoon_201608_kp60/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "6c63efefe54518276c85a6b42836aaf8a413ac5966eaaa6ac62d082dc0c0afce",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "5595119aeddbc006368da6f8107a40b8f5b299f5aeb2055edb97c19caa75f989",
+      "new_sidecar_sha256": "387e0dc8aadb85b3ab798069ac4acd15d8c0575e61299d659654619a6a9e82ef",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "dffd8ee3b8fef06e91559a04e674f1f6f7262e952fea0d12256661a025db725d"
+    },
+    {
+      "path": "results\\sensitivity\\adr0050_drained_bracket\\phase2\\tokachi_kp60.0_historical_bulk_joint_0.60_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "c642d89baa273bfff2d3acdb633d7c5ce019744e939a7615910f5419172601cd",
+      "old_sidecar_sha256": "2290aa0bbfb491c7294dbabd316f8ba435f9dcc6ac1ad1dcee42c9cdada63e3c",
+      "changes": {
+        "events/typhoon_201608_kp60/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "6c63efefe54518276c85a6b42836aaf8a413ac5966eaaa6ac62d082dc0c0afce",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "c642d89baa273bfff2d3acdb633d7c5ce019744e939a7615910f5419172601cd",
+      "new_sidecar_sha256": "d5835b3c3c8743a42851b202715b2551d1a2ccdf73fede7ab3bc36bf27478ba8",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "1a7492f84e5fea4d11901af2af3e696d4f82daabaf2004dfc550f869087a93c4"
+    },
+    {
+      "path": "results\\sensitivity\\adr0050_drained_bracket\\phase2\\tokachi_kp60.0_historical_bulk_joint_0.80_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "7234886867c8f5b8cc9ba7c4169868fdf3729b4d69497f1bd0061064099b9b62",
+      "old_sidecar_sha256": "b82d24734cfa32290f277ca50e6014cbba9d8db604d6d38205c5baded3eb4014",
+      "changes": {
+        "events/typhoon_201608_kp60/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "6c63efefe54518276c85a6b42836aaf8a413ac5966eaaa6ac62d082dc0c0afce",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "7234886867c8f5b8cc9ba7c4169868fdf3729b4d69497f1bd0061064099b9b62",
+      "new_sidecar_sha256": "4e37cc4d03b0c7ba43fa2200eed1e72443b31cfe4367ef215b1ff0eec4e70769",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "35dc2c452f88eb8a47e1d0791b606000664a6de33ae3ad064effaa208ea604f3"
+    },
+    {
+      "path": "results\\sensitivity\\adr0050_drained_bracket\\phase2\\tokachi_kp60.0_historical_matrix_berm_only_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "64900c23cee28c407bfb0acbfe6483bb68f81ea4b33651cc69a5e982625661e4",
+      "old_sidecar_sha256": "6ff9792cfa5e75bfcd997fd35afdf8f248ff8ec9d994189698fb1b83aba7d059",
+      "changes": {
+        "events/typhoon_201608_kp60/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "6c63efefe54518276c85a6b42836aaf8a413ac5966eaaa6ac62d082dc0c0afce",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "64900c23cee28c407bfb0acbfe6483bb68f81ea4b33651cc69a5e982625661e4",
+      "new_sidecar_sha256": "4b3513070cc475d0f7b5a6aa10ff782eea9617e0feec31feef3e2af4f1c53daa",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "d5ff5649d8eadb8ff80d0660ae6b3d87862cc6741d3be573bdea1b8106aef655"
+    },
+    {
+      "path": "results\\sensitivity\\adr0050_drained_bracket\\phase2\\tokachi_kp60.0_historical_matrix_joint_0.20_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "732e8bc02b75656aaed154a6042c5736dc5b39b47cc86c5e1b32e1ee724cb995",
+      "old_sidecar_sha256": "904cae0279f4a61f6851a72689e07af36b65d9de3892571d7c3a95ab33f45f52",
+      "changes": {
+        "events/typhoon_201608_kp60/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "6c63efefe54518276c85a6b42836aaf8a413ac5966eaaa6ac62d082dc0c0afce",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "732e8bc02b75656aaed154a6042c5736dc5b39b47cc86c5e1b32e1ee724cb995",
+      "new_sidecar_sha256": "4a7997fb4de7bc2d3dbd21a2bac4c75c39ea9c534084984156ba7fe3077e5e36",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "da90b832163d8596916d08e3ea633eb155e206340102e5b5af4886bf695eb167"
+    },
+    {
+      "path": "results\\sensitivity\\adr0050_drained_bracket\\phase2\\tokachi_kp60.0_historical_matrix_joint_0.40_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "42746718eb0f745ad772b30fa591a02c60ab009445d277da0e015652dca41cfb",
+      "old_sidecar_sha256": "4a65662cb2f39f2e1685941a71754bd0be67d6ff9aedbcdc6e026173f304b6cd",
+      "changes": {
+        "events/typhoon_201608_kp60/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "6c63efefe54518276c85a6b42836aaf8a413ac5966eaaa6ac62d082dc0c0afce",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "42746718eb0f745ad772b30fa591a02c60ab009445d277da0e015652dca41cfb",
+      "new_sidecar_sha256": "7cb3ab482019a39f5945901e8e400af9f6c353be50ec407925e925f071288369",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "9d6f27480f63744785054da984f2adc2147d61ed5c90d110ef6137fe766ce8d2"
+    },
+    {
+      "path": "results\\sensitivity\\adr0050_drained_bracket\\phase2\\tokachi_kp60.0_historical_matrix_joint_0.60_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "8a87db7efc2f6fda32c70d4c5c75e4eae4edc50aeb2ff47b53269321fdabef13",
+      "old_sidecar_sha256": "9aec7b763d77b1e1169c32c03bb4cbb61c4c7cf86d373a55c8e70f939afb2d7f",
+      "changes": {
+        "events/typhoon_201608_kp60/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "6c63efefe54518276c85a6b42836aaf8a413ac5966eaaa6ac62d082dc0c0afce",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "8a87db7efc2f6fda32c70d4c5c75e4eae4edc50aeb2ff47b53269321fdabef13",
+      "new_sidecar_sha256": "5e00ff79a6b0c7c7a872c6469f8cfa2c5881acd434867de29f92fa7d18bf1a00",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "cbba64ab2cf3247ee880cf73826e4d84e2b2092b3c7d9f2b4eed87ac72cd9f3f"
+    },
+    {
+      "path": "results\\sensitivity\\adr0050_drained_bracket\\phase2\\tokachi_kp60.0_historical_matrix_joint_0.80_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "422c67cc9608998638fecfa96deb3c950194133c71d029d28a658ecb03b46ed6",
+      "old_sidecar_sha256": "833d88fb649c08a08a6fc911cdc3cd6b8cce332e10690a2f735f5709f7d5e922",
+      "changes": {
+        "events/typhoon_201608_kp60/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "6c63efefe54518276c85a6b42836aaf8a413ac5966eaaa6ac62d082dc0c0afce",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "422c67cc9608998638fecfa96deb3c950194133c71d029d28a658ecb03b46ed6",
+      "new_sidecar_sha256": "2959d88845c0b64bc8dbaa85928e4e3a66e00c80a1394278de70bd2a1b15e7aa",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "d80bfaae42c8534fe020490a5b50b327d62eea733be17c51096476abef48afba"
+    },
+    {
+      "path": "results\\sensitivity\\adr0052_foreland_credit\\phase2\\tokachi_kp57.4_historical_matrix_credit_full_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "566c5832120f7aa201dc4a0b6ac9c966de92fd95407743af02c9a94e2ea7bea9",
+      "old_sidecar_sha256": "d25733f224b2af35530a800aa2ab7e3f7ca7e105011552c1735523154b8e6370",
+      "changes": {
+        "events/typhoon_201608_kp57.4/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "b9c76e4feb3dc67a87bff395ffeb009b229efa8f164b11f535e9ecbac3ece46b",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "566c5832120f7aa201dc4a0b6ac9c966de92fd95407743af02c9a94e2ea7bea9",
+      "new_sidecar_sha256": "78d40c9ea444acc61d1223b25059f361ae8b78b28886f4c5df0e0f43febce0cf",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "23705cc6fd25b6f55cae7227682c5a8655e410b37644bddeac46d659b0945baa"
+    },
+    {
+      "path": "results\\sensitivity\\adr0052_foreland_credit\\phase2\\tokachi_kp57.4_historical_matrix_credit_half_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "1f979642cfaf018c1273ff804f26f03c99c288ff984512cd26445aefced9f431",
+      "old_sidecar_sha256": "6536ddea28b431e1aa793dcbf5d44a7fd5f27e545878ea81203ab5fc424d9694",
+      "changes": {
+        "events/typhoon_201608_kp57.4/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "b9c76e4feb3dc67a87bff395ffeb009b229efa8f164b11f535e9ecbac3ece46b",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "1f979642cfaf018c1273ff804f26f03c99c288ff984512cd26445aefced9f431",
+      "new_sidecar_sha256": "77bc786e3044f0c85f36b54492006aed0d08b858942f0795939e8b337e09c92b",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "a1c7c5a5dac3a3a273cccf4d090f9fc621b72b89623d2874fa2149801ccaa24b"
+    },
+    {
+      "path": "results\\sensitivity\\adr0052_foreland_credit\\phase2\\tokachi_kp58.8_historical_matrix_credit_full_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "622bc7fa4a7cb4e2da84fae4ef452ea3afa7e39cb27209365bf8e719b5b8f220",
+      "old_sidecar_sha256": "e5969eb31c29aee6f00c3326b98bee5cf8e956a8decd9c04c3bb29ae0d46fc69",
+      "changes": {
+        "events/typhoon_201608_kp58.8/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "520e663845aa394fa508250e65c77885f4bffa3de226575c7757059a61964a05",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "622bc7fa4a7cb4e2da84fae4ef452ea3afa7e39cb27209365bf8e719b5b8f220",
+      "new_sidecar_sha256": "95e767b78f05492702698c16455c0d5156d4f4a63cf97b2590ba8a6a6c28d8f6",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "5b46b4087ba9a4989c390370650261ffe8469ccf596caada12911c793cd705e0"
+    },
+    {
+      "path": "results\\sensitivity\\adr0052_foreland_credit\\phase2\\tokachi_kp58.8_historical_matrix_credit_half_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "6a897cad63c76f358e61185240537b79d95fe605661dc3b4769d468e396b504d",
+      "old_sidecar_sha256": "4b52a5807b5f119b40de340600bbfd5f52aad9645168e15717351fd175c0d3ef",
+      "changes": {
+        "events/typhoon_201608_kp58.8/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "520e663845aa394fa508250e65c77885f4bffa3de226575c7757059a61964a05",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "6a897cad63c76f358e61185240537b79d95fe605661dc3b4769d468e396b504d",
+      "new_sidecar_sha256": "879e3bf6abc64a3cf01e27c4f7ec2923250a8b41234f93187afdc35344e37d76",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "87a712e987127fec8534dfee16d284e0c4847ea2c04bb2a50a3a12de376db715"
+    },
+    {
+      "path": "results\\sensitivity\\adr0052_foreland_credit\\phase2\\tokachi_kp60.0_historical_matrix_credit_full_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "c8c4ce04737d2badfb7af8c76c2f4505e6e71456a06c96fe77e2ed69011c0809",
+      "old_sidecar_sha256": "be1431451400d2f26061f6e80f2c4e28067547a1972cb8678ca64cfb928fe209",
+      "changes": {
+        "events/typhoon_201608_kp60/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "6c63efefe54518276c85a6b42836aaf8a413ac5966eaaa6ac62d082dc0c0afce",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "c8c4ce04737d2badfb7af8c76c2f4505e6e71456a06c96fe77e2ed69011c0809",
+      "new_sidecar_sha256": "9ea77b337bb544ea5a6310828e97a2b9009e4824d794c04b07488ced9d19b499",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "d4e9c32b3b46fdb1cb9064113e632eca4309ed4e49017c145e979f085cfae80c"
+    },
+    {
+      "path": "results\\sensitivity\\adr0052_foreland_credit\\phase2\\tokachi_kp60.0_historical_matrix_credit_half_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "61983e91eb631e890482498a5d18a3471b404a4a76a5a6f4310f12ee59438b1a",
+      "old_sidecar_sha256": "f92e4964f38abbdd6630c7c031b46a832d95e7867519782f68ac8961017e3fce",
+      "changes": {
+        "events/typhoon_201608_kp60/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "6c63efefe54518276c85a6b42836aaf8a413ac5966eaaa6ac62d082dc0c0afce",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "61983e91eb631e890482498a5d18a3471b404a4a76a5a6f4310f12ee59438b1a",
+      "new_sidecar_sha256": "c4f7af42769fc766324270930dfc137f93c5e6ba97dad0bc706b0d6e2f41f891",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "6872fe09f964271f174e778ec5a403dee08403155b6975fe8b77e5e02dfc69d9"
+    },
+    {
+      "path": "results\\sensitivity\\adr0052_foreland_credit\\phase2\\tokachi_kp62.0_historical_matrix_credit_full_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "55fcd6d0a394b28ec7ab425d9aa0a22b5396a374a316adc56ae76fe2a3c62ed5",
+      "old_sidecar_sha256": "3803bd5f74828db0ce92442b99ae806606195188b6ba69715d760f53c44eadcb",
+      "changes": {
+        "events/typhoon_201608_kp62/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "30e221ceab337aa1d90f1207ecabb3927561bf335e98c91e6a8cd2492879a125",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "55fcd6d0a394b28ec7ab425d9aa0a22b5396a374a316adc56ae76fe2a3c62ed5",
+      "new_sidecar_sha256": "91c8bd09d6c93d27211b47df7fe4e1a9f03f627ad0d0f3d7af2d8257c5061dd9",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "0761890c06f2a1c4b0a08f024db57493920fe209d6bfdb312ca3117b803aa0e9"
+    },
+    {
+      "path": "results\\sensitivity\\adr0052_foreland_credit\\phase2\\tokachi_kp62.0_historical_matrix_credit_half_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "e1452b6010c15a1f8496a030181e8afbdee40eb42c49c96bec73d36e0c50876a",
+      "old_sidecar_sha256": "af791cc3ae84207dd3e8ca47100caf64f6fea2f71e2cbb1af82a47bf4e6ab9b9",
+      "changes": {
+        "events/typhoon_201608_kp62/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "30e221ceab337aa1d90f1207ecabb3927561bf335e98c91e6a8cd2492879a125",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "e1452b6010c15a1f8496a030181e8afbdee40eb42c49c96bec73d36e0c50876a",
+      "new_sidecar_sha256": "6e9ec51d5581190ae666737e36da478b75b62c987ff15c58deb1a62530b4d243",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "60ac25e139b32578ac47bac661f9e962c302f9c9731be0a7d98c0433278c3c03"
+    },
+    {
+      "path": "results\\sensitivity\\conductivity_posterior\\phase2\\tokachi_kp57.4_historical_bulk_gamma_bl_sub_lower_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "13a499881843c894b337f06ff68df12b39082271933c767ab100df56db8886c7",
+      "old_sidecar_sha256": "1fad0f3e1d781b9693f4cb739a105f94da13fefb0436b57e999fad19cf603e93",
+      "changes": {
+        "events/typhoon_201608_kp57.4/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "b9c76e4feb3dc67a87bff395ffeb009b229efa8f164b11f535e9ecbac3ece46b",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "13a499881843c894b337f06ff68df12b39082271933c767ab100df56db8886c7",
+      "new_sidecar_sha256": "229864da198d4bfb29e72f634ff357e81564549841a5a7d2f2bf8783aa988c23",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "92cfabc8ec040af7df2aa1a46a09c8081b5f5423be663583175c9d0e0a8d777b"
+    },
+    {
+      "path": "results\\sensitivity\\conductivity_posterior\\phase2\\tokachi_kp57.4_historical_bulk_k_aq_field_geomean_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "23dd40fa56a6ae556a881d22ac59c1f1d344a3eafb5c9bd21b23bcad87ad47fb",
+      "old_sidecar_sha256": "770ba868431436a85782181306e8964ae195713c5dd1507d85a189859e69cbca",
+      "changes": {
+        "events/typhoon_201608_kp57.4/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "b9c76e4feb3dc67a87bff395ffeb009b229efa8f164b11f535e9ecbac3ece46b",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "23dd40fa56a6ae556a881d22ac59c1f1d344a3eafb5c9bd21b23bcad87ad47fb",
+      "new_sidecar_sha256": "8200f5a0f336dc56993066722f97258d1742dc1bf799239cc16676fb6f8f0d2a",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "6432a24e222f7c868435d5646715899e427f3c911cee9f47a573663d0139520c"
+    },
+    {
+      "path": "results\\sensitivity\\conductivity_posterior\\phase2\\tokachi_kp57.4_historical_bulk_k_aq_field_toe_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "aa025693b471150c39bdb93ccc6070cb0ec1ae1e5a39e057275962d35439d95a",
+      "old_sidecar_sha256": "99df671ce6daa7260e4b18e3d2c022fdf13df91c9a8089a629bbd4ceb3684da6",
+      "changes": {
+        "events/typhoon_201608_kp57.4/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "b9c76e4feb3dc67a87bff395ffeb009b229efa8f164b11f535e9ecbac3ece46b",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "aa025693b471150c39bdb93ccc6070cb0ec1ae1e5a39e057275962d35439d95a",
+      "new_sidecar_sha256": "141a9687b8753cbcd36f17df63fe8ba5351cb00a28c4c2915678055e00afe28c",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "807998a3aa5db0f650c59cbd035b8330281b8ecb8c1892d144d24990d3e9e847"
+    },
+    {
+      "path": "results\\sensitivity\\conductivity_posterior\\phase2\\tokachi_kp57.4_historical_bulk_k_aq_regional_upper_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "721d1f76820fb98748a77cce32b92c5c5cf84db959c034b6fbda1b749dc94c5f",
+      "old_sidecar_sha256": "feb3ed2e1c85df9941950ef069e20fcee9789178269a00749915f21b1fb59e31",
+      "changes": {
+        "events/typhoon_201608_kp57.4/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "b9c76e4feb3dc67a87bff395ffeb009b229efa8f164b11f535e9ecbac3ece46b",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "721d1f76820fb98748a77cce32b92c5c5cf84db959c034b6fbda1b749dc94c5f",
+      "new_sidecar_sha256": "84595d1f9848b392ebdc07fa18e2b7276cfa71332c461abcc7516528c3828c79",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "b245bb09fb93865e3eb56e2e04816bd150d5eb574a351d3a37792b490309ff35"
+    },
+    {
+      "path": "results\\sensitivity\\conductivity_posterior\\phase2\\tokachi_kp57.4_historical_matrix_gamma_bl_sub_lower_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "2c064ebc18803a6e9238d5ebea66728a79c221aca6b3dcf7dd206d76d05d3380",
+      "old_sidecar_sha256": "4d777fdf16a9b8eb83c29863d1ffbb8b786e2fb2248cc1ce416f9cddb91a8031",
+      "changes": {
+        "events/typhoon_201608_kp57.4/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "b9c76e4feb3dc67a87bff395ffeb009b229efa8f164b11f535e9ecbac3ece46b",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "2c064ebc18803a6e9238d5ebea66728a79c221aca6b3dcf7dd206d76d05d3380",
+      "new_sidecar_sha256": "aee0ac4540633a5db17495f84ba735046011b1c14269e60c7c1a6f6984690d34",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "3d92b24d3344132380dcec8939f112fb142bfc405d613b98495d6fd6121bd8a5"
+    },
+    {
+      "path": "results\\sensitivity\\conductivity_posterior\\phase2\\tokachi_kp57.4_historical_matrix_k_aq_field_geomean_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "8bfd6e49499644f9ce0d1691e728497a7a472253240872291d73d72fe3d4e222",
+      "old_sidecar_sha256": "658747d632d674eddff707d2c07459c8a80f828a8c604449db24b2bf29053a66",
+      "changes": {
+        "events/typhoon_201608_kp57.4/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "b9c76e4feb3dc67a87bff395ffeb009b229efa8f164b11f535e9ecbac3ece46b",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "8bfd6e49499644f9ce0d1691e728497a7a472253240872291d73d72fe3d4e222",
+      "new_sidecar_sha256": "4396616c6eb659116c59fec4461a238fd6c258ad537b25ad9f830f77fe71ac49",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "370f8fc39b0725a329967d04e957ea4a6c98e2e68cc3428843dd9ff067c02fb8"
+    },
+    {
+      "path": "results\\sensitivity\\conductivity_posterior\\phase2\\tokachi_kp57.4_historical_matrix_k_aq_field_toe_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "4482ba1542bb95a6c0bd830926802a78894fa56e83276c3dc161b8f719801e1d",
+      "old_sidecar_sha256": "487d9b311d816296c75ace40b9fa6212916c5609ac869d38e547380853a4097a",
+      "changes": {
+        "events/typhoon_201608_kp57.4/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "b9c76e4feb3dc67a87bff395ffeb009b229efa8f164b11f535e9ecbac3ece46b",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "4482ba1542bb95a6c0bd830926802a78894fa56e83276c3dc161b8f719801e1d",
+      "new_sidecar_sha256": "d717f1b631c7ac0448d3807ea7e8eef78f0d43bfd8a4bf89c5a7c94eee0e3eaf",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "ac8827e1d9dfcc7234629679c929407ed2063473d9cc0e01a7b8c06c66706229"
+    },
+    {
+      "path": "results\\sensitivity\\conductivity_posterior\\phase2\\tokachi_kp57.4_historical_matrix_k_aq_regional_upper_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "72319dd563fa3a357481ed2553fbab9eed1f0f6e2a38297b32b7798e8e045645",
+      "old_sidecar_sha256": "3e576a8ae7f1e8ce8dead534ff8253abe91d0eb40759e8fff079c6ca47c0f7ca",
+      "changes": {
+        "events/typhoon_201608_kp57.4/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "b9c76e4feb3dc67a87bff395ffeb009b229efa8f164b11f535e9ecbac3ece46b",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "72319dd563fa3a357481ed2553fbab9eed1f0f6e2a38297b32b7798e8e045645",
+      "new_sidecar_sha256": "1a7d79b215c06bbba99e04e9ffa2c4e6605b3d50fe56a29038f2dde0354bc6f0",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "37f92c844da73ace7b25c55cd68e7096714634f22fe66f7591959202d26b866b"
+    },
+    {
+      "path": "results\\sensitivity\\conductivity_posterior\\phase2\\tokachi_kp58.8_historical_bulk_gamma_bl_sub_lower_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "07709343fe295827051ac48a9aec08af28664b1a4361cbc0d0645aeedf8a06f5",
+      "old_sidecar_sha256": "56a1b554d177ac8efbeefae8c23539fc81cd33f7c22ac83d42eaa65d29dcbb0d",
+      "changes": {
+        "events/typhoon_201608_kp58.8/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "520e663845aa394fa508250e65c77885f4bffa3de226575c7757059a61964a05",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "07709343fe295827051ac48a9aec08af28664b1a4361cbc0d0645aeedf8a06f5",
+      "new_sidecar_sha256": "3f4cb87e5a072d3dbe41b58db52b7a428e7ce25e6325cd5d6947e8374d46b5df",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "a93acc7f21199033c80f52e5c914c7fe082d1a92e855dc492436e0460adedab1"
+    },
+    {
+      "path": "results\\sensitivity\\conductivity_posterior\\phase2\\tokachi_kp58.8_historical_bulk_k_aq_field_geomean_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "3c08be8efed0ce822a6be0bce3bf6483cebf2a309d0a06f1875100d889479151",
+      "old_sidecar_sha256": "2c51cb95f19f119ee1b916d692d82b131d55b7e035fcf7d069967d1c785c8fb7",
+      "changes": {
+        "events/typhoon_201608_kp58.8/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "520e663845aa394fa508250e65c77885f4bffa3de226575c7757059a61964a05",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "3c08be8efed0ce822a6be0bce3bf6483cebf2a309d0a06f1875100d889479151",
+      "new_sidecar_sha256": "0b94170ddada56c7c70e4c20aeb148666d7e651472cca1c4425059581f0bed77",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "67efac3277e486b28f1d86ff69d191a795d775eee640468d646e16a5faa7eb17"
+    },
+    {
+      "path": "results\\sensitivity\\conductivity_posterior\\phase2\\tokachi_kp58.8_historical_bulk_k_aq_field_toe_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "d79957ca642243290861c7376832a98bcfb30014af14450f7011dbbcd9b0bdba",
+      "old_sidecar_sha256": "029ab6e5294928adc04d5f6853b208feac2f16f07e8c1b1ab3685ddc6f32fe4c",
+      "changes": {
+        "events/typhoon_201608_kp58.8/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "520e663845aa394fa508250e65c77885f4bffa3de226575c7757059a61964a05",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "d79957ca642243290861c7376832a98bcfb30014af14450f7011dbbcd9b0bdba",
+      "new_sidecar_sha256": "ba942eacb31dc63ea3cfba281da0a81659cb0b7e025fa7e415f5e214c273b128",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "2cf6ab0834285f2b7ae7d83ef196c053c9f15ff36d18074053309e81f6767c82"
+    },
+    {
+      "path": "results\\sensitivity\\conductivity_posterior\\phase2\\tokachi_kp58.8_historical_bulk_k_aq_regional_upper_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "4ab429ba37c3155733716137213387bbb6c681d0a8539d617831aa8b370528d3",
+      "old_sidecar_sha256": "f44b6ca92cf44a85e5e8060ad6b21b93f07dca5b561f50298e8e4a981112fc2b",
+      "changes": {
+        "events/typhoon_201608_kp58.8/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "520e663845aa394fa508250e65c77885f4bffa3de226575c7757059a61964a05",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "4ab429ba37c3155733716137213387bbb6c681d0a8539d617831aa8b370528d3",
+      "new_sidecar_sha256": "ffeccb8324d01e4f975f912249f7308059afeba768ac3c437401f7925f5e4580",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "4a056165b1bd3d63f1114f5ee5a13b24702de050def061c5314a27ebc3a0f9ad"
+    },
+    {
+      "path": "results\\sensitivity\\conductivity_posterior\\phase2\\tokachi_kp58.8_historical_matrix_gamma_bl_sub_lower_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "4a5c118749862fa58f7af41bf17d22f181780a3ca01359d39e5e14090552b05a",
+      "old_sidecar_sha256": "58653fd475110199e1a56aa9eca41981a41c9716be25e06d4addd5391d4598e2",
+      "changes": {
+        "events/typhoon_201608_kp58.8/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "520e663845aa394fa508250e65c77885f4bffa3de226575c7757059a61964a05",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "4a5c118749862fa58f7af41bf17d22f181780a3ca01359d39e5e14090552b05a",
+      "new_sidecar_sha256": "d2ec7d2012e50dc61194f489c28be36ada99ff35e5887a45846defe4e004388e",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "2ff028f3af9021d8066ca4e491ca29db78061d6d6fd5a299ab3b267e5719db77"
+    },
+    {
+      "path": "results\\sensitivity\\conductivity_posterior\\phase2\\tokachi_kp58.8_historical_matrix_k_aq_field_geomean_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "a348396f6ddf4982bcf10355f42e969521cb6a63ed7460b8a8bddf3d423a2005",
+      "old_sidecar_sha256": "86047ecde1969770056d3c575e90234fd0733cb60862e7be8dd21d007ae86828",
+      "changes": {
+        "events/typhoon_201608_kp58.8/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "520e663845aa394fa508250e65c77885f4bffa3de226575c7757059a61964a05",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "a348396f6ddf4982bcf10355f42e969521cb6a63ed7460b8a8bddf3d423a2005",
+      "new_sidecar_sha256": "54f7fbb2daf9294353e0338aaba1a6021185e2d02ef623a6c90e79df26483be5",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "cf74e8300378a15fa10d25c3c0e8415ea198e4585a925015043670ddd02adc32"
+    },
+    {
+      "path": "results\\sensitivity\\conductivity_posterior\\phase2\\tokachi_kp58.8_historical_matrix_k_aq_field_toe_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "e1e7a50aad983fc4a84537e407c58213189dd1d580e98793880869f13fb7b566",
+      "old_sidecar_sha256": "354e9c74823a1a62509e01cb851d360cbcc4fcb4b13a60904e15a8d51724aa97",
+      "changes": {
+        "events/typhoon_201608_kp58.8/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "520e663845aa394fa508250e65c77885f4bffa3de226575c7757059a61964a05",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "e1e7a50aad983fc4a84537e407c58213189dd1d580e98793880869f13fb7b566",
+      "new_sidecar_sha256": "7f65312909f318352a353a15e6c6bf13582c18cd6d4e70819b1c63a08c9a7b3d",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "72fba7bffb9f9a144f8b048d7769f42316b008eaa607c609aa7a4955f6b4b91c"
+    },
+    {
+      "path": "results\\sensitivity\\conductivity_posterior\\phase2\\tokachi_kp58.8_historical_matrix_k_aq_regional_upper_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "05c23971d42339d675406e00185f08245487ee09d9c2bdf5e36e174ccf1d810f",
+      "old_sidecar_sha256": "50c768e298d1695b2f2e334232dd2577cd948c6df935d60a0bd19bca06ae37d6",
+      "changes": {
+        "events/typhoon_201608_kp58.8/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "520e663845aa394fa508250e65c77885f4bffa3de226575c7757059a61964a05",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "05c23971d42339d675406e00185f08245487ee09d9c2bdf5e36e174ccf1d810f",
+      "new_sidecar_sha256": "11208215e0ec749aa16c5d829f3404945436c5c3737e26062ff12eec63a4fa0d",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "6cf990d944015c5fcb5b0b07b841303ab91c7721dbba083449ef6607b7f5fbe6"
+    },
+    {
+      "path": "results\\sensitivity\\conductivity_posterior\\phase2\\tokachi_kp60.0_historical_bulk_gamma_bl_sub_lower_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "23ea557a70b0e1da1b38ddabdbf8941e7261e4dbd14612798768629b9d3e30ff",
+      "old_sidecar_sha256": "f2c5522a370fc1aeb152d26bd3f2721442831e6326c84b234c7b6043f9660a9c",
+      "changes": {
+        "events/typhoon_201608_kp60/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "6c63efefe54518276c85a6b42836aaf8a413ac5966eaaa6ac62d082dc0c0afce",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "23ea557a70b0e1da1b38ddabdbf8941e7261e4dbd14612798768629b9d3e30ff",
+      "new_sidecar_sha256": "f887490ab121d76c779ba31ec21b3be4cb607f5e2123691460345c852c61069e",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "bb5559c34e3c1883edbb684dbc05b4d1ea3cae0f0152de75967f3ac0f3a14bb1"
+    },
+    {
+      "path": "results\\sensitivity\\conductivity_posterior\\phase2\\tokachi_kp60.0_historical_bulk_k_aq_field_geomean_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "97b48fa2d81f0ee37fbc2eabe13dc79075fa011a73af4ad6457175063856434a",
+      "old_sidecar_sha256": "fb15d00de17040357483cf3e9e4e2b291909c1e16ddc2d7a3bf9f60566e37a96",
+      "changes": {
+        "events/typhoon_201608_kp60/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "6c63efefe54518276c85a6b42836aaf8a413ac5966eaaa6ac62d082dc0c0afce",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "97b48fa2d81f0ee37fbc2eabe13dc79075fa011a73af4ad6457175063856434a",
+      "new_sidecar_sha256": "38f52eabd7aa26a506da9c0d4df4a53526a7322abc4dff9d9a2a667aae692aa8",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "db044671fd4ca605a8182fc343223ab71e6907c916b6a5936000fa2ec3d0181a"
+    },
+    {
+      "path": "results\\sensitivity\\conductivity_posterior\\phase2\\tokachi_kp60.0_historical_bulk_k_aq_field_toe_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "64fae8254779a3f164af01b42bf0f8b6fc837c13fc9515c6254fe6ae26fa84f6",
+      "old_sidecar_sha256": "5ea638219be89acf5fe75d58eb2a2672406b1ebcecacbd39afd12bb1b02939ac",
+      "changes": {
+        "events/typhoon_201608_kp60/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "6c63efefe54518276c85a6b42836aaf8a413ac5966eaaa6ac62d082dc0c0afce",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "64fae8254779a3f164af01b42bf0f8b6fc837c13fc9515c6254fe6ae26fa84f6",
+      "new_sidecar_sha256": "dd7832c2b5d6432f0936400fd8f4c9171a153df62176f0720d2b71159892c44f",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "95e0e852eba6b8e2546ca9c8d89109eabaeef4aa11205287a3b1dd4b959906a9"
+    },
+    {
+      "path": "results\\sensitivity\\conductivity_posterior\\phase2\\tokachi_kp60.0_historical_bulk_k_aq_regional_upper_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "7f4735530f524712e048f1e70f7fce75bc1c6ef2c1ca72b184161ace81186f2b",
+      "old_sidecar_sha256": "3d61057cbc819b629d162e555d337d490a39c1699d9a3e52ba7fe6192ae22c31",
+      "changes": {
+        "events/typhoon_201608_kp60/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "6c63efefe54518276c85a6b42836aaf8a413ac5966eaaa6ac62d082dc0c0afce",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "7f4735530f524712e048f1e70f7fce75bc1c6ef2c1ca72b184161ace81186f2b",
+      "new_sidecar_sha256": "5bd3a0292e38e9d3a545f2485f7ff5123bbf5d2737832f5ed243ac9e60e5c660",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "170e88b8446aebd6a22455f05d3c001f31cc87497490bea19b03cbbf78c35447"
+    },
+    {
+      "path": "results\\sensitivity\\conductivity_posterior\\phase2\\tokachi_kp60.0_historical_matrix_gamma_bl_sub_lower_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "1ca21caab6a052f741391aec04ea66a444ea42e30758f5a05d05a74dc8b3fb2c",
+      "old_sidecar_sha256": "c8a584219dcd2a0a401107fa07e50c5b3064664caa82cdb9acc6471692fae501",
+      "changes": {
+        "events/typhoon_201608_kp60/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "6c63efefe54518276c85a6b42836aaf8a413ac5966eaaa6ac62d082dc0c0afce",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "1ca21caab6a052f741391aec04ea66a444ea42e30758f5a05d05a74dc8b3fb2c",
+      "new_sidecar_sha256": "9cbb61cd396e668617c9959b9bdb3082d42864e0f978eba995b1d0d2178d7f0e",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "0049c146758c12cb25aeec3a88324ad4e62daaf6fca784b3121fd08cc0e4fcf7"
+    },
+    {
+      "path": "results\\sensitivity\\conductivity_posterior\\phase2\\tokachi_kp60.0_historical_matrix_k_aq_field_geomean_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "7edf451c80e9a2dfec9828c8ed8971519c299a26a1f60dfa7325f1c5d285bd50",
+      "old_sidecar_sha256": "9c7dc45bd9a4835019a202810a32b78f3f690dd567a95389d7ac95f39060e089",
+      "changes": {
+        "events/typhoon_201608_kp60/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "6c63efefe54518276c85a6b42836aaf8a413ac5966eaaa6ac62d082dc0c0afce",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "7edf451c80e9a2dfec9828c8ed8971519c299a26a1f60dfa7325f1c5d285bd50",
+      "new_sidecar_sha256": "0211a4a61eef3321f890ea056c86debb3679c4f0c0ddaf31d7be30727654b8e6",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "2849290becbe30bbce3d60194a674560757a562e565928bcb2e3b9b9c6419293"
+    },
+    {
+      "path": "results\\sensitivity\\conductivity_posterior\\phase2\\tokachi_kp60.0_historical_matrix_k_aq_field_toe_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "0349278dfdbc91712dad35fa6d84446dfd6081ea7af4a5bd3556bac6d45abdaf",
+      "old_sidecar_sha256": "04d3eef1d4d1ab0c68e3c845f0e4aab96af1dee6e1748cd196b5b3042ccea718",
+      "changes": {
+        "events/typhoon_201608_kp60/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "6c63efefe54518276c85a6b42836aaf8a413ac5966eaaa6ac62d082dc0c0afce",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "0349278dfdbc91712dad35fa6d84446dfd6081ea7af4a5bd3556bac6d45abdaf",
+      "new_sidecar_sha256": "9627ea638d97beaef693795c4ec7e66e433b3adc60f8378d3755d54660cd10d4",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "11e5f4c12b27c890a9e582b9890d5d155d97510eb2a58c19ea4d3ff28b6f7654"
+    },
+    {
+      "path": "results\\sensitivity\\conductivity_posterior\\phase2\\tokachi_kp60.0_historical_matrix_k_aq_regional_upper_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "340fa2eaaffc7bd74c75aa0074be27a454c04528d5a65aa54eeecd9c06d6018e",
+      "old_sidecar_sha256": "40687d203e684438aff8d224aab880db6b5bb872263b350df5cdb7f0d3b17235",
+      "changes": {
+        "events/typhoon_201608_kp60/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "6c63efefe54518276c85a6b42836aaf8a413ac5966eaaa6ac62d082dc0c0afce",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "340fa2eaaffc7bd74c75aa0074be27a454c04528d5a65aa54eeecd9c06d6018e",
+      "new_sidecar_sha256": "24fc990dc74995dd45ebbd20aa0d8dab9e04c8c690344e78f168956845141bdc",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "7f153b3f015a8415bbc8f20f9f32343a2fe60686dcb99d2bfd9beea102924319"
+    },
+    {
+      "path": "results\\sensitivity\\conductivity_posterior\\phase2\\tokachi_kp62.0_historical_bulk_gamma_bl_sub_lower_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "26eaaca7e579673e222b5e224867f9a2a292da74900fe534ff678b60ea68e9f3",
+      "old_sidecar_sha256": "f1b4b3133e1eadf892a0b3fe15658f32e9b9016593ce366448506f1e3f37da6d",
+      "changes": {
+        "events/typhoon_201608_kp62/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "30e221ceab337aa1d90f1207ecabb3927561bf335e98c91e6a8cd2492879a125",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "26eaaca7e579673e222b5e224867f9a2a292da74900fe534ff678b60ea68e9f3",
+      "new_sidecar_sha256": "d2ee1709f565d0ccd7e7a110a41066a0f6715a62a301ff946fee893244e384d7",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "73bc0bbbf9ac019547c29f87c41d9e2e8e2aa3ec0b6b9801e2159d4902a390e1"
+    },
+    {
+      "path": "results\\sensitivity\\conductivity_posterior\\phase2\\tokachi_kp62.0_historical_bulk_k_aq_field_geomean_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "45ada3d57d4a98225a4785ae6f4cc105f3307eb3be4d7a6cd5073c676da163c1",
+      "old_sidecar_sha256": "0ebf1bd6fa2dd64a9eebd5174d29cd58834cc6c98d843b10b5ad9e04ffbdf2be",
+      "changes": {
+        "events/typhoon_201608_kp62/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "30e221ceab337aa1d90f1207ecabb3927561bf335e98c91e6a8cd2492879a125",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "45ada3d57d4a98225a4785ae6f4cc105f3307eb3be4d7a6cd5073c676da163c1",
+      "new_sidecar_sha256": "0058124310331793b6d2dbbce814da616df264b0ce1ad5132dc5de31984064c3",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "49204e307cb76adb7427bd497683c4ee8d69cd6b2daf1fca3e5ef1964824181c"
+    },
+    {
+      "path": "results\\sensitivity\\conductivity_posterior\\phase2\\tokachi_kp62.0_historical_bulk_k_aq_field_toe_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "0d029b5e01e9ca458cb825f95181fc45a7519bdfa1ebcadf16e4f6f2534466fa",
+      "old_sidecar_sha256": "b717ed41c5e14311be191efb782ad388861695573e706d3f888b5ab0f1ffa52a",
+      "changes": {
+        "events/typhoon_201608_kp62/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "30e221ceab337aa1d90f1207ecabb3927561bf335e98c91e6a8cd2492879a125",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "0d029b5e01e9ca458cb825f95181fc45a7519bdfa1ebcadf16e4f6f2534466fa",
+      "new_sidecar_sha256": "b4345f84f8b83d5cbabbd324c30f41be1885bb1ae53ad5dbb1095db672054932",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "29433c4ff6f662d13b4e6a3cae900ef2c8aad1da7fb6ad967065280479f35b2e"
+    },
+    {
+      "path": "results\\sensitivity\\conductivity_posterior\\phase2\\tokachi_kp62.0_historical_bulk_k_aq_regional_upper_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "2c436747cf05c4b1305e68a1d264bc386e4b43999274ac6f1bdd0f88bbf1ea64",
+      "old_sidecar_sha256": "a7e474ac6aa1819ef21b2af24eeebdf5eb7c54ebc76cd40c492e6ec14a6ba83c",
+      "changes": {
+        "events/typhoon_201608_kp62/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "30e221ceab337aa1d90f1207ecabb3927561bf335e98c91e6a8cd2492879a125",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "2c436747cf05c4b1305e68a1d264bc386e4b43999274ac6f1bdd0f88bbf1ea64",
+      "new_sidecar_sha256": "5197226619bfc98d67b112d78c907e671d5d38caf05de6d358de1fccb5b6e6eb",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "eb365a1d6a49553d081320b7bb84be2600ef6b88814871c417e3ec489b364a35"
+    },
+    {
+      "path": "results\\sensitivity\\conductivity_posterior\\phase2\\tokachi_kp62.0_historical_matrix_gamma_bl_sub_lower_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "deb1ebb31adcb13b6d6bb81095172379cf07838171e46f5d6f9fcbbf5b9128f2",
+      "old_sidecar_sha256": "488b61f88bed99fcc1768aa138cc504ec662b84fdb0a9f39d0122ba942c9bb47",
+      "changes": {
+        "events/typhoon_201608_kp62/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "30e221ceab337aa1d90f1207ecabb3927561bf335e98c91e6a8cd2492879a125",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "deb1ebb31adcb13b6d6bb81095172379cf07838171e46f5d6f9fcbbf5b9128f2",
+      "new_sidecar_sha256": "bceab018a0fee63554adc2193cbbfba842104c4ef6a5a6ab3472f7962fb9ac3c",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "299ffa032c161064a47dbb0a64552e578083fdd259f5fa8bfbb1dcefb88bfb6b"
+    },
+    {
+      "path": "results\\sensitivity\\conductivity_posterior\\phase2\\tokachi_kp62.0_historical_matrix_k_aq_field_geomean_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "617f9dc74bbe0d1d4e271e47d5fa612e87bda4641b5b9e40599dcc8df52acf7f",
+      "old_sidecar_sha256": "90da4b874824728a9a0ef0ea54058636f021ee43e97b0bcdfea7b233fdde5c59",
+      "changes": {
+        "events/typhoon_201608_kp62/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "30e221ceab337aa1d90f1207ecabb3927561bf335e98c91e6a8cd2492879a125",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "617f9dc74bbe0d1d4e271e47d5fa612e87bda4641b5b9e40599dcc8df52acf7f",
+      "new_sidecar_sha256": "20307ea845f3152cf0f0d9b61b07510d14b65cc1da700115ba9e93f6e6d2cfdb",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "c6b0648286138d8f421d65de5ce2cd8627e9b406e423abf7a33a466e9c25b79e"
+    },
+    {
+      "path": "results\\sensitivity\\conductivity_posterior\\phase2\\tokachi_kp62.0_historical_matrix_k_aq_field_toe_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "bc45befdca5c29550b4c09439e43b5c160005a69dce3b4e4f0167880eac84e1c",
+      "old_sidecar_sha256": "0314926ce3f197fdf60d496fe4ea6a260b4b06b5b48f9b8b8e2e3ac9abc92cef",
+      "changes": {
+        "events/typhoon_201608_kp62/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "30e221ceab337aa1d90f1207ecabb3927561bf335e98c91e6a8cd2492879a125",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "bc45befdca5c29550b4c09439e43b5c160005a69dce3b4e4f0167880eac84e1c",
+      "new_sidecar_sha256": "7459b7f455a23868d497330dd2f5beb69097077d4c00efaef029ed418e551ff2",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "fe99fd0843006b52585dec2bc0655c0e4e00c22824efcc8eb9a62f804bfdd39c"
+    },
+    {
+      "path": "results\\sensitivity\\conductivity_posterior\\phase2\\tokachi_kp62.0_historical_matrix_k_aq_regional_upper_posterior.json",
+      "date": "2026-09-15",
+      "kind": "derived_timestamp_correction_not_physical_rerun",
+      "old_h5_sha256": "4f21bd7462496f9320e0d3a6b9b9a7edd64a00c45577a3fea8e43fcb61645f40",
+      "old_sidecar_sha256": "f2d85efd761afb1546559dadafe37253084b9db7b41c9b8b22f837120b094d32",
+      "changes": {
+        "events/typhoon_201608_kp62/t_breach": {
+          "offset_s": 225.0,
+          "record_sha256": "30e221ceab337aa1d90f1207ecabb3927561bf335e98c91e6a8cd2492879a125",
+          "finite_count": 0
+        }
+      },
+      "new_h5_sha256": "4f21bd7462496f9320e0d3a6b9b9a7edd64a00c45577a3fea8e43fcb61645f40",
+      "new_sidecar_sha256": "77cfe3e93cfd251f28850aa5f9b8e8c4ed7f1928e52acb7563890270727b0cc7",
+      "unchanged_dataset_count": 25,
+      "unchanged_dataset_manifest_sha256": "8aca5f2b2177688b1982a9069b7286b5979b77190a2185da3b495b6a27f15a43"
+    }
+  ],
+  "sustained_64_day_replay": {
+    "generated": "scripts/assess_2011_2006_closure.py",
+    "date": "2026-07-18",
+    "convention": "surveyed H23.9 right-bank trace peak held for 64 days (ADR-0040 sustained-peak convention), replayed through M8 via the Phase 2 pipeline at the production N; upper bound on any faithful 2011 time series",
+    "event_2006": "no bound computable: the 2006 drop carries no stage record and no trace survey; closed for lack of any constructible observation",
+    "strata": [
+      {
+        "stratum": "tokachi_kp57.4_historical_matrix",
+        "kp": 57.4,
+        "z_toe_m_msl": 38.3,
+        "trace_right_2011_m_msl": 37.329,
+        "head_above_toe_m": -0.971,
+        "n_prior": 100000,
+        "bound_reject_count": 0,
+        "bound_reject_fraction": 0.0,
+        "bound_static_reject_fraction": 0.0,
+        "bound_initiation_fraction": 0.0,
+        "reject_2016_count": 63,
+        "marginal_beyond_2016_count": 0,
+        "marginal_beyond_2016_fraction": 0.0,
+        "runtime_seconds": 0.1
+      },
+      {
+        "stratum": "tokachi_kp57.4_historical_bulk",
+        "kp": 57.4,
+        "z_toe_m_msl": 38.3,
+        "trace_right_2011_m_msl": 37.329,
+        "head_above_toe_m": -0.971,
+        "n_prior": 100000,
+        "bound_reject_count": 0,
+        "bound_reject_fraction": 0.0,
+        "bound_static_reject_fraction": 0.0,
+        "bound_initiation_fraction": 0.0,
+        "reject_2016_count": 0,
+        "marginal_beyond_2016_count": 0,
+        "marginal_beyond_2016_fraction": 0.0,
+        "runtime_seconds": 0.1
+      },
+      {
+        "stratum": "tokachi_kp58.8_historical_matrix",
+        "kp": 58.8,
+        "z_toe_m_msl": 38.5,
+        "trace_right_2011_m_msl": 39.229,
+        "head_above_toe_m": 0.729,
+        "n_prior": 100000,
+        "bound_reject_count": 0,
+        "bound_reject_fraction": 0.0,
+        "bound_static_reject_fraction": 3e-05,
+        "bound_initiation_fraction": 0.00064,
+        "reject_2016_count": 5512,
+        "marginal_beyond_2016_count": 0,
+        "marginal_beyond_2016_fraction": 0.0,
+        "runtime_seconds": 115.5
+      },
+      {
+        "stratum": "tokachi_kp58.8_historical_bulk",
+        "kp": 58.8,
+        "z_toe_m_msl": 38.5,
+        "trace_right_2011_m_msl": 39.229,
+        "head_above_toe_m": 0.729,
+        "n_prior": 100000,
+        "bound_reject_count": 0,
+        "bound_reject_fraction": 0.0,
+        "bound_static_reject_fraction": 0.0,
+        "bound_initiation_fraction": 0.00064,
+        "reject_2016_count": 0,
+        "marginal_beyond_2016_count": 0,
+        "marginal_beyond_2016_fraction": 0.0,
+        "runtime_seconds": 114.8
+      },
+      {
+        "stratum": "tokachi_kp60.0_historical_matrix",
+        "kp": 60.0,
+        "z_toe_m_msl": 40.0,
+        "trace_right_2011_m_msl": 41.403,
+        "head_above_toe_m": 1.403,
+        "n_prior": 100000,
+        "bound_reject_count": 908,
+        "bound_reject_fraction": 0.00908,
+        "bound_static_reject_fraction": 0.07421,
+        "bound_initiation_fraction": 0.50708,
+        "reject_2016_count": 3244,
+        "marginal_beyond_2016_count": 326,
+        "marginal_beyond_2016_fraction": 0.00326,
+        "runtime_seconds": 129.4
+      },
+      {
+        "stratum": "tokachi_kp60.0_historical_bulk",
+        "kp": 60.0,
+        "z_toe_m_msl": 40.0,
+        "trace_right_2011_m_msl": 41.403,
+        "head_above_toe_m": 1.403,
+        "n_prior": 100000,
+        "bound_reject_count": 0,
+        "bound_reject_fraction": 0.0,
+        "bound_static_reject_fraction": 1e-05,
+        "bound_initiation_fraction": 0.50708,
+        "reject_2016_count": 23,
+        "marginal_beyond_2016_count": 0,
+        "marginal_beyond_2016_fraction": 0.0,
+        "runtime_seconds": 140.4
+      },
+      {
+        "stratum": "tokachi_kp62.0_historical_matrix",
+        "kp": 62.0,
+        "z_toe_m_msl": 44.9,
+        "trace_right_2011_m_msl": 43.735,
+        "head_above_toe_m": -1.165,
+        "n_prior": 100000,
+        "bound_reject_count": 0,
+        "bound_reject_fraction": 0.0,
+        "bound_static_reject_fraction": 0.0,
+        "bound_initiation_fraction": 0.0,
+        "reject_2016_count": 0,
+        "marginal_beyond_2016_count": 0,
+        "marginal_beyond_2016_fraction": 0.0,
+        "runtime_seconds": 0.1
+      },
+      {
+        "stratum": "tokachi_kp62.0_historical_bulk",
+        "kp": 62.0,
+        "z_toe_m_msl": 44.9,
+        "trace_right_2011_m_msl": 43.735,
+        "head_above_toe_m": -1.165,
+        "n_prior": 100000,
+        "bound_reject_count": 0,
+        "bound_reject_fraction": 0.0,
+        "bound_static_reject_fraction": 0.0,
+        "bound_initiation_fraction": 0.0,
+        "reject_2016_count": 0,
+        "marginal_beyond_2016_count": 0,
+        "marginal_beyond_2016_fraction": 0.0,
+        "runtime_seconds": 0.1
+      }
+    ]
+  },
+  "validation": {
+    "python": "3.11",
+    "pytest_passed": 991,
+    "pytest_warnings": 8,
+    "ruff": "passed",
+    "black": "passed; 161 files; optional notebooks not checked without black[jupyter]",
+    "commands": [
+      "python -m pytest",
+      "python -m ruff check .",
+      "python -m black --check ."
+    ],
+    "final_suite_seconds": 136.08,
+    "warnings_reviewed": "8 expected bootstrap-degeneracy warnings from deliberately small test grids; no tolerance changes or suppressed warnings."
+  },
+  "derived_outputs": [
+    {
+      "path": "results/sensitivity/ce_prior/phase2_survival_sensitivity.json",
+      "old_sha256": "97d2db52ecc06782ba230123bc7a7ed0f53d1f844b089450733c444239a9c78e",
+      "new_sha256": "0436bab5052059ff53a1749d63c84300797fdedf05348e096640cf8f6beb445d"
+    },
+    {
+      "path": "results/sensitivity/seepage_length/phase2_ceiling.json",
+      "old_sha256": "abc2dfbe7e949a7f6f442836add6fd920fa544ea3985653ec54d5ad02f04a76f",
+      "new_sha256": "12e96104bfb034fd9549445871b750af39d503375134b05a9e210ea33b179d18"
+    },
+    {
+      "path": "docs/decisions/r10-foreshore-exhaustion-screening.json",
+      "old_sha256": "caaf3fe3c20eef629d3ec47e8504a2ffd6b8c1b851e0ed8055b5a63a63fc49a0",
+      "new_sha256": "2b78eaf2326909499025326e984f8e68b493bc0f31ec9f1d9577a6cb91212841"
+    }
+  ],
+  "figures": [
+    {
+      "path": "docs/figures/adr0039-timestep-stress.png",
+      "old_sha256": "5c50bb33ddcdd43ff763feb20a6b356bbf5cf10944be51b261ddeeef4d7d6044",
+      "new_sha256": "3f4e93f29ef1b12bebb3ed26ec7be789cccf913ec3c86d084e37e770a5934173",
+      "before_after_inspected": true
+    },
+    {
+      "path": "docs/figures/ce_prior_phase2_sensitivity.png",
+      "old_sha256": "c534142d5237c79d2bc5e0772300e2b6959e05cfd6a9ac37a5747ad7fe3af546",
+      "new_sha256": "dcb91a584e0f3d2360e90f26e793e0cd42a64503a69509d5b4547c039a19d7d1",
+      "before_after_inspected": true
+    },
+    {
+      "path": "docs/figures/seepage_length_system_and_ceiling.png",
+      "old_sha256": "17af7878243355133af5cde579cdf6d5f48f4be37b4f0e4fc27e8d25ccb00f59",
+      "new_sha256": "d60d79ab1231d702d90bd3b7fd5a4ddf814945282223e6d499ae45953bd67b5f",
+      "before_after_inspected": true
+    },
+    {
+      "path": "docs/figures/r10_foreshore_exhaustion.png",
+      "old_sha256": "57e29973b500eeba5f50a045cb27224e7eeb5a91b6e4d606a853ae1358df952a",
+      "new_sha256": "5d75bc1dcb7bc9a47fa6f3bd9438d6f1f45cddfec777016ae268e8fccac41e4c",
+      "before_after_inspected": true
+    }
+  ],
+  "field_outputs": [
+    {
+      "path": "results\\validation_yabe\\validation_results.json",
+      "old_sha256": "90467c42710a85c00063824d3f3ef9a6712b9f9b619a22683b8efde9300ee501",
+      "new_sha256": "a4a2c7519dc10b45dcfc03831c2668e1db5845b12ad041ebedfb9ed3cd6cfd76"
+    },
+    {
+      "path": "results\\validation_gounokawa\\validation_results.json",
+      "old_sha256": "421088e9be988e11b5b2110ae52758aa046949f7e1abae9525d07b5a1ba02ad7",
+      "new_sha256": "1fa47262fab1e47d3c4938b3043d58ec97da8990d58fb2f46de43cab1cebd5bd"
+    },
+    {
+      "path": "results\\validation_shikaga\\validation_results.json",
+      "old_sha256": "da99d34796058dc5f2170afa8fa48f1dffca391ace66df9ba82a2dd4cd7a7b6e",
+      "new_sha256": "59b4b1d9d23a72388045227ca7371a7b810345b1a5011000aa0f0961d2545dce"
+    }
+  ],
+  "gauge_replays": [
+    {
+      "path": "results\\sensitivity\\adr0046_ztoe\\phase2\\tokachi_kp57.4_historical_matrix_ztoe_minus0.30m_posterior.json",
+      "old_h5_sha256": "86d6e8c4088025263f3db53d33396cf278eb205703b684100b96d0f4bd1e97a6",
+      "old_sidecar_sha256": "7e98fe78b3f8a6f519b3936bdf44ae7f8ee56272f9a00fd11be22b54cca55401",
+      "new_h5_sha256": "725977780a956170a61931a1859c9065f0f8e640e0db541590b58bb64b6463f4",
+      "new_sidecar_sha256": "b5b1aa257b75031004b9b5d79340cad2f80a56409b4ef86fb622cdedd875a9a9",
+      "gauge_kp": 56.73,
+      "n": 100000
+    },
+    {
+      "path": "results\\sensitivity\\adr0046_ztoe\\phase2\\tokachi_kp57.4_historical_matrix_ztoe_plus0.30m_posterior.json",
+      "old_h5_sha256": "8e8298b2f63b2b19aa058f662f5bd8c7d9dc3adcd4118232978502d17df5b960",
+      "old_sidecar_sha256": "0d7228d440c5eace622b176b8bd246e03152e28d635551ca2569f759735e6a38",
+      "new_h5_sha256": "3cc6ef31c94afc94394ee76803f59f0691acc0b3ed535952d7dcba75ec7e590e",
+      "new_sidecar_sha256": "bdffcf556fec9debdb6a4257fe72197fe2c2b9ab6aeb4d9e71a6a1bfda235b5b",
+      "gauge_kp": 56.73,
+      "n": 100000
+    },
+    {
+      "path": "results\\sensitivity\\adr0046_ztoe\\phase2\\tokachi_kp62.0_historical_matrix_ztoe_minus0.30m_posterior.json",
+      "old_h5_sha256": "30cba9d1ab23e8d7a5158dddafb58e99781c2771c49596dc57464c8ba79636f3",
+      "old_sidecar_sha256": "fecb681d74cc3a1b242a3b9ba1fa7243a7fc60b6525c52c618317a0fa349da98",
+      "new_h5_sha256": "de01df64d5c7939d58a1c28ee6318a809fa7bbf71b0c088e856123872f39791a",
+      "new_sidecar_sha256": "8290951d3e571c7591b1398a12f641d19e80434d66b106d701b98c47358e3295",
+      "gauge_kp": 56.73,
+      "n": 100000
+    },
+    {
+      "path": "results\\sensitivity\\adr0046_ztoe\\phase2\\tokachi_kp62.0_historical_matrix_ztoe_plus0.30m_posterior.json",
+      "old_h5_sha256": "f340e564792691d8152d2526938c997dd0e05321af78cb9a320d6e335224a8b8",
+      "old_sidecar_sha256": "b3bb59a2d71878547f3ff415cc3c009d39f354827cb7b6febc8f41f20cb82727",
+      "new_h5_sha256": "d3b1a0f5ebf5d3d9e32b88c73e554e3c144eab84b1ceed1208bc7906758e5389",
+      "new_sidecar_sha256": "4a35755435a640f6fb161554533d812bbe02190ac7d8f11c70327b5efedb350f",
+      "gauge_kp": 56.73,
+      "n": 100000
+    }
+  ],
+  "annual_outputs": [
+    {
+      "path": "results\\system_integration\\phase3\\campaign_summary.json",
+      "sha256": "5acdc0d7dc182675c2e3c65a4be33e3953bd8686c53ab93df8db19f56b71c622"
+    },
+    {
+      "path": "results\\system_integration\\phase3\\rq3_sections_bulk_posterior.json",
+      "sha256": "0f3958271a9f66ca6fc867ab895454d0e4e8f98cc60f4ef259294a092a9b3d37"
+    },
+    {
+      "path": "results\\system_integration\\phase3\\rq3_sections_bulk_prior.json",
+      "sha256": "5f6664f92b8ed0780028cdab5ecf1f325e8ba21c152e13dc7a63e36d0a242331"
+    },
+    {
+      "path": "results\\system_integration\\phase3\\rq3_sections_matrix_posterior.json",
+      "sha256": "b3c55fba04fef881754960cba9bb37c80177daea72c8dd5ac60c93df1f561a0c"
+    },
+    {
+      "path": "results\\system_integration\\phase3\\rq3_sections_matrix_prior.json",
+      "sha256": "7fd2073cc38f990383ba9695e7543874fbbc7bb19831447df1fdb9fd6cbcb3ef"
+    },
+    {
+      "path": "results\\system_integration\\phase3\\rq3_segment_curves_bulk_posterior.json",
+      "sha256": "499b2ef4cbd9ef39f3cc1cc77ae126d884874406bf1927473d40fd21f8eaaaf1"
+    },
+    {
+      "path": "results\\system_integration\\phase3\\rq3_segment_curves_bulk_prior.json",
+      "sha256": "50d0279922094c9db27e629ce5aa67ad9c64c857da9adc4cd5713a9cc2056515"
+    },
+    {
+      "path": "results\\system_integration\\phase3\\rq3_segment_curves_matrix_posterior.json",
+      "sha256": "a5d1b01b4865d16a9255800db33615b95d8cdaf9e7d4b3bfd1d0d389daf2dcf3"
+    },
+    {
+      "path": "results\\system_integration\\phase3\\rq3_segment_curves_matrix_prior.json",
+      "sha256": "7a5ae5400dd786a018f129f73776dd20dd0a5eaa97156c9d341926f9c2e599d1"
+    },
+    {
+      "path": "results\\system_integration\\phase3\\rq4_annual.csv",
+      "sha256": "e84b25a129cfe833bde7c9663410d52dfac78f60a578783cdcabb492a1b0d4c9"
+    },
+    {
+      "path": "results\\system_integration\\phase3\\rq4_attribution.json",
+      "sha256": "2b257531940e957e0964afff932717506037d5ac0e19ab42329d2f94d826748c"
+    }
+  ],
+  "invariance_dependency_map": {
+    "phase1_arrays": "Every covered removed final interval is inert. Shared theta/L/config unchanged. Original phase1 artifacts retain original source metadata; retained by demonstrated invariance, not relabelled as regenerated.",
+    "phase2_nonclock": "All datasets except finite t_breach are byte-value identical on 80 transformed posteriors; 8 production replays independently compare every row. Four old datum companions were genuinely replayed.",
+    "phase3": "Annual integration consumes failure/posterior curves, theta masks and hazard input; none consumes breach-clock arrays. Its already refreshed gauge baseline is retained. Hash changes identify derived posteriors, not new probabilities.",
+    "companions": "Current production masks feed refreshed L summary; five C_e priors at two sections are rerun. Foreshore 2016 event calculations refreshed; canonical design and ensemble fields remain unchanged.",
+    "sustained": "The gap driver now supplies an extra observation node, preserving its original number of interval loads exactly. The 2011 64-day hold is independently rerun with its corrected span. ADR0040 barrier-step caveat remains separate.",
+    "duration_statistics": "Sample-count exposure summaries retain their documented uniform-bin statistic; they are not stored progression states. No global replacement of sample counting or N-load M7 loops was made."
+  },
+  "gsa_endpoint_proof": [
+    {
+      "path": "docs\\decisions\\adr0033-gsa-study-kp58_8_matrix.json",
+      "config_hash": "7f2a571004ed38ef9d81a4d46b5bd5ec3804df65b40b94d967c408eff94618bc",
+      "levels": [
+        40.25,
+        41.0,
+        41.5,
+        42.5
+      ],
+      "max_final_stage": 36.825518149078,
+      "toe": 38.5,
+      "hashes": [
+        "9c217603d423c21e957c8c55046547a44a61729d687f54385e3af398cb091ed1",
+        "6dcf715b9caad9ca55cc369358990384981fbf1972c475cc84c1f1b522d99e55",
+        "556b77dd44339c5057967a85c8b4994cdfb75b3e0c103a4b62e140cf72bb2078",
+        "776c54c4b997d87cc4d4ee500af657e82ddb4a56b1b0f51164c26c4ae97a9079"
+      ]
+    },
+    {
+      "path": "docs\\decisions\\adr0033-gsa-study-kp60_0_matrix.json",
+      "config_hash": "184069b2609bbf79c6451ba08ebe155a125e3218f99dad42edfb4910adde507e",
+      "levels": [
+        42.0,
+        42.75,
+        43.25,
+        44.25
+      ],
+      "max_final_stage": 38.60038347909174,
+      "toe": 40.0,
+      "hashes": [
+        "fd9c5a6dc8a43a6359f33544c1cf6875f0346f4880117d82bc82a8000b0b7c9c",
+        "e0a90c347ec5cf22938e10d929b86c9972901be7378598fe5346ced614f53aab",
+        "12699c9ef4538ce111836414c99f4f1632201fba52a7b2fa2d2fa73d883127c5",
+        "899ef01f3f7eda45388e340452fbbc771984869d7460ea1c417de225ee581711"
+      ]
+    }
+  ],
+  "sample_finiteness": [
+    {
+      "path": "canonical_shape\\arms\\tokachi_kp57.4_historical_bulk_alternate.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "canonical_shape\\arms\\tokachi_kp57.4_historical_bulk_production.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "canonical_shape\\arms\\tokachi_kp57.4_historical_matrix_alternate.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "canonical_shape\\arms\\tokachi_kp57.4_historical_matrix_production.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "canonical_shape\\arms\\tokachi_kp58.8_historical_bulk_alternate.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "canonical_shape\\arms\\tokachi_kp58.8_historical_bulk_production.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "canonical_shape\\arms\\tokachi_kp58.8_historical_matrix_alternate.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "canonical_shape\\arms\\tokachi_kp58.8_historical_matrix_production.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "canonical_shape\\arms\\tokachi_kp60.0_historical_bulk_alternate.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "canonical_shape\\arms\\tokachi_kp60.0_historical_bulk_production.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "canonical_shape\\arms\\tokachi_kp60.0_historical_matrix_alternate.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "canonical_shape\\arms\\tokachi_kp60.0_historical_matrix_production.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "canonical_shape\\arms\\tokachi_kp62.0_historical_bulk_alternate.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "canonical_shape\\arms\\tokachi_kp62.0_historical_bulk_production.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "canonical_shape\\arms\\tokachi_kp62.0_historical_matrix_alternate.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "canonical_shape\\arms\\tokachi_kp62.0_historical_matrix_production.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "canonical_shape\\ladder_kp57_4_alternate.h5",
+      "finite": {
+        "theta_matrix": true,
+        "seepage_length_samples": true
+      }
+    },
+    {
+      "path": "canonical_shape\\ladder_kp62_0_alternate.h5",
+      "finite": {
+        "theta_matrix": true,
+        "seepage_length_samples": true
+      }
+    },
+    {
+      "path": "equal_head_convention\\tokachi_kp57.4_historical_matrix_gate.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "equal_head_convention\\tokachi_kp57.4_historical_matrix_gross.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "equal_head_convention\\tokachi_kp57.4_historical_matrix_n1000000.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "equal_head_convention\\tokachi_kp58.8_historical_matrix_gate.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "equal_head_convention\\tokachi_kp58.8_historical_matrix_gross.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "equal_head_convention\\tokachi_kp60.0_historical_matrix_gate.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "equal_head_convention\\tokachi_kp60.0_historical_matrix_gross.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "equal_head_convention\\tokachi_kp62.0_historical_matrix_gate.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "equal_head_convention\\tokachi_kp62.0_historical_matrix_gross.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "equal_head_convention\\tokachi_kp62.0_historical_matrix_n1000000.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "hwl_bias_resolution\\ladder_kp57_4_n100000.h5",
+      "finite": {
+        "theta_matrix": true,
+        "seepage_length_samples": true
+      }
+    },
+    {
+      "path": "hwl_bias_resolution\\ladder_kp57_4_n1000000.h5",
+      "finite": {
+        "theta_matrix": true,
+        "seepage_length_samples": true
+      }
+    },
+    {
+      "path": "hwl_bias_resolution\\ladder_kp62_0_n100000.h5",
+      "finite": {
+        "theta_matrix": true,
+        "seepage_length_samples": true
+      }
+    },
+    {
+      "path": "hwl_bias_resolution\\ladder_kp62_0_n1000000.h5",
+      "finite": {
+        "theta_matrix": true,
+        "seepage_length_samples": true
+      }
+    },
+    {
+      "path": "hwl_bias_resolution\\tilted_kp62_0.h5",
+      "finite": {
+        "theta_matrix": true,
+        "seepage_length_samples": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0045_mp\\tokachi_kp57.4_historical_matrix_mp.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0045_mp\\tokachi_kp58.8_historical_matrix_mp.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0045_mp\\tokachi_kp60.0_historical_matrix_mp.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0045_mp\\tokachi_kp62.0_historical_matrix_mp.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0046_ztoe\\tokachi_kp57.4_historical_matrix_ztoe_minus0.30m.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0046_ztoe\\tokachi_kp57.4_historical_matrix_ztoe_plus0.30m.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0046_ztoe\\tokachi_kp58.8_historical_matrix_ztoe_minus0.30m.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0046_ztoe\\tokachi_kp58.8_historical_matrix_ztoe_plus0.30m.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0046_ztoe\\tokachi_kp60.0_historical_matrix_ztoe_minus0.30m.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0046_ztoe\\tokachi_kp60.0_historical_matrix_ztoe_plus0.30m.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0046_ztoe\\tokachi_kp62.0_historical_matrix_ztoe_minus0.30m.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0046_ztoe\\tokachi_kp62.0_historical_matrix_ztoe_plus0.30m.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0048_prior_means\\tokachi_kp57.4_historical_bulk_gamma_bl_sub_lower.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0048_prior_means\\tokachi_kp57.4_historical_bulk_k_aq_field_geomean.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0048_prior_means\\tokachi_kp57.4_historical_bulk_k_aq_field_toe.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0048_prior_means\\tokachi_kp57.4_historical_bulk_k_aq_regional_upper.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0048_prior_means\\tokachi_kp57.4_historical_matrix_gamma_bl_sub_lower.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0048_prior_means\\tokachi_kp57.4_historical_matrix_k_aq_field_geomean.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0048_prior_means\\tokachi_kp57.4_historical_matrix_k_aq_field_toe.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0048_prior_means\\tokachi_kp57.4_historical_matrix_k_aq_regional_upper.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0048_prior_means\\tokachi_kp58.8_historical_bulk_gamma_bl_sub_lower.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0048_prior_means\\tokachi_kp58.8_historical_bulk_k_aq_field_geomean.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0048_prior_means\\tokachi_kp58.8_historical_bulk_k_aq_field_toe.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0048_prior_means\\tokachi_kp58.8_historical_bulk_k_aq_regional_upper.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0048_prior_means\\tokachi_kp58.8_historical_matrix_gamma_bl_sub_lower.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0048_prior_means\\tokachi_kp58.8_historical_matrix_k_aq_field_geomean.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0048_prior_means\\tokachi_kp58.8_historical_matrix_k_aq_field_toe.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0048_prior_means\\tokachi_kp58.8_historical_matrix_k_aq_regional_upper.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0048_prior_means\\tokachi_kp60.0_historical_bulk_gamma_bl_sub_lower.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0048_prior_means\\tokachi_kp60.0_historical_bulk_k_aq_field_geomean.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0048_prior_means\\tokachi_kp60.0_historical_bulk_k_aq_field_toe.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0048_prior_means\\tokachi_kp60.0_historical_bulk_k_aq_regional_upper.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0048_prior_means\\tokachi_kp60.0_historical_matrix_gamma_bl_sub_lower.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0048_prior_means\\tokachi_kp60.0_historical_matrix_k_aq_field_geomean.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0048_prior_means\\tokachi_kp60.0_historical_matrix_k_aq_field_toe.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0048_prior_means\\tokachi_kp60.0_historical_matrix_k_aq_regional_upper.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0048_prior_means\\tokachi_kp62.0_historical_bulk_gamma_bl_sub_lower.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0048_prior_means\\tokachi_kp62.0_historical_bulk_k_aq_field_geomean.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0048_prior_means\\tokachi_kp62.0_historical_bulk_k_aq_field_toe.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0048_prior_means\\tokachi_kp62.0_historical_bulk_k_aq_regional_upper.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0048_prior_means\\tokachi_kp62.0_historical_matrix_gamma_bl_sub_lower.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0048_prior_means\\tokachi_kp62.0_historical_matrix_k_aq_field_geomean.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0048_prior_means\\tokachi_kp62.0_historical_matrix_k_aq_field_toe.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0048_prior_means\\tokachi_kp62.0_historical_matrix_k_aq_regional_upper.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0049_critical_length\\tokachi_kp57.4_historical_matrix_gate.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0049_critical_length\\tokachi_kp57.4_historical_matrix_l_c_lower.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0049_critical_length\\tokachi_kp57.4_historical_matrix_l_c_upper.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0049_critical_length\\tokachi_kp58.8_historical_matrix_gate.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0049_critical_length\\tokachi_kp58.8_historical_matrix_l_c_lower.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0049_critical_length\\tokachi_kp58.8_historical_matrix_l_c_upper.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0049_critical_length\\tokachi_kp60.0_historical_matrix_gate.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0049_critical_length\\tokachi_kp60.0_historical_matrix_l_c_lower.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0049_critical_length\\tokachi_kp60.0_historical_matrix_l_c_upper.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0049_critical_length\\tokachi_kp62.0_historical_matrix_gate.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0049_critical_length\\tokachi_kp62.0_historical_matrix_l_c_lower.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0049_critical_length\\tokachi_kp62.0_historical_matrix_l_c_upper.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0050_drained_bracket\\tokachi_kp58.8_historical_bulk_berm_only.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0050_drained_bracket\\tokachi_kp58.8_historical_bulk_gate.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0050_drained_bracket\\tokachi_kp58.8_historical_bulk_joint_0.20.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0050_drained_bracket\\tokachi_kp58.8_historical_bulk_joint_0.40.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0050_drained_bracket\\tokachi_kp58.8_historical_bulk_joint_0.60.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0050_drained_bracket\\tokachi_kp58.8_historical_bulk_joint_0.80.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0050_drained_bracket\\tokachi_kp58.8_historical_matrix_berm_only.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0050_drained_bracket\\tokachi_kp58.8_historical_matrix_gate.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0050_drained_bracket\\tokachi_kp58.8_historical_matrix_joint_0.20.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0050_drained_bracket\\tokachi_kp58.8_historical_matrix_joint_0.40.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0050_drained_bracket\\tokachi_kp58.8_historical_matrix_joint_0.60.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0050_drained_bracket\\tokachi_kp58.8_historical_matrix_joint_0.80.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0050_drained_bracket\\tokachi_kp60.0_historical_bulk_berm_only.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0050_drained_bracket\\tokachi_kp60.0_historical_bulk_gate.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0050_drained_bracket\\tokachi_kp60.0_historical_bulk_joint_0.20.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0050_drained_bracket\\tokachi_kp60.0_historical_bulk_joint_0.40.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0050_drained_bracket\\tokachi_kp60.0_historical_bulk_joint_0.60.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0050_drained_bracket\\tokachi_kp60.0_historical_bulk_joint_0.80.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0050_drained_bracket\\tokachi_kp60.0_historical_matrix_berm_only.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0050_drained_bracket\\tokachi_kp60.0_historical_matrix_gate.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0050_drained_bracket\\tokachi_kp60.0_historical_matrix_joint_0.20.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0050_drained_bracket\\tokachi_kp60.0_historical_matrix_joint_0.40.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0050_drained_bracket\\tokachi_kp60.0_historical_matrix_joint_0.60.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0050_drained_bracket\\tokachi_kp60.0_historical_matrix_joint_0.80.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0052_foreland_credit\\tokachi_kp57.4_historical_bulk_credit_full.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0052_foreland_credit\\tokachi_kp57.4_historical_bulk_credit_half.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0052_foreland_credit\\tokachi_kp57.4_historical_bulk_gate.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0052_foreland_credit\\tokachi_kp57.4_historical_matrix_credit_full.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0052_foreland_credit\\tokachi_kp57.4_historical_matrix_credit_half.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0052_foreland_credit\\tokachi_kp57.4_historical_matrix_gate.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0052_foreland_credit\\tokachi_kp58.8_historical_bulk_credit_full.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0052_foreland_credit\\tokachi_kp58.8_historical_bulk_credit_half.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0052_foreland_credit\\tokachi_kp58.8_historical_bulk_gate.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0052_foreland_credit\\tokachi_kp58.8_historical_matrix_credit_full.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0052_foreland_credit\\tokachi_kp58.8_historical_matrix_credit_half.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0052_foreland_credit\\tokachi_kp58.8_historical_matrix_gate.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0052_foreland_credit\\tokachi_kp60.0_historical_bulk_credit_full.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0052_foreland_credit\\tokachi_kp60.0_historical_bulk_credit_half.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0052_foreland_credit\\tokachi_kp60.0_historical_bulk_gate.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0052_foreland_credit\\tokachi_kp60.0_historical_matrix_credit_full.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0052_foreland_credit\\tokachi_kp60.0_historical_matrix_credit_half.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0052_foreland_credit\\tokachi_kp60.0_historical_matrix_gate.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0052_foreland_credit\\tokachi_kp62.0_historical_bulk_credit_full.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0052_foreland_credit\\tokachi_kp62.0_historical_bulk_credit_half.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0052_foreland_credit\\tokachi_kp62.0_historical_bulk_gate.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0052_foreland_credit\\tokachi_kp62.0_historical_matrix_credit_full.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0052_foreland_credit\\tokachi_kp62.0_historical_matrix_credit_half.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "sensitivity\\adr0052_foreland_credit\\tokachi_kp62.0_historical_matrix_gate.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "stage6_6\\stage6_6_kp57_4.h5",
+      "finite": {
+        "theta_matrix": true,
+        "seepage_length_samples": true
+      }
+    },
+    {
+      "path": "stage6_6\\stage6_6_kp57_4_bulk.h5",
+      "finite": {
+        "theta_matrix": true,
+        "seepage_length_samples": true
+      }
+    },
+    {
+      "path": "stage6_6\\stage6_6_kp62_0.h5",
+      "finite": {
+        "theta_matrix": true,
+        "seepage_length_samples": true
+      }
+    },
+    {
+      "path": "stage6_6\\stage6_6_kp62_0_bulk.h5",
+      "finite": {
+        "theta_matrix": true,
+        "seepage_length_samples": true
+      }
+    },
+    {
+      "path": "tokachi_kp57.4_historical_bulk.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "tokachi_kp57.4_historical_matrix.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "tokachi_kp58.8_historical_bulk.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "tokachi_kp58.8_historical_matrix.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "tokachi_kp60.0_historical_bulk.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "tokachi_kp60.0_historical_matrix.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "tokachi_kp62.0_historical_bulk.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    },
+    {
+      "path": "tokachi_kp62.0_historical_matrix.h5",
+      "finite": {
+        "theta_matrix": true
+      }
+    }
+  ],
+  "gsa_config_recovery": "Exact recorded config hashes recovered from 481063b2ca550625ec52db11250e12a172ad70c4; subsequent YAML change only adds disabled length-effect settings.",
+  "sustained_final_step_proof": [
+    {
+      "stratum": "tokachi_kp57.4_historical_matrix",
+      "n": 100000,
+      "length_changes": 0,
+      "max_length_delta_m": 0.0,
+      "flag_changes": 0,
+      "state_sha256": "8568d6b117678d53edec66018e6d52abe48837f64aebd6aee0153ddf2001ea51"
+    },
+    {
+      "stratum": "tokachi_kp57.4_historical_bulk",
+      "n": 100000,
+      "length_changes": 0,
+      "max_length_delta_m": 0.0,
+      "flag_changes": 0,
+      "state_sha256": "8568d6b117678d53edec66018e6d52abe48837f64aebd6aee0153ddf2001ea51"
+    },
+    {
+      "stratum": "tokachi_kp58.8_historical_matrix",
+      "n": 100000,
+      "length_changes": 0,
+      "max_length_delta_m": 0.0,
+      "flag_changes": 0,
+      "state_sha256": "f0a0f32464b239d44c6fcb97dcf015ac9c4cd8d50736b0c6bde7dbb92ff60270"
+    },
+    {
+      "stratum": "tokachi_kp58.8_historical_bulk",
+      "n": 100000,
+      "length_changes": 0,
+      "max_length_delta_m": 0.0,
+      "flag_changes": 0,
+      "state_sha256": "16a56848c14c2b00c91ac9902a41a28945882f65d7e9d8041e9268d628804cf6"
+    },
+    {
+      "stratum": "tokachi_kp60.0_historical_matrix",
+      "n": 100000,
+      "length_changes": 0,
+      "max_length_delta_m": 0.0,
+      "flag_changes": 0,
+      "state_sha256": "8734fd3b93ffaf58d0a0cab0e3b7448d779af47a1fe9092ba53fad24bf223ad0"
+    },
+    {
+      "stratum": "tokachi_kp60.0_historical_bulk",
+      "n": 100000,
+      "length_changes": 0,
+      "max_length_delta_m": 0.0,
+      "flag_changes": 0,
+      "state_sha256": "8be0f3c3ddf6a207d56d9f9a77d93de8631a5d396ca8c062d0b5dc06d6ea2971"
+    },
+    {
+      "stratum": "tokachi_kp62.0_historical_matrix",
+      "n": 100000,
+      "length_changes": 0,
+      "max_length_delta_m": 0.0,
+      "flag_changes": 0,
+      "state_sha256": "8568d6b117678d53edec66018e6d52abe48837f64aebd6aee0153ddf2001ea51"
+    },
+    {
+      "stratum": "tokachi_kp62.0_historical_bulk",
+      "n": 100000,
+      "length_changes": 0,
+      "max_length_delta_m": 0.0,
+      "flag_changes": 0,
+      "state_sha256": "8568d6b117678d53edec66018e6d52abe48837f64aebd6aee0153ddf2001ea51"
+    }
+  ],
+  "source_files": {
+    "bep_reliability_engine\\bank_heights.py": "f651af0f6b37bc7b8b218dc94d92d9a894771e892bacee398eaa9bac72d8da4d",
+    "bep_reliability_engine\\config.py": "3c4a81b7f3976e1b64ab379af841418f1426ad00c6b4cf9c8828aa19fd8ee390",
+    "bep_reliability_engine\\constants.py": "cfb8078985cb2d53aa706c230e6b9821606aa03be929b6f0080418834c850a28",
+    "bep_reliability_engine\\convergence.py": "aa36c63d0291dc6f06424f717bdec82689cd32ea60e73bfe938e49aaeec36600",
+    "bep_reliability_engine\\evaluator.py": "037be14c8f28e4dc73ce1bdfdcc39ecfa5f62b1a15d68f9278baca844f764648",
+    "bep_reliability_engine\\fragility.py": "28bdc67f139e8e4c95094233308ead0b696e9b227b77948495d6503bdcc4e793",
+    "bep_reliability_engine\\gap_decomposition.py": "84ea2c0d6a851986050812b7aaa7f6d0e75f596495b0d8dd05bccf1e1a6e98ea",
+    "bep_reliability_engine\\gsa_qoi.py": "0980175059be5949a4816fc086de59209fa99a576fe22cf37a0f93e3052b7f02",
+    "bep_reliability_engine\\hydraulics.py": "0ac989848dc4b2539ed0eb771b7bde80bb4ef0b95b3db2e0672ddba93c67cb10",
+    "bep_reliability_engine\\hydrographs.py": "73bac4f50a96d68cecf5f41c2898b88b5e6aa2421cd303ec1b845c59ccaccc37",
+    "bep_reliability_engine\\initiation.py": "b31943868bc4b5715316b4a34ff1458ad411586c802e0f081e3f426c8d51898c",
+    "bep_reliability_engine\\progression.py": "3df11fdbacce1e23a9efa00c2525c9ad55ec260004b9a04bfe83ed0f3ac70676",
+    "bep_reliability_engine\\progression_numba.py": "128556aef6b72a739df9f8482129d1abbb0dc0ee19e69abdd0a153fc34ca7e04",
+    "bep_reliability_engine\\run.py": "c88bf1d06d454d74b37bd8ebacf1d4ec213e7e828789737755d4d6f48127c964",
+    "bep_reliability_engine\\sampling.py": "3f7a4e255cc17d9b70502effbc5dfd73851c60ecfa085c0a97e2dfe806ed76b8",
+    "bep_reliability_engine\\sellmeijer.py": "c66d8701bfed99be1427614264d93755d0e90a08d80362e799c8082ae6976eea",
+    "bep_reliability_engine\\sensitivity.py": "62864e399c181757f9d03ba03211bbac66e8d240887d6778b984a09db7e4d072",
+    "bep_reliability_engine\\tail_sampling.py": "bf01d03abf457f8c32461d666ec79ed31fd7492c019ae5fb6b6a15571c6daf24",
+    "bep_reliability_engine\\time_contract.py": "b8ae5eb62157f4301ae9772d4827b8c5fc9c6d92a01e02997b37ab67bfa14bbb",
+    "bep_reliability_engine\\__init__.py": "3598d1c639f1a6eecca90d82a463192c0852895d60e3afa246c25fdbeae1c7bc",
+    "bayesian_reliability_updating\\analysis.py": "815cea10d3175e48f9284de7e38b10f766de3c86a653de05c0f16e6f804ccf63",
+    "bayesian_reliability_updating\\cli.py": "eb7561442107a5a7a0a55631e3c0a87cac7e47293755c36c88f1c1777710f283",
+    "bayesian_reliability_updating\\events.py": "9edc2af6dd5397336229aba31a46debdc480a8be6374c35f3fdb23a576492835",
+    "bayesian_reliability_updating\\filtering.py": "963bf009a87543a7230bf2f38931c12ff67828efce12ca2ef778ec23363ce7a7",
+    "bayesian_reliability_updating\\fragility_update.py": "107be12c4b5026aa01de1532731e0bb48354bb91bf18f3c8c92004d4cd9ef7dc",
+    "bayesian_reliability_updating\\pipeline.py": "e941f5e68f69efa96a742282b2dbb14dc6cd742452b770ba1154f3129feeb45b",
+    "bayesian_reliability_updating\\plots.py": "1e3de1cd3eef032f788ea9a47be928b48f29fca4f56fc44c26c43a48d81beb6c",
+    "bayesian_reliability_updating\\posterior.py": "82b1693b3ad1d8ee65e5ab664586b8c8729b80b9ef73e6a9fe51e504e1d14042",
+    "bayesian_reliability_updating\\replay.py": "d2d914c935c97ae5f7902c6f768cabf351f6cd580f8b891628062db5f7ba95ad",
+    "bayesian_reliability_updating\\sequential.py": "5d86ed25b78e38b0cb9846a6fbfcff4698b720376b828109bf79f6501f92b10f",
+    "bayesian_reliability_updating\\__init__.py": "b9012f1aafe9dfa00e72dd82f3a68e53fd76282c8e175d78aa46cfc0bca8851d",
+    "bayesian_reliability_updating\\__main__.py": "e9b314548220333a3e2211d8dca5ecc8ab7b3b27cbd45c876a64b8e9d28d2d2d"
+  }
+}

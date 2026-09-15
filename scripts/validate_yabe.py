@@ -358,7 +358,7 @@ def forced_progression(
     t_lc = np.full(n, np.nan)
     t_half = np.full(n, np.nan)
     t_full = np.full(n, np.nan)
-    for k in range(i_start, h.size):
+    for k in range(i_start, h.size - 1):
         h_ero = (h[k] - z_toe) - 0.3 * d_bl
         h_eq = equilibrium_head(l_cur, h_c, l_c, length_arr)
         rate = progression_rate(h_ero, h_eq, c_e, k_aq, length_arr)
@@ -496,7 +496,7 @@ def discrimination_test(records: dict) -> list[dict]:
             compute_critical_pipe_length(d_aq, site["L"]), dtype=np.float64
         )
         prog = integrate_progression(
-            np.asarray(rec.h),
+            np.asarray(rec.h)[:-1],
             float(rec.native_dt),
             InstantaneousHead(r_e, site["z_toe"]),
             site["z_toe"],

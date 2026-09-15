@@ -55,3 +55,12 @@ Enforcing the shared sample and the single-source `H_c` inside one function is t
 - Phase 1 architecture spec §1 (M8), §2 (M8 I/O contract), §3–§4 (shared preamble then branch; head conventions), §8 (Phase 2 handoff and survival-discrimination decomposition), §9 (importable without notebook context), §12 (failure mode 4).
 - ADR-0001, ADR-0002, ADR-0007, ADR-0008, ADR-0010.
 - Tests: `tests/test_evaluator.py`, `tests/test_evaluator_phase2_surface.py`.
+
+
+## Contract correction, 2026-09-15
+
+ADR-0053 supersedes incompatible time/activation descriptions above. Records
+contain instantaneous samples, M7 consumes interval loads, and M8 returns an
+initial state followed by interval-end states. Non-finite record inputs are
+rejected. Public lag activation is unsupported and rejected on every backend;
+the retained low-level lag class is not a public routing guarantee.

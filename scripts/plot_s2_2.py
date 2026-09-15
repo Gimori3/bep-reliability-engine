@@ -68,7 +68,7 @@ def main() -> None:
     # t_max long enough to cover DgFlow's later breach (~9 h) on one axis.
     t = np.arange(0.0, 35000.0, DT_S)
     result = integrate_progression(
-        np.full(t.size, H_M),
+        np.full(t.size - 1, H_M),
         DT_S,
         InstantaneousHead(1.0, 0.0),
         0.0,
@@ -81,7 +81,7 @@ def main() -> None:
         seepage_length_m=L_M,
         store_trajectory=True,
     )
-    sim = result.l_trajectory_m
+    sim = np.concatenate(([0.0], result.l_trajectory_m))
 
     # --- digitized DgFlow trajectory (running-max cleaned, note §5C) --------
     dg = np.loadtxt(DATA_DIR / "L3m_S2-2_pipelength_l-t.csv", delimiter=",", skiprows=1)

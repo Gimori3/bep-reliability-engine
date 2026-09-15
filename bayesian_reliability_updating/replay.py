@@ -354,6 +354,8 @@ def replay_event(
     )
     config = run.config
     settings: dict[str, Any] = {
+        "time_contract": "instantaneous_samples_left_euler_v1",
+        "head_model": "instantaneous",
         "l_ini_m": _L_INI_M,
         "replay_dt_seconds": float(replay_rec.native_dt),
         "record_native_dt_seconds": float(record.native_dt),
@@ -471,5 +473,5 @@ def breach_times_for_rows(
             continue
         reached = np.nonzero(trajectory >= float(geometry["L"]))[0]
         if reached.size:
-            times[out_idx] = float(replay.record.t[reached[0]])
+            times[out_idx] = float(replay.record.t[reached[0]] - replay.record.t[0])
     return times

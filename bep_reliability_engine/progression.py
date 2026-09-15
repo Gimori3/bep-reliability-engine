@@ -99,6 +99,7 @@ from numpy.typing import ArrayLike, NDArray
 from bep_reliability_engine.constants import GAMMA_W
 from bep_reliability_engine.hydraulics import AquiferHeadModel, InstantaneousHead
 from bep_reliability_engine.initiation import erosion_indicator
+from bep_reliability_engine.time_contract import validate_interval_loads
 
 __all__ = [
     "CRACK_RESISTANCE_FACTOR",
@@ -146,7 +147,7 @@ class ProgressionResult(NamedTuple):
 
     l_trajectory_m: NDArray[np.float64] | None
     """Full trajectory [m], shape ``(T,) + R``; ``l_trajectory_m[k]`` is the
-    pipe length after processing sample k. None unless
+    pipe length at (k+1)*dt after interval k. None unless
     ``store_trajectory=True`` (default off: ~800 MB per cross-section at
     N = 1e5, spec §12 failure mode 6)."""
 
@@ -518,7 +519,9 @@ def integrate_progression(
     ValueError
         If ``crack_resistance_factor`` is negative (ADR-0051).
     """
-    h_river = np.asarray(h_river_m, dtype=np.float64)
+    # N left-endpoint loads denote N intervals, not N observation times.
+    # Returned trajectory entries are interval END states (ADR-0053).
+    h_river = validate_interval_loads(h_river_m, dt_s)
     n_steps = h_river.shape[0]
 
     # Per-realization theta inputs (scalars or (N,) arrays; numpy broadcasts
@@ -530,6 +533,27 @@ def integrate_progression(
     h_c = np.asarray(h_c_m, dtype=np.float64)
     l_c = np.asarray(l_c_m, dtype=np.float64)
     length = np.asarray(seepage_length_m, dtype=np.float64)
+
+    if n_steps == 0:
+        initial = np.broadcast_arrays(
+            np.asarray(l_ini_m, dtype=np.float64),
+            c_e_arr,
+            k_aq,
+            d_bl,
+            gamma_bl_sub,
+            h_c,
+            l_c,
+            length,
+        )[0].copy()
+        return ProgressionResult(
+            l_final_m=initial,
+            l_trajectory_m=(
+                np.empty((0,) + initial.shape) if store_trajectory else None
+            ),
+            uplift_occurred=np.zeros(initial.shape, dtype=bool),
+            heave_occurred=np.zeros(initial.shape, dtype=bool),
+            t_uh_s=np.full(initial.shape, np.nan),
+        )
 
     # Aquifer-head state is reinitialized per event in equilibrium with the
     # initial river stage (it never carries across events; spec §5).

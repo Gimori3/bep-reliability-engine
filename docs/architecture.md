@@ -1,5 +1,14 @@
 # Phase 1 Computational Architecture: Time-Dependent BEP Reliability Engine
 
+> **2026-09-15 contract correction (ADR-0053):** M3 records contain N
+> instantaneous samples spanning N-1 intervals. M8 passes N-1 left-endpoint
+> loads to the unchanged interval-based M7 kernel and stores the initial
+> state followed by interval-end states. Breach times use elapsed end-state
+> times. Public records must be finite. Public aquifer-lag activation is
+> unsupported and rejected, including on NumPy; legacy lag-hook descriptions
+> below describe a low-level research class, not supported public routing.
+
+
 ## Authoritative Specification for Implementation
 
 ---
@@ -178,7 +187,7 @@ STATIC BRANCH:
 
 TRANSIENT BRANCH (full timestep loop):
   7. Initialize l_current = l_ini, uplift_ever = False
-  8. For each timestep t_k:
+  8. For each interval start t_k, k = 0, ..., N_samples - 2:
        a. h_aq(t_k)        = z_toe + r_e · (h(t_k) − z_toe)
                               [instantaneous form — the executed ADR-0032 diagnostic
                                retained it (Π_central ≈ 0.01 ≪ 0.10); the dormant lag hook
