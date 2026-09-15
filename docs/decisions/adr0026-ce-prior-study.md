@@ -288,3 +288,21 @@ no C_e value is invented.
   (the two calibration analyses; cited via ADR-0026's 2026-07-08 email record).
 - ADR-0001 (stochastic C_e promotion; prior amended), ADR-0026 (field prior),
   ADR-0033 (GSA fm7), ADR-0045 (m_p model factor), `docs/phase2_report.md` §11.
+
+
+## Gauge reconciliation, 2026-09-15 (authoritative for the 2016 replay)
+
+The KP 56.73 station convention was missing from the earlier companion.
+The full N=100000 replay was repeated at KP58.8 and KP60.0 with identical
+prior remappings and current record timing. Static results and the zero
+marginal-transient finding persist. Earlier Phase 2 numbers above are superseded.
+Evidence: `adr0053-time-contract-evidence.json` and the refreshed
+`results/sensitivity/ce_prior/phase2_survival_sensitivity.json`.
+
+| Prior | KP58.8 rejection (%) | KP60.0 rejection (%) | C_e mean pull (%), KP58.8 / KP60.0 |
+|---|---:|---:|---:|
+| compgeo_lab | 0.518 | 0.109 | -0.38 / -0.14 |
+| adr0001_lab | 0.375 | 0.071 | -0.33 / -0.11 |
+| field_meanshift_labcov | 5.802 | 3.016 | -2.02 / -1.64 |
+| field_adr0026 | 5.512 | 3.244 | -4.01 / -3.62 |
+| reconciled_mixture | 3.178 | 1.544 | -3.04 / -2.01 |

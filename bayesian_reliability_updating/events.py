@@ -180,10 +180,12 @@ def default_2016_source(
     row of `HQrelation_TokachiRiv_2017.csv`. The decisive evidence is a primary
     station register, not an inference from the off-grid spacing:
     `data/raw/Uncertainty_HQrelation.xlsx` (the ADR-0042 decision 6 source)
-    carries a sheet `TokachiRiv._Obihiro` whose first data row reads
-    `point = "Obihiro"`, `KP = 56.73`, with that station's own rating
+    carries a sheet `TokachiRiv._Obihiro` whose observations identify
+    `point = "Obihiro"`, `KP = 56.73`. Later observations carry the rating
     `HQ_a = 135.36`, `HQ_b = -32.62` -- **exactly** the KP 56.73 row of the
-    committed rating CSV, and not the KP 56.6 row (140.33, -32.49). Phase 3
+    committed rating CSV, and not the KP 56.6 row (140.33, -32.49). The
+    first observation instead has (87.41, -31.17); the earlier first-row
+    attribution is corrected by ADR-0053 (2026-09-15). Phase 3
     already read it this way (`system_integration/segments.py`,
     `docs/phase3_report.md`); Phase 2 did not.
 

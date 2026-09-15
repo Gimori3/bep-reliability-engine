@@ -72,3 +72,12 @@ Pinning the contracts now lets M3 and M1 be written to a fixed target and keeps 
 - Phase 1 architecture spec §1 (M1, M3, M8), §2 (HydrographRecord and M8 I/O contracts), §8 (Phase 2 handoff).
 - ADR-0005 (per-realization lambda_out, foreshore proxy), ADR-0006 (foreshore tanh correction), ADR-0007 (r_e-translated erosion head and z_toe ≡ h_e datum).
 - Pol (2024, SIE) Eqs. (6), (8).
+
+
+## Contract correction, 2026-09-15
+
+ADR-0053 supersedes incompatible time/activation descriptions above. Records
+contain instantaneous samples, M7 consumes interval loads, and M8 returns an
+initial state followed by interval-end states. Non-finite record inputs are
+rejected. Public lag activation is unsupported and rejected on every backend;
+the retained low-level lag class is not a public routing guarantee.

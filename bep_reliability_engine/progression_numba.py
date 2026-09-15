@@ -61,6 +61,7 @@ from bep_reliability_engine.progression import (
     ProgressionResult,
     resolve_crack_resistance_factor,
 )
+from bep_reliability_engine.time_contract import validate_interval_loads
 
 __all__ = ["integrate_progression_numba"]
 
@@ -262,12 +263,7 @@ def integrate_progression_numba(
     one JIT compilation (cached on disk thereafter via ``cache=True``).
     """
     crack_factor = resolve_crack_resistance_factor(crack_resistance_factor)
-    h_river = np.ascontiguousarray(np.asarray(h_river_m, dtype=np.float64))
-    if not np.all(np.isfinite(h_river)):
-        raise ValueError(
-            "integrate_progression_numba requires a finite stage series; "
-            "use the numpy backend to diagnose non-finite hydrographs."
-        )
+    h_river = np.ascontiguousarray(validate_interval_loads(h_river_m, dt_s))
 
     # Broadcast every per-realization input to one common (N,) shape. Scalars
     # are valid inputs (N = 1); the result shape then matches the broadcast

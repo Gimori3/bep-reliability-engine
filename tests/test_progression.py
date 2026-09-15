@@ -542,7 +542,7 @@ def _b25_245_replay(
     t_grid = np.arange(0.0, t_raw[-1] + dt_s, dt_s)
     h_grid = np.interp(t_grid, t_raw[keep], h_raw[keep])
     result = integrate_progression(
-        h_grid,
+        h_grid[:-1],
         dt_s,
         InstantaneousHead(1.0, 0.0),
         0.0,
@@ -555,6 +555,10 @@ def _b25_245_replay(
         seepage_length_m=B25_L_M,
         store_trajectory=store_trajectory,
     )
+    if result.l_trajectory_m is not None:
+        result = result._replace(
+            l_trajectory_m=np.concatenate(([0.0], result.l_trajectory_m))
+        )
     return t_grid, result
 
 
@@ -702,7 +706,7 @@ def _s2_2_replay(
     """
     t_grid = np.arange(0.0, t_max_s, dt_s)
     result = integrate_progression(
-        np.full(t_grid.size, S2_H_M),
+        np.full(t_grid.size - 1, S2_H_M),
         dt_s,
         InstantaneousHead(1.0, 0.0),
         0.0,
@@ -715,7 +719,7 @@ def _s2_2_replay(
         seepage_length_m=S2_L_M,
         store_trajectory=True,
     )
-    return t_grid, result.l_trajectory_m
+    return t_grid, np.concatenate(([0.0], result.l_trajectory_m))
 
 
 def _normalized_growth_curve(

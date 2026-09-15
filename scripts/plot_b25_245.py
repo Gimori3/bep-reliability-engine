@@ -61,7 +61,7 @@ def main() -> None:
     h_grid = np.interp(t, t_raw[keep], h_raw[keep])
 
     result = integrate_progression(
-        h_grid,
+        h_grid[:-1],
         DT_S,
         InstantaneousHead(1.0, 0.0),
         0.0,
@@ -74,7 +74,7 @@ def main() -> None:
         seepage_length_m=L_M,
         store_trajectory=True,
     )
-    sim = result.l_trajectory_m
+    sim = np.concatenate(([0.0], result.l_trajectory_m))
 
     # --- digitized measured pipe length ------------------------------------
     exp = np.loadtxt(

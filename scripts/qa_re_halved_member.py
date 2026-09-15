@@ -121,7 +121,7 @@ def transient_failures_for_scale(
 
     head_model = InstantaneousHead(r_e, z_toe_m)
     progression = integrate_progression(
-        np.asarray(record.h, dtype=np.float64),
+        np.asarray(record.h, dtype=np.float64)[:-1],
         float(record.native_dt),
         head_model,
         z_toe_m,

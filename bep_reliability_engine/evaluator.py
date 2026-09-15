@@ -170,11 +170,13 @@ from bep_reliability_engine.hydraulics import (
     leakage_length_out,
     response_factor,
 )
+from bep_reliability_engine.initiation import z_heave, z_uplift
 from bep_reliability_engine.progression import integrate_progression
 from bep_reliability_engine.sellmeijer import (
     compute_critical_head,
     compute_critical_head_vectorized,
 )
+from bep_reliability_engine.time_contract import validate_record
 
 if TYPE_CHECKING:  # pragma: no cover
     # Typing-only import: M8 consumes the record structurally via .h, .peak
@@ -191,6 +193,23 @@ __all__ = [
     "evaluate_batch",
     "evaluate_batch_diagnostics",
 ]
+
+
+def _terminal_gate(progression, hydrograph, r_e, z_toe, d_bl, gamma_bl):
+    """Observe the last instantaneous gate without adding exposure time."""
+    head = InstantaneousHead(r_e, z_toe).step(float(hydrograph.h[-1]), 0.0)
+    delta = head - z_toe
+    up = z_uplift(delta, gamma_bl, d_bl) < 0.0
+    with np.errstate(divide="ignore", invalid="ignore"):
+        heave = z_heave(delta, gamma_bl, d_bl) < 0.0
+    first = up & heave & np.isnan(progression.t_uh_s)
+    return progression._replace(
+        uplift_occurred=progression.uplift_occurred | up,
+        heave_occurred=progression.heave_occurred | heave,
+        t_uh_s=np.where(
+            first, (len(hydrograph.h) - 1) * hydrograph.native_dt, progression.t_uh_s
+        ),
+    )
 
 
 def _gate_response_factor(r_e, toe_gradient_relief_factor: float | None):
@@ -719,7 +738,7 @@ float, optional
     # H_erosion(t) = (h(t) - z_toe) - 0.3*D_bl drives the rate (ADR-0027) -- the
     # two heads kept separate exactly as the M7 tests verify. Phase 1 uses the
     # instantaneous (quasi-static) M4 form (module docstring ambiguity 5).
-    h_river_m = np.asarray(hydrograph.h, dtype=np.float64)
+    h_river_m = validate_record(hydrograph)[:-1]
     dt_s = float(hydrograph.native_dt)
     head_model = InstantaneousHead(
         _gate_response_factor(r_e, toe_gradient_relief_factor), z_toe_m
@@ -740,6 +759,14 @@ float, optional
         store_trajectory=store_trajectory,
         crack_resistance_factor=crack_resistance_factor,
     )
+    progression = _terminal_gate(
+        progression,
+        hydrograph,
+        _gate_response_factor(r_e, toe_gradient_relief_factor),
+        z_toe_m,
+        d_bl_m,
+        gamma_bl_sub_knpm3,
+    )
     l_e_final = float(progression.l_final_m)
     z_transient = seepage_length_m - l_e_final
     failure_trans = bool(z_transient <= 0.0)
@@ -748,7 +775,11 @@ float, optional
         Z_static=z_static,
         Z_transient=z_transient,
         l_e_final=l_e_final,
-        l_trajectory=progression.l_trajectory_m,
+        l_trajectory=(
+            None
+            if progression.l_trajectory_m is None
+            else np.concatenate(([float(l_ini)], progression.l_trajectory_m))
+        ),
         H_c=h_c_m,
         H_c_transient=h_c_transient_m,
         l_c=l_c_m,
@@ -1135,7 +1166,7 @@ def evaluate_batch_diagnostics(
 
     # --- Transient branch: the same r_e drives the M7 timestepper, vectorized
     # across realizations within each (serial) timestep (spec §6).
-    h_river_m = np.asarray(hydrograph.h, dtype=np.float64)
+    h_river_m = validate_record(hydrograph)[:-1]
     dt_s = float(hydrograph.native_dt)
     if progression_backend == "numba":
         # ADR-0029 opt-in JIT backend: same physics, realization-parallel,
@@ -1188,6 +1219,14 @@ def evaluate_batch_diagnostics(
             equilibrium_end_factor=equilibrium_end_factor,
             crack_resistance_factor=crack_resistance_factor,
         )
+    progression = _terminal_gate(
+        progression,
+        hydrograph,
+        _gate_response_factor(r_e, toe_gradient_relief_factor),
+        z_toe_m,
+        d_bl_m,
+        gamma_bl_sub_knpm3,
+    )
     l_e_final = np.asarray(progression.l_final_m, dtype=np.float64)
     z_transient = seepage_length - l_e_final
     failure_trans = z_transient <= 0.0

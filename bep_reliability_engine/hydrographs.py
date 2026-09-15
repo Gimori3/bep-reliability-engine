@@ -81,6 +81,8 @@ from typing import Mapping
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
+from bep_reliability_engine.time_contract import validate_record
+
 __all__ = [
     "CanonicalShape",
     "HydrographRecord",
@@ -210,6 +212,10 @@ class HydrographRecord:
     event_id: str
     native_dt: float
     provenance: dict = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        """Reject invalid observations at construction (ADR-0053)."""
+        validate_record(self)
 
 
 def _si_time_axis(

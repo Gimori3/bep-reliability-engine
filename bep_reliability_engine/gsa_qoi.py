@@ -43,6 +43,7 @@ from bep_reliability_engine.hydraulics import (
 )
 from bep_reliability_engine.progression import integrate_progression
 from bep_reliability_engine.sellmeijer import compute_critical_head_vectorized
+from bep_reliability_engine.time_contract import validate_record
 
 __all__ = ["QoiBatch", "evaluate_qoi_batch"]
 
@@ -181,7 +182,7 @@ def evaluate_qoi_batch(
     failure_static = z_static <= 0.0
 
     # Transient branch: identical dispatch to evaluate_batch (ADR-0029).
-    h_river_m = np.asarray(hydrograph.h, dtype=np.float64)
+    h_river_m = validate_record(hydrograph)[:-1]
     dt_s = float(hydrograph.native_dt)
     if progression_backend == "numba":
         try:

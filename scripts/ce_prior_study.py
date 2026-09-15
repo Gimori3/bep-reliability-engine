@@ -546,6 +546,7 @@ def run_phase2(backend: str = "numba") -> dict[str, Any]:
     param_names = ["k_aq", "d_70", "D_aq", "D_bl", "k_bl", "gamma_bl_sub", "C_e"]
     record: dict[str, Any] = {
         "analysis": "phase2_survival_sensitivity",
+        "time_contract": "instantaneous_samples_left_euler_v1",
         "n_samples": PHASE2_N,
         "backend_note": (
             "candidate replays use numba; baseline cross-checked vs config numpy"
@@ -569,6 +570,8 @@ def run_phase2(backend: str = "numba") -> dict[str, Any]:
         section_out: dict[str, Any] = {
             "config": stem,
             "results_h5": h5,
+            "config_hash": cfg.config_hash(),
+            "event_provenance": refined.provenance,
             "candidates": {},
         }
         for c in cands:

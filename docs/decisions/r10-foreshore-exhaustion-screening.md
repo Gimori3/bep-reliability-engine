@@ -344,3 +344,23 @@ retreat rate", never "will this levee fail".
 - `docs/tokachi_basin_document_review_2026-07-27.md` §10.2 (review item R10) and
   the 2011/2016 failure attributions; 続十勝川治水史 (2023) for the 堤防防御ライン
   required-high-water-bed-width methodology and the Otofuke KP 18.2 account.
+
+
+## Gauge reconciliation, 2026-09-15 (authoritative for observed-event values)
+
+The observed 2016 loading is rebuilt with the adopted KP 56.73 gauge.
+Design-level and canonical-grid results, and the d4PDF ensemble climate arm,
+are unchanged. Earlier observed-event numbers above are superseded.
+The assumed retreat rates and threshold convention are unchanged; this is
+not an additional validation of their physical applicability.
+
+| Section | 2016 mobilising hours | Critical retreat rate (m/h) | Exposure at 1 m/h |
+|---|---:|---:|---:|
+| KP57.4 | 42 | 4.762 | 0.2100 |
+| KP58.8 | 67 | 4.851 | 0.2062 |
+| KP60 | 21 | 28.571 | 0.0350 |
+| KP62 | 16 | 2.750 | 0.3636 |
+
+The KP62/KP60 exposure ratio is now 10.390 under observed loading;
+the design-level ratio remains 13.622. The observed mean-to-peak excess-depth
+ratio spans 0.275 to 0.476. Figure and Appendix I values are refreshed.

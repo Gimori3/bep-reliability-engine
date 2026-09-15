@@ -428,7 +428,7 @@ def _hydrograph_for_level(
         t=t,
         h=h,
         peak=float(level_m),
-        duration_hours=float(n_steps * native_dt_s / 3600.0),
+        duration_hours=float((n_steps - 1) * native_dt_s / 3600.0),
         scenario=config.scenario,
         event_id=f"stub_h{level_m:g}",
         native_dt=float(native_dt_s),
@@ -930,8 +930,10 @@ def _build_metadata(
         # 'numpy' is the bit-identical reference; 'numba' is equivalent to
         # < 1e-10 only, so the marker keeps the two distinguishable forever.
         "progression_backend": config.timestepper.progression_backend,
-        "aquifer_lag_active": bool(config.timestepper.aquifer_lag_active),
-        "tau_aq": None,  # lag inactive in Phase 1 (ADR-0014); from S_s when active.
+        "aquifer_lag_active": False,
+        "head_model": "instantaneous",
+        "time_contract": "instantaneous_samples_left_euler_v1",
+        "tau_aq": None,  # public lag activation is unsupported (ADR-0053).
         # ADR-0032: the spec §11 aquifer-response diagnostic that justifies the
         # instantaneous default. tau_aq magnitudes, the flood timescales, Pi vs
         # the pre-registered threshold, and the per-section verdict — descriptive
@@ -1161,6 +1163,8 @@ def run_fragility_analysis(
         (``0 < P_f < 1``) conditioning levels — i.e. the grid does not bracket
         the transition for that branch.
     """
+    if config.timestepper.aquifer_lag_active:
+        raise ValueError("aquifer_lag_active=True is unsupported (ADR-0053)")
     # 1. Resolve and guard the output path BEFORE any expensive work (fail fast,
     #    so a long run is never lost to a refused write at the end).
     resolved_path: Path | None = None

@@ -899,7 +899,7 @@ def _sustained_ladder_point(
     the resulting failure indicator with the analytic sustained-peak limit
     computed from the same call's diagnostics.
     """
-    n_steps = max(2, int(round(hours * 3600.0 / dt_s)))
+    n_steps = max(2, int(round(hours * 3600.0 / dt_s)) + 1)
     record = sustained_peak_record(
         level_m, dt_s=dt_s, n_steps=n_steps, scenario=scenario
     )

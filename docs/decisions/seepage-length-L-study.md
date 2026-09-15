@@ -286,3 +286,16 @@ two-population coupling and the production geometry (as with the ADR-0033 indice
 η² probe is first-order only (use the GSA for total effects); the reach bounds assume the
 weakest-link/series form the thesis adopts. All numbers regenerate from the committed
 configs and the persisted posteriors.
+
+
+## Gauge reconciliation, 2026-09-15 (superseding the earlier numerical summary)
+
+The retained-sample diagnostics were recomputed from current KP 56.73
+production posteriors, N=100000 per section. The older summary used the
+pre-correction masks. This numerical refresh does not adjudicate the separate
+claim that a Sobol share bounds future updating. Evidence: ADR-0053 companion.
+
+| Section | Rejection (%) | L mean change (%) | L CoV change (%) | k_aq mean change (%) | C_e mean change (%) |
+|---|---:|---:|---:|---:|---:|
+| KP58.8 | 5.512 | 1.339 | -3.566 | -4.047 | -4.012 |
+| KP60.0 | 3.244 | 0.519 | -1.617 | -2.912 | -3.624 |

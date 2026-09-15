@@ -32,9 +32,9 @@
   },
   "sanity_anchor": {
     "event_2016": {
-      "exposure_ratio_kp62_0": 0.38636363636363635,
-      "exposure_ratio_kp60_0": 0.03666666666666667,
-      "separation": 10.537190082644628,
+      "exposure_ratio_kp62_0": 0.36363636363636365,
+      "exposure_ratio_kp60_0": 0.035,
+      "separation": 10.38961038961039,
       "foreshore_width_ratio": 13.636363636363637
     },
     "design_hwl": {
@@ -61,78 +61,78 @@
         "thresholds": {
           "z_mob-1.0m": {
             "threshold_m_msl": 35.41,
-            "mobilising_hours": 112.0,
+            "mobilising_hours": 104.0,
             "record_hours": 744.0,
             "peak_stage_m_msl": 39.658,
             "peak_excess_depth_m": 4.248000000000005,
-            "mean_excess_depth_m": 1.1325714285714343,
-            "critical_retreat_rate_m_per_h": 1.7857142857142858,
+            "mean_excess_depth_m": 1.1444392378264026,
+            "critical_retreat_rate_m_per_h": 1.9230769230769231,
             "rates": {
               "low": {
                 "retreat_rate_m_per_h": 0.1,
-                "cumulative_retreat_m": 11.200000000000001,
+                "cumulative_retreat_m": 10.4,
                 "time_to_exhaustion_h": 2000.0,
-                "exposure_ratio": 0.05600000000000001,
+                "exposure_ratio": 0.052000000000000005,
                 "exhausted": false
               },
               "central": {
                 "retreat_rate_m_per_h": 1.0,
-                "cumulative_retreat_m": 112.0,
+                "cumulative_retreat_m": 104.0,
                 "time_to_exhaustion_h": 200.0,
-                "exposure_ratio": 0.56,
+                "exposure_ratio": 0.52,
                 "exhausted": false
               },
               "narrative_2011": {
                 "retreat_rate_m_per_h": 5.0,
-                "cumulative_retreat_m": 560.0,
+                "cumulative_retreat_m": 520.0,
                 "time_to_exhaustion_h": 40.0,
-                "exposure_ratio": 2.8,
+                "exposure_ratio": 2.6,
                 "exhausted": true
               },
               "high": {
                 "retreat_rate_m_per_h": 10.0,
-                "cumulative_retreat_m": 1120.0,
+                "cumulative_retreat_m": 1040.0,
                 "time_to_exhaustion_h": 20.0,
-                "exposure_ratio": 5.6,
+                "exposure_ratio": 5.2,
                 "exhausted": true
               }
             }
           },
           "z_mob": {
             "threshold_m_msl": 36.41,
-            "mobilising_hours": 46.0,
+            "mobilising_hours": 42.0,
             "record_hours": 744.0,
             "peak_stage_m_msl": 39.658,
             "peak_excess_depth_m": 3.2480000000000047,
-            "mean_excess_depth_m": 1.0355942028985567,
-            "critical_retreat_rate_m_per_h": 4.3478260869565215,
+            "mean_excess_depth_m": 1.0782070773263517,
+            "critical_retreat_rate_m_per_h": 4.761904761904762,
             "rates": {
               "low": {
                 "retreat_rate_m_per_h": 0.1,
-                "cumulative_retreat_m": 4.6000000000000005,
+                "cumulative_retreat_m": 4.2,
                 "time_to_exhaustion_h": 2000.0,
-                "exposure_ratio": 0.023000000000000003,
+                "exposure_ratio": 0.021,
                 "exhausted": false
               },
               "central": {
                 "retreat_rate_m_per_h": 1.0,
-                "cumulative_retreat_m": 46.0,
+                "cumulative_retreat_m": 42.0,
                 "time_to_exhaustion_h": 200.0,
-                "exposure_ratio": 0.23,
+                "exposure_ratio": 0.21,
                 "exhausted": false
               },
               "narrative_2011": {
                 "retreat_rate_m_per_h": 5.0,
-                "cumulative_retreat_m": 230.0,
+                "cumulative_retreat_m": 210.0,
                 "time_to_exhaustion_h": 40.0,
-                "exposure_ratio": 1.15,
+                "exposure_ratio": 1.05,
                 "exhausted": true
               },
               "high": {
                 "retreat_rate_m_per_h": 10.0,
-                "cumulative_retreat_m": 460.0,
+                "cumulative_retreat_m": 420.0,
                 "time_to_exhaustion_h": 20.0,
-                "exposure_ratio": 2.3,
+                "exposure_ratio": 2.1,
                 "exhausted": true
               }
             }
@@ -143,7 +143,7 @@
             "record_hours": 744.0,
             "peak_stage_m_msl": 39.658,
             "peak_excess_depth_m": 2.2480000000000047,
-            "mean_excess_depth_m": 1.0558633776091142,
+            "mean_excess_depth_m": 1.0274270912034613,
             "critical_retreat_rate_m_per_h": 11.764705882352942,
             "rates": {
               "low": {
@@ -600,7 +600,7 @@
           }
         ]
       },
-      "elapsed_s": 4.44
+      "elapsed_s": 5.97
     },
     {
       "section": "KP58.8",
@@ -618,117 +618,117 @@
         "thresholds": {
           "z_mob-1.0m": {
             "threshold_m_msl": 36.53,
-            "mobilising_hours": 240.0,
+            "mobilising_hours": 212.0,
             "record_hours": 744.0,
             "peak_stage_m_msl": 40.75,
             "peak_excess_depth_m": 4.219999999999999,
-            "mean_excess_depth_m": 0.7979587813620082,
-            "critical_retreat_rate_m_per_h": 1.3541666666666667,
+            "mean_excess_depth_m": 0.8161044659858097,
+            "critical_retreat_rate_m_per_h": 1.5330188679245282,
             "rates": {
               "low": {
                 "retreat_rate_m_per_h": 0.1,
-                "cumulative_retreat_m": 24.0,
+                "cumulative_retreat_m": 21.200000000000003,
                 "time_to_exhaustion_h": 3250.0,
-                "exposure_ratio": 0.07384615384615385,
+                "exposure_ratio": 0.06523076923076924,
                 "exhausted": false
               },
               "central": {
                 "retreat_rate_m_per_h": 1.0,
-                "cumulative_retreat_m": 240.0,
+                "cumulative_retreat_m": 212.0,
                 "time_to_exhaustion_h": 325.0,
-                "exposure_ratio": 0.7384615384615385,
+                "exposure_ratio": 0.6523076923076923,
                 "exhausted": false
               },
               "narrative_2011": {
                 "retreat_rate_m_per_h": 5.0,
-                "cumulative_retreat_m": 1200.0,
+                "cumulative_retreat_m": 1060.0,
                 "time_to_exhaustion_h": 65.0,
-                "exposure_ratio": 3.6923076923076925,
+                "exposure_ratio": 3.2615384615384615,
                 "exhausted": true
               },
               "high": {
                 "retreat_rate_m_per_h": 10.0,
-                "cumulative_retreat_m": 2400.0,
+                "cumulative_retreat_m": 2120.0,
                 "time_to_exhaustion_h": 32.5,
-                "exposure_ratio": 7.384615384615385,
+                "exposure_ratio": 6.523076923076923,
                 "exhausted": true
               }
             }
           },
           "z_mob": {
             "threshold_m_msl": 37.53,
-            "mobilising_hours": 72.0,
+            "mobilising_hours": 67.0,
             "record_hours": 744.0,
             "peak_stage_m_msl": 40.75,
             "peak_excess_depth_m": 3.219999999999999,
-            "mean_excess_depth_m": 0.8775574970131437,
-            "critical_retreat_rate_m_per_h": 4.513888888888889,
+            "mean_excess_depth_m": 0.8847413391756841,
+            "critical_retreat_rate_m_per_h": 4.850746268656716,
             "rates": {
               "low": {
                 "retreat_rate_m_per_h": 0.1,
-                "cumulative_retreat_m": 7.2,
+                "cumulative_retreat_m": 6.7,
                 "time_to_exhaustion_h": 3250.0,
-                "exposure_ratio": 0.022153846153846156,
+                "exposure_ratio": 0.020615384615384615,
                 "exhausted": false
               },
               "central": {
                 "retreat_rate_m_per_h": 1.0,
-                "cumulative_retreat_m": 72.0,
+                "cumulative_retreat_m": 67.0,
                 "time_to_exhaustion_h": 325.0,
-                "exposure_ratio": 0.22153846153846155,
+                "exposure_ratio": 0.20615384615384616,
                 "exhausted": false
               },
               "narrative_2011": {
                 "retreat_rate_m_per_h": 5.0,
-                "cumulative_retreat_m": 360.0,
+                "cumulative_retreat_m": 335.0,
                 "time_to_exhaustion_h": 65.0,
-                "exposure_ratio": 1.1076923076923078,
+                "exposure_ratio": 1.0307692307692307,
                 "exhausted": true
               },
               "high": {
                 "retreat_rate_m_per_h": 10.0,
-                "cumulative_retreat_m": 720.0,
+                "cumulative_retreat_m": 670.0,
                 "time_to_exhaustion_h": 32.5,
-                "exposure_ratio": 2.2153846153846155,
+                "exposure_ratio": 2.0615384615384613,
                 "exhausted": true
               }
             }
           },
           "z_mob+1.0m": {
             "threshold_m_msl": 38.53,
-            "mobilising_hours": 22.0,
+            "mobilising_hours": 21.0,
             "record_hours": 744.0,
             "peak_stage_m_msl": 40.75,
             "peak_excess_depth_m": 2.219999999999999,
-            "mean_excess_depth_m": 0.9305050505050516,
-            "critical_retreat_rate_m_per_h": 14.772727272727273,
+            "mean_excess_depth_m": 0.9441293141109675,
+            "critical_retreat_rate_m_per_h": 15.476190476190476,
             "rates": {
               "low": {
                 "retreat_rate_m_per_h": 0.1,
-                "cumulative_retreat_m": 2.2,
+                "cumulative_retreat_m": 2.1,
                 "time_to_exhaustion_h": 3250.0,
-                "exposure_ratio": 0.00676923076923077,
+                "exposure_ratio": 0.006461538461538462,
                 "exhausted": false
               },
               "central": {
                 "retreat_rate_m_per_h": 1.0,
-                "cumulative_retreat_m": 22.0,
+                "cumulative_retreat_m": 21.0,
                 "time_to_exhaustion_h": 325.0,
-                "exposure_ratio": 0.06769230769230769,
+                "exposure_ratio": 0.06461538461538462,
                 "exhausted": false
               },
               "narrative_2011": {
                 "retreat_rate_m_per_h": 5.0,
-                "cumulative_retreat_m": 110.0,
+                "cumulative_retreat_m": 105.0,
                 "time_to_exhaustion_h": 65.0,
-                "exposure_ratio": 0.3384615384615385,
+                "exposure_ratio": 0.3230769230769231,
                 "exhausted": false
               },
               "high": {
                 "retreat_rate_m_per_h": 10.0,
-                "cumulative_retreat_m": 220.0,
+                "cumulative_retreat_m": 210.0,
                 "time_to_exhaustion_h": 32.5,
-                "exposure_ratio": 0.676923076923077,
+                "exposure_ratio": 0.6461538461538462,
                 "exhausted": false
               }
             }
@@ -1223,7 +1223,7 @@
           }
         ]
       },
-      "elapsed_s": 4.37
+      "elapsed_s": 5.61
     },
     {
       "section": "KP60.0",
@@ -1241,78 +1241,78 @@
         "thresholds": {
           "z_mob-1.0m": {
             "threshold_m_msl": 39.25,
-            "mobilising_hours": 78.0,
+            "mobilising_hours": 72.0,
             "record_hours": 744.0,
             "peak_stage_m_msl": 42.296,
             "peak_excess_depth_m": 3.0459999999999994,
-            "mean_excess_depth_m": 0.8173945409429266,
-            "critical_retreat_rate_m_per_h": 7.6923076923076925,
+            "mean_excess_depth_m": 0.8303651376146797,
+            "critical_retreat_rate_m_per_h": 8.333333333333334,
             "rates": {
               "low": {
                 "retreat_rate_m_per_h": 0.1,
-                "cumulative_retreat_m": 7.800000000000001,
+                "cumulative_retreat_m": 7.2,
                 "time_to_exhaustion_h": 6000.0,
-                "exposure_ratio": 0.013000000000000001,
+                "exposure_ratio": 0.012,
                 "exhausted": false
               },
               "central": {
                 "retreat_rate_m_per_h": 1.0,
-                "cumulative_retreat_m": 78.0,
+                "cumulative_retreat_m": 72.0,
                 "time_to_exhaustion_h": 600.0,
-                "exposure_ratio": 0.13,
+                "exposure_ratio": 0.12,
                 "exhausted": false
               },
               "narrative_2011": {
                 "retreat_rate_m_per_h": 5.0,
-                "cumulative_retreat_m": 390.0,
+                "cumulative_retreat_m": 360.0,
                 "time_to_exhaustion_h": 120.0,
-                "exposure_ratio": 0.65,
+                "exposure_ratio": 0.6,
                 "exhausted": false
               },
               "high": {
                 "retreat_rate_m_per_h": 10.0,
-                "cumulative_retreat_m": 780.0,
+                "cumulative_retreat_m": 720.0,
                 "time_to_exhaustion_h": 60.0,
-                "exposure_ratio": 1.3,
+                "exposure_ratio": 1.2,
                 "exhausted": true
               }
             }
           },
           "z_mob": {
             "threshold_m_msl": 40.25,
-            "mobilising_hours": 22.0,
+            "mobilising_hours": 21.0,
             "record_hours": 744.0,
             "peak_stage_m_msl": 42.296,
             "peak_excess_depth_m": 2.0459999999999994,
-            "mean_excess_depth_m": 0.8547272727272719,
-            "critical_retreat_rate_m_per_h": 27.272727272727273,
+            "mean_excess_depth_m": 0.8673137614678904,
+            "critical_retreat_rate_m_per_h": 28.571428571428573,
             "rates": {
               "low": {
                 "retreat_rate_m_per_h": 0.1,
-                "cumulative_retreat_m": 2.2,
+                "cumulative_retreat_m": 2.1,
                 "time_to_exhaustion_h": 6000.0,
-                "exposure_ratio": 0.003666666666666667,
+                "exposure_ratio": 0.0035,
                 "exhausted": false
               },
               "central": {
                 "retreat_rate_m_per_h": 1.0,
-                "cumulative_retreat_m": 22.0,
+                "cumulative_retreat_m": 21.0,
                 "time_to_exhaustion_h": 600.0,
-                "exposure_ratio": 0.03666666666666667,
+                "exposure_ratio": 0.035,
                 "exhausted": false
               },
               "narrative_2011": {
                 "retreat_rate_m_per_h": 5.0,
-                "cumulative_retreat_m": 110.0,
+                "cumulative_retreat_m": 105.0,
                 "time_to_exhaustion_h": 120.0,
-                "exposure_ratio": 0.18333333333333332,
+                "exposure_ratio": 0.175,
                 "exhausted": false
               },
               "high": {
                 "retreat_rate_m_per_h": 10.0,
-                "cumulative_retreat_m": 220.0,
+                "cumulative_retreat_m": 210.0,
                 "time_to_exhaustion_h": 60.0,
-                "exposure_ratio": 0.36666666666666664,
+                "exposure_ratio": 0.35,
                 "exhausted": false
               }
             }
@@ -1323,7 +1323,7 @@
             "record_hours": 744.0,
             "peak_stage_m_msl": 42.296,
             "peak_excess_depth_m": 1.0459999999999994,
-            "mean_excess_depth_m": 0.5257419354838709,
+            "mean_excess_depth_m": 0.5133321100917448,
             "critical_retreat_rate_m_per_h": 66.66666666666667,
             "rates": {
               "low": {
@@ -1857,7 +1857,7 @@
           }
         ]
       },
-      "elapsed_s": 4.59
+      "elapsed_s": 5.65
     },
     {
       "section": "KP62.0",
@@ -1875,117 +1875,117 @@
         "thresholds": {
           "z_mob-1.0m": {
             "threshold_m_msl": 42.82,
-            "mobilising_hours": 55.0,
+            "mobilising_hours": 49.0,
             "record_hours": 744.0,
             "peak_stage_m_msl": 45.729,
             "peak_excess_depth_m": 2.908999999999999,
-            "mean_excess_depth_m": 0.8426499511241435,
-            "critical_retreat_rate_m_per_h": 0.8,
+            "mean_excess_depth_m": 0.895360681520316,
+            "critical_retreat_rate_m_per_h": 0.8979591836734694,
             "rates": {
               "low": {
                 "retreat_rate_m_per_h": 0.1,
-                "cumulative_retreat_m": 5.5,
+                "cumulative_retreat_m": 4.9,
                 "time_to_exhaustion_h": 440.0,
-                "exposure_ratio": 0.125,
+                "exposure_ratio": 0.11136363636363637,
                 "exhausted": false
               },
               "central": {
                 "retreat_rate_m_per_h": 1.0,
-                "cumulative_retreat_m": 55.0,
+                "cumulative_retreat_m": 49.0,
                 "time_to_exhaustion_h": 44.0,
-                "exposure_ratio": 1.25,
+                "exposure_ratio": 1.1136363636363635,
                 "exhausted": true
               },
               "narrative_2011": {
                 "retreat_rate_m_per_h": 5.0,
-                "cumulative_retreat_m": 275.0,
+                "cumulative_retreat_m": 245.0,
                 "time_to_exhaustion_h": 8.8,
-                "exposure_ratio": 6.25,
+                "exposure_ratio": 5.568181818181818,
                 "exhausted": true
               },
               "high": {
                 "retreat_rate_m_per_h": 10.0,
-                "cumulative_retreat_m": 550.0,
+                "cumulative_retreat_m": 490.0,
                 "time_to_exhaustion_h": 4.4,
-                "exposure_ratio": 12.5,
+                "exposure_ratio": 11.136363636363637,
                 "exhausted": true
               }
             }
           },
           "z_mob": {
             "threshold_m_msl": 43.82,
-            "mobilising_hours": 17.0,
+            "mobilising_hours": 16.0,
             "record_hours": 744.0,
             "peak_stage_m_msl": 45.729,
             "peak_excess_depth_m": 1.908999999999999,
-            "mean_excess_depth_m": 0.8793690702087263,
-            "critical_retreat_rate_m_per_h": 2.588235294117647,
+            "mean_excess_depth_m": 0.9085956422018358,
+            "critical_retreat_rate_m_per_h": 2.75,
             "rates": {
               "low": {
                 "retreat_rate_m_per_h": 0.1,
-                "cumulative_retreat_m": 1.7000000000000002,
+                "cumulative_retreat_m": 1.6,
                 "time_to_exhaustion_h": 440.0,
-                "exposure_ratio": 0.03863636363636364,
+                "exposure_ratio": 0.03636363636363637,
                 "exhausted": false
               },
               "central": {
                 "retreat_rate_m_per_h": 1.0,
-                "cumulative_retreat_m": 17.0,
+                "cumulative_retreat_m": 16.0,
                 "time_to_exhaustion_h": 44.0,
-                "exposure_ratio": 0.38636363636363635,
+                "exposure_ratio": 0.36363636363636365,
                 "exhausted": false
               },
               "narrative_2011": {
                 "retreat_rate_m_per_h": 5.0,
-                "cumulative_retreat_m": 85.0,
+                "cumulative_retreat_m": 80.0,
                 "time_to_exhaustion_h": 8.8,
-                "exposure_ratio": 1.9318181818181819,
+                "exposure_ratio": 1.8181818181818181,
                 "exhausted": true
               },
               "high": {
                 "retreat_rate_m_per_h": 10.0,
-                "cumulative_retreat_m": 170.0,
+                "cumulative_retreat_m": 160.0,
                 "time_to_exhaustion_h": 4.4,
-                "exposure_ratio": 3.8636363636363638,
+                "exposure_ratio": 3.6363636363636362,
                 "exhausted": true
               }
             }
           },
           "z_mob+1.0m": {
             "threshold_m_msl": 44.82,
-            "mobilising_hours": 7.0,
+            "mobilising_hours": 6.0,
             "record_hours": 744.0,
             "peak_stage_m_msl": 45.729,
             "peak_excess_depth_m": 0.9089999999999989,
-            "mean_excess_depth_m": 0.49409139784946127,
-            "critical_retreat_rate_m_per_h": 6.285714285714286,
+            "mean_excess_depth_m": 0.5678110091743124,
+            "critical_retreat_rate_m_per_h": 7.333333333333333,
             "rates": {
               "low": {
                 "retreat_rate_m_per_h": 0.1,
-                "cumulative_retreat_m": 0.7000000000000001,
+                "cumulative_retreat_m": 0.6000000000000001,
                 "time_to_exhaustion_h": 440.0,
-                "exposure_ratio": 0.01590909090909091,
+                "exposure_ratio": 0.01363636363636364,
                 "exhausted": false
               },
               "central": {
                 "retreat_rate_m_per_h": 1.0,
-                "cumulative_retreat_m": 7.0,
+                "cumulative_retreat_m": 6.0,
                 "time_to_exhaustion_h": 44.0,
-                "exposure_ratio": 0.1590909090909091,
+                "exposure_ratio": 0.13636363636363635,
                 "exhausted": false
               },
               "narrative_2011": {
                 "retreat_rate_m_per_h": 5.0,
-                "cumulative_retreat_m": 35.0,
+                "cumulative_retreat_m": 30.0,
                 "time_to_exhaustion_h": 8.8,
-                "exposure_ratio": 0.7954545454545454,
+                "exposure_ratio": 0.6818181818181818,
                 "exhausted": false
               },
               "high": {
                 "retreat_rate_m_per_h": 10.0,
-                "cumulative_retreat_m": 70.0,
+                "cumulative_retreat_m": 60.0,
                 "time_to_exhaustion_h": 4.4,
-                "exposure_ratio": 1.5909090909090908,
+                "exposure_ratio": 1.3636363636363635,
                 "exhausted": true
               }
             }
@@ -2579,8 +2579,12 @@
           }
         ]
       },
-      "elapsed_s": 4.43
+      "elapsed_s": 5.63
     }
   ],
-  "d4pdf_ensemble": null
+  "d4pdf_ensemble": null,
+  "refresh_2026_09_15": {
+    "scope": "2016 and canonical section calculations; existing d4PDF ensemble retained unchanged",
+    "gauge_kp": 56.73
+  }
 }
