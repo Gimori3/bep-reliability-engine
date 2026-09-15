@@ -443,6 +443,17 @@ wrong-datum guard.
   posterior side is measured in §6.2, and it is the side the published headline
   lives on. The arms reject 0.00 per cent under the 2016 record, so the two
   sides agree bit-for-bit on every arm.
+- **Open on the thesis side, 2026-09-15.** The declined credit is carried in the
+  Chapter 6 piping-conditions register, the Chapter 7 system-conditions register
+  and its dominance section, the Chapter 8 limitations register, the Chapter 9
+  RQ3 answer and answers register, and Appendix B. It is **not** named in the
+  Summary. Adding it there needs a re-wording of author-edited Summary prose,
+  which `msc-thesis/CLAUDE.md` reserves to the author, and takes the Summary from
+  two pages to three: the last Summary page ends flush, and a 191-character
+  insertion produced exactly two lines of overflow at an isolated build. The
+  sentence is drafted and left for the author in the 2026-09-14/15 project-log
+  entry. Until it is placed, §6.1's rule ("the dominance claim must not be quoted
+  without it") is satisfied by the main body and not by the abstract.
 
 ---
 
