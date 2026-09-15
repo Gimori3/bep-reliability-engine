@@ -98,9 +98,9 @@ def _make_hydrograph(
     M3 (``hydrographs.py``) is implemented, so the former ``SimpleNamespace``
     stand-in is replaced by the concrete frozen dataclass (the ADR-0010
     Consequences swap). The record is constructed *directly* (not through
-    ``build_hydrograph_record``) so the deterministic single-sample (T = 1)
-    Euler-step cases stay expressible — the loader requires T >= 2 to derive
-    ``native_dt``, but the record type itself does not. The real construction
+    ``build_hydrograph_record``) so deterministic two-node, one-interval
+    Euler-step cases and zero-span point observations stay expressible.
+    The real construction
     path (hours -> seconds, Eq. 4.19) is exercised separately by
     ``test_real_m3_built_record_feeds_both_entry_points``. ``peak`` defaults
     to max(h) (ADR-0010); the explicit override is retained for the
@@ -112,7 +112,7 @@ def _make_hydrograph(
         t=t,
         h=h_arr,
         peak=float(np.max(h_arr)) if peak is None else float(peak),
-        duration_hours=float(h_arr.size * dt_s / 3600.0),
+        duration_hours=float((h_arr.size - 1) * dt_s / 3600.0),
         scenario="historical",
         event_id="test-event",
         native_dt=float(dt_s),
@@ -166,7 +166,7 @@ def test_shared_sample_deterministic_single_step() -> None:
 
     h_peak = 14.0
     result = evaluate_realization(
-        THETA, _make_hydrograph([h_peak], peak=h_peak), GEOMETRY
+        THETA, _make_hydrograph([h_peak, h_peak], peak=h_peak), GEOMETRY
     )
 
     L = GEOMETRY["L"]
@@ -231,7 +231,7 @@ def test_head_convention_both_raw_differ_by_crack_term() -> None:
     H_c, _l_c, _lambda_in, _r_e = _reference_preamble(THETA, GEOMETRY)
     h_peak = 14.0
     result = evaluate_realization(
-        THETA, _make_hydrograph([h_peak], peak=h_peak), GEOMETRY
+        THETA, _make_hydrograph([h_peak, h_peak], peak=h_peak), GEOMETRY
     )
 
     L = GEOMETRY["L"]
@@ -278,7 +278,7 @@ def test_single_H_c_anchors_static_and_transient() -> None:
     h_peak = 14.0
     l_ini = l_c / 2.0
     result = evaluate_realization(
-        THETA, _make_hydrograph([h_peak], peak=h_peak), GEOMETRY, l_ini=l_ini
+        THETA, _make_hydrograph([h_peak, h_peak], peak=h_peak), GEOMETRY, l_ini=l_ini
     )
 
     L = GEOMETRY["L"]
@@ -510,7 +510,9 @@ def test_per_row_single_re_single_Hc_and_crack_offset(theta: np.ndarray) -> None
     """
     H_c, l_c, lambda_in, r_e = _reference_preamble(theta, GEOMETRY)
     result = evaluate_realization(
-        theta, _make_hydrograph([CROSS_ROW_PEAK], peak=CROSS_ROW_PEAK), GEOMETRY
+        theta,
+        _make_hydrograph([CROSS_ROW_PEAK, CROSS_ROW_PEAK], peak=CROSS_ROW_PEAK),
+        GEOMETRY,
     )
 
     L = GEOMETRY["L"]
@@ -550,7 +552,9 @@ def test_re_and_Hc_vary_across_distinct_theta_rows() -> None:
     """
     results = [
         evaluate_realization(
-            theta, _make_hydrograph([CROSS_ROW_PEAK], peak=CROSS_ROW_PEAK), GEOMETRY
+            theta,
+            _make_hydrograph([CROSS_ROW_PEAK, CROSS_ROW_PEAK], peak=CROSS_ROW_PEAK),
+            GEOMETRY,
         )
         for theta in THETA_ROWS
     ]
@@ -683,7 +687,7 @@ def test_alpha_exponent_threaded_through_both_entry_points() -> None:
     bit-identical to the scalar loop carrying the same override, proving the
     thread reaches the vectorized path too.
     """
-    hydro = _make_hydrograph([CROSS_ROW_PEAK], peak=CROSS_ROW_PEAK)
+    hydro = _make_hydrograph([CROSS_ROW_PEAK, CROSS_ROW_PEAK], peak=CROSS_ROW_PEAK)
 
     r_2d = evaluate_realization(THETA, hydro, GEOMETRY, alpha_exponent=-1.0 / 3.0)
     r_3d = evaluate_realization(THETA, hydro, GEOMETRY, alpha_exponent=-1.0 / 2.0)

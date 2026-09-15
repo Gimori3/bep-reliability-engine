@@ -222,3 +222,11 @@ actually occurred at each section, not a scaling of the event.
   September stage-sheet anomaly).
 - Thesis methodology chapter, "The Historical Constraint" section.
 - Mission section 6 (ingestion mandate).
+
+
+### Station-source clarification, 2026-09-15
+
+ADR-0053 corrects the September 13 first-row attribution above: the first
+Obihiro observation identifies KP 56.73 but has rating coefficients
+(87.41, -31.17). Later observations contain the adopted (135.36, -32.62).
+The gauge correction remains supported; no rating or model input is reverted.

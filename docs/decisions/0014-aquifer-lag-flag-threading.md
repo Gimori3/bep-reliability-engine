@@ -55,3 +55,12 @@ The spec's own baseline is instantaneous (§13) and conditions lag activation on
 - Phase 1 architecture spec §1 (M1 timestepper settings), §6 (lag insertion line), §11 (aquifer-response diagnostic, global flag, per-realization τ_aq), §13 (instantaneous default; lag hook retained in M4), §8 (`aquifer_lag_active`, `tau_aq` metadata attrs).
 - ADR-0004, ADR-0010, ADR-0011; ADR-0015 (deterministic-input scope).
 - `bep_reliability_engine/hydraulics.py` (`make_head_model`, `aquifer_response_time`, `LaggedHead`), `bep_reliability_engine/evaluator.py` (ambiguity #5); `config.py`/`hydrographs.py`/`fragility.py` (empty stubs as of 2026-06-17); `tests/test_hydraulics.py` (sole caller of `aquifer_response_time`).
+
+
+## Contract correction, 2026-09-15
+
+ADR-0053 supersedes incompatible time/activation descriptions above. Records
+contain instantaneous samples, M7 consumes interval loads, and M8 returns an
+initial state followed by interval-end states. Non-finite record inputs are
+rejected. Public lag activation is unsupported and rejected on every backend;
+the retained low-level lag class is not a public routing guarantee.

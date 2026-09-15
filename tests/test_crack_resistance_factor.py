@@ -204,10 +204,10 @@ def test_gross_head_erodes_strictly_faster_and_leaves_the_gate_alone() -> None:
 
 
 def _single_step_record(peak: float):
-    """A one-sample record: l_e is then exactly one forward-Euler step."""
+    """Two instantaneous samples: exactly one forward-Euler interval."""
 
     class _Rec:
-        h = np.array([peak], dtype=np.float64)
+        h = np.array([peak, peak], dtype=np.float64)
         native_dt = _DT_S
 
     rec = _Rec()

@@ -447,11 +447,11 @@ class TimestepperSettings(_StrictModel):
         Acceptance threshold for the Δt/2 test (fractional l_e change), in
         ``(0, 1)``. Default ``0.01`` (the spec §11 <1% target).
     aquifer_lag_active : bool
-        Global lag flag (ADR-0004, ADR-0014). Phase 1 default ``False``
-        (instantaneous). Metadata-only until the §11 diagnostic is built.
+        Legacy lag flag (ADR-0014). Only ``False`` is supported by public
+        evaluation; activation is rejected (ADR-0053).
     specific_storage_per_m : float or None
         Specific storage S_s [1/m] for τ_aq (ADR-0004); ``> 0`` when set.
-        Required when ``aquifer_lag_active`` is True. Default ``None``.
+        Used for response-time diagnostics only. Default ``None``.
     progression_backend : {'numpy', 'numba'}
         M7 batch-timestepper backend for the production sweep (ADR-0029).
         ``'numpy'`` (default) is the reference path, bit-identical to looping
@@ -492,28 +492,12 @@ class TimestepperSettings(_StrictModel):
     )
 
     @model_validator(mode="after")
-    def _lag_requires_specific_storage(self) -> TimestepperSettings:
-        """S_s is needed to derive τ_aq once the lag is active (ADR-0014)."""
-        if self.aquifer_lag_active and self.specific_storage_per_m is None:
+    def _reject_unsupported_lag(self) -> TimestepperSettings:
+        """Reject unsupported public lag activation (ADR-0053)."""
+        if self.aquifer_lag_active:
             raise ValueError(
-                "specific_storage_per_m is required when aquifer_lag_active is "
-                "True (ADR-0014; it is the input from which tau_aq is derived)."
-            )
-        return self
-
-    @model_validator(mode="after")
-    def _numba_backend_requires_instantaneous_head(self) -> TimestepperSettings:
-        """The numba kernel inlines the instantaneous M4 form only (ADR-0029).
-
-        Refusing the combination at load time is the fail-fast alternative to
-        silently dropping the lag: a lagged run must use the numpy backend
-        until the exponential lag update is implemented in the kernel.
-        """
-        if self.aquifer_lag_active and self.progression_backend == "numba":
-            raise ValueError(
-                "progression_backend='numba' supports only the instantaneous "
-                "head model; the aquifer-lag form is numpy-only (ADR-0029). "
-                "Set progression_backend='numpy' or deactivate the lag."
+                "aquifer_lag_active=True is unsupported by public evaluation "
+                "(ADR-0053); only the instantaneous head model is implemented."
             )
         return self
 

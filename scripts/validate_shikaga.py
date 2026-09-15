@@ -259,7 +259,7 @@ def full_chain(rec: HydrographRecord) -> list[dict]:
         h_c = np.asarray(compute_critical_head_vectorized(tm, geom).H_c)
         l_c = np.asarray(compute_critical_pipe_length(d_aq, L_BASE_M))
         prog = integrate_progression(
-            np.asarray(rec.h),
+            np.asarray(rec.h)[:-1],
             float(rec.native_dt),
             InstantaneousHead(r_e, Z_EXIT_PRIMARY),
             Z_EXIT_PRIMARY,

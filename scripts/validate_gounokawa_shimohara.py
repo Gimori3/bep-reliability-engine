@@ -274,7 +274,7 @@ def _hybrid_scalar(rec: HydrographRecord, L: float, z_toe: float) -> dict:
     h_c = float(np.asarray(sell.H_c)[0])
     l_c = float(np.asarray(compute_critical_pipe_length(sand["D_aq"], L)))
     prog = integrate_progression(
-        np.asarray(rec.h),
+        np.asarray(rec.h)[:-1],
         float(rec.native_dt),
         InstantaneousHead(np.array([r_e]), z_toe),
         z_toe,
@@ -412,7 +412,7 @@ def tier2(record_2018: HydrographRecord) -> list[dict]:
 
             head_model = InstantaneousHead(r_e, Z_TOE_PRIMARY_M)
             prog = integrate_progression(
-                np.asarray(record_2018.h),
+                np.asarray(record_2018.h)[:-1],
                 float(record_2018.native_dt),
                 head_model,
                 Z_TOE_PRIMARY_M,

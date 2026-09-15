@@ -295,19 +295,19 @@ def test_d70_interpretation_under_correlation_is_rejected() -> None:
 
 
 def test_lag_active_without_specific_storage_is_rejected() -> None:
-    """Activating the lag requires S_s to derive tau_aq (ADR-0014)."""
+    """Public lag activation is refused with or without storage (ADR-0053)."""
     bad = _valid_config_dict()
     bad["timestepper"]["aquifer_lag_active"] = True
     # specific_storage_per_m intentionally left unset (None).
     with pytest.raises(ValidationError):
         Config.model_validate(bad)
 
-    # Supplying S_s makes the same config valid.
+    # Storage cannot enable an unsupported public model.
     good = _valid_config_dict()
     good["timestepper"]["aquifer_lag_active"] = True
     good["timestepper"]["specific_storage_per_m"] = 5.0e-5
-    cfg = Config.model_validate(good)
-    assert cfg.timestepper.specific_storage_per_m == 5.0e-5
+    with pytest.raises(ValueError, match="unsupported"):
+        Config.model_validate(good)
 
 
 def test_bounds_with_low_not_below_high_is_rejected() -> None:
