@@ -11,12 +11,25 @@ Metric (campaign decision D1, pre-registered in
     dbeta   = beta_transient - beta_static  (paired, shared sample)
 
 ``beta`` is a strictly decreasing function of ``P_f``, so a confidence
-interval on ``P_f`` maps to one on ``beta`` by swapping its endpoints. The
-existing exact Clopper-Pearson intervals therefore carry over unchanged --
-no new statistical machinery is introduced, and the resolution criteria R1
-(at least 30 transient failing rows) and R2 (multiplicative interval width
-at most 2) stay defined on the probability ratio ``B`` exactly as
-pre-registered, because they map monotonically too.
+interval on ``P_f`` maps to one on ``beta`` by swapping its endpoints. That
+carries the exact Clopper-Pearson interval into a **per-branch** ``beta``
+interval unchanged, and no further machinery is needed for those.
+
+It does **not** carry a criterion defined on ``B`` over to ``dbeta``. There is
+no map from ``B`` alone: ``dbeta = Phi^-1(B p_t) - Phi^-1(p_t)`` depends on both
+branch probabilities, and only with one of them held fixed is it a monotone
+function of ``B`` (derivation and counterexamples in
+``docs/decisions/metric-and-decomposition-study.md``, audit item F3). So the two
+pre-registered criteria are traced to their estimands here:
+
+* **R1** (at least 30 transient failing rows) is a condition on the transient
+  **count**. Both estimators are functions of the same two counts on the same
+  rows, so a count floor governs both. That is the shared sample, not a map
+  between metrics.
+* **R2** (multiplicative interval width at most 2) is a condition on the width
+  of the interval on ``B`` and stays defined there. Its index-space counterpart
+  is ``R2_BETA_MAX_WIDTH`` below, a ceiling on the **directly evaluated** paired
+  bootstrap interval on ``dbeta``, never an image of the interval on ``B``.
 
 Inputs (all read-only)::
 
@@ -108,6 +121,21 @@ RECORD_CSV = DECISIONS / "rq1-beta-reexpression.csv"
 #: level exactly as the ratio-space companion does.
 R1_MIN_ROWS = 30
 R2_MAX_WIDTH = 2.0
+
+#: The index-space precision criterion, derived from R2's own stated rule rather
+#: than chosen after seeing the results. ADR-0040 s1.1 fixed R2 = 2.0 so that the
+#: interval "cannot straddle a decade": in log terms it occupies
+#: log10(2) = 0.301 of the one-decade granularity the ratio claim is quoted to.
+#: The index claim's granularity is the span the four design-level dbeta values
+#: are quoted over, 0.90 to 1.87, so one index unit; the same fraction of that
+#: gives 0.30. It is a ceiling on the DIRECTLY EVALUATED paired-bootstrap
+#: interval on dbeta. Measured over the 102 levels of this record it is strictly
+#: stricter than R1-and-R2 -- 14 levels pass on the ratio and fail here, none the
+#: other way round -- and all 14 are KP 62.0's hypothetical above-crest extension,
+#: where the static branch fails in every realization and no dbeta interval
+#: exists. No design anchor is reclassified. See
+#: ``docs/decisions/metric-and-decomposition-study.md``.
+R2_BETA_MAX_WIDTH = 0.30
 
 #: A paired-bootstrap interval is reported only where both branches clear the
 #: R1 floor; below it the deliverable is the one-sided Clopper-Pearson bound.
@@ -365,6 +393,14 @@ def level_row(
         row["delta_beta_lower_bound"] = delta_beta_cp_bound(k_s, k_t, n)
     else:
         row["delta_beta_lower_bound"] = None
+    # The index-space verdict, evaluated on dbeta's OWN interval. R1 is reused
+    # because it is a count condition and the counts are shared; R2 is not,
+    # because a width ceiling on a ratio carries none to a difference.
+    ci = row["delta_beta_ci"]
+    width = ci[1] - ci[0] if ci and all(np.isfinite(v) for v in ci) else float("nan")
+    row["delta_beta_ci_width"] = width
+    row["R2_beta_width"] = bool(np.isfinite(width) and width <= R2_BETA_MAX_WIDTH)
+    row["resolved_index_space"] = bool(row["R1_rows"] and row["R2_beta_width"])
     return row
 
 
@@ -776,6 +812,8 @@ CSV_COLUMNS = (
     "delta_beta_lower_bound",
     "B",
     "resolved",
+    "delta_beta_ci_width",
+    "resolved_index_space",
     "attainable",
     "artifact",
 )
@@ -828,6 +866,8 @@ def _csv_rows(record: dict[str, Any]) -> list[dict[str, Any]]:
                 "delta_beta_lower_bound": row.get("delta_beta_lower_bound"),
                 "B": row.get("B"),
                 "resolved": row.get("resolved"),
+                "delta_beta_ci_width": row.get("delta_beta_ci_width"),
+                "resolved_index_space": row.get("resolved_index_space"),
                 "attainable": row.get("attainable"),
                 "artifact": extra.get("artifact", base.get("artifact", "")),
             }
@@ -1026,10 +1066,20 @@ def write_markdown(record: dict[str, Any], path: Path) -> None:
     add("  resample per replicate applied to both branches. Reported only where")
     add(f"  both branches carry at least {MIN_ROWS_FOR_BOOTSTRAP} failing rows")
     add("  (the R1 floor); below that the bound above is the deliverable.")
-    add("- The resolution criteria R1 (at least 30 transient failing rows) and R2")
-    add("  (interval width factor at most 2) remain defined on the probability")
-    add("  ratio B exactly as pre-registered. They are not restated on dbeta:")
-    add("  the map is monotone, so a level resolved on B is resolved on dbeta.")
+    add("- The two pre-registered criteria are traced to their estimands. R1 (at")
+    add("  least 30 transient failing rows) is a condition on the transient COUNT,")
+    add("  and both estimators are functions of the same two counts on the same")
+    add("  rows, so it governs both; that is the shared sample, not a map between")
+    add("  metrics. R2 (interval width factor at most 2) is a condition on the")
+    add("  width of the interval on B and stays there: there is no map from B")
+    add("  alone to dbeta, so no verdict transfers. The index-space criterion is")
+    add(f"  R2beta, a ceiling of {R2_BETA_MAX_WIDTH} on the directly evaluated paired")
+    add("  interval on dbeta, derived from R2's own rule (ADR-0040 s1.1 set 2.0 so")
+    add("  the interval cannot straddle the decade the ratio claim is quoted to;")
+    add("  the same fraction of the one index unit the design-level dbeta values")
+    add("  span gives 0.30). It is strictly stricter than R1-and-R2 on this")
+    add("  record and reclassifies no design anchor. See")
+    add("  docs/decisions/metric-and-decomposition-study.md.")
     add("")
     add("## 2. Design-level anchors")
     add("")
@@ -1505,6 +1555,10 @@ def write_markdown(record: dict[str, Any], path: Path) -> None:
         " `stage_a_brute_kp57_4.json`, `stage_a_anchors.json` |"
     )
     add("")
+    # Exactly one terminating newline, so a regeneration is idempotent under
+    # the end-of-file pre-commit hook rather than producing a phantom diff.
+    while lines and not lines[-1].strip():
+        lines.pop()
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
@@ -1704,7 +1758,7 @@ def figure_delta_beta_vs_stage(record: dict[str, Any]) -> Path:
     axes[0][0].set_ylabel(
         r"$\Delta\beta = \beta_\mathrm{trans} - \beta_\mathrm{static}$"
     )
-    axes[1][0].set_ylabel("ratio  $B = P_{f,\mathrm{static}}/P_{f,\mathrm{trans}}$")
+    axes[1][0].set_ylabel(r"ratio  $B = P_{f,\mathrm{static}}/P_{f,\mathrm{trans}}$")
     # The stamped line, which carried the run conditions, the bootstrap band
     # and the warning about the two vertical scales, is the caption's sentence
     # now. So is the description of the bottom row, which the caption used to
@@ -1862,11 +1916,14 @@ def figure_hwl_dbeta_resolved(record: dict[str, Any]) -> Path:
             lw=2.0,
             zorder=3,
         )
+        # The panel plots dbeta, so the marker carries dbeta's OWN verdict:
+        # the R1 count floor and the directly evaluated interval width. The
+        # ratio-space R2 is not an image of it and cannot label this axis.
         for marker, keep, text in (
             ("o", True, "$N = 10^6$: resolved"),
             ("x", False, "$N = 10^6$: unresolved"),
         ):
-            sub = [r for r in usable if bool(r["resolved"]) is keep]
+            sub = [r for r in usable if bool(r["resolved_index_space"]) is keep]
             if not sub:
                 continue
             axis.plot(
@@ -2048,7 +2105,8 @@ def figure_kp57_dbeta_bound(record: dict[str, Any]) -> Path:
     )
     flips = record["euler_flips"]["kp57_4"]
     for row in rows:
-        resolved = bool(row["resolved"])
+        # dbeta's own verdict, as in figure_hwl_dbeta_resolved.
+        resolved = bool(row["resolved_index_space"])
         ci = row["delta_beta_ci"]
         yerr = None
         if ci and np.isfinite(ci[0]) and np.isfinite(ci[1]):
@@ -2265,10 +2323,35 @@ def build_record(n_replicates: int) -> dict[str, Any]:
             "n_bootstrap": n_replicates,
             "min_rows_for_bootstrap": MIN_ROWS_FOR_BOOTSTRAP,
             "resolution_criteria": {
-                "defined_on": "probability ratio B",
                 "R1_min_transient_rows": R1_MIN_ROWS,
+                "R1_estimand": "the transient failure count at the level",
+                "R1_governs_both_metrics": True,
+                "R1_reason": (
+                    "both estimators are functions of the same two counts on the"
+                    " same rows, so a count floor governs both; this is the"
+                    " shared sample, not a map between metrics"
+                ),
                 "R2_max_ci_width_factor": R2_MAX_WIDTH,
-                "note": "kept as pre-registered; the map to beta is monotone",
+                "R2_estimand": (
+                    "the multiplicative width of the 95 per cent interval on B"
+                ),
+                "R2_transfers_to_delta_beta": False,
+                "R2_reason": (
+                    "dbeta depends on both branch probabilities, not on their"
+                    " ratio, so a width condition on B carries no verdict to it"
+                ),
+                "R2_beta_max_ci_width": R2_BETA_MAX_WIDTH,
+                "R2_beta_estimand": (
+                    "the additive width of the directly evaluated 95 per cent"
+                    " paired-bootstrap interval on dbeta"
+                ),
+                "R2_beta_derivation": (
+                    "ADR-0040 s1.1 set R2 = 2.0 so the interval occupies"
+                    " log10(2) = 0.301 of the decade the ratio claim is quoted"
+                    " to; the same fraction of the one index unit the four"
+                    " design-level dbeta values span (0.90 to 1.87) gives 0.30"
+                ),
+                "evidence": ("docs/decisions/metric-and-decomposition-study.md"),
             },
         },
         "n_bootstrap": n_replicates,
