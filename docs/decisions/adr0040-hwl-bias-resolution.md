@@ -72,6 +72,31 @@ equivalent in practice (k = 30 alone gives `hi/lo` ~ 2.1 for a Poisson-like coun
 gives ~1.9), so R2 is the binding criterion and R1 the structural guard; both are stated so
 that a lucky-looking narrow interval on a tiny count cannot pass.
 
+**Amendment 2026-09-16: the estimand of each criterion, and what does not transfer.**
+Both criteria above stand exactly as pre-registered. What is corrected is a later
+claim, made when the comparison was re-expressed in reliability-index terms on
+2026-08-28, that they carry over to `Δβ` "through the monotone map". There is no such
+map: `Δβ = Φ⁻¹(B·P_t) − Φ⁻¹(P_t)` depends on **both** branch probabilities, and only
+with one of them held fixed is it a monotone function of `B`.
+
+* **R1's estimand is the transient count**, so it governs any estimator built from
+  those counts, `Δβ` included. The reason is that both estimators run on the same two
+  counts on the same rows, which is the shared sample, not a map between metrics.
+* **R2's estimand is the multiplicative width of the interval on `B`** and stays there.
+  Holding that interval at a factor of exactly 2.00, the directly evaluated `Δβ`
+  interval width runs 0.152 to 0.675 across `P_t` from 1e-6 to 5e-2.
+
+The index-space replacement, `R2β`, is a ceiling of **0.30** on the directly evaluated
+paired-bootstrap interval on `Δβ`, derived from R2's own rule: R2 = 2.0 was set so the
+interval occupies `log10(2) = 0.301` of the decade the ratio claim is quoted to, and the
+same fraction of the one index unit the four design-level `Δβ` values span gives 0.30.
+Measured over the 102 levels of the RQ1 record it is **strictly stricter** than R1-and-R2
+(14 levels pass on the ratio and fail on the index, none the reverse), and all 14 are
+KP 62.0's hypothetical above-crest extension where `Δβ` has no interval at all.
+**No anchor in this ADR is reclassified**, and no probability, index, ratio, interval or
+bound recorded here changes. Evidence:
+`docs/decisions/metric-and-decomposition-study.md`.
+
 **The interval on B.** By **paired bootstrap over realization rows** (ADR-0040 Decision 6
 and ADR-0047 §4.5), never as two independent binomials: C0 and C4b are evaluated on the
 same rows, C4b is nested within C0 in continuous time, and treating them as independent
