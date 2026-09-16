@@ -299,3 +299,41 @@ claim that a Sobol share bounds future updating. Evidence: ADR-0053 companion.
 |---|---:|---:|---:|---:|---:|
 | KP58.8 | 5.512 | 1.339 | -3.566 | -4.047 | -4.012 |
 | KP60.0 | 3.244 | 0.519 | -1.617 | -2.912 | -3.624 |
+
+## Interpretive correction, 2026-09-16: the ceiling is a magnitude, not a theorem
+
+The 2026-09-15 gauge reconciliation above refreshed section 3's numbers and
+explicitly left the interpretation open. It is closed here. Evidence and
+derivation: `docs/decisions/survival-information-and-nesting-study.md` §1,
+driver `scripts/survival_information_study.py --part conditioning future`,
+gate `tests/test_survival_information.py`.
+
+**Withdrawn.** Section 3's "that share is **essentially irreducible by survival
+evidence** — a floor that no amount of additional survival events (which only
+filter θ rows) can lower", its restatement as finding 4 ("**≈ ½–¾ of the
+transient fragility variance is L-borne and irreducible** by any θ-only
+survival filter — a structural bound"), and section 3's "it **cannot tighten
+the single largest contributor to BEP fragility uncertainty**".
+
+**Why.** Accept-Reject rejects rows, not columns, and each row carries its own
+paired L, so the retained marginal is conditioned whether or not L is a θ
+column: `π(L|S) = π(L)·P(S|L)/P(S)`, which equals the prior only if `P(S|L)` is
+flat. It is not: acceptance runs **0.7224** in the lowest prior L decile to
+**0.9996** in the highest at KP 58.8. Separately, a Sobol total-effect index is
+a variance share under a fixed input distribution, and conditioning changes that
+distribution, so `ST_L` cannot bound a posterior in the first place. The two
+quantities are not commensurable.
+
+**What replaces it, measured.** The 2016 survival removed **4.5 %** of Var(L) at
+KP 58.8 and 2.2 % at KP 60.0. Reading Phase 1's own transient failure matrix as
+the survival set of a hypothetical event at each conditioning level (the ladder
+is exactly nested, 0 non-monotone pairs at all eight strata), a survival **0.50 m
+above** the 2016 peak would move the retained mean 5.7 times as far and remove
+**9.7 %** of Var(L); the minimum over the whole computed grid, i.e. the most any
+single survival could do, is **about 11 %**. So the ceiling is real as a
+magnitude and false as a theorem, and the recommendation that follows is
+unchanged: L-borne fragility variance is reduced by surveying, because survival
+evidence reaches it only weakly.
+
+**Unaffected.** Every measured number in sections 1 and 2, findings 1, 2, 3 and
+5, the CoV 0.20/0.15 retention, and the recommendation of section 5.

@@ -47,9 +47,21 @@ every QoI at KP58.8 and top-three everywhere.** Y1 design-level ST: L 0.63 >
 k_aq 0.57 > C_e 0.34 > d_70 0.28 (KP58.8); k_aq 0.61 > L 0.49 ≈ C_e 0.48 >
 d_70 0.25 (KP60.0 — leadership is section-dependent, membership is not).
 L acts through H_c (resistance), the rate denominator, r_e, and the failure
-criterion Z = L − l_e itself. Since Phase 2 Accept–Reject filters only the
+criterion Z = L − l_e itself. ~~Since Phase 2 Accept–Reject filters only the
 7-column θ matrix, survival evidence cannot reduce this dominant geometric
-uncertainty — a hard ceiling on posterior tightening.
+uncertainty — a hard ceiling on posterior tightening.~~
+**Corrected 2026-09-16 (`survival-information-and-nesting-study.md` §1).**
+That inference is invalid twice over and neither half survives measurement.
+Accept–Reject rejects **rows**, and every row carries its own paired L, so
+the retained L marginal *is* conditioned: `π(L|S) = π(L)·P(S|L)/P(S)`, and
+`P(S|L)` runs 0.72 to 1.00 across prior L deciles at KP 58.8. And a Sobol
+total-effect index is a variance share under a *fixed* input distribution,
+which conditioning changes; it bounds nothing about a posterior. The true
+statement is quantitative: the 2016 survival removed 4.5 % of Var(L) at
+KP 58.8, and the most informative single survival anywhere on the computed
+grid removes about 11 %. L-borne variance is hard to reach with survival
+evidence, not unreachable — and the investigation-priority conclusion this
+finding supports is unchanged.
 
 **2. Structural zeros are exact.** C_e, D_bl, k_bl, γ'_bl return identically
 0.0 on Y2/Y4 (no static pathway, ADR-0001/0016/0028), and Y4's decomposition
@@ -148,8 +160,10 @@ every number above is reproducible from the configs.
   `seepage-length-L-study.md`): CoV 0.20/0.15 lognormal kept unchanged (the
   transient shoulder P_f is ~3–4× sensitive to CoV(L), the design level
   robust; the symmetric prior is conservative vs the one-sided physical
-  upside), and the ST_L ≈ 0.49–0.78 total-effect share was confirmed
-  irreducible by the θ-only Phase 2 filter (posterior L ≈ prior L).
+  upside), and the ST_L ≈ 0.49–0.78 total-effect share was ~~confirmed
+  irreducible by the θ-only Phase 2 filter (posterior L ≈ prior L)~~
+  **measured hard to reach, not irreducible — corrected 2026-09-16, see the
+  finding-1 note above.**
 - Indicator indices lose meaning as P_f → 0/1; use Y3/Y4 there.
 - Per-cross-section only; the **segment-scale restatement** of the L
   importance is addressed by the seepage-length L study (the reach-scale

@@ -25,6 +25,7 @@ from bayesian_reliability_updating.analysis import (
     c_e_headline,
     correlation_shift,
     prior_posterior_summary,
+    seepage_length_update,
 )
 from bayesian_reliability_updating.events import (
     default_2016_source,
@@ -468,6 +469,21 @@ def run_survival_update(
     marginals = prior_posterior_summary(run.theta, run.param_names, state.alive)
     headline = c_e_headline(run.theta, run.param_names, state.alive)
     correlations = correlation_shift(run.theta, run.param_names, state.alive)
+    # The seepage length is conditioned by the same row-wise rejection even
+    # though it is not a theta column, so it gets its own block rather than
+    # being left out of the record (2026-09-16; the study note is
+    # docs/decisions/survival-information-and-nesting-study.md). None only
+    # where L is deterministic.
+    seepage = (
+        seepage_length_update(
+            run.seepage_length_samples,
+            state.alive,
+            theta=run.theta,
+            param_names=run.param_names,
+        )
+        if run.seepage_length_samples is not None
+        else None
+    )
 
     phase1_meta = run.result.metadata
     trace_context = _trace_context(run, settings)
@@ -518,6 +534,7 @@ def run_survival_update(
             "marginals": marginals,
             "c_e_headline": headline,
             "correlation_shift": correlations,
+            "seepage_length_update": seepage,
         },
     }
     metadata = json.loads(json.dumps(metadata))
