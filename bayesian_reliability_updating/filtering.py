@@ -31,8 +31,24 @@ the transient rejection with the static rejection under the same replay:
 rows rejected by the static criterion would have failed at peak head
 regardless of time, so only the additional transient rejection (survives
 static, fails transient) is evidence about the time-dependent progression
-mechanism. The two failure sets are not strictly nested (different driving
-heads, ADR-0027/0028), so the full two-by-two table is reported.
+mechanism. The full two-by-two table is reported rather than assumed.
+
+**What the ``transient_only_reject`` cell is, corrected 2026-09-16.** Under
+the production head convention that cell is empty by construction, not by
+measurement, and the earlier statement here that the two failure sets "are
+not strictly nested" was wrong for every setting production reaches. To
+pass ``l_c`` the pipe needs ``H_erosion > H_eq(l_c) = H_c``, and
+``max_t H_erosion = (h_peak - z_toe) - 0.3 * D_bl``, so a transient failure
+forces ``Z_static = H_c - (h_peak - z_toe) < -0.3 * D_bl < 0``: strict
+inclusion with a guaranteed margin of one crack decrement. The cell is
+therefore a discretization diagnostic, which is exactly the use ADR-0030
+put it to when the native 3600 s step let forward Euler jump the barrier.
+It stays in the table because two settings can break the implication: a
+transient-only scale exponent (ADR-0017) decouples the two critical heads,
+and ``crack_resistance_factor = 0`` (ADR-0051) shrinks the margin to zero.
+Non-nested input is still reported faithfully; see
+``docs/decisions/survival-information-and-nesting-study.md`` and
+``tests/test_survival_information.py``.
 """
 
 from __future__ import annotations
