@@ -220,6 +220,19 @@ recorded here so they are not propagated:
    under-levee `L` is Sellmeijer's own calibration geometry. The asymmetry is
    real but it is between the *gate* and the *rule*, not inside the rule.
 
+**Added 2026-09-16.** A third claim, made on the thesis side rather than in
+this register, also does not survive: that the 1998 exit gradients
+corroborate the under-levee convention because a foreshore-spanning path
+would imply an average gradient too small to produce the reported local
+exit gradient. A local exit gradient is a head difference across the blanket
+divided by its thickness, not an average along the path, and measured
+through this engine's own translation the tabulated gradients select neither
+convention (the spanning path is in fact the closer of the two at three of
+four sections). The convention rests on the surveyed footprint, on
+Sellmeijer's calibration geometry and on the permissive wording of
+TR Zmw 1999 §4.4.2, not on that back-calculation. Evidence:
+`physical-model-qualifications-study.md` section 2.
+
 ---
 
 ## References
