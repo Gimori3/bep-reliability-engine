@@ -189,6 +189,20 @@ received" with consistent hydraulic boundary conditions across mechanisms.
    unit conversion — the finding, and why the primary now uses the
    dimensionally-correct factor.
 
+   **Reading note added 2026-09-16.** "Negligible at every node" is the
+   correct summary and "the law never engages" is not. The conversion
+   divides the *rate* coefficient; the critical shear is converted
+   separately and correctly and is a sampled quantity (Normal, mean
+   50.66 Pa, CoV 0.560, resampled positive), so the correction leaves the
+   activation condition untouched. Measured on the committed generation,
+   bed shear peaks at 25.4 to 108.1 Pa and exceeds the sampled threshold
+   for 15.2 to 97.8 per cent of draws at **all 114 nodes**; the corrected
+   coefficient then accumulates at most 3.16 m of depth against a levee
+   width of at least 7.0 m, so it is the breach criterion that fails and
+   not the threshold. Separate activation, accumulated depth and criterion
+   whenever this result is explained. Evidence:
+   `physical-model-qualifications-study.md` section 5 and its JSON.
+
    **The finding (unchanged).** `ErosionModel_231019.py` converts
    k = 0.021 ft^3/(lb·hr) to SI via `0.3048/0.45359237` (a linear ft->m
    factor times a pound-*mass*->kg factor). k is an erosion rate per unit
