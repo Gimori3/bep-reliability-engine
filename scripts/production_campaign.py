@@ -1196,6 +1196,22 @@ COMPANION_EXCLUSIONS: dict[str, str] = {
         "machine missing those inputs: it opens each artifact directly and "
         "raises. Its figures are regenerated from the same one command."
     ),
+    "scripts/metric_decomposition_study.py": (
+        "Metric relationship and comparator-ladder order: pure post-processing "
+        "on exactly the same substantive ground as the "
+        "scripts/rq1_beta_analysis.py entry above. It evaluates no limit state, "
+        "loads no Config and therefore has no config_hash exposure at all for a "
+        "companion hash gate to assert. Its inputs are the persisted production "
+        "sweeps this campaign gates directly under G0/G1, plus the ADR-0040 "
+        "N = 1e6 ladders, the ADR-0051 equal-head arms and the ADR-0045/0049 "
+        "companion arm sweeps, none of which the campaign produces (evidence "
+        "rather than regenerable cache, conventions section 10.2). Like "
+        "rq1_beta_analysis it cannot pass vacuously on a machine missing those "
+        "inputs: it opens each artifact directly and raises. It also gates the "
+        "row pairing it depends on, refusing unless the equal-head arm's static "
+        "column is bit-identical to the ladder's C0 and its stored production "
+        "transient to C4b at every shared level."
+    ),
     "scripts/drained_bracket_annualisation.py": (
         "ADR-0050 Phase 3 companion: re-sweeps nothing and writes nothing the "
         "campaign produces. It reads the persisted ADR-0050 arm curves, which "
