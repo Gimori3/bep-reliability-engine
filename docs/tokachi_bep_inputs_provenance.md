@@ -572,6 +572,41 @@ B_f about 100 m, so 44 versus 250 m is worth 5e-5 in P_f, in the conservative di
 re-measure it from imagery.** The high-value, poorly-constrained geometric input is `L`
 (3.1), which ADR-0033 ranks top by total-effect Sobol' index.
 
+### 3.10 RECORDED (2026-09-16): the 1998 exit gradients and design levels, and what they cannot settle
+
+Neither the CSV nor any config carries OYO's 1998 exit gradients or its 1998
+design water levels, because the engine consumes neither: the loading datum is
+the 2019 bank-height survey (ADR-0018) and the exit gradient is a model output,
+not an input. They are nevertheless an external comparison set, and
+`scripts/physical_model_qualifications.py --part gradients` now reads them, so
+they are recorded here rather than left implicit in the driver.
+
+| KP | vertical exit gradient `i_v` | horizontal `i_h` | 1998 design level [m T.P.] |
+|---|---|---|---|
+| 57.4 | 0.040 | 0.050 | 39.51 |
+| 58.8 | 1.300 | 0.620 | 41.33 |
+| 60.0 | 0.500 | 0.400 | 43.06 |
+| 62.0 | 0.970 | (not reported) | 46.68 |
+
+Source: OYO (1999), Forms 6 and 7, the 1998 deterministic safety evaluation,
+transcribed in the thesis Chapter 3 evaluation table and Appendix A borehole
+summary. `i_v = 0.97` at KP 62.0 is independently quoted at section 6 of this
+document. KP 63.4's appendix HWL of 46.68 m is a carry-over from the KP 62.0 row
+and is wrong (3.7); 46.68 is KP 62.0's own value and is used only there.
+
+**These values are a comparison set, never a constraint.** They are *maximum
+local* outputs of OYO's own finite-element model, whose schematization carried a
+continuous cohesive blanket across the whole domain including the foreshore.
+Measured against the adopted leakage-length translation at the prior means, the
+under-levee seepage-length convention over-predicts the tabulated vertical
+gradients by 1.1 to 16.6 and a foreshore-spanning path by 0.5 to 8.9, the
+spanning path being closer at three of the four sections; and the adopted
+model's horizontal gradient at the toe is 0.005 to 0.016 against tabulated 0.05
+to 0.62. **They therefore discriminate between no two seepage-length
+conventions, in either direction.** The thesis carried a back-calculation
+cross-check that used them as corroboration; it is withdrawn. Evidence:
+`docs/decisions/physical-model-qualifications-study.md` section 2.
+
 ---
 
 ## 4. Per-cross-section detail
