@@ -792,3 +792,28 @@ ADR-0053 corrects the September 13 first-row attribution above: the first
 Obihiro observation identifies KP 56.73 but has rating coefficients
 (87.41, -31.17). Later observations contain the adopted (135.36, -32.62).
 The gauge correction remains supported; no rating or model input is reverted.
+
+### Above-toe duration corrected, 2026-09-16
+
+The 2026-09-14 gauge addendum above did not include section 3's
+"hours at or above toe" column, which is still the superseded **KP 56.6**
+translation. Rebuilt through the committed ADR-0035 loader at the corrected
+**KP 56.73** node, with both nodes run in one process to confirm the
+attribution (`scripts/survival_information_study.py --part excursions`):
+
+| KP | body value | corrected |
+|---|---:|---:|
+| 57.4 | 9 | **9** |
+| 58.8 | 24 | **21** |
+| 60.0 | 31 | **28** |
+| 62.0 | 6 | **6** |
+
+Section 1's derived phrase "6 to 31 hours above the toe" becomes **6 to 28**.
+No rejection fraction, posterior, figure or conclusion depends on this column;
+it is a descriptive statistic of the loading. The same run establishes a
+separate point of record: at the mechanism's datum the reconstructed 2016
+record is a **single continuous excursion** at KP 57.4, KP 58.8 and KP 62.0,
+and at KP 60.0 a 4-hour precursor 170 hours before a 24-hour main window which
+disappears once the crack decrement is applied. There is therefore no
+inter-peak interval in the 2016 replay across which carried-over damage could
+act. See `docs/decisions/survival-information-and-nesting-study.md` §4.

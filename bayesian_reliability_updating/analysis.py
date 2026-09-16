@@ -16,6 +16,23 @@ them exactly (rejection is joint), and :func:`correlation_shift` reports
 the induced changes (Spearman rank, robust for the lognormal marginals) so
 downstream users never mistake the posterior for a product of independent
 marginals.
+
+The seepage length is the one conditioned quantity that is not a theta
+column, and until 2026-09-16 nothing here measured it. It is drawn
+independently of theta, but the survival event depends on it, so with an
+independent prior ``pi(theta, L) = pi(theta) pi(L)`` the conditioned
+marginal is
+
+    pi(L | S) = pi(L) * P(S | L) / P(S),
+
+which equals ``pi(L)`` if and only if ``P(S | L)`` is constant in ``L``.
+Rejection here is row-wise on the joint draw, so the retained sample
+carries the conditioned L exactly; what was missing was any diagnostic that
+looked at it. :func:`seepage_length_update` supplies one, and reports the
+acceptance profile ``P(S | L)`` itself rather than only the moment shifts,
+because a shifted mean is evidence of conditioning while an unshifted mean
+is not evidence of its absence. See
+``docs/decisions/survival-information-and-nesting-study.md``.
 """
 
 from __future__ import annotations
@@ -32,9 +49,16 @@ __all__ = [
     "correlation_shift",
     "marginal_summary",
     "prior_posterior_summary",
+    "seepage_length_update",
 ]
 
 _QUANTILES: tuple[float, ...] = (0.05, 0.25, 0.50, 0.75, 0.95)
+
+# Deciles of the prior L draw for the acceptance profile P(S | L). Ten bins
+# of 1e4 rows at production N give a per-bin binomial standard error under
+# 0.005 at the acceptance levels actually observed, which is an order below
+# the profile spread the production strata show.
+_ACCEPTANCE_BINS: int = 10
 
 
 def column(
@@ -214,3 +238,144 @@ def correlation_shift(
         "max_shift_pair": [param_names[int(i)], param_names[int(j)]],
         "max_shift_value": float(delta[i, j]),
     }
+
+
+def seepage_length_update(
+    seepage_length_samples: NDArray[np.float64],
+    accept: NDArray[np.bool_],
+    *,
+    theta: NDArray[np.float64] | None = None,
+    param_names: list[str] | None = None,
+    bins: int = _ACCEPTANCE_BINS,
+) -> dict[str, Any]:
+    """How the survival constraint conditions the seepage length.
+
+    The seepage length is drawn independently of ``theta`` (ADR-0001,
+    ``sampling.sample_seepage_length``) but it is not independent of the
+    survival event: it sets the critical head, the rate denominator and the
+    breach criterion itself. Independence in the PRIOR therefore does not
+    make the retained marginal equal to the prior marginal, and this
+    function measures the difference instead of assuming it away.
+
+    The reported object of record is ``acceptance_by_bin``, the empirical
+    ``P(S | L)`` over equal-count bins of the prior draw. It is the
+    discriminating quantity: the conditioned marginal equals the prior if
+    and only if this profile is flat, whereas the mean shift can be small,
+    or vanish by symmetry, while the profile is steep.
+
+    Parameters
+    ----------
+    seepage_length_samples : numpy.ndarray, shape (N,)
+        The per-row stochastic L actually used in the replay (row j pairs
+        with theta row j and with ``accept`` element j).
+    accept : numpy.ndarray, shape (N,), bool
+        The operative acceptance mask.
+    theta : numpy.ndarray, shape (N, 7), optional
+        The prior rows. When given with ``param_names``, the induced
+        dependence between L and each theta column is reported too.
+    param_names : list of str, optional
+        Canonical column names, required with ``theta``.
+    bins : int
+        Number of equal-count L bins for the acceptance profile.
+
+    Returns
+    -------
+    dict
+        ``prior`` and ``posterior`` marginal summaries, the relative mean
+        and coefficient-of-variation shifts, the retained variance ratio,
+        the two-sample Kolmogorov-Smirnov statistic, the acceptance profile
+        with its bin edges, counts and spread, and (when ``theta`` is given)
+        the prior and posterior Spearman rank correlations between L and
+        every theta column with their induced changes.
+
+    Raises
+    ------
+    ValueError
+        If the array lengths disagree, or if exactly one of ``theta`` and
+        ``param_names`` is given.
+    """
+    L = np.asarray(seepage_length_samples, dtype=np.float64)
+    accept = np.asarray(accept, dtype=bool)
+    if L.shape != accept.shape:
+        raise ValueError(
+            f"seepage length has shape {L.shape} against acceptance mask "
+            f"{accept.shape}; the two must pair row for row."
+        )
+    if (theta is None) != (param_names is None):
+        raise ValueError("theta and param_names must be given together.")
+
+    prior = marginal_summary(L)
+    retained = L[accept]
+    posterior = marginal_summary(retained) if retained.size else None
+
+    def _cov(summary: dict[str, float] | None) -> float:
+        if summary is None or not summary["mean"]:
+            return float("nan")
+        return summary["std"] / summary["mean"]
+
+    prior_cov, posterior_cov = _cov(prior), _cov(posterior)
+    result: dict[str, Any] = {
+        "prior": prior,
+        "posterior": posterior,
+        "prior_cov": prior_cov,
+        "posterior_cov": posterior_cov,
+        "relative_mean_shift": (
+            posterior["mean"] / prior["mean"] - 1.0
+            if posterior is not None and prior["mean"]
+            else float("nan")
+        ),
+        "relative_cov_shift": (
+            posterior_cov / prior_cov - 1.0 if prior_cov else float("nan")
+        ),
+        "variance_ratio": (
+            (posterior["std"] / prior["std"]) ** 2
+            if posterior is not None and prior["std"]
+            else float("nan")
+        ),
+        "ks_statistic": (
+            float(stats.ks_2samp(retained, L).statistic)
+            if retained.size
+            else float("nan")
+        ),
+    }
+
+    # P(S | L) over equal-count bins of the prior draw. Quantile edges keep
+    # the bin counts equal, so every bin's binomial error is the same.
+    edges = np.quantile(L, np.linspace(0.0, 1.0, bins + 1))
+    edges[-1] = np.nextafter(edges[-1], np.inf)
+    index = np.clip(np.digitize(L, edges) - 1, 0, bins - 1)
+    rates, counts = [], []
+    for b in range(bins):
+        member = index == b
+        counts.append(int(member.sum()))
+        rates.append(float(accept[member].mean()) if member.any() else float("nan"))
+    finite = [r for r in rates if np.isfinite(r)]
+    result["acceptance_by_bin"] = rates
+    result["acceptance_bin_counts"] = counts
+    result["acceptance_bin_edges"] = [float(e) for e in edges]
+    result["acceptance_spread"] = (
+        float(max(finite) - min(finite)) if finite else float("nan")
+    )
+
+    if theta is not None and param_names is not None:
+        induced: dict[str, dict[str, float]] = {}
+        for name in param_names:
+            values = column(theta, param_names, name)
+            rho_prior = float(stats.spearmanr(L, values).statistic)
+            rho_post = (
+                float(stats.spearmanr(retained, values[accept]).statistic)
+                if retained.size > 2
+                else float("nan")
+            )
+            induced[name] = {
+                "spearman_prior": rho_prior,
+                "spearman_posterior": rho_post,
+                "shift": rho_post - rho_prior,
+            }
+        result["induced_dependence"] = induced
+        finite_shifts = {k: v for k, v in induced.items() if np.isfinite(v["shift"])}
+        if finite_shifts:
+            worst = max(finite_shifts, key=lambda k: abs(finite_shifts[k]["shift"]))
+            result["max_induced_shift_parameter"] = worst
+            result["max_induced_shift_value"] = finite_shifts[worst]["shift"]
+    return result
