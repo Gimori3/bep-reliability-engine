@@ -1,0 +1,796 @@
+{
+  "study": "climate attribution and system composition",
+  "note": "docs/decisions/climate-attribution-and-composition-study.md",
+  "driver": "scripts/climate_attribution_decomposition.py",
+  "generated": "2026-09-17T13:26:30+00:00",
+  "elapsed_s": 7.4,
+  "scope": "Point quantities are exact arithmetic on the committed Phase 3 artifacts. Intervals are hazard-sampling uncertainty ONLY, the finite-ensemble spread of the d4PDF peak-stage distribution with the fragility curves held fixed, and are far narrower than the aquifer-conductivity bracket, which does not cancel. Quote that scope wherever any interval here is quoted.",
+  "arm": {
+    "d70": "matrix",
+    "bep_source": "posterior",
+    "surface_variant": "primary",
+    "lambda_ac_m": 250.0
+  },
+  "estimator": {
+    "imported_from": "scripts/annualisation_uncertainty_study.py",
+    "seed": 20260820,
+    "replicates": 10000,
+    "resampling_unit": "d4PDF ensemble member block",
+    "draw": "pattern-stratified (fixed SST-pattern composition)",
+    "occupancy_floor_blocks": 20
+  },
+  "inputs": {
+    "results/system_integration/phase3/rq4_annual.csv": "e84b25a129cfe833bde7c9663410d52dfac78f60a578783cdcabb492a1b0d4c9",
+    "results/system_integration/phase3/rq4_attribution.json": "2b257531940e957e0964afff932717506037d5ac0e19ab42329d2f94d826748c"
+  },
+  "identities": {
+    "1_partition": "P = w_in p_in + (1 - w_in) p_out",
+    "2_ratio_mixture": "R = s_in R_in + (1 - s_in) R_out",
+    "3_inside_product": "R_in = (w'_in / w_in) (p'_in / p_in)",
+    "note": "identity 3 is the change in the INSIDE stratum's contribution, one addend of identity 2, and is not the total ratio"
+  },
+  "two_stratum": {
+    "KP 57.4": {
+      "duration": {
+        "definition": "hours_above_datum > 24 h",
+        "historical": {
+          "w_inside": 0.001,
+          "p_f_inside": 0.09905890377568925,
+          "p_f_outside": 0.0006545701721646256,
+          "n_inside": 3,
+          "n_years": 3000,
+          "contribution_inside": 9.905890377568926e-05,
+          "contribution_outside": 0.000653915601992461,
+          "p_annual_reconstructed": 0.0007529745057681502,
+          "p_annual_published": 0.0007529745057681502,
+          "reconstruction_relative_deviation": 0.0,
+          "share_of_annual_total": 0.13155678315381195,
+          "occupancy": {
+            "n_years": 3,
+            "n_carrying_member_blocks": 3,
+            "n_member_blocks": 50,
+            "largest_block_share": 0.3333333333333333,
+            "n_sst_patterns": 1,
+            "carrying_blocks_per_pattern": {
+              "HPB": 3
+            },
+            "clears_floor": false,
+            "floor_failures": [
+              "F1 occupancy: 3 carrying member blocks, floor is 20",
+              "F2 concentration: the largest member block holds 33.3 % of the stratum, cap is 20 %"
+            ]
+          }
+        },
+        "+4K": {
+          "w_inside": 0.0077777777777777776,
+          "p_f_inside": 0.36428183449873747,
+          "p_f_outside": 0.0067505206215731145,
+          "n_inside": 42,
+          "n_years": 5400,
+          "contribution_inside": 0.0028333031572124025,
+          "contribution_outside": 0.006698016572294212,
+          "p_annual_reconstructed": 0.009531319729506615,
+          "p_annual_published": 0.009531319729506616,
+          "reconstruction_relative_deviation": 1.8200244302019697e-16,
+          "share_of_annual_total": 0.29726241880662074,
+          "occupancy": {
+            "n_years": 42,
+            "n_carrying_member_blocks": 33,
+            "n_member_blocks": 90,
+            "largest_block_share": 0.07142857142857142,
+            "n_sst_patterns": 6,
+            "carrying_blocks_per_pattern": {
+              "HFB_CC": 2,
+              "HFB_GF": 5,
+              "HFB_HA": 7,
+              "HFB_MI": 11,
+              "HFB_MP": 4,
+              "HFB_MR": 4
+            },
+            "clears_floor": true,
+            "floor_failures": []
+          }
+        },
+        "ratio_total": 12.658223693487733,
+        "ratio_inside_contribution": 28.60220585146172,
+        "ratio_outside_contribution": 10.242937394192094,
+        "historical_share_inside": 0.13155678315381195,
+        "mixture_reconstruction": 12.658223693487734,
+        "mixture_relative_deviation": 1.4033223637169025e-16,
+        "frequency_factor_inside": 7.777777777777778,
+        "severity_factor_inside": 3.677426466616507,
+        "product_inside": 28.60220585146172,
+        "product_over_total_ratio": 2.2595750038906863,
+        "frequency_share_of_log_inside": 0.6116834793420604,
+        "counterfactual_frequency_only": 0.0014199372113031503,
+        "counterfactual_severity_only": 0.007108051935450279,
+        "attribution_log": {
+          "log_total": 2.5383070983005926,
+          "frequency_first": 0.6343365618804113,
+          "frequency_last": 0.2933549727785323,
+          "frequency_shapley": 0.4638457673294718,
+          "severity_first": 2.2449521255220604,
+          "severity_last": 1.9039705364201813,
+          "severity_shapley": 2.074461330971121,
+          "frequency_share_first": 0.24990536499901936,
+          "frequency_share_last": 0.11557111153923601,
+          "frequency_share_shapley": 0.1827382382691277
+        },
+        "attribution_additive": {
+          "delta_total": 0.008778345223738465,
+          "frequency": 0.0015451152497956682,
+          "severity": 0.007233229973942797,
+          "frequency_share": 0.17601440936924606
+        },
+        "both_strata_clear_floor": false,
+        "intervals": {
+          "withheld": "below the pre-registered occupancy floor of 20 carrying member blocks in at least one scenario; point values only"
+        }
+      }
+    },
+    "KP 58.8": {
+      "duration": {
+        "definition": "hours_above_datum > 24 h",
+        "historical": {
+          "w_inside": 0.050666666666666665,
+          "p_f_inside": 0.13082283386078017,
+          "p_f_outside": 0.0008604144470407786,
+          "n_inside": 152,
+          "n_years": 3000,
+          "contribution_inside": 0.006628356915612862,
+          "contribution_outside": 0.0008168201150573792,
+          "p_annual_reconstructed": 0.007445177030670241,
+          "p_annual_published": 0.0074451770306702405,
+          "reconstruction_relative_deviation": 1.1649981382784132e-16,
+          "share_of_annual_total": 0.8902886913645562,
+          "occupancy": {
+            "n_years": 152,
+            "n_carrying_member_blocks": 46,
+            "n_member_blocks": 50,
+            "largest_block_share": 0.05263157894736842,
+            "n_sst_patterns": 1,
+            "carrying_blocks_per_pattern": {
+              "HPB": 46
+            },
+            "clears_floor": true,
+            "floor_failures": []
+          }
+        },
+        "+4K": {
+          "w_inside": 0.13462962962962963,
+          "p_f_inside": 0.27654697760253777,
+          "p_f_outside": 0.0043627912154075655,
+          "n_inside": 727,
+          "n_years": 5400,
+          "contribution_inside": 0.03723141716982314,
+          "contribution_outside": 0.0037754302499258432,
+          "p_annual_reconstructed": 0.04100684741974898,
+          "p_annual_published": 0.04100684741974899,
+          "reconstruction_relative_deviation": 3.3842610883398176e-16,
+          "share_of_annual_total": 0.907931711714381,
+          "occupancy": {
+            "n_years": 727,
+            "n_carrying_member_blocks": 90,
+            "n_member_blocks": 90,
+            "largest_block_share": 0.023383768913342505,
+            "n_sst_patterns": 6,
+            "carrying_blocks_per_pattern": {
+              "HFB_CC": 15,
+              "HFB_GF": 15,
+              "HFB_HA": 15,
+              "HFB_MI": 15,
+              "HFB_MP": 15,
+              "HFB_MR": 15
+            },
+            "clears_floor": true,
+            "floor_failures": []
+          }
+        },
+        "ratio_total": 5.507840478583945,
+        "ratio_inside_contribution": 5.616990401063926,
+        "ratio_outside_contribution": 4.622107340807383,
+        "historical_share_inside": 0.8902886913645562,
+        "mixture_reconstruction": 5.507840478583946,
+        "mixture_relative_deviation": 1.6125710669247165e-16,
+        "frequency_factor_inside": 2.6571637426900585,
+        "severity_factor_inside": 2.1139045030689,
+        "product_inside": 5.616990401063926,
+        "product_over_total_ratio": 1.0198171902226267,
+        "frequency_share_of_log_inside": 0.5662658211962254,
+        "counterfactual_frequency_only": 0.0183572068384831,
+        "counterfactual_severity_only": 0.01815345665902216,
+        "attribution_log": {
+          "log_total": 1.7061726186793875,
+          "frequency_first": 0.9024557963206825,
+          "frequency_last": 0.8148780708868792,
+          "frequency_shapley": 0.8586669336037809,
+          "severity_first": 0.8912945477925083,
+          "severity_last": 0.8037168223587051,
+          "severity_shapley": 0.8475056850756066,
+          "frequency_share_first": 0.5289358101522,
+          "frequency_share_last": 0.47760587760317685,
+          "frequency_share_shapley": 0.5032708438776884
+        },
+        "attribution_additive": {
+          "delta_total": 0.033561670389078736,
+          "frequency": 0.01688271028426984,
+          "severity": 0.016678960104808897,
+          "frequency_share": 0.5030354594556659
+        },
+        "both_strata_clear_floor": true,
+        "intervals": {
+          "ratio_total": {
+            "point": 5.507840478583945,
+            "ci_low": 4.17584582251224,
+            "ci_high": 7.690215275974093,
+            "relative_half_width": 0.3190333368519589,
+            "n_replicates_undefined": 0
+          },
+          "ratio_inside_contribution": {
+            "point": 5.616990401063926,
+            "ci_low": 4.135101141263451,
+            "ci_high": 8.164488163537849,
+            "relative_half_width": 0.3586784678776718,
+            "n_replicates_undefined": 0
+          },
+          "frequency_factor": {
+            "point": 2.6571637426900585,
+            "ci_low": 2.2530696457326895,
+            "ci_high": 3.2170723514211885,
+            "relative_half_width": 0.18139693278980284,
+            "n_replicates_undefined": 0
+          },
+          "severity_factor": {
+            "point": 2.1139045030689,
+            "ci_low": 1.6599340482516534,
+            "ci_high": 2.844694572383248,
+            "relative_half_width": 0.28023037994658617,
+            "n_replicates_undefined": 0
+          },
+          "frequency_share_shapley": {
+            "point": 0.5032708438776884,
+            "ci_low": 0.42643255453592155,
+            "ci_high": 0.5894309330469794,
+            "relative_half_width": 0.16193902398076518,
+            "n_replicates_undefined": 0
+          },
+          "product_over_total": {
+            "point": 1.0198171902226267,
+            "ci_low": 0.970213995956632,
+            "ci_high": 1.0924596872579018,
+            "relative_half_width": 0.059935100365676036,
+            "n_replicates_undefined": 0
+          }
+        }
+      }
+    },
+    "KP 60.0": {
+      "duration": {
+        "definition": "hours_above_datum > 24 h",
+        "historical": {
+          "w_inside": 0.035,
+          "p_f_inside": 0.04814680918504115,
+          "p_f_outside": 0.0001278920969949892,
+          "n_inside": 105,
+          "n_years": 3000,
+          "contribution_inside": 0.0016851383214764404,
+          "contribution_outside": 0.00012341587360016458,
+          "p_annual_reconstructed": 0.001808554195076605,
+          "p_annual_published": 0.001808554195076605,
+          "reconstruction_relative_deviation": 0.0,
+          "share_of_annual_total": 0.9317599251733029,
+          "occupancy": {
+            "n_years": 105,
+            "n_carrying_member_blocks": 43,
+            "n_member_blocks": 50,
+            "largest_block_share": 0.05714285714285714,
+            "n_sst_patterns": 1,
+            "carrying_blocks_per_pattern": {
+              "HPB": 43
+            },
+            "clears_floor": true,
+            "floor_failures": []
+          }
+        },
+        "+4K": {
+          "w_inside": 0.09833333333333333,
+          "p_f_inside": 0.12806874785921393,
+          "p_f_outside": 0.0017942313286701702,
+          "n_inside": 531,
+          "n_years": 5400,
+          "contribution_inside": 0.012593426872822703,
+          "contribution_outside": 0.0016177985813509367,
+          "p_annual_reconstructed": 0.014211225454173639,
+          "p_annual_published": 0.01421122545417364,
+          "reconstruction_relative_deviation": 1.220671279595626e-16,
+          "share_of_annual_total": 0.8861605153920198,
+          "occupancy": {
+            "n_years": 531,
+            "n_carrying_member_blocks": 88,
+            "n_member_blocks": 90,
+            "largest_block_share": 0.026365348399246705,
+            "n_sst_patterns": 6,
+            "carrying_blocks_per_pattern": {
+              "HFB_CC": 14,
+              "HFB_GF": 15,
+              "HFB_HA": 14,
+              "HFB_MI": 15,
+              "HFB_MP": 15,
+              "HFB_MR": 15
+            },
+            "clears_floor": true,
+            "floor_failures": []
+          }
+        },
+        "ratio_total": 7.857782472242527,
+        "ratio_inside_contribution": 7.473230364726929,
+        "ratio_outside_contribution": 13.108512982634508,
+        "historical_share_inside": 0.9317599251733029,
+        "mixture_reconstruction": 7.857782472242528,
+        "mixture_relative_deviation": 1.130316883723365e-16,
+        "frequency_factor_inside": 2.8095238095238093,
+        "severity_factor_inside": 2.6599633501570428,
+        "product_inside": 7.473230364726929,
+        "product_over_total_ratio": 0.9510609884055684,
+        "frequency_share_of_log_inside": 0.5135986470824376,
+        "counterfactual_frequency_only": 0.004849752277319528,
+        "counterfactual_severity_only": 0.006213839407239202,
+        "attribution_log": {
+          "log_total": 2.0615044384220447,
+          "frequency_first": 0.9863998879768806,
+          "frequency_last": 0.827253210313302,
+          "frequency_shapley": 0.9068265491450913,
+          "severity_first": 1.2342512281087428,
+          "severity_last": 1.0751045504451642,
+          "severity_shapley": 1.1546778892769534,
+          "frequency_share_first": 0.4784854544052834,
+          "frequency_share_last": 0.4012861650429012,
+          "frequency_share_shapley": 0.4398858097240923
+        },
+        "attribution_additive": {
+          "delta_total": 0.012402671259097034,
+          "frequency": 0.00551929206458868,
+          "severity": 0.006883379194508353,
+          "frequency_share": 0.44500833322824906
+        },
+        "both_strata_clear_floor": true,
+        "intervals": {
+          "ratio_total": {
+            "point": 7.857782472242527,
+            "ci_low": 5.401708640880369,
+            "ci_high": 12.824618527438732,
+            "relative_half_width": 0.47232854261234997,
+            "n_replicates_undefined": 0
+          },
+          "ratio_inside_contribution": {
+            "point": 7.473230364726929,
+            "ci_low": 4.957574908359432,
+            "ci_high": 12.72000744984975,
+            "relative_half_width": 0.51934920794951,
+            "n_replicates_undefined": 0
+          },
+          "frequency_factor": {
+            "point": 2.8095238095238093,
+            "ci_low": 2.295992645079673,
+            "ci_high": 3.551592874977706,
+            "relative_half_width": 0.22345427820219238,
+            "n_replicates_undefined": 0
+          },
+          "severity_factor": {
+            "point": 2.6599633501570428,
+            "ci_low": 1.8720206186644979,
+            "ci_high": 4.203362527838541,
+            "relative_half_width": 0.438228201346534,
+            "n_replicates_undefined": 0
+          },
+          "frequency_share_shapley": {
+            "point": 0.4398858097240923,
+            "ci_low": 0.3546580284774052,
+            "ci_high": 0.5381589134783558,
+            "relative_half_width": 0.20857786378247464,
+            "n_replicates_undefined": 0
+          },
+          "product_over_total": {
+            "point": 0.9510609884055684,
+            "ci_low": 0.8881578478328468,
+            "ci_high": 1.0692289493628635,
+            "relative_half_width": 0.09519426395229301,
+            "n_replicates_undefined": 0
+          }
+        }
+      }
+    },
+    "KP 62.0": {
+      "duration": {
+        "definition": "hours_above_datum > 24 h",
+        "historical": {
+          "w_inside": 0.006333333333333333,
+          "p_f_inside": 0.09297495915609613,
+          "p_f_outside": 0.0004198637344820872,
+          "n_inside": 19,
+          "n_years": 3000,
+          "contribution_inside": 0.0005888414079886088,
+          "contribution_outside": 0.000417204597497034,
+          "p_annual_reconstructed": 0.0010060460054856428,
+          "p_annual_published": 0.001006046005485643,
+          "reconstruction_relative_deviation": 2.1553729483019687e-16,
+          "share_of_annual_total": 0.5853026648660672,
+          "occupancy": {
+            "n_years": 19,
+            "n_carrying_member_blocks": 14,
+            "n_member_blocks": 50,
+            "largest_block_share": 0.15789473684210525,
+            "n_sst_patterns": 1,
+            "carrying_blocks_per_pattern": {
+              "HPB": 14
+            },
+            "clears_floor": false,
+            "floor_failures": [
+              "F1 occupancy: 14 carrying member blocks, floor is 20"
+            ]
+          }
+        },
+        "+4K": {
+          "w_inside": 0.034444444444444444,
+          "p_f_inside": 0.20723769152326396,
+          "p_f_outside": 0.005840583748782713,
+          "n_inside": 186,
+          "n_years": 5400,
+          "contribution_inside": 0.007138187152467981,
+          "contribution_outside": 0.005639408086324641,
+          "p_annual_reconstructed": 0.012777595238792622,
+          "p_annual_published": 0.012777595238792624,
+          "reconstruction_relative_deviation": 1.3576290714783386e-16,
+          "share_of_annual_total": 0.5586487143368364,
+          "occupancy": {
+            "n_years": 186,
+            "n_carrying_member_blocks": 72,
+            "n_member_blocks": 90,
+            "largest_block_share": 0.043010752688172046,
+            "n_sst_patterns": 6,
+            "carrying_blocks_per_pattern": {
+              "HFB_CC": 9,
+              "HFB_GF": 11,
+              "HFB_HA": 12,
+              "HFB_MI": 14,
+              "HFB_MP": 14,
+              "HFB_MR": 12
+            },
+            "clears_floor": true,
+            "floor_failures": []
+          }
+        },
+        "ratio_total": 12.70080609546734,
+        "ratio_inside_contribution": 12.122427287936363,
+        "ratio_outside_contribution": 13.517128335012494,
+        "historical_share_inside": 0.5853026648660672,
+        "mixture_reconstruction": 12.700806095467339,
+        "mixture_relative_deviation": 1.3986173995949722e-16,
+        "frequency_factor_inside": 5.43859649122807,
+        "severity_factor_inside": 2.2289624368141054,
+        "product_inside": 12.122427287936363,
+        "product_over_total_ratio": 0.954461252050971,
+        "frequency_share_of_log_inside": 0.678750374144487,
+        "counterfactual_frequency_only": 0.003607872576782126,
+        "counterfactual_severity_only": 0.0071160987646877606,
+        "attribution_log": {
+          "log_total": 2.5416654635343208,
+          "frequency_first": 1.2770904829893661,
+          "frequency_last": 0.5853336163157716,
+          "frequency_shapley": 0.9312120496525689,
+          "severity_first": 1.9563318472185491,
+          "severity_last": 1.2645749805449547,
+          "severity_shapley": 1.610453413881752,
+          "frequency_share_first": 0.5024620672200912,
+          "frequency_share_last": 0.2302953023179668,
+          "frequency_share_shapley": 0.366378684769029
+        },
+        "attribution_additive": {
+          "delta_total": 0.011771549233306979,
+          "frequency": 0.004131661522700673,
+          "severity": 0.007639887710606307,
+          "frequency_share": 0.3509870655776008
+        },
+        "both_strata_clear_floor": false,
+        "intervals": {
+          "withheld": "below the pre-registered occupancy floor of 20 carrying member blocks in at least one scenario; point values only"
+        }
+      }
+    }
+  },
+  "composition_overlap": {
+    "KP 57.4": {
+      "historical": {
+        "marginals": {
+          "bep": 0.0007529745057681502,
+          "overflow": 0.0,
+          "fluvial_scour": 0.0
+        },
+        "p_annual_union": 0.0007529745057681502,
+        "sum_of_marginals": 0.0007529745057681502,
+        "largest_marginal": 0.0007529745057681502,
+        "sum_over_union": 1.0,
+        "union_over_largest": 1.0,
+        "frechet_lower": 0.0007529745057681502,
+        "frechet_upper": 0.0007529745057681502,
+        "dependence_factor_range": [
+          1.0,
+          1.0
+        ],
+        "sum_normalised_shares": {
+          "bep": 1.0,
+          "overflow": 0.0,
+          "fluvial_scour": 0.0
+        },
+        "union_normalised_marginals": {
+          "bep": 1.0,
+          "overflow": 0.0,
+          "fluvial_scour": 0.0
+        }
+      },
+      "+4K": {
+        "marginals": {
+          "bep": 0.009484134792543604,
+          "overflow": 0.0009114344650738865,
+          "fluvial_scour": 0.0
+        },
+        "p_annual_union": 0.009531319729506616,
+        "sum_of_marginals": 0.01039556925761749,
+        "largest_marginal": 0.009484134792543604,
+        "sum_over_union": 1.0906746969609433,
+        "union_over_largest": 1.0049751440690309,
+        "frechet_lower": 0.009484134792543604,
+        "frechet_upper": 0.01039556925761749,
+        "dependence_factor_range": [
+          0.995049485454051,
+          1.0906746969609433
+        ],
+        "sum_normalised_shares": {
+          "bep": 0.9123247181094944,
+          "overflow": 0.08767528189050551,
+          "fluvial_scour": 0.0
+        },
+        "union_normalised_marginals": {
+          "bep": 0.995049485454051,
+          "overflow": 0.09562521150689239,
+          "fluvial_scour": 0.0
+        }
+      }
+    },
+    "KP 58.8": {
+      "historical": {
+        "marginals": {
+          "bep": 0.0073632188269890575,
+          "overflow": 0.00019507776382913884,
+          "fluvial_scour": 0.0
+        },
+        "p_annual_union": 0.0074451770306702405,
+        "sum_of_marginals": 0.007558296590818196,
+        "largest_marginal": 0.0073632188269890575,
+        "sum_over_union": 1.015193669630952,
+        "union_over_largest": 1.011130757567706,
+        "frechet_lower": 0.0073632188269890575,
+        "frechet_upper": 0.007558296590818196,
+        "dependence_factor_range": [
+          0.9889917723455657,
+          1.015193669630952
+        ],
+        "sum_normalised_shares": {
+          "bep": 0.9741902475663473,
+          "overflow": 0.0258097524336527,
+          "fluvial_scour": 0.0
+        },
+        "union_normalised_marginals": {
+          "bep": 0.9889917723455657,
+          "overflow": 0.02620189728538628,
+          "fluvial_scour": 0.0
+        }
+      },
+      "+4K": {
+        "marginals": {
+          "bep": 0.04054286077793307,
+          "overflow": 0.0025293600327370483,
+          "fluvial_scour": 0.0
+        },
+        "p_annual_union": 0.04100684741974899,
+        "sum_of_marginals": 0.04307222081067012,
+        "largest_marginal": 0.04054286077793307,
+        "sum_over_union": 1.050366549024845,
+        "union_over_largest": 1.0114443488425084,
+        "frechet_lower": 0.04054286077793307,
+        "frechet_upper": 0.04307222081067012,
+        "dependence_factor_range": [
+          0.988685142335705,
+          1.050366549024845
+        ],
+        "sum_normalised_shares": {
+          "bep": 0.9412763032615569,
+          "overflow": 0.05872369673844306,
+          "fluvial_scour": 0.0
+        },
+        "union_normalised_marginals": {
+          "bep": 0.988685142335705,
+          "overflow": 0.06168140668913999,
+          "fluvial_scour": 0.0
+        }
+      }
+    },
+    "KP 60.0": {
+      "historical": {
+        "marginals": {
+          "bep": 0.001808554195076605,
+          "overflow": 0.0,
+          "fluvial_scour": 0.0
+        },
+        "p_annual_union": 0.001808554195076605,
+        "sum_of_marginals": 0.001808554195076605,
+        "largest_marginal": 0.001808554195076605,
+        "sum_over_union": 1.0,
+        "union_over_largest": 1.0,
+        "frechet_lower": 0.001808554195076605,
+        "frechet_upper": 0.001808554195076605,
+        "dependence_factor_range": [
+          1.0,
+          1.0
+        ],
+        "sum_normalised_shares": {
+          "bep": 1.0,
+          "overflow": 0.0,
+          "fluvial_scour": 0.0
+        },
+        "union_normalised_marginals": {
+          "bep": 1.0,
+          "overflow": 0.0,
+          "fluvial_scour": 0.0
+        }
+      },
+      "+4K": {
+        "marginals": {
+          "bep": 0.014209050759257477,
+          "overflow": 2.3036501417792023e-05,
+          "fluvial_scour": 0.0
+        },
+        "p_annual_union": 0.01421122545417364,
+        "sum_of_marginals": 0.014232087260675269,
+        "largest_marginal": 0.014209050759257477,
+        "sum_over_union": 1.0014679808274733,
+        "union_over_largest": 1.000153049978708,
+        "frechet_lower": 0.014209050759257477,
+        "frechet_upper": 0.014232087260675269,
+        "dependence_factor_range": [
+          0.9998469734420036,
+          1.0014679808274733
+        ],
+        "sum_normalised_shares": {
+          "bep": 0.9983813687341951,
+          "overflow": 0.0016186312658048594,
+          "fluvial_scour": 0.0
+        },
+        "union_normalised_marginals": {
+          "bep": 0.9998469734420036,
+          "overflow": 0.0016210073854698098,
+          "fluvial_scour": 0.0
+        }
+      }
+    },
+    "KP 62.0": {
+      "historical": {
+        "marginals": {
+          "bep": 0.0008580186169895641,
+          "overflow": 0.00019927445677934933,
+          "fluvial_scour": 0.0
+        },
+        "p_annual_union": 0.001006046005485643,
+        "sum_of_marginals": 0.0010572930737689135,
+        "largest_marginal": 0.0008580186169895641,
+        "sum_over_union": 1.0509390902641,
+        "union_over_largest": 1.1725223504070883,
+        "frechet_lower": 0.0008580186169895641,
+        "frechet_upper": 0.0010572930737689135,
+        "dependence_factor_range": [
+          0.8528622074050953,
+          1.0509390902641
+        ],
+        "sum_normalised_shares": {
+          "bep": 0.8115239173288071,
+          "overflow": 0.18847608267119284,
+          "fluvial_scour": 0.0
+        },
+        "union_normalised_marginals": {
+          "bep": 0.8528622074050953,
+          "overflow": 0.19807688285900474,
+          "fluvial_scour": 0.0
+        }
+      },
+      "+4K": {
+        "marginals": {
+          "bep": 0.008403164105895132,
+          "overflow": 0.008391873485202778,
+          "fluvial_scour": 0.0
+        },
+        "p_annual_union": 0.012777595238792624,
+        "sum_of_marginals": 0.016795037591097912,
+        "largest_marginal": 0.008403164105895132,
+        "sum_over_union": 1.314413023517006,
+        "union_over_largest": 1.5205695233095193,
+        "frechet_lower": 0.008403164105895132,
+        "frechet_upper": 0.016795037591097912,
+        "dependence_factor_range": [
+          0.6576483249667534,
+          1.314413023517006
+        ],
+        "sum_normalised_shares": {
+          "bep": 0.500336129664227,
+          "overflow": 0.49966387033577286,
+          "fluvial_scour": 0.0
+        },
+        "union_normalised_marginals": {
+          "bep": 0.6576483249667534,
+          "overflow": 0.6567646985502524,
+          "fluvial_scour": 0.0
+        }
+      }
+    }
+  },
+  "historical_consistency": {
+    "per_section_annual_bep": {
+      "KP 57.4": 0.0007529745057681502,
+      "KP 58.8": 0.0073632188269890575,
+      "KP 60.0": 0.001808554195076605,
+      "KP 62.0": 0.0008580186169895641
+    },
+    "years": 60,
+    "reach_annual_series_union": 0.010754055005328556,
+    "reach_annual_sum": 0.010782766144823376,
+    "reach_annual_largest": 0.0073632188269890575,
+    "union_over_largest": 1.460510037527442,
+    "expected_failures": 0.6452433003197133,
+    "p_no_failure": 0.5227050835659972,
+    "exclusion_upper_95_exact": 0.04870291331009746,
+    "exclusion_upper_95_rule_of_three": 0.05,
+    "exact_upper_over_reported": 4.5287952577856005,
+    "rule_of_three_over_reported": 4.64940898807244,
+    "assumptions": {
+      "inter_section_independence": "the series union assumes the four sections fail independently given the year. They share one flood, so positive dependence is expected; under it the reach union falls toward the largest single-section value, here a factor of 1.461 below the independent composition. The independent composition therefore OVER-states the reach probability, which makes the check conservative.",
+      "persistent_epistemic_uncertainty": "the sixty years are treated as independent Bernoulli trials at a known p. The soil and conductivity uncertainty is persistent, so p is one uncertain number held fixed across the sixty years. (1 - p)^60 is convex in p, so E[(1 - p)^60] >= (1 - E[p])^60 by Jensen: the reported no-failure probability is a LOWER bound on the one a persistent-epistemic treatment gives, and the record is therefore at least as consistent with the model as stated.",
+      "not_calibration": "the check constrains over-prediction only. It excludes nothing below its threshold and cannot confirm the reported value."
+    }
+  },
+  "gates": {
+    "0_partition_reconstructs_published_annual": {
+      "passed": true,
+      "tolerance": 1e-12,
+      "worst_relative_deviation": 3.3842610883398176e-16
+    },
+    "1_production_rows_reproduced": {
+      "passed": true,
+      "fields_compared": 160,
+      "table": "results/system_integration/phase3/rq4_annual.csv"
+    },
+    "2_mixture_reconstructs_total_ratio": {
+      "passed": true,
+      "tolerance": 1e-12,
+      "worst_relative_deviation": 1.6125710669247165e-16
+    },
+    "3_attribution_terms_sum_to_log_ratio": {
+      "passed": true,
+      "tolerance": 1e-12,
+      "worst_relative_deviation": 1.749548784492555e-16
+    },
+    "4_inside_product_reconstructs_inside_ratio": {
+      "passed": true,
+      "tolerance": 1e-12,
+      "worst_relative_deviation": 0.0
+    },
+    "5_defect_present": {
+      "passed": true,
+      "criterion": "the inside-stratum product must miss the total ratio by more than 1e-06 somewhere",
+      "worst_relative_departure": 1.259575003890686
+    },
+    "6_read_only": {
+      "passed": true,
+      "hazard_cache_files": 228,
+      "phase3_files": 11
+    }
+  }
+}
