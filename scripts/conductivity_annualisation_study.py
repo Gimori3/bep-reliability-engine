@@ -2022,7 +2022,7 @@ def render_figure(payload: dict[str, Any], out_dir: Path) -> Path:
     ax_right.set_xscale("log")
     ax_right.set_ylim(-0.03, 1.03)
     ax_right.set_xlabel("aquifer hydraulic conductivity, prior mean [m/s]")
-    ax_right.set_ylabel("piping share of the annual failure probability")
+    ax_right.set_ylabel("piping share of the summed annual contributions")
     ax_right.set_title("Which mechanism leads, across the same bracket")
     # Outside the axes: eight series over a monotone rise leave no interior
     # region a legend can occupy without covering a crossing, and the crossings

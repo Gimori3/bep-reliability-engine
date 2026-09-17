@@ -164,18 +164,31 @@ class TestFrequencyDoesNotDominateOverBothStrata:
             ), name
             assert block["frequency_share_of_log_inside"] > 0.5, name
 
-    def test_frequency_is_never_a_majority_over_both_strata(
+    def test_frequency_never_exceeds_a_bare_majority_over_both_strata(
         self, duration: dict
     ) -> None:
+        """Not "never a majority": four of the sixteen readings do cross a half,
+        all four by less than 0.03. The claim that holds is that none reaches
+        0.53, so no reading makes the total increase mainly a frequency
+        effect."""
+        crossings = 0
         for name, block in duration.items():
             a = block["attribution_log"]
-            for key in (
-                "frequency_share_first",
-                "frequency_share_last",
-                "frequency_share_shapley",
-            ):
-                assert a[key] <= 0.53, f"{name} {key}"
-            assert block["attribution_additive"]["frequency_share"] <= 0.53, name
+            readings = [
+                a[k]
+                for k in (
+                    "frequency_share_first",
+                    "frequency_share_last",
+                    "frequency_share_shapley",
+                )
+            ]
+            readings.append(block["attribution_additive"]["frequency_share"])
+            for value in readings:
+                assert value <= 0.53, name
+                if value > 0.5:
+                    crossings += 1
+                    assert value - 0.5 < 0.03, name
+        assert crossings == 4
 
     def test_the_resolved_pair_carries_intervals_that_straddle_a_half(
         self, duration: dict
