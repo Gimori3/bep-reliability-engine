@@ -74,11 +74,20 @@ class SystemFragility:
     sources: dict[str, str]
 
     def dominance_share(self, mechanism: str) -> NDArray[np.float64]:
-        """Mechanism i's share of the union failure probability per stage.
+        """Mechanism i's share of the SUMMED marginal probabilities per stage.
 
         Defined as ``P_i(h) / sum_j P_j(h)`` (the thesis's relative-dominance
-        comparison of the mechanisms against the system curve); stages where
-        every mechanism is 0 return 0 for all shares.
+        comparison of the mechanisms); stages where every mechanism is 0 return
+        0 for all shares.
+
+        The denominator is the sum, **not** the union ``p_sys``, and the two
+        differ wherever more than one mechanism is loaded: ``sum_j P_j >=
+        p_sys``, by a factor of up to 1.31 at the annualised KP 62.0 warming
+        cell. These shares rank the mechanisms; they are not disjoint
+        attributable fractions of the system probability. Corrected 2026-09-17,
+        this docstring having said "share of the union failure probability",
+        which the expression below has never computed. Measured in
+        ``docs/decisions/climate-attribution-and-composition-study.md``.
         """
         total = np.zeros_like(self.p_sys)
         for p in self.per_mechanism.values():
