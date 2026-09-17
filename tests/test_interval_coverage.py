@@ -130,11 +130,13 @@ def test_paired_bound_uses_the_two_97_5_endpoints(rq1):
 
 
 def test_kp57_4_design_level_does_not_rank_against_kp60_0(rq1):
-    """The bound orders KP 57.4 above the drained pair and nowhere else.
+    """The bound orders KP 57.4 above KP 58.8 and KP 62.0 and nowhere else.
 
-    Bounding dbeta from ABOVE with the same construction gives 2.00, and
-    KP 60.0's resolved 1.8657 lies inside [1.27, 2.00]. So "KP 57.4 falls from
-    first to second" is not supported, in either direction.
+    KP 60.0 is a drained section too, so "above both drained sections" is wrong:
+    1.27 clears KP 58.8's 1.22 and not KP 60.0's 1.87. Bounding dbeta from ABOVE
+    with the same construction gives 2.00, and KP 60.0's resolved 1.8657 lies
+    inside [1.27, 2.00], so "KP 57.4 falls from first to second" is unsupported
+    in either direction.
     """
     n, k_static, k_trans = 1_000_000, 1132, 2
     p_s_lo, p_s_hi = rq1._cp(k_static, n)
