@@ -912,8 +912,9 @@ and the field-by-field comparison as
 
 The hazard-sampling estimator drew its member blocks pooled over all 90 warming
 members, which keeps the six prescribed sea-surface-temperature patterns in the
-pool but randomises their weights: 2 to 31 blocks from a pattern across 10,000
-replicates, against the design's 15. The study's own note declares that axis
+pool but randomises their weights: 3 to 31 blocks from a pattern across 10,000
+replicates at the recorded contrast seed, against the design's 15 and a
+Binomial(90, 1/6) standard deviation of 3.5. The study's own note declares that axis
 outside the interval, so the warming bands carried between-pattern structural
 spread they disclaimed. The draw now resamples 15 members inside each of the six
 patterns.
