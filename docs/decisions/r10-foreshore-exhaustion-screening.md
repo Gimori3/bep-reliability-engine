@@ -364,3 +364,51 @@ not an additional validation of their physical applicability.
 The KP62/KP60 exposure ratio is now 10.390 under observed loading;
 the design-level ratio remains 13.622. The observed mean-to-peak excess-depth
 ratio spans 0.275 to 0.476. Figure and Appendix I values are refreshed.
+
+## Retreat-law exponent, 2026-09-17 (amends section 3(c) and the engine docstring)
+
+Section 3(c) above already attributes the softening magnitude correctly, to "a
+depth-linear law". Two places generalized it and are corrected here: the engine
+attribute docstring `ExhaustionResult.mean_excess_depth_m`, which claimed the
+factor for "any monotone depth-dependent rate law", and the thesis Appendix I
+sentence built on it. **The bounding direction stated in 3(c) is untouched and
+is a theorem.**
+
+Calibrate a rate `f(d)` of excess depth so that `f(d_peak)` equals the constant
+rate. Then
+
+    exposure_ratio(f) / exposure_ratio(const) = E[f(d)] / f(d_peak),
+
+and with `x = d/d_peak` in [0,1] and `f = c d**p` that is `R(p) = E[x**p]`,
+**strictly decreasing in p** unless the depth is constant. The mean-to-peak
+ratio is `R(1)`, one member of the family. Measured on the observed 2016
+records at the primary threshold (driver
+`scripts/foreshore_retreat_law_probe.py`, evidence
+`docs/decisions/r10-foreshore-retreat-law-probe.json`, gate
+`tests/test_foreshore_exhaustion.py`):
+
+| Section | mean/peak = R(1) | softening at p=0.5 | at p=1 | at p=2 | at p=3 |
+|---|---:|---:|---:|---:|---:|
+| KP 57.4 | 0.332 | 1.92 | 3.01 | 5.25 | 7.28 |
+| KP 58.8 | 0.275 | 2.16 | 3.64 | 6.92 | 10.03 |
+| KP 60.0 | 0.424 | 1.69 | 2.36 | 3.61 | 4.74 |
+| KP 62.0 | 0.476 | 1.55 | 2.10 | 3.13 | 4.06 |
+
+So a **convex** law, which is what a shear-stress-driven rate is, softens *more*
+than the linear factor, and a **concave** law *less*; the factor is unbounded as
+`p` grows. The published "roughly two to four times smaller", read as a property
+of every monotone law, is escaped on both sides inside the ordinary exponent
+range 0.5 to 2: 1.55 at the low end and 6.92 at the high end. That is what gate
+2 asserts, so the record fails if the family ever becomes exponent-insensitive.
+
+`R(p)` decreased strictly in `p` at all twelve section-and-threshold cells, the
+prediction written before the measurement was run.
+
+**What is general, and is why the constant-rate treatment remains the bounding
+one:** `d(t) <= d_peak` on the mobilising window, so `E[f(d)] <= f(d_peak)` for
+every non-decreasing `f`, power law or not. The gate checks that on a dead-band
+law, a saturating law and a logarithmic law as well as on power laws.
+
+Nothing else moves. No exposure ratio, critical rate, bracket member, threshold
+convention, coverage count or figure changes; no mechanism joins the Phase 3
+composition; the indicator's arithmetic is untouched.

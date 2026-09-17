@@ -184,11 +184,25 @@ class ExhaustionResult:
         peak. Diagnostic only: the indicator itself is depth-independent.
     mean_excess_depth_m : float
         Mean of ``stage - z_mob`` over the mobilising samples [m]; ``0.0``
-        when the bed is never mobilised. Diagnostic only. Its ratio to
-        ``peak_excess_depth_m`` is the factor by which any monotone
-        depth-dependent rate law, calibrated to the same peak rate, would
-        *reduce* ``exposure_ratio`` — which is why the constant-rate
-        treatment used here is the bounding one.
+        when the bed is never mobilised. Diagnostic only.
+
+        Its ratio to ``peak_excess_depth_m`` is the factor by which a rate
+        **proportional to excess depth**, calibrated to the same peak rate,
+        would reduce ``exposure_ratio``. It is **not** that factor for every
+        monotone law, and this docstring said it was until 2026-09-17. For a
+        rate ``f(d)`` calibrated so ``f(d_peak)`` is the constant rate, the
+        reduction is ``E[f(d)] / f(d_peak)``; with ``x = d / d_peak`` in
+        [0, 1] and ``f = c d**p`` that is ``E[x**p]``, strictly decreasing in
+        ``p``. Measured on the 2016 records at the four sections, the factor
+        runs 1.55 to 2.16 for ``p = 0.5``, 2.10 to 3.64 for ``p = 1`` and
+        3.13 to 6.92 for ``p = 2``, so a convex law reduces more and a
+        concave law less (``scripts/foreshore_retreat_law_probe.py``, and the
+        "Retreat-law exponent, 2026-09-17" section of
+        ``docs/decisions/r10-foreshore-exhaustion-screening.md``).
+
+        What *is* general, and what makes the constant-rate treatment the
+        bounding one, needs no exponent: ``d(t) <= d_peak`` on the window, so
+        ``E[f(d)] <= f(d_peak)`` for every non-decreasing ``f``.
     """
 
     mobilising_hours: float

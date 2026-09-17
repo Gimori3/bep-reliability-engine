@@ -364,3 +364,76 @@ def test_screening_module_is_not_wired_into_the_phase_3_composition() -> None:
     assert "foreshore_exhaustion" not in source
     assert not hasattr(composition, "foreshore_exhaustion")
     assert "foreshore_exhaustion" not in composition.__all__
+
+
+# ============================================================================
+# The retreat-law exponent behind the softening factor (S08, 2026-09-17)
+# ============================================================================
+def test_softening_factor_is_the_linear_law_not_every_monotone_law() -> None:
+    """``E[x**p]`` decreases in ``p``, so one factor cannot serve every law.
+
+    The indicator's ``mean_excess_depth_m / peak_excess_depth_m`` is the
+    softening a rate **proportional** to excess depth would produce. The
+    docstring claimed it for "any monotone depth-dependent rate law" until
+    2026-09-17. This is the analytic half of the refutation, on a triangular
+    pulse where every quantity is a closed form, so it runs on a fresh clone
+    with no data drop: for ``d(t)`` rising linearly to a peak and falling back,
+    ``E[x] -> 1/2``, ``E[x**2] -> 1/3`` and ``E[x**0.5] -> 2/3``.
+    """
+    n = 2001
+    x = 1.0 - np.abs(np.linspace(-1.0, 1.0, n))
+    assert math.isclose(x.mean(), 0.5, rel_tol=2e-3)
+    assert math.isclose(np.mean(x**2.0), 1.0 / 3.0, rel_tol=2e-3)
+    assert math.isclose(np.mean(x**0.5), 2.0 / 3.0, rel_tol=2e-3)
+    # Strictly decreasing in p, which is what makes a single factor wrong.
+    factors = [float(np.mean(x**p)) for p in (0.5, 1.0, 1.5, 2.0, 3.0)]
+    assert all(b < a for a, b in zip(factors[:-1], factors[1:], strict=True))
+    # The convex member softens MORE than the linear one and the concave
+    # member LESS, in both cases by more than a rounding margin.
+    assert np.mean(x**2.0) < 0.85 * x.mean()
+    assert np.mean(x**0.5) > 1.15 * x.mean()
+
+
+def test_constant_rate_bounds_every_non_decreasing_law() -> None:
+    """The bounding direction needs no exponent: ``E[f(d)] <= f(d_peak)``.
+
+    Checked on an irregular window against a deliberately awkward set of
+    non-decreasing laws, including one with a dead band and one that
+    saturates, neither of which is a power law.
+    """
+    rng = np.random.default_rng(20260917)
+    depth = np.abs(rng.normal(size=500)) * 1.7
+    peak = depth.max()
+    laws = (
+        lambda d: d,
+        lambda d: d**3,
+        lambda d: np.sqrt(d),
+        lambda d: np.where(d > 0.6 * peak, d - 0.6 * peak, 0.0),  # dead band
+        lambda d: np.minimum(d, 0.3 * peak),  # saturating
+        lambda d: np.log1p(d),
+    )
+    for law in laws:
+        assert np.mean(law(depth)) <= law(np.array([peak]))[0] + 1e-12
+
+
+@requires_rating_csvs
+def test_retreat_law_probe_reproduces_its_own_gates() -> None:
+    """The committed probe must still pass both of its gates on live data."""
+    import sys
+
+    sys.path.insert(0, str(REPO / "scripts"))
+    import foreshore_retreat_law_probe as probe
+
+    sections = probe.measure()
+    assert set(sections) == {"KP57.4", "KP58.8", "KP60.0", "KP62.0"}
+    gates = probe.gate(sections)
+    assert gates["gate_1_R_strictly_decreasing_in_p"]["held"]
+    assert gates["gate_2_family_escapes_the_published_window"]["held"]
+    # The linear member must still reproduce the published mean-to-peak span,
+    # which is the number the thesis prints.
+    linear = [
+        block["thresholds"]["z_mob"]["linear_ratio_mean_over_peak"]
+        for block in sections.values()
+    ]
+    assert 0.27 <= min(linear) <= 0.28
+    assert 0.47 <= max(linear) <= 0.48
