@@ -104,6 +104,10 @@ compound-event memory model.
   study node on another band or river is ever added, re-run the shape
   comparison before extending this ADR to it.
 
+## Scope qualification, 2026-09-17 (no decision changed)
+
+`docs/decisions/climate-attribution-and-composition-study.md` §7. The measurement above supports the **differential** claim, that one shape introduces no between-climate bias, and not the **level** claim, that one shape reproduces either ensemble's mean fragility. This ADR's own table refutes the level reading: the pinned member's `t50` is 55 h against ensemble medians of 40 h (HPB) and 35 h (HFB), deliberately in the upper duration quartile. The level effect of the shape choice is what the second approved member measures, not this finding. One direction follows and was not stated: warming shapes are the marginally *shorter*, and a shorter sharper event at equal peak lowers transient probabilities, so a shape-matched treatment would lower the warming curve and with it the climate ratio. The shared historical shape is therefore conservative for the ratio.
+
 ## References
 
 - ADR-0019 §9 (scenario tags; HPB/HFB), ADR-0020 §1 (canonical event pinning)
