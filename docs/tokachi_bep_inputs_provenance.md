@@ -430,16 +430,34 @@ population **six members across two contractors and two decades**:
 
 | Source | Campaign | k_s (m/s) |
 |---|---|---|
-| B-2 / B-4 / B-6 / B-9 / B-3 (KP 63.4) | OYO 1999 | 5.09e-5, 2.23e-6, 1.24e-4, 7.04e-5, 6.25e-5 |
+| B-2 / B-4 / B-6 / B-9 (the four modelled sections) | OYO 1999 | 5.09e-5, 2.23e-6, 1.24e-4, 7.04e-5 |
 | KP1.8R-2 (landside toe) | 2005/06 Kunijiban | 5.15e-4 |
 | KP2.1L-2 (riverside) | 2005/06 Kunijiban | 8.61e-5 |
 
-Geometric mean 5.94e-5 m/s (excluding the flagged 4.22e-3 recovery outlier), against
-Form-5 analysis constants of 1.0e-3 to 3.0e-3 m/s — a **17x to 51x** systematic offset
-that now reproduces across independent campaigns. Under the production
-Lognormal(mean, CoV 0.50) the lower field value sits **5.0 to 7.3 sigma** below the prior
-median, i.e. effectively outside the prior's support; the CoV is carrying aleatory
+Geometric mean 5.94e-5 m/s, against Form-5 analysis constants of 1.0e-3 to
+3.0e-3 m/s — a **17x to 51x** systematic offset (16.83 and 50.50) that now
+reproduces across independent campaigns. Under the production
+Lognormal(mean, CoV 0.50) the lower of the two 2005/06 values, 8.61e-5, sits
+**5.0 sigma (KP 60.0/62.0) to 7.3 sigma (KP 57.4)** below the prior median,
+i.e. effectively outside the prior's support; the CoV is carrying aleatory
 scatter, not this epistemic mean offset.
+
+> **CORRECTION, 2026-09-17 (S08, audit Section 7, Appendix A row).** The table
+> above listed **B-3 (KP 63.4)** and its 6.25e-5 among the six members while the
+> geometric mean beside it excluded that value, and the parenthetical read
+> "excluding the flagged 4.22e-3 recovery outlier" as though one KP 63.4 test
+> were the only exclusion. The six are the **four modelled sections' OYO field
+> tests plus the two 2005/06 determinations**, as ADR-0048's own Context states
+> ("Provenance section 3.6 already recorded four OYO **field** permeability
+> tests ... The 2005/06 campaign supplies two more"). **Both** KP 63.4 tests are
+> out: the recovery test additionally as a flagged outlier, and both because
+> KP 63.4 is unconfined and carries no `k_aq` prior in the modelled set. The
+> member list is corrected above; **no adopted value moves**. For audit: the
+> seven-member alternative that keeps the unflagged KP 63.4 test gives
+> 5.98e-5 m/s and an offset of 17x to 50x, and the eight-member population that
+> also keeps the outlier gives 1.02e-4 m/s. The sigma sentence is corrected in
+> the same pass: 5.0 to 7.3 belongs to the 8.61e-5 field value, not to the
+> geometric mean, which sits 5.7 to 8.1 sigma below the per-section medians.
 
 **The CSV is still unchanged, and deliberately so.** Single-borehole tests (JGS 1314)
 sample a small radius around the screen and are biased *low* relative to the bulk
