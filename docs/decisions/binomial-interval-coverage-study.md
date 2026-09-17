@@ -177,7 +177,10 @@ bootstrap's own approximation error on a proportion, not anything stratification
 does. The stratified arm pools to **0.9544**, and its per-level values decay
 from 0.979 in the bulk to 0.925 and 0.931 at the two deepest levels: the same
 conservatism, and the same decay with depth, that the Clopper-Pearson cells
-show, landing on the iid arm's level rather than below it.
+show. At those two deepest cells it lands a little **under** the iid arm, 740/800
+against 760/800 and 745/800 against 752/799, and neither difference is resolved:
+the exact intervals are `[0.9045, 0.9423]` against `[0.9325, 0.9640]` and
+`[0.9114, 0.9478]` against `[0.9225, 0.9565]`, overlapping in both cases.
 
 An earlier reading of these numbers, that the deep-tail dip is a small-count
 effect and therefore direct support for the R1 thirty-row floor, **does not
