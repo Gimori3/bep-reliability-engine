@@ -12,8 +12,11 @@ Metric (campaign decision D1, pre-registered in
 
 ``beta`` is a strictly decreasing function of ``P_f``, so a confidence
 interval on ``P_f`` maps to one on ``beta`` by swapping its endpoints. That
-carries the exact Clopper-Pearson interval into a **per-branch** ``beta``
-interval unchanged, and no further machinery is needed for those.
+carries the Clopper-Pearson interval into a **per-branch** ``beta`` interval
+unchanged, and no further machinery is needed for those. Its endpoints are
+exact functions of the count; what that interval's coverage rests on under the
+production Latin hypercube is measured in
+``docs/decisions/binomial-interval-coverage-study.md`` and is not assumed here.
 
 It does **not** carry a criterion defined on ``B`` over to ``dbeta``. There is
 no map from ``B`` alone: ``dbeta = Phi^-1(B p_t) - Phi^-1(p_t)`` depends on both
@@ -194,9 +197,11 @@ def _cp(k: int, n: int, confidence: float = 0.95) -> tuple[float, float]:
 def beta_interval(k: int, n: int, confidence: float = 0.95) -> dict[str, Any]:
     """Point beta and its monotone image of the Clopper-Pearson interval.
 
-    Returns the probability, its exact interval, the point beta, and the beta
+    Returns the probability, its interval, the point beta, and the beta
     interval with endpoints swapped (beta is decreasing in p). ``k = 0`` and
-    ``k = n`` give an infinite point beta and a one-sided finite bound.
+    ``k = n`` give an infinite point beta, leaving one finite endpoint: as a
+    one-sided statement that endpoint carries ``1 - (1 - confidence)/2``, i.e.
+    97.5 per cent at the 0.95 default, not 95 per cent.
     """
     p = k / n
     p_lo, p_hi = _cp(k, n, confidence)
@@ -212,7 +217,7 @@ def beta_interval(k: int, n: int, confidence: float = 0.95) -> dict[str, Any]:
 
 
 def delta_beta_cp_bound(k_static: int, k_trans: int, n: int) -> float:
-    """One-sided lower bound on ``dbeta`` from the two exact intervals.
+    """One-sided lower bound on ``dbeta`` from the two branch intervals.
 
     The direct analogue of the ratio bound used at KP 57.4 in ADR-0040
     (static lower endpoint over transient upper endpoint): a lower bound on
@@ -221,6 +226,13 @@ def delta_beta_cp_bound(k_static: int, k_trans: int, n: int) -> float:
     **lower** bound on ``P_static``. Valid whenever the static branch has at
     least one failure; it does not require any transient failure at all,
     which is exactly why it is the deliverable at a zero-count level.
+
+    **Confidence level.** Each endpoint comes from a two-sided 95 per cent
+    interval, so each holds on its own at 97.5 per cent. The union bound makes
+    the pair a **95 per cent** statement: that is the level to quote for this
+    bound, and 97.5 per cent is the level to quote for either endpoint alone.
+    Swapping the two endpoints for the other pair gives the matching upper
+    bound at the same 95 per cent.
     """
     _, trans_hi = _cp(k_trans, n)
     static_lo, _ = _cp(k_static, n)
@@ -1051,9 +1063,12 @@ def write_markdown(record: dict[str, Any], path: Path) -> None:
     add("    beta(h) = -Phi^-1( P_f(h) ),   dbeta(h) = beta_transient - beta_static")
     add("")
     add("- beta is strictly decreasing in P_f, so an interval on P_f maps to one")
-    add("  on beta by swapping its endpoints. The exact Clopper-Pearson intervals")
+    add("  on beta by swapping its endpoints. The Clopper-Pearson intervals")
     add("  already persisted with every sweep are reused unchanged; no new")
-    add("  statistical machinery is introduced.")
+    add("  statistical machinery is introduced. Their endpoints are exact")
+    add("  functions of the count; the coverage that name refers to is a")
+    add("  property of the sampling design and is measured, not assumed, in")
+    add("  `docs/decisions/binomial-interval-coverage-study.md`.")
     add("- P_f above 0.5 gives a negative beta and is reported as such.")
     add("- A zero-failure level gives an infinite point beta. The deliverable")
     add("  there is a one-sided bound: the Clopper-Pearson **upper** bound on")
@@ -1061,6 +1076,14 @@ def write_markdown(record: dict[str, Any], path: Path) -> None:
     add("  **lower** bound on P_static gives an **upper** bound on beta_static,")
     add("  so their difference is a lower bound on dbeta. This is the exact")
     add("  analogue of the ratio bound already used at KP 57.4.")
+    add("- Confidence levels, stated once because the two differ. Each of those")
+    add("  endpoints is an endpoint of a two-sided 95 % interval, so on its own")
+    add("  it is a ONE-SIDED 97.5 % limit: at k = 0 and n = 1e5 the upper")
+    add("  endpoint is 3.689e-5, where the one-sided 95 % limit would be")
+    add("  2.996e-5. The PAIRED bound above combines two of them, so by the")
+    add("  union bound it is a 95 % statement, and so is the upper bound formed")
+    add("  the same way from the other two endpoints. A single-branch endpoint")
+    add("  is therefore quoted at 97.5 % and a paired bound at 95 %.")
     add("- dbeta intervals are paired bootstrap over the shared realization set,")
     add(f"  B = {record['n_bootstrap']} replicates, percentile method, one row")
     add("  resample per replicate applied to both branches. Reported only where")

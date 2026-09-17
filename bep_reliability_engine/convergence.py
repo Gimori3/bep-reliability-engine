@@ -3,7 +3,8 @@
 Single responsibility: the *statistical* machinery for the spec §11 convergence
 study and the spec §12 fm5 tail-variance question, with **no physics** — the
 limit-state evaluation is injected as a callable, exactly as ``run.py`` keeps
-physics inside M8. Two questions, one replicate design (ADR-0031):
+physics inside M8. Three questions, one replicate design (ADR-0031, and the
+2026-09-17 interval-coverage study that reuses it):
 
 * **Estimator convergence (spec §11).** Does N = 10⁵ resolve the failure
   probabilities of interest? The spec target is a Monte Carlo estimator
@@ -19,9 +20,20 @@ physics inside M8. Two questions, one replicate design (ADR-0031):
   the same replicate ladder for both samplers — LHS (``stratified=True``) and
   crude MC (``stratified=False``), both from
   :func:`~bep_reliability_engine.tail_sampling.sample_theta_tilted` with no tilt
-  so the LHS arm is bit-identical to production M2 — gives the variance-reduction
+  so the LHS arm is bit-identical to production M2 — gives the variability
   ratio ``CoV_MC / CoV_LHS`` per conditioning level, and its decay from bulk to
-  tail is the fm5 answer.
+  tail is the fm5 answer. It is a ratio of standard deviations at a common
+  mean, so the corresponding variance ratio is its square: 1.40 in the bulk is
+  a factor of about two in variance, or in samples for equal precision.
+* **Interval coverage (audit item F5, 2026-09-17).** The ADR-0024 deliverable
+  reports a Clopper-Pearson interval on every raw point. Its endpoints are exact
+  functions of the count, but its ``>= 1 - alpha`` coverage guarantee is derived
+  from ``K ~ Binomial(n, p)``, and randomized LHS rows are **dependent**, so the
+  guarantee does not follow from the design. Variance is not coverage: neither
+  the empirical CoV above nor an analytic variance bound settles it.
+  :func:`interval_coverage` and :func:`coverage_lower_limit` reduce the same
+  replicate counts to a measured coverage, with a genuinely binomial crude-MC
+  arm as the apparatus control.
 
 Design contract
 ---------------
@@ -67,7 +79,9 @@ __all__ = [
     "PF_COV_TARGET",
     "ReplicateSample",
     "binomial_cov",
+    "coverage_lower_limit",
     "empirical_cov",
+    "interval_coverage",
     "n_for_cov_target",
     "run_replicates",
 ]
@@ -163,6 +177,110 @@ def n_for_cov_target(p: float, cov_target: float = PF_COV_TARGET) -> float:
     if not 0.0 < p < 1.0 or cov_target <= 0.0:
         return float("nan")
     return float((1.0 - p) / (p * cov_target**2))
+
+
+def interval_coverage(
+    counts: NDArray[np.int64],
+    n_samples: int,
+    p_reference: NDArray[np.float64] | float,
+    confidence: float = 0.95,
+) -> dict[str, float]:
+    """Measured coverage of the ADR-0024 interval over replicate counts.
+
+    For each replicate ``r`` the two-sided Clopper-Pearson interval is built
+    from that replicate's own count through
+    :func:`~bep_reliability_engine.fragility.binomial_ci` — the production
+    helper, not a re-implementation — and tested against a reference
+    probability. ``p_reference`` is per-replicate so a caller can pass a
+    **leave-one-out** reference (the mean of the other replicates), which keeps
+    the replicate under test out of its own target.
+
+    This is a *measurement*, not a proof. Coverage is a property of the joint
+    law of the count under the sampling design, and a randomized Latin
+    hypercube makes the rows dependent, so the binomial guarantee does not
+    transfer automatically. Running the same reduction on a genuinely iid arm
+    is what makes the result interpretable: the iid arm's count IS binomial, so
+    its measured coverage validates the apparatus before the stratified arm's
+    is read.
+
+    Parameters
+    ----------
+    counts : numpy.ndarray of int, shape (R,)
+        Per-replicate failure counts at one (sampler, N, level, branch).
+    n_samples : int
+        Sample size N behind each count.
+    p_reference : numpy.ndarray of float, shape (R,), or float
+        The probability each replicate's interval is tested against. A scalar
+        is broadcast.
+    confidence : float, optional
+        Nominal two-sided confidence level. Default 0.95.
+
+    Returns
+    -------
+    dict
+        ``coverage`` (fraction of replicates whose interval covers the
+        reference), ``n_replicates``, ``n_covered``, ``miss_low`` (fraction
+        whose interval lies entirely **above** the reference) and ``miss_high``
+        (entirely below), plus the ``mean_width`` of the intervals. The two
+        miss fractions locate a deficit on the side it occurs.
+    """
+    from bep_reliability_engine.fragility import binomial_ci
+
+    k = np.asarray(counts, dtype=np.int64)
+    n = int(n_samples)
+    if k.ndim != 1 or k.size == 0:
+        raise ValueError("counts must be a non-empty 1-D array of replicate counts.")
+    p_ref = np.broadcast_to(np.asarray(p_reference, dtype=np.float64), k.shape)
+
+    lower, upper = binomial_ci(k / n, n, confidence=confidence)
+    below = p_ref < lower
+    above = p_ref > upper
+    covered = ~(below | above)
+    return {
+        "coverage": float(np.mean(covered)),
+        "n_replicates": int(k.size),
+        "n_covered": int(np.count_nonzero(covered)),
+        "miss_low": float(np.mean(below)),
+        "miss_high": float(np.mean(above)),
+        "mean_width": float(np.mean(upper - lower)),
+    }
+
+
+def coverage_lower_limit(
+    n_covered: int, n_replicates: int, confidence: float = 0.95
+) -> float:
+    """One-sided lower confidence limit on a measured coverage proportion.
+
+    The replicates ARE independent of one another (each is a fresh draw of the
+    whole design from its own seed), so the number of covering replicates is
+    genuinely binomial and the exact one-sided Clopper-Pearson lower limit
+    applies without qualification here, whatever the within-replicate
+    dependence is. ``Beta.ppf(1 - confidence, k, R - k + 1)``, and 0 at
+    ``k = 0``.
+
+    Parameters
+    ----------
+    n_covered : int
+        Replicates whose interval covered the reference.
+    n_replicates : int
+        Total replicates R.
+    confidence : float, optional
+        One-sided confidence level. Default 0.95.
+
+    Returns
+    -------
+    float
+        The lower limit, in ``[0, 1]``.
+    """
+    from scipy.stats import beta
+
+    k = int(n_covered)
+    r = int(n_replicates)
+    if r <= 0 or not 0 <= k <= r:
+        raise ValueError(f"need 0 <= n_covered <= n_replicates, got {k} of {r}.")
+    if k == 0:
+        return 0.0
+    return float(beta.ppf(1.0 - float(confidence), k, r - k + 1))
 
 
 @dataclass(frozen=True)

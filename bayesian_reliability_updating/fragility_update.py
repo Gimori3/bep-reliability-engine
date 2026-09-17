@@ -17,7 +17,16 @@ Uncertainty on the posterior points mirrors the Phase 1 deliverable
 (ADR-0024): always-on Clopper-Pearson binomial CIs with ``n = n_accepted``
 (reusing M9's :func:`~bep_reliability_engine.fragility.binomial_ci`), plus
 percentile bootstrap bands from resampling the accepted rows with
-replacement. Where the point set brackets the transition, a lognormal fit
+replacement. **The sampling qualification on those intervals is the Phase 1 one
+a step stronger.** Coverage of the Clopper-Pearson interval is a property of
+independent trials; the prior sample is a randomized Latin hypercube, whose rows
+are dependent, and was measured under that design in
+``docs/decisions/binomial-interval-coverage-study.md`` (audit item F5). The
+accepted rows here are a **survival-selected subset** of that design, which the
+measurement does not cover, so quote the posterior intervals as inheriting the
+qualification rather than as exactly covering.
+
+Where the point set brackets the transition, a lognormal fit
 through M9's :func:`~bep_reliability_engine.fragility.fit_lognormal_fragility`
 is attached (datum-anchored at z_toe like Phase 1); fits stay Optional and
 their absence is not an error (raw tail points with CIs are the intended

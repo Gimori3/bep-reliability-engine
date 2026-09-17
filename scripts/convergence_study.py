@@ -528,7 +528,7 @@ def _plot(payload: dict, paths: dict[str, Path]) -> None:
     ax0.grid(True, which="both", alpha=0.3)
     tail_handles, tail_labels = ax0.get_legend_handles_labels()
 
-    # Right panel: variance-reduction ratio MC/LHS vs P_f, one point per level.
+    # Right panel: variability ratio CoV_MC/CoV_LHS vs P_f, one point per level.
     # The ratio is N-invariant in expectation, so the ladder mean per level is
     # the robust statistic (its SE shrinks with both R and the ladder length).
     p_axis, ratios, se = [], [], []
@@ -559,7 +559,7 @@ def _plot(payload: dict, paths: dict[str, Path]) -> None:
         ax1.invert_xaxis()
     ax1.axhline(1.0, color="0.3", ls="--", lw=1.2, label="parity (no advantage)")
     ax1.set_xlabel(rf"$P_f$ ({branch}), deeper tail $\rightarrow$")
-    ax1.set_ylabel(r"variance-reduction ratio  $\mathrm{CoV_{MC}}/\mathrm{CoV_{LHS}}$")
+    ax1.set_ylabel(r"variability ratio  $\mathrm{CoV_{MC}}/\mathrm{CoV_{LHS}}$")
     fs.panel_title(ax1, "The advantage from bulk to tail", scale=tail_scale)
     ax1.grid(True, which="both", alpha=0.3)
     extra_handles, extra_labels = ax1.get_legend_handles_labels()
