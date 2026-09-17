@@ -58,6 +58,10 @@ DRIVER = REPO / "scripts" / "annualisation_uncertainty_study.py"
 FIGURE_DRIVER = REPO / "scripts" / "phase3_figures.py"
 FIGURE = REPO / "docs" / "figures" / "phase3_rq4_four_sections.png"
 PRODUCTION_TABLE = REPO / "results" / "system_integration" / "phase3" / "rq4_annual.csv"
+SUPERSEDED = (
+    DECISIONS / "annualisation-hazard-sampling-uncertainty-pooled-draw-2026-09-14.json"
+)
+COMPARISON = DECISIONS / "annualisation-pattern-stratification-comparison.json"
 
 sys.path.insert(0, str(REPO / "scripts"))
 
@@ -909,3 +913,218 @@ def test_the_part_two_prose_agrees_with_the_part_two_record() -> None:
     assert "3 yr" in part_two or "3 years in 3" in part_two
     for label in ("KP 58.8", "KP 60.0"):
         assert label in part_two
+
+
+# --------------------------------------------------------------------------- #
+# 8. Part 3: the pattern-stratified draw (2026-09-17)                           #
+# --------------------------------------------------------------------------- #
+# The defect these guard. The estimand conditions on six prescribed
+# sea-surface-temperature patterns at equal weight, and Appendix E says that
+# axis is left outside the interval; the draw pooled all 90 member blocks, so
+# the patterns' weights were resampled and between-pattern structural spread
+# sat inside an interval that disclaimed it. Every guard below asserts a
+# direction, a composition or an invariance rather than a value, because the
+# defect was a mismatch between a stated target and an implementation, not an
+# arithmetic error.
+def test_the_member_draw_is_stratified_inside_the_prescribed_patterns() -> None:
+    """The record must say what it conditions on, and gate 6 must have run."""
+    estimator = _evidence()["estimator"]
+    assert "WITHIN each prescribed" in estimator["stratification"]
+    assert "equal weight" in estimator["estimand"]
+    assert "prescribed CMIP5 design, not a sample" in (
+        estimator["why_not_pooled_over_patterns"]
+    )
+    gate = _evidence()["gates"][
+        "gate_6_every_replicate_retains_the_design_pattern_composition"
+    ]
+    assert gate["passed"] is True
+    warming = gate["measured"]["+4K"]
+    assert warming["design_blocks_per_stratum"] == [15] * 6
+    assert warming["min_blocks_drawn_per_stratum"] == [15] * 6
+    assert warming["max_blocks_drawn_per_stratum"] == [15] * 6
+    assert warming["composition_is_exactly_the_design"] is True
+    assert gate["measured"]["historical"]["design_blocks_per_stratum"] == [50]
+
+
+def test_a_single_stratum_draw_is_the_unstratified_draw_bit_for_bit() -> None:
+    """One stratum makes the stratified draw the pooled one, call for call.
+
+    This is what makes the historical half of the study provably untouched by
+    the correction: the historical ensemble carries one forcing group, so the
+    two functions must consume the same stream and return the same integers,
+    not merely similar ones.
+    """
+    import annualisation_uncertainty_study as study
+
+    pooled = study.draw_multiplicities(50, 300, np.random.default_rng(31))
+    stratified = study.draw_multiplicities_stratified(
+        [np.arange(50)], 50, 300, np.random.default_rng(31)
+    )
+    assert np.array_equal(pooled, stratified)
+    assert stratified.dtype == pooled.dtype
+
+
+def test_the_stratified_draw_holds_every_stratum_at_its_own_size() -> None:
+    """Each stratum draws its own k with replacement from its own k.
+
+    The resampled event count is therefore the fixed ensemble size in every
+    replicate, which is what lets ``replicate_means`` keep dividing by it, and
+    the pattern weights are exactly the design's in every replicate.
+    """
+    import annualisation_uncertainty_study as study
+
+    strata = [np.arange(0, 15), np.arange(15, 30), np.arange(30, 45)]
+    counts = study.draw_multiplicities_stratified(
+        strata, 45, 500, np.random.default_rng(5)
+    )
+    assert counts.sum(axis=1).tolist() == [45] * 500
+    for columns in strata:
+        assert counts[:, columns].sum(axis=1).tolist() == [15] * 500
+    composition = study.pattern_composition(counts, strata)
+    assert composition["composition_is_exactly_the_design"] is True
+    # A pooled draw over the same blocks does NOT keep it, which is the defect.
+    pooled = study.draw_multiplicities(45, 500, np.random.default_rng(5))
+    assert (
+        study.pattern_composition(pooled, strata)["composition_is_exactly_the_design"]
+        is False
+    )
+
+
+def test_the_strata_are_read_from_the_member_header_grammar() -> None:
+    """``HFB_CC_m101`` belongs to ``HFB_CC``; ``HPB_m001`` to one group."""
+    import annualisation_uncertainty_study as study
+
+    warming = [
+        f"HFB_{pattern}_m{100 + member}_{2051 + year}"
+        for pattern in ("CC", "GF")
+        for member in (1, 2)
+        for year in (0, 1)
+    ]
+    columns = study.stratum_columns(warming)
+    assert [c.tolist() for c in columns] == [[0, 1], [2, 3]]
+    historical = ["HPB_m001_1951", "HPB_m002_1951"]
+    assert [c.tolist() for c in study.stratum_columns(historical)] == [[0, 1]]
+
+
+def test_the_calendar_year_block_needs_no_stratification() -> None:
+    """A warming year block carries the six patterns in equal numbers.
+
+    So the pre-registered S2 arm already conditions on equal pattern weights
+    and is reported without a stratified twin. Measured in the record, not
+    argued from the design.
+    """
+    handling = _evidence()["resampling_unit_sensitivity"]["year"]["+4K"][
+        "pattern_handling"
+    ]
+    assert handling["stratified"] is False
+    assert handling["pattern_balanced_by_construction"] is True
+    assert handling["events_per_pattern_per_year_block"] == [15]
+    member = _evidence()["resampling_unit_sensitivity"]["member"]["+4K"]
+    assert member["pattern_handling"]["blocks_per_stratum"] == [15] * 6
+
+
+def test_the_correction_moved_no_point_estimate_and_no_historical_number() -> None:
+    """The superseded record is retained and its invariants hold against it.
+
+    The design is balanced, so the plain ensemble mean is the equally weighted
+    pattern mean exactly and stratification cannot move a published value; the
+    historical ensemble has one stratum, so its whole half is untouched. Both
+    are checked here against the kept pooled-draw record rather than asserted
+    in prose.
+    """
+    old = json.loads(_require(SUPERSEDED).read_text(encoding="utf-8"))
+    new = _evidence()
+    arms = ("matrix/posterior", "matrix/prior", "bulk/posterior", "bulk/prior")
+    for label in SECTIONS:
+        for arm in arms:
+            for scenario in SCENARIOS:
+                a = old["sections"][label][arm][scenario]
+                b = new["sections"][label][arm][scenario]
+                assert a["p_annual_system"]["point"] == b["p_annual_system"]["point"]
+                if scenario == "historical":
+                    assert a == b, f"{label} {arm} historical moved"
+            assert (
+                old["sections"][label][arm]["climate_ratio"]["point"]
+                == new["sections"][label][arm]["climate_ratio"]["point"]
+            )
+
+
+def test_the_comparison_record_states_what_moved_and_why() -> None:
+    """The old-versus-new record is committed and asserts its own invariants."""
+    payload = json.loads(_require(COMPARISON).read_text(encoding="utf-8"))
+    assert payload["by_scenario"]["historical"]["changed"] == 0
+    assert payload["by_scenario"]["+4K"]["changed"] > 0
+    assert payload["pooled_arm_identity"]["passed"] is True
+    assert payload["pooled_arm_identity"]["leaves_compared"] > 0
+    assert "every point estimate identical" in payload["invariants_asserted"]
+    causes = {record["cause"] for record in payload["changed"]}
+    assert not any(cause.endswith("(must not happen)") for cause in causes)
+
+
+def test_the_measured_narrowing_matches_its_analytic_prediction() -> None:
+    """Width ratio against sqrt(W / (W + B)), the two-component prediction.
+
+    A pooled draw's replicate variance is (W + B) / K and a stratified one's is
+    W / K, so the ratio of widths is the square root of the variance share, to
+    the normal approximation. Agreement identifies the difference between the
+    two records as the between-pattern component and nothing else; a future
+    change that narrowed the interval for some other reason would break this
+    without breaking any value assertion.
+    """
+    spread = _evidence()["structural_pattern_spread"]["+4K"]
+    widening = spread["sampling_the_patterns_instead"]
+    for label in SECTIONS:
+        predicted = spread["sections"][label][
+            "predicted_width_ratio_stratified_over_pooled"
+        ]
+        measured = widening[label]["measured_width_ratio_stratified_over_pooled"]
+        assert 0.0 < measured < 1.0, f"{label} did not narrow"
+        assert abs(measured - predicted) < 0.05, (
+            f"{label}: measured width ratio {measured} against the analytic "
+            f"prediction {predicted}; the narrowing is not the between-pattern "
+            "variance component"
+        )
+
+
+def test_the_structural_axis_is_reported_as_values_not_as_an_interval() -> None:
+    """The six patterns are a design, so they get numbers and not a band.
+
+    Each pattern's own annualised value is exact for the ensemble as simulated.
+    Reporting the six, their range and their ratio is a defensible statement
+    about a prescribed six-member set; a percentile interval from six units is
+    not, which is why the sampled reading stays a factor and never an interval.
+    """
+    spread = _evidence()["structural_pattern_spread"]["+4K"]
+    assert len(spread["patterns"]) == 6
+    for label in SECTIONS:
+        section = spread["sections"][label]
+        assert len(section["per_pattern_annual"]) == 6
+        assert section["max_over_min"] > 1.0
+        # Not bit-identity, and the driver does not assert it either:
+        # averaging six pattern means re-associates the addends numpy's
+        # pairwise sum adds in one pass, so the two differ by summation
+        # order alone. The bound is the same relative 1e-15 the driver
+        # aborts on.
+        point = section["published_point"]
+        assert abs(section["equal_weight_mean"] - point) <= 1e-15 * point
+        assert not {"ci_low", "ci_high"} & set(section)
+    assert "never as an interval" in spread["sampling_the_patterns_instead_reading"]
+    assert "historical" in _evidence()["structural_pattern_spread"]
+    assert "no prescribed-pattern axis" in (
+        _evidence()["structural_pattern_spread"]["historical"]["note"]
+    )
+
+
+def test_the_note_records_the_correction_as_post_hoc() -> None:
+    """Part 3 is a correction, not a back-dated pre-registration.
+
+    The pre-registered gates in Part 1 keep their meaning only if a later
+    change to the estimator is labelled as what it is. A session that folded
+    this revision into Part 1 would destroy the thing Part 1 is for.
+    """
+    text = _require(NOTE).read_text(encoding="utf-8")
+    part_three = text[text.index("## 5. Part 3") :]
+    assert "not pre-registered" in part_three
+    assert "2026-09-17" in part_three
+    assert "Part 1 is unchanged" in part_three
+    assert SUPERSEDED.name in part_three

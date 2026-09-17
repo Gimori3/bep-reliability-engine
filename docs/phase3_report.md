@@ -899,3 +899,53 @@ intervals are the hazard-sampling ones of
 `annualisation-hazard-sampling-uncertainty.json`, re-run on the corrected
 curves; that study re-sweeps nothing and its pre-registered verdicts are
 unchanged.
+
+## Addendum, 2026-09-17 - the warming intervals are pattern-stratified
+
+Authoritative where it differs from the 2026-09-14 addendum above and from
+sections 1 to 10. Record of the correction:
+`docs/decisions/annualisation-hazard-sampling-uncertainty.md` Part 3; the
+superseded evidence is kept as
+`docs/decisions/annualisation-hazard-sampling-uncertainty-pooled-draw-2026-09-14.json`
+and the field-by-field comparison as
+`docs/decisions/annualisation-pattern-stratification-comparison.json`.
+
+The hazard-sampling estimator drew its member blocks pooled over all 90 warming
+members, which keeps the six prescribed sea-surface-temperature patterns in the
+pool but randomises their weights: 2 to 31 blocks from a pattern across 10,000
+replicates, against the design's 15. The study's own note declares that axis
+outside the interval, so the warming bands carried between-pattern structural
+spread they disclaimed. The draw now resamples 15 members inside each of the six
+patterns.
+
+**No point estimate, mechanism share, dominance ordering, climate-ratio point or
+historical interval in this report moves**, and the 2026-09-14 addendum's
+corrected column above stands unchanged in its historical rows. What moves is
+the warming interval, in the narrowing direction:
+
+| section | scenario | 2026-09-14 addendum | pattern-stratified |
+|---|---|---|---|
+| KP 57.4 | +4K | 9.53 [7.51, 11.6] e-3 | 9.53 **[7.75, 11.4]** e-3 |
+| KP 58.8 | +4K | 4.10 [3.66, 4.55] e-2 | 4.10 **[3.76, 4.44]** e-2 |
+| KP 60.0 | +4K | 1.42 [1.20, 1.65] e-2 | 1.42 **[1.24, 1.62]** e-2 |
+| KP 62.0 | +4K | 1.28 [1.02, 1.55] e-2 | 1.28 **[1.05, 1.52]** e-2 |
+
+Warming relative half-widths are 8 to 19 per cent against 11 to 21; historical
+stays 29 to 58. Climate-ratio intervals move with their warming half: 7.4 to
+28.0, 4.2 to 7.7, 5.4 to 12.8 and 7.9 to 24.6. **Every pre-registered verdict is
+unchanged**, including the KP 62.0 warming tie and the unresolved KP 57.4
+against KP 62.0 ratio pair, and all 100 verdict fields of the two records agree.
+
+The structural axis is now reported as the six patterns' own annualised values
+rather than only as a widening factor. They span a factor of **3.0 to 5.7**
+across the four sections, and every warming number in this report is conditional
+on that set. Resampling the six would widen the published warming half-width by
+1.8 to 3.0, against the 1.6 to 2.4 quoted when the denominator still contained
+part of that spread.
+
+**Figure provenance.** The five `phase3_*.png` figures were last rendered on
+2026-09-10 and were not redrawn when the 2026-09-14 gauge correction moved the
+Phase 3 tables under them. They are redrawn here from the current tables, so
+they now carry both the gauge correction and the stratified intervals;
+`phase3_event_based_validation.png` is byte-unchanged, its two surface
+mechanisms being untouched by either.
