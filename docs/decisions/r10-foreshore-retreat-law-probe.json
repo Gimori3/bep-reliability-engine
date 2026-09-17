@@ -1,0 +1,358 @@
+{
+ "study": "R10 foreshore-exhaustion: the retreat-law exponent behind the softening factor",
+ "generated": "2026-09-17T15:11:35Z",
+ "generated_by": "scripts/foreshore_retreat_law_probe.py",
+ "parent": "docs/decisions/r10-foreshore-exhaustion-screening.md",
+ "forcing": "observed August 2016 record per section (ADR-0035 chain)",
+ "exponents": [
+  0.5,
+  1.0,
+  1.5,
+  2.0,
+  3.0
+ ],
+ "not_a_probability": "these are ratios between two screening treatments of the same event, not probabilities, and no mechanism joins the Phase 3 composition",
+ "sections": {
+  "KP57.4": {
+   "mobilisation_stage_m_msl": 36.41,
+   "event_id": "typhoon_201608_kp57.4",
+   "thresholds": {
+    "z_mob-1.0m": {
+     "n_samples": 104,
+     "peak_excess_depth_m": 4.248000000000005,
+     "mean_excess_depth_m": 1.1444392378264026,
+     "linear_ratio_mean_over_peak": 0.2694066002416199,
+     "R_of_p": {
+      "0.5": 0.4738675924835901,
+      "1": 0.2694066002416199,
+      "1.5": 0.17561462161551103,
+      "2": 0.12675698636124372,
+      "3": 0.08084542707449353
+     },
+     "softening_factor_1_over_R": {
+      "0.5": 2.110294132499955,
+      "1": 3.7118615472046357,
+      "1.5": 5.694286676136742,
+      "2": 7.889111509405154,
+      "3": 12.369283411398994
+     }
+    },
+    "z_mob": {
+     "n_samples": 42,
+     "peak_excess_depth_m": 3.2480000000000047,
+     "mean_excess_depth_m": 1.0782070773263517,
+     "linear_ratio_mean_over_peak": 0.33196030705860535,
+     "R_of_p": {
+      "0.5": 0.5213934595182875,
+      "1": 0.3319603070586053,
+      "1.5": 0.24118050448080078,
+      "2": 0.19058712209979387,
+      "3": 0.1374404836043441
+     },
+     "softening_factor_1_over_R": {
+      "0.5": 1.9179373690722825,
+      "1": 3.0124083474337096,
+      "1.5": 4.146272113298466,
+      "2": 5.246944226779326,
+      "3": 7.275876610553434
+     }
+    },
+    "z_mob+1.0m": {
+     "n_samples": 17,
+     "peak_excess_depth_m": 2.2480000000000047,
+     "mean_excess_depth_m": 1.0274270912034613,
+     "linear_ratio_mean_over_peak": 0.4570405209979801,
+     "R_of_p": {
+      "0.5": 0.6245080900586476,
+      "1": 0.45704052099798004,
+      "1.5": 0.3640810345232104,
+      "2": 0.3053399976129154,
+      "3": 0.2354419125679874
+     },
+     "softening_factor_1_over_R": {
+      "0.5": 1.6012602813617514,
+      "1": 2.1879898040909587,
+      "1.5": 2.746641283607563,
+      "2": 3.275037688536687,
+      "3": 4.247332130005676
+     }
+    }
+   }
+  },
+  "KP58.8": {
+   "mobilisation_stage_m_msl": 37.53,
+   "event_id": "typhoon_201608_kp58.8",
+   "thresholds": {
+    "z_mob-1.0m": {
+     "n_samples": 212,
+     "peak_excess_depth_m": 4.219999999999999,
+     "mean_excess_depth_m": 0.8161044659858097,
+     "linear_ratio_mean_over_peak": 0.19338968388289335,
+     "R_of_p": {
+      "0.5": 0.37317141283473054,
+      "1": 0.1933896838828933,
+      "1.5": 0.11970054900513076,
+      "2": 0.08294060990097354,
+      "3": 0.049495777668983124
+     },
+     "softening_factor_1_over_R": {
+      "0.5": 2.6797336709253186,
+      "1": 5.170906637427195,
+      "1.5": 8.354180564010084,
+      "2": 12.056819948562522,
+      "3": 20.203743573598945
+     }
+    },
+    "z_mob": {
+     "n_samples": 67,
+     "peak_excess_depth_m": 3.219999999999999,
+     "mean_excess_depth_m": 0.8847413391756841,
+     "linear_ratio_mean_over_peak": 0.2747643910483492,
+     "R_of_p": {
+      "0.5": 0.4636123601724186,
+      "1": 0.27476439104834915,
+      "1.5": 0.18979064806505858,
+      "2": 0.14460189337648757,
+      "3": 0.09972610422715737
+     },
+     "softening_factor_1_over_R": {
+      "0.5": 2.156974416359602,
+      "1": 3.6394817981491427,
+      "1.5": 5.268963514246543,
+      "2": 6.915538770964676,
+      "3": 10.027464802216553
+     }
+    },
+    "z_mob+1.0m": {
+     "n_samples": 21,
+     "peak_excess_depth_m": 2.219999999999999,
+     "mean_excess_depth_m": 0.9441293141109675,
+     "linear_ratio_mean_over_peak": 0.4252834748247603,
+     "R_of_p": {
+      "0.5": 0.5939452505410474,
+      "1": 0.42528347482476037,
+      "1.5": 0.334221898197437,
+      "2": 0.27763163822672976,
+      "3": 0.21138967883629536
+     },
+     "softening_factor_1_over_R": {
+      "0.5": 1.6836568675127241,
+      "1": 2.351372811774673,
+      "1.5": 2.9920241773304266,
+      "2": 3.6018949655274635,
+      "3": 4.730599930446089
+     }
+    }
+   }
+  },
+  "KP60.0": {
+   "mobilisation_stage_m_msl": 40.25,
+   "event_id": "typhoon_201608_kp60",
+   "thresholds": {
+    "z_mob-1.0m": {
+     "n_samples": 72,
+     "peak_excess_depth_m": 3.0459999999999994,
+     "mean_excess_depth_m": 0.8303651376146797,
+     "linear_ratio_mean_over_peak": 0.2726083839838082,
+     "R_of_p": {
+      "0.5": 0.4655473366825605,
+      "1": 0.2726083839838082,
+      "1.5": 0.1861185948320663,
+      "2": 0.14055219766169189,
+      "3": 0.09586879946651916
+     },
+     "softening_factor_1_over_R": {
+      "0.5": 2.1480092811310896,
+      "1": 3.6682657568572643,
+      "1.5": 5.372918277737343,
+      "2": 7.114794479464439,
+      "3": 10.430922318467502
+     }
+    },
+    "z_mob": {
+     "n_samples": 21,
+     "peak_excess_depth_m": 2.0459999999999994,
+     "mean_excess_depth_m": 0.8673137614678904,
+     "linear_ratio_mean_over_peak": 0.42390701929026914,
+     "R_of_p": {
+      "0.5": 0.5914261934910499,
+      "1": 0.4239070192902692,
+      "1.5": 0.33329272323609616,
+      "2": 0.2769268307577293,
+      "3": 0.21091512326602674
+     },
+     "softening_factor_1_over_R": {
+      "0.5": 1.690828054295727,
+      "1": 2.3590078826112872,
+      "1.5": 3.00036553540842,
+      "2": 3.611062161307348,
+      "3": 4.7412437027509995
+     }
+    },
+    "z_mob+1.0m": {
+     "n_samples": 9,
+     "peak_excess_depth_m": 1.0459999999999994,
+     "mean_excess_depth_m": 0.5133321100917448,
+     "linear_ratio_mean_over_peak": 0.4907572754223185,
+     "R_of_p": {
+      "0.5": 0.6414131437200501,
+      "1": 0.49075727542231856,
+      "1.5": 0.40791477614692634,
+      "2": 0.3534264640454905,
+      "3": 0.2834037899941841
+     },
+     "softening_factor_1_over_R": {
+      "0.5": 1.5590575431620062,
+      "1": 2.0376671932972474,
+      "1.5": 2.4514924647883096,
+      "2": 2.8294429017949465,
+      "3": 3.5285343220728334
+     }
+    }
+   }
+  },
+  "KP62.0": {
+   "mobilisation_stage_m_msl": 43.82,
+   "event_id": "typhoon_201608_kp62",
+   "thresholds": {
+    "z_mob-1.0m": {
+     "n_samples": 49,
+     "peak_excess_depth_m": 2.908999999999999,
+     "mean_excess_depth_m": 0.895360681520316,
+     "linear_ratio_mean_over_peak": 0.3077898527055058,
+     "R_of_p": {
+      "0.5": 0.49310887514951535,
+      "1": 0.3077898527055058,
+      "1.5": 0.22068133393393016,
+      "2": 0.17265735524834405,
+      "3": 0.1229883351253348
+     },
+     "softening_factor_1_over_R": {
+      "0.5": 2.0279497092742256,
+      "1": 3.2489700073277037,
+      "1.5": 4.531420859996207,
+      "2": 5.791818127653099,
+      "3": 8.130852401416128
+     }
+    },
+    "z_mob": {
+     "n_samples": 16,
+     "peak_excess_depth_m": 1.908999999999999,
+     "mean_excess_depth_m": 0.9085956422018358,
+     "linear_ratio_mean_over_peak": 0.475953715139778,
+     "R_of_p": {
+      "0.5": 0.646067731346545,
+      "1": 0.475953715139778,
+      "1.5": 0.37993831797082733,
+      "2": 0.31904510826061216,
+      "3": 0.24643064271794818
+     },
+     "softening_factor_1_over_R": {
+      "0.5": 1.5478253308144387,
+      "1": 2.101044635624538,
+      "1.5": 2.632006177583759,
+      "2": 3.134353024410421,
+      "3": 4.057936906590584
+     }
+    },
+    "z_mob+1.0m": {
+     "n_samples": 6,
+     "peak_excess_depth_m": 0.9089999999999989,
+     "mean_excess_depth_m": 0.5678110091743124,
+     "linear_ratio_mean_over_peak": 0.6246545755492993,
+     "R_of_p": {
+      "0.5": 0.7697867454587243,
+      "1": 0.6246545755492994,
+      "1.5": 0.527109015127199,
+      "2": 0.4578399452087418,
+      "3": 0.3669857411706859
+     },
+     "softening_factor_1_over_R": {
+      "0.5": 1.2990610787979846,
+      "1": 1.6008847755907896,
+      "1.5": 1.897140764626622,
+      "2": 2.184169403445286,
+      "3": 2.7249015092793423
+     }
+    }
+   }
+  }
+ },
+ "gates": {
+  "gate_1_R_strictly_decreasing_in_p": {
+   "statement": "R(p) = E[x**p] decreases strictly in p at every populated section and threshold cell",
+   "held": true,
+   "cells_checked": 12,
+   "per_cell": [
+    {
+     "cell": "KP57.4/z_mob-1.0m",
+     "strictly_decreasing": true
+    },
+    {
+     "cell": "KP57.4/z_mob",
+     "strictly_decreasing": true
+    },
+    {
+     "cell": "KP57.4/z_mob+1.0m",
+     "strictly_decreasing": true
+    },
+    {
+     "cell": "KP58.8/z_mob-1.0m",
+     "strictly_decreasing": true
+    },
+    {
+     "cell": "KP58.8/z_mob",
+     "strictly_decreasing": true
+    },
+    {
+     "cell": "KP58.8/z_mob+1.0m",
+     "strictly_decreasing": true
+    },
+    {
+     "cell": "KP60.0/z_mob-1.0m",
+     "strictly_decreasing": true
+    },
+    {
+     "cell": "KP60.0/z_mob",
+     "strictly_decreasing": true
+    },
+    {
+     "cell": "KP60.0/z_mob+1.0m",
+     "strictly_decreasing": true
+    },
+    {
+     "cell": "KP62.0/z_mob-1.0m",
+     "strictly_decreasing": true
+    },
+    {
+     "cell": "KP62.0/z_mob",
+     "strictly_decreasing": true
+    },
+    {
+     "cell": "KP62.0/z_mob+1.0m",
+     "strictly_decreasing": true
+    }
+   ]
+  },
+  "gate_2_family_escapes_the_published_window": {
+   "statement": "read as universal, the published softening window of roughly two to four does not hold: at the primary threshold some concave (p=0.5) member softens by less than 2 and some convex (p=2) member by more than 4",
+   "published_window": [
+    2.0,
+    4.0
+   ],
+   "held": true,
+   "linear_span": [
+    2.101044635624538,
+    3.6394817981491427
+   ],
+   "concave_span": [
+    1.5478253308144387,
+    2.156974416359602
+   ],
+   "convex_span": [
+    3.134353024410421,
+    6.915538770964676
+   ]
+  }
+ }
+}
