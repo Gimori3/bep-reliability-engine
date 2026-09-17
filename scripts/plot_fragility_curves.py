@@ -49,6 +49,20 @@ FIGURES_DIR = RESULTS_DIR / "figures"
 PUB_FIGURES_DIR = REPO_ROOT / "docs" / "figures"
 
 
+#: Panel titles carry the section's **as-built** remediation state, which the
+#: engine does not model: every curve in these figures is computed on the
+#: unremediated foundation (``remediation_state`` is a label, not physics).
+#: The word alone read as an applied drained model, so the state is named as
+#: as-built and the figure title states the evaluation basis once.
+PANEL_STATE_PREFIX = "as built"
+EVALUATION_BASIS = "unremediated foundation"
+
+
+def _panel_label(kp: str, remediation: str) -> str:
+    """``KP 58.8 · as built: drained`` — status, not model."""
+    return f"KP {kp}  ·  {PANEL_STATE_PREFIX}: {remediation}"
+
+
 def save_both(fig, name: str) -> None:
     """Write the study-local copy and the tracked publication copy."""
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
@@ -221,7 +235,7 @@ def figure_per_section(data: dict[str, dict]) -> None:
                 color=INK_2,
                 fontsize=fs.pt("annotation", SCALE),
             )
-        fs.panel_title(ax, f"KP {kp}  ·  {d['remediation']}", scale=SCALE)
+        fs.panel_title(ax, _panel_label(kp, d["remediation"]), scale=SCALE)
         ax.set_ylim(-0.03, 1.03)
         ax.set_xlabel("conditioning water level h  [m T.P.]")
     for ax in axes[:, 0]:
@@ -230,7 +244,7 @@ def figure_per_section(data: dict[str, dict]) -> None:
     fs.legend_below(fig, handles, labels, scale=SCALE)
     fs.title(
         fig,
-        "Prior fragility at the four cross-sections",
+        f"Prior fragility at the four cross-sections, {EVALUATION_BASIS}",
         scale=SCALE,
     )
     fs.layout(fig, scale=SCALE, legend_rows=1)
@@ -364,7 +378,7 @@ def figure_tail_log(data: dict[str, dict]) -> None:
             )
         ax.set_yscale("log")
         ax.set_ylim(floor / 2, 1.5)
-        fs.panel_title(ax, f"KP {kp}  ·  {d['remediation']}", scale=SCALE)
+        fs.panel_title(ax, _panel_label(kp, d["remediation"]), scale=SCALE)
         ax.set_xlabel("conditioning water level h  [m T.P.]")
     for ax in axes[:, 0]:
         ax.set_ylabel("P(failure | h)   [log]")
@@ -372,7 +386,7 @@ def figure_tail_log(data: dict[str, dict]) -> None:
     fs.legend_below(fig, handles, labels, scale=SCALE)
     fs.title(
         fig,
-        "The fragility tails on a logarithmic axis",
+        f"The fragility tails on a logarithmic axis, {EVALUATION_BASIS}",
         scale=SCALE,
     )
     fs.layout(fig, scale=SCALE, legend_rows=1)

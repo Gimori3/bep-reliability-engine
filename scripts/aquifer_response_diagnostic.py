@@ -270,12 +270,19 @@ def _plot(spreads: dict[str, list[dict]], blocks: dict[str, dict]) -> None:
             label=section.replace("KP", "KP "),
             color=colors[section],
         )
+    # The 1.5 h figure the specification carried is a *peak-plateau* duration
+    # (ADR-0032 retired it against a measured 18 h rise and 9 h plateau), so
+    # labelling it "1.5 h plateau" on a rising-limb axis set two unlike
+    # quantities against each other. It is drawn here as what it is: the flood
+    # timescale the retired expectation assumed, an order-of-magnitude
+    # reference for the measured rising limbs beside it. The plateau-against-
+    # plateau comparison is in the text, not on this axis.
     axes[0].axvline(
         1.5,
         color=fs.INK_2,
         ls=":",
         lw=1,
-        label="1.5 h plateau, the flashy-river expectation",
+        label="1.5 h, the retired flashy-river timescale",
     )
     axes[0].set_xlabel(r"rising-limb time $T_\mathrm{rise}$, 10 per cent to peak [h]")
     axes[0].set_ylabel("ensemble members")
