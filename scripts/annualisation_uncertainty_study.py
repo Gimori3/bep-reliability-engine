@@ -405,6 +405,12 @@ def draw_multiplicities_stratified(
     counts = np.zeros((replicates, n_blocks), dtype=np.int32)
     for columns in strata:
         k = int(columns.size)
+        if k == 0:
+            # A stratum with no members carries no weight and is skipped rather
+            # than dividing by its own size. The d4PDF design has none, but the
+            # estimator must not assume a balance that belongs to this ensemble
+            # rather than to the method.
+            continue
         counts[:, columns] = rng.multinomial(k, np.full(k, 1.0 / k), replicates)
     return counts
 
