@@ -338,7 +338,7 @@ def plot_fragility_update(
             linewidth=0,
             elinewidth=0.9,
             capsize=2,
-            label="posterior, 95 per cent exact interval",
+            label="posterior, 95 per cent Clopper-Pearson interval",
         )
         if z_toe_m is not None:
             ax.axvline(z_toe_m, color="#c3c2b7", linewidth=0.9)
@@ -368,8 +368,11 @@ def plot_fragility_update(
                 textcoords="offset points",
             )
         # The floor row is a display device, not a measurement: a marker on it
-        # is an exact zero. Neither the figure nor its caption said so, and a
-        # reader had every reason to take it for a probability of about 5e-6.
+        # is a level at which no realization failed. Neither the figure nor its
+        # caption said so, and a reader had every reason to take it for a
+        # probability of about 5e-6. It is not a zero *probability* either, and
+        # the figure says so itself: the same marker carries a non-zero
+        # Clopper-Pearson upper whisker. The legend therefore names the count.
         ax.axhline(floor, color="#c3c2b7", lw=0.9, zorder=1)
         ax.set_yscale("log")
         ax.set_title(label, fontsize=points["panel_title"], color=_INK)
@@ -389,9 +392,9 @@ def plot_fragility_update(
         handles,
         [
             "prior",
-            "posterior, 95% exact interval",
+            "posterior, 95% Clopper-Pearson interval",
             "posterior bootstrap band",
-            "display floor: exact zero",
+            "display floor: no failures in the sample",
         ],
         loc="upper center",
         ncol=2,

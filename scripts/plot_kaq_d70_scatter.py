@@ -260,16 +260,20 @@ def build_figure(specimens: list[Specimen]):
 
     results = {}
     for ax, key, name, descriptor, hazen in (
-        (axes[0], "d60_mm", r"$\ln\,d_{60}$  [mm]", "median", None),
-        (axes[1], "d10_mm", r"$\ln\,d_{10}$  [mm]", "fine", 2.0),
+        # The descriptor names the percentile, not a relative size. It read
+        # "median" for d60 and "fine" for d10; d60 is the 60th-percentile
+        # diameter and the median is d50, which OYO reports separately. The
+        # leading "Against the" was dropped with it: the percentile form is
+        # nine characters longer and the two titles then met in the gutter.
+        (axes[0], "d60_mm", r"$\ln\,d_{60}$  [mm]", "60th-percentile", None),
+        (axes[1], "d10_mm", r"$\ln\,d_{10}$  [mm]", "10th-percentile", 2.0),
     ):
         r, slope = _panel(ax, specimens, key, scale, hazen_slope=hazen)
         results[key] = r
         ax.set_xlabel(name, fontsize=fs.pt("axis_label", scale))
         fs.panel_title(
             ax,
-            f"Against the {descriptor} grain size: "
-            f"r = {r:+.2f}, slope {slope:+.2f}",
+            f"{descriptor} diameter: r = {r:+.2f}, slope {slope:+.2f}",
             scale=scale,
         )
         # Room for the label columns on both flanks, taken before the labels
