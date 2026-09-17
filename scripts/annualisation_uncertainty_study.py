@@ -321,19 +321,113 @@ def ensemble_structure(event_ids: list[str]) -> dict[str, Any]:
             "events_per_block": sorted(set(sizes)),
             "balanced": len(set(sizes)) == 1,
         }
+    per_pattern = sorted({int(n) for n in np.bincount(pattern_of_block(event_ids))})
+    record["pattern_strata"] = {
+        "n_strata": len(stratum_columns(event_ids)),
+        "member_blocks_per_pattern": per_pattern,
+        "balanced": len(per_pattern) == 1,
+    }
     return record
 
 
+def pattern_of_block(event_ids: list[str]) -> np.ndarray:
+    """Stratum index of each member block, in ``block_index`` column order.
+
+    The stratum is the prescribed sea-surface-temperature pattern: ``HFB_CC``
+    and its five siblings under warming, and the single ``HPB`` group
+    historically. Derived from the member label rather than re-split from the
+    event id, so the block columns and the strata cannot disagree about which
+    block belongs where.
+    """
+    blocks = np.unique(block_labels(event_ids, "member"))
+    patterns = np.asarray([str(b).rsplit("_", 1)[0] for b in blocks], dtype=object)
+    _, index = np.unique(patterns, return_inverse=True)
+    return index
+
+
+def stratum_columns(event_ids: list[str]) -> list[np.ndarray]:
+    """Block columns of each pattern stratum, in a deterministic order.
+
+    ``np.unique`` sorts, so the strata come back in pattern-label order and the
+    draw is reproducible from the seed alone. Historically there is exactly one
+    stratum holding every block, which is what makes the historical draw
+    identical to the unstratified one rather than merely close to it.
+    """
+    index = pattern_of_block(event_ids)
+    return [np.flatnonzero(index == s) for s in range(int(index.max()) + 1)]
+
+
 def draw_multiplicities(n_blocks: int, replicates: int, rng) -> np.ndarray:
-    """Bootstrap block multiplicities, ``(replicates, n_blocks)``.
+    """Unstratified bootstrap block multiplicities, ``(replicates, n_blocks)``.
 
     Drawing block counts from ``Multinomial(K, uniform)`` is exactly the
     with-replacement draw of K blocks, and it turns a replicate into one row of
     a matrix product against the per-block sums. Held as ``int32`` so the same
     draw can be shared by all 114 nodes without a memory cost.
+
+    **This stopped being the estimator under warming on 2026-09-17** (Part 3).
+    It survives as the resampling-unit sensitivity's unstratified arm and as
+    the named alternative the superseded record was computed with. Under
+    warming it randomises the weights of the six prescribed
+    sea-surface-temperature patterns, which the conditional estimand holds
+    fixed; the estimator is ``draw_multiplicities_stratified``.
     """
     counts = rng.multinomial(n_blocks, np.full(n_blocks, 1.0 / n_blocks), replicates)
     return counts.astype(np.int32)
+
+
+def draw_multiplicities_stratified(
+    strata: list[np.ndarray], n_blocks: int, replicates: int, rng
+) -> np.ndarray:
+    """Pattern-stratified block multiplicities, ``(replicates, n_blocks)``.
+
+    Part 3, 2026-09-17. Each stratum draws its own ``k_p`` blocks with
+    replacement from its own ``k_p``, so every replicate carries exactly the
+    design's pattern composition: 15 member blocks from each of the six
+    prescribed sea-surface-temperature patterns under warming, and all 50 from
+    the single historical group. The resampled event count is therefore still
+    the fixed 5,400 or 3,000 that ``replicate_means`` divides by.
+
+    Why this and not the pooled draw. The six patterns are prescribed CMIP5
+    warming patterns chosen to span structural spread; they are not a sample
+    from a population of patterns, and the estimand conditions on them at equal
+    weight. A pooled draw over all 90 blocks randomises their weights, which
+    folds between-pattern structural spread into an interval that declares
+    itself hazard-sampling noise and declares that axis left outside. The point
+    estimate is unaffected either way: the design is balanced, so the plain
+    ensemble mean **is** the equally weighted pattern mean, exactly.
+
+    With a single stratum covering every block this reduces, call for call, to
+    ``draw_multiplicities`` -- the same one ``rng.multinomial(K, uniform(K), R)``
+    against the same generator state -- so the historical draw is bit-identical
+    to the superseded one rather than merely close to it.
+    """
+    counts = np.zeros((replicates, n_blocks), dtype=np.int32)
+    for columns in strata:
+        k = int(columns.size)
+        counts[:, columns] = rng.multinomial(k, np.full(k, 1.0 / k), replicates)
+    return counts
+
+
+def pattern_composition(
+    multiplicities: np.ndarray, strata: list[np.ndarray]
+) -> dict[str, Any]:
+    """Retained blocks per pattern across replicates: the F6 diagnostic.
+
+    Records how many blocks each replicate drew from each stratum, at its
+    extremes. Under the stratified draw the minimum and maximum both equal the
+    design count in every stratum; under the pooled draw they do not, which is
+    the defect this measures rather than asserts.
+    """
+    drawn = [multiplicities[:, columns].sum(axis=1) for columns in strata]
+    return {
+        "design_blocks_per_stratum": [int(c.size) for c in strata],
+        "min_blocks_drawn_per_stratum": [int(d.min()) for d in drawn],
+        "max_blocks_drawn_per_stratum": [int(d.max()) for d in drawn],
+        "composition_is_exactly_the_design": all(
+            int(d.min()) == int(d.max()) == int(c.size) for d, c in zip(drawn, strata)
+        ),
+    }
 
 
 def replicate_means(
@@ -379,6 +473,67 @@ def chunked_replicate_means(
         out[done : done + take] = replicate_means(sums, counts, n_events)
         done += take
     return out
+
+
+def chunked_replicate_means_stratified(
+    sums: np.ndarray,
+    strata: list[np.ndarray],
+    n_blocks: int,
+    n_events: int,
+    replicates: int,
+    rng,
+    chunk: int = 1000,
+) -> np.ndarray:
+    """``chunked_replicate_means`` under the pattern-stratified draw."""
+    out = np.empty((replicates, sums.shape[1]), dtype=np.float64)
+    done = 0
+    while done < replicates:
+        take = min(chunk, replicates - done)
+        counts = draw_multiplicities_stratified(strata, n_blocks, take, rng)
+        out[done : done + take] = replicate_means(sums, counts, n_events)
+        done += take
+    return out
+
+
+def strata_for_unit(event_ids: list[str], unit: str) -> list[np.ndarray] | None:
+    """Pattern strata over the blocks of ``unit``, or ``None`` where none exist.
+
+    A unit can be stratified by sea-surface-temperature pattern only if each of
+    its blocks lies wholly inside one pattern. The member and the individual
+    event do; the calendar year does not, because every warming year carries
+    events from all six patterns at once. Returning ``None`` for that case is
+    the honest answer, not a failure: section 1.6's S2 arm is **already**
+    pattern-balanced by construction, which the record states and measures.
+    """
+    labels = block_labels(event_ids, unit)
+    _, inverse = np.unique(labels, return_inverse=True)
+    _, pattern_index = np.unique(block_labels(event_ids, "sst"), return_inverse=True)
+    n_blocks = int(inverse.max()) + 1
+    low = np.full(n_blocks, np.iinfo(np.int64).max, dtype=np.int64)
+    high = np.full(n_blocks, -1, dtype=np.int64)
+    np.minimum.at(low, inverse, pattern_index)
+    np.maximum.at(high, inverse, pattern_index)
+    if not np.array_equal(low, high):
+        return None
+    return [np.flatnonzero(low == s) for s in range(int(pattern_index.max()) + 1)]
+
+
+def year_block_pattern_balance(event_ids: list[str]) -> dict[str, Any]:
+    """Events of each pattern inside each calendar-year block.
+
+    Measured rather than argued: if every year block holds the same count of
+    every pattern, the calendar-year arm conditions on equal pattern weights
+    without being stratified at all.
+    """
+    _, years = np.unique(block_labels(event_ids, "year"), return_inverse=True)
+    _, patterns = np.unique(block_labels(event_ids, "sst"), return_inverse=True)
+    table = np.zeros((int(years.max()) + 1, int(patterns.max()) + 1), dtype=np.int64)
+    np.add.at(table, (years, patterns), 1)
+    counts = sorted({int(n) for n in table.ravel()})
+    return {
+        "events_per_pattern_per_year_block": counts,
+        "pattern_balanced_by_construction": len(counts) == 1,
+    }
 
 
 def percentile_interval(samples: np.ndarray) -> tuple[float, float]:
@@ -919,13 +1074,24 @@ def stratum_occupancy(event_ids: list[str], mask: np.ndarray) -> dict[str, Any]:
     labels = block_labels(event_ids, "member")
     _, n_blocks_total, _ = block_index(labels)
     n_events = int(mask.sum())
+    pattern_labels = block_labels(event_ids, "sst")
     if n_events:
-        _, counts = np.unique(labels[mask], return_counts=True)
+        carrying_blocks, counts = np.unique(labels[mask], return_counts=True)
         carrying = int(counts.size)
         largest = float(counts.max()) / float(n_events)
-        patterns = int(np.unique(block_labels(event_ids, "sst")[mask]).size)
+        patterns = int(np.unique(pattern_labels[mask]).size)
+        # Which stratum each carrying block sits in. Under the stratified draw
+        # a block is resampled inside its own pattern, so a stratum carrying
+        # none of them contributes exactly zero in every replicate and the
+        # stratum's information rests on the patterns that do carry it.
+        carrier_patterns = [str(b).rsplit("_", 1)[0] for b in carrying_blocks]
+        per_pattern = {
+            name: int(carrier_patterns.count(name))
+            for name in sorted(set(carrier_patterns))
+        }
     else:
         carrying, largest, patterns = 0, 0.0, 0
+        per_pattern = {}
 
     failures: list[str] = []
     if carrying < STRATUM_BLOCK_FLOOR:
@@ -945,6 +1111,7 @@ def stratum_occupancy(event_ids: list[str], mask: np.ndarray) -> dict[str, Any]:
         "n_member_blocks": n_blocks_total,
         "largest_block_share": largest,
         "n_sst_patterns": patterns,
+        "carrying_blocks_per_pattern": per_pattern,
         "clears_floor": not failures,
         "floor_failures": failures,
     }
@@ -1487,8 +1654,50 @@ def unit_sensitivity(
     six-pattern unit is **structural climate-model spread rather than sampling
     noise**, and a percentile interval from six units is not trustworthy at its
     ends.
+
+    Part 3, 2026-09-17. Each unit is now reported twice where the second
+    reading exists: ``pooled``, the unstratified draw, and
+    ``pattern_stratified``, the draw the estimand actually calls for. The
+    pooled pass runs first and takes exactly the stream it always took, so its
+    numbers are bit-identical to the superseded record and the difference
+    between the two readings is the between-pattern component and nothing else.
+    The calendar-year unit has no stratified reading because a warming year
+    block spans all six patterns; it is already pattern-balanced by
+    construction, which ``year_block_pattern_balance`` measures.
     """
     out: dict[str, Any] = {}
+
+    def _arm(stacked, sums, n_blocks, n_events, strata) -> dict[str, Any]:
+        means = (
+            chunked_replicate_means(sums, n_blocks, n_events, REPLICATES, rng)
+            if strata is None
+            else chunked_replicate_means_stratified(
+                sums, strata, n_blocks, n_events, REPLICATES, rng
+            )
+        )
+        per_section: dict[str, Any] = {}
+        for column, kp in enumerate(BEP_KPS):
+            lo, hi = percentile_interval(means[:, column])
+            point = float(np.mean(stacked[:, column]))
+            per_section[_label(kp)] = {
+                "ci_low": lo,
+                "ci_high": hi,
+                "relative_half_width": (
+                    float(0.5 * (hi - lo) / point) if point > 0.0 else None
+                ),
+            }
+        return {"n_blocks": n_blocks, "sections": per_section}
+
+    def _stacked(scenario) -> np.ndarray:
+        return np.column_stack(
+            [
+                per_event[("Tokachi", round(kp, 3), scenario)]["__system__"]
+                for kp in BEP_KPS
+            ]
+        )
+
+    # Pass 1, pooled: the same units in the same order, taking the same stream
+    # the superseded record took, so these arms are unchanged by Part 3.
     for unit in RESAMPLING_UNITS:
         entry: dict[str, Any] = {}
         for scenario in campaign.SCENARIOS:
@@ -1496,38 +1705,154 @@ def unit_sensitivity(
             if unit == "sst" and len(set(block_labels(ids, "sst"))) < 2:
                 continue
             index, n_blocks, _ = block_index(block_labels(ids, unit))
-            stacked = np.column_stack(
-                [
-                    per_event[("Tokachi", round(kp, 3), scenario)]["__system__"]
-                    for kp in BEP_KPS
-                ]
-            )
-            sums = block_sums(stacked, index, n_blocks)
+            stacked = _stacked(scenario)
             # The i.i.d.-over-events unit has one block per event, so its
             # multiplicity matrix is (replicates x n_events) and is drawn in
             # chunks rather than held whole.
-            means = chunked_replicate_means(sums, n_blocks, len(ids), REPLICATES, rng)
-            per_section: dict[str, Any] = {}
-            for column, kp in enumerate(BEP_KPS):
-                lo, hi = percentile_interval(means[:, column])
-                point = float(np.mean(stacked[:, column]))
-                per_section[_label(kp)] = {
-                    "ci_low": lo,
-                    "ci_high": hi,
-                    "relative_half_width": (
-                        float(0.5 * (hi - lo) / point) if point > 0.0 else None
-                    ),
-                }
-            entry[scenario] = {"n_blocks": n_blocks, "sections": per_section}
+            sums = block_sums(stacked, index, n_blocks)
+            entry[scenario] = {"pooled": _arm(stacked, sums, n_blocks, len(ids), None)}
         out[unit] = entry
+
+    # Pass 2, pattern-stratified, where the unit's blocks nest inside a pattern.
+    for unit in RESAMPLING_UNITS:
+        if unit == "sst":
+            out[unit]["pattern_handling"] = (
+                "none: this arm resamples the pattern axis itself and is "
+                "structural climate-model spread, not hazard-sampling noise"
+            )
+            continue
+        for scenario in campaign.SCENARIOS:
+            ids = event_ids[scenario]
+            strata = strata_for_unit(ids, unit)
+            if strata is None:
+                out[unit][scenario]["pattern_handling"] = {
+                    "stratified": False,
+                    "reason": (
+                        "a calendar-year block spans every pattern, so it "
+                        "cannot be stratified by one; it is already "
+                        "pattern-balanced by construction"
+                    ),
+                    **year_block_pattern_balance(ids),
+                }
+                continue
+            index, n_blocks, _ = block_index(block_labels(ids, unit))
+            stacked = _stacked(scenario)
+            sums = block_sums(stacked, index, n_blocks)
+            out[unit][scenario]["pattern_stratified"] = _arm(
+                stacked, sums, n_blocks, len(ids), strata
+            )
+            out[unit][scenario]["pattern_handling"] = {
+                "stratified": True,
+                "blocks_per_stratum": [int(c.size) for c in strata],
+            }
     out["reading"] = (
-        "member is the estimator; event is the naive independent-years "
-        "alternative the production numbers implicitly assume; year is the "
-        "crossed shared-forcing axis; sst is the six warming sea-surface "
-        "patterns and is structural climate-model spread rather than "
-        "hazard-sampling noise, reported because it is the largest measured "
-        "grouping and never quoted as the sampling interval"
+        "member is the estimator and its pattern_stratified arm is the "
+        "published one; event is the naive independent-years alternative the "
+        "production numbers implicitly assume; year is the crossed "
+        "shared-forcing axis, which needs no stratification because every "
+        "warming year block carries the six patterns in equal numbers; sst is "
+        "the six warming sea-surface patterns and is structural "
+        "climate-model spread rather than hazard-sampling noise, reported "
+        "because it is the largest measured grouping and never quoted as the "
+        "sampling interval. The pooled arms are the superseded draw, kept so "
+        "the between-pattern component is visible as a difference rather than "
+        "asserted"
     )
+    return out
+
+
+def structural_pattern_spread(
+    per_event: dict[tuple[str, float, str], dict[str, np.ndarray]],
+    event_ids: dict[str, list[str]],
+    campaign,
+) -> dict[str, Any]:
+    """The prescribed patterns' own annualised values: the axis held fixed.
+
+    Part 3, 2026-09-17. Not a bootstrap and not an interval. Each warming
+    pattern carries 900 events, so its conditional annual mean is exact for the
+    ensemble as simulated, and the six values **are** the structural spread the
+    estimand conditions on. Reported as the six values, their range and their
+    ratio, which is a defensible statement about a prescribed six-member design
+    in a way that a percentile interval from six units is not.
+
+    The equally weighted mean of the six is asserted against the published
+    point estimate, which is what makes "the point estimate is the conditional
+    estimand" a checked claim rather than a remark about a balanced design.
+    """
+    out: dict[str, Any] = {}
+    for scenario in campaign.SCENARIOS:
+        labels = block_labels(event_ids[scenario], "sst")
+        patterns = sorted(set(str(x) for x in labels))
+        if len(patterns) < 2:
+            out[scenario] = {
+                "n_patterns": len(patterns),
+                "note": (
+                    "the historical ensemble carries a single observed-forcing "
+                    "group, so it has no prescribed-pattern axis"
+                ),
+            }
+            continue
+        entry: dict[str, Any] = {"patterns": patterns, "sections": {}}
+        for kp in BEP_KPS:
+            values = per_event[("Tokachi", round(kp, 3), scenario)]["__system__"]
+            means = {name: float(values[labels == name].mean()) for name in patterns}
+            ordered = [means[name] for name in patterns]
+            equal_weight = float(np.mean(ordered))
+            published = float(values.mean())
+            if abs(equal_weight - published) > 1e-15 * max(published, 1e-300):
+                raise AssertionError(
+                    f"the equally weighted pattern mean at {_label(kp)} "
+                    f"{scenario} is {equal_weight!r} against the published "
+                    f"{published!r}; the design is not balanced and the "
+                    "conditional estimand is not the plain ensemble mean."
+                )
+            # The two variance components of the member block means. Under a
+            # pooled draw the replicate variance is (W + B) / K; under the
+            # stratified draw it is W / K, so the ratio of interval widths is
+            # sqrt(W / (W + B)) to the normal approximation. Recorded so the
+            # measured narrowing has an analytic prediction to be checked
+            # against rather than being taken on trust.
+            member_labels = block_labels(event_ids[scenario], "member")
+            blocks, inverse = np.unique(member_labels, return_inverse=True)
+            sums_b = np.zeros(blocks.size)
+            counts_b = np.zeros(blocks.size)
+            np.add.at(sums_b, inverse, values)
+            np.add.at(counts_b, inverse, 1.0)
+            block_mean = sums_b / counts_b
+            block_pattern = np.asarray(
+                [str(b).rsplit("_", 1)[0] for b in blocks], dtype=object
+            )
+            within = float(
+                np.mean([block_mean[block_pattern == name].var() for name in patterns])
+            )
+            between = float(
+                np.var([block_mean[block_pattern == name].mean() for name in patterns])
+            )
+            total = within + between
+            entry["sections"][_label(kp)] = {
+                "per_pattern_annual": means,
+                "min": min(ordered),
+                "max": max(ordered),
+                "max_over_min": (
+                    max(ordered) / min(ordered) if min(ordered) > 0 else None
+                ),
+                "equal_weight_mean": equal_weight,
+                "published_point": published,
+                "within_pattern_block_variance": within,
+                "between_pattern_block_variance": between,
+                "between_pattern_variance_share": (
+                    between / total if total > 0.0 else None
+                ),
+                "predicted_width_ratio_stratified_over_pooled": (
+                    float(np.sqrt(within / total)) if total > 0.0 else None
+                ),
+            }
+        entry["reading"] = (
+            "these six values are held fixed at equal weight by the estimator "
+            "and are NOT inside any interval this study reports; they are the "
+            "structural condition every warming number carries"
+        )
+        out[scenario] = entry
     return out
 
 
@@ -1753,16 +2078,38 @@ def main(argv: list[str] | None = None) -> int:
     rng = np.random.default_rng(SEED)
     index_by_scenario: dict[str, tuple[np.ndarray, int]] = {}
     multiplicities: dict[str, np.ndarray] = {}
+    strata_by_scenario: dict[str, list[np.ndarray]] = {}
+    composition: dict[str, Any] = {}
     for scenario in campaign.SCENARIOS:
         labels = block_labels(event_ids[scenario], "member")
         index, n_blocks, _ = block_index(labels)
         index_by_scenario[scenario] = (index, n_blocks)
-        multiplicities[scenario] = draw_multiplicities(n_blocks, args.replicates, rng)
+        strata = stratum_columns(event_ids[scenario])
+        strata_by_scenario[scenario] = strata
+        multiplicities[scenario] = draw_multiplicities_stratified(
+            strata, n_blocks, args.replicates, rng
+        )
+        composition[scenario] = pattern_composition(multiplicities[scenario], strata)
+        # GATE 6. Part 3's whole point: every replicate must carry the design's
+        # pattern composition, because the estimand conditions on the six
+        # prescribed patterns at equal weight and this note says that axis is
+        # left outside the interval. Measured per replicate, not asserted.
+        if not composition[scenario]["composition_is_exactly_the_design"]:
+            raise AssertionError(
+                f"GATE 6 FAILED: the {scenario} draw does not retain the "
+                "design's pattern composition in every replicate, so the "
+                "interval would carry between-pattern structural spread that "
+                f"the estimand holds fixed. {composition[scenario]}"
+            )
 
+    strata_shape = " + ".join(
+        f"{scenario} {len(strata_by_scenario[scenario])} x "
+        f"{index_by_scenario[scenario][1] // len(strata_by_scenario[scenario])}"
+        for scenario in campaign.SCENARIOS
+    )
     print(
-        f"bootstrapping {args.replicates} replicates over "
-        f"{index_by_scenario['historical'][1]} historical and "
-        f"{index_by_scenario['+4K'][1]} warming members ...",
+        f"bootstrapping {args.replicates} replicates, members stratified "
+        f"within the prescribed patterns ({strata_shape}) ...",
         flush=True,
     )
     replicates_by_arm: dict[str, dict[tuple[str, float, str], dict[str, np.ndarray]]]
@@ -1891,6 +2238,44 @@ def main(argv: list[str] | None = None) -> int:
         per_event_by_arm[primary], event_ids, campaign, np.random.default_rng(SEED + 1)
     )
 
+    print("structural pattern spread ...", flush=True)
+    pattern_spread = structural_pattern_spread(
+        per_event_by_arm[primary], event_ids, campaign
+    )
+    # What sampling the prescribed patterns instead of conditioning on them
+    # would be worth, as a ratio against the published arm. Reported here, with
+    # the six-unit caveat, and never as a second interval around a number.
+    widening: dict[str, Any] = {}
+    for kp in BEP_KPS:
+        label = _label(kp)
+        published = sensitivity["member"]["+4K"]["pattern_stratified"]["sections"][
+            label
+        ]["relative_half_width"]
+        sampled = sensitivity["sst"]["+4K"]["pooled"]["sections"][label][
+            "relative_half_width"
+        ]
+        measured = sensitivity["member"]["+4K"]["pattern_stratified"]["sections"][label]
+        pooled = sensitivity["member"]["+4K"]["pooled"]["sections"][label]
+        widening[label] = {
+            "published_relative_half_width": published,
+            "if_the_six_patterns_were_resampled": sampled,
+            "factor": (sampled / published if published else None),
+            "pooled_member_relative_half_width": pooled["relative_half_width"],
+            "measured_width_ratio_stratified_over_pooled": (
+                measured["relative_half_width"] / pooled["relative_half_width"]
+                if pooled["relative_half_width"]
+                else None
+            ),
+        }
+    if "+4K" in pattern_spread and "sections" in pattern_spread["+4K"]:
+        pattern_spread["+4K"]["sampling_the_patterns_instead"] = widening
+        pattern_spread["+4K"]["sampling_the_patterns_instead_reading"] = (
+            "a six-unit percentile interval, reported as a factor on the "
+            "published half-width and never as an interval of its own; it "
+            "measures structural climate-model spread, which the estimand "
+            "conditions on rather than estimates"
+        )
+
     print("section aggregates ...", flush=True)
     aggregates = section_aggregate_intervals(
         campaign, context, multiplicities, *PRIMARY_ARM
@@ -1935,6 +2320,28 @@ def main(argv: list[str] | None = None) -> int:
         },
         "estimator": {
             "unit": "d4PDF ensemble member (the prefix-and-member pair)",
+            "stratification": (
+                "members are resampled WITHIN each prescribed "
+                "sea-surface-temperature pattern, 15 of 15 in each of the six "
+                "warming patterns and 50 of 50 in the single historical group, "
+                "so every replicate carries the design's pattern composition "
+                "exactly"
+            ),
+            "estimand": (
+                "the annualised probability conditional on the six prescribed "
+                "warming sea-surface-temperature patterns at equal weight; the "
+                "balanced design makes the plain ensemble mean identical to "
+                "that equally weighted pattern mean, so the point estimate IS "
+                "the conditional estimand and the interval is the finite-member "
+                "spread within it"
+            ),
+            "why_not_pooled_over_patterns": (
+                "a pooled draw over all 90 warming blocks randomises the six "
+                "pattern weights, which folds between-pattern structural spread "
+                "into an interval this study declares to be hazard-sampling "
+                "noise with that axis left outside; the patterns are a "
+                "prescribed CMIP5 design, not a sample from a population"
+            ),
             "why_not_years": (
                 "the simulated years are nested exactly 60-per-member inside "
                 "the ensemble members, so they are not independent draws and an "
@@ -1945,6 +2352,12 @@ def main(argv: list[str] | None = None) -> int:
             "preregistered_replicates": REPLICATES,
             "seed": SEED,
             "interval": "two-sided 95 % percentile (2.5 / 97.5)",
+            "interval_convention": (
+                "two-sided 95 %: each endpoint is a one-sided 97.5 % limit, and "
+                "a paired difference resolves iff that two-sided interval "
+                "excludes zero, which is a two-sided 5 % test. A percentile "
+                "bootstrap's coverage is approximate, not exact"
+            ),
             "point_estimates": (
                 "always the unresampled production values, never a bootstrap " "mean"
             ),
@@ -1954,6 +2367,7 @@ def main(argv: list[str] | None = None) -> int:
                 "from independent streams and the climate ratio is formed "
                 "inside each replicate"
             ),
+            "pattern_composition_per_replicate": composition,
         },
         "ensemble_structure": structure,
         "gates": {
@@ -1977,6 +2391,17 @@ def main(argv: list[str] | None = None) -> int:
             "gate_2_hazard_cache_unchanged": {
                 "passed": True,
                 "cache_files": len(cache_after),
+            },
+            "gate_6_every_replicate_retains_the_design_pattern_composition": {
+                "passed": True,
+                "criterion": (
+                    "in every replicate of every scenario the number of member "
+                    "blocks drawn from each prescribed sea-surface-temperature "
+                    "pattern equals the design count exactly, so the estimand's "
+                    "equal pattern weights are conditioned on rather than "
+                    "resampled"
+                ),
+                "measured": composition,
             },
             "gate_3_no_production_artifact_written": {
                 "passed": True,
@@ -2033,6 +2458,7 @@ def main(argv: list[str] | None = None) -> int:
             "Q6_floor_sensitivity": q6,
         },
         "resampling_unit_sensitivity": sensitivity,
+        "structural_pattern_spread": pattern_spread,
         "elapsed_s": round(time.time() - started, 1),
     }
 

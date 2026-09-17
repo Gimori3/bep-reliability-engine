@@ -2,7 +2,9 @@
 
 **Status: Part 1 pre-registered 2026-08-20, before Part 2 existed and before a
 single interval was computed. Part 2 records the outcome and may not re-tune
-anything in Part 1.** Un-numbered companion study: it adds no `Config` field,
+anything in Part 1. Part 3, added 2026-09-17, corrects the estimator's block
+draw after the fact and is NOT pre-registered; it is labelled as a correction
+throughout and it re-tunes nothing in Part 1.** Un-numbered companion study: it adds no `Config` field,
 changes no default and alters no persisted production result, so it consumes no
 ADR number. See section 1.8 for that judgement in full.
 
@@ -373,6 +375,8 @@ every file under `results/system_integration/phase3/` byte-unchanged.
 
 ### 2.2 The headline intervals
 
+> **Superseded in the warming column, 2026-09-17.** The estimator's block draw was pooled over all 90 warming member blocks and is now stratified inside the six prescribed sea-surface-temperature patterns. Every historical number and every point estimate below is unchanged; the warming intervals are narrower. The corrected values are in section 5, Part 3. The numbers below are kept as the record of what the pooled draw gave.
+
 Matrix, posterior, 250 m, primary -- the arm Chapter 7's system annual table
 prints. 95 % percentile, hazard-sampling only.
 
@@ -393,6 +397,8 @@ The KP 58.8 dominance margin, prior side, is **43.0 [33.9, 57.9]**; the same
 margin on the posterior side is **37.6 [30.2, 49.4]**.
 
 ### 2.3 Q1. The four climate ratios: PARTIAL, 5 of 6 pairs resolve
+
+> **Superseded in the warming column, 2026-09-17.** The estimator's block draw was pooled over all 90 warming member blocks and is now stratified inside the six prescribed sea-surface-temperature patterns. Every historical number and every point estimate below is unchanged; the warming intervals are narrower. The corrected values are in section 5, Part 3. The numbers below are kept as the record of what the pooled draw gave.
 
 | Pair | difference | 95 % interval | resolved |
 |---|---|---|---|
@@ -421,6 +427,8 @@ verdict weaker for a reason with no physical content. And no replicate had an
 undefined ratio at any of the four sections, so nothing was discarded.
 
 ### 2.4 Q2. The KP 62.0 warming split: a TIE, and the third decimal is not real
+
+> **Superseded in the warming column, 2026-09-17.** The estimator's block draw was pooled over all 90 warming member blocks and is now stratified inside the six prescribed sea-surface-temperature patterns. Every historical number and every point estimate below is unchanged; the warming intervals are narrower. The corrected values are in section 5, Part 3. The numbers below are kept as the record of what the pooled draw gave.
 
 Paired inside each replicate at KP 62.0 under +4K:
 
@@ -471,6 +479,8 @@ per cent". This is the one place where a headline number in Chapter 7 needs
 rewording rather than merely annotating.
 
 ### 2.6 The resampling unit was worth little, and the SST design is worth a lot
+
+> **Superseded in the warming column, 2026-09-17.** The estimator's block draw was pooled over all 90 warming member blocks and is now stratified inside the six prescribed sea-surface-temperature patterns. Every historical number and every point estimate below is unchanged; the warming intervals are narrower. The corrected values are in section 5, Part 3. The numbers below are kept as the record of what the pooled draw gave.
 
 Relative half-width of the annual system probability, primary arm, per unit:
 
@@ -846,6 +856,8 @@ outcome, not a wasted clause.
 
 ### 4.3 The concentration factor
 
+> **Superseded in the warming column, 2026-09-17.** The estimator's block draw was pooled over all 90 warming member blocks and is now stratified inside the six prescribed sea-surface-temperature patterns. Every historical number and every point estimate below is unchanged; the warming intervals are narrower. The corrected values are in section 5, Part 3. The numbers below are kept as the record of what the pooled draw gave.
+
 Duration stratum, matrix / posterior / 250 m / primary, 95 % percentile.
 
 | Section | Scenario | Occupancy | Concentration factor |
@@ -880,6 +892,8 @@ concentration factors are one-significant-figure quantities, and the KP 60.0
 historical one is barely that.
 
 ### 4.4 The share of the annual total from long-duration years
+
+> **Superseded in the warming column, 2026-09-17.** The estimator's block draw was pooled over all 90 warming member blocks and is now stratified inside the six prescribed sea-surface-temperature patterns. Every historical number and every point estimate below is unchanged; the warming intervals are narrower. The corrected values are in section 5, Part 3. The numbers below are kept as the record of what the pooled draw gave.
 
 | Section | Scenario | Share | 95 % interval |
 |---|---|---|---|
@@ -953,6 +967,8 @@ quoted at all. Where the compound stratification is discussed, the floor value
 is load-bearing and should be named.
 
 ### 4.7 The compound stratification, beyond the question that was asked
+
+> **Superseded in the warming column, 2026-09-17.** The estimator's block draw was pooled over all 90 warming member blocks and is now stratified inside the six prescribed sea-surface-temperature patterns. Every historical number and every point estimate below is unchanged; the warming intervals are narrower. The corrected values are in section 5, Part 3. The numbers below are kept as the record of what the pooled draw gave.
 
 Section 3.3 fixed the floor for **every** stratified entry of the table, and
 having fixed it, applying it to the compound rows as well is what "apply the
@@ -1039,3 +1055,178 @@ it is recorded here.
   separable inputs to the fragility, which Chapter 7 already states as a
   structural qualification on the whole attribution. An interval on a stratified
   mean does not touch that.
+
+---
+
+## 5. Part 3. The pattern-stratified draw, a correction (2026-09-17)
+
+**This section is a correction made after the numbers of Parts 2 and 4 were
+seen, and it is not pre-registered. Part 1 is unchanged and nothing in it was
+re-tuned.** The pooled-draw record it supersedes is kept verbatim as
+`annualisation-hazard-sampling-uncertainty-pooled-draw-2026-09-14.json`, and
+`scripts/annualisation_stratification_comparison.py` writes a field-by-field
+old-versus-new record with a cause for every moved value.
+
+### 5.1 The defect
+
+Section 1.1 names the block as the (SST-pattern, member) pair and section 1.6
+declares the six prescribed patterns **outside** the interval, as structural
+climate-model spread rather than hazard-sampling noise. The draw did not do
+that. `draw_multiplicities` took one `Multinomial(90, uniform)` over all 90
+warming blocks, which keeps the six patterns in the pool but **randomises their
+weights**: across 10,000 replicates one pattern's representation ran from 2 to
+31 blocks against the design's 15. Between-pattern spread was therefore inside
+an interval whose own note said that axis was left outside.
+
+Section 0b had already measured the size of what was leaking in, and did not
+join it to the draw: the SST-pattern design effect is 3.8 to 9.0 against the
+member's 1.19 to 1.30.
+
+### 5.2 The estimand, stated plainly
+
+The six d4PDF warming patterns are prescribed CMIP5 warming patterns selected to
+span structural spread. They are a design, not a draw from a population of
+patterns. The target is therefore the annual probability **conditional on those
+six at equal weight**, with sampling uncertainty coming from the finite 15
+members inside each.
+
+Two facts make that target the one the published numbers already are.
+
+* **The design is balanced**, 6 patterns by 15 members by 60 years, measured
+  from the cached event ids rather than assumed. So the plain ensemble mean
+  **is** the equally weighted pattern mean, exactly. The driver asserts this
+  per section and scenario and aborts if it ever stops holding.
+* **The historical ensemble has one forcing group.** Its stratified draw is the
+  pooled draw, call for call against the same generator state, so the whole
+  historical half of the study is bit-identical across the correction.
+
+The correction narrows the warming bands. That is a consequence and not the
+reason: an interval must randomise what the design leaves random and hold fixed
+what the design prescribes.
+
+### 5.3 The corrected headline intervals
+
+Matrix, posterior, 250 m, primary. 95 % percentile, hazard-sampling only, and
+the scope sentence at the top of this note travels with every one of them.
+
+| Section | historical (unchanged) | +4K | superseded +4K | climate ratio | superseded ratio |
+|---|---|---|---|---|---|
+| KP 57.4 | 7.53e-4 [3.46e-4, 1.22e-3] | 9.53e-3 [7.75e-3, 1.14e-2] | [7.51e-3, 1.16e-2] | 12.7 [7.41, 28.01] | [7.30, 28.07] |
+| KP 58.8 | 7.45e-3 [5.41e-3, 9.69e-3] | 4.10e-2 [3.76e-2, 4.44e-2] | [3.66e-2, 4.55e-2] | 5.51 [4.18, 7.69] | [4.13, 7.72] |
+| KP 60.0 | 1.81e-3 [1.13e-3, 2.56e-3] | 1.42e-2 [1.24e-2, 1.62e-2] | [1.20e-2, 1.65e-2] | 7.86 [5.40, 12.82] | [5.34, 12.86] |
+| KP 62.0 | 1.01e-3 [5.33e-4, 1.56e-3] | 1.28e-2 [1.05e-2, 1.52e-2] | [1.02e-2, 1.55e-2] | 12.7 [7.87, 24.56] | [7.71, 24.77] |
+
+Relative half-widths are **29 to 58 % historically, unchanged, and 8 to 19 %
+under warming** against the superseded 11 to 21. The one-significant-figure
+reading of every absolute annual probability is unchanged, because a band of
+8 % does not buy a second digit any more than a band of 11 % did.
+
+The KP 58.8 dominance margin is unchanged historically (prior 43.0 [33.9, 57.9],
+posterior 37.7 [30.3, 49.6]) and slightly narrower under warming (posterior
+16.0 [13.7, 19.2] against [13.7, 19.4]).
+
+### 5.4 Nothing the pre-registration decides changed
+
+Over 2,576 shared leaves of the two records, 1,977 are identical and 599 moved.
+**Every one of the 100 verdict fields is unchanged**: the six Q1 pair
+resolutions, the Q2 tie, the Q3 lead and degeneracy classifications, the Q4/Q5
+range verdicts on both stratifiers, every occupancy and concentration floor
+verdict and every printed-precision verdict. The 1,038 purely historical leaves
+are identical, the point estimates are identical, and the 91 pooled
+resampling-unit values reappear bit-identical under their `pooled` arm.
+
+In particular: KP 57.4 against KP 62.0 remains the one unresolved climate-ratio
+pair, so the two 12.7s are still not distinguishable from one another; and the
+KP 62.0 warming split is still a tie, its share interval 0.476 to 0.530 against
+0.476 to 0.532, and the difference of 1.1e-5 per year still inside +/- 9e-4.
+
+### 5.5 The narrowing is the between-pattern component, and it was predicted
+
+For a balanced design of `G` patterns by `m` members with block means `b`, a
+pooled draw has replicate variance `(W + B) / (G m)` and a stratified one
+`W / (G m)`, where `W` is the mean within-pattern variance of the block means
+and `B` the variance of the pattern means. The width ratio is therefore
+`sqrt(W / (W + B))`. Predicted before the stratified code was written, and
+measured after:
+
+| Section | B/(W+B) | predicted width ratio | measured | factor if the six were resampled |
+|---|---|---|---|---|
+| KP 57.4 | 0.179 | 0.906 | 0.912 | 1.82 |
+| KP 58.8 | 0.393 | 0.779 | 0.789 | 3.00 |
+| KP 60.0 | 0.260 | 0.860 | 0.880 | 2.28 |
+| KP 62.0 | 0.197 | 0.896 | 0.917 | 1.90 |
+
+Agreement within 2.4 % identifies the difference between the two records as the
+between-pattern variance component and nothing else. `tests/test_annualisation_uncertainty.py`
+pins it, so a later narrowing that arrived for some other reason would break a
+test without breaking any value assertion.
+
+### 5.6 The structural axis, now stated as values rather than as a factor
+
+The axis this study conditions on is best given by the six patterns' own
+annualised probabilities, which are exact for the ensemble as simulated because
+each carries 900 events. This is a defensible statement about a prescribed
+six-member design in a way that a percentile interval from six units is not.
+
+| Section | CC | GF | HA | MI | MP | MR | max/min |
+|---|---|---|---|---|---|---|---|
+| KP 57.4 | 2.64e-3 | 1.36e-2 | 1.04e-2 | 1.52e-2 | 8.65e-3 | 6.72e-3 | 5.74 |
+| KP 58.8 | 1.94e-2 | 5.51e-2 | 3.97e-2 | 5.89e-2 | 3.98e-2 | 3.31e-2 | 3.04 |
+| KP 60.0 | 5.29e-3 | 1.98e-2 | 1.47e-2 | 2.15e-2 | 1.33e-2 | 1.07e-2 | 4.07 |
+| KP 62.0 | 3.69e-3 | 1.77e-2 | 1.36e-2 | 2.07e-2 | 1.24e-2 | 8.57e-3 | 5.60 |
+
+**Every warming number in this study is conditional on that set, and the set
+spans a factor of 3.0 to 5.7.** The sampled reading, kept for continuity with
+section 2.6 and still never the headline, now widens the published warming
+half-width by **1.8 to 3.0** rather than the superseded 1.6 to 2.4: the
+denominator changed, because the published interval no longer contains part of
+the numerator's spread.
+
+### 5.7 The resampling-unit sensitivity, under one conditioning
+
+Section 2.6's comparison was between arms that did not condition alike. Each
+unit is now reported twice where a second reading exists, and the like-for-like
+comparison is between the stratified arms.
+
+| Unit | blocks | KP 57.4 | KP 58.8 | KP 60.0 | KP 62.0 |
+|---|---|---|---|---|---|
+| member, +4K, pattern-stratified (the estimator) | 90 | 19.2 % | 8.3 % | 13.4 % | 18.3 % |
+| member, +4K, pooled (superseded) | 90 | 21.1 % | 10.6 % | 15.2 % | 19.9 % |
+| S1 i.i.d. over events, +4K, pattern-stratified | 5,400 | 19.2 % | 9.2 % | 13.3 % | 18.4 % |
+| S1 i.i.d. over events, +4K, pooled | 5,400 | 19.7 % | 9.5 % | 13.7 % | 18.9 % |
+| S2 calendar year, +4K | 60 | 22.0 % | 12.3 % | 16.3 % | 21.3 % |
+| S3 sea-surface pattern, +4K | 6 | 35.0 % | 25.0 % | 30.5 % | 34.8 % |
+
+Section 2.6's conclusion survives in its own terms: **against the arm that
+conditions the same way**, the member block is within about 10 % of the naive
+i.i.d.-over-events width, in both directions, and the block choice is still a
+question of validity rather than of width. What changes is the direction at
+KP 58.8, where the member arm is now the narrower of the two.
+
+**S2 needs no stratification and never did.** Each of the 60 warming calendar
+year blocks holds exactly 15 events of every pattern, so resampling years
+preserves the design's pattern weights exactly. Measured, not argued, and
+recorded in the sensitivity block as `pattern_balanced_by_construction`.
+
+### 5.8 Gate 6
+
+Added with the correction and evaluated per replicate, not asserted: in every
+replicate of every scenario, the number of member blocks drawn from each
+prescribed pattern equals the design count. Measured 15 of 15 in each of the six
+warming strata and 50 of 50 historically, minimum equal to maximum. A failure
+aborts the run; the same diagnostic applied to the pooled draw returns 2 to 31
+and would abort it, which is what makes the gate a measurement of the defect
+rather than a restatement of the fix.
+
+### 5.9 What the correction does not touch
+
+* No `Config` field, default, prior, physics kernel, persisted sweep, posterior,
+  fragility curve or production annual number. Gates 0 to 5 pass unchanged,
+  including gate 1's 912 published rows reproduced field for field.
+* Not the conductivity bracket, which remains four orders of magnitude wide at
+  the same sections and does not cancel. A hazard-sampling half-width of 8 %
+  sits inside that bracket, not beside it.
+* Not the count-limited cells. KP 57.4's three-year historical long-duration
+  stratum is still below the floor and still prints its count and no number.
+* Not the ADR judgement of section 1.8. This changes nothing a baseline run can
+  compute under any setting a user can reach, so it consumes no ADR number.
