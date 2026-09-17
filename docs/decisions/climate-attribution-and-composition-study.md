@@ -131,9 +131,10 @@ to `log R` exactly at all three readings.
 | KP 60.0 | 0.479 | 0.401 | **0.440** | 0.445 | 0.514 |
 | KP 62.0 | 0.502 | 0.230 | **0.366** | 0.351 | 0.679 |
 
-All eight order-dependent readings and all four symmetric ones are at or below
-**0.529**. Frequency is never a majority of the total under any of them, and
-the Shapley interval at the two resolved sections straddles a half. The last
+No reading anywhere exceeds **0.529**, and the four of the sixteen that exceed
+a half at all do so by less than 0.03: frequency is never more than a bare
+majority of the total, and the Shapley interval at the two resolved sections
+straddles a half. The last
 column is the claim that does survive: **inside the long stratum** frequency
 exceeds severity everywhere, carrying 51 to 68 per cent of `log R_in`.
 
