@@ -2244,6 +2244,29 @@ def main(argv: list[str] | None = None) -> int:
         per_event_by_arm[primary], event_ids, campaign, np.random.default_rng(SEED + 1)
     )
 
+    # The contrast gate 6 exists to exclude, measured rather than remembered.
+    # Drawn from its own generator so the estimator's stream is untouched, and
+    # recorded so the "a pattern ran from x to y blocks" statement is
+    # reproducible from the seed instead of from a probe someone once ran.
+    pooled_contrast: dict[str, Any] = {}
+    contrast_rng = np.random.default_rng(SEED + 2)
+    for scenario in campaign.SCENARIOS:
+        n_blocks = index_by_scenario[scenario][1]
+        strata = strata_by_scenario[scenario]
+        pooled = draw_multiplicities(n_blocks, args.replicates, contrast_rng)
+        record = pattern_composition(pooled, strata)
+        record["seed"] = SEED + 2
+        share = 1.0 / len(strata)
+        sd = float(np.sqrt(n_blocks * share * (1.0 - share)))
+        record["binomial_reference"] = (
+            "under a pooled draw a stratum's block count is "
+            f"Binomial({n_blocks}, {share:.4f}), mean "
+            f"{n_blocks * share:.1f} and standard deviation {sd:.2f}"
+            if len(strata) > 1
+            else "a single stratum leaves nothing to reweight"
+        )
+        pooled_contrast[scenario] = record
+
     print("structural pattern spread ...", flush=True)
     pattern_spread = structural_pattern_spread(
         per_event_by_arm[primary], event_ids, campaign
@@ -2408,6 +2431,13 @@ def main(argv: list[str] | None = None) -> int:
                     "resampled"
                 ),
                 "measured": composition,
+                "pooled_draw_contrast": pooled_contrast,
+                "contrast_reading": (
+                    "the same diagnostic applied to a pooled draw over the same "
+                    "blocks, from its own generator so the estimator's stream is "
+                    "untouched; it is what this gate exists to exclude and what "
+                    "the superseded record was computed with"
+                ),
             },
             "gate_3_no_production_artifact_written": {
                 "passed": True,
