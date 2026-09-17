@@ -177,13 +177,35 @@ def binomial_ci(
         upper = 1                                   if k == N
               = Beta.ppf(1 - alpha/2, k + 1, N-k)   otherwise
 
-    with ``alpha = 1 - confidence``. Exact (conservative) coverage — the
-    standard choice for rare-event counts, where the deep-tail levels are
-    carried by a handful of failing realizations. Computed always, for both
-    branches, at every section: at tail-only branches (ADR-0024) the raw
-    points with these CIs ARE the fragility deliverable, and at bracketed
-    branches they complement the bootstrap bands (which quantify the fitted
-    curve, not the points).
+    with ``alpha = 1 - confidence``. The endpoints are exact functions of the
+    count — "exact" in the Clopper-Pearson (1934) sense of inverting the exact
+    binomial law rather than a normal approximation — and are the standard
+    choice for rare-event counts, where the deep-tail levels are carried by a
+    handful of failing realizations. Computed always, for both branches, at
+    every section: at tail-only branches (ADR-0024) the raw points with these
+    CIs ARE the fragility deliverable, and at bracketed branches they
+    complement the bootstrap bands (which quantify the fitted curve, not the
+    points).
+
+    **Coverage is a property of the design, not of the endpoints.** The
+    ``>= 1 - alpha`` guarantee follows from ``K ~ Binomial(n, p)``, which needs
+    independent rows; the production sample is a randomized Latin hypercube
+    (M2), whose rows are dependent. The estimator stays exactly unbiased under
+    that design (each LHS row is marginally the target distribution) and
+    ADR-0031 measured its dispersion, but neither is a coverage statement, so
+    coverage was measured directly, over independent randomizations of the
+    production design with a genuinely iid control arm:
+    ``docs/decisions/binomial-interval-coverage-study.md``
+    (``scripts/interval_coverage_study.py``, 2026-09-17, audit item F5). Do not
+    restate the guarantee as if it were inherited from the binomial model.
+
+    One zero-count caveat travels with the endpoints. At ``k = 0`` the interval
+    is ``[0, 1 - (alpha/2)**(1/n)]``, whose upper endpoint is a **one-sided
+    ``1 - alpha/2``** bound, not a one-sided ``1 - alpha`` one (3.689e-5 against
+    2.996e-5 at ``n = 1e5``). Pairing one branch's lower endpoint with the
+    other's upper endpoint, as ``rq1_beta_analysis.delta_beta_cp_bound`` does,
+    is then a union-bound statement at ``1 - alpha`` built from two
+    ``1 - alpha/2`` endpoints.
 
     Parameters
     ----------

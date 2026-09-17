@@ -217,3 +217,37 @@ study does not re-run but cites as the designated tool.
 - Ratios use the iid replicate-SE; the ladder-mean ± SE is the reported
   statistic. R = 50 gives a per-rung ratio SE ≈ 1/√49 ≈ 0.14, tightened to
   ≈ 0.04–0.09 by averaging the six N-invariant rungs.
+
+---
+
+## Addendum, 2026-09-17: what this ladder does NOT establish
+
+Raised by audit item F5. This study measures the estimator's **dispersion**
+under the production design, and that is all it measures. It does not establish
+the **coverage** of the Clopper-Pearson interval the ADR-0024 deliverable
+reports, because coverage depends on the whole law of the failure count and not
+on its second moment, and because randomized Latin hypercube rows are dependent
+so the count is not binomial.
+
+The inference "LHS-to-crude variance parity in the deep tail justifies the exact
+binomial interval there" was drawn in the thesis and is not supported by this
+record. Coverage has since been measured directly, on the same two sections and
+the same conditioning levels, with a genuinely iid control arm:
+`docs/decisions/binomial-interval-coverage-study.md`
+(`scripts/interval_coverage_study.py`, R = 800 randomizations per arm at
+N = 1e5). The verdict there is that coverage is not contradicted at any cell,
+conservatively so in the bulk and at about the nominal level in the deep tail.
+
+Two readings of this ladder are strengthened rather than changed by that work.
+The variability ratio `CoV_MC / CoV_LHS` is a ratio of standard deviations at a
+common mean, so the corresponding **variance** ratio is its square: the bulk
+1.40 is a factor of about two in variance, which is how §"LHS versus crude Monte
+Carlo in the tail" already reads it ("about 2x fewer samples for equal
+precision"). The figure axis said "variance-reduction ratio" for the CoV ratio
+and now says "variability ratio"; the numbers and the underlying record are
+unchanged and the two n-ladder figures came back byte-identical on redraw. And
+the bulk-to-tail decay itself has a textbook mechanism: Stein's asymptotic form
+for the LHS variance removes the **additive** part of the integrand, which is
+nearly all of it in the bulk and nearly none of it in a tail governed by the
+multiplicative `C_e x k_aq` interaction (A. B. Owen, *Monte Carlo theory,
+methods and examples*, ch. 10, Propositions 10.1 and 10.4).

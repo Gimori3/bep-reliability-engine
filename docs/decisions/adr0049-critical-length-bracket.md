@@ -231,3 +231,56 @@ undisturbed by the bracket at Δt = 225 s.
   **lowers** the static-to-transient ratio.
 * Nothing here changes a production number. The production configuration
   continues to carry Eq. (13) as published, and ADR-0049 §Decision records why.
+
+---
+
+## 8. Amendment, 2026-09-17: the two published maxima and the count behind them
+
+Raised by S05's rare-event admissibility work (audit item U02, handed over as
+S04's M04). **Nothing in this note is retracted and no measurement is redone.**
+What is added is the count behind two numbers, and the window the thesis quotes.
+
+The upper arm's largest departure factor, **1.667 at KP 62.0's 46.50 m**, and
+the transient-span table's largest entry, **2.08 at the same stage**, both come
+from a level where the contingency cells are tiny: `min_cell_failures` is **15**
+for the departure and **12** for the span (§5.1 already recorded that the
+baseline there carries 15 failing rows; the companion JSON carries the per-level
+minimum for each arm). The
+ADR-0047 §4.5 resolution rule is a rule about **direction** and carries no count
+floor, so both levels are correctly flagged `resolved: true` and stay so: the ρ
+interval at 46.50 m is [0.3928, 0.7857] and excludes 1.
+
+The thesis, however, quotes these as **magnitudes**, and it refuses a magnitude
+elsewhere on exactly this ground: KP 57.4's design-level point estimate of 1.558
+is withheld because two transient realizations cannot support it (ADR-0040 R1,
+at least 30 failing rows). Applying that existing rule consistently, the
+quotable window is the set of levels where **every** contingency cell holds at
+least 30 failures. Over that window:
+
+| quantity | all resolved levels | R1-qualified levels |
+|---|---|---|
+| ρ departure, `l_c` upper arm | 1.194 / 1.238 / 1.275 / **1.667** | 1.194 / 1.238 / 1.275 / **1.385** |
+| ρ departure, `l_c` lower arm | 1.111 / 1.122 / 1.166 / 1.226 | unchanged |
+| transient span at an anchor | 1.00 to **2.083** | 1.00 to **1.698** |
+
+(sections in KP order; the qualified upper-arm maximum is 46.75 m on **130**
+failures, and the qualified span maximum is KP 62.0's rising limb, also
+46.75 m, on 106.) **175 of the 176 resolved levels already clear the floor**, so
+the window costs one level and no section.
+
+Consequences, applied: the headline pair becomes **1.11 to 1.38** on the ratio
+and **1.00 to 1.70** on the transient probability; §7's "narrowest of the three"
+statement becomes 1.11 to 1.38 against `k_aq`'s 2.24 to 163, which is the same
+verdict more strongly; and the `l_c`-against-`m_p` contrast of §5.3 is
+undisturbed, the model factor's 1.07 to 1.22 still being the same size as the
+shorter-`l_c` arm's 1.11 to 1.23 and still reaching it by the opposite route.
+The direction at 46.50 m is retained and stated; only its magnitude is withheld.
+
+**What is NOT done, deliberately.** The ADR-0047 §4.5 rule is not amended. A
+count floor bolted onto a pre-registered resolution rule after seeing which
+level it would exclude is the post-hoc gating this repository's own method
+forbids (`bep-research-methodology`, and ADR-0032's pre-registration
+discipline). The floor applied here is R1, which already exists, already governs
+the counts these ratios are built from, and is applied in the direction it
+always has been: it decides which point estimates may be quoted, not which
+directions are real.
