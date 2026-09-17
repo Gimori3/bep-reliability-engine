@@ -156,6 +156,8 @@ silently zero. Conditional independence given h is the thesis-fixed
 assumption (Pol RESS 2023); the known non-conservative coupling exclusion
 is carried as a documented limitation, not re-decided here.
 
+**Qualified 2026-09-17, no decision changed** (`docs/decisions/climate-attribution-and-composition-study.md`). Two things above are looser than the code. First, the dominance share's denominator is `sum_j P_j`, **not** `p_sys`: "share of the annual P_f" reads as a share of the union and is a share of the sum, which exceeds the union by up to 1.314 at the annualised KP 62.0 warming cell. The shares rank the mechanisms; they are not disjoint parts of the system probability, and no ordering or tie depends on the choice, both mechanisms sharing the denominator. Second, the coupling exclusion is non-conservative because it omits a change to a **marginal**; the independence assumption itself, with the marginals held fixed, sits above the positively dependent end of the Frechet bracket `max_i P_i <= P_union <= min(1, sum_i P_i)` and therefore over-states the union. Two channels, opposite signs; do not quote one direction for both.
+
 ---
 
 ## Alternatives Considered
