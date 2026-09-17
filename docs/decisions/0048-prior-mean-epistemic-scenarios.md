@@ -312,6 +312,28 @@ all 98 evaluated levels.
 
 ---
 
+## Clarification — 2026-09-17: which six members the field geometric mean is over
+
+`k_aq_field_geomean`'s 5.94e-5 m/s target and the 17x-to-51x offset are
+unchanged; what was ambiguous is the population behind them, and the
+provenance table this ADR points at listed one member too many. The six are
+the **four modelled sections' OYO field permeability tests plus the two 2005/06
+Kunijiban determinations**, which is what the Context above already says in
+words. **Both** KP 63.4 tests are excluded: the 4.22e-3 recovery test
+additionally as the flagged outlier, and both because KP 63.4 is unconfined and
+carries no `k_aq` prior in the modelled set.
+
+For audit, the alternatives that were not adopted: keeping the unflagged
+KP 63.4 test gives seven members, 5.98e-5 m/s and 17x to 50x; keeping the
+outlier as well gives eight, 1.02e-4 m/s and 9.8x to 29x. The **5.0 to 7.3
+sigma** figure in the Context belongs to the lower 2005/06 value, 8.61e-5, not
+to the geometric mean, which lies 5.7 to 8.1 sigma below the per-section prior
+medians. See the dated correction in `docs/tokachi_bep_inputs_provenance.md`
+§3.6. No scenario target, config field, default, sweep or persisted number
+moves.
+
+---
+
 ## References
 
 - `docs/decisions/epistemic-bracket-synthesis.md` and `.json` (2026-07-30) — the
