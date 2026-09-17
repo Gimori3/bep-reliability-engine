@@ -1128,3 +1128,69 @@ def test_the_note_records_the_correction_as_post_hoc() -> None:
     assert "2026-09-17" in part_three
     assert "Part 1 is unchanged" in part_three
     assert SUPERSEDED.name in part_three
+
+
+def test_the_stratified_draw_is_deterministic_given_its_seed() -> None:
+    """Same seed, same integers. The record must be reproducible from it."""
+    import annualisation_uncertainty_study as study
+
+    strata = [np.arange(0, 15), np.arange(15, 30)]
+    first = study.draw_multiplicities_stratified(
+        strata, 30, 400, np.random.default_rng(study.SEED)
+    )
+    second = study.draw_multiplicities_stratified(
+        strata, 30, 400, np.random.default_rng(study.SEED)
+    )
+    assert np.array_equal(first, second)
+    # And a different seed really does give a different draw, so the check
+    # above is testing determinism rather than a constant.
+    other = study.draw_multiplicities_stratified(
+        strata, 30, 400, np.random.default_rng(study.SEED + 1)
+    )
+    assert not np.array_equal(first, other)
+
+
+def test_the_draw_handles_unequal_and_empty_strata_explicitly() -> None:
+    """The d4PDF design is balanced; the estimator must not assume it.
+
+    An unequal design still has to draw each stratum's own count from its own
+    members, and a stratum with no members is a zero-weight stratum rather than
+    a division by zero. Both are asserted here because the balance is a
+    property of this ensemble and not of the method.
+    """
+    import annualisation_uncertainty_study as study
+
+    ragged = [np.arange(0, 4), np.arange(4, 17), np.arange(17, 20)]
+    counts = study.draw_multiplicities_stratified(
+        ragged, 20, 200, np.random.default_rng(3)
+    )
+    assert counts.sum(axis=1).tolist() == [20] * 200
+    for columns in ragged:
+        assert counts[:, columns].sum(axis=1).tolist() == [int(columns.size)] * 200
+    assert (
+        study.pattern_composition(counts, ragged)["composition_is_exactly_the_design"]
+        is True
+    )
+
+    with_empty = [np.arange(0, 5), np.array([], dtype=int), np.arange(5, 8)]
+    counts = study.draw_multiplicities_stratified(
+        with_empty, 8, 50, np.random.default_rng(4)
+    )
+    assert counts.sum(axis=1).tolist() == [8] * 50
+    composition = study.pattern_composition(counts, with_empty)
+    assert composition["design_blocks_per_stratum"] == [5, 0, 3]
+    assert composition["min_blocks_drawn_per_stratum"] == [5, 0, 3]
+
+
+def test_the_record_states_its_confidence_convention() -> None:
+    """Two-sided 95 per cent, and its coverage called approximate.
+
+    A percentile bootstrap's coverage is a property of the resample, not a
+    guarantee, and the neighbouring binomial work of 2026-09-17 measured the
+    paired percentile bootstrap under-covering mildly in its own right. The
+    record must not let a reader inherit exactness from the wording.
+    """
+    convention = _evidence()["estimator"]["interval_convention"]
+    assert "one-sided 97.5" in convention
+    assert "two-sided 5 % test" in convention
+    assert "approximate, not exact" in convention

@@ -375,7 +375,7 @@ every file under `results/system_integration/phase3/` byte-unchanged.
 
 ### 2.2 The headline intervals
 
-> **Superseded in the warming column, 2026-09-17.** The estimator's block draw was pooled over all 90 warming member blocks and is now stratified inside the six prescribed sea-surface-temperature patterns. Every historical number and every point estimate below is unchanged; the warming intervals are narrower. The corrected values are in section 5, Part 3. The numbers below are kept as the record of what the pooled draw gave.
+> **Superseded, 2026-09-17. Two corrections reach the numbers below and they are different corrections.** (1) The 2026-09-14 Obihiro gauge correction re-ran this study and regenerated its record, but this prose was not re-read against it, so a few values here are pre-gauge; section 5.10 lists them. (2) The estimator's block draw was pooled over all 90 warming member blocks and is now stratified inside the six prescribed sea-surface-temperature patterns, which narrows every warming interval and moves no point estimate and no historical interval. Corrected values are in section 5. The numbers below are kept as the record of what was written on the date of each part.
 
 Matrix, posterior, 250 m, primary -- the arm Chapter 7's system annual table
 prints. 95 % percentile, hazard-sampling only.
@@ -398,7 +398,7 @@ margin on the posterior side is **37.6 [30.2, 49.4]**.
 
 ### 2.3 Q1. The four climate ratios: PARTIAL, 5 of 6 pairs resolve
 
-> **Superseded in the warming column, 2026-09-17.** The estimator's block draw was pooled over all 90 warming member blocks and is now stratified inside the six prescribed sea-surface-temperature patterns. Every historical number and every point estimate below is unchanged; the warming intervals are narrower. The corrected values are in section 5, Part 3. The numbers below are kept as the record of what the pooled draw gave.
+> **Superseded, 2026-09-17. Two corrections reach the numbers below and they are different corrections.** (1) The 2026-09-14 Obihiro gauge correction re-ran this study and regenerated its record, but this prose was not re-read against it, so a few values here are pre-gauge; section 5.10 lists them. (2) The estimator's block draw was pooled over all 90 warming member blocks and is now stratified inside the six prescribed sea-surface-temperature patterns, which narrows every warming interval and moves no point estimate and no historical interval. Corrected values are in section 5. The numbers below are kept as the record of what was written on the date of each part.
 
 | Pair | difference | 95 % interval | resolved |
 |---|---|---|---|
@@ -428,7 +428,7 @@ undefined ratio at any of the four sections, so nothing was discarded.
 
 ### 2.4 Q2. The KP 62.0 warming split: a TIE, and the third decimal is not real
 
-> **Superseded in the warming column, 2026-09-17.** The estimator's block draw was pooled over all 90 warming member blocks and is now stratified inside the six prescribed sea-surface-temperature patterns. Every historical number and every point estimate below is unchanged; the warming intervals are narrower. The corrected values are in section 5, Part 3. The numbers below are kept as the record of what the pooled draw gave.
+> **Superseded, 2026-09-17. Two corrections reach the numbers below and they are different corrections.** (1) The 2026-09-14 Obihiro gauge correction re-ran this study and regenerated its record, but this prose was not re-read against it, so a few values here are pre-gauge; section 5.10 lists them. (2) The estimator's block draw was pooled over all 90 warming member blocks and is now stratified inside the six prescribed sea-surface-temperature patterns, which narrows every warming interval and moves no point estimate and no historical interval. Corrected values are in section 5. The numbers below are kept as the record of what was written on the date of each part.
 
 Paired inside each replicate at KP 62.0 under +4K:
 
@@ -480,7 +480,7 @@ rewording rather than merely annotating.
 
 ### 2.6 The resampling unit was worth little, and the SST design is worth a lot
 
-> **Superseded in the warming column, 2026-09-17.** The estimator's block draw was pooled over all 90 warming member blocks and is now stratified inside the six prescribed sea-surface-temperature patterns. Every historical number and every point estimate below is unchanged; the warming intervals are narrower. The corrected values are in section 5, Part 3. The numbers below are kept as the record of what the pooled draw gave.
+> **Superseded, 2026-09-17. Two corrections reach the numbers below and they are different corrections.** (1) The 2026-09-14 Obihiro gauge correction re-ran this study and regenerated its record, but this prose was not re-read against it, so a few values here are pre-gauge; section 5.10 lists them. (2) The estimator's block draw was pooled over all 90 warming member blocks and is now stratified inside the six prescribed sea-surface-temperature patterns, which narrows every warming interval and moves no point estimate and no historical interval. Corrected values are in section 5. The numbers below are kept as the record of what was written on the date of each part.
 
 Relative half-width of the annual system probability, primary arm, per unit:
 
@@ -820,8 +820,10 @@ loading fractions and the median duration. Its 4a half asserts that the
 unresampled block estimator reproduces those conditional means; bit-identity is
 **not** asserted there and is not achievable, because the block-grouped sum
 reorders the addends `np.mean` adds pairwise. The bound is 1e-12 relative and
-the **worst measured deviation over every cell is 2.57e-16**, which is one unit
-in the last place.
+the **worst measured deviation over every cell is 3.98e-16** (2026-09-17;
+superseded value 2.57e-16, which this study's own re-run after the 2026-09-14
+Obihiro gauge correction overtook and which had not been carried here), which
+is under two units in the last place.
 
 **Gate 5**, new: the random stream's state is unchanged across the stratified
 pass, so part one's draw is the one used. Checked directly as well: every key
@@ -856,7 +858,7 @@ outcome, not a wasted clause.
 
 ### 4.3 The concentration factor
 
-> **Superseded in the warming column, 2026-09-17.** The estimator's block draw was pooled over all 90 warming member blocks and is now stratified inside the six prescribed sea-surface-temperature patterns. Every historical number and every point estimate below is unchanged; the warming intervals are narrower. The corrected values are in section 5, Part 3. The numbers below are kept as the record of what the pooled draw gave.
+> **Superseded, 2026-09-17. Two corrections reach the numbers below and they are different corrections.** (1) The 2026-09-14 Obihiro gauge correction re-ran this study and regenerated its record, but this prose was not re-read against it, so a few values here are pre-gauge; section 5.10 lists them. (2) The estimator's block draw was pooled over all 90 warming member blocks and is now stratified inside the six prescribed sea-surface-temperature patterns, which narrows every warming interval and moves no point estimate and no historical interval. Corrected values are in section 5. The numbers below are kept as the record of what was written on the date of each part.
 
 Duration stratum, matrix / posterior / 250 m / primary, 95 % percentile.
 
@@ -893,7 +895,7 @@ historical one is barely that.
 
 ### 4.4 The share of the annual total from long-duration years
 
-> **Superseded in the warming column, 2026-09-17.** The estimator's block draw was pooled over all 90 warming member blocks and is now stratified inside the six prescribed sea-surface-temperature patterns. Every historical number and every point estimate below is unchanged; the warming intervals are narrower. The corrected values are in section 5, Part 3. The numbers below are kept as the record of what the pooled draw gave.
+> **Superseded, 2026-09-17. Two corrections reach the numbers below and they are different corrections.** (1) The 2026-09-14 Obihiro gauge correction re-ran this study and regenerated its record, but this prose was not re-read against it, so a few values here are pre-gauge; section 5.10 lists them. (2) The estimator's block draw was pooled over all 90 warming member blocks and is now stratified inside the six prescribed sea-surface-temperature patterns, which narrows every warming interval and moves no point estimate and no historical interval. Corrected values are in section 5. The numbers below are kept as the record of what was written on the date of each part.
 
 | Section | Scenario | Share | 95 % interval |
 |---|---|---|---|
@@ -968,7 +970,7 @@ is load-bearing and should be named.
 
 ### 4.7 The compound stratification, beyond the question that was asked
 
-> **Superseded in the warming column, 2026-09-17.** The estimator's block draw was pooled over all 90 warming member blocks and is now stratified inside the six prescribed sea-surface-temperature patterns. Every historical number and every point estimate below is unchanged; the warming intervals are narrower. The corrected values are in section 5, Part 3. The numbers below are kept as the record of what the pooled draw gave.
+> **Superseded, 2026-09-17. Two corrections reach the numbers below and they are different corrections.** (1) The 2026-09-14 Obihiro gauge correction re-ran this study and regenerated its record, but this prose was not re-read against it, so a few values here are pre-gauge; section 5.10 lists them. (2) The estimator's block draw was pooled over all 90 warming member blocks and is now stratified inside the six prescribed sea-surface-temperature patterns, which narrows every warming interval and moves no point estimate and no historical interval. Corrected values are in section 5. The numbers below are kept as the record of what was written on the date of each part.
 
 Section 3.3 fixed the floor for **every** stratified entry of the table, and
 having fixed it, applying it to the compound rows as well is what "apply the
@@ -1230,3 +1232,35 @@ rather than a restatement of the fix.
   stratum is still below the floor and still prints its count and no number.
 * Not the ADR judgement of section 1.8. This changes nothing a baseline run can
   compute under any setting a user can reach, so it consumes no ADR number.
+
+### 5.10 Values this note's own prose carried from before the gauge correction
+
+Found while tracing Part 3 through the thesis. The 2026-09-14 Obihiro gauge
+correction re-ran this study and regenerated
+`annualisation-hazard-sampling-uncertainty.json`, and the three figures and the
+tables that consume it were updated, but the prose of Parts 2 and 4 was not
+re-read against the regenerated record. **None of these is a Part 3 effect**;
+all are pre-gauge values, and the correct ones are in the record and in the
+thesis as of 2026-09-17. Listed rather than edited in place, because Parts 2 and
+4 are dated outcomes.
+
+| Where | Printed | Correct |
+|---|---|---|
+| 2.2 headline table, historical column | KP 58.8 7.42e-3 [5.39e-3, 9.66e-3], KP 60.0 1.80e-3 [1.13e-3, 2.55e-3] | 7.45e-3 [5.41e-3, 9.69e-3], 1.81e-3 [1.13e-3, 2.56e-3] |
+| 2.2, the KP 58.8 posterior margin | 37.6 [30.2, 49.4] | 37.7 [30.3, 49.6] |
+| 4.1, gate 4a worst deviation | 2.57e-16 | 3.98e-16 (corrected in place, being a gate reading rather than an outcome) |
+| 4.3 / 5.x, historical concentration range | 151 to 378 | 151 to 376 (the clearing pair is 152 and 376; 151 is KP 57.4's count-limited point) |
+| 4.3, the two historical intervals | 98 to 252 and 141 to 1358 | 97 to 251 and 141 to 1348 |
+| 4.3, the warming concentration range | 35 to 72 | 35 to 71 |
+
+The prior-side margin 43.0 [33.9, 57.9], the shares 89 and 93 per cent, the
+warming share range 56 to 91 per cent, the compound factors and every count are
+unchanged by the gauge correction and remain as printed.
+
+**What this says about the propagation, and it is the transferable part.** The
+gauge correction updated every artifact that is *generated* and left the prose
+that *quotes* them behind, in this note and in the thesis table together. A
+regenerated JSON is not a propagated correction until something re-reads the
+sentences built on it, and nothing in the repository's gates does that: the
+tests pin structure and verdicts, not printed digits. The same pass found the
+five Phase 3 figures still rendered from the pre-gauge tables.
