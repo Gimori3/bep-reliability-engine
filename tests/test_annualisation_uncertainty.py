@@ -944,6 +944,18 @@ def test_the_member_draw_is_stratified_inside_the_prescribed_patterns() -> None:
     assert warming["max_blocks_drawn_per_stratum"] == [15] * 6
     assert warming["composition_is_exactly_the_design"] is True
     assert gate["measured"]["historical"]["design_blocks_per_stratum"] == [50]
+    # The contrast the gate exists to exclude, recorded beside it so the
+    # "a pattern ran from x to y blocks" statement is reproducible from a seed
+    # rather than from a probe someone once ran.
+    contrast = gate["pooled_draw_contrast"]["+4K"]
+    assert contrast["composition_is_exactly_the_design"] is False
+    assert min(contrast["min_blocks_drawn_per_stratum"]) < 15
+    assert max(contrast["max_blocks_drawn_per_stratum"]) > 15
+    assert "Binomial(90" in contrast["binomial_reference"]
+    assert (
+        gate["pooled_draw_contrast"]["historical"]["composition_is_exactly_the_design"]
+        is True
+    )
 
 
 def test_a_single_stratum_draw_is_the_unstratified_draw_bit_for_bit() -> None:

@@ -1076,8 +1076,9 @@ declares the six prescribed patterns **outside** the interval, as structural
 climate-model spread rather than hazard-sampling noise. The draw did not do
 that. `draw_multiplicities` took one `Multinomial(90, uniform)` over all 90
 warming blocks, which keeps the six patterns in the pool but **randomises their
-weights**: across 10,000 replicates one pattern's representation ran from 2 to
-31 blocks against the design's 15. Between-pattern spread was therefore inside
+weights**: a stratum's block count is then `Binomial(90, 1/6)`, mean 15 and
+standard deviation 3.5, and across 10,000 replicates at the recorded contrast
+seed the six ran from 3 to 31 blocks against the design's 15. Between-pattern spread was therefore inside
 an interval whose own note said that axis was left outside.
 
 Section 0b had already measured the size of what was leaking in, and did not
@@ -1216,9 +1217,12 @@ Added with the correction and evaluated per replicate, not asserted: in every
 replicate of every scenario, the number of member blocks drawn from each
 prescribed pattern equals the design count. Measured 15 of 15 in each of the six
 warming strata and 50 of 50 historically, minimum equal to maximum. A failure
-aborts the run; the same diagnostic applied to the pooled draw returns 2 to 31
-and would abort it, which is what makes the gate a measurement of the defect
-rather than a restatement of the fix.
+aborts the run; the same diagnostic applied to a pooled draw over the same
+blocks returns 3 to 31 and would abort it, which is what makes the gate a
+measurement of the defect rather than a restatement of the fix. That contrast
+is **recorded in the evidence file** beside the gate, drawn from its own
+generator at `SEED + 2` so the estimator's stream is untouched and the range is
+reproducible from the seed rather than from a probe someone once ran.
 
 ### 5.9 What the correction does not touch
 

@@ -1,7 +1,7 @@
 {
   "study": "Hazard-sampling uncertainty on the Phase 3 annualised results: a block bootstrap over d4PDF ensemble members with the fragility curves held fixed",
   "generated_by": "scripts/annualisation_uncertainty_study.py",
-  "generated": "2026-09-17T11:05:42",
+  "generated": "2026-09-17T11:42:55",
   "note": "docs/decisions/annualisation-hazard-sampling-uncertainty.md",
   "scope": {
     "statement": "Hazard-sampling uncertainty ONLY: the finite-ensemble spread of the d4PDF peak-stage distribution with the fragility curves held fixed, which is not the total uncertainty and is far smaller than the aquifer-conductivity bracket that dominates it and does not cancel. Quote this scope wherever any number here is quoted.",
@@ -216,7 +216,53 @@
           ],
           "composition_is_exactly_the_design": true
         }
-      }
+      },
+      "pooled_draw_contrast": {
+        "historical": {
+          "design_blocks_per_stratum": [
+            50
+          ],
+          "min_blocks_drawn_per_stratum": [
+            50
+          ],
+          "max_blocks_drawn_per_stratum": [
+            50
+          ],
+          "composition_is_exactly_the_design": true,
+          "seed": 20260822,
+          "binomial_reference": "a single stratum leaves nothing to reweight"
+        },
+        "+4K": {
+          "design_blocks_per_stratum": [
+            15,
+            15,
+            15,
+            15,
+            15,
+            15
+          ],
+          "min_blocks_drawn_per_stratum": [
+            4,
+            4,
+            4,
+            3,
+            3,
+            4
+          ],
+          "max_blocks_drawn_per_stratum": [
+            29,
+            30,
+            30,
+            29,
+            31,
+            30
+          ],
+          "composition_is_exactly_the_design": false,
+          "seed": 20260822,
+          "binomial_reference": "under a pooled draw a stratum's block count is Binomial(90, 0.1667), mean 15.0 and standard deviation 3.54"
+        }
+      },
+      "contrast_reading": "the same diagnostic applied to a pooled draw over the same blocks, from its own generator so the estimator's stream is untouched; it is what this gate exists to exclude and what the superseded record was computed with"
     },
     "gate_3_no_production_artifact_written": {
       "passed": true,
@@ -4700,5 +4746,5 @@
       "sampling_the_patterns_instead_reading": "a six-unit percentile interval, reported as a factor on the published half-width and never as an interval of its own; it measures structural climate-model spread, which the estimand conditions on rather than estimates"
     }
   },
-  "elapsed_s": 20.7
+  "elapsed_s": 21.5
 }
