@@ -53,7 +53,7 @@ inventory found:
    |---|---|---|---|
    | KP 57.4 matrix and bulk | -0.97 m | 0 / 100000 | 0 |
    | KP 58.8 matrix and bulk | +0.73 m | 0 / 100000 | 0 |
-   | KP 60.0 matrix | +1.40 m | 908 (0.908%) | 316 (0.316%) |
+   | KP 60.0 matrix | +1.40 m | 908 (0.908%) | 316 (0.316%) [**superseded 2026-09-20: 326 (0.326%)**] |
    | KP 60.0 bulk | +1.40 m | 0 / 100000 | 0 |
    | KP 62.0 matrix and bulk | -1.17 m | 0 / 100000 | 0 |
 
@@ -61,7 +61,8 @@ inventory found:
    basin's governing segment: even an infinite hold at the surveyed 2011
    peak clears no realization's transient limit state there. The single
    nonzero stratum bounds the marginal information any 2011 hydrograph
-   could add beyond 2016 at 0.316 percent of the prior, under a hold
+   could add beyond 2016 at 0.316 percent of the prior [**superseded
+   2026-09-20: 0.326 percent**], under a hold
    incomparably more erosive than any real flood (the real 2016 event
    held its own peak region for roughly a day, not 64; the measured
    canonical-versus-real shape factor of 3 to 4 from the Phase 2 report
@@ -151,3 +152,28 @@ scientific position.
   README.md` (drop inventory and extract provenance).
 - Schweckendiek (2014) section 4.2.3 (inequality evidence; the
   intersection form for multiple observations).
+
+---
+
+## Correction, 2026-09-20: the marginal is 0.326 per cent at the corrected gauge
+
+The two figures marked **superseded** above were computed at the KP 56.6 Obihiro
+node. ADR-0035's 2026-09-14 amendment moved the node to KP 56.73 and
+`scripts/assess_2011_2006_closure.py` was re-run, regenerating
+`adr0044-event-closure-bound.json` in engine commit `adfc848`. That artifact now
+holds, at KP 60.0 matrix, `bound_reject_count = 908`,
+`marginal_beyond_2016_count = 326` and `marginal_beyond_2016_fraction = 0.00326`
+against `reject_2016_count = 3244`, the corrected 2016 transient rejection.
+
+**Nothing about the decision changes.** The bound is still exactly zero at seven
+of eight strata including KP 58.8, the total bound at KP 60.0 matrix is still
+0.908 per cent, and the event set is still closed at 2016 on the same argument:
+the marginal a 2011 hydrograph could add beyond 2016 is bounded, by a hold
+incomparably more erosive than any real flood, at a third of a per cent of the
+prior in one stratum and at zero everywhere else. Only the third decimal of that
+one figure moved, with the transient rejection it is measured against.
+
+The thesis already prints 0.326 at all six of its sites: the Summary,
+Chapter 4, Chapter 6, Chapter 8 and Chapter 9 twice. `docs/phase2_report.md`
+section 12 carried the same stale 0.316 and now carries a matching dated
+correction.

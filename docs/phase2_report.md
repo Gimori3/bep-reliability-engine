@@ -817,3 +817,20 @@ and at KP 60.0 a 4-hour precursor 170 hours before a 24-hour main window which
 disappears once the crack decrement is applied. There is therefore no
 inter-peak interval in the 2016 replay across which carried-over damage could
 act. See `docs/decisions/survival-information-and-nesting-study.md` §4.
+
+### 2011 closure bound corrected, 2026-09-20
+
+The 2026-09-14 gauge addendum above re-ran `assess_2011_2006_closure.py` and
+regenerated `docs/decisions/adr0044-event-closure-bound.json`, but its
+correction table did not carry section 12's marginal figure. The artifact now
+holds `marginal_beyond_2016_count = 326`, `marginal_beyond_2016_fraction =
+0.00326` at KP 60.0 matrix against `reject_2016_count = 3244`, which is the
+corrected KP 56.73 transient rejection. So the sentence in section 12, and the
+same figure in `docs/decisions/0044-event-set-closure-2016-only.md`, should read
+**0.326 per cent**, not the 0.316 written at the superseded KP 56.6 node. The
+**0.908 per cent** total bound at that stratum is unchanged, as is the exactly
+zero bound at the other seven strata, and the closure verdict is untouched: the
+event set is still closed at 2016 on the same argument. The thesis already
+prints 0.326 at all six of its sites (Summary, Chapter 4, Chapter 6, Chapter 8
+and Chapter 9 twice), so this correction brings the engine record up to the thesis and the artifact, not the
+other way round.
