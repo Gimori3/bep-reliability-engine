@@ -15,6 +15,11 @@ and go unnoticed:
 Nothing here touches a default, a config, a prior or a persisted result. The
 driver is ``scripts/climate_attribution_decomposition.py`` and the evidence is
 ``docs/decisions/climate-attribution-and-composition-study.{md,json}``.
+
+Every path here is committed except the Phase 3 attribution table, which lives
+under the gitignored ``results/``. Conventions section 9.4: that one is guarded
+by an explicit skip naming it as untracked, and absence of anything else
+asserts rather than skips.
 """
 
 from __future__ import annotations
@@ -75,6 +80,17 @@ class TestPartitionIsExact:
                 ), name
 
     def test_stratified_fields_are_the_published_ones(self, duration: dict) -> None:
+        """The record's strata must be the ones Phase 3 actually published.
+
+        ``results/`` is gitignored, so this is the one guard in this file that
+        may skip: on a fresh clone the untracked attribution table is absent,
+        and without it there is nothing to compare the record against.
+        """
+        if not ATTRIBUTION.is_file():
+            pytest.skip(
+                "results/system_integration/phase3/rq4_attribution.json is "
+                "untracked (gitignored campaign output); absent on a fresh clone"
+            )
         published = json.loads(ATTRIBUTION.read_text(encoding="utf-8"))
         keys = {"KP 57.4": 57.4, "KP 58.8": 58.8, "KP 60.0": 60.0, "KP 62.0": 62.0}
         for name, block in duration.items():
