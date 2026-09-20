@@ -603,7 +603,7 @@ Long-duration stratum, `hours_above_datum > 24`:
 | KP 62.0 | +4K | 186 | 72 | 90 | 6 | 4.3 % |
 
 Compound stratum, `n_peaks_above_datum >= 2`, which supplies the separate
-"3.7 to 91 historically" and "1.6 to 23 under warming" ranges in the same
+"3.7 to 91 historically" and "1.6 to 22 under warming" ranges in the same
 subsection:
 
 | Section | Scenario | Years | Carrying members | of | Largest member's share |
@@ -1268,3 +1268,16 @@ regenerated JSON is not a propagated correction until something re-reads the
 sentences built on it, and nothing in the repository's gates does that: the
 tests pin structure and verdicts, not printed digits. The same pass found the
 five Phase 3 figures still rendered from the pre-gauge tables.
+
+### Compound-range upper endpoint corrected, 2026-09-20
+
+The warming compound concentration range was printed as **"1.6 to 23"** in
+section 5 above and at `msc-thesis/mainmatter/7. Results - System Integration
+and Climate Sensitivity.tex`. The companion's own KP 57.4 `+4K` cell carries
+`point = 22.45134923737562` and `printed = "22"`, so the upper endpoint rounds
+to **22**, not 23. Both sites now read "1.6 to 22". Nothing else moves: the
+lower endpoint 1.6028 (KP 60.0), the three resolving cells, the historical
+"3.7 to 91", the duration range "35 to 71" and every interval are unchanged,
+and the correction is a rounding repair, not a recomputation. Verified against
+`annualisation-hazard-sampling-uncertainty.json`
+`preregistration_outcome.Q4_compound["+4K"].per_cell["KP 57.4"]`.
