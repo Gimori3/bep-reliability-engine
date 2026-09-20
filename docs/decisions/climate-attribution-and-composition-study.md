@@ -305,3 +305,8 @@ code path rather than a copy of it.
 * `3/n` quoted as an exact 95 per cent exclusion limit;
 * the inference from between-climate shape invariance to one canonical shape
   representing the ensemble mean fragility.
+
+
+## Interpretation correction, 2026-09-20
+
+The no-differential-bias and universal conservative-sign assertions in section 7 are superseded by [whole-document synthesis](whole-document-claim-synthesis-2026-09-20.md): marginal shape summaries do not establish joint trajectory ordering. Shared exposure does not prove residual positive dependence, and the non-breach calculation remains conditional on complete detection and stationary independent years given p. The measured decomposition, conditional Frechet bounds and Jensen inequality remain unchanged.

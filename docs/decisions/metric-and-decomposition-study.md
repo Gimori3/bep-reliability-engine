@@ -308,3 +308,8 @@ unfiltered.
 * The complementary ratio evidence. `B` is not withdrawn anywhere; it is the
   metric in which the order-of-magnitude claim is quoted, and R2 remains its
   criterion.
+
+
+## Interpretation correction, 2026-09-20
+
+The same-channel necessity assertion in section 1 is superseded by the exact metric conditions and counterexample in [whole-document synthesis](whole-document-claim-synthesis-2026-09-20.md). Four contingency cells in the arm count-floor description means four marginal branch failure counts, not four cells of the 16-pattern contingency. Measurements and gates are unchanged.
