@@ -443,17 +443,35 @@ wrong-datum guard.
   posterior side is measured in §6.2, and it is the side the published headline
   lives on. The arms reject 0.00 per cent under the 2016 record, so the two
   sides agree bit-for-bit on every arm.
-- **Open on the thesis side, 2026-09-15.** The declined credit is carried in the
-  Chapter 6 piping-conditions register, the Chapter 7 system-conditions register
-  and its dominance section, the Chapter 8 limitations register, the Chapter 9
-  RQ3 answer and answers register, and Appendix B. It is **not** named in the
-  Summary. Adding it there needs a re-wording of author-edited Summary prose,
-  which `msc-thesis/CLAUDE.md` reserves to the author, and takes the Summary from
-  two pages to three: the last Summary page ends flush, and a 191-character
-  insertion produced exactly two lines of overflow at an isolated build. The
-  sentence is drafted and left for the author in the 2026-09-14/15 project-log
-  entry. Until it is placed, §6.1's rule ("the dominance claim must not be quoted
-  without it") is satisfied by the main body and not by the abstract.
+- ~~Open on the thesis side, 2026-09-15: the Summary does not name the declined
+  credit.~~ **Closed 2026-09-15, same day, on the author's instruction.** The
+  credit was already carried in the Chapter 6 piping-conditions register, the
+  Chapter 7 system-conditions register and its dominance section, the Chapter 8
+  limitations register, the Chapter 9 RQ3 answer and answers register, and
+  Appendix B; it is now in the Summary too, so §6.1's rule ("the dominance claim
+  must not be quoted without it") is satisfied by the abstract as well as the
+  main body. The placed sentence is the drafted one less one relative pronoun,
+  in the system-risk paragraph directly after "The adopted values lie inside both
+  brackets and at neither favorable extreme": *"A third choice acts from one
+  side: the foreland seepage-length credit Dutch guidance permits is declined
+  throughout, and crediting it in full removes piping's lead at every section."*
+  It is true of both climates, not only the historical one: under the full credit
+  the eight §6.2 shares are 0.000 / 0.000 / 0.000 / 0.059 historically and
+  0.000 / 0.002 / 0.056 / 0.090 under warming, all below a half.
+  **The two-page budget was met by paying for the insertion in the same two
+  paragraphs it lands among**, verified at an isolated `latexmk -xelatex` build:
+  187 pages, zero undefined references or citations, zero overfull boxes, the
+  chapter page map byte-identical to the pre-edit build (main body 98,
+  References on 99), and both Summary pages ending at exactly the y-coordinates
+  they ended at before. The compensating cuts are word-level repetition only
+  ("Survival" four times in the 2016 paragraph, a hedge restated two sentences
+  later, two repeated nouns); **no number, interval, caveat or claim left the
+  Summary**. A useful mechanic for a later session: cuts made in a paragraph that
+  ends on the *first* Summary page buy nothing, because the page break sits
+  between paragraphs, so three such trims were made and then reverted. Only the
+  last line of a paragraph on the overflowing page is worth anything, and with
+  `\widowpenalty` at 10000 the last paragraph must gain a **whole** line, never
+  one of two.
 
 ---
 
