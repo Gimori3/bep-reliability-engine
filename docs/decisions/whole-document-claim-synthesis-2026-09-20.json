@@ -1,0 +1,26 @@
+{
+  "date": "2026-09-20",
+  "engine_baseline": "7c9603457e7bceca60384bc496f7b20f4747d65d",
+  "checks": {
+    "all_arm_interval_points_equal_live_production": 912,
+    "arms": [
+      "matrix/posterior",
+      "matrix/prior",
+      "bulk/posterior",
+      "bulk/prior"
+    ],
+    "historical_shared_leaves": 1016,
+    "historical_changed_leaves": 0,
+    "occupancy_single_block_historical": 0.36416968008711675,
+    "occupancy_single_block_warming_pattern": 0.3552643664941443
+  },
+  "sha256": {
+    "results\\system_integration\\phase3\\rq4_annual.csv": "e84b25a129cfe833bde7c9663410d52dfac78f60a578783cdcabb492a1b0d4c9",
+    "results\\sensitivity\\annualisation_uncertainty\\reach_intervals.json": "2f0b0ce7e95d26e781b4d26870c8a0cc3451888bb4a85ca1f4fbc7950d9d4754",
+    "docs/decisions/annualisation-hazard-sampling-uncertainty.json": "ce8393638827ad7a480b7fe9738633cf4fbb141db6153fe66c57d91ad2bd1399",
+    "docs/decisions/metric-and-decomposition.json": "384c3e443dd2ae3329c1b036944238b5cf2dc1d812389f321ac2794153e78b7c",
+    "docs/decisions/survival-information-and-nesting-study.json": "eaa9f526af8bef88d107ffe1d121d0c9b5eb14e9ab4504a98615b8193fa77454",
+    "docs/decisions/climate-attribution-and-composition-study.json": "a8c16fc3b5b14355bd43826451d9049cd5a4f88fdbc0189dc3e8f6b987a08b7b"
+  },
+  "validation": "65 targeted tests passed; one missing untracked-table skip then rerun against safely linked results: 1 passed. No executable or production-output change."
+}
