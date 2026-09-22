@@ -14,9 +14,9 @@ neither settles it:
 * ADR-0031 measured the estimator's **dispersion** over 50 replicate designs.
 
 Coverage is a different functional of the same law, so it is measured here,
-under a decision rule fixed before the first replicate was drawn
-(``.codex/remediation/2026-09-14/S05-preedit-verdicts.md``, reproduced in
-``docs/decisions/binomial-interval-coverage-study.md``).
+under a decision rule fixed before the first replicate was drawn and reproduced
+verbatim in the ``decision_rule`` block below, in the companion JSONs it writes,
+and in ``docs/decisions/binomial-interval-coverage-study.md``.
 
 Design
 ------

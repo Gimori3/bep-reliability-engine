@@ -155,7 +155,7 @@ citations still buy nothing.
 
 | Grammar | Meaning |
 |---|---|
-| `NNNN-slug.md` | A numbered **decision** (ADR). 0001 to 0051, gap-free. Superseded ADRs stay in place with their Status line updated; they are never deleted or renamed. |
+| `NNNN-slug.md` | A numbered **decision** (ADR). 0001 to 0053, gap-free. Superseded ADRs stay in place with their Status line updated; they are never deleted or renamed. |
 | `adrNNNN-slug.md` / `.json` | **Evidence for** the ADR of that number: a companion analysis note, an evidence JSON, or both. Note the grammar differs from the ADR's own filename (lowercase `adr` prefix, no separating dash). |
 | `<topic>-study.md`, `<topic>-synthesis.md` | An **un-numbered study**: work that produced a finding but changed no default and therefore consumed no ADR number (`seepage-length-L-study.md`, `r10-foreshore-exhaustion-screening.md`, `epistemic-bracket-synthesis.md`, `m7-pol-ode-reference-values.md`). |
 

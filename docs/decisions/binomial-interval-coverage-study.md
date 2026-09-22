@@ -68,9 +68,9 @@ sample." That is what was done.
 
 ## 3. The design, and the rule fixed before it ran
 
-Registered in `.codex/remediation/2026-09-14/S05-preedit-verdicts.md` before the
-first replicate was drawn, and reproduced verbatim in the driver's
-`decision_rule` block.
+Registered in a dated pre-registration note before the first replicate was
+drawn, and reproduced verbatim in the driver's `decision_rule` block, which is
+what the two companion JSONs carry.
 
 * **Production arm.** Exactly the production design:
   `sample_theta_tilted(shift_z=None, stratified=True)`, bit-identical to M2
