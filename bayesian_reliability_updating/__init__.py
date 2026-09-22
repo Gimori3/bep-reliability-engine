@@ -39,6 +39,12 @@ Module map (one responsibility each):
 
 from __future__ import annotations
 
+# The Phase 2 package version, deliberately independent of the distribution
+# version in pyproject.toml. It is stamped into every persisted posterior as
+# provenance ("package_version"), and those sidecars are SHA-256 recorded in the
+# campaign manifest, so bumping it would change the hash of a re-run artifact
+# against the record the thesis numbers trace to. Frozen for that reason; see
+# docs/conventions.md section 10.1.
 __version__ = "0.1.0"
 
 from bayesian_reliability_updating.events import (  # noqa: F401
