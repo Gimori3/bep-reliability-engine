@@ -27,6 +27,10 @@ Run from the repository root (venv active)::
     python scripts/plot_kaq_d70_scatter.py
 
 Writes ``docs/figures/adr0012-kaq-d70-scatter.png`` and the study-local copy.
+Corrected 2026-09-24 (``docs/decisions/bimodal-foundation-d70-study.md``):
+the note's KP 58.8 rows now carry the sheet-4 pairing, and every in-scope
+specimen is embankment fill (OYO report Table 4-3-1), so the legend names the
+stratum instead of calling the specimens "sand matrix" and "gravel framework".
 """
 
 from __future__ import annotations
@@ -164,8 +168,8 @@ def _panel(ax, specimens, size_key, scale, hazen_slope=None):
         )
 
     styles = {
-        "gravel": (fs.BLUE, "o", "gravel framework, in scope"),
-        "sand": (fs.MAGENTA, "D", "sand matrix, in scope"),
+        "gravel": (fs.BLUE, "o", "fill, 15 % gravel or more, in scope"),
+        "sand": (fs.MAGENTA, "D", "fill, under 15 % gravel, in scope"),
         "out": (fs.MUTED, "s", "KP 63.4, out of scope"),
     }
     for spec in specimens:
@@ -299,7 +303,7 @@ def build_figure(specimens: list[Specimen]):
     fs.legend_below(fig, keep_h, keep_l, scale=scale, ncol=3)
     fs.title(
         fig,
-        "Laboratory conductivity against grain size, paired specimens",
+        "Laboratory conductivity against grain size, paired embankment-fill specimens",
         scale=scale,
     )
     fs.layout(fig, scale=scale, legend_rows=2)

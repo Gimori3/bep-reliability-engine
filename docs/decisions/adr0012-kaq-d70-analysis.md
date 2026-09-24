@@ -57,8 +57,8 @@ in-scope** (the four config sections KP 57.4/58.8/60.0/62.0); 2 more at KP 63.4
 | KP | Sample | Gravel % | d60 (mm) | d10 (mm) | k_lab (m/s) | class |
 |----|--------|---------:|---------:|---------:|------------:|-------|
 | 57.4 | B-2-2 | 38.0 | 1.47 | 0.0057 | 2.69e-5 | gravel ⟨GF⟩ |
-| 58.8 | B-4-2 | 53.1 | 7.10 | 0.0152 | 9.16e-6 | gravel ⟨GF⟩ |
-| 58.8 | B-4-3 | 68.9 | 11.10 | 0.192 | 2.84e-5 | gravel [G-F] |
+| 58.8 | B-4-1 | 24.0 | 0.459 | 0.0071 | 9.16e-6 | sandy ⟨Sfg⟩ |
+| 58.8 | B-4-2 | 53.1 | 7.10 | 0.0152 | 2.84e-5 | gravel ⟨GF⟩ |
 | 60.0 | B-6-1 | 4.2 | 0.228 | 0.0053 | 5.59e-4 | **SAND ⟨SF⟩** |
 | 60.0 | B-6-2 | 85.3 | 13.20 | 0.530 | 1.83e-4 | gravel (GW) |
 | 62.0 | B-9-1 | 43.9 | 3.46 | 0.016 | 1.08e-5 | gravel ⟨GF⟩ |
@@ -66,6 +66,38 @@ in-scope** (the four config sections KP 57.4/58.8/60.0/62.0); 2 more at KP 63.4
 | 63.4 | B-3-2 | 39.0 | 1.67 | 0.110 | 1.96e-5 | ⟨SG⟩ (o.o.s.) |
 
 Per-section paired counts: **KP57.4 N=1, KP58.8 N=2, KP60.0 N=2, KP62.0 N=1**.
+
+*Corrected 2026-09-24 (Green Light item 4,
+`bimodal-foundation-d70-study.md`). Two errors in this table, both found by
+reading OYO report Tables 4-3-1 and 4-3-2 (report pp. 52 to 53) beside the
+sheet-4 image:*
+
+1. *The KP 58.8 conductivities were attached one specimen too deep. Sheet 4
+   puts 9.16e-4 cm/s under the 0.50 to 1.00 m specimen (24.0 % gravel, d60
+   0.459 mm, d10 0.0071 mm) and 2.84e-3 cm/s under the 2.30 to 3.00 m specimen
+   (53.1 % gravel, d60 7.1 mm, d10 0.0152 mm); the 6.50 to 7.00 m specimen has
+   no laboratory k. Until this date the two rows read "B-4-2, 53.1, 7.10,
+   0.0152, 9.16e-6" and "B-4-3, 68.9, 11.10, 0.192, 2.84e-5". The rows above
+   now carry the sheet-4 pairing, under this note's own sample labels (which
+   are shifted one position from OYO's numbering; OYO calls the shallow
+   specimen 58.8, the thesis B-4-1).*
+2. *The "class" column describes grading, not stratum. **All six in-scope
+   specimens are embankment fill**: Table 4-3-1, headed "Tokachi right bank,
+   embankment fill", holds every one of them (KP 57.4 Bc, KP 58.8 Bs and Bc,
+   KP 60.0 Bs and Bg, KP 62.0 Bg). No aquifer specimen has a laboratory
+   conductivity; Table 4-3-2's Ag conductivity column carries the in-situ
+   field test beside the nearest specimen. The "sand matrix" and "gravel
+   framework" readings in sections 2 to 4 below are therefore readings of
+   fill gradations, not of the aquifer.*
+
+*Recomputed on the corrected pairing (in-scope N = 6): ln k vs ln d60
+r = -0.13 (r^2 0.02, p 0.80, slope -0.14); ln k vs ln d10 r = +0.28 (r^2 0.08,
+p 0.59, slope +0.26). Both remain far below r^2 0.3, so Diagnostic A still
+selects Outcome 2, but the diagnostic now reads as uninformative about the
+aquifer rather than as evidence of two aquifer populations: the decoupling
+rests on the physical two-soil argument and on the author's endorsement
+(ADR-0012, Pol 2026-07-07), not on this regression. Sections 2 to 4 are kept
+as written on the superseded pairing.*
 
 Exclusions: no numeric outliers dropped; no censored/non-detect values in the paired
 set. The KP63.4 field recovery value 4.2e-3 m/s (flagged an outlier elsewhere) is a

@@ -214,6 +214,9 @@ def test_config_matches_csv_and_thesis_priors(path: Path) -> None:
     # bulk configs carry the separate bulk-gravel co-primary (provenance 3.3).
     if cfg.priors.d70_interpretation == "matrix":
         assert cfg.priors.d_70.mean == pytest.approx(float(row["d70_m"]))
+        # ADR-0054: the matrix d_70 is the aquifer (Ag) material finer than
+        # 2 mm, so its clip ceiling is 2 mm (was 1 mm) and its floor 50 um.
+        assert list(cfg.priors.bounds["d_70"]) == pytest.approx([50.0e-6, 2.0e-3])
 
     # --- (2) FIXED CoVs equal the thesis prior table (review item #2) ---------
     for name, expected in _EXPECTED_COVS.items():

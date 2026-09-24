@@ -62,7 +62,7 @@ priors:
     cov: 0.5
   d_70:
     family: lognormal
-    mean: 0.00053
+    mean: 0.00065
     cov: 0.3
   D_aq:
     family: lognormal
@@ -87,7 +87,7 @@ priors:
   bounds:
     d_70:
     - 5.0e-05
-    - 0.001
+    - 0.002
   d70_interpretation: matrix
 correlation:
   rho_log_kaq_d70: 0.0
