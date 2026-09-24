@@ -268,6 +268,14 @@ revetted, 高水護岸, KP 56.8 to 62.0). KP allocation anchored to posts and br
 | 57.4 | KP 56.0 to 58.0, type ⑥ (側帯盛土 only) | berm-only | toe-bounded 1998 L is a conservative lower bound; current L larger (3.1) |
 | 58.8 | KP 58.0 to 61.0, types ④ + ⑤ (berm + ドレン材 toe-drain) | drained | exit head set to zero in model; BEP near-zero; L moot |
 | 60.0 | KP 58.0 to 61.0, types ④ + ⑤ | drained | same as 58.8 |
+
+**[Corrected 2026-09-24: the Note column for KP 58.8 and KP 60.0 is wrong
+about the engine. No drain physics exists and the exit head is never set to
+zero; both sections are evaluated on the unremediated foundation, BEP is not
+near zero there (they carry the largest annual probabilities), and L is
+load-bearing. Section 3.1's 2026-07-28 correction already said so for its own
+bullet. The drained configuration is bracketed by ADR-0050 and scoped in
+`docs/decisions/drained-sections-scope-study.md`.]**
 | 62.0 | KP 61.0 to 62.8, revetment, no mapped 側帯 | unreinforced | CLOSED 2026-07-22 on three independent lines; see below |
 | 63.4 | beyond urban works | unreinforced | anomalous, unconfined; section may be excluded |
 
@@ -315,6 +323,11 @@ effectively removed from the active piping population by remediation, while the 
 section (KP 62.0) is the one whose remediation state is least certain. Toe drains exist
 only on the Tokachi right bank (type ⑤); the Satsunai types carry berms but no drains
 (not in scope here).
+
+**[Corrected 2026-09-24: this paragraph describes a drain treatment the engine
+never had. KP 58.8 and KP 60.0 are modelled unremediated and are the two most
+probable sections, not removed from the active population; see the marker under
+the section 3.2 table.]**
 
 ### 3.3 JUDGMENT (engineer-approved): representative grain size `d70_m`
 
@@ -647,6 +660,8 @@ cross-check that used them as corroboration; it is withdrawn. Evidence:
 ### KP 58.80
 - `L_m` 35: L memo, 様式-5/7 base. State `drained`, so the model sets exit head to zero and
   BEP is near zero regardless of L; L is a placeholder here.
+  **[Corrected 2026-09-24: not what the engine does; see the marker under the
+  section 3.2 table.]**
 - `D_aq_m` 8, `D_bl_m` 0.85 (corrected): A_c thickness 0.85 m, read from the OYO geological
   cross-section 図4-1-2 legend (report PDF p.35, "層厚は0.85mで", sandy silt, N=5) and
   corroborated by landside-toe borehole B-4 in 様式-4 (shallow samples gravel-with-fines, no
@@ -665,6 +680,8 @@ cross-check that used them as corroboration; it is withdrawn. Evidence:
 ### KP 60.00
 - `L_m` 34.8: L memo, 様式-6 footprint (best-constrained, with an independent exit-gradient
   consistency check). State `drained`; L is a placeholder as for 58.8.
+  **[Corrected 2026-09-24: L is load-bearing here; see the marker under the
+  section 3.2 table.]**
 - `D_aq_m` 9, `D_bl_m` 0.85 (corrected): A_c thickness 0.85 to 1.35 m, thickening toward the
   riverside ("層厚は0.85〜1.35mで堤外側で厚くなる"), read from the OYO geological cross-section
   図4-1-3 legend (report PDF p.36, sandy silt, N=5 to 6); the landside-toe value governs D_bl,
