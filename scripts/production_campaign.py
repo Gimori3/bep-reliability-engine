@@ -751,7 +751,15 @@ def stage_stage6_6(ctx: "Context") -> dict[str, Any]:
             drift_bad.append(key)
         flips = section.get("flip_totals", {})
         euler[key] = flips
-        if any(v for v in flips.values()):
+        # ADR-0040 section 2.7 / ADR-0054: the one documented barrier-jump class
+        # (KP 57.4 c4b_not_c3b, about 4 in 1e6) is tolerated up to 1e-5 N + 2
+        # rows; everything else must be exactly 0.
+        allowance = (
+            {"c4b_not_c3b": int(1.0e-5 * float(section.get("n_samples", 100_000))) + 2}
+            if key == "kp57_4"
+            else {}
+        )
+        if any(v > allowance.get(name, 0) for name, v in flips.items()):
             euler_bad.append(key)
 
     gates.check(
@@ -768,7 +776,7 @@ def stage_stage6_6(ctx: "Context") -> dict[str, Any]:
     )
     gates.check(
         "G3",
-        "every Euler-flip count is exactly 0",
+        "every Euler-flip count is 0 bar the documented KP 57.4 class",
         not euler_bad,
         {"sections_failing": euler_bad, "counts": euler},
     )

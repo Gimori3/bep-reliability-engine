@@ -1,8 +1,10 @@
 # Study: the bimodal foundation, the operative d70 and the distribution chosen for it
 
 Date: 2026-09-24 (Green Light item 4)
-Status: Part 1 (pre-registration) committed before any matrix d70 was computed.
-Part 2 records the outcome.
+Status: Complete. Part 1 (pre-registration) was committed (ed0f59f) before any
+matrix d70 was computed; Part 2 records the outcome. **The owner adopted the
+outcome as a production change: ADR-0054** (all four matrix means re-based, clip
+ceiling 2 mm, bulk unchanged).
 
 Evidence: `bimodal-foundation-d70-study.json`, driver
 `scripts/bimodal_foundation_d70_study.py`, data
@@ -118,3 +120,141 @@ Aquifer-top depths read from the soil logs (scanned at 150 dpi, about
   factor 2 at the KP 62.0 anchor, much less than the k_aq bracket.
 
 A prediction that fails is reported as failed in Part 2.
+
+## Part 2: outcome
+
+### 2.1 What is in the data, specimen by specimen
+
+The full transcription (Tables 4-3-1 and 4-3-2, the four modelled sections,
+every layer: 28 fill, 6 blanket, 28 aquifer, 12 lower-gravel specimens) is
+`data/processed/oyo_1999_gradations_by_layer.csv`. The driver's consistency
+checks flag three printing defects (D1-1 and D3-2 in fill, percentiles out of
+order; the KP 57.4 shallow specimen's d10 printed 0.0019 in Table 4-3-1 and
+0.019 on sheet 4, the latter reproducing its Uc) and two depth misprints
+(D1-3, D9-2) corrected from the soil logs. None touches an aquifer d70. Sheet 4
+at KP 62.0 prints the shallow specimen's particle density and water content
+(2.666, 23.7 %) identical to KP 60.0's; Table 4-3-1 gives 2.685 and 12.9 %, so
+sheet 4 carries a copy error there. It affects no modelled value.
+
+Which specimens fed which prior, and what each distribution represents:
+
+| Model quantity | Represents physically | Specimens behind it, before ADR-0054 | After ADR-0054 |
+|---|---|---|---|
+| matrix d70 mean | the eroding sand matrix at the pipe tip | three fill specimens (Bc, Bs, Bs), KP 62.0 borrowed | 28 Ag specimens, 6 to 8 per section |
+| matrix d70 CoV 0.30 | place-to-place variability of that matrix along and across the section | none (judgment, "within-section grading") | measured: pooled within-section sigma_ln 0.293, CoV 0.300 |
+| bulk d70 | the whole gravel, if the framework controlled entrainment | one Ag specimen per section, extrapolated from d60 | unchanged |
+| k_aq | the transmissive gravel framework (seepage path) | OYO analysis constants (not specimens) | unchanged |
+| ADR-0012 diagnostic | whether k and d co-vary as one soil | six fill specimens (all Table 4-3-1) | uninformative about the aquifer; decision stands on physics |
+| gamma'_p (deterministic 16.87) | aquifer particle weight | 12 sheet-4 specimens, mostly fill | Ag mean G_s 2.725 gives 16.92 kN/m3: unaffected |
+
+### 2.2 The adopted means against the aquifer matrix (the pre-registered test)
+
+Matrix d70 (finer than 2 mm), per section over the Ag specimens:
+
+| KP | n | median (mm) | range (mm) | sigma_ln | adopted | adopted / median | verdict |
+|---|---|---|---|---|---|---|---|
+| 57.4 | 7 | 0.90 | 0.71 to 1.05 | 0.12 | 0.70 | 0.78 | reproduced |
+| 58.8 | 7 | 0.65 | 0.41 to 1.48 | 0.48 | 0.53 | 0.81 | reproduced |
+| 60.0 | 6 | 0.74 | 0.42 to 0.88 | 0.27 | 0.26 | **0.35** | adopted 2.9x finer (conservative) |
+| 62.0 | 8 | 0.75 | 0.60 to 1.11 | 0.19 | 0.70 (transfer) | 0.93 | reproduced; transfer corroborated |
+
+Alternatives: sand-only matrix (0.075 to 2 mm) medians 1.05 / 0.80 / 0.93 /
+0.93 mm; finer than 4.75 mm 1.92 / 1.69 / 1.32 / 1.81 mm. One interpolation
+caveat: the one clean sand (D4-4, KP 58.8, 0 % gravel) has no tabulated point
+between d60 and its 2 mm maximum, so its d70 is 0.43 mm by interpolation and
+about 0.29 mm by extrapolating its d50-to-d60 slope; the section median does not
+depend on that choice.
+
+Across all 28 specimens the median is 0.77 mm, the between-section differences
+are not significant (one-way ANOVA on ln d70, p = 0.31), ln d70 passes
+Shapiro-Wilk (p = 0.23; untransformed p = 0.09), and the pooled within-section
+sigma_ln is 0.293.
+
+Prediction scoring. **P1 partly failed**: 25 of the 28 matrix d70 lie between
+0.6 and 1.5 mm, but three gravels have finer matrices (0.41, 0.42, 0.46 mm),
+because their passing-2-mm share falls between their d10 and d20. **P2 held**
+(all four medians at or above the adopted means; outside the band only at
+KP 60.0). **P3 held** (KP 62.0 ratio 0.93). **P4 held** (corrected r^2 0.02 and
+0.08). **P5 held at three sections and failed at KP 60.0**: the in-memory
+variant moved KP 60.0's design-level B from 2.92 to 6.37, beyond the factor of 2
+predicted, and delta-beta from 1.87 to 1.22.
+
+In-memory consequence (N = 1e5, production seed, each baseline bit-identical to
+the persisted sweep; the `consequence` block of the JSON):
+
+| KP | d70 mean (mm) | curve shift at P = 0.1 (static / transient) | design anchor | B | delta-beta |
+|---|---|---|---|---|---|
+| 57.4 | 0.70 to 0.90 | +0.12 / +0.12 m | 39.25 m | 0 transient failures either way | unresolved |
+| 58.8 | 0.53 to 0.65 | +0.12 / +0.13 m | 41.00 m | 2.75 to 3.09 | 1.224 to 1.133 |
+| 60.0 | 0.26 to 0.74 | +0.77 / +0.78 m | 42.75 m | 2.92 to 6.37 | 1.866 to 1.223 |
+| 62.0 | 0.70 to 0.75 | +0.07 / +0.06 m | 46.50 m | 26.2 to 22.0 (15 and 13 rows) | 0.96 to 0.89 |
+
+These in-memory arms kept the 1 mm clip; the production re-basing (ADR-0054)
+uses 2 mm, so its numbers differ slightly and are the ones of record (section
+2.6).
+
+### 2.3 The explanation the thesis owes
+
+- **Why a lognormal.** d70 is positive, grain sizes vary multiplicatively and
+  are read on logarithmic sieve scales, the 28 aquifer matrix values are
+  consistent with a lognormal (Shapiro-Wilk on ln d70, p = 0.23), and the family
+  matches every other geotechnical input and Pol's reliability
+  parameterisation.
+- **What the CoV represents.** Place-to-place (aleatory, spatial) variability of
+  the matrix d70 the pipe tip meets within a section: the scatter between the
+  section's aquifer specimens. It is *not* the contrast between the matrix and
+  the gravel framework, and not the uncertainty about which fraction governs.
+  The 0.30 is now measured rather than judged: pooled within-section sigma_ln
+  0.293. The thesis wording "within-section grading heterogeneity between the
+  matrix and framework fractions" mixed the bimodality of each sieve curve into
+  the spread of a unimodal distribution and is replaced.
+- **Why not a bimodal (mixture) distribution for d70.** The bimodality is in
+  each specimen's sieve curve (a gap-graded sand-gravel: whole-specimen d60 of
+  4.8 to 25 mm in the gravels against a matrix d70 of 0.4 to 1.5 mm), not in the
+  population of the operative quantity. The matrix d70 across the 28 specimens
+  is unimodal. The genuinely two-valued question, whether the pipe tip is
+  controlled by the matrix or by the whole gravel, is epistemic (which physics
+  governs), not a location-to-location frequency. A mixture would need a
+  weight no data supply and would hide the model question inside a
+  probability, so it is carried as the two co-primary readings. The
+  location-mixture case (sand at some locations, a gravel's matrix at others)
+  does occur: D4-4 is a clean sand directly beneath the blanket at KP 58.8. It
+  is represented by the matrix lognormal's lower tail rather than by a separate
+  mode: D4-4's d70 (0.29 to 0.43 mm) lies 1.3 to 2.6 sigma_ln below KP 58.8's
+  prior median, so 0.5 to 10 per cent of that section's draws are as fine.
+- **What the choice cannot capture.** (1) A laterally continuous sand layer at
+  the aquifer top (as at B-4) is a stratigraphic feature, not a random draw: it
+  would change the seepage geometry and the conductivity contrast, which a
+  single-aquifer schematisation does not represent. (2) Local covariation of
+  matrix d70 and conductivity with gravel content is removed by the
+  decoupling. (3) Whether the matrix can migrate through the framework's pore
+  throats (internal stability, Green Light item 1) is not tested by any d70.
+  (4) The matrix definition (fines in or out, 2 or 4.75 mm) moves the median by
+  up to a factor of about 2; the finer-than-2 mm matrix is the finest, so the
+  most conservative, of the three. (5) The matrix d70 is reconstructed from
+  summary percentiles, not measured on a full curve.
+- **KP 62.0.** No longer a transfer: its own eight aquifer specimens give
+  0.75 mm, 7 per cent above the transferred 0.70 mm. The condition registered on
+  every KP 62.0 result in Chapters 6, 7 and 9 is retired.
+
+### 2.4 Hand-off to Green Light item 1 (uniformity and internal stability)
+
+Per Ag specimen the JSON carries the whole-specimen Uc (printed), the M2 matrix
+d10 / d60 / d70 / Cu, and the S2 (sand-only) matrix d10 / d60 / d70 / Cu.
+Section medians: whole Uc 44 / 34 / 80 / 46; M2 matrix Cu 46 / 42 / 66 / 42
+(dominated by the fines tail); S2 sand-matrix Cu 6.4 / 4.5 / 5.3 / 5.4. The
+passing-2-mm share (the matrix fraction by mass) is 18 to 46 per cent in 24
+specimens and 54 to 100 per cent in the four sand-rich ones (D7-4, D8-5, B6-2,
+D4-4). Item 1 should use the Ag rows only; the fill rows describe the levee
+body.
+
+### 2.5 Other records corrected by this study
+
+- ADR-0012 companion table: the KP 58.8 laboratory k was shifted one specimen
+  too deep, and all six pairs are fill. Corrected with the superseded rows kept;
+  re-paired r = -0.13 (d60) and +0.28 (d10). Decision unchanged; ADR-0012
+  amended.
+- Thesis `tab:app_grainsize` and `tab:app_lab_perm`: the same KP 58.8 shift, and
+  every specimen labelled aquifer. Corrected in the thesis with a layer column.
+- Provenance section 3.3, the per-section entries and section 8.8: marked
+  superseded or resolved.
