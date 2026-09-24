@@ -130,7 +130,8 @@ INTERPRETATIONS: list[str] = ["matrix", "bulk"]
 # COVs are specification constants, identical in every config; the CSV has no
 # COV columns. Means for the five geotech variables come from the CSV per row.
 # These match the thesis Study-Area prior table (NOT the older architecture
-# spec-section-7 table): d_70 widened to 0.30 (within-section grading), D_aq
+# spec-section-7 table): d_70 widened to 0.30 (place-to-place variability of the
+# aquifer matrix d_70; ADR-0054 measures a pooled within-section 0.30), D_aq
 # tightened to 0.10 (rescaled Pol absolute sigma), D_bl 0.167 (Pol absolute
 # sigma; the same 0.167 the provenance doc uses for the mu_ln values). The
 # corresponding mu_ln reproduce thesis Table `tab:priors_muln` (review item #2).
@@ -186,12 +187,15 @@ BULK_D70_MM: dict[str, float] = {
 }
 
 # d_70 sample bounds (spec section 12 failure-mode-2 clip), interpretation-
-# specific: the matrix clip [50 um, 1 mm] would collapse the mm-scale bulk
-# distribution onto its upper edge, so bulk gets a wide non-truncating window.
-# Bulk d_70 lies far outside Sellmeijer's validated 150-430 um range, so bulk
-# H_c is an extrapolation (provenance section 3.3).
+# specific: the matrix clip would collapse the mm-scale bulk distribution onto
+# its upper edge, so bulk gets a wide non-truncating window. Bulk d_70 lies far
+# outside Sellmeijer's validated 150-430 um range, so bulk H_c is an
+# extrapolation (provenance section 3.3).
+# ADR-0054: the matrix is the aquifer material finer than 2 mm, so 2 mm is the
+# matrix d_70's own ceiling; the former 1 mm clip would have piled up to 31 %
+# of the re-based KP 57.4 draws on the cap. The 50 um floor is unchanged.
 D70_BOUNDS: dict[str, tuple[float, float]] = {
-    "matrix": (50.0e-6, 1.0e-3),
+    "matrix": (50.0e-6, 2.0e-3),
     "bulk": (5.0e-4, 5.0e-2),
 }
 

@@ -153,6 +153,22 @@ inference. Verified against the actual source before wiring:
   remain co-primary runs (spec §7/§13); this ADR only concerns their
   coupling.
 
+## Amendment (2026-09-24): the six pairs are embankment fill
+
+Recorded by the Green Light item 4 study
+(`bimodal-foundation-d70-study.md`). Reading OYO report Tables 4-3-1 and
+4-3-2 established that **all six in-scope diagnostic specimens are levee
+embankment fill** (layers Bc, Bs, Bg), not aquifer; no aquifer specimen has a
+laboratory conductivity. The KP 58.8 conductivities were also attached one
+specimen too deep in the companion table (corrected there, with the
+superseded rows kept). On the corrected pairing the pooled in-scope r is
+-0.13 on d60 and +0.28 on d10 (r^2 0.02 and 0.08), so Diagnostic A's outcome is
+unchanged. What changes is what the outcome means: the regression cannot speak
+to the aquifer at all. **The two-population decision stands** on the physical
+argument of the Decision section and on the author's endorsement below; the
+Consequences, the configs and every result are unchanged. The "single
+sand-matrix specimen" of the Decision section is a sandy fill specimen.
+
 ## References
 
 - Spec §7 (mandatory coupling and the two-population fallback), §12 (Failure
