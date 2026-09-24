@@ -651,12 +651,32 @@ def level_index(grid: NDArray[np.float64], level_m: float) -> int:
     return int(matches[0])
 
 
-def flip_summary(result: GapDecompositionResult) -> dict:
+#: The one documented flip class (ADR-0040 section 2.7, amended 2026-07-30): at
+#: KP 57.4 forward-Euler barrier jumps put ``c4b_not_c3b`` rows at a rate of about
+#: 4 in 1e6, so "exactly 0" is a statement about N = 1e5, not about the
+#: discretisation. ADR-0054 (2026-09-24) met one such row at N = 1e5 under the
+#: re-based d70 prior. The gate therefore tolerates that class, at that section
+#: only, up to ``1e-5 * N + 2`` rows; every other diagnostic, and every other
+#: section, must still be exactly 0.
+DOCUMENTED_FLIP_CLASS = {"kp57_4": "c4b_not_c3b"}
+DOCUMENTED_FLIP_RATE = 1.0e-5
+
+
+def documented_flip_allowance(key: str | None, n_samples: int) -> dict[str, int]:
+    """Per-diagnostic flip counts the gate tolerates at this section and N."""
+    if key not in DOCUMENTED_FLIP_CLASS:
+        return {}
+    return {DOCUMENTED_FLIP_CLASS[key]: int(DOCUMENTED_FLIP_RATE * n_samples) + 2}
+
+
+def flip_summary(result: GapDecompositionResult, key: str | None = None) -> dict:
     """Gate G-A2: every Euler-flip count must be exactly 0 at every level.
 
     Records *where* any nonzero count sits, not just that one exists: a flip is
     the ADR-0030 barrier-jump fingerprint, and whether it lands near the design
-    anchor or far above it decides whether it touches the deliverable.
+    anchor or far above it decides whether it touches the deliverable. ``pass``
+    applies the documented KP 57.4 allowance (``documented_flip_allowance``);
+    ``all_zero`` keeps the literal statement.
     """
     totals = {name: int(counts.sum()) for name, counts in result.flip_counts.items()}
     offenders: dict[str, list[dict[str, float]]] = {}
@@ -667,9 +687,12 @@ def flip_summary(result: GapDecompositionResult) -> dict:
         ]
         if hits:
             offenders[name] = hits
+    allowance = documented_flip_allowance(key, int(result.n_samples))
     return {
         "per_diagnostic_totals": totals,
         "all_zero": all(v == 0 for v in totals.values()),
+        "documented_allowance": allowance,
+        "pass": all(v <= allowance.get(name, 0) for name, v in totals.items()),
         "levels": int(result.conditioning_grid.size),
         "offending_levels": offenders,
     }
@@ -865,7 +888,7 @@ def cmd_verify(args: argparse.Namespace) -> dict:
         )
         result.metadata["base_config_hash"] = config.config_hash()
         record = verify_against_production(key, result)
-        flips = flip_summary(result)
+        flips = flip_summary(result, key)
         out = OUT_DIR / f"ladder_{key}_n{result.n_samples}.h5"
         result.save(out)
         payload["sections"][key] = {
@@ -882,11 +905,12 @@ def cmd_verify(args: argparse.Namespace) -> dict:
         }
         if record.get("status") != "bit_identical":
             failures.append(f"GATE G-A1 FAILED at {key}: {record}")
-        if not flips["all_zero"]:
+        if not flips["pass"]:
             failures.append(f"GATE G-A2 FAILED at {key}: {flips}")
         print(
             f"  wall {wall:.0f}s  peak {peak:.2f} GB  "
             f"flips {'all-zero' if flips['all_zero'] else 'NONZERO'}"
+            f"{'' if flips['all_zero'] or not flips['pass'] else ' (documented)'}"
         )
     out_path = OUT_DIR / "stage_a_verify.json"
     if out_path.exists():
@@ -964,7 +988,7 @@ def cmd_brute(args: argparse.Namespace) -> dict:
     # evidence on disk.
     out = OUT_DIR / f"ladder_{key}_n{n_big}.h5"
     result.save(out)
-    flips = flip_summary(result)
+    flips = flip_summary(result, key)
 
     # G-A3: consistency with the N=1e5 arm at every adequately-counted level.
     small = GapDecompositionResult.load(OUT_DIR / f"ladder_{key}_n100000.h5")
@@ -1032,11 +1056,11 @@ def cmd_brute(args: argparse.Namespace) -> dict:
             f"[{est.ci_lo:.1f}, {est.ci_hi:.1f}] k_trans={est.k_transient} "
             f"resolved={est.resolved}"
         )
-    payload["gate_G_A2"] = {"pass": flips["all_zero"], "detail": flips}
+    payload["gate_G_A2"] = {"pass": flips["pass"], "detail": flips}
     # Write the evidence unconditionally, then gate. Both gates stop the task on
     # failure, as pre-registered -- but with the diagnostics on disk.
     _write(OUT_DIR / f"stage_a_brute_{key}.json", payload)
-    if not flips["all_zero"]:
+    if not flips["pass"]:
         raise SystemExit(
             f"GATE G-A2 FAILED at N={n_big}: nonzero Euler flips "
             f"{flips['per_diagnostic_totals']} at {flips['offending_levels']}. "

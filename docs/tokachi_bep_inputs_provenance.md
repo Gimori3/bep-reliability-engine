@@ -351,6 +351,30 @@ KP 62.0 and KP 63.4 d_70 are assigned by analogy: their shallowest specimens are
 (62.0-1 d_60 = 7.87 mm, B-9-1 d_60 = 3.46 mm), so no section-specific sand-matrix sample
 exists. This remains a judgment item even though the interpretation is approved.
 
+**[Superseded 2026-09-24 by ADR-0054. The table above is kept as the record of what
+the CSV carried until that date.]** OYO report Tables 4-3-1 (embankment fill) and
+4-3-2 (foundation), report pp. 52 to 53, show that the three "blanket-aquifer
+transition" specimens are **levee embankment fill** (OYO numbers 57.4, 58.8, 60.0;
+layers Bc, Bs, Bs; 0.50 to 1.00 m into a fill column 3.5 to 4.4 m deep), and so are
+62.0-1 and B-9-1. The sample labels above are also shifted one position from OYO's
+own numbering (OYO calls the shallow specimen by its chainage and the next B-2-1).
+The CSV now carries, per ADR-0054, the median d_70 of the material finer than 2 mm
+of each section's own aquifer (Ag) specimens, reconstructed from their tabulated
+fractions and percentiles (`data/processed/oyo_1999_gradations_by_layer.csv`,
+`scripts/bimodal_foundation_d70_study.py`,
+`docs/decisions/bimodal-foundation-d70-study.md`):
+
+| KP | CSV value (matrix, m) | basis | bulk-gravel co-primary (mm, unchanged) |
+|------|------------------------|-------|------------------------------|
+| 57.4 | 9.0e-4 | median of 7 Ag specimens (B-1, B-2), range 0.71 to 1.05 mm | 5.5 |
+| 58.8 | 6.5e-4 | median of 7 Ag specimens (B-3, B-4), range 0.41 to 1.48 mm | 13 |
+| 60.0 | 7.4e-4 | median of 6 Ag specimens (B-5, B-6), range 0.42 to 0.88 mm | 1.3 (from the one sand-rich Ag specimen, B6-2; the other five have d_60 9.5 to 18 mm) |
+| 62.0 | 7.5e-4 | median of 8 Ag specimens (B-7, B-8, B-9), range 0.60 to 1.11 mm | 13.5 |
+| 63.4 | 7.7e-4 | pooled median of the four sections' 28 Ag specimens (no config; inert) | 9.5 |
+
+No section is now assigned by analogy, and none of the four lies inside Sellmeijer's
+validated range. The matrix clip ceiling is 2 mm (was 1 mm).
+
 ### 3.4 CONFIRMED: `gamma_sub_kNm3` (audit-trail only; the engine uses 16.87 basin-wide)
 
 This column is the particle submerged unit weight of the aquifer sand,
@@ -651,7 +675,7 @@ cross-check that used them as corroboration; it is withdrawn. Evidence:
   homogeneous silt, N=3) and corroborated by landside-toe borehole B-2 in 様式-4 (shallow
   samples sand/gravel-with-fines, no clay). The earlier 2.5 m matched neither the legend nor
   the 様式-5 lumped cohesive layer (about 0.6 to 1.0 m); resolved (3.8).- `k_aq_mps` 3.0e-3, `k_bl_mps` 1.6e-6: Form 5, cm/s divided by 100.
-- `d70_m` 7.0e-4: matrix, from B-2-1 (d_60 = 0.635 mm). Bulk co-primary 5.5 mm.
+- `d70_m` 7.0e-4: matrix, from B-2-1 (d_60 = 0.635 mm). Bulk co-primary 5.5 mm. **[2026-09-24, ADR-0054: now 9.0e-4 m, the median of this section's Ag matrix; the source above is embankment fill (3.3).]**
 - `gamma_sub_kNm3` 16.84: from B-2-1/2/3 G_s.
 - `foreshore_width_m` 200: 様式-3 `高水敷幅` annotation, verified verbatim 2026-07-28;
   MLIT 2008 profile reads ">=148 (clipped)", consistent. See 3.9.
@@ -668,7 +692,7 @@ cross-check that used them as corroboration; it is withdrawn. Evidence:
   clay). The earlier 2.0 m matched neither the legend nor the 様式-5 lumped cohesive layer
   (about 1.0 to 1.5 m); resolved (3.8).
 - `k_aq_mps` 2.0e-3, `k_bl_mps` 1.0e-6: Form 5.
-- `d70_m` 5.3e-4: matrix, from B-4-1 (d_60 = 0.459 mm). Bulk co-primary 13 mm.
+- `d70_m` 5.3e-4: matrix, from B-4-1 (d_60 = 0.459 mm). Bulk co-primary 13 mm. **[2026-09-24, ADR-0054: now 6.5e-4 m, the median of this section's Ag matrix; the source above is embankment fill (3.3).]**
 - `gamma_sub_kNm3` 16.49 (lowest, B-4-1 G_s = 2.645).
 - `foreshore_width_m` 325: 様式-3 `高水敷幅`, verified verbatim 2026-07-28; MLIT 2008
   ">=148 (clipped)", consistent. See 3.9.
@@ -690,7 +714,7 @@ cross-check that used them as corroboration; it is withdrawn. Evidence:
   exceeded even the riverside maximum; resolved (3.8).
 - `k_aq_mps` 1.0e-3, `k_bl_mps` 1.0e-6: Form 5.
 - `d70_m` 2.6e-4: matrix, from B-6-1 (d_60 = 0.228 mm), only section squarely inside the
-  Sellmeijer validated range. Bulk co-primary 1.3 mm.
+  Sellmeijer validated range. Bulk co-primary 1.3 mm. **[2026-09-24, ADR-0054: now 7.4e-4 m, the median of this section's Ag matrix; the source above is embankment fill (3.3).]**
 - `gamma_sub_kNm3` 16.72. `remediation_state` drained.
 - `foreshore_width_m` 600: 様式-3 `高水敷幅`, verified verbatim 2026-07-28; MLIT 2008
   ">=148 (clipped)", consistent. See 3.9.
@@ -705,7 +729,7 @@ cross-check that used them as corroboration; it is withdrawn. Evidence:
   cover-to-aquifer depth, not the mapped blanket. Governing section; resolved (3.8).
 - `k_aq_mps` 1.0e-3, `k_bl_mps` 3.0e-6: Form 5.
 - `d70_m` 7.0e-4: assigned by analogy (no clean matrix sample; shallow specimens gravelly).
-  Bulk co-primary 13.5 mm.
+  Bulk co-primary 13.5 mm. **[2026-09-24, ADR-0054: now 7.5e-4 m, the median of this section's Ag matrix; the source above is embankment fill (3.3).]**
 - `gamma_sub_kNm3` 16.80; pumiceous-matrix caveat strongest here and at 63.4.
 - `foreshore_width_m` 44: 様式-3 `高水敷幅` annotation, verified verbatim 2026-07-28;
   MLIT 2008 profile reads ~34 m, corroborating (no widening 1998->2008). Narrowest of the
@@ -744,7 +768,7 @@ Resolved in this revision:
 - `remediation_state`: allocated for all five from the Fukuda landside-type map (3.2).
 - `gamma_sub_kNm3`: definition confirmed (particle, per-section) (3.4).
 - `k_bl_mps` at KP 63.4: written as literal NaN per engineer convention (3.4).
-- `d70_m`: matrix interpretation approved (3.3).
+- `d70_m`: matrix interpretation approved (3.3). Means re-based on the aquifer (Ag) matrix 2026-09-24 (ADR-0054).
 - Field-permeability factor-100: resolved (main text correct, appendix wrong) (3.6).
 - KP 63.4 HWL: resolved (appendix carry-over from KP 62.0; about 49.0 m correct) (3.7).
 - `D_bl_m`: all four confined sections corrected to the mapped competent A_c from the OYO
@@ -1277,3 +1301,8 @@ while B5 at KP 61.0 describes 中～粗粒砂 (medium to coarse). If that coarse
 pattern holds on the Tokachi right bank, the tabulated matrix `d70` ordering — which puts
 KP 60.0 lowest at 2.6e-4 m — deserves a look. Grade names are not grain sizes and these
 are not the production sections, so this is a flag, not a finding.
+
+**[Resolved 2026-09-24, ADR-0054.]** The flag was right: KP 60.0's 2.6e-4 m came from a
+silty embankment-fill specimen. The section's six aquifer specimens give a matrix d_70
+median of 0.74 mm, and the four sections' aquifer matrices are statistically
+indistinguishable (ANOVA p = 0.31); the CSV now carries those medians.
