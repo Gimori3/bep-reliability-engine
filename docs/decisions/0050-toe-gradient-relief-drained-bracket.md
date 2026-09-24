@@ -255,9 +255,12 @@ at:
   lowest initiating stage moves from 39.75 to 42.00 m (KP 58.8) and 41.25 to
   43.50 m (KP 60.0), both above the design level;
 - annual system P_f, historical: KP 58.8 **7.42e-3 → 4.25e-3 → 1.97e-4** (the
-  last a lower bound, ADR-0024 raw tail); KP 60.0 **1.80e-3 → 6.40e-4 → 0**;
+  last a lower bound, ADR-0024 raw tail); KP 60.0 **1.80e-3 → 6.40e-4 → 0** [superseded 2026-09-24: 7.45e-3 → 4.26e-3 and
+  1.81e-3 → 6.40e-4 at the corrected gauge node, the strongest arm unchanged];
 - 2016 survival rejection: KP 58.8 **5.673 % → 1.551 %** on the measured berm
-  alone, KP 60.0 **3.363 % → 0.555 %**; **marginal transient rejection stays
+  alone, KP 60.0 **3.363 % → 0.555 %** [superseded 2026-09-24: KP 56.6 gauge
+  node; at the corrected KP 56.73 node 5.512 % → 1.497 % and 3.244 % → 0.531 %,
+  `drained-sections-scope-study.md` §6.2]; **marginal transient rejection stays
   exactly 0.000 in all 24 replays**;
 - **the climate ratio RISES** with credited drainage (KP 58.8 5.51 → 14.22,
   KP 60.0 7.87 → 26.01): the as-if-undrained treatment *understates* warming
@@ -265,6 +268,9 @@ at:
 - **the ranking**: KP 58.8 keeps the top under every arm but the strongest, in
   both climates; **KP 60.0 leaves second place for last under every arm,
   including the measured-berm-only arm that assumes nothing about the drain.**
+  [Qualified 2026-09-24: historically KP 60.0 is last in only 89 % of
+  hazard-sampling replicates on the berm arm, below KP 62.0 in all of them;
+  `drained-sections-scope-study.md` §6.4.]
 
 **P2 falsified** (see the amendment above) and **P5 refuted**: there is no single
 verdict on berm-versus-gate, because the response is strongly non-linear in the

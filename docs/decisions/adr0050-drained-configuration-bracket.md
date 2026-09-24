@@ -185,6 +185,14 @@ Prior rejected by the 2016 survival (matrix):
 | berm + 60 % | 0.013 % | 0.002 % |
 | berm + 80 % | 0.000 % | 0.000 % |
 
+**[Superseded 2026-09-24: the table above was measured at the retired KP 56.6
+gauge node. The arm replays were re-run at the corrected KP 56.73 node on
+2026-09-15 and give, in the same row order, KP 58.8 5.512 / 1.497 / 1.298 /
+0.593 / 0.013 / 0 % and KP 60.0 3.244 / 0.531 / 0.419 / 0.161 / 0.001 / 0 %.
+The ratios below become 3.7 and 6.1 unchanged to two figures. Record:
+`drained-sections-scope-study.json` → `survival`; study
+`drained-sections-scope-study.md` §6.2.]**
+
 On the **measured berm geometry alone**, requiring no assumption about the drain
 at all, the same evidence rejects 3.7 times less at KP 58.8 and 6.1 times less at
 KP 60.0. Under strong relief the update becomes vacuous, which is the physically
@@ -215,6 +223,13 @@ Annual system failure probability:
 † The strongest arm's transient transition is no longer bracketed, so its
 deliverable form flips to the raw tail (ADR-0024) and the curve holds its last
 value above the grid. **Those four numbers are lower bounds, not estimates.**
+
+**[Superseded 2026-09-24: the as-if-undrained and berm rows above are the
+pre-gauge-correction values. At the corrected KP 56.73 node the tracked
+annualisation records (regenerated 2026-09-15) give 7.45e-3 / 4.10e-2 /
+1.81e-3 / 1.42e-2 as-if-undrained and 4.26e-3 / 2.67e-2 / 6.40e-4 / 6.52e-3 on
+the berm; the strongest arm is unchanged. Hazard-sampling intervals on all of
+them: `drained-sections-scope-study.md` §6.3.]**
 
 **Three further results.**
 
@@ -250,6 +265,14 @@ Two statements survive this, and they point in opposite directions:
    about the drain.** Its second place is an artefact of the as-if-undrained
    treatment, and this is the one ranking change the bracket establishes without
    any ungrounded input at all.
+
+   **[Qualified 2026-09-24: with hazard-sampling intervals, which this section
+   did not have, KP 60.0 falls below KP 62.0 in every replicate in both
+   climates, and to last in every replicate under warming, but historically
+   it is last in only 89 % of replicates (KP 57.4 / KP 60.0 = 1.18 [0.88,
+   1.39]). The resolved statement is "leaves second place for third or last
+   historically and last under warming". `drained-sections-scope-study.md`
+   §6.4.]**
 
 ---
 
