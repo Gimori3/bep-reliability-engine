@@ -123,13 +123,20 @@ def test_the_seam_leaves_every_piping_number_exactly_unchanged() -> None:
         assert section["displacement"]["p_annual_bep"] == 1.0, section["kp"]
 
 
-def test_the_kp62_warming_crossing_is_recorded_as_not_surviving() -> None:
-    """The one ordering the seam changes, and the margin it changes from."""
+def test_the_kp62_warming_crossing_is_recorded_as_surviving() -> None:
+    """Since ADR-0054 (2026-09-25) the seam changes no ordering.
+
+    Before the re-basing piping led this cell by 1.0013 and the seam handed it
+    to overflow (margin 0.858). On the re-based production overflow's point
+    estimate already leads (0.922) and the seam only widens that lead (0.790),
+    so the crossing survives it.
+    """
     crossing = _evidence()["kp62_warming_crossing"]
-    assert crossing["survives"] is False
-    assert crossing["primary"]["dominant"] == "bep"
+    assert crossing["survives"] is True
+    assert crossing["primary"]["dominant"] == "overflow"
     assert crossing["no_rating_error"]["dominant"] == "overflow"
-    assert abs(crossing["primary"]["margin_bep_over_overflow"] - 1.0013) < 5e-4
+    assert abs(crossing["primary"]["margin_bep_over_overflow"] - 0.922) < 5e-4
+    assert abs(crossing["no_rating_error"]["margin_bep_over_overflow"] - 0.790) < 5e-4
 
 
 def test_the_primary_arm_reproduces_the_published_dominance_counts() -> None:
@@ -140,7 +147,8 @@ def test_the_primary_arm_reproduces_the_published_dominance_counts() -> None:
         "overflow": 31,
         "bep": 4,
     }
-    assert counts["+4K"] == {"overflow": 109, "bep": 4, "no mechanism loaded": 1}
+    # KP 62.0 under warming moved from piping to overflow with ADR-0054.
+    assert counts["+4K"] == {"overflow": 110, "bep": 3, "no mechanism loaded": 1}
 
 
 def test_the_note_and_the_companion_product_are_both_committed() -> None:

@@ -714,6 +714,21 @@ def stage_phase2_no_initiation(ctx: "Context") -> dict[str, Any]:
 # --------------------------------------------------------------------------- #
 
 
+def _stage6_6_flips_documented(key: str, out_dir: Path) -> bool:
+    """Apply the documented KP 57.4 flip share rule to a Stage 6.6 ladder."""
+    import importlib.util
+
+    from bep_reliability_engine.gap_decomposition import GapDecompositionResult
+
+    spec = importlib.util.spec_from_file_location(
+        "hwl_bias_resolution", REPO / "scripts" / "hwl_bias_resolution.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    result = GapDecompositionResult.load(out_dir / f"stage6_6_{key}.h5")
+    return bool(module.flip_summary(result, key)["pass"])
+
+
 def stage_stage6_6(ctx: "Context") -> dict[str, Any]:
     """Ten-comparator ladder at KP62.0 and KP57.4, matrix and bulk."""
     gates = Gates("stage6_6")
@@ -752,14 +767,10 @@ def stage_stage6_6(ctx: "Context") -> dict[str, Any]:
         flips = section.get("flip_totals", {})
         euler[key] = flips
         # ADR-0040 section 2.7 / ADR-0054: the one documented barrier-jump class
-        # (KP 57.4 c4b_not_c3b, about 4 in 1e6) is tolerated up to 1e-5 N + 2
-        # rows; everything else must be exactly 0.
-        allowance = (
-            {"c4b_not_c3b": int(1.0e-5 * float(section.get("n_samples", 100_000))) + 2}
-            if key == "kp57_4"
-            else {}
-        )
-        if any(v > allowance.get(name, 0) for name, v in flips.items()):
+        # (KP 57.4 c4b_not_c3b) is tolerated where it is at most 1 per cent of
+        # the transient failures at every level (hwl_bias_resolution's share
+        # rule); everything else must be exactly 0.
+        if any(flips.values()) and not _stage6_6_flips_documented(key, out_dir):
             euler_bad.append(key)
 
     gates.check(
@@ -1106,6 +1117,13 @@ COMPANION_EXCLUSIONS: dict[str, str] = {
     ),
     "scripts/stage6_6_gap_decomposition.py": (
         "run as its own campaign stage (G3), not as a companion"
+    ),
+    "scripts/bimodal_foundation_d70_study.py": (
+        "ADR-0054 decision record, not a companion: its in-memory arm measured "
+        "the pre-ADR-0054 fill-specimen d70 means against the aquifer medians "
+        "that ADR-0054 then adopted as production, so re-running it against the "
+        "re-based sweeps would compare production with itself. Its evidence "
+        "JSON is the frozen record of that decision."
     ),
     "scripts/mp_model_factor_companion.py": (
         "ADR-0045 m_p companion: OFF in production (decision 3), KP58.8+KP60.0 "

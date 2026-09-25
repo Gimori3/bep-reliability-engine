@@ -1,7 +1,7 @@
 {
   "study": "Hazard-sampling uncertainty on the Phase 3 annualised results: a block bootstrap over d4PDF ensemble members with the fragility curves held fixed",
   "generated_by": "scripts/annualisation_uncertainty_study.py",
-  "generated": "2026-09-17T11:42:55",
+  "generated": "2026-09-25T04:56:34",
   "note": "docs/decisions/annualisation-hazard-sampling-uncertainty.md",
   "scope": {
     "statement": "Hazard-sampling uncertainty ONLY: the finite-ensemble spread of the d4PDF peak-stage distribution with the fragility curves held fixed, which is not the total uncertainty and is far smaller than the aquifer-conductivity bracket that dominates it and does not cancel. Quote this scope wherever any number here is quoted.",
@@ -163,7 +163,7 @@
       "criterion_4b": "every field of rq4_attribution.json reproduced by float equality with no tolerance, through the production stratified_annual_p_f",
       "criterion_4a": "the unresampled block estimator reproduces the production conditional means; bit-identity is not asserted because the block-grouped sum reorders the addends np.mean adds pairwise",
       "unresampled_tolerance": 1e-12,
-      "worst_relative_deviation": 3.976178071163444e-16
+      "worst_relative_deviation": 3.616909775795507e-16
     },
     "gate_5_stratified_pass_reused_the_part_one_draw": {
       "passed": true,
@@ -266,13 +266,13 @@
     },
     "gate_3_no_production_artifact_written": {
       "passed": true,
-      "phase3_files_unchanged": 11,
+      "phase3_files_unchanged": 12,
       "criterion": "SHA-256 of every file under results/system_integration/phase3/ unchanged across the run; this study's own two outputs are listed under the record's 'writes' key"
     }
   },
   "writes": [
-    "docs/decisions/annualisation-hazard-sampling-uncertainty.json",
-    "results/sensitivity/annualisation_uncertainty"
+    "results/production_campaign/companions/annualisation-hazard-sampling-uncertainty.json",
+    "results/production_campaign/companions/annualisation_uncertainty"
   ],
   "sections": {
     "KP 57.4": {
@@ -280,10 +280,10 @@
         "historical": {
           "n_years": 3000,
           "p_annual_system": {
-            "point": 0.0007529745057681502,
-            "ci_low": 0.0003459278367394817,
-            "ci_high": 0.001224029322978148,
-            "relative_half_width": 0.5830884575188022
+            "point": 0.0004977748875059569,
+            "ci_low": 0.00021577395516373648,
+            "ci_high": 0.0008311733337772064,
+            "relative_half_width": 0.6181502864646877
           },
           "mechanisms_present": [
             "bep",
@@ -295,10 +295,10 @@
             "fluvial_scour"
           ],
           "p_annual_bep": {
-            "point": 0.0007529745057681502,
-            "ci_low": 0.0003459278367394817,
-            "ci_high": 0.001224029322978148,
-            "relative_half_width": 0.5830884575188022
+            "point": 0.0004977748875059569,
+            "ci_low": 0.00021577395516373648,
+            "ci_high": 0.0008311733337772064,
+            "relative_half_width": 0.6181502864646877
           },
           "share_bep": {
             "point": 1.0,
@@ -337,10 +337,10 @@
         "+4K": {
           "n_years": 5400,
           "p_annual_system": {
-            "point": 0.009531319729506616,
-            "ci_low": 0.007746252491895367,
-            "ci_high": 0.011419778181861547,
-            "relative_half_width": 0.1927081345615681
+            "point": 0.007591684863164393,
+            "ci_low": 0.006059548683372485,
+            "ci_high": 0.009235663770978888,
+            "relative_half_width": 0.20918380734013528
           },
           "mechanisms_present": [
             "bep",
@@ -351,16 +351,16 @@
             "fluvial_scour"
           ],
           "p_annual_bep": {
-            "point": 0.009484134792543604,
-            "ci_low": 0.007719071601166865,
-            "ci_high": 0.011357373109588639,
-            "relative_half_width": 0.19180987976268513
+            "point": 0.007517103321678081,
+            "ci_low": 0.006007591594857522,
+            "ci_high": 0.009127431071601999,
+            "relative_half_width": 0.20751606990337462
           },
           "share_bep": {
-            "point": 0.9123247181094944,
-            "ci_low": 0.864331194423446,
-            "ci_high": 0.9641619591695697,
-            "relative_half_width": 0.05471229857335859
+            "point": 0.8918632759164364,
+            "ci_low": 0.8364570939637526,
+            "ci_high": 0.9545282991294883,
+            "relative_half_width": 0.06619355699135128
           },
           "p_annual_overflow": {
             "point": 0.0009114344650738865,
@@ -369,10 +369,10 @@
             "relative_half_width": 0.7093337808243085
           },
           "share_overflow": {
-            "point": 0.08767528189050551,
-            "ci_low": 0.03583804083043033,
-            "ci_high": 0.13566880557655392,
-            "relative_half_width": 0.5693210366337836
+            "point": 0.1081367240835635,
+            "ci_low": 0.04547170087051168,
+            "ci_high": 0.16354290603624744,
+            "relative_half_width": 0.5459348161615073
           },
           "p_annual_fluvial_scour": {
             "point": 0.0,
@@ -387,26 +387,26 @@
             "relative_half_width": null
           },
           "margin_bep_over_overflow": {
-            "point": 10.405723237352847,
-            "ci_low": 6.370891179684561,
-            "ci_high": 26.903311828121467,
-            "relative_half_width": 0.9865926750162264,
+            "point": 8.24755219352902,
+            "ci_low": 5.114603413374836,
+            "ci_high": 20.991700672144123,
+            "relative_half_width": 0.9625339061950019,
             "n_replicates_undefined": 0
           }
         },
         "climate_ratio": {
-          "point": 12.658223693487734,
-          "ci_low": 7.4095221473275075,
-          "ci_high": 28.013441719209276,
-          "relative_half_width": 0.8138550902083461,
+          "point": 15.251241180931496,
+          "ci_low": 8.670973236942487,
+          "ci_high": 36.14796183497649,
+          "relative_half_width": 0.9008115559928415,
           "n_replicates_undefined": 0,
           "definition": "warming p_annual_system divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
         },
         "climate_ratio_piping_only": {
-          "point": 12.595558972967249,
-          "ci_low": 7.371923896179727,
-          "ci_high": 27.87802853519514,
-          "relative_half_width": 0.8140212229971643,
+          "point": 15.101411321373906,
+          "ci_low": 8.584284718835526,
+          "ci_high": 35.80539952333912,
+          "relative_half_width": 0.9012771795036125,
           "n_replicates_undefined": 0,
           "definition": "warming p_annual_bep divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
         }
@@ -415,10 +415,10 @@
         "historical": {
           "n_years": 3000,
           "p_annual_system": {
-            "point": 0.0007547863728584468,
-            "ci_low": 0.00034687960795589843,
-            "ci_high": 0.0012268821586982114,
-            "relative_half_width": 0.5829480912656522
+            "point": 0.0004979251062096787,
+            "ci_low": 0.00021584827756519743,
+            "ci_high": 0.0008314153417449509,
+            "relative_half_width": 0.6181321814294448
           },
           "mechanisms_present": [
             "bep",
@@ -430,10 +430,10 @@
             "fluvial_scour"
           ],
           "p_annual_bep": {
-            "point": 0.0007547863728584468,
-            "ci_low": 0.00034687960795589843,
-            "ci_high": 0.0012268821586982114,
-            "relative_half_width": 0.5829480912656522
+            "point": 0.0004979251062096787,
+            "ci_low": 0.00021584827756519743,
+            "ci_high": 0.0008314153417449509,
+            "relative_half_width": 0.6181321814294448
           },
           "share_bep": {
             "point": 1.0,
@@ -472,10 +472,10 @@
         "+4K": {
           "n_years": 5400,
           "p_annual_system": {
-            "point": 0.009542470043173192,
-            "ci_low": 0.007756024119293991,
-            "ci_high": 0.011432214409710645,
-            "relative_half_width": 0.19262257433266186
+            "point": 0.007593029740614387,
+            "ci_low": 0.0060606728173280815,
+            "ci_high": 0.009237085867184832,
+            "relative_half_width": 0.20916637747817723
           },
           "mechanisms_present": [
             "bep",
@@ -486,16 +486,16 @@
             "fluvial_scour"
           ],
           "p_annual_bep": {
-            "point": 0.009495307767275725,
-            "ci_low": 0.007730156572063864,
-            "ci_high": 0.011369604215365384,
-            "relative_half_width": 0.191644532884146
+            "point": 0.007518481128340701,
+            "ci_low": 0.006008760290168022,
+            "ci_high": 0.009129100457557231,
+            "relative_half_width": 0.2075113386683366
           },
           "share_bep": {
-            "point": 0.9124188487881759,
-            "ci_low": 0.8644573950909583,
-            "ci_high": 0.964203565567692,
-            "relative_half_width": 0.05466029697282726
+            "point": 0.8918809500553131,
+            "ci_low": 0.8364811964337416,
+            "ci_high": 0.954537084959738,
+            "relative_half_width": 0.06618365854695893
           },
           "p_annual_overflow": {
             "point": 0.0009114344650738865,
@@ -504,10 +504,10 @@
             "relative_half_width": 0.7093337808243085
           },
           "share_overflow": {
-            "point": 0.08758115121182403,
-            "ci_low": 0.035796434432307955,
-            "ci_high": 0.13554260490904163,
-            "relative_half_width": 0.5694499849373257
+            "point": 0.10811904994468688,
+            "ci_low": 0.045462915040262106,
+            "ci_high": 0.16351880356625825,
+            "relative_half_width": 0.5459532274210368
           },
           "p_annual_fluvial_scour": {
             "point": 0.0,
@@ -522,26 +522,26 @@
             "relative_half_width": null
           },
           "margin_bep_over_overflow": {
-            "point": 10.417981907789692,
-            "ci_low": 6.3777540441798655,
-            "ci_high": 26.93574415169232,
-            "relative_half_width": 0.9866589464961978,
+            "point": 8.249063883853905,
+            "ci_low": 5.115504698171155,
+            "ci_high": 20.99595061673116,
+            "relative_half_width": 0.9625604882054067,
             "n_replicates_undefined": 0
           }
         },
         "climate_ratio": {
-          "point": 12.642610394560997,
-          "ci_low": 7.404079096342953,
-          "ci_high": 27.962882496369364,
-          "relative_half_width": 0.8130758901211991,
+          "point": 15.249341007153241,
+          "ci_low": 8.669968995926046,
+          "ci_high": 36.14281435048029,
+          "relative_half_width": 0.9007879534488454,
           "n_replicates_undefined": 0,
           "definition": "warming p_annual_system divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
         },
         "climate_ratio_piping_only": {
-          "point": 12.58012612405296,
-          "ci_low": 7.366335986006393,
-          "ci_high": 27.82486814373282,
-          "relative_half_width": 0.8131290559404689,
+          "point": 15.099622482531805,
+          "ci_low": 8.583555599052742,
+          "ci_high": 35.79920503692395,
+          "relative_half_width": 0.9012029760795671,
           "n_replicates_undefined": 0,
           "definition": "warming p_annual_bep divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
         }
@@ -822,10 +822,10 @@
         "historical": {
           "n_years": 3000,
           "p_annual_system": {
-            "point": 0.0074451770306702405,
-            "ci_low": 0.005406264171117382,
-            "ci_high": 0.009692668177130758,
-            "relative_half_width": 0.2878644784640869
+            "point": 0.006177217606020477,
+            "ci_low": 0.0043939860908620045,
+            "ci_high": 0.008152515224815157,
+            "relative_half_width": 0.3042250875450779
           },
           "mechanisms_present": [
             "bep",
@@ -836,16 +836,16 @@
             "fluvial_scour"
           ],
           "p_annual_bep": {
-            "point": 0.0073632188269890575,
-            "ci_low": 0.0053475261941047375,
-            "ci_high": 0.009584729258801291,
-            "relative_half_width": 0.28772763408616614
+            "point": 0.00608432780046243,
+            "ci_low": 0.004328928622707563,
+            "ci_high": 0.008029128219733204,
+            "relative_half_width": 0.3040762856945687
           },
           "share_bep": {
-            "point": 0.9741902475663473,
-            "ci_low": 0.9680014959484126,
-            "ci_high": 0.9802378334125649,
-            "relative_half_width": 0.006280260706119908
+            "point": 0.9689337212206093,
+            "ci_low": 0.9622260379740066,
+            "ci_high": 0.9755470915141369,
+            "relative_half_width": 0.006874078819007928
           },
           "p_annual_overflow": {
             "point": 0.00019507776382913884,
@@ -854,10 +854,10 @@
             "relative_half_width": 0.4157851566486704
           },
           "share_overflow": {
-            "point": 0.0258097524336527,
-            "ci_low": 0.01976216658743517,
-            "ci_high": 0.031998504051587356,
-            "relative_half_width": 0.23704871822399828
+            "point": 0.031066278779390666,
+            "ci_low": 0.024452908485863168,
+            "ci_high": 0.03777396202599344,
+            "relative_half_width": 0.21439731540952117
           },
           "p_annual_fluvial_scour": {
             "point": 0.0,
@@ -872,20 +872,20 @@
             "relative_half_width": null
           },
           "margin_bep_over_overflow": {
-            "point": 37.745044245218125,
-            "ci_low": 30.2514609812566,
-            "ci_high": 49.60173921679454,
-            "relative_half_width": 0.25632872635974463,
+            "point": 31.18924310508019,
+            "ci_low": 25.473262172318123,
+            "ci_high": 39.89493090468501,
+            "relative_half_width": 0.23119619613368955,
             "n_replicates_undefined": 0
           }
         },
         "+4K": {
           "n_years": 5400,
           "p_annual_system": {
-            "point": 0.04100684741974899,
-            "ci_low": 0.037618724504282164,
-            "ci_high": 0.04440753665170383,
-            "relative_half_width": 0.08277656750750553
+            "point": 0.03573075302145446,
+            "ci_low": 0.032570330996103236,
+            "ci_high": 0.03893305501554691,
+            "relative_half_width": 0.08903708264451062
           },
           "mechanisms_present": [
             "bep",
@@ -896,16 +896,16 @@
             "fluvial_scour"
           ],
           "p_annual_bep": {
-            "point": 0.04054286077793307,
-            "ci_low": 0.03719696062199567,
-            "ci_high": 0.04390163942804836,
-            "relative_half_width": 0.08268630626211204
+            "point": 0.03518146109519624,
+            "ci_low": 0.03207754364786044,
+            "ci_high": 0.0383310498997939,
+            "relative_half_width": 0.08887502191867933
           },
           "share_bep": {
-            "point": 0.9412763032615569,
-            "ci_low": 0.9317260598800813,
-            "ci_high": 0.9505713644303159,
-            "relative_half_width": 0.010010506205741565
+            "point": 0.9329274739429236,
+            "ci_low": 0.922484578454803,
+            "ci_high": 0.9431406303291588,
+            "relative_half_width": 0.011070556099637148
           },
           "p_annual_overflow": {
             "point": 0.0025293600327370483,
@@ -914,10 +914,10 @@
             "relative_half_width": 0.22062835077941015
           },
           "share_overflow": {
-            "point": 0.05872369673844306,
-            "ci_low": 0.04942863556968408,
-            "ci_high": 0.0682739401199188,
-            "relative_half_width": 0.16045740984403806
+            "point": 0.06707252605707628,
+            "ci_low": 0.05685936967084122,
+            "ci_high": 0.077515421545197,
+            "relative_half_width": 0.15398295761798375
           },
           "p_annual_fluvial_scour": {
             "point": 0.0,
@@ -932,26 +932,26 @@
             "relative_half_width": null
           },
           "margin_bep_over_overflow": {
-            "point": 16.028900691556036,
-            "ci_low": 13.64687695396969,
-            "ci_high": 19.231187634615157,
-            "relative_half_width": 0.17419506141139365,
+            "point": 13.909234209384573,
+            "ci_low": 11.9006587432034,
+            "ci_high": 16.587250896349026,
+            "relative_half_width": 0.16847053125266878,
             "n_replicates_undefined": 0
           }
         },
         "climate_ratio": {
-          "point": 5.507840478583947,
-          "ci_low": 4.175845822512238,
-          "ci_high": 7.690215275974094,
-          "relative_half_width": 0.31903333685195906,
+          "point": 5.784279476674148,
+          "ci_low": 4.3256982955878565,
+          "ci_high": 8.260180588302662,
+          "relative_half_width": 0.3401013305616639,
           "n_replicates_undefined": 0,
           "definition": "warming p_annual_system divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
         },
         "climate_ratio_piping_only": {
-          "point": 5.506132811010279,
-          "ci_low": 4.175844916635025,
-          "ci_high": 7.683379577258144,
-          "relative_half_width": 0.31851162885222406,
+          "point": 5.7823086212617145,
+          "ci_low": 4.324577199061947,
+          "ci_high": 8.251092525440118,
+          "relative_half_width": 0.33952834270556415,
           "n_replicates_undefined": 0,
           "definition": "warming p_annual_bep divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
         }
@@ -960,10 +960,10 @@
         "historical": {
           "n_years": 3000,
           "p_annual_system": {
-            "point": 0.00846694925456121,
-            "ci_low": 0.0062590056367103596,
-            "ci_high": 0.01087031326942526,
-            "relative_half_width": 0.27231222805727534
+            "point": 0.0068531976099739335,
+            "ci_low": 0.004960469340753544,
+            "ci_high": 0.008943672725926976,
+            "relative_half_width": 0.29060911503386394
           },
           "mechanisms_present": [
             "bep",
@@ -974,16 +974,16 @@
             "fluvial_scour"
           ],
           "p_annual_bep": {
-            "point": 0.008389875497708863,
-            "ci_low": 0.006204251913007031,
-            "ci_high": 0.010767568217374414,
-            "relative_half_width": 0.27195375578657566
+            "point": 0.006764250471576047,
+            "ci_low": 0.004899396188402959,
+            "ci_high": 0.00882792616769074,
+            "relative_half_width": 0.2903891566253937
           },
           "share_bep": {
-            "point": 0.9772767820760168,
-            "ci_low": 0.971361507154707,
-            "ci_high": 0.9830138549996414,
-            "relative_half_width": 0.005961641603815386
+            "point": 0.971968880151867,
+            "ci_low": 0.9654750159544818,
+            "ci_high": 0.9783794537654252,
+            "relative_half_width": 0.006638297827460863
           },
           "p_annual_overflow": {
             "point": 0.00019507776382913884,
@@ -992,10 +992,10 @@
             "relative_half_width": 0.4157851566486704
           },
           "share_overflow": {
-            "point": 0.022723217923983255,
-            "ci_low": 0.016986145000358506,
-            "ci_high": 0.028638492845293004,
-            "relative_half_width": 0.2563973967929078
+            "point": 0.02803111984813302,
+            "ci_low": 0.021620546234574725,
+            "ci_high": 0.034524984045518174,
+            "relative_half_width": 0.23018056147697813
           },
           "p_annual_fluvial_scour": {
             "point": 0.0,
@@ -1010,20 +1010,20 @@
             "relative_half_width": null
           },
           "margin_bep_over_overflow": {
-            "point": 43.007851499965085,
-            "ci_low": 33.91803864832804,
-            "ci_high": 57.87150969093191,
-            "relative_half_width": 0.2784778849348393,
+            "point": 34.674636097943974,
+            "ci_low": 27.96453186020048,
+            "ci_high": 45.25230063005087,
+            "relative_half_width": 0.2492855111877506,
             "n_replicates_undefined": 0
           }
         },
         "+4K": {
           "n_years": 5400,
           "p_annual_system": {
-            "point": 0.044616565137658055,
-            "ci_low": 0.0411182146604454,
-            "ci_high": 0.04809735432152693,
-            "relative_half_width": 0.07821242670237379
+            "point": 0.038261110936771425,
+            "ci_low": 0.03502870301761523,
+            "ci_high": 0.04152918246402574,
+            "relative_half_width": 0.0849489114044925
           },
           "mechanisms_present": [
             "bep",
@@ -1034,16 +1034,16 @@
             "fluvial_scour"
           ],
           "p_annual_bep": {
-            "point": 0.0441806502877034,
-            "ci_low": 0.04071964779346523,
-            "ci_high": 0.047620649794979854,
-            "relative_half_width": 0.07809982375288113
+            "point": 0.03773509472903511,
+            "ci_low": 0.03455405210702137,
+            "ci_high": 0.0409500873226203,
+            "relative_half_width": 0.08474916071533706
           },
           "share_bep": {
-            "point": 0.94584972224615,
-            "ci_low": 0.9367787004498123,
-            "ci_high": 0.954641230166114,
-            "relative_half_width": 0.009442583370370315
+            "point": 0.9371813166798804,
+            "ci_low": 0.9271485238443906,
+            "ci_high": 0.946951224103477,
+            "relative_half_width": 0.010565031497448491
           },
           "p_annual_overflow": {
             "point": 0.0025293600327370483,
@@ -1052,10 +1052,10 @@
             "relative_half_width": 0.22062835077941015
           },
           "share_overflow": {
-            "point": 0.05415027775384996,
-            "ci_low": 0.04535876983388604,
-            "ci_high": 0.06322129955018775,
-            "relative_half_width": 0.16493479310945666
+            "point": 0.06281868332011964,
+            "ci_low": 0.053048775896523,
+            "ci_high": 0.0728514761556095,
+            "relative_half_width": 0.15761791884568252
           },
           "p_annual_fluvial_scour": {
             "point": 0.0,
@@ -1070,26 +1070,26 @@
             "relative_half_width": null
           },
           "margin_bep_over_overflow": {
-            "point": 17.46712595908896,
-            "ci_low": 14.817454041771219,
-            "ci_high": 21.046453282886,
-            "relative_half_width": 0.17830635834722255,
+            "point": 14.918830945629178,
+            "ci_low": 12.726557825441127,
+            "ci_high": 17.85057635709347,
+            "relative_half_width": 0.171729894598529,
             "n_replicates_undefined": 0
           }
         },
         "climate_ratio": {
-          "point": 5.269497170261505,
-          "ci_low": 4.051446246365103,
-          "ci_high": 7.204719515146234,
-          "relative_half_width": 0.2992005846949384,
+          "point": 5.58295749141793,
+          "ci_low": 4.217375637854535,
+          "ci_high": 7.814944904941854,
+          "relative_half_width": 0.32219207047675613,
           "n_replicates_undefined": 0,
           "definition": "warming p_annual_system divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
         },
         "climate_ratio_piping_only": {
-          "point": 5.265948261063993,
-          "ci_low": 4.0507731268187905,
-          "ci_high": 7.19593044988287,
-          "relative_half_width": 0.2986316202837697,
+          "point": 5.5786069554344815,
+          "ci_low": 4.214132902784298,
+          "ci_high": 7.807653396479849,
+          "relative_half_width": 0.3220804514821456,
           "n_replicates_undefined": 0,
           "definition": "warming p_annual_bep divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
         }
@@ -1376,10 +1376,10 @@
         "historical": {
           "n_years": 3000,
           "p_annual_system": {
-            "point": 0.001808554195076605,
-            "ci_low": 0.001130355328954261,
-            "ci_high": 0.002562519716799443,
-            "relative_half_width": 0.3959417947617875
+            "point": 0.00031469129653997945,
+            "ci_low": 0.00016532649750904767,
+            "ci_high": 0.0004858536024093747,
+            "relative_half_width": 0.5092722748047246
           },
           "mechanisms_present": [
             "bep",
@@ -1391,10 +1391,10 @@
             "fluvial_scour"
           ],
           "p_annual_bep": {
-            "point": 0.001808554195076605,
-            "ci_low": 0.001130355328954261,
-            "ci_high": 0.002562519716799443,
-            "relative_half_width": 0.3959417947617875
+            "point": 0.00031469129653997945,
+            "ci_low": 0.00016532649750904767,
+            "ci_high": 0.0004858536024093747,
+            "relative_half_width": 0.5092722748047246
           },
           "share_bep": {
             "point": 1.0,
@@ -1433,10 +1433,10 @@
         "+4K": {
           "n_years": 5400,
           "p_annual_system": {
-            "point": 0.01421122545417364,
-            "ci_low": 0.012384346924739336,
-            "ci_high": 0.01615398602891297,
-            "relative_half_width": 0.13262892480065974
+            "point": 0.004223557816256767,
+            "ci_low": 0.003391057795070678,
+            "ci_high": 0.005120977899275299,
+            "relative_half_width": 0.20479417820990142
           },
           "mechanisms_present": [
             "bep",
@@ -1447,16 +1447,16 @@
             "fluvial_scour"
           ],
           "p_annual_bep": {
-            "point": 0.014209050759257477,
-            "ci_low": 0.012383086213162404,
-            "ci_high": 0.016151239407609725,
-            "relative_half_width": 0.13259693621659754
+            "point": 0.004216257199230885,
+            "ci_low": 0.003388277913879427,
+            "ci_high": 0.005109334178284302,
+            "relative_half_width": 0.2040976372028282
           },
           "share_bep": {
-            "point": 0.9983813687341951,
-            "ci_low": 0.9965903413770137,
-            "ci_high": 0.9998871514951508,
-            "relative_half_width": 0.0016510775448048368
+            "point": 0.994565957670197,
+            "ci_low": 0.9890340564382453,
+            "ci_high": 0.9996009056938656,
+            "relative_half_width": 0.0053122918465727175
           },
           "p_annual_overflow": {
             "point": 2.3036501417792023e-05,
@@ -1465,10 +1465,10 @@
             "relative_half_width": 1.0754678681326368
           },
           "share_overflow": {
-            "point": 0.0016186312658048594,
-            "ci_low": 0.00011284850484922068,
-            "ci_high": 0.0034096586229863213,
-            "relative_half_width": 1.0183944261381148
+            "point": 0.005434042329802977,
+            "ci_low": 0.0003990943061344495,
+            "ci_high": 0.010965943561754716,
+            "relative_half_width": 0.9722825674053399
           },
           "p_annual_fluvial_scour": {
             "point": 0.0,
@@ -1483,26 +1483,26 @@
             "relative_half_width": null
           },
           "margin_bep_over_overflow": {
-            "point": 616.8059333993856,
-            "ci_low": 292.27968216428616,
-            "ci_high": 8506.213972326217,
-            "relative_half_width": 6.658442992670889,
+            "point": 183.02506629650364,
+            "ci_low": 90.18110752463595,
+            "ci_high": 2369.747456629604,
+            "relative_half_width": 6.22747035483116,
             "n_replicates_undefined": 14
           }
         },
         "climate_ratio": {
-          "point": 7.857782472242528,
-          "ci_low": 5.4017086408803685,
-          "ci_high": 12.824618527438737,
-          "relative_half_width": 0.4723285426123503,
+          "point": 13.421273046616312,
+          "ci_low": 8.200826746491856,
+          "ci_high": 26.247544016541298,
+          "relative_half_width": 0.6723176410824631,
           "n_replicates_undefined": 0,
           "definition": "warming p_annual_system divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
         },
         "climate_ratio_piping_only": {
-          "point": 7.856580022837316,
-          "ci_low": 5.400710747339051,
-          "ci_high": 12.82144705189662,
-          "relative_half_width": 0.4722625037221763,
+          "point": 13.398073749062958,
+          "ci_low": 8.192032000360665,
+          "ci_high": 26.180806079148187,
+          "relative_half_width": 0.6713194156005311,
           "n_replicates_undefined": 0,
           "definition": "warming p_annual_bep divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
         }
@@ -1511,10 +1511,10 @@
         "historical": {
           "n_years": 3000,
           "p_annual_system": {
-            "point": 0.0020250317468853943,
-            "ci_low": 0.0012887804417086456,
-            "ci_high": 0.002842017774876022,
-            "relative_half_width": 0.3835093784471126
+            "point": 0.0003218487227041872,
+            "ci_low": 0.00016979278453519683,
+            "ci_high": 0.0004962937698613396,
+            "relative_half_width": 0.5072274057558269
           },
           "mechanisms_present": [
             "bep",
@@ -1526,10 +1526,10 @@
             "fluvial_scour"
           ],
           "p_annual_bep": {
-            "point": 0.0020250317468853943,
-            "ci_low": 0.0012887804417086456,
-            "ci_high": 0.002842017774876022,
-            "relative_half_width": 0.3835093784471126
+            "point": 0.0003218487227041872,
+            "ci_low": 0.00016979278453519683,
+            "ci_high": 0.0004962937698613396,
+            "relative_half_width": 0.5072274057558269
           },
           "share_bep": {
             "point": 1.0,
@@ -1568,10 +1568,10 @@
         "+4K": {
           "n_years": 5400,
           "p_annual_system": {
-            "point": 0.015340647327771224,
-            "ci_low": 0.013446316607853469,
-            "ci_high": 0.01734883622300711,
-            "relative_half_width": 0.127195402246452
+            "point": 0.00427613253666602,
+            "ci_low": 0.0034387196576486498,
+            "ci_high": 0.005180040532072236,
+            "relative_half_width": 0.2036093198108921
           },
           "mechanisms_present": [
             "bep",
@@ -1582,16 +1582,16 @@
             "fluvial_scour"
           ],
           "p_annual_bep": {
-            "point": 0.015338550378454741,
-            "ci_low": 0.013443969271630222,
-            "ci_high": 0.0173464797043089,
-            "relative_half_width": 0.12721249193666734
+            "point": 0.004268854824469144,
+            "ci_low": 0.003435002587998866,
+            "ci_high": 0.005167967886389281,
+            "relative_half_width": 0.2029777738583461
           },
           "share_bep": {
-            "point": 0.9985003827014789,
-            "ci_low": 0.996836870218359,
-            "ci_high": 0.9998958705366194,
-            "relative_half_width": 0.0015317972688123644
+            "point": 0.9946325524882595,
+            "ci_low": 0.9891613165927472,
+            "ci_high": 0.9996060903757643,
+            "relative_half_width": 0.00525056904526579
           },
           "p_annual_overflow": {
             "point": 2.3036501417792023e-05,
@@ -1600,10 +1600,10 @@
             "relative_half_width": 1.0754678681326368
           },
           "share_overflow": {
-            "point": 0.0014996172985211262,
-            "ci_low": 0.00010412946338057553,
-            "ci_high": 0.0031631297816409527,
-            "relative_half_width": 1.0199269911320255
+            "point": 0.005367447511740396,
+            "ci_low": 0.0003939096242358156,
+            "ci_high": 0.010838683407252818,
+            "relative_half_width": 0.9729740030219954
           },
           "p_annual_fluvial_scour": {
             "point": 0.0,
@@ -1618,26 +1618,26 @@
             "relative_half_width": null
           },
           "margin_bep_over_overflow": {
-            "point": 665.836799619588,
-            "ci_low": 315.07387502470476,
-            "ci_high": 9192.35730599443,
-            "relative_half_width": 6.66626073839834,
+            "point": 185.30829604065374,
+            "ci_low": 91.25456458318796,
+            "ci_high": 2400.441809129791,
+            "relative_half_width": 6.230663423832907,
             "n_replicates_undefined": 14
           }
         },
         "climate_ratio": {
-          "point": 7.575509545154514,
-          "ci_low": 5.2694129917312695,
-          "ci_high": 12.140798682911482,
-          "relative_half_width": 0.45352630408705136,
+          "point": 13.286156616492883,
+          "ci_low": 8.139680221290858,
+          "ci_high": 25.89475642026099,
+          "relative_half_width": 0.6681795462552998,
           "n_replicates_undefined": 0,
           "definition": "warming p_annual_system divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
         },
         "climate_ratio_piping_only": {
-          "point": 7.574474030862104,
-          "ci_low": 5.268624918133757,
-          "ci_high": 12.139050995079097,
-          "relative_half_width": 0.45352496087199395,
+          "point": 13.263544402482125,
+          "ci_low": 8.132827011065476,
+          "ci_high": 25.842032656823815,
+          "relative_half_width": 0.6675894884644958,
           "n_replicates_undefined": 0,
           "definition": "warming p_annual_bep divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
         }
@@ -1918,10 +1918,10 @@
         "historical": {
           "n_years": 3000,
           "p_annual_system": {
-            "point": 0.001006046005485643,
-            "ci_low": 0.0005330230946676522,
-            "ci_high": 0.0015647030626748505,
-            "relative_half_width": 0.5127399554204191
+            "point": 0.0009165780319013992,
+            "ci_low": 0.00047296806617615976,
+            "ci_high": 0.0014430212883503027,
+            "relative_half_width": 0.5291711062296638
           },
           "mechanisms_present": [
             "bep",
@@ -1932,16 +1932,16 @@
             "fluvial_scour"
           ],
           "p_annual_bep": {
-            "point": 0.0008580186169895641,
-            "ci_low": 0.0004848956023562627,
-            "ci_high": 0.001281170047062147,
-            "relative_half_width": 0.4640193283332739
+            "point": 0.0007643846350220552,
+            "ci_low": 0.00042904178685918525,
+            "ci_high": 0.0011485623149013495,
+            "relative_half_width": 0.470653447934235
           },
           "share_bep": {
-            "point": 0.8115239173288071,
-            "ci_low": 0.6902902420099024,
-            "ci_high": 0.9795314119486352,
-            "relative_half_width": 0.17820865396721283
+            "point": 0.7932106296980627,
+            "ci_low": 0.6669139956924882,
+            "ci_high": 0.9768234348859307,
+            "relative_half_width": 0.19535128980269098
           },
           "p_annual_overflow": {
             "point": 0.00019927445677934933,
@@ -1950,10 +1950,10 @@
             "relative_half_width": 1.1206393797509
           },
           "share_overflow": {
-            "point": 0.18847608267119284,
-            "ci_low": 0.02046858805136472,
-            "ci_high": 0.30970975799009753,
-            "relative_half_width": 0.7673153161914192
+            "point": 0.2067893703019374,
+            "ci_low": 0.02317656511406928,
+            "ci_high": 0.3330860043075117,
+            "relative_half_width": 0.7493360000587488
           },
           "p_annual_fluvial_scour": {
             "point": 0.0,
@@ -1968,20 +1968,20 @@
             "relative_half_width": null
           },
           "margin_bep_over_overflow": {
-            "point": 4.305712989295073,
-            "ci_low": 2.228829549773896,
-            "ci_high": 47.85536501975823,
-            "relative_half_width": 5.298371673102886,
+            "point": 3.8358385082360833,
+            "ci_low": 2.002227701726307,
+            "ci_high": 42.14703316728351,
+            "relative_half_width": 5.232859175296442,
             "n_replicates_undefined": 0
           }
         },
         "+4K": {
           "n_years": 5400,
           "p_annual_system": {
-            "point": 0.012777595238792624,
-            "ci_low": 0.010538580099777522,
-            "ci_high": 0.015154645725619765,
-            "relative_half_width": 0.18063123536062264
+            "point": 0.012311584335803571,
+            "ci_low": 0.010105171447174906,
+            "ci_high": 0.01466198415701162,
+            "relative_half_width": 0.18506199468515816
           },
           "mechanisms_present": [
             "bep",
@@ -1992,16 +1992,16 @@
             "fluvial_scour"
           ],
           "p_annual_bep": {
-            "point": 0.008403164105895132,
-            "ci_low": 0.007056135673300422,
-            "ci_high": 0.009817471689920894,
-            "relative_half_width": 0.16430334941830377
+            "point": 0.0077365549618373395,
+            "ci_low": 0.00647059182110865,
+            "ci_high": 0.0090706157451117,
+            "relative_half_width": 0.16803499340652106
           },
           "share_bep": {
-            "point": 0.500336129664227,
-            "ci_low": 0.4762864639208166,
-            "ci_high": 0.5304111389159466,
-            "relative_half_width": 0.05408831362173746
+            "point": 0.4796843652338086,
+            "ci_low": 0.4566563138424028,
+            "ci_high": 0.5087217895155031,
+            "relative_half_width": 0.0542705573150403
           },
           "p_annual_overflow": {
             "point": 0.008391873485202778,
@@ -2010,10 +2010,10 @@
             "relative_half_width": 0.24361053745258368
           },
           "share_overflow": {
-            "point": 0.49966387033577286,
-            "ci_low": 0.4695888610840534,
-            "ci_high": 0.5237135360791835,
-            "relative_half_width": 0.05416108528995545
+            "point": 0.5203156347661915,
+            "ci_low": 0.4912782104844969,
+            "ci_high": 0.5433436861575973,
+            "relative_half_width": 0.050032588100582955
           },
           "p_annual_fluvial_scour": {
             "point": 0.0,
@@ -2028,26 +2028,26 @@
             "relative_half_width": null
           },
           "margin_bep_over_overflow": {
-            "point": 1.0013454231301584,
-            "ci_low": 0.909440812916779,
-            "ci_high": 1.1295224032623132,
-            "relative_half_width": 0.10989294266586327,
+            "point": 0.9219103428428767,
+            "ci_low": 0.8404557289918972,
+            "ci_high": 1.035506518889164,
+            "relative_half_width": 0.10578620329596933,
             "n_replicates_undefined": 0
           }
         },
         "climate_ratio": {
-          "point": 12.70080609546734,
-          "ci_low": 7.868671432860964,
-          "ci_high": 24.56086841515988,
-          "relative_half_width": 0.6571314000398771,
+          "point": 13.432118060110772,
+          "ci_low": 8.209076804115709,
+          "ci_high": 26.538225510945306,
+          "relative_half_width": 0.6822881032166286,
           "n_replicates_undefined": 0,
           "definition": "warming p_annual_system divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
         },
         "climate_ratio_piping_only": {
-          "point": 9.79368505473505,
-          "ci_low": 6.294749546758058,
-          "ci_high": 17.667787768705224,
-          "relative_half_width": 0.5806312005330685,
+          "point": 10.12128528932834,
+          "ci_low": 6.461826065433828,
+          "ci_high": 18.46225541778727,
+          "relative_half_width": 0.5928312960907459,
           "n_replicates_undefined": 0,
           "definition": "warming p_annual_bep divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
         }
@@ -2056,10 +2056,10 @@
         "historical": {
           "n_years": 3000,
           "p_annual_system": {
-            "point": 0.001006046005485643,
-            "ci_low": 0.0005330230946676522,
-            "ci_high": 0.0015647030626748505,
-            "relative_half_width": 0.5127399554204191
+            "point": 0.0009165780319013992,
+            "ci_low": 0.00047296806617615976,
+            "ci_high": 0.0014430212883503027,
+            "relative_half_width": 0.5291711062296638
           },
           "mechanisms_present": [
             "bep",
@@ -2070,16 +2070,16 @@
             "fluvial_scour"
           ],
           "p_annual_bep": {
-            "point": 0.0008580186169895641,
-            "ci_low": 0.0004848956023562627,
-            "ci_high": 0.001281170047062147,
-            "relative_half_width": 0.4640193283332739
+            "point": 0.0007643846350220552,
+            "ci_low": 0.00042904178685918525,
+            "ci_high": 0.0011485623149013495,
+            "relative_half_width": 0.470653447934235
           },
           "share_bep": {
-            "point": 0.8115239173288071,
-            "ci_low": 0.6902902420099024,
-            "ci_high": 0.9795314119486352,
-            "relative_half_width": 0.17820865396721283
+            "point": 0.7932106296980627,
+            "ci_low": 0.6669139956924882,
+            "ci_high": 0.9768234348859307,
+            "relative_half_width": 0.19535128980269098
           },
           "p_annual_overflow": {
             "point": 0.00019927445677934933,
@@ -2088,10 +2088,10 @@
             "relative_half_width": 1.1206393797509
           },
           "share_overflow": {
-            "point": 0.18847608267119284,
-            "ci_low": 0.02046858805136472,
-            "ci_high": 0.30970975799009753,
-            "relative_half_width": 0.7673153161914192
+            "point": 0.2067893703019374,
+            "ci_low": 0.02317656511406928,
+            "ci_high": 0.3330860043075117,
+            "relative_half_width": 0.7493360000587488
           },
           "p_annual_fluvial_scour": {
             "point": 0.0,
@@ -2106,20 +2106,20 @@
             "relative_half_width": null
           },
           "margin_bep_over_overflow": {
-            "point": 4.305712989295073,
-            "ci_low": 2.228829549773896,
-            "ci_high": 47.85536501975823,
-            "relative_half_width": 5.298371673102886,
+            "point": 3.8358385082360833,
+            "ci_low": 2.002227701726307,
+            "ci_high": 42.14703316728351,
+            "relative_half_width": 5.232859175296442,
             "n_replicates_undefined": 0
           }
         },
         "+4K": {
           "n_years": 5400,
           "p_annual_system": {
-            "point": 0.012777595238792624,
-            "ci_low": 0.010538580099777522,
-            "ci_high": 0.015154645725619765,
-            "relative_half_width": 0.18063123536062264
+            "point": 0.012311584335803571,
+            "ci_low": 0.010105171447174906,
+            "ci_high": 0.01466198415701162,
+            "relative_half_width": 0.18506199468515816
           },
           "mechanisms_present": [
             "bep",
@@ -2130,16 +2130,16 @@
             "fluvial_scour"
           ],
           "p_annual_bep": {
-            "point": 0.008403164105895132,
-            "ci_low": 0.007056135673300422,
-            "ci_high": 0.009817471689920894,
-            "relative_half_width": 0.16430334941830377
+            "point": 0.0077365549618373395,
+            "ci_low": 0.00647059182110865,
+            "ci_high": 0.0090706157451117,
+            "relative_half_width": 0.16803499340652106
           },
           "share_bep": {
-            "point": 0.500336129664227,
-            "ci_low": 0.4762864639208166,
-            "ci_high": 0.5304111389159466,
-            "relative_half_width": 0.05408831362173746
+            "point": 0.4796843652338086,
+            "ci_low": 0.4566563138424028,
+            "ci_high": 0.5087217895155031,
+            "relative_half_width": 0.0542705573150403
           },
           "p_annual_overflow": {
             "point": 0.008391873485202778,
@@ -2148,10 +2148,10 @@
             "relative_half_width": 0.24361053745258368
           },
           "share_overflow": {
-            "point": 0.49966387033577286,
-            "ci_low": 0.4695888610840534,
-            "ci_high": 0.5237135360791835,
-            "relative_half_width": 0.05416108528995545
+            "point": 0.5203156347661915,
+            "ci_low": 0.4912782104844969,
+            "ci_high": 0.5433436861575973,
+            "relative_half_width": 0.050032588100582955
           },
           "p_annual_fluvial_scour": {
             "point": 0.0,
@@ -2166,26 +2166,26 @@
             "relative_half_width": null
           },
           "margin_bep_over_overflow": {
-            "point": 1.0013454231301584,
-            "ci_low": 0.909440812916779,
-            "ci_high": 1.1295224032623132,
-            "relative_half_width": 0.10989294266586327,
+            "point": 0.9219103428428767,
+            "ci_low": 0.8404557289918972,
+            "ci_high": 1.035506518889164,
+            "relative_half_width": 0.10578620329596933,
             "n_replicates_undefined": 0
           }
         },
         "climate_ratio": {
-          "point": 12.70080609546734,
-          "ci_low": 7.868671432860964,
-          "ci_high": 24.56086841515988,
-          "relative_half_width": 0.6571314000398771,
+          "point": 13.432118060110772,
+          "ci_low": 8.209076804115709,
+          "ci_high": 26.538225510945306,
+          "relative_half_width": 0.6822881032166286,
           "n_replicates_undefined": 0,
           "definition": "warming p_annual_system divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
         },
         "climate_ratio_piping_only": {
-          "point": 9.79368505473505,
-          "ci_low": 6.294749546758058,
-          "ci_high": 17.667787768705224,
-          "relative_half_width": 0.5806312005330685,
+          "point": 10.12128528932834,
+          "ci_low": 6.461826065433828,
+          "ci_high": 18.46225541778727,
+          "relative_half_width": 0.5928312960907459,
           "n_replicates_undefined": 0,
           "definition": "warming p_annual_bep divided by historical, formed inside each replicate, never a quotient of two marginal intervals"
         }
@@ -2473,22 +2473,22 @@
       "river": "Tokachi",
       "representative_kp": 62.4,
       "historical": {
-        "point": 0.0010742793413435375,
-        "ci_low": 0.0005497116225410845,
-        "ci_high": 0.0017016609218667492,
-        "relative_half_width": 0.5361497959576278
+        "point": 0.0009997141533638217,
+        "ci_low": 0.0004901523310279959,
+        "ci_high": 0.0016102270809594918,
+        "relative_half_width": 0.5601975055383015
       },
       "+4K": {
-        "point": 0.01353453183442802,
-        "ci_low": 0.011171096334379314,
-        "ci_high": 0.016030234303350474,
-        "relative_half_width": 0.1795089046453342
+        "point": 0.01317509862147384,
+        "ci_low": 0.010827394162048622,
+        "ci_high": 0.015674772263913065,
+        "relative_half_width": 0.18395984125552559
       },
       "climate_ratio": {
-        "point": 12.598708095327593,
-        "ci_low": 7.6848191693248635,
-        "ci_high": 25.11344765889659,
-        "relative_half_width": 0.6916831613884036,
+        "point": 13.178865755918816,
+        "ci_low": 7.890763868593725,
+        "ci_high": 27.119732457604957,
+        "relative_half_width": 0.7295380704661639,
         "n_replicates_undefined": 0
       }
     },
@@ -2519,22 +2519,22 @@
       "river": "Tokachi",
       "representative_kp": 59.6,
       "historical": {
-        "point": 0.0018277204294506414,
-        "ci_low": 0.001148819167841623,
-        "ci_high": 0.0025825822781026524,
-        "relative_half_width": 0.39222713910682067
+        "point": 0.00031959404344932235,
+        "ci_low": 0.00016942846411478337,
+        "ci_high": 0.0004923311474628279,
+        "relative_half_width": 0.5051763165905919
       },
       "+4K": {
-        "point": 0.014347327353533354,
-        "ci_low": 0.012496146880238432,
-        "ci_high": 0.01631421910194636,
-        "relative_half_width": 0.13305865711524453
+        "point": 0.0046285342473086815,
+        "ci_low": 0.0036211266464344356,
+        "ci_high": 0.005756142945806449,
+        "relative_half_width": 0.23063632948308047
       },
       "climate_ratio": {
-        "point": 7.849847888304086,
-        "ci_low": 5.40749997269048,
-        "ci_high": 12.76965142777059,
-        "relative_half_width": 0.4689359309783174,
+        "point": 14.482542281932806,
+        "ci_low": 8.753066311820621,
+        "ci_high": 28.471480721544403,
+        "relative_half_width": 0.6807649522391799,
         "n_replicates_undefined": 0
       }
     },
@@ -2542,22 +2542,22 @@
       "river": "Tokachi",
       "representative_kp": 58.0,
       "historical": {
-        "point": 0.007505680500821951,
-        "ci_low": 0.005461541531548612,
-        "ci_high": 0.009754496144023569,
-        "relative_half_width": 0.28598037259944875
+        "point": 0.006228162234052032,
+        "ci_low": 0.004444171929054316,
+        "ci_high": 0.008210282808683257,
+        "relative_half_width": 0.30234527763567226
       },
       "+4K": {
-        "point": 0.041136127532546425,
-        "ci_low": 0.03774902415384247,
-        "ci_high": 0.04453578238855033,
-        "relative_half_width": 0.08249145753131781
+        "point": 0.03585045595863581,
+        "ci_low": 0.03268664306795948,
+        "ci_high": 0.03905178077559327,
+        "relative_half_width": 0.08877345541961691
       },
       "climate_ratio": {
-        "point": 5.480665947350356,
-        "ci_low": 4.162616327444387,
-        "ci_high": 7.633317753429205,
-        "relative_half_width": 0.31663136006881965,
+        "point": 5.75618530978946,
+        "ci_low": 4.311348598034794,
+        "ci_high": 8.191628210479992,
+        "relative_half_width": 0.33705304846997053,
         "n_replicates_undefined": 0
       }
     },
@@ -2676,7 +2676,7 @@
       "KP 57.4": {
         "historical": {
           "n_years": 3000,
-          "p_annual_system": 0.0007529745057681502,
+          "p_annual_system": 0.0004977748875059569,
           "duration": {
             "definition": "hours_above_datum > 24 h",
             "occupancy": {
@@ -2694,12 +2694,12 @@
                 "F2 concentration: the largest member block holds 33.3 % of the stratum, cap is 20 %"
               ]
             },
-            "p_f_inside": 0.09905890377568925,
-            "p_f_outside": 0.0006545701721646256,
+            "p_f_inside": 0.0708303263115657,
+            "p_f_outside": 0.0004273719331275188,
             "n_inside": 3,
             "n_outside": 2997,
             "concentration_factor": {
-              "point": 151.334277038789,
+              "point": 165.73462321970362,
               "count_limited": true,
               "interval_withheld_because": "F1 occupancy: 3 carrying member blocks, floor is 20; F2 concentration: the largest member block holds 33.3 % of the stratum, cap is 20 %",
               "n_years": 3,
@@ -2708,7 +2708,7 @@
               "rule": "pre-registered floor, section 3.3: the concentration factor is reported with the count and no number below 20 carrying member blocks or above a 20 % single-block share"
             },
             "share_of_annual_total": {
-              "point": 0.13155678315381192,
+              "point": 0.14229389245900448,
               "count_limited": true,
               "interval_withheld_because": "F1 occupancy: 3 carrying member blocks, floor is 20; F2 concentration: the largest member block holds 33.3 % of the stratum, cap is 20 %",
               "n_years": 3,
@@ -2733,12 +2733,12 @@
                 "F1 occupancy: 5 carrying member blocks, floor is 20"
               ]
             },
-            "p_f_inside": 0.05941350742424765,
-            "p_f_outside": 0.0006550437329493196,
+            "p_f_inside": 0.04249169793211778,
+            "p_f_outside": 0.00042766817123782364,
             "n_inside": 5,
             "n_outside": 2995,
             "concentration_factor": {
-              "point": 90.70158897138008,
+              "point": 99.35669939881593,
               "count_limited": true,
               "interval_withheld_because": "F1 occupancy: 5 carrying member blocks, floor is 20",
               "n_years": 5,
@@ -2747,7 +2747,7 @@
               "rule": "pre-registered floor, section 3.3: the concentration factor is reported with the count and no number below 20 carrying member blocks or above a 20 % single-block share"
             },
             "share_of_annual_total": {
-              "point": 0.13150845296246497,
+              "point": 0.14227213612233927,
               "count_limited": true,
               "interval_withheld_because": "F1 occupancy: 5 carrying member blocks, floor is 20",
               "n_years": 5,
@@ -2759,7 +2759,7 @@
         },
         "+4K": {
           "n_years": 5400,
-          "p_annual_system": 0.009531319729506616,
+          "p_annual_system": 0.007591684863164393,
           "duration": {
             "definition": "hours_above_datum > 24 h",
             "occupancy": {
@@ -2779,33 +2779,33 @@
               "clears_floor": true,
               "floor_failures": []
             },
-            "p_f_inside": 0.36428183449873747,
-            "p_f_outside": 0.0067505206215731145,
+            "p_f_inside": 0.3172119992389113,
+            "p_f_outside": 0.005164649924048795,
             "n_inside": 42,
             "n_outside": 5358,
             "concentration_factor": {
-              "point": 53.96351702631296,
-              "ci_low": 39.57056161748647,
-              "ci_high": 71.95258601261476,
-              "relative_half_width": 0.30003626690360646,
+              "point": 61.419845275831385,
+              "ci_low": 43.019836771989716,
+              "ci_high": 84.76369411831907,
+              "relative_half_width": 0.3398238562704056,
               "n_replicates_undefined": 0,
-              "printed": "54",
+              "printed": "61",
               "printed_precision_supported": false
             },
             "share_of_annual_total": {
-              "point": 0.2972624188066207,
-              "ci_low": 0.20911917283819179,
-              "ci_high": 0.3837183257692644,
-              "relative_half_width": 0.2936784838662288,
+              "point": 0.32498773104979456,
+              "ci_low": 0.22509492854369356,
+              "ci_high": 0.4214894686120045,
+              "relative_half_width": 0.30215685286626925,
               "n_replicates_undefined": 0,
-              "printed": "30%",
+              "printed": "32%",
               "printed_precision_supported": false
             },
             "p_f_inside_interval": {
-              "point": 0.36428183449873747,
-              "ci_low": 0.2792157498063356,
-              "ci_high": 0.45247174933508233,
-              "relative_half_width": 0.2378048850104646,
+              "point": 0.3172119992389113,
+              "ci_low": 0.23549566321689194,
+              "ci_high": 0.40053643578468434,
+              "relative_half_width": 0.26014270103869924,
               "n_replicates_undefined": 0
             }
           },
@@ -2828,33 +2828,33 @@
               "clears_floor": true,
               "floor_failures": []
             },
-            "p_f_inside": 0.19188545874002275,
-            "p_f_outside": 0.008546722814350226,
+            "p_f_inside": 0.1641372574503554,
+            "p_f_outside": 0.006746437869117002,
             "n_inside": 29,
             "n_outside": 5371,
             "concentration_factor": {
-              "point": 22.45134923737562,
-              "ci_low": 10.181373942553726,
-              "ci_high": 39.69385993611032,
-              "relative_half_width": 0.657254173936817,
+              "point": 24.329469956541416,
+              "ci_low": 10.428078847871632,
+              "ci_high": 44.84808370832818,
+              "relative_half_width": 0.7073726826342576,
               "n_replicates_undefined": 0,
-              "printed": "22",
+              "printed": "24",
               "printed_precision_supported": false
             },
             "share_of_annual_total": {
-              "point": 0.10811682026909485,
-              "ci_low": 0.04640979189909185,
-              "ci_high": 0.1841983375663331,
-              "relative_half_width": 0.6372206716970387,
+              "point": 0.116110966139053,
+              "ci_low": 0.04739076035243047,
+              "ci_high": 0.201389543426281,
+              "relative_half_width": 0.6631534823740229,
               "n_replicates_undefined": 0,
-              "printed": "11%",
+              "printed": "12%",
               "printed_precision_supported": false
             },
             "p_f_inside_interval": {
-              "point": 0.19188545874002275,
-              "ci_low": 0.09103605498226919,
-              "ci_high": 0.30848074011495347,
-              "relative_half_width": 0.566600217026582,
+              "point": 0.1641372574503554,
+              "ci_low": 0.07370250104907464,
+              "ci_high": 0.2706018064255826,
+              "relative_half_width": 0.5998007656368382,
               "n_replicates_undefined": 0
             }
           }
@@ -2863,7 +2863,7 @@
       "KP 58.8": {
         "historical": {
           "n_years": 3000,
-          "p_annual_system": 0.0074451770306702405,
+          "p_annual_system": 0.006177217606020477,
           "duration": {
             "definition": "hours_above_datum > 24 h",
             "occupancy": {
@@ -2878,33 +2878,33 @@
               "clears_floor": true,
               "floor_failures": []
             },
-            "p_f_inside": 0.13082283386078017,
-            "p_f_outside": 0.0008604144470407786,
+            "p_f_inside": 0.11063372613809377,
+            "p_f_outside": 0.0006022915888592616,
             "n_inside": 152,
             "n_outside": 2848,
             "concentration_factor": {
-              "point": 152.04630083876302,
-              "ci_low": 97.43855421364327,
-              "ci_high": 250.92131896382082,
-              "relative_half_width": 0.5047237713232426,
+              "point": 183.68798134410892,
+              "ci_low": 114.40211630867256,
+              "ci_high": 313.58161117584024,
+              "relative_half_width": 0.5421680106931928,
               "n_replicates_undefined": 0,
-              "printed": "152",
+              "printed": "184",
               "printed_precision_supported": false
             },
             "share_of_annual_total": {
-              "point": 0.8902886913645564,
-              "ci_low": 0.8339663756335773,
-              "ci_high": 0.9307669036093291,
-              "relative_half_width": 0.05436468468861737,
+              "point": 0.9074380217505815,
+              "ci_low": 0.8557637877781114,
+              "ci_high": 0.9433947431829147,
+              "relative_half_width": 0.048284815769428724,
               "n_replicates_undefined": 0,
-              "printed": "89%",
+              "printed": "91%",
               "printed_precision_supported": false
             },
             "p_f_inside_interval": {
-              "point": 0.13082283386078017,
-              "ci_low": 0.09789481536131825,
-              "ci_high": 0.16417256823204415,
-              "relative_half_width": 0.25331110370708587,
+              "point": 0.11063372613809377,
+              "ci_low": 0.08090331857137899,
+              "ci_high": 0.14088123239870515,
+              "relative_half_width": 0.27106523444967096,
               "n_replicates_undefined": 0
             }
           },
@@ -2922,40 +2922,40 @@
               "clears_floor": true,
               "floor_failures": []
             },
-            "p_f_inside": 0.026450995870524293,
-            "p_f_outside": 0.007220825037619687,
+            "p_f_inside": 0.022704533707160017,
+            "p_f_outside": 0.005982122812246485,
             "n_inside": 35,
             "n_outside": 2965,
             "concentration_factor": {
-              "point": 3.66315424244703,
-              "ci_low": 0.2589201796973069,
-              "ci_high": 9.325225267044331,
-              "relative_half_width": 1.2374997730494997,
+              "point": 3.795397456682056,
+              "ci_low": 0.20154713219179643,
+              "ci_high": 9.985872467161805,
+              "relative_half_width": 1.288972426029326,
               "n_replicates_undefined": 0,
               "printed": "4",
               "printed_precision_supported": false
             },
             "share_of_annual_total": {
-              "point": 0.04144897435635626,
-              "ci_low": 0.0026991353700594523,
-              "ci_high": 0.10098842911583324,
-              "relative_half_width": 1.185666174761463,
+              "point": 0.04288115515395936,
+              "ci_low": 0.002092138158524206,
+              "ci_high": 0.10709809480379474,
+              "relative_half_width": 1.2243834881343558,
               "n_replicates_undefined": 0,
               "printed": "4%",
               "printed_precision_supported": false
             },
             "p_f_inside_interval": {
-              "point": 0.026450995870524293,
-              "ci_low": 0.0017738137990661615,
-              "ci_high": 0.07353556025362211,
-              "relative_half_width": 1.3565036795934735,
+              "point": 0.022704533707160017,
+              "ci_low": 0.001148020370637401,
+              "ci_high": 0.06515550680387003,
+              "relative_half_width": 1.4095750051243614,
               "n_replicates_undefined": 0
             }
           }
         },
         "+4K": {
           "n_years": 5400,
-          "p_annual_system": 0.04100684741974899,
+          "p_annual_system": 0.03573075302145446,
           "duration": {
             "definition": "hours_above_datum > 24 h",
             "occupancy": {
@@ -2975,33 +2975,33 @@
               "clears_floor": true,
               "floor_failures": []
             },
-            "p_f_inside": 0.27654697760253777,
-            "p_f_outside": 0.0043627912154075655,
+            "p_f_inside": 0.24389423699839685,
+            "p_f_outside": 0.0033458069801026217,
             "n_inside": 727,
             "n_outside": 4673,
             "concentration_factor": {
-              "point": 63.38762593678303,
-              "ci_low": 51.224708422197914,
-              "ci_high": 80.27225019298092,
-              "relative_half_width": 0.22912627931319232,
+              "point": 72.89548932404827,
+              "ci_low": 57.901366945579305,
+              "ci_high": 94.30256846052534,
+              "relative_half_width": 0.24968075427224856,
               "n_replicates_undefined": 0,
-              "printed": "63",
+              "printed": "73",
               "printed_precision_supported": false
             },
             "share_of_annual_total": {
-              "point": 0.9079317117143808,
-              "ci_low": 0.887936824851172,
-              "ci_high": 0.9263151603122284,
-              "relative_half_width": 0.021135034147331085,
+              "point": 0.9189672206510546,
+              "ci_low": 0.8996438185785905,
+              "ci_high": 0.9364673554654628,
+              "relative_half_width": 0.020035283119665633,
               "n_replicates_undefined": 0,
-              "printed": "91%",
+              "printed": "92%",
               "printed_precision_supported": false
             },
             "p_f_inside_interval": {
-              "point": 0.27654697760253777,
-              "ci_low": 0.25572275147728685,
-              "ci_high": 0.29727499325100853,
-              "relative_half_width": 0.07512691357893253,
+              "point": 0.24389423699839685,
+              "ci_low": 0.2240714566426559,
+              "ci_high": 0.26403991938191085,
+              "relative_half_width": 0.08193810405515581,
               "n_replicates_undefined": 0
             }
           },
@@ -3024,33 +3024,33 @@
               "clears_floor": true,
               "floor_failures": []
             },
-            "p_f_inside": 0.0765918393506964,
-            "p_f_outside": 0.040122119019112404,
+            "p_f_inside": 0.0663482382266038,
+            "p_f_outside": 0.03496952877361339,
             "n_inside": 131,
             "n_outside": 5269,
             "concentration_factor": {
-              "point": 1.9089679514237878,
-              "ci_low": 1.114697781301045,
-              "ci_high": 2.8132522905622004,
-              "relative_half_width": 0.44488816797429803,
+              "point": 1.897315764708489,
+              "ci_low": 1.0669286255840171,
+              "ci_high": 2.8507588779599637,
+              "relative_half_width": 0.4700931404135624,
               "n_replicates_undefined": 0,
               "printed": "2",
               "printed_precision_supported": false
             },
             "share_of_annual_total": {
-              "point": 0.04531100059784729,
-              "ci_low": 0.025566768432732395,
-              "ci_high": 0.06829616686683092,
-              "relative_half_width": 0.47151241277298767,
+              "point": 0.045046884726101924,
+              "ci_low": 0.024679079188436395,
+              "ci_high": 0.06885146387867225,
+              "relative_half_width": 0.4902934460264757,
               "n_replicates_undefined": 0,
               "printed": "5%",
               "printed_precision_supported": false
             },
             "p_f_inside_interval": {
-              "point": 0.0765918393506964,
-              "ci_low": 0.04532737016236647,
-              "ci_high": 0.11077558521051514,
-              "relative_half_width": 0.4272531878264234,
+              "point": 0.0663482382266038,
+              "ci_low": 0.03781656991149018,
+              "ci_high": 0.09778712969541141,
+              "relative_half_width": 0.4519378463305956,
               "n_replicates_undefined": 0
             }
           }
@@ -3059,7 +3059,7 @@
       "KP 60.0": {
         "historical": {
           "n_years": 3000,
-          "p_annual_system": 0.001808554195076605,
+          "p_annual_system": 0.00031469129653997945,
           "duration": {
             "definition": "hours_above_datum > 24 h",
             "occupancy": {
@@ -3074,33 +3074,33 @@
               "clears_floor": true,
               "floor_failures": []
             },
-            "p_f_inside": 0.04814680918504115,
-            "p_f_outside": 0.0001278920969949892,
+            "p_f_inside": 0.008732905187637897,
+            "p_f_outside": 9.367476655598941e-06,
             "n_inside": 105,
             "n_outside": 2895,
             "concentration_factor": {
-              "point": 376.46430323937483,
-              "ci_low": 141.0240667695836,
-              "ci_high": 1347.8454253349187,
-              "relative_half_width": 1.6028363754291701,
+              "point": 932.2580144801577,
+              "ci_low": 253.26036336243362,
+              "ci_high": 11179.432426977715,
+              "relative_half_width": 5.860057995697626,
               "n_replicates_undefined": 0,
-              "printed": "376",
+              "printed": "932",
               "printed_precision_supported": false
             },
             "share_of_annual_total": {
-              "point": 0.9317599251733026,
-              "ci_low": 0.8320614335702807,
-              "ci_high": 0.9802589330520284,
-              "relative_half_width": 0.0795255813637744,
+              "point": 0.9712746584603917,
+              "ci_low": 0.898422684909034,
+              "ci_high": 0.9975137799706375,
+              "relative_half_width": 0.05101085166716744,
               "n_replicates_undefined": 0,
-              "printed": "93%",
+              "printed": "97%",
               "printed_precision_supported": false
             },
             "p_f_inside_interval": {
-              "point": 0.04814680918504115,
-              "ci_low": 0.031146781974745567,
-              "ci_high": 0.06702255611442894,
-              "relative_half_width": 0.3725664768541889,
+              "point": 0.008732905187637897,
+              "ci_low": 0.00468359726392681,
+              "ci_high": 0.013571061655980049,
+              "relative_half_width": 0.5088492432411914,
               "n_replicates_undefined": 0
             }
           },
@@ -3118,40 +3118,40 @@
               "clears_floor": true,
               "floor_failures": []
             },
-            "p_f_inside": 0.011266009493752158,
-            "p_f_outside": 0.0017226640864105303,
+            "p_f_inside": 0.0022319821184789016,
+            "p_f_outside": 0.00029727896818735553,
             "n_inside": 27,
             "n_outside": 2973,
             "concentration_factor": {
-              "point": 6.539875987794489,
-              "ci_low": 0.14315084042823004,
-              "ci_high": 18.376546753363847,
-              "relative_half_width": 1.3940169467253656,
+              "point": 7.508039105787763,
+              "ci_low": 0.010330287362191451,
+              "ci_high": 24.256224342254583,
+              "relative_half_width": 1.6146622116154024,
               "n_replicates_undefined": 0,
-              "printed": "7",
+              "printed": "8",
               "printed_precision_supported": false
             },
             "share_of_annual_total": {
-              "point": 0.056063614637478235,
-              "ci_low": 0.0011013949312439382,
-              "ci_high": 0.14617914450670183,
-              "relative_half_width": 1.293867248067824,
+              "point": 0.06383347517765903,
+              "ci_low": 7.808585376625552e-05,
+              "ci_high": 0.18391081611051002,
+              "relative_half_width": 1.4399398571447595,
               "n_replicates_undefined": 0,
               "printed": "6%",
               "printed_precision_supported": false
             },
             "p_f_inside_interval": {
-              "point": 0.011266009493752158,
-              "ci_low": 0.0002234431994669108,
-              "ci_high": 0.03336698293329996,
-              "relative_half_width": 1.4709529471022376,
+              "point": 0.0022319821184789016,
+              "ci_low": 2.6973174217729934e-06,
+              "ci_high": 0.006928833928735825,
+              "relative_half_width": 1.551566330655512,
               "n_replicates_undefined": 0
             }
           }
         },
         "+4K": {
           "n_years": 5400,
-          "p_annual_system": 0.01421122545417364,
+          "p_annual_system": 0.004223557816256767,
           "duration": {
             "definition": "hours_above_datum > 24 h",
             "occupancy": {
@@ -3171,33 +3171,33 @@
               "clears_floor": true,
               "floor_failures": []
             },
-            "p_f_inside": 0.12806874785921393,
-            "p_f_outside": 0.0017942313286701702,
+            "p_f_inside": 0.04058136190044496,
+            "p_f_outside": 0.00025847382186286124,
             "n_inside": 531,
             "n_outside": 4869,
             "concentration_factor": {
-              "point": 71.3780580089049,
-              "ci_low": 54.473479854993684,
-              "ci_high": 96.61448250119524,
-              "relative_half_width": 0.2951957773980358,
+              "point": 157.00376002478217,
+              "ci_low": 97.87470425306613,
+              "ci_high": 275.78561046473214,
+              "relative_half_width": 0.5665816735331173,
               "n_replicates_undefined": 0,
-              "printed": "71",
+              "printed": "157",
               "printed_precision_supported": false
             },
             "share_of_annual_total": {
-              "point": 0.8861605153920198,
-              "ci_low": 0.8531945833774894,
-              "ci_high": 0.9149902594726743,
-              "relative_half_width": 0.03486708955196887,
+              "point": 0.944819690053105,
+              "ci_low": 0.9130945030068894,
+              "ci_high": 0.9683156492705521,
+              "relative_half_width": 0.0292231135977696,
               "n_replicates_undefined": 0,
-              "printed": "89%",
+              "printed": "94%",
               "printed_precision_supported": false
             },
             "p_f_inside_interval": {
-              "point": 0.12806874785921393,
-              "ci_low": 0.11185440512874557,
-              "ci_high": 0.14519818671634055,
-              "relative_half_width": 0.1301792285197081,
+              "point": 0.04058136190044496,
+              "ci_low": 0.03268678224218648,
+              "ci_high": 0.049014244787668526,
+              "relative_half_width": 0.20116947510949634,
               "n_replicates_undefined": 0
             }
           },
@@ -3220,33 +3220,33 @@
               "clears_floor": true,
               "floor_failures": []
             },
-            "p_f_inside": 0.02252407450641628,
-            "p_f_outside": 0.014052780888354334,
+            "p_f_inside": 0.0074334519259009356,
+            "p_f_outside": 0.004162376592426976,
             "n_inside": 101,
             "n_outside": 5299,
             "concentration_factor": {
-              "point": 1.602819732646809,
-              "ci_low": 0.6156971386182968,
-              "ci_high": 2.8979917145415084,
-              "relative_half_width": 0.7119623403170721,
+              "point": 1.7858672229286872,
+              "ci_low": 0.19587168661742246,
+              "ci_high": 4.790600954376497,
+              "relative_half_width": 1.2864140202495196,
               "n_replicates_undefined": 0,
               "printed": "2",
               "printed_precision_supported": false
             },
             "share_of_annual_total": {
-              "point": 0.02964442560753486,
-              "ci_low": 0.01064930854222234,
-              "ci_high": 0.05544579495595609,
-              "relative_half_width": 0.7555634068745056,
+              "point": 0.032918474983964656,
+              "ci_low": 0.0034477214885536454,
+              "ci_high": 0.08623199426710558,
+              "relative_half_width": 1.2574135469349363,
               "n_replicates_undefined": 0,
               "printed": "3%",
               "printed_precision_supported": false
             },
             "p_f_inside_interval": {
-              "point": 0.02252407450641628,
-              "ci_low": 0.008659253128400478,
-              "ci_high": 0.040548859519539744,
-              "relative_half_width": 0.7079004818168022,
+              "point": 0.0074334519259009356,
+              "ci_low": 0.0008210089472160386,
+              "ci_high": 0.01932063241100211,
+              "relative_half_width": 1.244349438739655,
               "n_replicates_undefined": 0
             }
           }
@@ -3255,7 +3255,7 @@
       "KP 62.0": {
         "historical": {
           "n_years": 3000,
-          "p_annual_system": 0.001006046005485643,
+          "p_annual_system": 0.0009165780319013992,
           "duration": {
             "definition": "hours_above_datum > 24 h",
             "occupancy": {
@@ -3272,12 +3272,12 @@
                 "F1 occupancy: 14 carrying member blocks, floor is 20"
               ]
             },
-            "p_f_inside": 0.09297495915609613,
-            "p_f_outside": 0.0004198637344820872,
+            "p_f_inside": 0.08682895609724894,
+            "p_f_outside": 0.0003689982991802979,
             "n_inside": 19,
             "n_outside": 2981,
             "concentration_factor": {
-              "point": 221.44079500170014,
+              "point": 235.309908718097,
               "count_limited": true,
               "interval_withheld_because": "F1 occupancy: 14 carrying member blocks, floor is 20",
               "n_years": 19,
@@ -3286,7 +3286,7 @@
               "rule": "pre-registered floor, section 3.3: the concentration factor is reported with the count and no number below 20 carrying member blocks or above a 20 % single-block share"
             },
             "share_of_annual_total": {
-              "point": 0.5853026648660671,
+              "point": 0.5999671635250369,
               "count_limited": true,
               "interval_withheld_because": "F1 occupancy: 14 carrying member blocks, floor is 20",
               "n_years": 19,
@@ -3311,12 +3311,12 @@
                 "F1 occupancy: 9 carrying member blocks, floor is 20"
               ]
             },
-            "p_f_inside": 0.016483802508077565,
-            "p_f_outside": 0.0009542809335706195,
+            "p_f_inside": 0.014924091294179232,
+            "p_f_outside": 0.0008697301614589985,
             "n_inside": 10,
             "n_outside": 2990,
             "concentration_factor": {
-              "point": 17.27353227775426,
+              "point": 17.159450086384975,
               "count_limited": true,
               "interval_withheld_because": "F1 occupancy: 9 carrying member blocks, floor is 20",
               "n_years": 10,
@@ -3325,7 +3325,7 @@
               "rule": "pre-registered floor, section 3.3: the concentration factor is reported with the count and no number below 20 carrying member blocks or above a 20 % single-block share"
             },
             "share_of_annual_total": {
-              "point": 0.054615800928243606,
+              "point": 0.05427467083997161,
               "count_limited": true,
               "interval_withheld_because": "F1 occupancy: 9 carrying member blocks, floor is 20",
               "n_years": 10,
@@ -3337,7 +3337,7 @@
         },
         "+4K": {
           "n_years": 5400,
-          "p_annual_system": 0.012777595238792624,
+          "p_annual_system": 0.012311584335803571,
           "duration": {
             "definition": "hours_above_datum > 24 h",
             "occupancy": {
@@ -3357,33 +3357,33 @@
               "clears_floor": true,
               "floor_failures": []
             },
-            "p_f_inside": 0.20723769152326396,
-            "p_f_outside": 0.005840583748782713,
+            "p_f_inside": 0.20191377664261528,
+            "p_f_outside": 0.005547869765595102,
             "n_inside": 186,
             "n_outside": 5214,
             "concentration_factor": {
-              "point": 35.48235937314591,
-              "ci_low": 26.54178161857182,
-              "ci_high": 47.80084463245435,
-              "relative_half_width": 0.29957228591134794,
+              "point": 36.39482993901113,
+              "ci_low": 26.952457383503617,
+              "ci_high": 49.61222704570486,
+              "relative_half_width": 0.31130478834732156,
               "n_replicates_undefined": 0,
-              "printed": "35",
+              "printed": "36",
               "printed_precision_supported": false
             },
             "share_of_annual_total": {
-              "point": 0.5586487143368364,
-              "ci_low": 0.4698950078260899,
-              "ci_high": 0.641347359374875,
-              "relative_half_width": 0.15345273975284596,
+              "point": 0.5648995021631056,
+              "ci_low": 0.4742863226787601,
+              "ci_high": 0.6490542308499468,
+              "relative_half_width": 0.15468938059067838,
               "n_replicates_undefined": 0,
               "printed": "56%",
               "printed_precision_supported": false
             },
             "p_f_inside_interval": {
-              "point": 0.20723769152326396,
-              "ci_low": 0.16349115764873565,
-              "ci_high": 0.25255669422773747,
-              "relative_half_width": 0.21488739795435222,
+              "point": 0.20191377664261528,
+              "ci_low": 0.15828468708140347,
+              "ci_high": 0.2471600856153369,
+              "relative_half_width": 0.2200825520965855,
               "n_replicates_undefined": 0
             }
           },
@@ -3406,33 +3406,33 @@
               "clears_floor": true,
               "floor_failures": []
             },
-            "p_f_inside": 0.06568898288416967,
-            "p_f_outside": 0.012062576486828068,
+            "p_f_inside": 0.06363993828090016,
+            "p_f_outside": 0.011617957931140104,
             "n_inside": 72,
             "n_outside": 5328,
             "concentration_factor": {
-              "point": 5.445684257911223,
-              "ci_low": 1.9307271128234267,
-              "ci_high": 10.399645391564128,
-              "relative_half_width": 0.7775807297712379,
+              "point": 5.477721528868971,
+              "ci_low": 1.8451413856206298,
+              "ci_high": 10.617361990504559,
+              "relative_half_width": 0.8007180137445943,
               "n_replicates_undefined": 0,
               "printed": "5",
               "printed_precision_supported": false
             },
             "share_of_annual_total": {
-              "point": 0.06854600484316352,
-              "ci_low": 0.02449547445633152,
-              "ci_high": 0.12437226302323029,
-              "relative_half_width": 0.7285383648209809,
+              "point": 0.06892147162119236,
+              "ci_low": 0.02348896609212644,
+              "ci_high": 0.12682647517399415,
+              "relative_half_width": 0.7496757298642249,
               "n_replicates_undefined": 0,
               "printed": "7%",
               "printed_precision_supported": false
             },
             "p_f_inside_interval": {
-              "point": 0.06568898288416967,
-              "ci_low": 0.024338585584233723,
-              "ci_high": 0.11910836386913237,
-              "relative_half_width": 0.7213521516386359,
+              "point": 0.06363993828090016,
+              "ci_low": 0.022472908954237654,
+              "ci_high": 0.11692184863126047,
+              "relative_half_width": 0.7420571281836799,
               "n_replicates_undefined": 0
             }
           }
@@ -3446,66 +3446,66 @@
       "rule": "a pair resolves iff the 95 % percentile interval of the paired bootstrap difference of ratios excludes zero",
       "pairs": {
         "KP 57.4 - KP 58.8": {
-          "point": 7.150383214903787,
-          "ci_low": 2.689411356003154,
-          "ci_high": 21.259744060429043,
+          "point": 9.466961704257347,
+          "ci_low": 3.7290762409092126,
+          "ci_high": 28.831620131858347,
           "resolved": true,
           "n_replicates_paired": 10000
         },
         "KP 57.4 - KP 60.0": {
-          "point": 4.800441221245206,
-          "ci_low": 1.5868053251481216,
-          "ci_high": 16.092299141913916,
-          "resolved": true,
-          "n_replicates_paired": 10000
-        },
-        "KP 57.4 - KP 62.0": {
-          "point": -0.04258240197960639,
-          "ci_low": -0.9827099427122199,
-          "ci_high": 3.872022843046984,
+          "point": 1.829968134315184,
+          "ci_low": -0.06435673716055225,
+          "ci_high": 10.654162835958436,
           "resolved": false,
           "n_replicates_paired": 10000
         },
+        "KP 57.4 - KP 62.0": {
+          "point": 1.8191231208207235,
+          "ci_low": 0.18673733966159936,
+          "ci_high": 9.921480187686806,
+          "resolved": true,
+          "n_replicates_paired": 10000
+        },
         "KP 58.8 - KP 60.0": {
-          "point": -2.3499419936585806,
-          "ci_low": -5.427210834639165,
-          "ci_high": -0.9736515699378466,
+          "point": -7.636993569942164,
+          "ci_low": -18.743118361063843,
+          "ci_high": -3.4669747660740686,
           "resolved": true,
           "n_replicates_paired": 10000
         },
         "KP 58.8 - KP 62.0": {
-          "point": -7.192965616883393,
-          "ci_low": -17.513226074781645,
-          "ci_high": -3.155023485184767,
+          "point": -7.6478385834366245,
+          "ci_low": -19.114247915347363,
+          "ci_high": -3.3243398209150223,
           "resolved": true,
           "n_replicates_paired": 10000
         },
         "KP 60.0 - KP 62.0": {
-          "point": -4.843023623224813,
-          "ci_low": -12.352953345080124,
-          "ci_high": -2.0558926817319603,
-          "resolved": true,
+          "point": -0.010845013494460432,
+          "ci_low": -1.6862271184356843,
+          "ci_high": 1.4237969462733187,
+          "resolved": false,
           "n_replicates_paired": 10000
         }
       },
-      "n_resolved": 5,
+      "n_resolved": 4,
       "n_pairs": 6,
-      "verdict": "PARTIAL: 5 of 6 pairs resolve"
+      "verdict": "PARTIAL: 4 of 6 pairs resolve"
     },
     "Q2": {
       "question": "is the KP 62.0 warming mechanism split resolvably distinguishable from a tie",
       "rule_1": "not a tie iff the 95 % interval of the paired difference of the two mechanisms' annual contributions excludes zero",
       "rule_2": "the three-decimal quotation is supported iff both endpoints of the 95 % interval of the piping share round to the same third decimal",
       "difference_p_annual_bep_minus_overflow": {
-        "point": 1.1290620692354023e-05,
-        "ci_low": -0.0009029450733769646,
-        "ci_high": 0.0008725722770004563
+        "point": -0.0006553185233654389,
+        "ci_low": -0.0016153167777548944,
+        "ci_high": 0.00023497775439288164
       },
-      "production_margin_bep_over_overflow": 1.0013454231301584,
+      "production_margin_bep_over_overflow": 0.9219103428428767,
       "share_bep": {
-        "point": 0.500336129664227,
-        "ci_low": 0.4762864639208166,
-        "ci_high": 0.5304111389159466
+        "point": 0.4796843652338086,
+        "ci_low": 0.4566563138424028,
+        "ci_high": 0.5087217895155031
       },
       "resolvably_not_a_tie": false,
       "three_decimal_quotation_supported": false,
@@ -3525,9 +3525,9 @@
           "two_decimal_quotation_supported": true
         },
         "KP 58.8": {
-          "share_bep": 0.9741902475663473,
-          "ci_low": 0.9680014959484126,
-          "ci_high": 0.9802378334125649,
+          "share_bep": 0.9689337212206093,
+          "ci_low": 0.9622260379740066,
+          "ci_high": 0.9755470915141369,
           "lead_resolved": true,
           "structurally_degenerate": false,
           "two_decimal_quotation_supported": false
@@ -3541,9 +3541,9 @@
           "two_decimal_quotation_supported": true
         },
         "KP 62.0": {
-          "share_bep": 0.8115239173288071,
-          "ci_low": 0.6902902420099024,
-          "ci_high": 0.9795314119486352,
+          "share_bep": 0.7932106296980627,
+          "ci_low": 0.6669139956924882,
+          "ci_high": 0.9768234348859307,
           "lead_resolved": true,
           "structurally_degenerate": false,
           "two_decimal_quotation_supported": false
@@ -3563,39 +3563,39 @@
           "KP 60.0"
         ],
         "range_point": [
-          152.04630083876302,
-          376.46430323937483
+          183.68798134410892,
+          932.2580144801577
         ],
         "range_interval": [
-          97.43855421364327,
-          1347.8454253349187
+          114.40211630867256,
+          11179.432426977715
         ],
         "per_cell": {
           "KP 58.8": {
-            "point": 152.04630083876302,
-            "ci_low": 97.43855421364327,
-            "ci_high": 250.92131896382082,
-            "relative_half_width": 0.5047237713232426,
+            "point": 183.68798134410892,
+            "ci_low": 114.40211630867256,
+            "ci_high": 313.58161117584024,
+            "relative_half_width": 0.5421680106931928,
             "n_replicates_undefined": 0,
-            "printed": "152",
+            "printed": "184",
             "printed_precision_supported": false
           },
           "KP 60.0": {
-            "point": 376.46430323937483,
-            "ci_low": 141.0240667695836,
-            "ci_high": 1347.8454253349187,
-            "relative_half_width": 1.6028363754291701,
+            "point": 932.2580144801577,
+            "ci_low": 253.26036336243362,
+            "ci_high": 11179.432426977715,
+            "relative_half_width": 5.860057995697626,
             "n_replicates_undefined": 0,
-            "printed": "376",
+            "printed": "932",
             "printed_precision_supported": false
           }
         },
         "printed_precision_supported_at": [],
         "pairs": {
           "KP 58.8 - KP 60.0": {
-            "point": -224.4180024006118,
-            "ci_low": -1122.232806223193,
-            "ci_high": -9.7948811651685,
+            "point": -748.5700331360488,
+            "ci_low": -10910.16511325299,
+            "ci_high": -99.92217266385477,
             "resolved": true,
             "n_replicates_paired": 10000
           }
@@ -3606,25 +3606,23 @@
         "withheld_below_floor": [
           {
             "section": "KP 57.4",
-            "point": 151.334277038789,
+            "point": 165.73462321970362,
             "n_years": 3,
             "n_carrying_member_blocks": 3,
             "failing_criterion": "F1 occupancy: 3 carrying member blocks, floor is 20; F2 concentration: the largest member block holds 33.3 % of the stratum, cap is 20 %",
             "point_falls_inside": [
-              "KP 58.8",
-              "KP 60.0"
+              "KP 58.8"
             ],
             "observation_is_not_a_measurement": "where a count-limited point sits relative to another cell's interval; this cell has no interval of its own and no resolution verdict may be formed from it"
           },
           {
             "section": "KP 62.0",
-            "point": 221.44079500170014,
+            "point": 235.309908718097,
             "n_years": 19,
             "n_carrying_member_blocks": 14,
             "failing_criterion": "F1 occupancy: 14 carrying member blocks, floor is 20",
             "point_falls_inside": [
-              "KP 58.8",
-              "KP 60.0"
+              "KP 58.8"
             ],
             "observation_is_not_a_measurement": "where a count-limited point sits relative to another cell's interval; this cell has no interval of its own and no resolution verdict may be formed from it"
           }
@@ -3642,101 +3640,101 @@
           "KP 62.0"
         ],
         "range_point": [
-          35.48235937314591,
-          71.3780580089049
+          36.39482993901113,
+          157.00376002478217
         ],
         "range_interval": [
-          26.54178161857182,
-          96.61448250119524
+          26.952457383503617,
+          275.78561046473214
         ],
         "per_cell": {
           "KP 57.4": {
-            "point": 53.96351702631296,
-            "ci_low": 39.57056161748647,
-            "ci_high": 71.95258601261476,
-            "relative_half_width": 0.30003626690360646,
+            "point": 61.419845275831385,
+            "ci_low": 43.019836771989716,
+            "ci_high": 84.76369411831907,
+            "relative_half_width": 0.3398238562704056,
             "n_replicates_undefined": 0,
-            "printed": "54",
+            "printed": "61",
             "printed_precision_supported": false
           },
           "KP 58.8": {
-            "point": 63.38762593678303,
-            "ci_low": 51.224708422197914,
-            "ci_high": 80.27225019298092,
-            "relative_half_width": 0.22912627931319232,
+            "point": 72.89548932404827,
+            "ci_low": 57.901366945579305,
+            "ci_high": 94.30256846052534,
+            "relative_half_width": 0.24968075427224856,
             "n_replicates_undefined": 0,
-            "printed": "63",
+            "printed": "73",
             "printed_precision_supported": false
           },
           "KP 60.0": {
-            "point": 71.3780580089049,
-            "ci_low": 54.473479854993684,
-            "ci_high": 96.61448250119524,
-            "relative_half_width": 0.2951957773980358,
+            "point": 157.00376002478217,
+            "ci_low": 97.87470425306613,
+            "ci_high": 275.78561046473214,
+            "relative_half_width": 0.5665816735331173,
             "n_replicates_undefined": 0,
-            "printed": "71",
+            "printed": "157",
             "printed_precision_supported": false
           },
           "KP 62.0": {
-            "point": 35.48235937314591,
-            "ci_low": 26.54178161857182,
-            "ci_high": 47.80084463245435,
-            "relative_half_width": 0.29957228591134794,
+            "point": 36.39482993901113,
+            "ci_low": 26.952457383503617,
+            "ci_high": 49.61222704570486,
+            "relative_half_width": 0.31130478834732156,
             "n_replicates_undefined": 0,
-            "printed": "35",
+            "printed": "36",
             "printed_precision_supported": false
           }
         },
         "printed_precision_supported_at": [],
         "pairs": {
           "KP 57.4 - KP 58.8": {
-            "point": -9.424108910470075,
-            "ci_low": -31.599220362846168,
-            "ci_high": 12.873489714300202,
+            "point": -11.475644048216886,
+            "ci_low": -39.520932919552855,
+            "ci_high": 17.080462526552445,
             "resolved": false,
             "n_replicates_paired": 10000
           },
           "KP 57.4 - KP 60.0": {
-            "point": -17.414540982591944,
-            "ci_low": -46.627243679559875,
-            "ci_high": 8.024265408210018,
-            "resolved": false,
+            "point": -95.58391474895078,
+            "ci_low": -214.59021537190418,
+            "ci_high": -31.455293498390915,
+            "resolved": true,
             "n_replicates_paired": 10000
           },
           "KP 57.4 - KP 62.0": {
-            "point": 18.481157653167045,
-            "ci_low": 3.5110816016438733,
-            "ci_high": 34.971609665883626,
+            "point": 25.025015336820253,
+            "ci_low": 6.765635386327334,
+            "ci_high": 46.12695281636598,
             "resolved": true,
             "n_replicates_paired": 10000
           },
           "KP 58.8 - KP 60.0": {
-            "point": -7.99043207212187,
-            "ci_low": -29.44884933387492,
-            "ci_high": 10.092864399026901,
-            "resolved": false,
+            "point": -84.1082707007339,
+            "ci_low": -197.66732960370425,
+            "ci_high": -24.4744667146422,
+            "resolved": true,
             "n_replicates_paired": 10000
           },
           "KP 58.8 - KP 62.0": {
-            "point": 27.90526656363712,
-            "ci_low": 12.208946376966912,
-            "ci_high": 44.71128149292287,
+            "point": 36.50065938503714,
+            "ci_low": 18.25097454769089,
+            "ci_high": 57.48302341027385,
             "resolved": true,
             "n_replicates_paired": 10000
           },
           "KP 60.0 - KP 62.0": {
-            "point": 35.89569863575899,
-            "ci_low": 19.1409246826913,
-            "ci_high": 59.25149574552674,
+            "point": 120.60893008577104,
+            "ci_low": 65.69995548478042,
+            "ci_high": 235.44372792542353,
             "resolved": true,
             "n_replicates_paired": 10000
           }
         },
         "endpoints_resolve": true,
-        "n_resolved": 3,
+        "n_resolved": 5,
         "n_pairs": 6,
         "withheld_below_floor": [],
-        "verdict": "PARTIAL: 3 of 6 pairs among the 4 clearing cells resolve"
+        "verdict": "PARTIAL: 5 of 6 pairs among the 4 clearing cells resolve"
       }
     },
     "Q5": {
@@ -3749,50 +3747,50 @@
           "KP 60.0"
         ],
         "range_point": [
-          0.8902886913645564,
-          0.9317599251733026
+          0.9074380217505815,
+          0.9712746584603917
         ],
         "range_interval": [
-          0.8320614335702807,
-          0.9802589330520284
+          0.8557637877781114,
+          0.9975137799706375
         ],
         "per_cell": {
           "KP 58.8": {
-            "point": 0.8902886913645564,
-            "ci_low": 0.8339663756335773,
-            "ci_high": 0.9307669036093291,
-            "relative_half_width": 0.05436468468861737,
+            "point": 0.9074380217505815,
+            "ci_low": 0.8557637877781114,
+            "ci_high": 0.9433947431829147,
+            "relative_half_width": 0.048284815769428724,
             "n_replicates_undefined": 0,
-            "printed": "89%",
+            "printed": "91%",
             "printed_precision_supported": false
           },
           "KP 60.0": {
-            "point": 0.9317599251733026,
-            "ci_low": 0.8320614335702807,
-            "ci_high": 0.9802589330520284,
-            "relative_half_width": 0.0795255813637744,
+            "point": 0.9712746584603917,
+            "ci_low": 0.898422684909034,
+            "ci_high": 0.9975137799706375,
+            "relative_half_width": 0.05101085166716744,
             "n_replicates_undefined": 0,
-            "printed": "93%",
+            "printed": "97%",
             "printed_precision_supported": false
           }
         },
         "printed_precision_supported_at": [],
         "pairs": {
           "KP 58.8 - KP 60.0": {
-            "point": -0.04147123380874629,
-            "ci_low": -0.10093604932024126,
-            "ci_high": 0.0429351569042445,
-            "resolved": false,
+            "point": -0.06383663670981021,
+            "ci_low": -0.12236701639724132,
+            "ci_high": -0.001081904668466016,
+            "resolved": true,
             "n_replicates_paired": 10000
           }
         },
-        "endpoints_resolve": false,
-        "n_resolved": 0,
+        "endpoints_resolve": true,
+        "n_resolved": 1,
         "n_pairs": 1,
         "withheld_below_floor": [
           {
             "section": "KP 57.4",
-            "point": 0.13155678315381192,
+            "point": 0.14229389245900448,
             "n_years": 3,
             "n_carrying_member_blocks": 3,
             "failing_criterion": "F1 occupancy: 3 carrying member blocks, floor is 20; F2 concentration: the largest member block holds 33.3 % of the stratum, cap is 20 %",
@@ -3801,7 +3799,7 @@
           },
           {
             "section": "KP 62.0",
-            "point": 0.5853026648660671,
+            "point": 0.5999671635250369,
             "n_years": 19,
             "n_carrying_member_blocks": 14,
             "failing_criterion": "F1 occupancy: 14 carrying member blocks, floor is 20",
@@ -3809,7 +3807,7 @@
             "observation_is_not_a_measurement": "where a count-limited point sits relative to another cell's interval; this cell has no interval of its own and no resolution verdict may be formed from it"
           }
         ],
-        "verdict": "COLLAPSED (pre-registered section 3.7): cells clear the floor but no pair of them resolves, so the spread is not a measured range"
+        "verdict": "RANGE SUPPORTED over the 2 cells that clear"
       },
       "+4K": {
         "scenario": "+4K",
@@ -3822,46 +3820,46 @@
           "KP 62.0"
         ],
         "range_point": [
-          0.2972624188066207,
-          0.9079317117143808
+          0.32498773104979456,
+          0.944819690053105
         ],
         "range_interval": [
-          0.20911917283819179,
-          0.9263151603122284
+          0.22509492854369356,
+          0.9683156492705521
         ],
         "per_cell": {
           "KP 57.4": {
-            "point": 0.2972624188066207,
-            "ci_low": 0.20911917283819179,
-            "ci_high": 0.3837183257692644,
-            "relative_half_width": 0.2936784838662288,
+            "point": 0.32498773104979456,
+            "ci_low": 0.22509492854369356,
+            "ci_high": 0.4214894686120045,
+            "relative_half_width": 0.30215685286626925,
             "n_replicates_undefined": 0,
-            "printed": "30%",
+            "printed": "32%",
             "printed_precision_supported": false
           },
           "KP 58.8": {
-            "point": 0.9079317117143808,
-            "ci_low": 0.887936824851172,
-            "ci_high": 0.9263151603122284,
-            "relative_half_width": 0.021135034147331085,
+            "point": 0.9189672206510546,
+            "ci_low": 0.8996438185785905,
+            "ci_high": 0.9364673554654628,
+            "relative_half_width": 0.020035283119665633,
             "n_replicates_undefined": 0,
-            "printed": "91%",
+            "printed": "92%",
             "printed_precision_supported": false
           },
           "KP 60.0": {
-            "point": 0.8861605153920198,
-            "ci_low": 0.8531945833774894,
-            "ci_high": 0.9149902594726743,
-            "relative_half_width": 0.03486708955196887,
+            "point": 0.944819690053105,
+            "ci_low": 0.9130945030068894,
+            "ci_high": 0.9683156492705521,
+            "relative_half_width": 0.0292231135977696,
             "n_replicates_undefined": 0,
-            "printed": "89%",
+            "printed": "94%",
             "printed_precision_supported": false
           },
           "KP 62.0": {
-            "point": 0.5586487143368364,
-            "ci_low": 0.4698950078260899,
-            "ci_high": 0.641347359374875,
-            "relative_half_width": 0.15345273975284596,
+            "point": 0.5648995021631056,
+            "ci_low": 0.4742863226787601,
+            "ci_high": 0.6490542308499468,
+            "relative_half_width": 0.15468938059067838,
             "n_replicates_undefined": 0,
             "printed": "56%",
             "printed_precision_supported": false
@@ -3870,44 +3868,44 @@
         "printed_precision_supported_at": [],
         "pairs": {
           "KP 57.4 - KP 58.8": {
-            "point": -0.6106692929077602,
-            "ci_low": -0.6965631544558507,
-            "ci_high": -0.526111973417426,
+            "point": -0.59397948960126,
+            "ci_low": -0.6916452958051068,
+            "ci_high": -0.49804869063518115,
             "resolved": true,
             "n_replicates_paired": 10000
           },
           "KP 57.4 - KP 60.0": {
-            "point": -0.5888980965853992,
-            "ci_low": -0.6750008972067005,
-            "ci_high": -0.5040523070185059,
+            "point": -0.6198319590033103,
+            "ci_low": -0.7168740726804651,
+            "ci_high": -0.5253858832040088,
             "resolved": true,
             "n_replicates_paired": 10000
           },
           "KP 57.4 - KP 62.0": {
-            "point": -0.2613862955302157,
-            "ci_low": -0.3428165695496839,
-            "ci_high": -0.1836047229961546,
+            "point": -0.23991177111331102,
+            "ci_low": -0.3301382354860981,
+            "ci_high": -0.15348295396665979,
             "resolved": true,
             "n_replicates_paired": 10000
           },
           "KP 58.8 - KP 60.0": {
-            "point": 0.02177119632236102,
-            "ci_low": -0.004164311312231891,
-            "ci_high": 0.05122522674952806,
+            "point": -0.025852469402050327,
+            "ci_low": -0.05144542673863215,
+            "ci_high": 0.006014630689838524,
             "resolved": false,
             "n_replicates_paired": 10000
           },
           "KP 58.8 - KP 62.0": {
-            "point": 0.3492829973775444,
-            "ci_low": 0.2713668086286488,
-            "ci_high": 0.43295479059556563,
+            "point": 0.35406771848794905,
+            "ci_low": 0.2739515718710572,
+            "ci_high": 0.4399632403823066,
             "resolved": true,
             "n_replicates_paired": 10000
           },
           "KP 60.0 - KP 62.0": {
-            "point": 0.3275118010551834,
-            "ci_low": 0.2531239522096896,
-            "ci_high": 0.40681124413223796,
+            "point": 0.3799201878899994,
+            "ci_low": 0.30470636682047725,
+            "ci_high": 0.4595928541713095,
             "resolved": true,
             "n_replicates_paired": 10000
           }
@@ -3929,39 +3927,39 @@
           "KP 60.0"
         ],
         "range_point": [
-          3.66315424244703,
-          6.539875987794489
+          3.795397456682056,
+          7.508039105787763
         ],
         "range_interval": [
-          0.14315084042823004,
-          18.376546753363847
+          0.010330287362191451,
+          24.256224342254583
         ],
         "per_cell": {
           "KP 58.8": {
-            "point": 3.66315424244703,
-            "ci_low": 0.2589201796973069,
-            "ci_high": 9.325225267044331,
-            "relative_half_width": 1.2374997730494997,
+            "point": 3.795397456682056,
+            "ci_low": 0.20154713219179643,
+            "ci_high": 9.985872467161805,
+            "relative_half_width": 1.288972426029326,
             "n_replicates_undefined": 0,
             "printed": "4",
             "printed_precision_supported": false
           },
           "KP 60.0": {
-            "point": 6.539875987794489,
-            "ci_low": 0.14315084042823004,
-            "ci_high": 18.376546753363847,
-            "relative_half_width": 1.3940169467253656,
+            "point": 7.508039105787763,
+            "ci_low": 0.010330287362191451,
+            "ci_high": 24.256224342254583,
+            "relative_half_width": 1.6146622116154024,
             "n_replicates_undefined": 0,
-            "printed": "7",
+            "printed": "8",
             "printed_precision_supported": false
           }
         },
         "printed_precision_supported_at": [],
         "pairs": {
           "KP 58.8 - KP 60.0": {
-            "point": -2.876721745347459,
-            "ci_low": -9.653134448491013,
-            "ci_high": 0.8888004889219511,
+            "point": -3.7126416491057066,
+            "ci_low": -15.15811138270305,
+            "ci_high": 1.274093171131463,
             "resolved": false,
             "n_replicates_paired": 10000
           }
@@ -3972,7 +3970,7 @@
         "withheld_below_floor": [
           {
             "section": "KP 57.4",
-            "point": 90.70158897138008,
+            "point": 99.35669939881593,
             "n_years": 5,
             "n_carrying_member_blocks": 5,
             "failing_criterion": "F1 occupancy: 5 carrying member blocks, floor is 20",
@@ -3981,7 +3979,7 @@
           },
           {
             "section": "KP 62.0",
-            "point": 17.27353227775426,
+            "point": 17.159450086384975,
             "n_years": 10,
             "n_carrying_member_blocks": 9,
             "failing_criterion": "F1 occupancy: 9 carrying member blocks, floor is 20",
@@ -4004,46 +4002,46 @@
           "KP 62.0"
         ],
         "range_point": [
-          1.602819732646809,
-          22.45134923737562
+          1.7858672229286872,
+          24.329469956541416
         ],
         "range_interval": [
-          0.6156971386182968,
-          39.69385993611032
+          0.19587168661742246,
+          44.84808370832818
         ],
         "per_cell": {
           "KP 57.4": {
-            "point": 22.45134923737562,
-            "ci_low": 10.181373942553726,
-            "ci_high": 39.69385993611032,
-            "relative_half_width": 0.657254173936817,
+            "point": 24.329469956541416,
+            "ci_low": 10.428078847871632,
+            "ci_high": 44.84808370832818,
+            "relative_half_width": 0.7073726826342576,
             "n_replicates_undefined": 0,
-            "printed": "22",
+            "printed": "24",
             "printed_precision_supported": false
           },
           "KP 58.8": {
-            "point": 1.9089679514237878,
-            "ci_low": 1.114697781301045,
-            "ci_high": 2.8132522905622004,
-            "relative_half_width": 0.44488816797429803,
+            "point": 1.897315764708489,
+            "ci_low": 1.0669286255840171,
+            "ci_high": 2.8507588779599637,
+            "relative_half_width": 0.4700931404135624,
             "n_replicates_undefined": 0,
             "printed": "2",
             "printed_precision_supported": false
           },
           "KP 60.0": {
-            "point": 1.602819732646809,
-            "ci_low": 0.6156971386182968,
-            "ci_high": 2.8979917145415084,
-            "relative_half_width": 0.7119623403170721,
+            "point": 1.7858672229286872,
+            "ci_low": 0.19587168661742246,
+            "ci_high": 4.790600954376497,
+            "relative_half_width": 1.2864140202495196,
             "n_replicates_undefined": 0,
             "printed": "2",
             "printed_precision_supported": false
           },
           "KP 62.0": {
-            "point": 5.445684257911223,
-            "ci_low": 1.9307271128234267,
-            "ci_high": 10.399645391564128,
-            "relative_half_width": 0.7775807297712379,
+            "point": 5.477721528868971,
+            "ci_low": 1.8451413856206298,
+            "ci_high": 10.617361990504559,
+            "relative_half_width": 0.8007180137445943,
             "n_replicates_undefined": 0,
             "printed": "5",
             "printed_precision_supported": false
@@ -4052,53 +4050,53 @@
         "printed_precision_supported_at": [],
         "pairs": {
           "KP 57.4 - KP 58.8": {
-            "point": 20.542381285951834,
-            "ci_low": 8.266428751230702,
-            "ci_high": 37.73715132417579,
+            "point": 22.43215419183293,
+            "ci_low": 8.515113268830989,
+            "ci_high": 42.93738979901327,
             "resolved": true,
             "n_replicates_paired": 10000
           },
           "KP 57.4 - KP 60.0": {
-            "point": 20.848529504728813,
-            "ci_low": 8.512339400714938,
-            "ci_high": 38.18286668937925,
+            "point": 22.54360273361273,
+            "ci_low": 8.190944498835645,
+            "ci_high": 43.10165630085413,
             "resolved": true,
             "n_replicates_paired": 10000
           },
           "KP 57.4 - KP 62.0": {
-            "point": 17.0056649794644,
-            "ci_low": 7.027354139173539,
-            "ci_high": 31.8359570842804,
+            "point": 18.851748427672447,
+            "ci_low": 7.289877098762434,
+            "ci_high": 36.80076682949511,
             "resolved": true,
             "n_replicates_paired": 10000
           },
           "KP 58.8 - KP 60.0": {
-            "point": 0.30614821877697884,
-            "ci_low": -0.7755567079842275,
-            "ci_high": 1.2723917468168608,
+            "point": 0.1114485417798019,
+            "ci_low": -2.641849001964761,
+            "ci_high": 1.906954400050411,
             "resolved": false,
             "n_replicates_paired": 10000
           },
           "KP 58.8 - KP 62.0": {
-            "point": -3.536716306487435,
-            "ci_low": -8.668119818414556,
-            "ci_high": 0.11553487235201781,
+            "point": -3.5804057641604814,
+            "ci_low": -8.93849771865493,
+            "ci_high": 0.19025099085838784,
             "resolved": false,
             "n_replicates_paired": 10000
           },
           "KP 60.0 - KP 62.0": {
-            "point": -3.842864525264414,
-            "ci_low": -8.943914793189068,
-            "ci_high": -0.06501132087522017,
-            "resolved": true,
+            "point": -3.6918543059402835,
+            "ci_low": -9.423387946525262,
+            "ci_high": 1.0875330009525839,
+            "resolved": false,
             "n_replicates_paired": 10000
           }
         },
         "endpoints_resolve": true,
-        "n_resolved": 4,
+        "n_resolved": 3,
         "n_pairs": 6,
         "withheld_below_floor": [],
-        "verdict": "PARTIAL: 4 of 6 pairs among the 4 clearing cells resolve"
+        "verdict": "PARTIAL: 3 of 6 pairs among the 4 clearing cells resolve"
       }
     },
     "Q6_floor_sensitivity": {
@@ -4112,8 +4110,8 @@
               "KP 62.0"
             ],
             "concentration_range_point": [
-              152.04630083876302,
-              376.46430323937483
+              183.68798134410892,
+              932.2580144801577
             ]
           },
           "duration/+4K": {
@@ -4124,8 +4122,8 @@
               "KP 62.0"
             ],
             "concentration_range_point": [
-              35.48235937314591,
-              71.3780580089049
+              36.39482993901113,
+              157.00376002478217
             ]
           },
           "compound/historical": {
@@ -4134,8 +4132,8 @@
               "KP 60.0"
             ],
             "concentration_range_point": [
-              3.66315424244703,
-              6.539875987794489
+              3.795397456682056,
+              7.508039105787763
             ]
           },
           "compound/+4K": {
@@ -4146,8 +4144,8 @@
               "KP 62.0"
             ],
             "concentration_range_point": [
-              1.602819732646809,
-              22.45134923737562
+              1.7858672229286872,
+              24.329469956541416
             ]
           }
         }
@@ -4161,8 +4159,8 @@
               "KP 60.0"
             ],
             "concentration_range_point": [
-              152.04630083876302,
-              376.46430323937483
+              183.68798134410892,
+              932.2580144801577
             ]
           },
           "duration/+4K": {
@@ -4173,8 +4171,8 @@
               "KP 62.0"
             ],
             "concentration_range_point": [
-              35.48235937314591,
-              71.3780580089049
+              36.39482993901113,
+              157.00376002478217
             ]
           },
           "compound/historical": {
@@ -4183,8 +4181,8 @@
               "KP 60.0"
             ],
             "concentration_range_point": [
-              3.66315424244703,
-              6.539875987794489
+              3.795397456682056,
+              7.508039105787763
             ]
           },
           "compound/+4K": {
@@ -4195,8 +4193,8 @@
               "KP 62.0"
             ],
             "concentration_range_point": [
-              1.602819732646809,
-              22.45134923737562
+              1.7858672229286872,
+              24.329469956541416
             ]
           }
         }
@@ -4210,8 +4208,8 @@
               "KP 60.0"
             ],
             "concentration_range_point": [
-              152.04630083876302,
-              376.46430323937483
+              183.68798134410892,
+              932.2580144801577
             ]
           },
           "duration/+4K": {
@@ -4222,8 +4220,8 @@
               "KP 62.0"
             ],
             "concentration_range_point": [
-              35.48235937314591,
-              71.3780580089049
+              36.39482993901113,
+              157.00376002478217
             ]
           },
           "compound/historical": {
@@ -4237,8 +4235,8 @@
               "KP 62.0"
             ],
             "concentration_range_point": [
-              1.602819732646809,
-              5.445684257911223
+              1.7858672229286872,
+              5.477721528868971
             ]
           }
         }
@@ -4253,24 +4251,24 @@
           "n_blocks": 50,
           "sections": {
             "KP 57.4": {
-              "ci_low": 0.0003703117896541259,
-              "ci_high": 0.0012196429506689348,
-              "relative_half_width": 0.5639840090922866
+              "ci_low": 0.00023014532572905285,
+              "ci_high": 0.0008302059075584956,
+              "relative_half_width": 0.6027429234487665
             },
             "KP 58.8": {
-              "ci_low": 0.00541910900909379,
-              "ci_high": 0.00974777504113263,
-              "relative_half_width": 0.2907026934488594
+              "ci_low": 0.004412088428787909,
+              "ci_high": 0.008214557715574947,
+              "relative_half_width": 0.30778171737717747
             },
             "KP 60.0": {
-              "ci_low": 0.001141016226214598,
-              "ci_high": 0.0025936153893795577,
-              "relative_half_width": 0.40159127305096654
+              "ci_low": 0.0001714361239709415,
+              "ci_high": 0.0004855951360535331,
+              "relative_half_width": 0.49915427521631467
             },
             "KP 62.0": {
-              "ci_low": 0.0005521546813394719,
-              "ci_high": 0.0015563124969054645,
-              "relative_half_width": 0.4990615787402591
+              "ci_low": 0.0004942125007105292,
+              "ci_high": 0.0014386732813132638,
+              "relative_half_width": 0.5152102427348678
             }
           }
         },
@@ -4278,24 +4276,24 @@
           "n_blocks": 50,
           "sections": {
             "KP 57.4": {
-              "ci_low": 0.00034580475550710887,
-              "ci_high": 0.0012274478093894318,
-              "relative_half_width": 0.5854401756822503
+              "ci_low": 0.00021608352534282368,
+              "ci_high": 0.0008328006883335363,
+              "relative_half_width": 0.6194739614936202
             },
             "KP 58.8": {
-              "ci_low": 0.00535914213342595,
-              "ci_high": 0.009728753890256368,
-              "relative_half_width": 0.2934525088409517
+              "ci_low": 0.004322729556132573,
+              "ci_high": 0.008179654394988698,
+              "relative_half_width": 0.31218949087183406
             },
             "KP 60.0": {
-              "ci_low": 0.0011138926785369844,
-              "ci_high": 0.002583113227446806,
-              "relative_half_width": 0.40618648667246315
+              "ci_low": 0.00016290069253437338,
+              "ci_high": 0.0004874097598243699,
+              "relative_half_width": 0.5155990503359373
             },
             "KP 62.0": {
-              "ci_low": 0.0005236849206664332,
-              "ci_high": 0.0015613353811995423,
-              "relative_half_width": 0.5157072613355339
+              "ci_low": 0.00046640922185782366,
+              "ci_high": 0.0014379279850190267,
+              "relative_half_width": 0.5299705695246872
             }
           }
         },
@@ -4311,24 +4309,24 @@
           "n_blocks": 90,
           "sections": {
             "KP 57.4": {
-              "ci_low": 0.007570873794817224,
-              "ci_high": 0.011590278464370173,
-              "relative_half_width": 0.21085247288000755
+              "ci_low": 0.005920637082012083,
+              "ci_high": 0.009358216707689616,
+              "relative_half_width": 0.22640426253446122
             },
             "KP 58.8": {
-              "ci_low": 0.03673164378774088,
-              "ci_high": 0.045399444364926475,
-              "relative_half_width": 0.10568723423750885
+              "ci_low": 0.03180027749205495,
+              "ci_high": 0.039790532180794064,
+              "relative_half_width": 0.11181201084597046
             },
             "KP 60.0": {
-              "ci_low": 0.012097412070251765,
-              "ci_high": 0.016414740752740554,
-              "relative_half_width": 0.15189853599926
+              "ci_low": 0.0033210255466712838,
+              "ci_high": 0.0051929622858835605,
+              "relative_half_width": 0.22160661942486762
             },
             "KP 62.0": {
-              "ci_low": 0.010267214238337543,
-              "ci_high": 0.01536223763871487,
-              "relative_half_width": 0.199373329063864
+              "ci_low": 0.009842077184991657,
+              "ci_high": 0.014864959558810887,
+              "relative_half_width": 0.20399008920452597
             }
           }
         },
@@ -4336,24 +4334,24 @@
           "n_blocks": 90,
           "sections": {
             "KP 57.4": {
-              "ci_low": 0.007730795229503515,
-              "ci_high": 0.011398066573020527,
-              "relative_half_width": 0.19238004009896154
+              "ci_low": 0.00604016152531847,
+              "ci_high": 0.009223805766365997,
+              "relative_half_width": 0.20967968892484487
             },
             "KP 58.8": {
-              "ci_low": 0.037614290029587105,
-              "ci_high": 0.04445250861262171,
-              "relative_half_width": 0.08337898440519113
+              "ci_low": 0.03255302961611887,
+              "ci_high": 0.03895227489371036,
+              "relative_half_width": 0.08954814461577502
             },
             "KP 60.0": {
-              "ci_low": 0.01233450570839998,
-              "ci_high": 0.01613514420863567,
-              "relative_half_width": 0.13371959063247052
+              "ci_low": 0.0033842452212228375,
+              "ci_high": 0.005120737672713429,
+              "relative_half_width": 0.2055722363745929
             },
             "KP 62.0": {
-              "ci_low": 0.010488841292906934,
-              "ci_high": 0.015160285523802752,
-              "relative_half_width": 0.18279825521133156
+              "ci_low": 0.010046311346942447,
+              "ci_high": 0.014665012011482481,
+              "relative_half_width": 0.18757539803826448
             }
           }
         },
@@ -4376,24 +4374,24 @@
           "n_blocks": 3000,
           "sections": {
             "KP 57.4": {
-              "ci_low": 0.00034703320545501526,
-              "ci_high": 0.001246429254093133,
-              "relative_half_width": 0.5972287519353627
+              "ci_low": 0.00021312601750804355,
+              "ci_high": 0.00084763873355194,
+              "relative_half_width": 0.637349062769165
             },
             "KP 58.8": {
-              "ci_low": 0.005541071096667057,
-              "ci_high": 0.009535003607594997,
-              "relative_half_width": 0.26822280346558747
+              "ci_low": 0.004503656617746733,
+              "ci_high": 0.008031697657357319,
+              "relative_half_width": 0.2855687839272543
             },
             "KP 60.0": {
-              "ci_low": 0.0011550412702193357,
-              "ci_high": 0.002566544146694118,
-              "relative_half_width": 0.39022963213302964
+              "ci_low": 0.00016680396404785043,
+              "ci_high": 0.0004935100700890965,
+              "relative_half_width": 0.5190898344399242
             },
             "KP 62.0": {
-              "ci_low": 0.0005332287265656812,
-              "ci_high": 0.0015847986219551737,
-              "relative_half_width": 0.5226251531518552
+              "ci_low": 0.00047479821448390667,
+              "ci_high": 0.0014627678615492458,
+              "relative_half_width": 0.5389446466526376
             }
           }
         },
@@ -4401,24 +4399,24 @@
           "n_blocks": 3000,
           "sections": {
             "KP 57.4": {
-              "ci_low": 0.00034478277962961604,
-              "ci_high": 0.0012651841435403837,
-              "relative_half_width": 0.6111769766838362
+              "ci_low": 0.00021141276120489598,
+              "ci_high": 0.0008602432446015732,
+              "relative_half_width": 0.6517308322317812
             },
             "KP 58.8": {
-              "ci_low": 0.0055600157297030555,
-              "ci_high": 0.009568936623542405,
-              "relative_half_width": 0.2692293868449796
+              "ci_low": 0.004514846289617145,
+              "ci_high": 0.008052362057316461,
+              "relative_half_width": 0.28633569297053424
             },
             "KP 60.0": {
-              "ci_low": 0.0011560001249102567,
-              "ci_high": 0.0025701963474253397,
-              "relative_half_width": 0.390974245163602
+              "ci_low": 0.00016694630307129566,
+              "ci_high": 0.0004983698070025922,
+              "relative_half_width": 0.5265851130541059
             },
             "KP 62.0": {
-              "ci_low": 0.0005323463816338358,
-              "ci_high": 0.0016067104565070224,
-              "relative_half_width": 0.5339537501342023
+              "ci_low": 0.0004732243063416439,
+              "ci_high": 0.0014830179704400284,
+              "relative_half_width": 0.5508498070827716
             }
           }
         },
@@ -4434,24 +4432,24 @@
           "n_blocks": 5400,
           "sections": {
             "KP 57.4": {
-              "ci_low": 0.007717464940256062,
-              "ci_high": 0.011482087546396038,
-              "relative_half_width": 0.19748695421923748
+              "ci_low": 0.006020499137990181,
+              "ci_high": 0.009295447623369825,
+              "relative_half_width": 0.21569312638818938
             },
             "KP 58.8": {
-              "ci_low": 0.03718144484774953,
-              "ci_high": 0.04494960849333035,
-              "relative_half_width": 0.09471788413853602
+              "ci_low": 0.032250043422749744,
+              "ci_high": 0.03936568368593572,
+              "relative_half_width": 0.09957305208364077
             },
             "KP 60.0": {
-              "ci_low": 0.012315372188056613,
-              "ci_high": 0.016223022382462083,
-              "relative_half_width": 0.1374846316739647
+              "ci_low": 0.003368268210970114,
+              "ci_high": 0.005149707615581613,
+              "relative_half_width": 0.21089321871653036
             },
             "KP 62.0": {
-              "ci_low": 0.010439967504804498,
-              "ci_high": 0.015276715174060323,
-              "relative_half_width": 0.1892667430320346
+              "ci_low": 0.009992196739470788,
+              "ci_high": 0.014802486427866076,
+              "relative_half_width": 0.1953562416173516
             }
           }
         },
@@ -4459,24 +4457,24 @@
           "n_blocks": 5400,
           "sections": {
             "KP 57.4": {
-              "ci_low": 0.007749883672179602,
-              "ci_high": 0.0114106763241896,
-              "relative_half_width": 0.19204017680138705
+              "ci_low": 0.0060312449699434015,
+              "ci_high": 0.009251422065797576,
+              "relative_half_width": 0.2120857987321624
             },
             "KP 58.8": {
-              "ci_low": 0.037235268082233666,
-              "ci_high": 0.04480851392929119,
-              "relative_half_width": 0.09234123473986235
+              "ci_low": 0.03227687581577264,
+              "ci_high": 0.0392110374444585,
+              "relative_half_width": 0.09703352213878977
             },
             "KP 60.0": {
-              "ci_low": 0.012352182930069535,
-              "ci_high": 0.016145394656206714,
-              "relative_half_width": 0.13345829106606585
+              "ci_low": 0.003383933117634939,
+              "ci_high": 0.005134578846980121,
+              "relative_half_width": 0.2072477524288676
             },
             "KP 62.0": {
-              "ci_low": 0.010476468380587299,
-              "ci_high": 0.01518799861213712,
-              "relative_half_width": 0.1843668602541765
+              "ci_low": 0.010042390655174508,
+              "ci_high": 0.014695647593305603,
+              "relative_half_width": 0.18897880285800678
             }
           }
         },
@@ -4499,24 +4497,24 @@
           "n_blocks": 60,
           "sections": {
             "KP 57.4": {
-              "ci_low": 0.0003654524174529808,
-              "ci_high": 0.0012073744957433155,
-              "relative_half_width": 0.5590641328762148
+              "ci_low": 0.00022827802378241606,
+              "ci_high": 0.0008244060455648221,
+              "relative_half_width": 0.5987927843942027
             },
             "KP 58.8": {
-              "ci_low": 0.005444007239685595,
-              "ci_high": 0.009716039498536885,
-              "relative_half_width": 0.28689930684339326
+              "ci_low": 0.004436484829165513,
+              "ci_high": 0.008139827410957602,
+              "relative_half_width": 0.29975814500874265
             },
             "KP 60.0": {
-              "ci_low": 0.0011625503877600962,
-              "ci_high": 0.0025375663684136865,
-              "relative_half_width": 0.3801423215286475
+              "ci_low": 0.0001719764062417423,
+              "ci_high": 0.0004771889837419021,
+              "relative_half_width": 0.4849396549189033
             },
             "KP 62.0": {
-              "ci_low": 0.0005520650105663655,
-              "ci_high": 0.001537498456485138,
-              "relative_half_width": 0.48975565756711087
+              "ci_low": 0.0004938656299077715,
+              "ci_high": 0.0014208274951418673,
+              "relative_half_width": 0.5056644568008879
             }
           }
         },
@@ -4524,24 +4522,24 @@
           "n_blocks": 60,
           "sections": {
             "KP 57.4": {
-              "ci_low": 0.0003734757964581027,
-              "ci_high": 0.001208664136412618,
-              "relative_half_width": 0.554592707692337
+              "ci_low": 0.00023121711030899488,
+              "ci_high": 0.0008238819154683914,
+              "relative_half_width": 0.5953140867841631
             },
             "KP 58.8": {
-              "ci_low": 0.00546441383489877,
-              "ci_high": 0.009614654456142758,
-              "relative_half_width": 0.27872007637609986
+              "ci_low": 0.004464570553638753,
+              "ci_high": 0.008066397128630713,
+              "relative_half_width": 0.2915411763608203
             },
             "KP 60.0": {
-              "ci_low": 0.001173767257973107,
-              "ci_high": 0.0025245441457248294,
-              "relative_half_width": 0.3734410866505738
+              "ci_low": 0.00017404593160872013,
+              "ci_high": 0.00048215197549161137,
+              "relative_half_width": 0.48953696411452613
             },
             "KP 62.0": {
-              "ci_low": 0.0005581808936134959,
-              "ci_high": 0.0015493263914422742,
-              "relative_half_width": 0.4925945197458083
+              "ci_low": 0.0004982741890606808,
+              "ci_high": 0.0014288557771595823,
+              "relative_half_width": 0.5076390420183061
             }
           }
         },
@@ -4557,24 +4555,24 @@
           "n_blocks": 60,
           "sections": {
             "KP 57.4": {
-              "ci_low": 0.0074909193631702824,
-              "ci_high": 0.011693120636501148,
-              "relative_half_width": 0.2204417327603588
+              "ci_low": 0.005834724046159061,
+              "ci_high": 0.009479614353460635,
+              "relative_half_width": 0.24005806174772495
             },
             "KP 58.8": {
-              "ci_low": 0.03602708346863759,
-              "ci_high": 0.04614105364449509,
-              "relative_half_width": 0.12332050391889661
+              "ci_low": 0.031242075938742547,
+              "ci_high": 0.040392161431620825,
+              "relative_half_width": 0.1280421586327068
             },
             "KP 60.0": {
-              "ci_low": 0.011935774155939577,
-              "ci_high": 0.01658069824653733,
-              "relative_half_width": 0.16342447403906338
+              "ci_low": 0.003255793517393331,
+              "ci_high": 0.005276492130660923,
+              "relative_half_width": 0.23921758635454005
             },
             "KP 62.0": {
-              "ci_low": 0.010158864726936535,
-              "ci_high": 0.01558949308336197,
-              "relative_half_width": 0.21250588451644298
+              "ci_low": 0.009714480090211777,
+              "ci_high": 0.015089601571759677,
+              "relative_half_width": 0.21829527926460282
             }
           }
         },
@@ -4594,24 +4592,24 @@
           "n_blocks": 6,
           "sections": {
             "KP 57.4": {
-              "ci_low": 0.006091804587872388,
-              "ci_high": 0.012760721434966439,
-              "relative_half_width": 0.3498422588032971
+              "ci_low": 0.004814373755905518,
+              "ci_high": 0.010173331452222717,
+              "relative_half_width": 0.35294916694444156
             },
             "KP 58.8": {
-              "ci_low": 0.030734814026356708,
-              "ci_high": 0.051259846997786636,
-              "relative_half_width": 0.2502634835754897
+              "ci_low": 0.02646235732001835,
+              "ci_high": 0.04495120674134371,
+              "relative_half_width": 0.25872459797060204
             },
             "KP 60.0": {
-              "ci_low": 0.009759636012102365,
-              "ci_high": 0.018442466709276416,
-              "relative_half_width": 0.30549197622587937
+              "ci_low": 0.002730771578040306,
+              "ci_high": 0.005597697657491897,
+              "relative_half_width": 0.3393970444084598
             },
             "KP 62.0": {
-              "ci_low": 0.008246571164113956,
-              "ci_high": 0.017134934313688177,
-              "relative_half_width": 0.34781048325076297
+              "ci_low": 0.007916409180798896,
+              "ci_high": 0.016541520790565662,
+              "relative_half_width": 0.3502843896655893
             }
           }
         }
@@ -4637,114 +4635,114 @@
       "sections": {
         "KP 57.4": {
           "per_pattern_annual": {
-            "HFB_CC": 0.0026439162663582905,
-            "HFB_GF": 0.013571502917116894,
-            "HFB_HA": 0.010423994964155024,
-            "HFB_MI": 0.015172241964053366,
-            "HFB_MP": 0.008652843883303084,
-            "HFB_MR": 0.006723418382053037
+            "HFB_CC": 0.0019402089364246424,
+            "HFB_GF": 0.010757811047732367,
+            "HFB_HA": 0.008553179568526966,
+            "HFB_MI": 0.01207847609359895,
+            "HFB_MP": 0.006726863716423318,
+            "HFB_MR": 0.0054935698162801175
           },
-          "min": 0.0026439162663582905,
-          "max": 0.015172241964053366,
-          "max_over_min": 5.738548590629723,
-          "equal_weight_mean": 0.009531319729506616,
-          "published_point": 0.009531319729506616,
-          "within_pattern_block_variance": 8.042033139947476e-05,
-          "between_pattern_block_variance": 1.7505384862298242e-05,
-          "between_pattern_variance_share": 0.17876187717129594,
-          "predicted_width_ratio_stratified_over_pooled": 0.9062218949179633
+          "min": 0.0019402089364246424,
+          "max": 0.01207847609359895,
+          "max_over_min": 6.225348140008465,
+          "equal_weight_mean": 0.007591684863164393,
+          "published_point": 0.007591684863164393,
+          "within_pattern_block_variance": 6.008196819154611e-05,
+          "between_pattern_block_variance": 1.1361550857813892e-05,
+          "between_pattern_variance_share": 0.1590284326555114,
+          "predicted_width_ratio_stratified_over_pooled": 0.9170450192572275
         },
         "KP 58.8": {
           "per_pattern_annual": {
-            "HFB_CC": 0.019403824432089947,
-            "HFB_GF": 0.055073462052515794,
-            "HFB_HA": 0.03972843610372209,
-            "HFB_MI": 0.058920541391058026,
-            "HFB_MP": 0.03984263899584997,
-            "HFB_MR": 0.03307218154325809
+            "HFB_CC": 0.016377027494937045,
+            "HFB_GF": 0.04830266811108732,
+            "HFB_HA": 0.03488805544253052,
+            "HFB_MI": 0.0518019430004534,
+            "HFB_MP": 0.034609962782450356,
+            "HFB_MR": 0.028404861297268102
           },
-          "min": 0.019403824432089947,
-          "max": 0.058920541391058026,
-          "max_over_min": 3.0365426979237933,
-          "equal_weight_mean": 0.041006847419748985,
-          "published_point": 0.04100684741974899,
-          "within_pattern_block_variance": 0.00027010839721921116,
-          "between_pattern_block_variance": 0.00017523488674142998,
-          "between_pattern_variance_share": 0.3934827200782869,
-          "predicted_width_ratio_stratified_over_pooled": 0.7787921930282257
+          "min": 0.016377027494937045,
+          "max": 0.0518019430004534,
+          "max_over_min": 3.1630857929784852,
+          "equal_weight_mean": 0.03573075302145446,
+          "published_point": 0.03573075302145446,
+          "within_pattern_block_variance": 0.00023687357756957506,
+          "between_pattern_block_variance": 0.00014108964794027655,
+          "between_pattern_variance_share": 0.37328935308442873,
+          "predicted_width_ratio_stratified_over_pooled": 0.7916505838534899
         },
         "KP 60.0": {
           "per_pattern_annual": {
-            "HFB_CC": 0.005286041519222836,
-            "HFB_GF": 0.019792683549288273,
-            "HFB_HA": 0.014658785823424059,
-            "HFB_MI": 0.021536975316022427,
-            "HFB_MP": 0.013336696701613056,
-            "HFB_MR": 0.0106561698154712
+            "HFB_CC": 0.0011357569188345667,
+            "HFB_GF": 0.00603837190484864,
+            "HFB_HA": 0.004765597891754134,
+            "HFB_MI": 0.006490895793653393,
+            "HFB_MP": 0.0036011956210614177,
+            "HFB_MR": 0.003309528767388453
           },
-          "min": 0.005286041519222836,
-          "max": 0.021536975316022427,
-          "max_over_min": 4.0743106609553905,
-          "equal_weight_mean": 0.014211225454173642,
-          "published_point": 0.01421122545417364,
-          "within_pattern_block_variance": 8.430974239765813e-05,
-          "between_pattern_block_variance": 2.9680287532675157e-05,
-          "between_pattern_variance_share": 0.26037617106351063,
-          "predicted_width_ratio_stratified_over_pooled": 0.8600138539212547
+          "min": 0.0011357569188345667,
+          "max": 0.006490895793653393,
+          "max_over_min": 5.715039623367551,
+          "equal_weight_mean": 0.004223557816256768,
+          "published_point": 0.004223557816256767,
+          "within_pattern_block_variance": 1.7868653943712544e-05,
+          "between_pattern_block_variance": 3.2475795516077674e-06,
+          "between_pattern_variance_share": 0.15379539880194457,
+          "predicted_width_ratio_stratified_over_pooled": 0.9198937988692256
         },
         "KP 62.0": {
           "per_pattern_annual": {
-            "HFB_CC": 0.0036918841420065214,
-            "HFB_GF": 0.017740012401483974,
-            "HFB_HA": 0.013577406603999548,
-            "HFB_MI": 0.02066949524891462,
-            "HFB_MP": 0.012413183977332312,
-            "HFB_MR": 0.008573589059018769
+            "HFB_CC": 0.0034700107362343976,
+            "HFB_GF": 0.017068996109528212,
+            "HFB_HA": 0.013142484347470224,
+            "HFB_MI": 0.01999783945627867,
+            "HFB_MP": 0.011972969264309978,
+            "HFB_MR": 0.00821720610099995
           },
-          "min": 0.0036918841420065214,
-          "max": 0.02066949524891462,
-          "max_over_min": 5.598630524109797,
-          "equal_weight_mean": 0.012777595238792622,
-          "published_point": 0.012777595238792624,
-          "within_pattern_block_variance": 0.00012765989107070604,
-          "between_pattern_block_variance": 3.131732962459489e-05,
-          "between_pattern_variance_share": 0.19699255961090387,
-          "predicted_width_ratio_stratified_over_pooled": 0.8961068242062975
+          "min": 0.0034700107362343976,
+          "max": 0.01999783945627867,
+          "max_over_min": 5.763048294766955,
+          "equal_weight_mean": 0.012311584335803573,
+          "published_point": 0.012311584335803571,
+          "within_pattern_block_variance": 0.00012473248858745666,
+          "between_pattern_block_variance": 2.957564940067767e-05,
+          "between_pattern_variance_share": 0.19166616736021994,
+          "predicted_width_ratio_stratified_over_pooled": 0.8990738749623304
         }
       },
       "reading": "these six values are held fixed at equal weight by the estimator and are NOT inside any interval this study reports; they are the structural condition every warming number carries",
       "sampling_the_patterns_instead": {
         "KP 57.4": {
-          "published_relative_half_width": 0.19238004009896154,
-          "if_the_six_patterns_were_resampled": 0.3498422588032971,
-          "factor": 1.818495612244056,
-          "pooled_member_relative_half_width": 0.21085247288000755,
-          "measured_width_ratio_stratified_over_pooled": 0.9123916711588279
+          "published_relative_half_width": 0.20967968892484487,
+          "if_the_six_patterns_were_resampled": 0.35294916694444156,
+          "factor": 1.6832778069932588,
+          "pooled_member_relative_half_width": 0.22640426253446122,
+          "measured_width_ratio_stratified_over_pooled": 0.9261295992292959
         },
         "KP 58.8": {
-          "published_relative_half_width": 0.08337898440519113,
-          "if_the_six_patterns_were_resampled": 0.2502634835754897,
-          "factor": 3.001517532994902,
-          "pooled_member_relative_half_width": 0.10568723423750885,
-          "measured_width_ratio_stratified_over_pooled": 0.7889220018551643
+          "published_relative_half_width": 0.08954814461577502,
+          "if_the_six_patterns_were_resampled": 0.25872459797060204,
+          "factor": 2.8892234348429424,
+          "pooled_member_relative_half_width": 0.11181201084597046,
+          "measured_width_ratio_stratified_over_pooled": 0.8008812643494481
         },
         "KP 60.0": {
-          "published_relative_half_width": 0.13371959063247052,
-          "if_the_six_patterns_were_resampled": 0.30549197622587937,
-          "factor": 2.284571578337588,
-          "pooled_member_relative_half_width": 0.15189853599926,
-          "measured_width_ratio_stratified_over_pooled": 0.8803217868612108
+          "published_relative_half_width": 0.2055722363745929,
+          "if_the_six_patterns_were_resampled": 0.3393970444084598,
+          "factor": 1.6509867791193937,
+          "pooled_member_relative_half_width": 0.22160661942486762,
+          "measured_width_ratio_stratified_over_pooled": 0.9276448370906586
         },
         "KP 62.0": {
-          "published_relative_half_width": 0.18279825521133156,
-          "if_the_six_patterns_were_resampled": 0.34781048325076297,
-          "factor": 1.9027013296634705,
-          "pooled_member_relative_half_width": 0.199373329063864,
-          "measured_width_ratio_stratified_over_pooled": 0.9168641365905915
+          "published_relative_half_width": 0.18757539803826448,
+          "if_the_six_patterns_were_resampled": 0.3502843896655893,
+          "factor": 1.8674324742423467,
+          "pooled_member_relative_half_width": 0.20399008920452597,
+          "measured_width_ratio_stratified_over_pooled": 0.9195319182894044
         }
       },
       "sampling_the_patterns_instead_reading": "a six-unit percentile interval, reported as a factor on the published half-width and never as an interval of its own; it measures structural climate-model spread, which the estimand conditions on rather than estimates"
     }
   },
-  "elapsed_s": 21.5
+  "elapsed_s": 161.7
 }

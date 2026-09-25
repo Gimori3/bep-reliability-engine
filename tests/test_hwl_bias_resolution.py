@@ -415,3 +415,20 @@ def test_theta_override_shape_is_validated(small_config) -> None:
         run_comparator_ladder(
             small_config, n_jobs=1, theta_override=np.zeros((7, 7), dtype=float)
         )
+
+
+def test_documented_flip_share_rule_is_narrow():
+    """ADR-0040 section 2.7 / ADR-0054: only KP 57.4's c4b_not_c3b is tolerated.
+
+    It passes where flips are at most 1 per cent of the level's transient
+    failures; any other diagnostic or section with a flip fails.
+    """
+    flips = np.array([0, 4, 3, 0])
+    trans = np.array([2, 2905, 59691, 0])
+    assert H.documented_flip_share_ok("kp57_4", "c4b_not_c3b", flips, trans)
+    assert not H.documented_flip_share_ok("kp57_4", "c4b_not_c0", flips, trans)
+    assert not H.documented_flip_share_ok("kp62_0", "c4b_not_c3b", flips, trans)
+    assert not H.documented_flip_share_ok(
+        "kp57_4", "c4b_not_c3b", np.array([0, 40, 0, 0]), trans
+    )
+    assert H.documented_flip_share_ok("kp62_0", "c4b_not_c0", np.zeros(4), trans)

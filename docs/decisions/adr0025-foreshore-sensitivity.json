@@ -19,14 +19,14 @@
           "foreshore_width_m": 0.0,
           "median_lambda_out_eff_m": 0.0,
           "median_foreland_tanh_credit": 0.0,
-          "max_abs_delta_P_f_trans": 0.0011099999999999999,
+          "max_abs_delta_P_f_trans": 0.00040000000000000105,
           "max_abs_delta_P_f_trans_at_stage_m_msl": 40.0,
-          "P_f_trans_baseline_at_that_stage": 0.03616,
-          "P_f_trans_arm_at_that_stage": 0.03727,
+          "P_f_trans_baseline_at_that_stage": 0.01809,
+          "P_f_trans_arm_at_that_stage": 0.01849,
           "max_abs_delta_P_f_static": 0.0
         }
       },
-      "elapsed_s": 146.7
+      "elapsed_s": 922.0
     },
     {
       "section": "KP58.8",
@@ -43,14 +43,14 @@
           "foreshore_width_m": 0.0,
           "median_lambda_out_eff_m": 0.0,
           "median_foreland_tanh_credit": 0.0,
-          "max_abs_delta_P_f_trans": 0.0016999999999999932,
-          "max_abs_delta_P_f_trans_at_stage_m_msl": 40.5,
-          "P_f_trans_baseline_at_that_stage": 0.0747,
-          "P_f_trans_arm_at_that_stage": 0.0764,
+          "max_abs_delta_P_f_trans": 0.0008200000000000429,
+          "max_abs_delta_P_f_trans_at_stage_m_msl": 41.75,
+          "P_f_trans_baseline_at_that_stage": 0.51725,
+          "P_f_trans_arm_at_that_stage": 0.51807,
           "max_abs_delta_P_f_static": 0.0
         }
       },
-      "elapsed_s": 254.7
+      "elapsed_s": 1319.2
     },
     {
       "section": "KP60.0",
@@ -67,14 +67,14 @@
           "foreshore_width_m": 0.0,
           "median_lambda_out_eff_m": 0.0,
           "median_foreland_tanh_credit": 0.0,
-          "max_abs_delta_P_f_trans": 0.004400000000000015,
-          "max_abs_delta_P_f_trans_at_stage_m_msl": 42.75,
-          "P_f_trans_baseline_at_that_stage": 0.31427,
-          "P_f_trans_arm_at_that_stage": 0.31867,
+          "max_abs_delta_P_f_trans": 0.0008400000000000629,
+          "max_abs_delta_P_f_trans_at_stage_m_msl": 44.25,
+          "P_f_trans_baseline_at_that_stage": 0.50062,
+          "P_f_trans_arm_at_that_stage": 0.50146,
           "max_abs_delta_P_f_static": 0.0
         }
       },
-      "elapsed_s": 317.1
+      "elapsed_s": 1454.8
     },
     {
       "section": "KP62.0",
@@ -91,10 +91,10 @@
           "foreshore_width_m": 0.0,
           "median_lambda_out_eff_m": 0.0,
           "median_foreland_tanh_credit": 0.0,
-          "max_abs_delta_P_f_trans": 0.00023999999999990695,
-          "max_abs_delta_P_f_trans_at_stage_m_msl": 51.0,
-          "P_f_trans_baseline_at_that_stage": 0.76809,
-          "P_f_trans_arm_at_that_stage": 0.76833,
+          "max_abs_delta_P_f_trans": 0.00021999999999999797,
+          "max_abs_delta_P_f_trans_at_stage_m_msl": 50.5,
+          "P_f_trans_baseline_at_that_stage": 0.66622,
+          "P_f_trans_arm_at_that_stage": 0.66644,
           "max_abs_delta_P_f_static": 0.0
         },
         "B_f=100m": {
@@ -102,9 +102,9 @@
           "median_lambda_out_eff_m": 36.224457239555726,
           "median_foreland_tanh_credit": 0.9916549930768104,
           "max_abs_delta_P_f_trans": 9.999999999998899e-05,
-          "max_abs_delta_P_f_trans_at_stage_m_msl": 49.25,
-          "P_f_trans_baseline_at_that_stage": 0.40958,
-          "P_f_trans_arm_at_that_stage": 0.40948,
+          "max_abs_delta_P_f_trans_at_stage_m_msl": 49.0,
+          "P_f_trans_baseline_at_that_stage": 0.31654,
+          "P_f_trans_arm_at_that_stage": 0.31644,
           "max_abs_delta_P_f_static": 0.0
         },
         "B_f=300m": {
@@ -112,13 +112,13 @@
           "median_lambda_out_eff_m": 36.529289080540025,
           "median_foreland_tanh_credit": 0.9999998528813471,
           "max_abs_delta_P_f_trans": 9.999999999998899e-05,
-          "max_abs_delta_P_f_trans_at_stage_m_msl": 49.25,
-          "P_f_trans_baseline_at_that_stage": 0.40958,
-          "P_f_trans_arm_at_that_stage": 0.40948,
+          "max_abs_delta_P_f_trans_at_stage_m_msl": 49.0,
+          "P_f_trans_baseline_at_that_stage": 0.31654,
+          "P_f_trans_arm_at_that_stage": 0.31644,
           "max_abs_delta_P_f_static": 0.0
         }
       },
-      "elapsed_s": 703.4
+      "elapsed_s": 2551.4
     }
   ]
 }

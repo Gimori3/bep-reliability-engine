@@ -83,14 +83,21 @@ from bep_reliability_engine.sensitivity import (  # noqa: E402
 # ---------------------------------------------------------------------------
 DEFAULT_SECTIONS: dict[str, list[float]] = {
     # Conditioning levels per section: shoulder / design HWL / transition /
-    # upper, read off each section's production fragility curve (ADR-0033 §1).
-    "kp58_8_historical_matrix.yaml": [40.25, 41.00, 41.50, 42.50],
-    "kp60_0_historical_matrix.yaml": [42.00, 42.75, 43.25, 44.25],
+    # upper, read off each section's production fragility curve (ADR-0033 §1)
+    # at the grid point nearest the §1 target transient P_f (KP58.8 0.025 /
+    # HWL / 0.49 / 0.81; KP60.0 0.049 / HWL / 0.53 / 0.82). Re-read on
+    # 2026-09-25 after ADR-0054 moved both curves to higher stages; the
+    # superseded stages were 40.25/41.00/41.50/42.50 and 42.00/42.75/43.25/44.25.
+    "kp58_8_historical_matrix.yaml": [40.25, 41.00, 41.75, 42.75],
+    "kp60_0_historical_matrix.yaml": [42.50, 42.75, 44.25, 45.50],
 }
 # Design levels (the HWL grid point) for the companion runs.
 DESIGN_LEVEL = {"kp58_8": 41.00, "kp60_0": 42.75}
 
-DEFAULT_N_LADDER = [1024, 2048, 4096, 8192]
+#: One rung above the original 2^10..2^13 ladder (ADR-0033 §3: shoulder levels
+#: may double N where P(1-P) is small). Since ADR-0054 the shoulder transients
+#: sit at P_f 0.015 and 0.025, where 2^13 no longer met the 0.02 drift limit.
+DEFAULT_N_LADDER = [2048, 4096, 8192, 16384]
 DEFAULT_REPLICATES = 25
 DEFAULT_N_BOOT = 500
 CONFIDENCE = 0.95

@@ -4,7 +4,8 @@ Date: 2026-09-24 (Green Light item 4)
 Status: Complete. Part 1 (pre-registration) was committed (ed0f59f) before any
 matrix d70 was computed; Part 2 records the outcome. **The owner adopted the
 outcome as a production change: ADR-0054** (all four matrix means re-based, clip
-ceiling 2 mm, bulk unchanged).
+ceiling 2 mm, bulk unchanged). Part 3 records the production cascade that
+ADR-0054 triggered (2026-09-25) and what it moved.
 
 Evidence: `bimodal-foundation-d70-study.json`, driver
 `scripts/bimodal_foundation_d70_study.py`, data
@@ -258,3 +259,162 @@ body.
   every specimen labelled aquifer. Corrected in the thesis with a layer column.
 - Provenance section 3.3, the per-section entries and section 8.8: marked
   superseded or resolved.
+
+
+## Part 3: the production cascade under ADR-0054 (2026-09-25)
+
+The owner's decision (re-base all four sections, raise the clip to 2 mm, keep
+bulk, write to the main `results/` with the old tree archived) was executed as
+a full production campaign. The superseded tree is
+`results/superseded_d70rebase_20260924T163630/`; every study below was re-run
+unchanged in method against the re-based production, and its committed JSON is
+the re-based record. Each affected note carries a dated pointer to this Part.
+
+### 3.1 What moved in the fragility (Phase 1)
+
+| Quantity (matrix, historical, N = 1e5) | Superseded | Re-based |
+|---|---|---|
+| Design level (nearest grid level), static / transient, KP 57.4 (39.25 m) | 2.1e-3 / 0 | 5.1e-4 / 0 |
+| KP 58.8 | 0.722 / 0.263 | 0.609 / 0.197 |
+| KP 60.0 | 0.917 / 0.314 | 0.353 / 0.056 |
+| KP 62.0 (46.50 m grid level) | 3.9e-3 / 1.5e-4 | 2.8e-3 / 1.3e-4 |
+| B at the drained design levels | 2.75 / 2.92 | 3.09 / 6.34 |
+
+KP 60.0 moves most (its matrix mean rose 2.8-fold, 0.26 to 0.74 mm) and its
+transient curve shifts about 1.5 m to higher stages. The shape of every other
+claim follows from that single fact.
+
+### 3.2 What changed in kind, not only in value
+
+1. **Phase 2 is informative at one stratum, not two.** KP 60.0 rejects 226
+   realizations (0.23 %) and moves no mean by more than 0.4 %.
+2. **KP 60.0 is the least likely of the four to fail in a year**, in both
+   climates, as if undrained and on its berm; it was second.
+3. **The KP 62.0 warming split tips to overflow's point estimate** (margin
+   0.922, share 0.48 [0.46, 0.51]), still a statistical tie. The canonical
+   alternate and the composition seam, which each used to reverse this cell,
+   now only widen overflow's lead: no ordering anywhere depends on either.
+4. **The conductivity bracket leaves no cell's ordering intact** under the
+   conservative reading (it left one): the lowest arm now drives KP 60.0's
+   historical piping to exactly zero, and the upward arm reverses KP 62.0 +4K.
+5. **Severity leads frequency at KP 60.0** in the climate attribution, both
+   inside the long stratum and over both strata (0.37 [0.29, 0.47]).
+6. **The climate ratios are 15.3 / 5.8 / 13.4 / 13.4**; the pair the ensemble
+   cannot separate is now KP 60.0 / KP 62.0.
+7. **Only KP 58.8 exceeds 1e-3 per year** historically; the surface-only
+   KP 62.2 ranks above KP 57.4 and KP 60.0 in the reach.
+8. **The berm's effect on the index gap is no longer resolved** at either
+   drained section (it was a resolved -0.016 and -0.058).
+
+### 3.3 Diagnostics the cascade surfaced
+
+- **Forward-Euler barrier jumps at KP 57.4** (the `c4b_not_c3b` class): 1 row
+  at N = 1e5 (40.50 m) and 14 at 1e6 (39.75 to 41.0 m), at most 0.14 % of the
+  transient failures at any level and none at an anchor. The campaign gates
+  now apply a share rule (at most 1 % per level) to that one documented class
+  (ADR-0040 amendment; `scripts/hwl_bias_resolution.py`,
+  `tests/test_hwl_bias_resolution.py`).
+- **One finite-hold straggler.** In the Stage 6.6 duration ladder at KP 62.0,
+  46.50 m, alpha = -1/2, one realization of 1,517 satisfies the sustained-peak
+  limit but has not breached after the longest hold, 1536 h. The limit is
+  exact at the other five levels; the reverse disagreement count is still zero
+  everywhere. It is a traverse slower than 64 days, not a disagreement.
+- **GSA levels re-read.** The ADR-0033 levels are defined by target transient
+  P_f read off each section's curve; the curves moved, so the levels were
+  re-read at the grid points nearest the same targets (KP 58.8 40.25 / 41.00 /
+  41.75 / 42.75 m; KP 60.0 42.50 / 42.75 / 44.25 / 45.50 m) and the ladder was
+  raised one rung to 2^14, as ADR-0033 §3 permits at shoulder levels.
+  **Outcome.** At 2^14 every interpreted index meets the 0.02 drift criterion
+  except the transient indicator at KP 58.8's shoulder (40.25 m), whose total
+  effects still drift 0.024 between 2^13 and 2^14 (first-order 0.012); those
+  indices are read to one decimal only, which is how the thesis now quotes
+  them. The static indicator at the two upper levels of each section is
+  saturated (P_f 0.99) and, as before, not interpreted. Design-level transient
+  rankings: KP 58.8 L 0.65, k_aq 0.59, C_e 0.32, d70 0.31 (C_e ahead of d70 and
+  resolved), first-order sum 0.55; KP 60.0, whose design level now sits on the
+  lower shoulder of its curve (P_f 0.056), k_aq 0.75, L 0.64, C_e 0.42 and d70
+  0.42 tied, first-order sum 0.34. The seepage-length total effect on the
+  transient indicator spans 0.49 to 0.81 across the eight levels. The bulk
+  companion is unchanged (bulk not re-based); the two correlated companions,
+  rerun at the design level, keep the ranking at P_f 0.17 against 0.199 under
+  independence. The static margin is level-invariant as before (sum S 0.98).
+- **Coverage and convergence levels at KP 60.0** were re-read the same way
+  (43.75 / 42.75 / 42.00 / 41.75 m).
+- **Two hard-coded pre-ADR-0054 anchors** in the equal-head and metric drivers
+  (the 1696 / 1132 static counts and the 1696 / 63 anchor ratio) were re-read
+  from the regenerated N = 1e6 ladder; the equal-head seed-recipe gate had
+  refused to run on the stale constant, as it should.
+- **Evidence left behind.** The committed Stage 6.6 copies
+  (`adr0040-stage6-6-*.json`) and the ADR-0047 ratio record are hand-installed
+  and were not rewritten by the campaign; both were refreshed here. The
+  drained-configuration record's rerun was matrix-only and had dropped its two
+  bulk blocks; they were restored from the committed file (bulk is unchanged).
+
+### 3.4 The RQ1 comparison
+
+Design anchors (`rq1-beta-reexpression.json`, `design_anchors`):
+
+| Anchor | Superseded | Re-based |
+|---|---|---|
+| KP 62.0, 46.39 m, N = 1e6 | dbeta 0.90 [0.85, 0.97], B 26.9 | **dbeta 0.85 [0.79, 0.93], B 23.6 [18.6, 32.0]** (1,203 static / 51 transient) |
+| KP 57.4, 39.21 m, N = 1e6 | dbeta >= 1.27, B >= 148 | **dbeta >= 0.88, B >= 37** (302 / 2); upper bound 1.63, point 1.18 withheld |
+| KP 57.4 resolved anchor, 39.50 m | 1.27, B 42.7 | **1.20 [1.16, 1.24], B 51.2 [44.4, 60.2]** (163 transient) |
+| KP 58.8 / KP 60.0 design, N = 1e5 | 1.22 / 1.87, B 2.75 / 2.92 | **1.13 / 1.22, B 3.09 / 6.34** |
+
+- Resolved dbeta now spans **0.85 to 1.22** (was 0.9 to 1.9 where it
+  resolved). The B ranking is 57.4 > 62.0 > 60.0 > 58.8 and the index ranking
+  60.0 > 58.8 > 62.0 with KP 57.4 bounded between 0.88 and 1.63, so KP 62.0
+  still falls from second to last, and the KP 57.4 bound no longer separates
+  that section from either drained one. At the resolved anchors KP 57.4's 1.20
+  and KP 60.0's 1.22 overlap, so "largest ratio and largest index at different
+  sections" is no longer established.
+- Stage stability at KP 62.0: 46.50 m gives B 21.6 [18.5, 25.9] on 130 and
+  dbeta 0.88; the paired ratio of the two levels is 1.09 [0.89, 1.39], so the
+  earlier "B resolvably smaller 11 cm higher" no longer holds. The 1e5 anchor
+  reads B 31.0 and dbeta 0.92 on four rows.
+- Composition, KP 62.0 design: head 0.35, gate 0.00, temporal 0.50. KP 57.4 at
+  39.50 m: 0.80 / 0.06 / 0.34. Head share, first: 0.417 and 0.669 (index),
+  78 and 100 % (probability, N = 1e5); last: 0.351 and 0.548; Shapley 0.384 and
+  0.608.
+- Severity: B decays x20 to x101 to 1.06 to 1.85 at the attainable tops;
+  dbeta dips at most 0.26 and rises at most 0.73. Top-of-range survival:
+  static 0.15 to 7.27 %, transient 5.6 to 49.9 %.
+- Equal convention (ADR-0051 driver): B_eq 7.20 [6.30, 8.38] and dbeta_eq
+  0.552 at KP 62.0; 1.97 / 0.776 at KP 58.8 and 3.30 / 0.866 at KP 60.0;
+  KP 57.4 design 15.1 / 0.678 on 20 rows (below floor). Retained share 65 / 69 / 71 %
+  at the three resolved design levels, 45 % at KP 57.4's resolved anchor.
+  Reduced-vs-reduced: 6.86 (dbeta 0.50) at KP 62.0, 4.26 (0.40) at KP 57.4
+  39.50 m. Seven gross-arm barrier jumps at KP 57.4 at 1e6.
+- Epistemic arms at the KP 62.0 anchor: adequate arms B 2.66 to 25.8, band /
+  statistical width 5.6 (46.39 m), 6.7 (46.50 m) and 4.9 (KP 57.4 39.50 m),
+  so F3 reads 4.9 to 6.7x (was 6.4 to 7.2x); it still does not fire at KP 62.0
+  and still fires at KP 57.4 (field-test k_aq: static failures, no transient).
+  dbeta over the resolved arms 0.83 to 0.93.
+- Metric study: m_p quotable rho 1.09 to 1.25 against index 0.13 to 0.19;
+  l_c rho 1.10 to 1.37 against index at most 0.10; m_p disagrees between
+  metrics at 2 to 5 quotable levels per section, l_c at none. Pairing variance
+  reduction 1.04 to 1.60 on dbeta, 1.03 to 1.32 on log B; paired SE 0.0017 to
+  0.0349, 0.035 at the KP 62.0 anchor.
+- Conductivity non-cancellation: maximum resolved departures 67 / 56 / 72 / 46
+  (were 82 / 66 / 163 / 46); normalised 0.98 to 1.59 decades per k_aq decade,
+  above one in eleven of the twelve section-and-arm pairs (the KP 62.0
+  regional-upper arm is 0.975). The "exceeds 1.0 everywhere" finding of the
+  2026-07-30 synthesis therefore no longer holds without that exception.
+- Stage 6.6 physics ladder at KP 62.0: exponent step -2.19 / -1.72 / -1.23
+  index (probability -0.37 / -0.45 / -0.51); one-branch -0.75 on 124 static /
+  1,147 transient failures; symmetric 1.29 at design (1.29 to 1.49 over the
+  range), KP 57.4 symmetric 1.14 to 2.11. Path dependence of the head step:
+  0.063 first / 0.032 second at KP 62.0 48.00 m (interaction 0.031); 0.163 /
+  0.072 at KP 57.4 40.50 m (0.091).
+- Initiation gate against transient, design grid levels: 3.96 (KP 58.8) and
+  4.85 (KP 60.0), three and a half to four times the steady-state shift; the
+  gate probability reaches 0.999 between 0.55 and 2.72 m below the transient
+  median. The gate is d70-invariant (identical probabilities before and after).
+
+### 3.5 Thesis carry-through
+
+Thesis commits `3c35fc0` (item 4 text) and the reconciliation commit that
+follows it carry every number above into Chapters 1 and 3 to 9, the Summary and
+Appendices B, E, H, I and K, with the 50 regenerated figures. A whole-document
+sweep compared every numeric token removed from the result chapters against the
+current text.

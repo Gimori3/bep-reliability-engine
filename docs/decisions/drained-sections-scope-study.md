@@ -1,5 +1,13 @@
 # The as-if-undrained deliverable at KP 58.8 and KP 60.0: what it represents, why it is not the present-day levee, and the measured-berm companion
 
+> **Re-based under ADR-0054, 2026-09-25.** The evidence this note reads was regenerated on the re-based
+> matrix d70 (0.70 / 0.53 / 0.26 / 0.70 mm became 0.90 / 0.65 / 0.74 /
+> 0.75 mm at KP 57.4 / 58.8 / 60.0 / 62.0; bulk unchanged). The committed
+> JSON is the re-based record. Where the prose below quotes a matrix-reading
+> number it is the pre-rebase value, kept as written; the re-based values are
+> in the JSON, tabulated in `bimodal-foundation-d70-study.md` Part 3 and in
+> the dated addenda of `docs/phase2_report.md` and `docs/phase3_report.md`.
+
 Study of record for Green Light item 3 (2026-09-24). No production default,
 config, CSV cell, persisted sweep or published production number changed.
 

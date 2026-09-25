@@ -3,6 +3,14 @@
 **Status:** Pre-registration written 2026-07-30, before any new number was computed.
 Outcome sections are appended below it, unedited above.
 
+> **Re-based under ADR-0054, 2026-09-25.** The evidence this note reads was regenerated on the re-based
+> matrix d70 (0.70 / 0.53 / 0.26 / 0.70 mm became 0.90 / 0.65 / 0.74 /
+> 0.75 mm at KP 57.4 / 58.8 / 60.0 / 62.0; bulk unchanged). The committed
+> JSON is the re-based record. Where the prose below quotes a matrix-reading
+> number it is the pre-rebase value, kept as written; the re-based values are
+> in the JSON, tabulated in `bimodal-foundation-d70-study.md` Part 3 and in
+> the dated addenda of `docs/phase2_report.md` and `docs/phase3_report.md`.
+
 **Type:** Companion note to ADR-0040 / ADR-0041. **Not** a new numbered ADR: no `Config`
 default changes, no physics changes, no `configs/*.yaml` or CSV edit, no persisted
 production sweep replaced. Everything here *adds* artifacts.

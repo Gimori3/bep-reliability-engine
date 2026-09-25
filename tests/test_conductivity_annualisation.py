@@ -249,25 +249,33 @@ def test_the_named_falsifier_fired_where_it_said_it_would() -> None:
     assert outcome["F5"]["fired"] is True
 
 
-def test_the_upward_arm_reverses_nothing_anywhere() -> None:
+def test_the_upward_arm_reverses_only_toward_piping() -> None:
     """P4, and the sign check on ADR-0048's monotone mechanism.
 
     Higher conductivity raises the response factor and lowers the critical
-    head, both pushing piping probability up. Since piping already leads
-    everywhere at the production value, a reversal under the upward arm would
-    indict the arms or this pipeline rather than reveal physics (falsifier F1).
+    head, both pushing piping probability up. P4 and falsifier F1 assumed piping
+    led everywhere at the production value, so any upward reversal would have
+    indicted the arms. Since ADR-0054 re-based the matrix d70 (2026-09-25) the
+    KP 62.0 warming cell's production lead is overflow's (margin 0.92), so P4
+    no longer holds and F1 fires, at that one cell only, and in the direction
+    the mechanism requires: the upward arm hands the lead to piping. A reversal
+    anywhere else, or toward overflow, would still indict the pipeline.
     """
     outcome = _evidence()["preregistration_outcome"]
-    assert outcome["P4"]["held"] is True
-    assert outcome["F1"]["fired"] is False
+    assert outcome["P4"]["held"] is False
+    assert outcome["F1"]["fired"] is True
 
     sections = _evidence()["sections"]
-    for label in SECTIONS:
-        for scenario in SCENARIOS:
-            entry = sections[label][scenario]
-            assert (
-                "k_aq_regional_upper" not in entry["arms_reversing_the_lead"]
-            ), f"{label} {scenario}"
+    reversed_up = [
+        (label, scenario)
+        for label in SECTIONS
+        for scenario in SCENARIOS
+        if "k_aq_regional_upper" in sections[label][scenario]["arms_reversing_the_lead"]
+    ]
+    assert reversed_up == [("KP 62.0", "+4K")]
+    cell = sections["KP 62.0"]["+4K"]
+    assert cell["reversal_margin_p_bep_over_p_overflow"] < 1.0
+    assert cell["arms"]["k_aq_regional_upper"]["leading_mechanism"] == "bep"
 
 
 def test_the_blanket_unit_weight_control_stays_quiet() -> None:
@@ -493,8 +501,16 @@ def test_the_upward_arm_is_the_one_that_contests_the_ordering_under_bulk() -> No
     upward = outcome["B1"]["cells_reversed_by_the_upward_arm"]
     downward = outcome["B1"]["cells_reversed_by_a_downward_arm"]
     assert len(upward) > len(downward)
-    # And the matrix reading still says the opposite, which is the contrast.
-    assert _evidence()["preregistration_outcome"]["P4"]["held"] is True
+    # Under the matrix reading the upward arm reverses one cell (the KP 62.0
+    # warming tie, since ADR-0054); under bulk it reverses several.
+    matrix_up = [
+        (label, scenario)
+        for label in SECTIONS
+        for scenario in SCENARIOS
+        if "k_aq_regional_upper"
+        in _evidence()["sections"][label][scenario]["arms_reversing_the_lead"]
+    ]
+    assert len(upward) > len(matrix_up) == 1
 
 
 def test_the_two_brackets_offset_rather_than_compound() -> None:
@@ -523,12 +539,12 @@ def test_the_two_brackets_offset_rather_than_compound() -> None:
 def test_no_cell_keeps_its_leading_mechanism_across_both_readings() -> None:
     """The RQ3 consequence: the claim rests on the union, and the union is empty.
 
-    Six of eight cells are contested under both readings. The two that are not
-    are each robust under exactly one reading and contested under the other, in
-    opposite senses, so the intersection of the robust sets is empty. C4
+    Seven of eight cells are contested under both readings since ADR-0054
+    (2026-09-25; six before). The one that is not is robust under bulk only and
+    contested under matrix, so the intersection of the robust sets is empty. C4
     predicted the two zero-overflow cells would survive; they do not, because
-    under bulk they collapse instead, so C4 scores as held only vacuously and
-    the measured truth is stronger than the prediction.
+    they collapse instead, so C4 scores as held only vacuously and the measured
+    truth is stronger than the prediction.
     """
     matrix, bulk = _evidence()["sections"], _bulk()["sections"]
     robust_both = [
@@ -540,8 +556,15 @@ def test_no_cell_keeps_its_leading_mechanism_across_both_readings() -> None:
     ]
     assert robust_both == []
     assert _bulk()["preregistration_outcome"]["C4"]["invariant_cells"] == []
-    # The one robust cell under each reading, and they are different cells.
-    assert matrix["KP 60.0"]["historical"]["ordering_verdict"] == "ROBUST"
+    # Since ADR-0054 (2026-09-25) no matrix cell is robust: KP 60.0 historical,
+    # the one it used to be, now collapses under the lowest arm (both mechanisms
+    # exactly zero). The single bulk-robust cell stays contested under matrix.
+    assert not any(
+        matrix[label][scenario]["ordering_verdict"] == "ROBUST"
+        for label in SECTIONS
+        for scenario in SCENARIOS
+    )
+    assert matrix["KP 60.0"]["historical"]["ordering_verdict"] == "COLLAPSED"
     assert bulk["KP 60.0"]["historical"]["ordering_verdict"] == "COLLAPSED"
     assert bulk["KP 62.0"]["+4K"]["ordering_verdict"] == "ROBUST"
     assert matrix["KP 62.0"]["+4K"]["ordering_verdict"] == "REVERSED"

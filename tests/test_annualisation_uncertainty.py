@@ -344,18 +344,20 @@ def test_the_record_matches_the_live_production_table() -> None:
 # 4. The pre-registered questions                                               #
 # --------------------------------------------------------------------------- #
 def test_q1_records_which_pairs_of_climate_ratios_resolve() -> None:
-    """Five of the six pairs resolve; the two 12.7s do not.
+    """Four of the six pairs resolve; the two 13.4s do not, nor KP 57.4 / KP 60.0.
 
-    The unresolved pair is the study's most quotable negative: KP 57.4 and
+    The unresolved pairs are the study's most quotable negative: KP 60.0 and
     KP 62.0 rise by factors this ensemble cannot tell apart, so their
-    near-equality must not be read as a finding about the two sections.
+    near-equality must not be read as a finding about the two sections. (Before
+    the ADR-0054 re-basing of 2026-09-25 five pairs resolved and the
+    indistinguishable pair was KP 57.4 / KP 62.0, at 12.7 each.)
     """
     q1 = _evidence()["preregistration_outcome"]["Q1"]
     assert q1["n_pairs"] == 6
-    assert q1["n_resolved"] == 5
+    assert q1["n_resolved"] == 4
     assert q1["verdict"].startswith("PARTIAL")
     unresolved = [key for key, entry in q1["pairs"].items() if not entry["resolved"]]
-    assert unresolved == ["KP 57.4 - KP 62.0"]
+    assert unresolved == ["KP 57.4 - KP 60.0", "KP 60.0 - KP 62.0"]
     for entry in q1["pairs"].values():
         assert entry["n_replicates_paired"] == _evidence()["estimator"]["replicates"], (
             "the between-section difference must be paired on every replicate; "
@@ -364,7 +366,10 @@ def test_q1_records_which_pairs_of_climate_ratios_resolve() -> None:
 
 
 def test_q2_records_the_kp62_warming_split_as_a_tie() -> None:
-    """A production margin of 1.0013 does not survive its own sampling interval.
+    """A production margin of 0.922 does not survive its own sampling interval.
+
+    Since the ADR-0054 re-basing (2026-09-25) overflow's point estimate leads by
+    that margin; before it piping led by 1.0013. Either way the split is a tie.
 
     Both halves are pinned: the split is not resolvably different from level,
     and the third decimal the thesis table prints is not an estimated digit.
@@ -375,7 +380,7 @@ def test_q2_records_the_kp62_warming_split_as_a_tie() -> None:
     assert q2["verdict"].startswith("TIE")
     difference = q2["difference_p_annual_bep_minus_overflow"]
     assert difference["ci_low"] < 0.0 < difference["ci_high"]
-    assert 1.0 < q2["production_margin_bep_over_overflow"] < 1.01
+    assert 0.9 < q2["production_margin_bep_over_overflow"] < 0.95
 
 
 def test_q3_separates_a_resolved_lead_from_a_degenerate_one() -> None:
@@ -595,7 +600,7 @@ def test_the_note_and_the_record_agree_on_every_verdict() -> None:
     part_two = text[text.index("## 2. Outcome") :]
     assert len(part_two.splitlines()) > 20, "Part 2 is still a placeholder"
     assert f"{outcome['Q1']['n_resolved']} of 6" in part_two
-    assert "KP 57.4 - KP 62.0" in part_two or "KP 57.4 and KP 62.0" in part_two
+    assert "KP 60.0 and KP 62.0" in part_two
     assert "tie" in part_two.lower()
     assert "degenerate" in part_two.lower()
 
@@ -827,21 +832,22 @@ def test_a_count_limited_cell_is_never_an_endpoint_of_a_quoted_range() -> None:
             )
 
 
-def test_the_two_historical_shares_are_recorded_as_indistinguishable() -> None:
-    """Q5's finding: "89 and 93 per cent" is one number, not two.
+def test_the_two_historical_shares_are_recorded_as_resolved() -> None:
+    """Q5's finding since ADR-0054: "91 and 97 per cent" are two numbers.
 
-    The chapter prints them as a pair, which invites a reader to see a
-    difference between KP 58.8 and KP 60.0 that the ensemble cannot resolve. A
-    later edit that flipped this into a clean separation would erase the most
-    directly usable correction part two produced.
+    Before the 2026-09-25 re-basing the pair was 89 and 93 per cent and did not
+    resolve (verdict COLLAPSED). On the re-based matrix d70 the paired interval
+    on the difference lies wholly below zero, so the chapter may print them as
+    a resolved pair; a later edit that flipped this back would have to be a
+    change in the evidence, not in the prose.
     """
     entry = _evidence()["preregistration_outcome"]["Q5"]["historical"]
     assert entry["clearing_cells"] == ["KP 58.8", "KP 60.0"]
-    assert entry["n_resolved"] == 0
-    assert entry["endpoints_resolve"] is False
-    assert "COLLAPSED" in entry["verdict"]
+    assert entry["n_resolved"] == 1
+    assert entry["endpoints_resolve"] is True
+    assert "RANGE SUPPORTED" in entry["verdict"]
     pair = entry["pairs"]["KP 58.8 - KP 60.0"]
-    assert pair["ci_low"] < 0.0 < pair["ci_high"]
+    assert pair["ci_high"] < 0.0
 
 
 def test_the_historical_concentration_range_rests_on_the_populated_pair() -> None:
@@ -908,7 +914,8 @@ def test_the_part_two_prose_agrees_with_the_part_two_record() -> None:
     assert len(part_two.splitlines()) > 40, "section 4 is still a placeholder"
     outcome = _evidence()["preregistration_outcome"]
     assert "RANGE SUPPORTED" in outcome["Q4"]["historical"]["verdict"]
-    assert "COLLAPSED" in outcome["Q5"]["historical"]["verdict"]
+    assert "RANGE SUPPORTED" in outcome["Q5"]["historical"]["verdict"]
+    assert "ADR-0054" in part_two
     assert "count-limited" in part_two
     assert "3 yr" in part_two or "3 years in 3" in part_two
     for label in ("KP 58.8", "KP 60.0"):
@@ -1043,10 +1050,15 @@ def test_the_correction_moved_no_point_estimate_and_no_historical_number() -> No
     historical ensemble has one stratum, so its whole half is untouched. Both
     are checked here against the kept pooled-draw record rather than asserted
     in prose.
+
+    Since ADR-0054 (2026-09-25) re-based the matrix d70, the matrix arms of the
+    current record describe a different production than the kept pooled-draw
+    record, so the invariance is checked on the two bulk arms, whose production
+    that re-basing left bit-identical.
     """
     old = json.loads(_require(SUPERSEDED).read_text(encoding="utf-8"))
     new = _evidence()
-    arms = ("matrix/posterior", "matrix/prior", "bulk/posterior", "bulk/prior")
+    arms = ("bulk/posterior", "bulk/prior")
     for label in SECTIONS:
         for arm in arms:
             for scenario in SCENARIOS:

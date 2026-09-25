@@ -1,5 +1,13 @@
 # The drained configuration at KP 58.8 and KP 60.0: how wide the bracket is, and what survives it
 
+> **Re-based under ADR-0054, 2026-09-25.** The evidence this note reads was regenerated on the re-based
+> matrix d70 (0.70 / 0.53 / 0.26 / 0.70 mm became 0.90 / 0.65 / 0.74 /
+> 0.75 mm at KP 57.4 / 58.8 / 60.0 / 62.0; bulk unchanged). The committed
+> JSON is the re-based record. Where the prose below quotes a matrix-reading
+> number it is the pre-rebase value, kept as written; the re-based values are
+> in the JSON, tabulated in `bimodal-foundation-d70-study.md` Part 3 and in
+> the dated addenda of `docs/phase2_report.md` and `docs/phase3_report.md`.
+
 Companion note to ADR-0050. Pre-registered 2026-08-21 (commit `ae8e07d`,
 before the first arm ran); measured and closed 2026-08-22.
 

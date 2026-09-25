@@ -515,9 +515,13 @@ def test_every_section_passed_its_gate() -> None:
 
 
 def test_the_record_reproduces_the_two_pre_named_1e6_static_counts() -> None:
-    """The campaign brief named these before the run; they are the seed gate."""
+    """The campaign brief named these before the run; they are the seed gate.
+
+    Re-read from the regenerated N = 1e6 ladder after ADR-0054 (2026-09-25);
+    the pre-ADR-0054 counts were 1696 and 1132.
+    """
     record = _evidence()
-    expected = {("KP62.0", 46.39): 1696, ("KP57.4", 39.21): 1132}
+    expected = {("KP62.0", 46.39): 1203, ("KP57.4", 39.21): 302}
     for (section, stage), count in expected.items():
         rows = record["n1e6"][section]["seed_recipe_gate"]["detail"]
         row = next(r for r in rows if abs(r["stage_m_msl"] - stage) < 1e-9)
@@ -573,13 +577,18 @@ def test_the_record_carries_both_equal_convention_readings() -> None:
 
 
 def test_the_design_anchor_factors_are_the_ones_the_note_quotes() -> None:
-    """Pins the four headline numbers against silent drift in a re-run."""
+    """Pins the four headline numbers against silent drift in a re-run.
+
+    Re-based under ADR-0054 (2026-09-25); before it 7.34199, 23.102, 1.87057
+    and 2.11341. KP 57.4's value now rests on 20 gross-head transient failures,
+    below the thirty-realization floor.
+    """
     record = _evidence()
     expected = {
-        ("n1e6", "KP62.0", 46.39): 7.34199,
-        ("n1e6", "KP57.4", 39.21): 23.102,
-        ("n1e5", "KP58.8", 41.0): 1.87057,
-        ("n1e5", "KP60.0", 42.75): 2.11341,
+        ("n1e6", "KP62.0", 46.39): 7.20359,
+        ("n1e6", "KP57.4", 39.21): 15.1,
+        ("n1e5", "KP58.8", 41.0): 1.97251,
+        ("n1e5", "KP60.0", 42.75): 3.29895,
     }
     for (stage_key, section, level), value in expected.items():
         rows = record[stage_key][section]["levels"]

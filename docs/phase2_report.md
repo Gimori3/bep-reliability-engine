@@ -834,3 +834,31 @@ event set is still closed at 2016 on the same argument. The thesis already
 prints 0.326 at all six of its sites (Summary, Chapter 4, Chapter 6, Chapter 8
 and Chapter 9 twice), so this correction brings the engine record up to the thesis and the artifact, not the
 other way round.
+
+
+## Addendum, 2026-09-25 - the matrix d70 re-based (ADR-0054); authoritative where it differs from everything above
+
+ADR-0054 replaced the matrix d70 prior means with the median of each section's
+own aquifer-matrix d70 (finer than 2 mm): 0.70 / 0.53 / 0.26 / 0.70 mm became
+0.90 / 0.65 / 0.74 / 0.75 mm at KP 57.4 / 58.8 / 60.0 / 62.0, the clip ceiling
+rose to 2 mm and the bulk reading is unchanged. The four matrix sweeps and
+their posteriors were re-run through the production campaign
+(`results/production_campaign_manifest.json`); the superseded artifacts are
+kept under `results/superseded_d70rebase_20260924T163630/`. Evidence:
+`docs/decisions/bimodal-foundation-d70-study.md` and the regenerated
+`phase2-survival-update-per-stratum.json`, `phase2-peak-shortcut.json`,
+`survival-information-and-nesting-study.json`.
+
+| Quantity (matrix, no-breach, trace-anchored) | Superseded | Re-based |
+|---|---|---|
+| Transient rejection KP 57.4 / 58.8 / 60.0 / 62.0 | 0.06 / 5.51 / 3.24 / 0.00 % | **0.02 / 3.81 / 0.23 / 0.00 %** (16 / 3,813 / 226 / 0 rows) |
+| Static rejection | 6.26 / 57.63 / 73.31 / 0.00 % | 2.73 / 45.22 / 12.83 / 0.00 % |
+| Marginal transient rejection | 0 in every stratum | 0 in every stratum (nesting holds, worst margin -0.099 m) |
+| Informative strata | two (KP 58.8, KP 60.0) | **one (KP 58.8)**; KP 60.0 moves no mean by more than 0.4 % |
+| Posterior C_e / k_aq mean shift, KP 58.8 | -4.0 / -4.0 % | -2.8 / -3.1 % |
+| Peak-only over-rejection, canonical member | 2.83 (KP 58.8), 4.04 (KP 60.0) | **2.87** at KP 58.8; KP 60.0's 4.98 rests on 226 rows and is not quoted |
+| Seepage length, KP 58.8 | mean +1.34 %, CoV -3.57 %, variance -4.5 % | mean +0.97 %, CoV -2.76 %, variance -3.6 % |
+| Survival compatibility, transient / static, KP 58.8 and 60.0 | 0.945, 0.968 / 0.424, 0.267 | 0.962, 0.998 / 0.548, 0.872 |
+| On the measured berm (ADR-0050), KP 58.8 / 60.0 | 1.50 / 0.53 % | 0.90 / 0.01 % (899 / 14 rows) |
+| No-initiation criterion | 66.4 / 99.6 / 99.3 / 39.6 % | unchanged (initiation does not see d70) |
+| 2011 bounding replay | one realization, 0.001 %, one stratum | one realization, 0.001 %, one stratum |

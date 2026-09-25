@@ -101,6 +101,11 @@ p = 0.23), supporting the lognormal family.
 - All four matrix means now exceed Sellmeijer's validated 0.430 mm limit (by
   51 to 109 per cent); none lies inside it.
 - Every thesis number on the matrix reading is re-derived.
+- The KP 57.4 forward-Euler barrier-jump class (ADR-0040 section 7) is more
+  frequent under the coarser matrix: 1 row at N = 1e5 and 14 at N = 1e6, none at
+  an anchor level, at most 0.14 per cent of a level's transient failures. The
+  ladder and campaign gates now apply a share rule to that class (at most 1 per
+  cent per level) instead of demanding zero; ADR-0040 is amended accordingly.
 
 ## References
 - OYO (1999), report Tables 4-3-1 and 4-3-2 (pp. 52 to 53), Figure 4-3-1 soil

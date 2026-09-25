@@ -267,11 +267,14 @@ def _lc_companion() -> dict:
 
 
 def test_critical_length_window_under_the_thirty_row_floor():
-    """The published 1.11 to 1.38 is the R1-qualified window; 1.67 is not.
+    """The published 1.10 to 1.37 is the R1-qualified window; 1.55 is not.
 
-    Pins ADR-0049 note section 8: the unfiltered maximum rests on 15 failing
-    realizations in its smallest contingency cell, and the maximum over levels
-    where every cell clears 30 is 1.3846.
+    Pins ADR-0049 note section 8 as re-based under ADR-0054 (2026-09-25): the
+    unfiltered maximum, 1.545 at KP 58.8 39.75 m, rests on 11 failing
+    realizations in its smallest contingency cell, four levels fall below the
+    thirty-row floor, and the maximum over levels where every cell clears 30 is
+    1.3663. (Before the re-basing: 176 levels, one below the floor, 1.6667 on
+    15 rows, qualified maximum 1.3846, shorter arm 1.2264.)
     """
     payload = _lc_companion()
     rows = []
@@ -284,30 +287,31 @@ def test_critical_length_window_under_the_thirty_row_floor():
                 departure = max(rho["rho"], 1.0 / rho["rho"])
                 rows.append((departure, int(level["min_cell_failures"]), arm))
 
-    assert len(rows) == 176
+    assert len(rows) == 172
     qualified = [r for r in rows if r[1] >= 30]
-    assert len(qualified) == 175  # exactly one level falls below the floor
+    assert len(qualified) == 168  # four levels fall below the floor
 
     unfiltered_max = max(r[0] for r in rows)
     qualified_max = max(r[0] for r in qualified)
-    assert unfiltered_max == pytest.approx(1.6667, abs=5e-4)
-    assert qualified_max == pytest.approx(1.3846, abs=5e-4)
+    assert unfiltered_max == pytest.approx(1.5455, abs=5e-4)
+    assert qualified_max == pytest.approx(1.3663, abs=5e-4)
 
-    # The excluded level is the unfiltered maximum, and its count is 15.
+    # The unfiltered maximum is one of the excluded levels, on 11 rows.
     excluded = [r for r in rows if r[1] < 30]
-    assert excluded[0][0] == pytest.approx(unfiltered_max)
-    assert excluded[0][1] == 15
+    worst = max(excluded)
+    assert worst[0] == pytest.approx(unfiltered_max)
+    assert worst[1] == 11
 
-    # The shorter-arm window is untouched by the floor.
     lower_arm = [r[0] for r in qualified if r[2] == "l_c_lower"]
-    assert max(lower_arm) == pytest.approx(1.2264, abs=5e-4)
+    assert max(lower_arm) == pytest.approx(1.1844, abs=5e-4)
 
 
 def test_critical_length_transient_span_window():
-    """The quoted transient span 1.00 to 1.70 is the R1-qualified maximum.
+    """The quoted transient span 1.00 to 1.61 is the R1-qualified maximum.
 
-    The unfiltered 2.083 sits at KP 62.0's design level, whose smallest cell
-    holds 12 failing realizations.
+    Re-based under ADR-0054 (2026-09-25): the unfiltered 1.667 rests on 12
+    failing realizations in its smallest cell and the qualified maximum is
+    1.605 at KP 62.0 46.75 m. (Before: 2.083 on 12 rows and 1.698.)
     """
     payload = _lc_companion()
     spans = []
@@ -329,9 +333,9 @@ def test_critical_length_transient_span_window():
             )
             spans.append((float(span), cells))
 
-    assert max(s for s, _ in spans) == pytest.approx(2.0833, abs=5e-4)
+    assert max(s for s, _ in spans) == pytest.approx(1.6667, abs=5e-4)
     qualified = [s for s, c in spans if c >= 30]
-    assert max(qualified) == pytest.approx(1.6981, abs=5e-4)
+    assert max(qualified) == pytest.approx(1.6047, abs=5e-4)
     assert min(qualified) == pytest.approx(1.0014, abs=5e-3)
 
 
@@ -349,9 +353,11 @@ def _coverage_records() -> list[dict]:
 def test_measured_coverage_record_still_says_what_the_thesis_quotes():
     """Pins the study's headline numbers and both pre-registered verdicts.
 
-    The thesis quotes 94.1 to 99.9 per cent under the production design and
-    93.8 to 96.6 under the iid control, so a regenerated record that moved
-    either range must fail here rather than leave the text behind.
+    The thesis quotes 95.0 to 99.9 per cent under the production design and
+    93.9 to 96.9 under the iid control (re-based under ADR-0054, 2026-09-25,
+    with KP 60.0 re-levelled; before: 94.1 to 99.9 and 93.8 to 96.6), so a
+    regenerated record that moved either range must fail here rather than leave
+    the text behind.
     """
     lhs_cov, iid_cov, lhs_lim, iid_lim = [], [], [], []
     for d in _coverage_records():
@@ -372,21 +378,22 @@ def test_measured_coverage_record_still_says_what_the_thesis_quotes():
                 iid_lim.append(iid["coverage_lower_limit_95"])
 
     assert len(lhs_cov) == 16  # 2 sections x 4 levels x 2 branches
-    assert min(lhs_cov) == pytest.approx(0.9413, abs=5e-4)
+    assert min(lhs_cov) == pytest.approx(0.9500, abs=5e-4)
     assert max(lhs_cov) == pytest.approx(0.9988, abs=5e-4)
-    assert min(iid_cov) == pytest.approx(0.9375, abs=5e-4)
-    assert max(iid_cov) == pytest.approx(0.9663, abs=5e-4)
+    assert min(iid_cov) == pytest.approx(0.9388, abs=5e-4)
+    assert max(iid_cov) == pytest.approx(0.9688, abs=5e-4)
     # Every cell clears the pre-registered floor, in both arms.
     assert min(lhs_lim) >= 0.90 and min(iid_lim) >= 0.90
-    assert min(lhs_lim) == pytest.approx(0.9257, abs=5e-4)
+    assert min(lhs_lim) == pytest.approx(0.9354, abs=5e-4)
 
 
 def test_stratification_does_not_reduce_coverage_below_the_iid_arm():
     """15 of 16 matched cells cover at least as often; the exception is explained.
 
-    The one shortfall is KP 58.8's deepest transient level on a mean of 31
+    The one shortfall is KP 60.0's deepest transient level on a mean of 25
     failing realizations, and its own exact interval contains 0.95, so it is
-    not a measured deficit.
+    not a measured deficit. (Before the ADR-0054 re-basing it was KP 58.8's
+    deepest transient level, 39.75 m, on a mean of 31.)
     """
     at_least = 0
     exception = None
@@ -402,8 +409,8 @@ def test_stratification_does_not_reduce_coverage_below_the_iid_arm():
     assert at_least == 15
     assert exception is not None
     level, branch, lhs, _iid = exception
-    assert branch == "transient" and level == pytest.approx(39.75)
-    assert lhs["mean_count"] == pytest.approx(31.0, abs=1.0)
+    assert branch == "transient" and level == pytest.approx(41.75)
+    assert lhs["mean_count"] == pytest.approx(25.0, abs=1.0)
     lo = Beta.ppf(0.025, lhs["n_covered"], lhs["n_replicates"] - lhs["n_covered"] + 1)
     hi = Beta.ppf(0.975, lhs["n_covered"] + 1, lhs["n_replicates"] - lhs["n_covered"])
     assert lo <= 0.95 <= hi
@@ -412,14 +419,15 @@ def test_stratification_does_not_reduce_coverage_below_the_iid_arm():
 def test_variance_ratio_decays_from_stratified_to_parity():
     """The mechanism behind the conservatism, and its limit.
 
-    In the bulk the stratified count carries a third to two fifths of the
-    binomial variance; by the deepest level it is back at 1. The iid arm stays
+    In the bulk the stratified count carries about a third to a half of the
+    binomial variance (0.37 and 0.47 since the ADR-0054 re-basing); by the
+    deepest level it is back at 1. The iid arm stays
     near 1 throughout, which is the second apparatus check.
     """
     for d in _coverage_records():
         bulk = d["levels"][0]["arms"]["production_lhs"]["transient"]["var_ratio"]
         deep = d["levels"][-1]["arms"]["production_lhs"]["transient"]["var_ratio"]
-        assert bulk < 0.45
+        assert bulk < 0.50
         assert 0.95 < deep < 1.10
         iid_ratios = [
             lv["arms"]["iid_control"][b]["var_ratio"]
@@ -433,10 +441,11 @@ def test_paired_bootstrap_shortfall_belongs_to_the_percentile_interval():
     """The iid arm under-covers slightly at every level, so LHS is not the cause.
 
     The percentile bootstrap is an approximate interval for a proportion, and
-    the independent-sampling arm shows that directly: 0.928 to 0.958 across all
-    eight levels, pooling to 0.943 over 6399 replicates against a nominal 0.95,
-    with no trend in the failure count. The stratified arm runs 0.925 to 0.979
-    and pools to 0.954, conservative in the bulk and converging onto the iid
+    the independent-sampling arm shows that directly: 0.935 to 0.968 across all
+    eight levels, pooling to 0.947 against a nominal 0.95, with no trend in the
+    failure count (re-based under ADR-0054; before 0.928 to 0.958, pooled
+    0.943). The stratified arm runs 0.931 to 0.968 and pools to 0.950,
+    conservative in the bulk and converging onto the iid
     values with depth, which is the same decay the Clopper-Pearson cells show.
     No cell falls below the pre-registered floor, and the nesting implication
     held in every replicate.
@@ -455,11 +464,11 @@ def test_paired_bootstrap_shortfall_belongs_to_the_percentile_interval():
                 lim.append(block["coverage_lower_limit_95"])
 
     assert len(iid_cov) == 8
-    assert min(iid_cov) == pytest.approx(0.9275, abs=5e-4)
-    assert max(iid_cov) == pytest.approx(0.9575, abs=5e-4)
-    assert sum(c < 0.95 for c in iid_cov) == 5  # the interval is approximate
-    assert min(lhs_cov) == pytest.approx(0.9250, abs=5e-4)
-    assert max(lhs_cov) == pytest.approx(0.9788, abs=5e-4)
+    assert min(iid_cov) == pytest.approx(0.9350, abs=5e-4)
+    assert max(iid_cov) == pytest.approx(0.9675, abs=5e-4)
+    assert sum(c < 0.95 for c in iid_cov) == 7  # the interval is approximate
+    assert min(lhs_cov) == pytest.approx(0.9313, abs=5e-4)
+    assert max(lhs_cov) == pytest.approx(0.9675, abs=5e-4)
     assert min(lhs_lim) >= 0.90 and min(iid_lim) >= 0.90
 
     # Pooled over every replicate: the iid arm sits below nominal, the
@@ -473,13 +482,15 @@ def test_paired_bootstrap_shortfall_belongs_to_the_percentile_interval():
                 covered += block["n_covered"]
                 reportable += block["n_reportable"]
         pooled[arm] = covered / reportable
-    assert pooled["iid_control"] == pytest.approx(0.9430, abs=5e-4)
-    assert pooled["production_lhs"] == pytest.approx(0.9544, abs=5e-4)
+    assert pooled["iid_control"] == pytest.approx(0.9466, abs=5e-4)
+    assert pooled["production_lhs"] == pytest.approx(0.9495, abs=5e-4)
 
-    # The stratified arm is conservative where the Clopper-Pearson cells are.
+    # The stratified arm is at least as conservative in the bulk as the iid arm
+    # (strictly at KP 58.8; the two tie at 0.9675 at KP 60.0's re-levelled bulk
+    # level since the ADR-0054 re-basing).
     for d in _coverage_records():
         bulk = d["levels"][0]["arms"]
         assert (
             bulk["production_lhs"]["paired_bootstrap_delta_beta"]["coverage"]
-            > bulk["iid_control"]["paired_bootstrap_delta_beta"]["coverage"]
+            >= bulk["iid_control"]["paired_bootstrap_delta_beta"]["coverage"]
         )

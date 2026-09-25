@@ -127,14 +127,15 @@ class TestTheTotalRatioIsAMixtureAndNotTheProduct:
     def test_the_product_is_not_the_total_ratio_where_the_stratum_is_a_minority(
         self, duration: dict
     ) -> None:
-        """KP 57.4 carries 13 per cent of its historical probability in the long
-        stratum, and there the product overshoots the total by a factor above 2.
+        """KP 57.4 carries 14 per cent of its historical probability in the long
+        stratum, and there the product overshoots the total by a factor above 2
+        (2.28 since the ADR-0054 re-basing of 2026-09-25; 2.26 before it).
         This is the measured defect; if it ever disappears, the correction in
         Chapter 7 has lost its subject."""
         worst = max(block["product_over_total_ratio"] for block in duration.values())
         assert worst > 2.0
         assert duration["KP 57.4"]["product_over_total_ratio"] == pytest.approx(
-            2.26, abs=0.01
+            2.28, abs=0.01
         )
 
     def test_the_error_of_the_product_has_its_exact_closed_form(
@@ -145,8 +146,8 @@ class TestTheTotalRatioIsAMixtureAndNotTheProduct:
         This is why the product is a usable approximation at KP 58.8 and
         KP 60.0 and not at KP 57.4: the error is the weight deficit times the
         gap between the two strata's contribution ratios. It also explains
-        KP 62.0, where the share is only 0.59 and the product is still within
-        5 per cent, because there the two contribution ratios nearly coincide.
+        KP 62.0, where the share is only 0.60 and the product is still within
+        6 per cent, because there the two contribution ratios lie close together.
         A share test alone would get that section wrong."""
         for name, block in duration.items():
             error = block["ratio_inside_contribution"] - block["ratio_total"]
@@ -174,19 +175,27 @@ class TestFrequencyDoesNotDominateOverBothStrata:
     def test_frequency_exceeds_severity_inside_the_long_stratum(
         self, duration: dict
     ) -> None:
+        """At three sections since ADR-0054 (2026-09-25); at KP 60.0 the long
+        stratum's conditional probability rises by 4.6 against a frequency
+        factor of 2.8, so severity leads there. Before the re-basing frequency
+        led at all four."""
         for name, block in duration.items():
-            assert (
-                block["frequency_factor_inside"] > block["severity_factor_inside"]
-            ), name
-            assert block["frequency_share_of_log_inside"] > 0.5, name
+            leads = block["frequency_factor_inside"] > block["severity_factor_inside"]
+            share = block["frequency_share_of_log_inside"]
+            if name == "KP 60.0":
+                assert not leads, name
+                assert share < 0.5, name
+            else:
+                assert leads, name
+                assert share > 0.5, name
 
     def test_frequency_never_exceeds_a_bare_majority_over_both_strata(
         self, duration: dict
     ) -> None:
-        """Not "never a majority": four of the sixteen readings do cross a half,
-        all four by less than 0.03. The claim that holds is that none reaches
-        0.53, so no reading makes the total increase mainly a frequency
-        effect."""
+        """Not "never a majority": one of the sixteen readings crosses a half,
+        by less than 0.03 (four did before the ADR-0054 re-basing of
+        2026-09-25). The claim that holds is that none reaches 0.53, so no
+        reading makes the total increase mainly a frequency effect."""
         crossings = 0
         for name, block in duration.items():
             a = block["attribution_log"]
@@ -204,14 +213,20 @@ class TestFrequencyDoesNotDominateOverBothStrata:
                 if value > 0.5:
                     crossings += 1
                     assert value - 0.5 < 0.03, name
-        assert crossings == 4
+        assert crossings == 1
 
     def test_the_resolved_pair_carries_intervals_that_straddle_a_half(
         self, duration: dict
     ) -> None:
+        """KP 58.8's interval straddles a half; since the ADR-0054 re-basing
+        (2026-09-25) KP 60.0's lies wholly below it, so severity leads there
+        resolvably. Before it both straddled."""
         for name in RESOLVED:
             interval = duration[name]["intervals"]["frequency_share_shapley"]
-            assert interval["ci_low"] < 0.5 < interval["ci_high"], name
+            if name == "KP 60.0":
+                assert interval["ci_high"] < 0.5, name
+            else:
+                assert interval["ci_low"] < 0.5 < interval["ci_high"], name
 
     def test_intervals_are_withheld_below_the_occupancy_floor(
         self, duration: dict
@@ -258,11 +273,11 @@ class TestMechanismSharesNormaliseBySumNotUnion:
         }
         worst = max(cells, key=cells.__getitem__)
         assert worst == ("KP 62.0", "+4K")
-        assert cells[worst] == pytest.approx(1.314, abs=0.002)
+        assert cells[worst] == pytest.approx(1.310, abs=0.002)
         cell = record["composition_overlap"]["KP 62.0"]["+4K"]
-        assert cell["sum_normalised_shares"]["bep"] == pytest.approx(0.500, abs=0.002)
+        assert cell["sum_normalised_shares"]["bep"] == pytest.approx(0.480, abs=0.002)
         assert cell["union_normalised_marginals"]["bep"] == pytest.approx(
-            0.658, abs=0.002
+            0.628, abs=0.002
         )
 
     def test_frechet_bracket_contains_the_independent_union(self, record: dict) -> None:
@@ -286,9 +301,10 @@ class TestHistoricalNonBreachCheck:
         assert c["reach_annual_series_union"] == pytest.approx(series, rel=EXACT)
         assert c["expected_failures"] == pytest.approx(60.0 * series, rel=EXACT)
         assert c["p_no_failure"] == pytest.approx((1.0 - series) ** 60, rel=EXACT)
-        assert round(c["reach_annual_series_union"], 4) == 0.0108
-        assert c["expected_failures"] == pytest.approx(0.645, abs=0.001)
-        assert c["p_no_failure"] == pytest.approx(0.523, abs=0.001)
+        # Re-based under ADR-0054 (2026-09-25); before it 0.0108, 0.645, 0.523.
+        assert round(c["reach_annual_series_union"], 4) == 0.0077
+        assert c["expected_failures"] == pytest.approx(0.459, abs=0.001)
+        assert c["p_no_failure"] == pytest.approx(0.631, abs=0.001)
 
     def test_exact_one_sided_bound_is_below_the_rule_of_three(
         self, record: dict
@@ -301,12 +317,12 @@ class TestHistoricalNonBreachCheck:
         )
         assert c["exclusion_upper_95_exact"] == pytest.approx(0.0487, abs=0.0001)
         assert c["exclusion_upper_95_exact"] < c["exclusion_upper_95_rule_of_three"]
-        assert c["exact_upper_over_reported"] == pytest.approx(4.53, abs=0.01)
+        assert c["exact_upper_over_reported"] == pytest.approx(6.37, abs=0.01)
 
     def test_independence_over_states_the_reach_probability(self, record: dict) -> None:
         c = record["historical_consistency"]
         assert c["reach_annual_series_union"] > c["reach_annual_largest"]
-        assert c["union_over_largest"] == pytest.approx(1.46, abs=0.01)
+        assert c["union_over_largest"] == pytest.approx(1.26, abs=0.01)
 
     def test_both_assumptions_are_recorded_with_their_directions(
         self, record: dict

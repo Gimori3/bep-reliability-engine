@@ -1764,10 +1764,14 @@ def figure_kp57_4_bound(evidence: dict[str, Any]) -> tuple[Path, list[dict[str, 
             f"$B$ = {_num(quotable['ratio']):.1f} "
             f"[{_num(quotable['ci_lo']):.1f}, {_num(quotable['ci_hi']):.1f}] "
             f"on {int(quotable['k_transient'])} transient rows, RESOLVED\n"
-            f"caveat: this level is itself one of the three Euler barrier-jump\n"
-            f"levels -- {quotable_flips} row in {int(quotable['k_transient'])} "
-            f"({quotable_flips / int(quotable['k_transient']):.2%}), biasing $B$ "
-            f"DOWN about 0.2 %,\nwhich is conservative in direction",
+            + (
+                f"caveat: this level is itself an Euler barrier-jump level\n"
+                f"-- {quotable_flips} row in {int(quotable['k_transient'])} "
+                f"({quotable_flips / int(quotable['k_transient']):.2%}), biasing "
+                f"$B$ DOWN,\nwhich is conservative in direction"
+                if quotable_flips
+                else "no Euler barrier-jump row at this level"
+            ),
         ),
     )
     for level, value, y_frac, colour, text in callouts:
@@ -1869,7 +1873,7 @@ def figure_kp57_4_bound(evidence: dict[str, Any]) -> tuple[Path, list[dict[str, 
         ls="none",
         label=(
             f"Euler barrier-jump level ({total_flips} rows in $10^6$; "
-            "0.4 expected at $N = 10^5$)"
+            f"{total_flips / 10:.1f} expected at $N = 10^5$)"
         ),
     )
     axk.set_yscale("log")
@@ -2418,14 +2422,23 @@ def figure_epistemic_knobs(
         .y0
     )
     arrow = FancyArrowPatch((0, 0), (1, 0), color=figstyle.RED)
+    # Since ADR-0054 the raised-datum arm fails nowhere at this anchor, so the
+    # span is unbounded (ratio_min = 0) and only its upper arm is a number.
+    l_span = kp62["brackets"]["L_measurement"]["span"]["design_hwl"]["span_trans"]
+    if span["span_trans"] is None:
+        span_text = (
+            f"exit-datum span unbounded at KP 62.0 (raised datum: no failure; "
+            f"lowered: ×{span['ratio_max']:.1f})"
+        )
+    else:
+        span_text = f"exit-datum span ×{span['span_trans']:.0f} at KP 62.0"
     fig.legend(
         [arrow],
         [
-            f"exit-datum span ×{span['span_trans']:.0f} at KP 62.0, "
-            f"{hwl_stage:.2f} m T.P.\n"
+            f"{span_text}, {hwl_stage:.2f} m T.P.\n"
             f"(nearest grid level to HWL {kp62['hwl_m_msl']:.2f} m; "
             f"{kp62['anchors']['design_hwl']['n_failures_trans_baseline']} failures):\n"
-            "second-largest bracket at this anchor, ahead of L at ×15"
+            f"L spans ×{l_span:.0f} at this anchor"
         ],
         handler_map={FancyArrowPatch: HandlerPatch(patch_func=legend_arrow)},
         loc="upper center",
