@@ -1133,6 +1133,13 @@ COMPANION_EXCLUSIONS: dict[str, str] = {
         "by hand. Its internal-stability block reads only tracked data and is "
         "pinned by tests/test_uniformity_coefficient_study.py."
     ),
+    "scripts/criterion_consequence_study.py": (
+        "Green Light item 2 study, not a companion: it annualises the static "
+        "branch beside the transient one and reads the 2016 replays, and its "
+        "gate 1 asserts the production Phase 3 table field for field, so after "
+        "a production re-run it refuses rather than drifting and is re-run by "
+        "hand (about 25 min). Pinned by tests/test_criterion_consequence.py."
+    ),
     "scripts/mp_model_factor_companion.py": (
         "ADR-0045 m_p companion: OFF in production (decision 3), KP58.8+KP60.0 "
         "only. Its hash gate reconstructs the Config from the sidecar's own "
@@ -2184,6 +2191,17 @@ FIGURE_DRIVERS: list[dict[str, Any]] = [
         "requires": ["docs/decisions/r10-foreshore-exhaustion-screening.json"],
         "produces": ["r10_foreshore_exhaustion.png"],
         "sources": ["docs/decisions/r10-foreshore-exhaustion-screening.json"],
+    },
+    {
+        "label": "Green Light item 2: what one flood outcome says between the criteria",
+        "command": [PY, "scripts/criterion_consequence_study.py", "--parts", "figure"],
+        "requires": [
+            "docs/decisions/criterion-consequence-and-2016-evidence-study.json"
+        ],
+        "produces": ["criterion_survival_evidence.png"],
+        "sources": [
+            "docs/decisions/criterion-consequence-and-2016-evidence-study.json"
+        ],
     },
 ]
 

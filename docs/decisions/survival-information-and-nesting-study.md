@@ -203,6 +203,16 @@ the implication and the knob that breaks it.
 
 ### 2.3 What the survival does and does not establish about the two comparators
 
+> **Superseded numbers and one reversed decision, 2026-09-25 (Green Light
+> item 2, `criterion-consequence-and-2016-evidence-study.md` §2.4 to §2.5).**
+> On the ADR-0054 re-based production the survival probabilities are 0.962 and
+> 0.998 (transient) against 0.548 and 0.872 (static) at KP 58.8 and KP 60.0,
+> and the berm-reading static failure at KP 58.8 is 23.2 %, not 34 %. The owner
+> decided that the per-section likelihood ratio (1.76 and 1.14) is stated in the
+> thesis, with its joint bound over dependence and with no model prior or
+> evidence scale; the "no Bayes factor" paragraph below stands for model
+> selection only. The text below is kept as written.
+
 Three quantities are routinely conflated and are distinguished here.
 
 1. **Set inclusion.** `F_transient subset F_static`: a theorem, above. It says
