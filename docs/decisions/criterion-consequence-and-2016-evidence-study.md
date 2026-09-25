@@ -208,7 +208,7 @@ Six findings.
 
 1. **The annual gap is much smaller than the design-level gap, and not because
    anything cancels.** Per event at the design level the criteria differ by
-   Δβ 0.85 to 1.22 and B 3.1 to at least 37; per year by Δβ 0.36 to 0.52 and a
+   Δβ 0.85 to 1.22 and B 3.1 to at least 37; per year by Δβ 0.36 to 0.53 and a
    factor of 2.6 to 6.0. The annual number is earned above the design level: at
    KP 57.4 and KP 62.0 essentially all of it (share of the annual probability
    from years whose peak exceeds the design level: 1.00 and 1.00), with the
@@ -230,11 +230,16 @@ Six findings.
    to first place historically (57 % of replicates).
 4. **Climate ratio.** The transient criterion is the more climate-sensitive
    one: its ratio is 1.3 to 1.7 times the steady-state one before updating.
-   After each criterion is updated on 2016, the two coincide at KP 58.8 (5.8
-   against 6.1, quotient 1.06 [0.97, 1.20]) and are no longer separated at
-   KP 60.0 (0.85 [0.75, 1.13]); the gap persists at the two sections the survival
-   does not reach.
-5. **The survival update closes about half of the gap where it is informative.**
+   After each criterion is updated on 2016, the two come within about 6 % at
+   KP 58.8 (5.8 against 6.1; quotient 1.06 [0.97, 1.20] primary, 0.95 fitted,
+   0.98 all-raw). At KP 60.0 the quotient rises from 0.63 to 0.85 [0.75, 1.13]
+   on the primary evaluation, but only to 0.73 [0.67, 0.80] fitted and 0.72
+   [0.65, 0.85] all-raw, so "no longer separated" there is evaluation-dependent
+   and is not quoted. The gap persists at the two sections the survival does
+   not reach.
+5. **The survival update roughly halves the ratio where it is informative**
+   (by 2.0 to 2.1 on the primary evaluation, 1.5 to 1.9 on the fitted and
+   all-raw ones).
    The steady-state self-update removes 45 % and 13 % of the static prior at
    KP 58.8 and KP 60.0 and lowers its annual probability to 0.43 and 0.50 of the
    prior; the transient update lowers its own by 10 % and 2 %. The posterior
