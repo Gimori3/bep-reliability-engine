@@ -277,7 +277,8 @@ Entries are the reduction factor of annual piping probability and the piping sha
 Only the matrix arm reverses a cell, KP 62.0 historical. At KP 60.0 the matrix
 arm lowers annual piping probability more than the bulk grain-size reading does
 (43.7 against 4.6 historically, 10.3 against 2.65 under warming); everywhere
-else the bulk reading is the larger lever, by one to four orders of magnitude.
+else the bulk reading is the larger lever, by factors of 3.8 (KP 57.4 +4K) to
+about 5,500 (KP 62.0 historical).
 **Posterior side not measured**: the 2016 update moves the baseline rows by at
 most 11 % (KP 58.8), leaves KP 62.0 exactly unchanged and changes no ordering;
 a larger H_c can only reduce the rows it rejects.

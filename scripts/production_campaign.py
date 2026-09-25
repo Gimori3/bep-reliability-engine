@@ -1125,6 +1125,14 @@ COMPANION_EXCLUSIONS: dict[str, str] = {
         "re-based sweeps would compare production with itself. Its evidence "
         "JSON is the frozen record of that decision."
     ),
+    "scripts/uniformity_coefficient_study.py": (
+        "Green Light item 1 study, not a companion: its uniformity-coefficient "
+        "arms are in-memory re-evaluations of production (about 40 min), and its "
+        "baseline gate asserts bit-identity with the persisted matrix sweeps, so "
+        "after a production re-run it refuses rather than drifting and is re-run "
+        "by hand. Its internal-stability block reads only tracked data and is "
+        "pinned by tests/test_uniformity_coefficient_study.py."
+    ),
     "scripts/mp_model_factor_companion.py": (
         "ADR-0045 m_p companion: OFF in production (decision 3), KP58.8+KP60.0 "
         "only. Its hash gate reconstructs the Config from the sidecar's own "
