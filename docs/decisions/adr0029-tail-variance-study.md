@@ -1,5 +1,13 @@
 # ADR-0029 companion: the spec §12 fm5 tail-variance study
 
+> **Re-based under ADR-0054, 2026-09-25.** The evidence this note reads was regenerated on the re-based
+> matrix d70 (0.70 / 0.53 / 0.26 / 0.70 mm became 0.90 / 0.65 / 0.74 /
+> 0.75 mm at KP 57.4 / 58.8 / 60.0 / 62.0; bulk unchanged). The committed
+> JSON is the re-based record. Where the prose below quotes a matrix-reading
+> number it is the pre-rebase value, kept as written; the re-based values are
+> in the JSON, tabulated in `bimodal-foundation-d70-study.md` Part 3 and in
+> the dated addenda of `docs/phase2_report.md` and `docs/phase3_report.md`.
+
 Date: 2026-07-07 (data: `adr0029-tail-cov-study.json`; figure:
 `../figures/adr0029-tail-cov.png`; script: `scripts/tail_variance_study.py`)
 

@@ -4,6 +4,14 @@
 No `Config` default changed, no production sweep re-run, no persisted production
 artifact touched.
 
+> **Re-based under ADR-0054, 2026-09-25.** The evidence this note reads was regenerated on the re-based
+> matrix d70 (0.70 / 0.53 / 0.26 / 0.70 mm became 0.90 / 0.65 / 0.74 /
+> 0.75 mm at KP 57.4 / 58.8 / 60.0 / 62.0; bulk unchanged). The committed
+> JSON is the re-based record. Where the prose below quotes a matrix-reading
+> number it is the pre-rebase value, kept as written; the re-based values are
+> in the JSON, tabulated in `bimodal-foundation-d70-study.md` Part 3 and in
+> the dated addenda of `docs/phase2_report.md` and `docs/phase3_report.md`.
+
 **Date:** 2026-08-21
 **Driver:** `scripts/critical_length_bracket_study.py`
 **Evidence:** `adr0049-critical-length-companion.json` beside this note

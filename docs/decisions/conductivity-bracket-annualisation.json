@@ -1,7 +1,7 @@
 {
   "study": "Aquifer-conductivity epistemic bracket propagated through the Phase 3 annualisation (defence-brief item A2)",
   "generated_by": "scripts/conductivity_annualisation_study.py",
-  "generated": "2026-08-21T18:44:21",
+  "generated": "2026-09-25T06:56:39",
   "note": "docs/decisions/conductivity-bracket-annualisation.md",
   "scope": {
     "d70_interpretation": "matrix",
@@ -54,7 +54,7 @@
     "k_aq_field_geomean": {
       "KP 57.4": {
         "sweep": "results/sensitivity/adr0048_prior_means/tokachi_kp57.4_historical_matrix_k_aq_field_geomean.h5",
-        "sha256": "433db22fcc2674023e84bef0099225b46d8a73d51ee6762c7bd72e9531363b9e",
+        "sha256": "bd28d8f0317ea442cb8240216b459c3ca1582a682fd1a9aa954a7c0ee6706538",
         "n_samples": 100000,
         "config_hash_round_trips": true,
         "parameter": "k_aq",
@@ -64,7 +64,7 @@
       },
       "KP 58.8": {
         "sweep": "results/sensitivity/adr0048_prior_means/tokachi_kp58.8_historical_matrix_k_aq_field_geomean.h5",
-        "sha256": "6eadb8b83a49a4729b4d9a54ffb703e3f4267e416fd2cd21d92a9ad0b75222b7",
+        "sha256": "9dab757e5ebd687a9d4b0ff2418cb04dd3ea83cd90225059d3169feb2b9a63a8",
         "n_samples": 100000,
         "config_hash_round_trips": true,
         "parameter": "k_aq",
@@ -74,7 +74,7 @@
       },
       "KP 60.0": {
         "sweep": "results/sensitivity/adr0048_prior_means/tokachi_kp60.0_historical_matrix_k_aq_field_geomean.h5",
-        "sha256": "3e74abe8116da6b45994adeff2c96c46c9d13938b4bf45ca91de3b550d447bb7",
+        "sha256": "3d93dfeb43258571854bca06f178ce4cee01316859d67af155b20484dc38698a",
         "n_samples": 100000,
         "config_hash_round_trips": true,
         "parameter": "k_aq",
@@ -84,7 +84,7 @@
       },
       "KP 62.0": {
         "sweep": "results/sensitivity/adr0048_prior_means/tokachi_kp62.0_historical_matrix_k_aq_field_geomean.h5",
-        "sha256": "a67a43ecdf4ce8f6761e7675321eb4de8dcc6b0d8233dfb7edc27960d7963286",
+        "sha256": "b3ca009e47c27a341ee78860a5698125619c588b47bd54a997e7af14fced813e",
         "n_samples": 100000,
         "config_hash_round_trips": true,
         "parameter": "k_aq",
@@ -96,7 +96,7 @@
     "k_aq_field_toe": {
       "KP 57.4": {
         "sweep": "results/sensitivity/adr0048_prior_means/tokachi_kp57.4_historical_matrix_k_aq_field_toe.h5",
-        "sha256": "1831ba261712aa6c2676d95a5873f1b4c748ee9ae494cbb28ba81abf36cb7314",
+        "sha256": "5201ab80560ec9a372f060ca462c69bb12f90b4b15fe65679a2172497df003ae",
         "n_samples": 100000,
         "config_hash_round_trips": true,
         "parameter": "k_aq",
@@ -106,7 +106,7 @@
       },
       "KP 58.8": {
         "sweep": "results/sensitivity/adr0048_prior_means/tokachi_kp58.8_historical_matrix_k_aq_field_toe.h5",
-        "sha256": "452242103304b99066582893f06df3546056fe79e42c26494c1ea30a38646538",
+        "sha256": "ff2bc0ebd284a0851d843e2c6c4dc0ae18fc188860ced50b8a2ca636bd850cbe",
         "n_samples": 100000,
         "config_hash_round_trips": true,
         "parameter": "k_aq",
@@ -116,7 +116,7 @@
       },
       "KP 60.0": {
         "sweep": "results/sensitivity/adr0048_prior_means/tokachi_kp60.0_historical_matrix_k_aq_field_toe.h5",
-        "sha256": "716da55437ae8788ce700d3bba376b7517d6f6336ccb21d7350a4ad8fe042570",
+        "sha256": "a37b3c4074b8725dda7a77ca1053baebd99807982035d96e280545d23a6dbde6",
         "n_samples": 100000,
         "config_hash_round_trips": true,
         "parameter": "k_aq",
@@ -126,7 +126,7 @@
       },
       "KP 62.0": {
         "sweep": "results/sensitivity/adr0048_prior_means/tokachi_kp62.0_historical_matrix_k_aq_field_toe.h5",
-        "sha256": "1ca54a7725fabc207013f4d3fd32d286d7423dddbf7b96008f97bceb92110f2d",
+        "sha256": "c7a8e0346e15df42ec1bb2e52ba03ded99ea7887005bea47aaf750611348b536",
         "n_samples": 100000,
         "config_hash_round_trips": true,
         "parameter": "k_aq",
@@ -138,7 +138,7 @@
     "k_aq_regional_upper": {
       "KP 57.4": {
         "sweep": "results/sensitivity/adr0048_prior_means/tokachi_kp57.4_historical_matrix_k_aq_regional_upper.h5",
-        "sha256": "2b1a1ad1a82875c739f024b35a426ee05882e10543ebe71723495b5ec80d90cf",
+        "sha256": "05274405aafdb882d8c2f9215373e63711dd477c4d9beab0cba8c4668d086260",
         "n_samples": 100000,
         "config_hash_round_trips": true,
         "parameter": "k_aq",
@@ -148,7 +148,7 @@
       },
       "KP 58.8": {
         "sweep": "results/sensitivity/adr0048_prior_means/tokachi_kp58.8_historical_matrix_k_aq_regional_upper.h5",
-        "sha256": "fa74c40ecef58bc5c5211ec98d5f9036e12b80749d0f888bf8da3ff924de7328",
+        "sha256": "0e0d5ee14d34374bbc4155db963e04b0b8c24b06a20e2dd9149713ab96e5a145",
         "n_samples": 100000,
         "config_hash_round_trips": true,
         "parameter": "k_aq",
@@ -158,7 +158,7 @@
       },
       "KP 60.0": {
         "sweep": "results/sensitivity/adr0048_prior_means/tokachi_kp60.0_historical_matrix_k_aq_regional_upper.h5",
-        "sha256": "204a3c3cddc9c9fe5cc17fd5a22d92bb677724675022a47a09f7ce1037254c4f",
+        "sha256": "f8630a1a68b0506499a515a8b3ac954347942c22ea61eb062334665c8120c3b2",
         "n_samples": 100000,
         "config_hash_round_trips": true,
         "parameter": "k_aq",
@@ -168,7 +168,7 @@
       },
       "KP 62.0": {
         "sweep": "results/sensitivity/adr0048_prior_means/tokachi_kp62.0_historical_matrix_k_aq_regional_upper.h5",
-        "sha256": "2af64c793a8e86954f13c8065b509b73a02a3453474c2158842ba5b8a03752a4",
+        "sha256": "2305d5c417255a44233ed83139e7df432f57a56e737464e5361497d953a18dc2",
         "n_samples": 100000,
         "config_hash_round_trips": true,
         "parameter": "k_aq",
@@ -180,7 +180,7 @@
     "gamma_bl_sub_lower": {
       "KP 57.4": {
         "sweep": "results/sensitivity/adr0048_prior_means/tokachi_kp57.4_historical_matrix_gamma_bl_sub_lower.h5",
-        "sha256": "c1b4da940637d7a6f690e2891bdebc51ff2ea1156f4a5b392d8a1afc64b3ef52",
+        "sha256": "2705b25cd3910fe0b1d567dbbcd6c1160e406a4fa96c5c9281bf443f01ff94c3",
         "n_samples": 100000,
         "config_hash_round_trips": true,
         "parameter": "gamma_bl_sub",
@@ -190,7 +190,7 @@
       },
       "KP 58.8": {
         "sweep": "results/sensitivity/adr0048_prior_means/tokachi_kp58.8_historical_matrix_gamma_bl_sub_lower.h5",
-        "sha256": "cf845c64a988632d61d28e2770f385634c27ecd5cfd2be059a1abc69f2377aad",
+        "sha256": "8d63e2add521931764dd9a4d39274609ae92ab71c114711a3591283bdfcfe242",
         "n_samples": 100000,
         "config_hash_round_trips": true,
         "parameter": "gamma_bl_sub",
@@ -200,7 +200,7 @@
       },
       "KP 60.0": {
         "sweep": "results/sensitivity/adr0048_prior_means/tokachi_kp60.0_historical_matrix_gamma_bl_sub_lower.h5",
-        "sha256": "d69b3a149b05c09ffcace0191e3da1fad64206ac563e2f4bad868667e68979a0",
+        "sha256": "d2af3593e93ed6275ac5a47bf7c7f17e1e246b5826e993eb1817902926009ecd",
         "n_samples": 100000,
         "config_hash_round_trips": true,
         "parameter": "gamma_bl_sub",
@@ -210,7 +210,7 @@
       },
       "KP 62.0": {
         "sweep": "results/sensitivity/adr0048_prior_means/tokachi_kp62.0_historical_matrix_gamma_bl_sub_lower.h5",
-        "sha256": "c7499c9e89dc295bbc88ce60d2d2766c3f0ba899670a38f1532f80f0a0d059e9",
+        "sha256": "c583166e4ea4c6b113f5d1d3e44c79675ad385f0b39d81b26067e47445dea60e",
         "n_samples": 100000,
         "config_hash_round_trips": true,
         "parameter": "gamma_bl_sub",
@@ -241,7 +241,8 @@
         "KP 62.0"
       ],
       "sections_collapsing_historically": [
-        "KP 57.4"
+        "KP 57.4",
+        "KP 60.0"
       ]
     },
     "P2": {
@@ -250,21 +251,20 @@
     },
     "P3": {
       "statement": "KP 62.0 at +4K reverses under both downward arms and holds under the upward arm",
-      "held": true,
+      "held": false,
       "arms_reversing": [
-        "k_aq_field_geomean",
-        "k_aq_field_toe"
+        "k_aq_regional_upper"
       ]
     },
     "P4": {
       "statement": "the upward arm reverses no ordering anywhere",
-      "held": true
+      "held": false
     },
     "P5": {
       "statement": "KP 57.4 and KP 60.0 cannot reverse historically, because overflow is exactly zero there",
       "held": true,
       "kp57_4_historical_verdict": "COLLAPSED",
-      "kp60_0_historical_verdict": "ROBUST"
+      "kp60_0_historical_verdict": "COLLAPSED"
     },
     "P6": {
       "statement": "the climate ratio rises under the downward arms and falls under the upward arm",
@@ -273,78 +273,71 @@
         {
           "section": "KP 57.4",
           "arm": "k_aq_field_toe",
-          "baseline_ratio": 12.642610394560997,
-          "arm_ratio": 234.14410090275976,
+          "baseline_ratio": 15.249341007153241,
+          "arm_ratio": 500.2675081178188,
           "moved_as_predicted": true
         },
         {
           "section": "KP 57.4",
           "arm": "k_aq_regional_upper",
-          "baseline_ratio": 12.642610394560997,
-          "arm_ratio": 7.253039590462951,
+          "baseline_ratio": 15.249341007153241,
+          "arm_ratio": 7.762688659807565,
           "moved_as_predicted": true
         },
         {
           "section": "KP 58.8",
           "arm": "k_aq_field_geomean",
-          "baseline_ratio": 5.269497170261505,
-          "arm_ratio": 13.054817139672744,
+          "baseline_ratio": 5.58295749141793,
+          "arm_ratio": 13.020338220573873,
           "moved_as_predicted": true
         },
         {
           "section": "KP 58.8",
           "arm": "k_aq_field_toe",
-          "baseline_ratio": 5.269497170261505,
-          "arm_ratio": 8.995967578555211,
+          "baseline_ratio": 5.58295749141793,
+          "arm_ratio": 9.847998490160018,
           "moved_as_predicted": true
         },
         {
           "section": "KP 58.8",
           "arm": "k_aq_regional_upper",
-          "baseline_ratio": 5.269497170261505,
-          "arm_ratio": 3.432371914797806,
-          "moved_as_predicted": true
-        },
-        {
-          "section": "KP 60.0",
-          "arm": "k_aq_field_geomean",
-          "baseline_ratio": 7.575509545154514,
-          "arm_ratio": 671.1843007918955,
+          "baseline_ratio": 5.58295749141793,
+          "arm_ratio": 3.5788951525995096,
           "moved_as_predicted": true
         },
         {
           "section": "KP 60.0",
           "arm": "k_aq_field_toe",
-          "baseline_ratio": 7.575509545154514,
-          "arm_ratio": 10.709499832990357,
+          "baseline_ratio": 13.286156616492883,
+          "arm_ratio": 25.630002648521415,
           "moved_as_predicted": true
         },
         {
           "section": "KP 60.0",
           "arm": "k_aq_regional_upper",
-          "baseline_ratio": 7.575509545154514,
-          "arm_ratio": 4.177585851735416,
+          "baseline_ratio": 13.286156616492883,
+          "arm_ratio": 5.089477615979219,
           "moved_as_predicted": true
         },
         {
           "section": "KP 62.0",
           "arm": "k_aq_field_geomean",
-          "baseline_ratio": 12.70080609546734,
-          "arm_ratio": 42.110414412725866,
+          "baseline_ratio": 13.432118060110772,
+          "arm_ratio": 42.11038085046754,
           "moved_as_predicted": true
         },
         {
           "section": "KP 62.0",
           "arm": "k_aq_field_toe",
-          "baseline_ratio": 12.70080609546734,
-          "arm_ratio": 24.959718501198935,
+          "baseline_ratio": 13.432118060110772,
+          "arm_ratio": 26.354916089051738,
           "moved_as_predicted": true
         },
         {
           "section": "KP 62.0",
           "arm": "k_aq_regional_upper",
-          "baseline_ratio": 12.70080609546734,
-          "arm_ratio": 5.038550012251924,
+          "baseline_ratio": 13.432118060110772,
+          "arm_ratio": 5.116923227977568,
           "moved_as_predicted": true
         }
       ]
@@ -356,64 +349,64 @@
         {
           "section": "KP 57.4",
           "scenario": "historical",
-          "control_log10_shift": 0.002103788938567403,
-          "quietest_conductivity_log10_shift": 0.6617964758776417,
+          "control_log10_shift": 0.001058900157203164,
+          "quietest_conductivity_log10_shift": 0.7474383716545697,
           "at_least_ten_times_quieter": true
         },
         {
           "section": "KP 57.4",
           "scenario": "+4K",
-          "control_log10_shift": 0.0009701880460868656,
-          "quietest_conductivity_log10_shift": 0.42047976937103587,
+          "control_log10_shift": 0.0004487628143815655,
+          "quietest_conductivity_log10_shift": 0.45419946354071866,
           "at_least_ten_times_quieter": true
         },
         {
           "section": "KP 58.8",
           "scenario": "historical",
-          "control_log10_shift": 0.0017470254498604953,
-          "quietest_conductivity_log10_shift": 0.6302350081517624,
+          "control_log10_shift": 0.0009571729358445932,
+          "quietest_conductivity_log10_shift": 0.6719913529739865,
           "at_least_ten_times_quieter": true
         },
         {
           "section": "KP 58.8",
           "scenario": "+4K",
-          "control_log10_shift": 0.0011149070328500224,
-          "quietest_conductivity_log10_shift": 0.4440601722441645,
+          "control_log10_shift": 0.0006361061957286543,
+          "quietest_conductivity_log10_shift": 0.47887600729931257,
           "at_least_ten_times_quieter": true
         },
         {
           "section": "KP 60.0",
           "scenario": "historical",
-          "control_log10_shift": 0.005985576819958389,
-          "quietest_conductivity_log10_shift": 0.6036092611962024,
+          "control_log10_shift": 0.00043523765593896275,
+          "quietest_conductivity_log10_shift": 0.8934355720192272,
           "at_least_ten_times_quieter": true
         },
         {
           "section": "KP 60.0",
           "scenario": "+4K",
-          "control_log10_shift": 0.0040823846898132895,
-          "quietest_conductivity_log10_shift": 0.4532519225389997,
+          "control_log10_shift": 0.00035490858720357843,
+          "quietest_conductivity_log10_shift": 0.608086288531876,
           "at_least_ten_times_quieter": true
         },
         {
           "section": "KP 62.0",
           "scenario": "historical",
-          "control_log10_shift": 9.028087369650494e-05,
-          "quietest_conductivity_log10_shift": 0.42568552142889504,
+          "control_log10_shift": 5.22547558329308e-05,
+          "quietest_conductivity_log10_shift": 0.4153354331296782,
           "at_least_ten_times_quieter": true
         },
         {
           "section": "KP 62.0",
           "scenario": "+4K",
-          "control_log10_shift": 3.84544233458892e-05,
-          "quietest_conductivity_log10_shift": 0.1322771240749482,
+          "control_log10_shift": 2.194122786209063e-05,
+          "quietest_conductivity_log10_shift": 0.12261829564888331,
           "at_least_ten_times_quieter": true
         }
       ]
     },
     "F1": {
       "statement": "the upward arm reverses an ordering (would indict the arms)",
-      "fired": false
+      "fired": true
     },
     "F3": {
       "statement": "the annualised conductivity span is narrower than the published length-effect bracket at every section (would deflate the study)",
@@ -423,56 +416,56 @@
           "section": "KP 57.4",
           "scenario": "historical",
           "conductivity_span": null,
-          "length_effect_span": 3.3672335035670526,
+          "length_effect_span": 3.6855038434765417,
           "conductivity_is_wider": true
         },
         {
           "section": "KP 57.4",
           "scenario": "+4K",
-          "conductivity_span": 27.562762832156196,
-          "length_effect_span": 2.1717279498926128,
+          "conductivity_span": 23.70625132534753,
+          "length_effect_span": 2.2726313266317044,
           "conductivity_is_wider": true
         },
         {
           "section": "KP 58.8",
           "scenario": "historical",
-          "conductivity_span": 184.8274712761879,
-          "length_effect_span": 2.5268046078129127,
+          "conductivity_span": 164.91308129723265,
+          "length_effect_span": 2.60018099971317,
           "conductivity_is_wider": true
         },
         {
           "section": "KP 58.8",
           "scenario": "+4K",
-          "conductivity_span": 48.59483014615312,
-          "length_effect_span": 2.0669253855679917,
+          "conductivity_span": 45.32959261552127,
+          "length_effect_span": 2.137398905244204,
           "conductivity_is_wider": true
         },
         {
           "section": "KP 60.0",
           "scenario": "historical",
-          "conductivity_span": 443745.3746641976,
-          "length_effect_span": 3.3656326101540137,
+          "conductivity_span": null,
+          "length_effect_span": 4.379794932136231,
           "conductivity_is_wider": true
         },
         {
           "section": "KP 60.0",
           "scenario": "+4K",
-          "conductivity_span": 2761.9603092369707,
-          "length_effect_span": 2.6509176167909616,
+          "conductivity_span": 2715.8893704950337,
+          "length_effect_span": 3.199985792511266,
           "conductivity_is_wider": true
         },
         {
           "section": "KP 62.0",
           "scenario": "historical",
-          "conductivity_span": 69.07985449628264,
-          "length_effect_span": 3.2855910349797575,
+          "conductivity_span": 65.54056089120667,
+          "length_effect_span": 3.2916230104166213,
           "conductivity_is_wider": true
         },
         {
           "section": "KP 62.0",
           "scenario": "+4K",
-          "conductivity_span": 8.265468449377709,
-          "length_effect_span": 1.9266491167639388,
+          "conductivity_span": 7.963974954056254,
+          "length_effect_span": 1.8833303482404067,
           "conductivity_is_wider": true
         }
       ]
@@ -486,8 +479,8 @@
     "KP 57.4": {
       "historical": {
         "baseline": {
-          "p_annual_system": 0.0007547863728584468,
-          "p_annual_bep": 0.0007547863728584468,
+          "p_annual_system": 0.0004979251062096787,
+          "p_annual_bep": 0.0004979251062096787,
           "p_annual_overflow": 0.0,
           "p_annual_fluvial_scour": 0.0,
           "share_bep": 1.0,
@@ -505,9 +498,9 @@
           },
           "driving_stage_band": {
             "defined": true,
-            "contribution_weighted_stage_p10_m_msl": 39.954705134994846,
-            "contribution_weighted_stage_median_m_msl": 40.40691379533723,
-            "contribution_weighted_stage_p90_m_msl": 40.806622964145795,
+            "contribution_weighted_stage_p10_m_msl": 40.05395654071798,
+            "contribution_weighted_stage_median_m_msl": 40.42855259762795,
+            "contribution_weighted_stage_p90_m_msl": 40.81319460064772,
             "grid_top_m_msl": 45.4,
             "attainable_max_m_msl": 43.25,
             "frac_peaks_above_attainable_max": 0.0,
@@ -539,7 +532,7 @@
               "grid_bottom_m_msl": 34.75,
               "grid_top_m_msl": 45.4,
               "p_bottom": 0.0,
-              "p_top": 0.0013199999999999878,
+              "p_top": 0.0005699999999999594,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -550,14 +543,14 @@
             }
           },
           "k_aq_field_toe": {
-            "p_annual_system": 5.672641806456094e-06,
-            "p_annual_bep": 5.672641806456094e-06,
+            "p_annual_system": 2.3183689077134013e-06,
+            "p_annual_bep": 2.3183689077134013e-06,
             "p_annual_overflow": 0.0,
             "share_bep": 1.0,
             "share_overflow": 0.0,
             "leading_mechanism": "bep",
-            "ratio_system_to_baseline": 0.0075155593826810455,
-            "ratio_bep_to_baseline": 0.0075155593826810455,
+            "ratio_system_to_baseline": 0.004656059473203435,
+            "ratio_bep_to_baseline": 0.004656059473203435,
             "coverage_system": {
               "grid_bottom_m_msl": 34.75,
               "grid_top_m_msl": 45.4,
@@ -572,7 +565,7 @@
               "grid_bottom_m_msl": 34.75,
               "grid_top_m_msl": 45.4,
               "p_bottom": 0.0,
-              "p_top": 0.35968999999999995,
+              "p_top": 0.2795099999999999,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -580,9 +573,9 @@
             },
             "driving_stage_band": {
               "defined": true,
-              "contribution_weighted_stage_p10_m_msl": 40.39218387961196,
-              "contribution_weighted_stage_median_m_msl": 40.73592990674117,
-              "contribution_weighted_stage_p90_m_msl": 40.837233475891,
+              "contribution_weighted_stage_p10_m_msl": 40.41530924879292,
+              "contribution_weighted_stage_median_m_msl": 40.74790502272211,
+              "contribution_weighted_stage_p90_m_msl": 40.839338949397856,
               "grid_top_m_msl": 45.4,
               "attainable_max_m_msl": 43.25,
               "frac_peaks_above_attainable_max": 0.0,
@@ -590,14 +583,14 @@
             }
           },
           "k_aq_regional_upper": {
-            "p_annual_system": 0.0034643401455577713,
-            "p_annual_bep": 0.0034643401455577713,
+            "p_annual_system": 0.0027835715965987737,
+            "p_annual_bep": 0.0027835715965987737,
             "p_annual_overflow": 0.0,
             "share_bep": 1.0,
             "share_overflow": 0.0,
             "leading_mechanism": "bep",
-            "ratio_system_to_baseline": 4.589828685483536,
-            "ratio_bep_to_baseline": 4.589828685483536,
+            "ratio_system_to_baseline": 5.590341924688164,
+            "ratio_bep_to_baseline": 5.590341924688164,
             "coverage_system": {
               "grid_bottom_m_msl": 34.75,
               "grid_top_m_msl": 45.4,
@@ -612,7 +605,7 @@
               "grid_bottom_m_msl": 34.75,
               "grid_top_m_msl": 45.4,
               "p_bottom": 0.0,
-              "p_top": 0.9999996651625833,
+              "p_top": 0.999998536392187,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -620,9 +613,9 @@
             },
             "driving_stage_band": {
               "defined": true,
-              "contribution_weighted_stage_p10_m_msl": 39.808213589746074,
-              "contribution_weighted_stage_median_m_msl": 40.2504585262939,
-              "contribution_weighted_stage_p90_m_msl": 40.756884372654035,
+              "contribution_weighted_stage_p10_m_msl": 39.84283247860935,
+              "contribution_weighted_stage_median_m_msl": 40.27136156996484,
+              "contribution_weighted_stage_p90_m_msl": 40.769096320704556,
               "grid_top_m_msl": 45.4,
               "attainable_max_m_msl": 43.25,
               "frac_peaks_above_attainable_max": 0.0,
@@ -630,14 +623,14 @@
             }
           },
           "gamma_bl_sub_lower": {
-            "p_annual_system": 0.0007584515437248147,
-            "p_annual_bep": 0.0007584515437248147,
+            "p_annual_system": 0.000499140632296465,
+            "p_annual_bep": 0.000499140632296465,
             "p_annual_overflow": 0.0,
             "share_bep": 1.0,
             "share_overflow": 0.0,
             "leading_mechanism": "bep",
-            "ratio_system_to_baseline": 1.004855904926433,
-            "ratio_bep_to_baseline": 1.004855904926433,
+            "ratio_system_to_baseline": 1.0024411825626531,
+            "ratio_bep_to_baseline": 1.0024411825626531,
             "coverage_system": {
               "grid_bottom_m_msl": 34.75,
               "grid_top_m_msl": 45.4,
@@ -652,7 +645,7 @@
               "grid_bottom_m_msl": 34.75,
               "grid_top_m_msl": 45.4,
               "p_bottom": 0.0,
-              "p_top": 0.9990839074993475,
+              "p_top": 0.9980970852346515,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -660,9 +653,9 @@
             },
             "driving_stage_band": {
               "defined": true,
-              "contribution_weighted_stage_p10_m_msl": 39.952791610916755,
-              "contribution_weighted_stage_median_m_msl": 40.40648276982494,
-              "contribution_weighted_stage_p90_m_msl": 40.80648428782375,
+              "contribution_weighted_stage_p10_m_msl": 40.052799278740295,
+              "contribution_weighted_stage_median_m_msl": 40.42834889330119,
+              "contribution_weighted_stage_p90_m_msl": 40.813141133798474,
               "grid_top_m_msl": 45.4,
               "attainable_max_m_msl": 43.25,
               "frac_peaks_above_attainable_max": 0.0,
@@ -683,12 +676,12 @@
       },
       "+4K": {
         "baseline": {
-          "p_annual_system": 0.009542470043173192,
-          "p_annual_bep": 0.009495307767275725,
+          "p_annual_system": 0.007593029740614387,
+          "p_annual_bep": 0.007518481128340701,
           "p_annual_overflow": 0.0009114344650738865,
           "p_annual_fluvial_scour": 0.0,
-          "share_bep": 0.9124188487881759,
-          "share_overflow": 0.08758115121182403,
+          "share_bep": 0.8918809500553131,
+          "share_overflow": 0.10811904994468688,
           "leading_mechanism": "bep",
           "coverage_system": {
             "grid_bottom_m_msl": 34.75,
@@ -702,26 +695,26 @@
           },
           "driving_stage_band": {
             "defined": true,
-            "contribution_weighted_stage_p10_m_msl": 40.27759500369235,
-            "contribution_weighted_stage_median_m_msl": 41.17725797472099,
-            "contribution_weighted_stage_p90_m_msl": 42.5489120279236,
+            "contribution_weighted_stage_p10_m_msl": 40.4031750532909,
+            "contribution_weighted_stage_median_m_msl": 41.31851921745264,
+            "contribution_weighted_stage_p90_m_msl": 42.67217677133167,
             "grid_top_m_msl": 45.4,
             "attainable_max_m_msl": 43.25,
             "frac_peaks_above_attainable_max": 0.0,
             "frac_of_annual_piping_above_attainable_max": 0.0
           }
         },
-        "reversal_margin_p_bep_over_p_overflow": 10.417981907789692,
+        "reversal_margin_p_bep_over_p_overflow": 8.249063883853905,
         "arms": {
           "k_aq_field_geomean": {
-            "p_annual_system": 0.0009116283582880232,
-            "p_annual_bep": 8.673114377316742e-07,
+            "p_annual_system": 0.0009114895210604525,
+            "p_annual_bep": 3.127554864306109e-07,
             "p_annual_overflow": 0.0009114344650738865,
-            "share_bep": 0.0009506848063455776,
-            "share_overflow": 0.9990493151936544,
+            "share_bep": 0.000343028724823977,
+            "share_overflow": 0.999656971275176,
             "leading_mechanism": "overflow",
-            "ratio_system_to_baseline": 0.09553379304975802,
-            "ratio_bep_to_baseline": 9.134105591824458e-05,
+            "ratio_system_to_baseline": 0.12004292781641333,
+            "ratio_bep_to_baseline": 4.1598227233914035e-05,
             "coverage_system": {
               "grid_bottom_m_msl": 34.75,
               "grid_top_m_msl": 45.4,
@@ -736,7 +729,7 @@
               "grid_bottom_m_msl": 34.75,
               "grid_top_m_msl": 45.4,
               "p_bottom": 0.0,
-              "p_top": 0.0013199999999999878,
+              "p_top": 0.0005699999999999594,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -744,9 +737,9 @@
             },
             "driving_stage_band": {
               "defined": true,
-              "contribution_weighted_stage_p10_m_msl": 42.462419150177524,
-              "contribution_weighted_stage_median_m_msl": 42.8929223180369,
-              "contribution_weighted_stage_p90_m_msl": 43.16358901281292,
+              "contribution_weighted_stage_p10_m_msl": 42.462519076307444,
+              "contribution_weighted_stage_median_m_msl": 42.89298477174312,
+              "contribution_weighted_stage_p90_m_msl": 43.16359069740791,
               "grid_top_m_msl": 45.4,
               "attainable_max_m_msl": 43.25,
               "frac_peaks_above_attainable_max": 0.0,
@@ -754,14 +747,14 @@
             }
           },
           "k_aq_field_toe": {
-            "p_annual_system": 0.001328215615516069,
-            "p_annual_bep": 0.0006774175031893759,
+            "p_annual_system": 0.0011598046363596127,
+            "p_annual_bep": 0.00044298903096250206,
             "p_annual_overflow": 0.0009114344650738865,
-            "share_bep": 0.4263565874735614,
-            "share_overflow": 0.5736434125264385,
+            "share_bep": 0.327068330000826,
+            "share_overflow": 0.672931669999174,
             "leading_mechanism": "overflow",
-            "ratio_system_to_baseline": 0.13918991723388138,
-            "ratio_bep_to_baseline": 0.071342342954275,
+            "ratio_system_to_baseline": 0.15274596254455966,
+            "ratio_bep_to_baseline": 0.05892001634381544,
             "coverage_system": {
               "grid_bottom_m_msl": 34.75,
               "grid_top_m_msl": 45.4,
@@ -776,7 +769,7 @@
               "grid_bottom_m_msl": 34.75,
               "grid_top_m_msl": 45.4,
               "p_bottom": 0.0,
-              "p_top": 0.35968999999999995,
+              "p_top": 0.2795099999999999,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -784,9 +777,9 @@
             },
             "driving_stage_band": {
               "defined": true,
-              "contribution_weighted_stage_p10_m_msl": 41.47990760875663,
-              "contribution_weighted_stage_median_m_msl": 42.69991817821167,
-              "contribution_weighted_stage_p90_m_msl": 43.15773562770933,
+              "contribution_weighted_stage_p10_m_msl": 41.75692624498135,
+              "contribution_weighted_stage_median_m_msl": 42.77067817733761,
+              "contribution_weighted_stage_p90_m_msl": 43.16012158195471,
               "grid_top_m_msl": 45.4,
               "attainable_max_m_msl": 43.25,
               "frac_peaks_above_attainable_max": 0.0,
@@ -794,14 +787,14 @@
             }
           },
           "k_aq_regional_upper": {
-            "p_annual_system": 0.025126996230560698,
-            "p_annual_bep": 0.02512651125124546,
+            "p_annual_system": 0.02160799966667974,
+            "p_annual_bep": 0.021606752967169587,
             "p_annual_overflow": 0.0009114344650738865,
-            "share_bep": 0.9649959150002129,
-            "share_overflow": 0.03500408499978717,
+            "share_bep": 0.9595245191107693,
+            "share_overflow": 0.040475480889230746,
             "leading_mechanism": "bep",
-            "ratio_system_to_baseline": 2.6331752802867725,
-            "ratio_bep_to_baseline": 2.646202931709126,
+            "ratio_system_to_baseline": 2.8457678166464464,
+            "ratio_bep_to_baseline": 2.8738188735652397,
             "coverage_system": {
               "grid_bottom_m_msl": 34.75,
               "grid_top_m_msl": 45.4,
@@ -816,7 +809,7 @@
               "grid_bottom_m_msl": 34.75,
               "grid_top_m_msl": 45.4,
               "p_bottom": 0.0,
-              "p_top": 0.9999996651625833,
+              "p_top": 0.999998536392187,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -824,9 +817,9 @@
             },
             "driving_stage_band": {
               "defined": true,
-              "contribution_weighted_stage_p10_m_msl": 39.83596991201525,
-              "contribution_weighted_stage_median_m_msl": 40.65024389900126,
-              "contribution_weighted_stage_p90_m_msl": 41.75646213697716,
+              "contribution_weighted_stage_p10_m_msl": 39.91529603083253,
+              "contribution_weighted_stage_median_m_msl": 40.702431215827495,
+              "contribution_weighted_stage_p90_m_msl": 41.796287347514536,
               "grid_top_m_msl": 45.4,
               "attainable_max_m_msl": 43.25,
               "frac_peaks_above_attainable_max": 0.0,
@@ -834,14 +827,14 @@
             }
           },
           "gamma_bl_sub_lower": {
-            "p_annual_system": 0.009563811182323741,
-            "p_annual_bep": 0.009516616020832208,
+            "p_annual_system": 0.007600879783934209,
+            "p_annual_bep": 0.007526324851472488,
             "p_annual_overflow": 0.0009114344650738865,
-            "share_bep": 0.9125978085447779,
-            "share_overflow": 0.08740219145522213,
+            "share_bep": 0.8919814572944061,
+            "share_overflow": 0.10801854270559379,
             "leading_mechanism": "bep",
-            "ratio_system_to_baseline": 1.0022364376365862,
-            "ratio_bep_to_baseline": 1.0022440824540642,
+            "ratio_system_to_baseline": 1.0010338486201145,
+            "ratio_bep_to_baseline": 1.0010432590037661,
             "coverage_system": {
               "grid_bottom_m_msl": 34.75,
               "grid_top_m_msl": 45.4,
@@ -856,7 +849,7 @@
               "grid_bottom_m_msl": 34.75,
               "grid_top_m_msl": 45.4,
               "p_bottom": 0.0,
-              "p_top": 0.9990839074993475,
+              "p_top": 0.9980970852346515,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -864,9 +857,9 @@
             },
             "driving_stage_band": {
               "defined": true,
-              "contribution_weighted_stage_p10_m_msl": 40.27641674356633,
-              "contribution_weighted_stage_median_m_msl": 41.175348144480736,
-              "contribution_weighted_stage_p90_m_msl": 42.54725860393138,
+              "contribution_weighted_stage_p10_m_msl": 40.40207890853977,
+              "contribution_weighted_stage_median_m_msl": 41.318121548174496,
+              "contribution_weighted_stage_p90_m_msl": 42.671688870846566,
               "grid_top_m_msl": 45.4,
               "attainable_max_m_msl": 43.25,
               "frac_peaks_above_attainable_max": 0.0,
@@ -884,32 +877,32 @@
           "k_aq_field_geomean",
           "k_aq_field_toe"
         ],
-        "conductivity_span_p_annual_system": 27.562762832156196,
-        "conductivity_span_p_annual_bep": 28970.57522608045
+        "conductivity_span_p_annual_system": 23.70625132534753,
+        "conductivity_span_p_annual_bep": 69085.1284937038
       },
       "climate_ratio_plus4k_over_historical": {
-        "baseline": 12.642610394560997,
+        "baseline": 15.249341007153241,
         "k_aq_field_geomean": null,
-        "k_aq_field_toe": 234.14410090275976,
-        "k_aq_regional_upper": 7.253039590462951,
-        "gamma_bl_sub_lower": 12.609653525596531
+        "k_aq_field_toe": 500.2675081178188,
+        "k_aq_regional_upper": 7.762688659807565,
+        "gamma_bl_sub_lower": 15.227932354382363
       }
     },
     "KP 58.8": {
       "historical": {
         "baseline": {
-          "p_annual_system": 0.00846694925456121,
-          "p_annual_bep": 0.008389875497708863,
+          "p_annual_system": 0.0068531976099739335,
+          "p_annual_bep": 0.006764250471576047,
           "p_annual_overflow": 0.00019507776382913884,
           "p_annual_fluvial_scour": 0.0,
-          "share_bep": 0.9772767820760168,
-          "share_overflow": 0.022723217923983255,
+          "share_bep": 0.971968880151867,
+          "share_overflow": 0.02803111984813302,
           "leading_mechanism": "bep",
           "coverage_system": {
             "grid_bottom_m_msl": 36.5,
             "grid_top_m_msl": 47.4,
             "p_bottom": 0.0,
-            "p_top": 0.9999925031623478,
+            "p_top": 0.999987115067526,
             "frac_peaks_below_grid": 0.0,
             "frac_peaks_above_grid": 0.0,
             "lower_bound_clamp": false,
@@ -917,30 +910,30 @@
           },
           "driving_stage_band": {
             "defined": true,
-            "contribution_weighted_stage_p10_m_msl": 40.47140488032866,
-            "contribution_weighted_stage_median_m_msl": 41.337997715440906,
-            "contribution_weighted_stage_p90_m_msl": 42.191511841908046,
+            "contribution_weighted_stage_p10_m_msl": 40.532938103050256,
+            "contribution_weighted_stage_median_m_msl": 41.57099322544788,
+            "contribution_weighted_stage_p90_m_msl": 42.28651109893632,
             "grid_top_m_msl": 47.4,
             "attainable_max_m_msl": null,
             "frac_of_annual_piping_above_attainable_max": null
           }
         },
-        "reversal_margin_p_bep_over_p_overflow": 43.007851499965085,
+        "reversal_margin_p_bep_over_p_overflow": 34.674636097943974,
         "arms": {
           "k_aq_field_geomean": {
-            "p_annual_system": 0.0001955219155037534,
-            "p_annual_bep": 4.650235494058556e-07,
+            "p_annual_system": 0.00019526729110694866,
+            "p_annual_bep": 1.9836543224388468e-07,
             "p_annual_overflow": 0.00019507776382913884,
-            "share_bep": 0.002378116603736614,
-            "share_overflow": 0.9976218833962633,
+            "share_bep": 0.0010158201772750568,
+            "share_overflow": 0.998984179822725,
             "leading_mechanism": "overflow",
-            "ratio_system_to_baseline": 0.02309236888344692,
-            "ratio_bep_to_baseline": 5.54267521053019e-05,
+            "ratio_system_to_baseline": 0.028492873286298157,
+            "ratio_bep_to_baseline": 2.9325559879462333e-05,
             "coverage_system": {
               "grid_bottom_m_msl": 36.5,
               "grid_top_m_msl": 47.4,
               "p_bottom": 0.0,
-              "p_top": 0.978121472,
+              "p_top": 0.977935328,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -950,7 +943,7 @@
               "grid_bottom_m_msl": 36.5,
               "grid_top_m_msl": 47.4,
               "p_bottom": 0.0,
-              "p_top": 0.023279999999999967,
+              "p_top": 0.014970000000000039,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -958,28 +951,28 @@
             },
             "driving_stage_band": {
               "defined": true,
-              "contribution_weighted_stage_p10_m_msl": 40.90069815332942,
-              "contribution_weighted_stage_median_m_msl": 42.006592974060965,
-              "contribution_weighted_stage_p90_m_msl": 42.54160220330134,
+              "contribution_weighted_stage_p10_m_msl": 40.89958199919033,
+              "contribution_weighted_stage_median_m_msl": 42.00646367605231,
+              "contribution_weighted_stage_p90_m_msl": 42.54144052127827,
               "grid_top_m_msl": 47.4,
               "attainable_max_m_msl": null,
               "frac_of_annual_piping_above_attainable_max": null
             }
           },
           "k_aq_field_toe": {
-            "p_annual_system": 0.0010452796138596863,
-            "p_annual_bep": 0.0008733524587816468,
+            "p_annual_system": 0.0007843008533269732,
+            "p_annual_bep": 0.0006063823403385403,
             "p_annual_overflow": 0.00019507776382913884,
-            "share_bep": 0.817416467916405,
-            "share_overflow": 0.1825835320835949,
+            "share_bep": 0.7565970373138807,
+            "share_overflow": 0.24340296268611925,
             "leading_mechanism": "bep",
-            "ratio_system_to_baseline": 0.12345410164075167,
-            "ratio_bep_to_baseline": 0.10409599749366304,
+            "ratio_system_to_baseline": 0.11444305242059938,
+            "ratio_bep_to_baseline": 0.08964516362701384,
             "coverage_system": {
               "grid_bottom_m_msl": 36.5,
               "grid_top_m_msl": 47.4,
               "p_bottom": 0.0,
-              "p_top": 0.9988163548814103,
+              "p_top": 0.9984248579118018,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -989,7 +982,7 @@
               "grid_bottom_m_msl": 36.5,
               "grid_top_m_msl": 47.4,
               "p_bottom": 0.0,
-              "p_top": 0.9471587000629598,
+              "p_top": 0.9296811567768662,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -997,28 +990,28 @@
             },
             "driving_stage_band": {
               "defined": true,
-              "contribution_weighted_stage_p10_m_msl": 41.04462305738227,
-              "contribution_weighted_stage_median_m_msl": 41.99525424356647,
-              "contribution_weighted_stage_p90_m_msl": 42.526499258667215,
+              "contribution_weighted_stage_p10_m_msl": 41.16064269302743,
+              "contribution_weighted_stage_median_m_msl": 42.00715117317863,
+              "contribution_weighted_stage_p90_m_msl": 42.535017872661484,
               "grid_top_m_msl": 47.4,
               "attainable_max_m_msl": null,
               "frac_of_annual_piping_above_attainable_max": null
             }
           },
           "k_aq_regional_upper": {
-            "p_annual_system": 0.03613782122163522,
-            "p_annual_bep": 0.03613072776457736,
+            "p_annual_system": 0.03220213065301062,
+            "p_annual_bep": 0.032192530205885445,
             "p_annual_overflow": 0.00019507776382913884,
-            "share_bep": 0.9946297745916028,
-            "share_overflow": 0.005370225408397056,
+            "share_bep": 0.9939767776610253,
+            "share_overflow": 0.006023222338974667,
             "leading_mechanism": "bep",
-            "ratio_system_to_baseline": 4.268104146504421,
-            "ratio_bep_to_baseline": 4.3064676912600275,
+            "ratio_system_to_baseline": 4.698847528655037,
+            "ratio_bep_to_baseline": 4.759216167580012,
             "coverage_system": {
               "grid_bottom_m_msl": 36.5,
               "grid_top_m_msl": 47.4,
               "p_bottom": 0.0,
-              "p_top": 0.9999999999874051,
+              "p_top": 0.9999999999440412,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -1028,7 +1021,7 @@
               "grid_bottom_m_msl": 36.5,
               "grid_top_m_msl": 47.4,
               "p_bottom": 0.0,
-              "p_top": 0.9999999994377258,
+              "p_top": 0.9999999975018413,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -1036,28 +1029,28 @@
             },
             "driving_stage_band": {
               "defined": true,
-              "contribution_weighted_stage_p10_m_msl": 40.001866476160615,
-              "contribution_weighted_stage_median_m_msl": 40.573920838517374,
-              "contribution_weighted_stage_p90_m_msl": 41.77550452802935,
+              "contribution_weighted_stage_p10_m_msl": 40.0249273718865,
+              "contribution_weighted_stage_median_m_msl": 40.59174079595981,
+              "contribution_weighted_stage_p90_m_msl": 41.90734162867189,
               "grid_top_m_msl": 47.4,
               "attainable_max_m_msl": null,
               "frac_of_annual_piping_above_attainable_max": null
             }
           },
           "gamma_bl_sub_lower": {
-            "p_annual_system": 0.008501077635270152,
-            "p_annual_bep": 0.008424138672223682,
+            "p_annual_system": 0.006868318523446791,
+            "p_annual_bep": 0.006779458669162807,
             "p_annual_overflow": 0.00019507776382913884,
-            "share_bep": 0.9773671115841621,
-            "share_overflow": 0.02263288841583782,
+            "share_bep": 0.9720300028964858,
+            "share_overflow": 0.02796999710351418,
             "leading_mechanism": "bep",
-            "ratio_system_to_baseline": 1.0040307765740484,
-            "ratio_bep_to_baseline": 1.004083871628867,
+            "ratio_system_to_baseline": 1.0022064026653559,
+            "ratio_bep_to_baseline": 1.0022483196993763,
             "coverage_system": {
               "grid_bottom_m_msl": 36.5,
               "grid_top_m_msl": 47.4,
               "p_bottom": 0.0,
-              "p_top": 0.9999924293104528,
+              "p_top": 0.9999870816067048,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -1067,7 +1060,7 @@
               "grid_bottom_m_msl": 36.5,
               "grid_top_m_msl": 47.4,
               "p_bottom": 0.0,
-              "p_top": 0.9996620227880739,
+              "p_top": 0.9994232860136064,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -1075,9 +1068,9 @@
             },
             "driving_stage_band": {
               "defined": true,
-              "contribution_weighted_stage_p10_m_msl": 40.46377672024342,
-              "contribution_weighted_stage_median_m_msl": 41.3244560544615,
-              "contribution_weighted_stage_p90_m_msl": 42.191085312862086,
+              "contribution_weighted_stage_p10_m_msl": 40.532077224678346,
+              "contribution_weighted_stage_median_m_msl": 41.56940676393086,
+              "contribution_weighted_stage_p90_m_msl": 42.28518095091212,
               "grid_top_m_msl": 47.4,
               "attainable_max_m_msl": null,
               "frac_of_annual_piping_above_attainable_max": null
@@ -1092,23 +1085,23 @@
         "arms_changing_the_lead": [
           "k_aq_field_geomean"
         ],
-        "conductivity_span_p_annual_system": 184.8274712761879,
-        "conductivity_span_p_annual_bep": 77696.55496101291
+        "conductivity_span_p_annual_system": 164.91308129723265,
+        "conductivity_span_p_annual_bep": 162289.01296827584
       },
       "+4K": {
         "baseline": {
-          "p_annual_system": 0.044616565137658055,
-          "p_annual_bep": 0.0441806502877034,
+          "p_annual_system": 0.038261110936771425,
+          "p_annual_bep": 0.03773509472903511,
           "p_annual_overflow": 0.0025293600327370483,
           "p_annual_fluvial_scour": 0.0,
-          "share_bep": 0.94584972224615,
-          "share_overflow": 0.05415027775384996,
+          "share_bep": 0.9371813166798804,
+          "share_overflow": 0.06281868332011964,
           "leading_mechanism": "bep",
           "coverage_system": {
             "grid_bottom_m_msl": 36.5,
             "grid_top_m_msl": 47.4,
             "p_bottom": 0.0,
-            "p_top": 0.9999925031623478,
+            "p_top": 0.999987115067526,
             "frac_peaks_below_grid": 0.0,
             "frac_peaks_above_grid": 0.0,
             "lower_bound_clamp": false,
@@ -1116,30 +1109,30 @@
           },
           "driving_stage_band": {
             "defined": true,
-            "contribution_weighted_stage_p10_m_msl": 40.72605004245871,
-            "contribution_weighted_stage_median_m_msl": 41.70600100573342,
-            "contribution_weighted_stage_p90_m_msl": 43.16521955721835,
+            "contribution_weighted_stage_p10_m_msl": 40.802290409120005,
+            "contribution_weighted_stage_median_m_msl": 41.80881193276219,
+            "contribution_weighted_stage_p90_m_msl": 43.23264940731334,
             "grid_top_m_msl": 47.4,
             "attainable_max_m_msl": null,
             "frac_of_annual_piping_above_attainable_max": null
           }
         },
-        "reversal_margin_p_bep_over_p_overflow": 17.46712595908896,
+        "reversal_margin_p_bep_over_p_overflow": 14.918830945629178,
         "arms": {
           "k_aq_field_geomean": {
-            "p_annual_system": 0.002552502853700046,
-            "p_annual_bep": 3.538069113751659e-05,
+            "p_annual_system": 0.0025424461736277284,
+            "p_annual_bep": 2.0626946464315225e-05,
             "p_annual_overflow": 0.0025293600327370483,
-            "share_bep": 0.013795036203139795,
-            "share_overflow": 0.9862049637968602,
+            "share_bep": 0.008089039917676531,
+            "share_overflow": 0.9919109600823235,
             "leading_mechanism": "overflow",
-            "ratio_system_to_baseline": 0.057209757089651835,
-            "ratio_bep_to_baseline": 0.0008008187047297478,
+            "ratio_system_to_baseline": 0.06644987851579269,
+            "ratio_bep_to_baseline": 0.000546625008163658,
             "coverage_system": {
               "grid_bottom_m_msl": 36.5,
               "grid_top_m_msl": 47.4,
               "p_bottom": 0.0,
-              "p_top": 0.978121472,
+              "p_top": 0.977935328,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -1149,7 +1142,7 @@
               "grid_bottom_m_msl": 36.5,
               "grid_top_m_msl": 47.4,
               "p_bottom": 0.0,
-              "p_top": 0.023279999999999967,
+              "p_top": 0.014970000000000039,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -1157,28 +1150,28 @@
             },
             "driving_stage_band": {
               "defined": true,
-              "contribution_weighted_stage_p10_m_msl": 41.65019725826808,
-              "contribution_weighted_stage_median_m_msl": 43.1420516992835,
-              "contribution_weighted_stage_p90_m_msl": 44.69808674237413,
+              "contribution_weighted_stage_p10_m_msl": 41.64987214599149,
+              "contribution_weighted_stage_median_m_msl": 43.14102110515036,
+              "contribution_weighted_stage_p90_m_msl": 44.697083275238214,
               "grid_top_m_msl": 47.4,
               "attainable_max_m_msl": null,
               "frac_of_annual_piping_above_attainable_max": null
             }
           },
           "k_aq_field_toe": {
-            "p_annual_system": 0.009403301516806448,
-            "p_annual_bep": 0.007805584947167142,
+            "p_annual_system": 0.0077237936193952465,
+            "p_annual_bep": 0.005996599611890612,
             "p_annual_overflow": 0.0025293600327370483,
-            "share_bep": 0.755261393490215,
-            "share_overflow": 0.24473860650978488,
+            "share_bep": 0.7033342710775277,
+            "share_overflow": 0.2966657289224724,
             "leading_mechanism": "bep",
-            "ratio_system_to_baseline": 0.2107580780320919,
-            "ratio_bep_to_baseline": 0.1766742883216374,
+            "ratio_system_to_baseline": 0.20187060517294536,
+            "ratio_bep_to_baseline": 0.15891306633653562,
             "coverage_system": {
               "grid_bottom_m_msl": 36.5,
               "grid_top_m_msl": 47.4,
               "p_bottom": 0.0,
-              "p_top": 0.9988163548814103,
+              "p_top": 0.9984248579118018,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -1188,7 +1181,7 @@
               "grid_bottom_m_msl": 36.5,
               "grid_top_m_msl": 47.4,
               "p_bottom": 0.0,
-              "p_top": 0.9471587000629598,
+              "p_top": 0.9296811567768662,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -1196,28 +1189,28 @@
             },
             "driving_stage_band": {
               "defined": true,
-              "contribution_weighted_stage_p10_m_msl": 41.41495239561991,
-              "contribution_weighted_stage_median_m_msl": 42.60668905227957,
-              "contribution_weighted_stage_p90_m_msl": 44.202847432089094,
+              "contribution_weighted_stage_p10_m_msl": 41.522071185598584,
+              "contribution_weighted_stage_median_m_msl": 42.75296464876808,
+              "contribution_weighted_stage_p90_m_msl": 44.336852090827556,
               "grid_top_m_msl": 47.4,
               "attainable_max_m_msl": null,
               "frac_of_annual_piping_above_attainable_max": null
             }
           },
           "k_aq_regional_upper": {
-            "p_annual_system": 0.12403844262312486,
-            "p_annual_bep": 0.12401560830563038,
+            "p_annual_system": 0.11524804929743579,
+            "p_annual_bep": 0.11521542304808072,
             "p_annual_overflow": 0.0025293600327370483,
-            "share_bep": 0.9800121643242755,
-            "share_overflow": 0.019987835675724507,
+            "share_bep": 0.978518283642334,
+            "share_overflow": 0.02148171635766609,
             "leading_mechanism": "bep",
-            "ratio_system_to_baseline": 2.78009842847431,
-            "ratio_bep_to_baseline": 2.8070118365855534,
+            "ratio_system_to_baseline": 3.012145922471762,
+            "ratio_bep_to_baseline": 3.0532697446610277,
             "coverage_system": {
               "grid_bottom_m_msl": 36.5,
               "grid_top_m_msl": 47.4,
               "p_bottom": 0.0,
-              "p_top": 0.9999999999874051,
+              "p_top": 0.9999999999440412,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -1227,7 +1220,7 @@
               "grid_bottom_m_msl": 36.5,
               "grid_top_m_msl": 47.4,
               "p_bottom": 0.0,
-              "p_top": 0.9999999994377258,
+              "p_top": 0.9999999975018413,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -1235,28 +1228,28 @@
             },
             "driving_stage_band": {
               "defined": true,
-              "contribution_weighted_stage_p10_m_msl": 40.13564454589154,
-              "contribution_weighted_stage_median_m_msl": 41.00097371022459,
-              "contribution_weighted_stage_p90_m_msl": 42.45405549018958,
+              "contribution_weighted_stage_p10_m_msl": 40.18818171486437,
+              "contribution_weighted_stage_median_m_msl": 41.0640246452394,
+              "contribution_weighted_stage_p90_m_msl": 42.48488358360108,
               "grid_top_m_msl": 47.4,
               "attainable_max_m_msl": null,
               "frac_of_annual_piping_above_attainable_max": null
             }
           },
           "gamma_bl_sub_lower": {
-            "p_annual_system": 0.04473125051530419,
-            "p_annual_bep": 0.044296030544606416,
+            "p_annual_system": 0.03831719261253219,
+            "p_annual_bep": 0.037791716456846626,
             "p_annual_overflow": 0.0025293600327370483,
-            "share_bep": 0.9459831514152733,
-            "share_overflow": 0.054016848584726655,
+            "share_bep": 0.9372695311497828,
+            "share_overflow": 0.06273046885021706,
             "leading_mechanism": "bep",
-            "ratio_system_to_baseline": 1.002570466312059,
-            "ratio_bep_to_baseline": 1.0026115563295621,
+            "ratio_system_to_baseline": 1.001465761824152,
+            "ratio_bep_to_baseline": 1.0015005057816366,
             "coverage_system": {
               "grid_bottom_m_msl": 36.5,
               "grid_top_m_msl": 47.4,
               "p_bottom": 0.0,
-              "p_top": 0.9999924293104528,
+              "p_top": 0.9999870816067048,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -1266,7 +1259,7 @@
               "grid_bottom_m_msl": 36.5,
               "grid_top_m_msl": 47.4,
               "p_bottom": 0.0,
-              "p_top": 0.9996620227880739,
+              "p_top": 0.9994232860136064,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -1274,9 +1267,9 @@
             },
             "driving_stage_band": {
               "defined": true,
-              "contribution_weighted_stage_p10_m_msl": 40.724574479312565,
-              "contribution_weighted_stage_median_m_msl": 41.70462283044096,
-              "contribution_weighted_stage_p90_m_msl": 43.16402459348865,
+              "contribution_weighted_stage_p10_m_msl": 40.80212976106288,
+              "contribution_weighted_stage_median_m_msl": 41.807638079203194,
+              "contribution_weighted_stage_p90_m_msl": 43.23216900673373,
               "grid_top_m_msl": 47.4,
               "attainable_max_m_msl": null,
               "frac_of_annual_piping_above_attainable_max": null
@@ -1291,22 +1284,22 @@
         "arms_changing_the_lead": [
           "k_aq_field_geomean"
         ],
-        "conductivity_span_p_annual_system": 48.59483014615312,
-        "conductivity_span_p_annual_bep": 3505.1776638169754
+        "conductivity_span_p_annual_system": 45.32959261552127,
+        "conductivity_span_p_annual_bep": 5585.675186940746
       },
       "climate_ratio_plus4k_over_historical": {
-        "baseline": 5.269497170261505,
-        "k_aq_field_geomean": 13.054817139672744,
-        "k_aq_field_toe": 8.995967578555211,
-        "k_aq_regional_upper": 3.432371914797806,
-        "gamma_bl_sub_lower": 5.261832962178647
+        "baseline": 5.58295749141793,
+        "k_aq_field_geomean": 13.020338220573873,
+        "k_aq_field_toe": 9.847998490160018,
+        "k_aq_regional_upper": 3.5788951525995096,
+        "gamma_bl_sub_lower": 5.5788316284002395
       }
     },
     "KP 60.0": {
       "historical": {
         "baseline": {
-          "p_annual_system": 0.0020250317468853943,
-          "p_annual_bep": 0.0020250317468853943,
+          "p_annual_system": 0.0003218487227041872,
+          "p_annual_bep": 0.0003218487227041872,
           "p_annual_overflow": 0.0,
           "p_annual_fluvial_scour": 0.0,
           "share_bep": 1.0,
@@ -1324,9 +1317,9 @@
           },
           "driving_stage_band": {
             "defined": true,
-            "contribution_weighted_stage_p10_m_msl": 41.81833182124536,
-            "contribution_weighted_stage_median_m_msl": 42.55826860020852,
-            "contribution_weighted_stage_p90_m_msl": 43.0108455523276,
+            "contribution_weighted_stage_p10_m_msl": 42.27310952155198,
+            "contribution_weighted_stage_median_m_msl": 42.72691440234398,
+            "contribution_weighted_stage_p90_m_msl": 43.05270344329504,
             "grid_top_m_msl": 48.2,
             "attainable_max_m_msl": null,
             "frac_of_annual_piping_above_attainable_max": null
@@ -1335,14 +1328,14 @@
         "reversal_margin_p_bep_over_p_overflow": null,
         "arms": {
           "k_aq_field_geomean": {
-            "p_annual_system": 5.174615683018209e-08,
-            "p_annual_bep": 5.174615683018209e-08,
+            "p_annual_system": 0.0,
+            "p_annual_bep": 0.0,
             "p_annual_overflow": 0.0,
-            "share_bep": 1.0,
+            "share_bep": 0.0,
             "share_overflow": 0.0,
-            "leading_mechanism": "bep",
-            "ratio_system_to_baseline": 2.5553257083386674e-05,
-            "ratio_bep_to_baseline": 2.5553257083386674e-05,
+            "leading_mechanism": "not defined",
+            "ratio_system_to_baseline": 0.0,
+            "ratio_bep_to_baseline": 0.0,
             "coverage_system": {
               "grid_bottom_m_msl": 38.25,
               "grid_top_m_msl": 48.2,
@@ -1357,31 +1350,25 @@
               "grid_bottom_m_msl": 38.25,
               "grid_top_m_msl": 48.2,
               "p_bottom": 0.0,
-              "p_top": 0.08074000000000003,
+              "p_top": 0.010539999999999994,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
               "below_grid_unresolved": false
             },
             "driving_stage_band": {
-              "defined": true,
-              "contribution_weighted_stage_p10_m_msl": 42.73433563867889,
-              "contribution_weighted_stage_median_m_msl": 42.998764391000186,
-              "contribution_weighted_stage_p90_m_msl": 43.084575300321795,
-              "grid_top_m_msl": 48.2,
-              "attainable_max_m_msl": null,
-              "frac_of_annual_piping_above_attainable_max": null
+              "defined": false
             }
           },
           "k_aq_field_toe": {
-            "p_annual_system": 0.0005044551672158195,
-            "p_annual_bep": 0.0005044551672158195,
+            "p_annual_system": 4.11354467113255e-05,
+            "p_annual_bep": 4.11354467113255e-05,
             "p_annual_overflow": 0.0,
             "share_bep": 1.0,
             "share_overflow": 0.0,
             "leading_mechanism": "bep",
-            "ratio_system_to_baseline": 0.249109757410815,
-            "ratio_bep_to_baseline": 0.249109757410815,
+            "ratio_system_to_baseline": 0.12780988026207984,
+            "ratio_bep_to_baseline": 0.12780988026207984,
             "coverage_system": {
               "grid_bottom_m_msl": 38.25,
               "grid_top_m_msl": 48.2,
@@ -1396,7 +1383,7 @@
               "grid_bottom_m_msl": 38.25,
               "grid_top_m_msl": 48.2,
               "p_bottom": 0.0,
-              "p_top": 0.9786756273134145,
+              "p_top": 0.9039323513448553,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -1404,23 +1391,23 @@
             },
             "driving_stage_band": {
               "defined": true,
-              "contribution_weighted_stage_p10_m_msl": 42.02555948417538,
-              "contribution_weighted_stage_median_m_msl": 42.633229355931235,
-              "contribution_weighted_stage_p90_m_msl": 43.04036792987248,
+              "contribution_weighted_stage_p10_m_msl": 42.356301862157466,
+              "contribution_weighted_stage_median_m_msl": 42.75730970154635,
+              "contribution_weighted_stage_p90_m_msl": 43.06708325581385,
               "grid_top_m_msl": 48.2,
               "attainable_max_m_msl": null,
               "frac_of_annual_piping_above_attainable_max": null
             }
           },
           "k_aq_regional_upper": {
-            "p_annual_system": 0.02296211775004148,
-            "p_annual_bep": 0.02296211775004148,
+            "p_annual_system": 0.012450131224021953,
+            "p_annual_bep": 0.012450131224021953,
             "p_annual_overflow": 0.0,
             "share_bep": 1.0,
             "share_overflow": 0.0,
             "leading_mechanism": "bep",
-            "ratio_system_to_baseline": 11.339139638357981,
-            "ratio_bep_to_baseline": 11.339139638357981,
+            "ratio_system_to_baseline": 38.6831773617599,
+            "ratio_bep_to_baseline": 38.6831773617599,
             "coverage_system": {
               "grid_bottom_m_msl": 38.25,
               "grid_top_m_msl": 48.2,
@@ -1435,7 +1422,7 @@
               "grid_bottom_m_msl": 38.25,
               "grid_top_m_msl": 48.2,
               "p_bottom": 0.0,
-              "p_top": 0.9999999999999953,
+              "p_top": 0.9999999997287954,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -1443,23 +1430,23 @@
             },
             "driving_stage_band": {
               "defined": true,
-              "contribution_weighted_stage_p10_m_msl": 41.24117947661239,
-              "contribution_weighted_stage_median_m_msl": 41.684364564319495,
-              "contribution_weighted_stage_p90_m_msl": 42.62299474086769,
+              "contribution_weighted_stage_p10_m_msl": 41.45057190976336,
+              "contribution_weighted_stage_median_m_msl": 42.02797165448885,
+              "contribution_weighted_stage_p90_m_msl": 42.74262931501943,
               "grid_top_m_msl": 48.2,
               "attainable_max_m_msl": null,
               "frac_of_annual_piping_above_attainable_max": null
             }
           },
           "gamma_bl_sub_lower": {
-            "p_annual_system": 0.002053134557683858,
-            "p_annual_bep": 0.002053134557683858,
+            "p_annual_system": 0.00032217143207624235,
+            "p_annual_bep": 0.00032217143207624235,
             "p_annual_overflow": 0.0,
             "share_bep": 1.0,
             "share_overflow": 0.0,
             "leading_mechanism": "bep",
-            "ratio_system_to_baseline": 1.0138777136910013,
-            "ratio_bep_to_baseline": 1.0138777136910013,
+            "ratio_system_to_baseline": 1.0010026740803684,
+            "ratio_bep_to_baseline": 1.0010026740803684,
             "coverage_system": {
               "grid_bottom_m_msl": 38.25,
               "grid_top_m_msl": 48.2,
@@ -1474,7 +1461,7 @@
               "grid_bottom_m_msl": 38.25,
               "grid_top_m_msl": 48.2,
               "p_bottom": 0.0,
-              "p_top": 0.9983712751243734,
+              "p_top": 0.9873231755410546,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -1482,30 +1469,34 @@
             },
             "driving_stage_band": {
               "defined": true,
-              "contribution_weighted_stage_p10_m_msl": 41.81528731085759,
-              "contribution_weighted_stage_median_m_msl": 42.55431999030489,
-              "contribution_weighted_stage_p90_m_msl": 43.01017352081675,
+              "contribution_weighted_stage_p10_m_msl": 42.273111694254844,
+              "contribution_weighted_stage_median_m_msl": 42.72689350540246,
+              "contribution_weighted_stage_p90_m_msl": 43.05270029779697,
               "grid_top_m_msl": 48.2,
               "attainable_max_m_msl": null,
               "frac_of_annual_piping_above_attainable_max": null
             }
           }
         },
-        "ordering_verdict": "ROBUST",
+        "ordering_verdict": "COLLAPSED",
         "arms_reversing_the_lead": [],
-        "arms_collapsing_to_undefined": [],
-        "arms_changing_the_lead": [],
-        "conductivity_span_p_annual_system": 443745.3746641976,
-        "conductivity_span_p_annual_bep": 443745.3746641976
+        "arms_collapsing_to_undefined": [
+          "k_aq_field_geomean"
+        ],
+        "arms_changing_the_lead": [
+          "k_aq_field_geomean"
+        ],
+        "conductivity_span_p_annual_system": null,
+        "conductivity_span_p_annual_bep": null
       },
       "+4K": {
         "baseline": {
-          "p_annual_system": 0.015340647327771224,
-          "p_annual_bep": 0.015338550378454741,
+          "p_annual_system": 0.00427613253666602,
+          "p_annual_bep": 0.004268854824469144,
           "p_annual_overflow": 2.3036501417792023e-05,
           "p_annual_fluvial_scour": 0.0,
-          "share_bep": 0.9985003827014789,
-          "share_overflow": 0.0014996172985211262,
+          "share_bep": 0.9946325524882595,
+          "share_overflow": 0.005367447511740396,
           "leading_mechanism": "bep",
           "coverage_system": {
             "grid_bottom_m_msl": 38.25,
@@ -1519,25 +1510,25 @@
           },
           "driving_stage_band": {
             "defined": true,
-            "contribution_weighted_stage_p10_m_msl": 42.03588722408859,
-            "contribution_weighted_stage_median_m_msl": 42.937893105299416,
-            "contribution_weighted_stage_p90_m_msl": 43.91531239531074,
+            "contribution_weighted_stage_p10_m_msl": 42.50544356298262,
+            "contribution_weighted_stage_median_m_msl": 43.443854031675556,
+            "contribution_weighted_stage_p90_m_msl": 44.60595131782106,
             "grid_top_m_msl": 48.2,
             "attainable_max_m_msl": null,
             "frac_of_annual_piping_above_attainable_max": null
           }
         },
-        "reversal_margin_p_bep_over_p_overflow": 665.836799619588,
+        "reversal_margin_p_bep_over_p_overflow": 185.30829604065374,
         "arms": {
           "k_aq_field_geomean": {
-            "p_annual_system": 3.473120809073353e-05,
-            "p_annual_bep": 1.1917376344855305e-05,
+            "p_annual_system": 2.3331091784903602e-05,
+            "p_annual_bep": 3.044404888154781e-07,
             "p_annual_overflow": 2.3036501417792023e-05,
-            "share_bep": 0.3409457578864265,
-            "share_overflow": 0.6590542421135733,
+            "share_bep": 0.013043196372863391,
+            "share_overflow": 0.9869568036271366,
             "leading_mechanism": "overflow",
-            "ratio_system_to_baseline": 0.0022639988618902355,
-            "ratio_bep_to_baseline": 0.0007769558433367354,
+            "ratio_system_to_baseline": 0.005456119889841907,
+            "ratio_bep_to_baseline": 7.131666485128995e-05,
             "coverage_system": {
               "grid_bottom_m_msl": 38.25,
               "grid_top_m_msl": 48.2,
@@ -1552,7 +1543,7 @@
               "grid_bottom_m_msl": 38.25,
               "grid_top_m_msl": 48.2,
               "p_bottom": 0.0,
-              "p_top": 0.08074000000000003,
+              "p_top": 0.010539999999999994,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -1560,23 +1551,23 @@
             },
             "driving_stage_band": {
               "defined": true,
-              "contribution_weighted_stage_p10_m_msl": 44.10922376139109,
-              "contribution_weighted_stage_median_m_msl": 44.84958156633852,
-              "contribution_weighted_stage_p90_m_msl": 44.92639390670708,
+              "contribution_weighted_stage_p10_m_msl": 44.68527748655368,
+              "contribution_weighted_stage_median_m_msl": 44.888995688677696,
+              "contribution_weighted_stage_p90_m_msl": 44.9277630771737,
               "grid_top_m_msl": 48.2,
               "attainable_max_m_msl": null,
               "frac_of_annual_piping_above_attainable_max": null
             }
           },
           "k_aq_field_toe": {
-            "p_annual_system": 0.005402462529048942,
-            "p_annual_bep": 0.005395034917652101,
+            "p_annual_system": 0.001054301608159384,
+            "p_annual_bep": 0.0010390221197196276,
             "p_annual_overflow": 2.3036501417792023e-05,
-            "share_bep": 0.9957482100851032,
-            "share_overflow": 0.004251789914896811,
+            "share_bep": 0.9783095763648895,
+            "share_overflow": 0.021690423635110565,
             "leading_mechanism": "bep",
-            "ratio_system_to_baseline": 0.3521665294572574,
-            "ratio_bep_to_baseline": 0.35173042983450536,
+            "ratio_system_to_baseline": 0.2465549416719888,
+            "ratio_bep_to_baseline": 0.2433959838043534,
             "coverage_system": {
               "grid_bottom_m_msl": 38.25,
               "grid_top_m_msl": 48.2,
@@ -1591,7 +1582,7 @@
               "grid_bottom_m_msl": 38.25,
               "grid_top_m_msl": 48.2,
               "p_bottom": 0.0,
-              "p_top": 0.9786756273134145,
+              "p_top": 0.9039323513448553,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -1599,23 +1590,23 @@
             },
             "driving_stage_band": {
               "defined": true,
-              "contribution_weighted_stage_p10_m_msl": 42.33568892674572,
-              "contribution_weighted_stage_median_m_msl": 43.22917103108829,
-              "contribution_weighted_stage_p90_m_msl": 44.506907386157295,
+              "contribution_weighted_stage_p10_m_msl": 42.923413111269134,
+              "contribution_weighted_stage_median_m_msl": 43.797867103674136,
+              "contribution_weighted_stage_p90_m_msl": 44.85281316819994,
               "grid_top_m_msl": 48.2,
               "attainable_max_m_msl": null,
               "frac_of_annual_piping_above_attainable_max": null
             }
           },
           "k_aq_regional_upper": {
-            "p_annual_system": 0.09592621823845596,
-            "p_annual_bep": 0.09592621823769698,
+            "p_annual_system": 0.0633646641806637,
+            "p_annual_bep": 0.06336466358951653,
             "p_annual_overflow": 2.3036501417792023e-05,
-            "share_bep": 0.9997599095325918,
-            "share_overflow": 0.00024009046740829912,
+            "share_bep": 0.999636577736931,
+            "share_overflow": 0.0003634222630690886,
             "leading_mechanism": "bep",
-            "ratio_system_to_baseline": 6.253074996698504,
-            "ratio_bep_to_baseline": 6.25392986109297,
+            "ratio_system_to_baseline": 14.81821801296817,
+            "ratio_bep_to_baseline": 14.843480557434109,
             "coverage_system": {
               "grid_bottom_m_msl": 38.25,
               "grid_top_m_msl": 48.2,
@@ -1630,7 +1621,7 @@
               "grid_bottom_m_msl": 38.25,
               "grid_top_m_msl": 48.2,
               "p_bottom": 0.0,
-              "p_top": 0.9999999999999953,
+              "p_top": 0.9999999997287954,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -1638,23 +1629,23 @@
             },
             "driving_stage_band": {
               "defined": true,
-              "contribution_weighted_stage_p10_m_msl": 41.41454535647299,
-              "contribution_weighted_stage_median_m_msl": 42.02894930547096,
-              "contribution_weighted_stage_p90_m_msl": 43.091096155643044,
+              "contribution_weighted_stage_p10_m_msl": 41.61028211068687,
+              "contribution_weighted_stage_median_m_msl": 42.27500507554976,
+              "contribution_weighted_stage_p90_m_msl": 43.36002357724384,
               "grid_top_m_msl": 48.2,
               "attainable_max_m_msl": null,
               "frac_of_annual_piping_above_attainable_max": null
             }
           },
           "gamma_bl_sub_lower": {
-            "p_annual_system": 0.015485529881540163,
-            "p_annual_bep": 0.01548344303400868,
+            "p_annual_system": 0.004279628451307161,
+            "p_annual_bep": 0.004272357589175336,
             "p_annual_overflow": 2.3036501417792023e-05,
-            "share_bep": 0.9985143951362292,
-            "share_overflow": 0.0014856048637708053,
+            "share_bep": 0.9946369294802909,
+            "share_overflow": 0.005363070519708945,
             "leading_mechanism": "bep",
-            "ratio_system_to_baseline": 1.009444357247341,
-            "ratio_bep_to_baseline": 1.009446306983316,
+            "ratio_system_to_baseline": 1.0008175412270701,
+            "ratio_bep_to_baseline": 1.0008205396646694,
             "coverage_system": {
               "grid_bottom_m_msl": 38.25,
               "grid_top_m_msl": 48.2,
@@ -1669,7 +1660,7 @@
               "grid_bottom_m_msl": 38.25,
               "grid_top_m_msl": 48.2,
               "p_bottom": 0.0,
-              "p_top": 0.9983712751243734,
+              "p_top": 0.9873231755410546,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -1677,9 +1668,9 @@
             },
             "driving_stage_band": {
               "defined": true,
-              "contribution_weighted_stage_p10_m_msl": 42.03353811818532,
-              "contribution_weighted_stage_median_m_msl": 42.93138008987649,
-              "contribution_weighted_stage_p90_m_msl": 43.91529130736809,
+              "contribution_weighted_stage_p10_m_msl": 42.50538148403304,
+              "contribution_weighted_stage_median_m_msl": 43.443648478645514,
+              "contribution_weighted_stage_p90_m_msl": 44.60580174011523,
               "grid_top_m_msl": 48.2,
               "attainable_max_m_msl": null,
               "frac_of_annual_piping_above_attainable_max": null
@@ -1694,26 +1685,26 @@
         "arms_changing_the_lead": [
           "k_aq_field_geomean"
         ],
-        "conductivity_span_p_annual_system": 2761.9603092369707,
-        "conductivity_span_p_annual_bep": 8049.273217683356
+        "conductivity_span_p_annual_system": 2715.8893704950337,
+        "conductivity_span_p_annual_bep": 208134.81096439165
       },
       "climate_ratio_plus4k_over_historical": {
-        "baseline": 7.575509545154514,
-        "k_aq_field_geomean": 671.1843007918955,
-        "k_aq_field_toe": 10.709499832990357,
-        "k_aq_regional_upper": 4.177585851735416,
-        "gamma_bl_sub_lower": 7.542384313578256
+        "baseline": 13.286156616492883,
+        "k_aq_field_geomean": null,
+        "k_aq_field_toe": 25.630002648521415,
+        "k_aq_regional_upper": 5.089477615979219,
+        "gamma_bl_sub_lower": 13.283699376220236
       }
     },
     "KP 62.0": {
       "historical": {
         "baseline": {
-          "p_annual_system": 0.001006046005485643,
-          "p_annual_bep": 0.0008580186169895641,
+          "p_annual_system": 0.0009165780319013992,
+          "p_annual_bep": 0.0007643846350220552,
           "p_annual_overflow": 0.00019927445677934933,
           "p_annual_fluvial_scour": 0.0,
-          "share_bep": 0.8115239173288071,
-          "share_overflow": 0.18847608267119284,
+          "share_bep": 0.7932106296980627,
+          "share_overflow": 0.2067893703019374,
           "leading_mechanism": "bep",
           "coverage_system": {
             "grid_bottom_m_msl": 41.75,
@@ -1727,26 +1718,26 @@
           },
           "driving_stage_band": {
             "defined": true,
-            "contribution_weighted_stage_p10_m_msl": 47.495290911369764,
-            "contribution_weighted_stage_median_m_msl": 48.233745904002596,
-            "contribution_weighted_stage_p90_m_msl": 48.71262341523263,
+            "contribution_weighted_stage_p10_m_msl": 47.519243420385635,
+            "contribution_weighted_stage_median_m_msl": 48.236370551973046,
+            "contribution_weighted_stage_p90_m_msl": 48.71645020586891,
             "grid_top_m_msl": 56.5,
             "attainable_max_m_msl": 50.5,
             "frac_peaks_above_attainable_max": 0.0,
             "frac_of_annual_piping_above_attainable_max": 0.0
           }
         },
-        "reversal_margin_p_bep_over_p_overflow": 4.305712989295073,
+        "reversal_margin_p_bep_over_p_overflow": 3.8358385082360833,
         "arms": {
           "k_aq_field_geomean": {
-            "p_annual_system": 0.0001992858949966271,
-            "p_annual_bep": 1.5583651571989974e-08,
+            "p_annual_system": 0.00019928544465964474,
+            "p_annual_bep": 1.4947132868951034e-08,
             "p_annual_overflow": 0.00019927445677934933,
-            "share_bep": 7.819583727462606e-05,
-            "share_overflow": 0.9999218041627254,
+            "share_bep": 7.500214550059496e-05,
+            "share_overflow": 0.9999249978544994,
             "leading_mechanism": "overflow",
-            "ratio_system_to_baseline": 0.19808825233636004,
-            "ratio_bep_to_baseline": 1.8162369980579935e-05,
+            "ratio_system_to_baseline": 0.2174233264637995,
+            "ratio_bep_to_baseline": 1.9554465362218795e-05,
             "coverage_system": {
               "grid_bottom_m_msl": 41.75,
               "grid_top_m_msl": 56.5,
@@ -1761,7 +1752,7 @@
               "grid_bottom_m_msl": 41.75,
               "grid_top_m_msl": 56.5,
               "p_bottom": 0.0,
-              "p_top": 0.16486,
+              "p_top": 0.15229999999999988,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -1769,9 +1760,9 @@
             },
             "driving_stage_band": {
               "defined": true,
-              "contribution_weighted_stage_p10_m_msl": 48.33693957021481,
-              "contribution_weighted_stage_median_m_msl": 48.66180451350135,
-              "contribution_weighted_stage_p90_m_msl": 48.75629595370698,
+              "contribution_weighted_stage_p10_m_msl": 48.33693917784748,
+              "contribution_weighted_stage_median_m_msl": 48.66180418197563,
+              "contribution_weighted_stage_p90_m_msl": 48.75629589228806,
               "grid_top_m_msl": 56.5,
               "attainable_max_m_msl": 50.5,
               "frac_peaks_above_attainable_max": 0.0,
@@ -1779,14 +1770,14 @@
             }
           },
           "k_aq_field_toe": {
-            "p_annual_system": 0.0003775133547058312,
-            "p_annual_bep": 0.00019351855534387587,
+            "p_annual_system": 0.00035223621924596906,
+            "p_annual_bep": 0.0001664546049077732,
             "p_annual_overflow": 0.00019927445677934933,
-            "share_bep": 0.49267311120892887,
-            "share_overflow": 0.5073268887910712,
+            "share_bep": 0.45513092161697943,
+            "share_overflow": 0.5448690783830206,
             "leading_mechanism": "overflow",
-            "ratio_system_to_baseline": 0.37524462365276856,
-            "ratio_bep_to_baseline": 0.2255412079785089,
+            "ratio_system_to_baseline": 0.3842948521417987,
+            "ratio_bep_to_baseline": 0.217762887009065,
             "coverage_system": {
               "grid_bottom_m_msl": 41.75,
               "grid_top_m_msl": 56.5,
@@ -1801,7 +1792,7 @@
               "grid_bottom_m_msl": 41.75,
               "grid_top_m_msl": 56.5,
               "p_bottom": 0.0,
-              "p_top": 0.9520527565734472,
+              "p_top": 0.946355819747463,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -1809,9 +1800,9 @@
             },
             "driving_stage_band": {
               "defined": true,
-              "contribution_weighted_stage_p10_m_msl": 47.773852180642464,
-              "contribution_weighted_stage_median_m_msl": 48.58982687986754,
-              "contribution_weighted_stage_p90_m_msl": 48.743816899783525,
+              "contribution_weighted_stage_p10_m_msl": 47.87959194499427,
+              "contribution_weighted_stage_median_m_msl": 48.598840799631596,
+              "contribution_weighted_stage_p90_m_msl": 48.74547477398726,
               "grid_top_m_msl": 56.5,
               "attainable_max_m_msl": 50.5,
               "frac_peaks_above_attainable_max": 0.0,
@@ -1819,14 +1810,14 @@
             }
           },
           "k_aq_regional_upper": {
-            "p_annual_system": 0.01376664062952846,
-            "p_annual_bep": 0.013764191020553287,
+            "p_annual_system": 0.013061279820446643,
+            "p_annual_bep": 0.013058208334412987,
             "p_annual_overflow": 0.00019927445677934933,
-            "share_bep": 0.9857288681593521,
-            "share_overflow": 0.014271131840647888,
+            "share_bep": 0.9849689070000726,
+            "share_overflow": 0.015031092999927418,
             "leading_mechanism": "bep",
-            "ratio_system_to_baseline": 13.683907648818671,
-            "ratio_bep_to_baseline": 16.04183259897809,
+            "ratio_system_to_baseline": 14.250046767269357,
+            "ratio_bep_to_baseline": 17.0832951581192,
             "coverage_system": {
               "grid_bottom_m_msl": 41.75,
               "grid_top_m_msl": 56.5,
@@ -1841,7 +1832,7 @@
               "grid_bottom_m_msl": 41.75,
               "grid_top_m_msl": 56.5,
               "p_bottom": 0.0,
-              "p_top": 0.9999999990954969,
+              "p_top": 0.9999999983321739,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -1849,9 +1840,9 @@
             },
             "driving_stage_band": {
               "defined": true,
-              "contribution_weighted_stage_p10_m_msl": 46.36525627953691,
-              "contribution_weighted_stage_median_m_msl": 47.158992873071256,
-              "contribution_weighted_stage_p90_m_msl": 48.23947250446199,
+              "contribution_weighted_stage_p10_m_msl": 46.36701551661689,
+              "contribution_weighted_stage_median_m_msl": 47.18343640103602,
+              "contribution_weighted_stage_p90_m_msl": 48.24127956718737,
               "grid_top_m_msl": 56.5,
               "attainable_max_m_msl": 50.5,
               "frac_peaks_above_attainable_max": 0.0,
@@ -1859,14 +1850,14 @@
             }
           },
           "gamma_bl_sub_lower": {
-            "p_annual_system": 0.0010062551634586183,
-            "p_annual_bep": 0.0008582413017501528,
+            "p_annual_system": 0.0009166883221417586,
+            "p_annual_bep": 0.0007645043017567182,
             "p_annual_overflow": 0.00019927445677934933,
-            "share_bep": 0.8115636053911436,
-            "share_overflow": 0.18843639460885636,
+            "share_bep": 0.7932363055167999,
+            "share_overflow": 0.2067636944832001,
             "leading_mechanism": "bep",
-            "ratio_system_to_baseline": 1.0002079010023746,
-            "ratio_bep_to_baseline": 1.000259533716611,
+            "ratio_system_to_baseline": 1.0001203282606834,
+            "ratio_bep_to_baseline": 1.000156553035187,
             "coverage_system": {
               "grid_bottom_m_msl": 41.75,
               "grid_top_m_msl": 56.5,
@@ -1881,7 +1872,7 @@
               "grid_bottom_m_msl": 41.75,
               "grid_top_m_msl": 56.5,
               "p_bottom": 0.0,
-              "p_top": 0.9941154825429376,
+              "p_top": 0.9930205304807023,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -1889,9 +1880,9 @@
             },
             "driving_stage_band": {
               "defined": true,
-              "contribution_weighted_stage_p10_m_msl": 47.49529800532809,
-              "contribution_weighted_stage_median_m_msl": 48.23374301163242,
-              "contribution_weighted_stage_p90_m_msl": 48.71261696742635,
+              "contribution_weighted_stage_p10_m_msl": 47.51927830649893,
+              "contribution_weighted_stage_median_m_msl": 48.2363701023976,
+              "contribution_weighted_stage_p90_m_msl": 48.716447739536235,
               "grid_top_m_msl": 56.5,
               "attainable_max_m_msl": 50.5,
               "frac_peaks_above_attainable_max": 0.0,
@@ -1909,18 +1900,18 @@
           "k_aq_field_geomean",
           "k_aq_field_toe"
         ],
-        "conductivity_span_p_annual_system": 69.07985449628264,
-        "conductivity_span_p_annual_bep": 883245.5574977702
+        "conductivity_span_p_annual_system": 65.54056089120667,
+        "conductivity_span_p_annual_bep": 873626.2966885228
       },
       "+4K": {
         "baseline": {
-          "p_annual_system": 0.012777595238792624,
-          "p_annual_bep": 0.008403164105895132,
+          "p_annual_system": 0.012311584335803571,
+          "p_annual_bep": 0.0077365549618373395,
           "p_annual_overflow": 0.008391873485202778,
           "p_annual_fluvial_scour": 0.0,
-          "share_bep": 0.500336129664227,
-          "share_overflow": 0.49966387033577286,
-          "leading_mechanism": "bep",
+          "share_bep": 0.4796843652338086,
+          "share_overflow": 0.5203156347661915,
+          "leading_mechanism": "overflow",
           "coverage_system": {
             "grid_bottom_m_msl": 41.75,
             "grid_top_m_msl": 56.5,
@@ -1933,26 +1924,26 @@
           },
           "driving_stage_band": {
             "defined": true,
-            "contribution_weighted_stage_p10_m_msl": 47.81064464395793,
-            "contribution_weighted_stage_median_m_msl": 49.10140545380772,
-            "contribution_weighted_stage_p90_m_msl": 50.474261864800376,
+            "contribution_weighted_stage_p10_m_msl": 47.88904498171386,
+            "contribution_weighted_stage_median_m_msl": 49.15623359932824,
+            "contribution_weighted_stage_p90_m_msl": 50.51351244617729,
             "grid_top_m_msl": 56.5,
             "attainable_max_m_msl": 50.5,
             "frac_peaks_above_attainable_max": 0.0012962962962962963,
-            "frac_of_annual_piping_above_attainable_max": 0.11786976529772512
+            "frac_of_annual_piping_above_attainable_max": 0.12468076025330335
           }
         },
-        "reversal_margin_p_bep_over_p_overflow": 1.0013454231301584,
+        "reversal_margin_p_bep_over_p_overflow": 0.9219103428428767,
         "arms": {
           "k_aq_field_geomean": {
-            "p_annual_system": 0.008392011624918939,
-            "p_annual_bep": 6.914089792285954e-06,
+            "p_annual_system": 0.008391985972572413,
+            "p_annual_bep": 5.620459866728052e-06,
             "p_annual_overflow": 0.008391873485202778,
-            "share_bep": 0.0008232247488757348,
-            "share_overflow": 0.9991767752511241,
+            "share_bep": 0.0006693020445734339,
+            "share_overflow": 0.9993306979554266,
             "leading_mechanism": "overflow",
-            "ratio_system_to_baseline": 0.6567755096390042,
-            "ratio_bep_to_baseline": 0.0008227959974547519,
+            "ratio_system_to_baseline": 0.6816333092214222,
+            "ratio_bep_to_baseline": 0.0007264809588314823,
             "coverage_system": {
               "grid_bottom_m_msl": 41.75,
               "grid_top_m_msl": 56.5,
@@ -1967,7 +1958,7 @@
               "grid_bottom_m_msl": 41.75,
               "grid_top_m_msl": 56.5,
               "p_bottom": 0.0,
-              "p_top": 0.16486,
+              "p_top": 0.15229999999999988,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -1975,24 +1966,24 @@
             },
             "driving_stage_band": {
               "defined": true,
-              "contribution_weighted_stage_p10_m_msl": 48.77442486490599,
-              "contribution_weighted_stage_median_m_msl": 49.432936401147686,
-              "contribution_weighted_stage_p90_m_msl": 50.832460496238625,
+              "contribution_weighted_stage_p10_m_msl": 48.774423902511536,
+              "contribution_weighted_stage_median_m_msl": 49.43293982439029,
+              "contribution_weighted_stage_p90_m_msl": 50.832462256694214,
               "grid_top_m_msl": 56.5,
               "attainable_max_m_msl": 50.5,
               "frac_peaks_above_attainable_max": 0.0012962962962962963,
-              "frac_of_annual_piping_above_attainable_max": 0.7395881385248919
+              "frac_of_annual_piping_above_attainable_max": 0.757456617401687
             }
           },
           "k_aq_field_toe": {
-            "p_annual_system": 0.009422627063900811,
-            "p_annual_bep": 0.002855233668888544,
+            "p_annual_system": 0.009283156001752346,
+            "p_annual_bep": 0.002576906001926983,
             "p_annual_overflow": 0.008391873485202778,
-            "share_bep": 0.2538638273620346,
-            "share_overflow": 0.7461361726379654,
+            "share_bep": 0.23493096975379993,
+            "share_overflow": 0.7650690302462001,
             "leading_mechanism": "overflow",
-            "ratio_system_to_baseline": 0.7374335223339858,
-            "ratio_bep_to_baseline": 0.33978078172786025,
+            "ratio_system_to_baseline": 0.754017984083154,
+            "ratio_bep_to_baseline": 0.3330818451672964,
             "coverage_system": {
               "grid_bottom_m_msl": 41.75,
               "grid_top_m_msl": 56.5,
@@ -2007,7 +1998,7 @@
               "grid_bottom_m_msl": 41.75,
               "grid_top_m_msl": 56.5,
               "p_bottom": 0.0,
-              "p_top": 0.9520527565734472,
+              "p_top": 0.946355819747463,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -2015,24 +2006,24 @@
             },
             "driving_stage_band": {
               "defined": true,
-              "contribution_weighted_stage_p10_m_msl": 48.592102732510085,
-              "contribution_weighted_stage_median_m_msl": 49.390875646886684,
-              "contribution_weighted_stage_p90_m_msl": 50.758976796231636,
+              "contribution_weighted_stage_p10_m_msl": 48.608327609417294,
+              "contribution_weighted_stage_median_m_msl": 49.39903357963365,
+              "contribution_weighted_stage_p90_m_msl": 50.77090049923073,
               "grid_top_m_msl": 56.5,
               "attainable_max_m_msl": 50.5,
               "frac_peaks_above_attainable_max": 0.0012962962962962963,
-              "frac_of_annual_piping_above_attainable_max": 0.21185958044673692
+              "frac_of_annual_piping_above_attainable_max": 0.22273814135360695
             }
           },
           "k_aq_regional_upper": {
-            "p_annual_system": 0.06936390731257845,
-            "p_annual_bep": 0.06933643685685,
+            "p_annual_system": 0.06683356610035811,
+            "p_annual_bep": 0.06679824145554217,
             "p_annual_overflow": 0.008391873485202778,
-            "share_bep": 0.8920358174740538,
-            "share_overflow": 0.10796418252594622,
+            "share_bep": 0.8883912667002017,
+            "share_overflow": 0.11160873329979826,
             "leading_mechanism": "bep",
-            "ratio_system_to_baseline": 5.428557253245154,
-            "ratio_bep_to_baseline": 8.251229653864298,
+            "ratio_system_to_baseline": 5.4285106024898875,
+            "ratio_bep_to_baseline": 8.63410675488543,
             "coverage_system": {
               "grid_bottom_m_msl": 41.75,
               "grid_top_m_msl": 56.5,
@@ -2047,7 +2038,7 @@
               "grid_bottom_m_msl": 41.75,
               "grid_top_m_msl": 56.5,
               "p_bottom": 0.0,
-              "p_top": 0.9999999990954969,
+              "p_top": 0.9999999983321739,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -2055,24 +2046,24 @@
             },
             "driving_stage_band": {
               "defined": true,
-              "contribution_weighted_stage_p10_m_msl": 46.56963262256621,
-              "contribution_weighted_stage_median_m_msl": 47.504140453179055,
-              "contribution_weighted_stage_p90_m_msl": 49.029483011766814,
+              "contribution_weighted_stage_p10_m_msl": 46.597876120845484,
+              "contribution_weighted_stage_median_m_msl": 47.53267946556775,
+              "contribution_weighted_stage_p90_m_msl": 49.082751345999455,
               "grid_top_m_msl": 56.5,
               "attainable_max_m_msl": 50.5,
               "frac_peaks_above_attainable_max": 0.0012962962962962963,
-              "frac_of_annual_piping_above_attainable_max": 0.01869462932565232
+              "frac_of_annual_piping_above_attainable_max": 0.019404461094927685
             }
           },
           "gamma_bl_sub_lower": {
-            "p_annual_system": 0.012778726675712011,
-            "p_annual_bep": 0.008405100858068861,
+            "p_annual_system": 0.0123122063517682,
+            "p_annual_bep": 0.0077378234493362084,
             "p_annual_overflow": 0.008391873485202778,
-            "share_bep": 0.5003937427240097,
-            "share_overflow": 0.4996062572759903,
-            "leading_mechanism": "bep",
-            "ratio_system_to_baseline": 1.0000885485021431,
-            "ratio_bep_to_baseline": 1.0002304789183363,
+            "share_bep": 0.4797252844079781,
+            "share_overflow": 0.5202747155920219,
+            "leading_mechanism": "overflow",
+            "ratio_system_to_baseline": 1.000050522820432,
+            "ratio_bep_to_baseline": 1.0001639602517045,
             "coverage_system": {
               "grid_bottom_m_msl": 41.75,
               "grid_top_m_msl": 56.5,
@@ -2087,7 +2078,7 @@
               "grid_bottom_m_msl": 41.75,
               "grid_top_m_msl": 56.5,
               "p_bottom": 0.0,
-              "p_top": 0.9941154825429376,
+              "p_top": 0.9930205304807023,
               "frac_peaks_below_grid": 0.0,
               "frac_peaks_above_grid": 0.0,
               "lower_bound_clamp": false,
@@ -2095,35 +2086,33 @@
             },
             "driving_stage_band": {
               "defined": true,
-              "contribution_weighted_stage_p10_m_msl": 47.81037358619772,
-              "contribution_weighted_stage_median_m_msl": 49.1012338478796,
-              "contribution_weighted_stage_p90_m_msl": 50.47416656755176,
+              "contribution_weighted_stage_p10_m_msl": 47.88900251949451,
+              "contribution_weighted_stage_median_m_msl": 49.15618488570511,
+              "contribution_weighted_stage_p90_m_msl": 50.51346005579741,
               "grid_top_m_msl": 56.5,
               "attainable_max_m_msl": 50.5,
               "frac_peaks_above_attainable_max": 0.0012962962962962963,
-              "frac_of_annual_piping_above_attainable_max": 0.11785808370196395
+              "frac_of_annual_piping_above_attainable_max": 0.124675620483927
             }
           }
         },
         "ordering_verdict": "REVERSED",
         "arms_reversing_the_lead": [
-          "k_aq_field_geomean",
-          "k_aq_field_toe"
+          "k_aq_regional_upper"
         ],
         "arms_collapsing_to_undefined": [],
         "arms_changing_the_lead": [
-          "k_aq_field_geomean",
-          "k_aq_field_toe"
+          "k_aq_regional_upper"
         ],
-        "conductivity_span_p_annual_system": 8.265468449377709,
-        "conductivity_span_p_annual_bep": 10028.281225709365
+        "conductivity_span_p_annual_system": 7.963974954056254,
+        "conductivity_span_p_annual_bep": 11884.835589872957
       },
       "climate_ratio_plus4k_over_historical": {
-        "baseline": 12.70080609546734,
-        "k_aq_field_geomean": 42.110414412725866,
-        "k_aq_field_toe": 24.959718501198935,
-        "k_aq_regional_upper": 5.038550012251924,
-        "gamma_bl_sub_lower": 12.699290537590896
+        "baseline": 13.432118060110772,
+        "k_aq_field_geomean": 42.11038085046754,
+        "k_aq_field_toe": 26.354916089051738,
+        "k_aq_regional_upper": 5.116923227977568,
+        "gamma_bl_sub_lower": 13.431180538006478
       }
     }
   },
@@ -2131,24 +2120,24 @@
     "definition": "published system P_f at lambda_ac = 40 m divided by 250 m, posterior side, matrix, primary surface (phase3_report section 6.2)",
     "values": {
       "KP 57.4": {
-        "historical": 3.3672335035670526,
-        "+4K": 2.1717279498926128
+        "historical": 3.6855038434765417,
+        "+4K": 2.2726313266317044
       },
       "KP 58.8": {
-        "historical": 2.5268046078129127,
-        "+4K": 2.0669253855679917
+        "historical": 2.60018099971317,
+        "+4K": 2.137398905244204
       },
       "KP 60.0": {
-        "historical": 3.3656326101540137,
-        "+4K": 2.6509176167909616
+        "historical": 4.379794932136231,
+        "+4K": 3.199985792511266
       },
       "KP 62.0": {
-        "historical": 3.2855910349797575,
-        "+4K": 1.9266491167639388
+        "historical": 3.2916230104166213,
+        "+4K": 1.8833303482404067
       }
     }
   },
-  "elapsed_s": 26.0,
+  "elapsed_s": 31.8,
   "bep_clamped_cells": [
     {
       "section": "KP 57.4",

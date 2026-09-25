@@ -206,6 +206,14 @@ def _quantile_ci(values: NDArray[np.float64]) -> tuple[float, float]:
 # --------------------------------------------------------------------------- #
 # stage 1: the metric relationship, analytically                              #
 # --------------------------------------------------------------------------- #
+#: KP 62.0's design anchor at N = 1e6 (46.39 m, stage A of
+#: docs/decisions/adr0040-hwl-bias-resolution.json): static and transient
+#: failure counts. Re-read 2026-09-25 after ADR-0054; they were 1696 and 63.
+ANCHOR_STATIC_COUNT = 1203
+ANCHOR_TRANSIENT_COUNT = 51
+ANCHOR_N = 1_000_000
+
+
 def metric_relationship() -> dict[str, Any]:
     """B does not determine dbeta; with an absolute probability fixed it does.
 
@@ -213,9 +221,11 @@ def metric_relationship() -> dict[str, Any]:
     ratio, slid down and up the tail at constant B. The monotonicity claim is
     checked against its analytic derivative, not asserted.
     """
-    b_fixed = 1696.0 / 63.0
+    b_fixed = ANCHOR_STATIC_COUNT / ANCHOR_TRANSIENT_COUNT
+    p_t_anchor = ANCHOR_TRANSIENT_COUNT / ANCHOR_N
+    p_s_anchor = ANCHOR_STATIC_COUNT / ANCHOR_N
     family = []
-    for p_t in (1e-6, 1e-5, 6.3e-5, 1e-4, 1e-3, 1e-2, 3e-2):
+    for p_t in (1e-6, 1e-5, p_t_anchor, 1e-4, 1e-3, 1e-2, 3e-2):
         p_s = b_fixed * p_t
         if p_s >= 1.0:
             continue
@@ -233,9 +243,12 @@ def metric_relationship() -> dict[str, Any]:
 
     # Restricted monotonicity, both restrictions, against the analytic slope.
     monotone_checks = []
-    for label, fixed_p in (("p_transient_fixed", 6.3e-5), ("p_static_fixed", 1.696e-3)):
+    for label, fixed_p in (
+        ("p_transient_fixed", p_t_anchor),
+        ("p_static_fixed", p_s_anchor),
+    ):
         rows = []
-        for b in (2.0, 5.0, 10.0, 26.9, 50.0, 100.0):
+        for b in (2.0, 5.0, 10.0, round(b_fixed, 1), 50.0, 100.0):
             if label == "p_transient_fixed":
                 p_t, p_s = fixed_p, b * fixed_p
                 slope = fixed_p / norm.pdf(norm.ppf(b * fixed_p))
@@ -267,7 +280,7 @@ def metric_relationship() -> dict[str, Any]:
         monotone_checks.append({"restriction": label, "rows": rows})
 
     # The two notions of common mode.
-    p_s0, p_t0 = 1.696e-3, 6.3e-5
+    p_s0, p_t0 = p_s_anchor, p_t_anchor
     b0 = p_s0 / p_t0
     d0 = beta_from_p(p_t0) - beta_from_p(p_s0)
     multiplicative = []

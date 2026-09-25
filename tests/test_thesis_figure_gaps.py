@@ -363,13 +363,16 @@ def test_the_peak_shortcut_slice_still_reproduces_from_the_live_artifacts() -> N
 # --------------------------------------------------------------------------- #
 
 
-def test_the_peak_shortcut_reproduces_the_published_2_83_and_4_04() -> None:
-    """``docs/phase2_report.md`` section 11.1 plus its 2026-09-14 addendum.
+def test_the_peak_shortcut_reproduces_the_published_2_87() -> None:
+    """``docs/phase2_report.md`` section 11.1 plus its 2026-09-14 and
+    2026-09-25 addenda.
 
-    The peak-only reading against the replay at production N: KP 58.8 15.6 %
-    against 5.51 % (factor 2.83) and KP 60.0 13.1 % against 3.24 % (4.04).
-    Those are the two informative strata and they are the scope of the claim,
-    so the slice's headline band must be exactly them.
+    The peak-only reading against the replay at production N: KP 58.8 10.9 %
+    against 3.81 % (factor 2.87). Since ADR-0054 re-based the matrix d70
+    (2026-09-25) KP 58.8 is the one informative stratum; KP 60.0 rejects 226
+    rows (4.98, small-number regime) and leaves the headline, which must be
+    exactly the informative stratum. Superseded: 2.83 and 4.04 on 15.6/5.51
+    and 13.1/3.24.
 
     **Values corrected 2026-09-14** with the Obihiro gauge node (ADR-0035
     decision 1's amendment: KP 56.73, the station's own rating, not the KP 56.6
@@ -382,22 +385,20 @@ def test_the_peak_shortcut_reproduces_the_published_2_83_and_4_04() -> None:
     by_stratum = {s["stratum"]: s for s in record["strata"]}
 
     kp58_8 = by_stratum["tokachi_kp58.8_historical_matrix"]
-    assert kp58_8["f_peak_only_transient"] * 100 == pytest.approx(15.6, abs=0.05)
-    assert kp58_8["f_replay_transient"] * 100 == pytest.approx(5.512, abs=0.005)
-    assert kp58_8["over_rejection_factor"] == pytest.approx(2.83, abs=0.005)
+    assert kp58_8["f_peak_only_transient"] * 100 == pytest.approx(10.94, abs=0.05)
+    assert kp58_8["f_replay_transient"] * 100 == pytest.approx(3.813, abs=0.005)
+    assert kp58_8["over_rejection_factor"] == pytest.approx(2.87, abs=0.005)
 
     kp60_0 = by_stratum["tokachi_kp60.0_historical_matrix"]
-    assert kp60_0["f_peak_only_transient"] * 100 == pytest.approx(13.1, abs=0.05)
-    assert kp60_0["f_replay_transient"] * 100 == pytest.approx(3.244, abs=0.005)
-    assert kp60_0["over_rejection_factor"] == pytest.approx(4.04, abs=0.005)
+    assert kp60_0["f_replay_transient"] * 100 == pytest.approx(0.226, abs=0.005)
+    assert kp60_0["small_number_regime"] is True
 
     headline = record["headline"]
     assert set(headline["informative_strata"]) == {
         "tokachi_kp58.8_historical_matrix",
-        "tokachi_kp60.0_historical_matrix",
     }
-    assert headline["factor_min"] == pytest.approx(2.83, abs=0.005)
-    assert headline["factor_max"] == pytest.approx(4.04, abs=0.005)
+    assert headline["factor_min"] == pytest.approx(2.87, abs=0.005)
+    assert headline["factor_max"] == pytest.approx(2.87, abs=0.005)
 
 
 def test_the_shortcut_over_rejects_wherever_the_comparison_is_defined() -> None:
@@ -446,17 +447,19 @@ def test_a_stratum_with_no_rejection_has_no_factor_rather_than_one() -> None:
 
 
 def test_the_small_number_strata_are_marked_and_kept_out_of_the_headline() -> None:
-    """65 and 23 rejected rows are not a measurement of a factor.
+    """16, 226 and 23 rejected rows are not a measurement of a factor.
 
-    Section 11.1 calls KP 57.4 the "small-number regime" at 65 rejected rows;
-    KP 60.0 bulk is further into it at 23. Their factors (7.46 and 6.12) are the
-    largest in the set, so letting them into the headline band would widen the
-    published "2.75 to 3.9x" to "2.75 to 7.5x" on the strength of 88 rows.
+    Section 11.1 calls KP 57.4 the "small-number regime"; since ADR-0054
+    (2026-09-25) it rejects 16 rows, KP 60.0 matrix 226 and KP 60.0 bulk 23,
+    all below the 500-row floor. Their factors (12.0, 4.98 and 6.12) are the
+    largest in the set, so letting them into the headline would widen the
+    published 2.87 to 12.0 on the strength of 265 rows.
     """
     record = _read(_require(PEAK_SHORTCUT_SLICE))
     flagged = {s["stratum"] for s in record["strata"] if s["small_number_regime"]}
     assert flagged == {
         "tokachi_kp57.4_historical_matrix",
+        "tokachi_kp60.0_historical_matrix",
         "tokachi_kp60.0_historical_bulk",
     }
     for stratum in record["strata"]:
@@ -535,9 +538,11 @@ def test_the_per_stratum_rejection_figures_are_the_published_ones() -> None:
     # amendment). Superseded: 0.065, 5.673, 3.363. The static column and every
     # bulk stratum are exactly invariant under the correction, so only these
     # three move.
-    assert rows[("KP57.4", "matrix")] == pytest.approx(0.063, abs=5e-4)
-    assert rows[("KP58.8", "matrix")] == pytest.approx(5.512, abs=5e-4)
-    assert rows[("KP60.0", "matrix")] == pytest.approx(3.244, abs=5e-4)
+    # Re-based 2026-09-25 (ADR-0054, matrix d70); superseded 0.063, 5.512 and
+    # 3.244. Bulk is not re-based and does not move.
+    assert rows[("KP57.4", "matrix")] == pytest.approx(0.016, abs=5e-4)
+    assert rows[("KP58.8", "matrix")] == pytest.approx(3.813, abs=5e-4)
+    assert rows[("KP60.0", "matrix")] == pytest.approx(0.226, abs=5e-4)
     assert rows[("KP62.0", "matrix")] == 0.0
     assert rows[("KP57.4", "bulk")] == 0.0
     assert rows[("KP58.8", "bulk")] == 0.0
@@ -623,9 +628,15 @@ def test_kp57_4_has_no_design_level_multiplier_and_that_is_not_a_gap() -> None:
 def test_m_p_is_the_only_bracket_that_cancels_in_the_ratio() -> None:
     """ADR-0048's property (c) was refuted; only the common-mode knob survives.
 
-    ``m_p`` cancels because ADR-0045 section 2 applies it to the single-source
-    H_c in BOTH branches. Every other bracket that moves both branches departs
-    from rho = 1 by at least 1.8x at every section. ``gamma'_bl`` is excluded
+    ``m_p`` nearly cancels because ADR-0045 section 2 applies it to the
+    single-source H_c in BOTH branches. Where every contingency cell clears the
+    thirty-row floor its departure stays within 1.25 at every section (the
+    metric study's quotable range). Over the whole grid, below-floor levels
+    included, it reaches 1.82 since ADR-0054 (2026-09-25), which is inside the
+    unfiltered departures of the seepage-length (1.33 to 2.29) and exit-datum
+    (1.79 to 5.28) arms, so on that measure the separation is one of mechanism,
+    not magnitude; conductivity departs by 45 or more everywhere.
+    ``gamma'_bl`` is excluded
     from that comparison on purpose: ADR-0028 keeps it out of the static branch
     entirely, so its rho near 1 is inertness, not cancellation, and treating it
     as a second canceller would be the same category error.
@@ -650,23 +661,30 @@ def test_m_p_is_the_only_bracket_that_cancels_in_the_ratio() -> None:
     for section in _read(_require(SYNTHESIS))["sections"]:
         worst = _cancellation_by_bracket(section)
         m_p = worst["m_p"]["max_resolved_departure_factor"]
-        assert m_p <= 1.25, (section["section"], m_p)
+        assert m_p <= 1.85, (section["section"], m_p)
+        kaq = worst["k_aq_prior_mean"]["max_resolved_departure_factor"]
+        assert kaq >= 45, (section["section"], kaq)
         for bracket, record in worst.items():
             if bracket == COMMON_MODE_BRACKET or bracket in SINGLE_BRANCH_BRACKETS:
                 continue
-            assert record["max_resolved_departure_factor"] >= 1.8, (
+            assert record["max_resolved_departure_factor"] > 1.3, (
                 section["section"],
                 bracket,
                 record,
             )
 
+    metric = _read(_require(DECISIONS / "metric-and-decomposition.json"))
+    for section in metric["cancellation_paired"]["m_p"]["sections"]:
+        quotable = section["max_resolved_rho_departure_factor_quotable"]
+        assert quotable <= 1.26, (section["section"], quotable)
+
 
 def test_the_contaminated_kp57_4_length_arm_is_excluded_by_name() -> None:
     """ADR-0047: the all-station median at KP 57.4 measures road fill.
 
-    Including it would put the L bracket's departure at 10.7 instead of the
-    2.25 the synthesis note publishes, and would attribute a road embankment's
-    geometry to the levee.
+    Including it would put the L bracket's departure at 9.1 instead of the
+    1.33 the re-based synthesis records (10.7 against 2.25 before ADR-0054,
+    2026-09-25), and would attribute a road embankment's geometry to the levee.
     """
     from thesis_figure_gaps import (
         CANCELLATION_ARM_EXCLUSIONS,
@@ -674,7 +692,7 @@ def test_the_contaminated_kp57_4_length_arm_is_excluded_by_name() -> None:
     )
 
     assert "L_dem_all_stations_median" in CANCELLATION_ARM_EXCLUSIONS
-    published = {"KP57.4": 2.25, "KP58.8": 1.82, "KP60.0": 3.22, "KP62.0": 2.11}
+    published = {"KP57.4": 1.33, "KP58.8": 1.78, "KP60.0": 2.29, "KP62.0": 1.87}
     for section in _read(_require(SYNTHESIS))["sections"]:
         worst = _cancellation_by_bracket(section)["L_measurement"]
         assert worst["max_resolved_departure_factor"] == pytest.approx(
@@ -703,7 +721,7 @@ def test_the_ranking_order_is_computed_from_the_evidence() -> None:
 # --------------------------------------------------------------------------- #
 
 
-def test_the_kp57_4_bound_reproduces_the_published_148_and_101() -> None:
+def test_the_kp57_4_bound_reproduces_the_published_37_and_69() -> None:
     """Recomputed from the counts with the repo's own Clopper-Pearson helper.
 
     The companion note's bound divides the static branch's 95 % lower endpoint
@@ -716,12 +734,13 @@ def test_the_kp57_4_bound_reproduces_the_published_148_and_101() -> None:
     brute = _read(_require(HWL_EVIDENCE))["stages"]["A_brute_kp57_4"]
     n = int(brute["n_samples"])
     a1, a2 = brute["anchor_A1"], brute["anchor_A2"]
-    assert round(_clopper_pearson_bound(a1["k_static"], a1["k_transient"], n)) == 148
-    assert round(_clopper_pearson_bound(a2["k_static"], a2["k_transient"], n)) == 101
+    # Re-based 2026-09-25 (ADR-0054); superseded 148 and 101.
+    assert round(_clopper_pearson_bound(a1["k_static"], a1["k_transient"], n)) == 37
+    assert round(_clopper_pearson_bound(a2["k_static"], a2["k_transient"], n)) == 69
 
 
 def test_the_two_kp57_4_anchors_stay_distinct_and_unresolved() -> None:
-    """A1 is 39.21 m on 2 rows, A2 is 39.25 m on 10. Neither is an estimate."""
+    """A1 is 39.21 m on 2 rows, A2 is 39.25 m on 2 (10 before ADR-0054)."""
     rows = {
         row["role"]: row
         for row in _rows(FIGURE_TO_CSV["adr0040_kp57_4_bound.png"])
@@ -731,7 +750,7 @@ def test_the_two_kp57_4_anchors_stay_distinct_and_unresolved() -> None:
     assert int(rows["A1_design_hwl"]["k_transient"]) == 2
     assert rows["A1_design_hwl"]["resolved"] == "False"
     assert float(rows["A2_nearest_grid_level"]["level_m_msl"]) == pytest.approx(39.25)
-    assert int(rows["A2_nearest_grid_level"]["k_transient"]) == 10
+    assert int(rows["A2_nearest_grid_level"]["k_transient"]) == 2
     assert rows["A2_nearest_grid_level"]["resolved"] == "False"
     assert (
         rows["A1_design_hwl"]["level_m_msl"]
@@ -739,12 +758,14 @@ def test_the_two_kp57_4_anchors_stay_distinct_and_unresolved() -> None:
     )
 
 
-def test_the_quotable_anchor_carries_its_flip_caveat() -> None:
-    """39.50 m is the recommended anchor AND one of the three flip levels.
+def test_the_quotable_anchor_states_its_flip_status() -> None:
+    """The recommended anchor's barrier-jump status is drawn, whichever it is.
 
-    One barrier-jump row in 521 biases B down about 0.2 %, conservative in
-    direction. It is uncomfortable and it is drawn: dropping it quietly would
-    misrepresent the number a viva would be shown.
+    Before ADR-0054 (2026-09-25) 39.50 m was one of three flip levels, one row
+    in 521 biasing B down about 0.2 %. On the re-based prior it carries none,
+    and the callout says so rather than keeping the old caveat or dropping the
+    line; the caveat branch stays in the driver for any rerun that brings a
+    flip back.
     """
     (row,) = [
         row
@@ -752,19 +773,17 @@ def test_the_quotable_anchor_carries_its_flip_caveat() -> None:
         if row["role"] == "A3_quotable_anchor"
     ]
     assert float(row["level_m_msl"]) == pytest.approx(39.50)
-    assert int(row["k_transient"]) == 521
-    assert float(row["bias_B"]) == pytest.approx(42.7, abs=0.05)
+    assert int(row["k_transient"]) == 163
+    assert float(row["bias_B"]) == pytest.approx(51.2, abs=0.05)
     assert row["resolved"] == "True"
-    assert int(row["euler_barrier_jump_rows"]) == 1, (
-        "the recommended anchor's own flip contamination must survive into the "
-        "table a chapter typesets from"
-    )
+    assert int(row["euler_barrier_jump_rows"]) == 0
     source = DRIVER.read_text(encoding="utf-8")
     assert "conservative in direction" in source
+    assert "no Euler barrier-jump row at this level" in source
 
 
 def test_the_euler_flip_levels_are_an_n1e6_statement() -> None:
-    """Four rows in 1e6; the expected count at the production N = 1e5 is 0.4.
+    """Fourteen rows in 1e6 (four before ADR-0054); 1.4 expected at N = 1e5.
 
     An unqualified "all Euler-flip counts are 0" reads as a statement about the
     discretisation when it is a statement about the sample size, so the figure
@@ -775,8 +794,8 @@ def test_the_euler_flip_levels_are_an_n1e6_statement() -> None:
         for row in _rows(FIGURE_TO_CSV["adr0040_kp57_4_bound.png"])
         if int(row["euler_barrier_jump_rows"]) > 0
     }
-    assert flips == {39.50: 1, 40.25: 2, 40.75: 1}
-    assert sum(flips.values()) == 4
+    assert flips == {39.75: 4, 40.0: 2, 40.25: 3, 40.5: 3, 40.75: 1, 41.0: 1}
+    assert sum(flips.values()) == 14
     source = DRIVER.read_text(encoding="utf-8")
     assert "$N = 10^5$" in source and "$N = 10^6$" in source
 
@@ -823,7 +842,7 @@ def test_the_three_brackets_run_in_the_documented_directions() -> None:
             assert ratio >= 1.0, row
 
 
-def test_the_kp58_8_posterior_lowers_the_annual_number_by_about_12_percent() -> None:
+def test_the_kp58_8_posterior_lowers_the_annual_number_by_about_10_percent() -> None:
     """Inventory 6.10's one named number, from the slice the figure draws."""
     (row,) = [
         row
@@ -832,9 +851,10 @@ def test_the_kp58_8_posterior_lowers_the_annual_number_by_about_12_percent() -> 
         and row["scenario"] == "historical"
         and row["arm"] == "prior_bep"
     ]
-    # The prior is 1.141x the posterior, i.e. the update cuts it 12.4 %.
+    # The update cuts it 9.9 % since ADR-0054 (2026-09-25; 12.4 % before), the
+    # "at most 9.9 per cent" of thesis Section 7.1.
     assert 1.0 - 1.0 / float(row["ratio_system_to_baseline"]) == pytest.approx(
-        0.124, abs=0.005
+        0.099, abs=0.005
     )
 
 

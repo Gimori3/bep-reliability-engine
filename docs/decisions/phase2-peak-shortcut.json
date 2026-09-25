@@ -1,6 +1,6 @@
 {
  "record": "WBI+ peak-only shortcut against the full transient replay",
- "generated": "2026-09-14T17:42:02",
+ "generated": "2026-09-25T03:49:13",
  "generated_by": "scripts/thesis_figure_gaps.py extract",
  "note": "Inventory row 4.7, the RQ2 clause 'what the time-resolved replay adds over a peak-only reading'. docs/phase2_report.md section 11.1 carries this comparison in prose only; this record is the artifact behind it. The peak-only column is the Phase 1 PRIOR TRANSIENT fragility linearly interpolated on its raw Monte Carlo points at the observed 2016 peak -- the reading a peak-based (WBI+, Zethof et al. 2023) survival update would take. The replay column is the Phase 2 posterior's rejection fraction over the same N = 1e5 prior sample. Both are transient, so this compares method against method on one sample. The mechanism is the loading shape: the Phase 1 curves condition on the canonical d4PDF compound shape scaled to each level, which carries far more above-toe exposure than the real 2016 event did at the same peak, so the peak-only reading rejects realizations the full replay retains. over_rejection_factor is null where the replay rejects nothing -- not defined, never 1.",
  "method": {
@@ -12,12 +12,12 @@
  "sources": [
   {
    "path": "results/tokachi_kp57.4_historical_matrix.h5",
-   "sha256": "3e44a3d5cbf8e29a0290c1b42dec5915a9c981e9e24be8d00a6aea5d8bba91c8",
+   "sha256": "4848520ff71ddfc68197a99275f1856611bafd9dd142c2d70541cb29756be03c",
    "gitignored": true
   },
   {
    "path": "results/phase2/tokachi_kp57.4_historical_matrix_posterior.json",
-   "sha256": "a963310b7193d2185f5ff4fd3d3eabffc75e817f200b6415388306b7be100bbe",
+   "sha256": "528bb38ae555cf1e64ed40e60e94475a95253b5975f759d67f08e12b7b0eb4a5",
    "gitignored": true
   },
   {
@@ -27,17 +27,17 @@
   },
   {
    "path": "results/phase2/tokachi_kp57.4_historical_bulk_posterior.json",
-   "sha256": "9d6977408603677f24b40ee520a3c7783650c0f3f6a88d95cac69a588be69fb5",
+   "sha256": "cbc605d83cae9750a9446698f66662e23f387d8677a58d011bb8c1c92d348c4e",
    "gitignored": true
   },
   {
    "path": "results/tokachi_kp58.8_historical_matrix.h5",
-   "sha256": "5916acc5cc52e66f7abc6cde18067874f2821f52ae5485656f4aeb648b7cbd60",
+   "sha256": "cd3600172fffe09f1fa50f0a3874fe5b256af8ab78dbd5673d362aae7454dea2",
    "gitignored": true
   },
   {
    "path": "results/phase2/tokachi_kp58.8_historical_matrix_posterior.json",
-   "sha256": "8a73a9867a96f78fd0f3a6830ea4f6389ef2ea5837ba00977d40e0cfb947a3d2",
+   "sha256": "ab8b655b11809d751117b92c7fb0b946cd6d9c3143f4deadf45240dae29605b4",
    "gitignored": true
   },
   {
@@ -47,17 +47,17 @@
   },
   {
    "path": "results/phase2/tokachi_kp58.8_historical_bulk_posterior.json",
-   "sha256": "83d09579f723197c218a2b2a923cba2f1ca53e58d9302ea8cbf993f2c52ffe59",
+   "sha256": "d04c195fb853be85ab43ebd52a3df26d43d0a0484d66030f0d788ab3e0080efa",
    "gitignored": true
   },
   {
    "path": "results/tokachi_kp60.0_historical_matrix.h5",
-   "sha256": "bbd0da9da4107918aa8f89d0e76f00ec6df49f9ecfbb8f89516ce7928e2f19e0",
+   "sha256": "e35d8d555f72dda5b854700a2dd3f590ea38cc5a94c6fd863972bf34f57a4718",
    "gitignored": true
   },
   {
    "path": "results/phase2/tokachi_kp60.0_historical_matrix_posterior.json",
-   "sha256": "2d123d1f6dbb78f6e6574a693d03fc2378958a8e835b6ecfc8de7861bab7b60b",
+   "sha256": "d493a54e6b5182c5dd7b574b9a4f47f0a27e5edb61d4b518b65e78f8e15b8b2e",
    "gitignored": true
   },
   {
@@ -67,17 +67,17 @@
   },
   {
    "path": "results/phase2/tokachi_kp60.0_historical_bulk_posterior.json",
-   "sha256": "109cd5945b69d59e4b6918d06142f58c0454ace32b942c4a17e7e3428d562248",
+   "sha256": "ee6214ce61a4fe4cd19f5a0435257de8a192ceb6b4009f84499907e2c52c18cd",
    "gitignored": true
   },
   {
    "path": "results/tokachi_kp62.0_historical_matrix.h5",
-   "sha256": "af447cae332963a592f17e4c70b1a6774ba5a70e7ed81931d41387073850f942",
+   "sha256": "b327695925af9d833b9cc78787f2496c0d9aac28f880a9d878adc2504ee0ecbf",
    "gitignored": true
   },
   {
    "path": "results/phase2/tokachi_kp62.0_historical_matrix_posterior.json",
-   "sha256": "35901b05fc51fab0d22333fb6936c386c19147ea97f23019bedfa13b4a6cb268",
+   "sha256": "74873cf3cd6180865d24eb223d7680905498f9001b875aa699b0f505a1146afe",
    "gitignored": true
   },
   {
@@ -87,7 +87,7 @@
   },
   {
    "path": "results/phase2/tokachi_kp62.0_historical_bulk_posterior.json",
-   "sha256": "be03903e8ae8dd8620ade4b041d8365660fcc3087463b1eac3dc4f567cf707d4",
+   "sha256": "dbf8dbeda887c60a9a0dbb3866491708849eece6d2201bce4012c168211cb517",
    "gitignored": true
   }
  ],
@@ -101,11 +101,11 @@
    "z_toe_m_msl": 38.3,
    "grid_min_m_msl": 34.75,
    "grid_max_m_msl": 43.25,
-   "f_peak_only_transient": 0.004848080000000033,
-   "f_replay_transient": 0.0006300000000000194,
-   "over_rejection_factor": 7.695365079364895,
-   "n_rejected_replay": 63,
-   "n_peak_only_expected": 485,
+   "f_peak_only_transient": 0.001915920000000014,
+   "f_replay_transient": 0.000160000000000049,
+   "over_rejection_factor": 11.974499999996421,
+   "n_rejected_replay": 16,
+   "n_peak_only_expected": 192,
    "small_number_regime": true
   },
   {
@@ -133,11 +133,11 @@
    "z_toe_m_msl": 38.5,
    "grid_min_m_msl": 36.5,
    "grid_max_m_msl": 45.0,
-   "f_peak_only_transient": 0.15596,
-   "f_replay_transient": 0.05511999999999995,
-   "over_rejection_factor": 2.829462989840351,
-   "n_rejected_replay": 5512,
-   "n_peak_only_expected": 15596,
+   "f_peak_only_transient": 0.10943,
+   "f_replay_transient": 0.03813,
+   "over_rejection_factor": 2.869918699186992,
+   "n_rejected_replay": 3813,
+   "n_peak_only_expected": 10943,
    "small_number_regime": false
   },
   {
@@ -165,12 +165,12 @@
    "z_toe_m_msl": 40.0,
    "grid_min_m_msl": 38.25,
    "grid_max_m_msl": 46.75,
-   "f_peak_only_transient": 0.13113863999999978,
-   "f_replay_transient": 0.032440000000000024,
-   "over_rejection_factor": 4.042498150431556,
-   "n_rejected_replay": 3244,
-   "n_peak_only_expected": 13114,
-   "small_number_regime": false
+   "f_peak_only_transient": 0.011243919999999958,
+   "f_replay_transient": 0.0022600000000000398,
+   "over_rejection_factor": 4.975185840707859,
+   "n_rejected_replay": 226,
+   "n_peak_only_expected": 1124,
+   "small_number_regime": true
   },
   {
    "stratum": "tokachi_kp60.0_historical_bulk",
@@ -223,11 +223,10 @@
  ],
  "headline": {
   "informative_strata": [
-   "tokachi_kp58.8_historical_matrix",
-   "tokachi_kp60.0_historical_matrix"
+   "tokachi_kp58.8_historical_matrix"
   ],
-  "factor_min": 2.829462989840351,
-  "factor_max": 4.042498150431556,
+  "factor_min": 2.869918699186992,
+  "factor_max": 2.869918699186992,
   "n_factor_defined": 4,
   "n_not_defined": 4
  }

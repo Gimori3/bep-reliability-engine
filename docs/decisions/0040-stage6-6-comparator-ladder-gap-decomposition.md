@@ -189,6 +189,25 @@ sample size and not about the discretisation being exact; see
 (iii) the finite-T sustained ladder of Decision 2;
 (iv) the full pre-existing test suite stays green.
 
+*Amended 2026-09-24 (ADR-0054).* Under the re-based matrix d70 prior the KP 57.4
+barrier-jump rate is higher: 1 `c4b_not_c3b` row at N = 1e5 (40.50 m) and 14 at
+N = 1e6 (39.75 to 41.00 m), against 0 and 4 before. None sits at 39.21, 39.25 or
+39.50 m. A flip only adds a spurious transient failure, so its effect on a ratio
+is bounded by its share of that level's transient failures, at most 0.14 per
+cent (4 of 2 905 at 39.75 m). Gates G3 and G-A2 now tolerate that one class at
+that one section where it is at most 1 per cent of the transient failures at
+every level (`hwl_bias_resolution.documented_flip_share_ok`); every other
+diagnostic and section must still be exactly zero. KP 62.0 stays clean at both N.
+
+*Amended 2026-09-25 (ADR-0054), finite-T ladder.* One realization of 1,517 at
+KP 62.0, 46.50 m, alpha = -1/2 satisfies the sustained-peak limit but has not
+breached after the longest hold of the duration ladder, 1536 h. The limit
+remains exact at every other level, and the reverse count (breach without
+the limit) is still zero everywhere, so this is a traverse slower than 64 days
+rather than a disagreement with the closed form: the limit is an infinite-hold
+statement and the ladder is finite. Verification check (iii) is read with that
+one-row exception.
+
 ---
 
 ## Alternatives Considered

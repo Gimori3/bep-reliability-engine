@@ -180,8 +180,11 @@ def test_figstyle_marks_the_hypothetical_extension_only_above_the_attainable_max
 def test_the_two_hwl_anchors_are_distinct_and_carry_different_row_counts() -> None:
     """A1 (inserted design HWL) is not A2 (nearest grid level).
 
-    They differ by 0.11 m at KP 62.0 and by a resolved 25 % in the bias factor,
-    so a document that quotes one as the other is wrong.
+    They differ by 0.11 m at KP 62.0, so a document that quotes one as the
+    other is wrong. Before ADR-0054 (2026-09-25) the two bias factors also
+    differed resolvably (26.9 on 63 rows against 21.6 on 176); on the re-based
+    prior they read 23.6 on 51 and 21.6 on 130 and the paired ratio of the two
+    levels, 1.09 [0.89, 1.39], no longer resolves a difference.
     """
     anchors = _read(_require(HWL_EVIDENCE))["stages"]["A_anchors_F2"]["sections"][
         "kp62_0"
@@ -191,16 +194,19 @@ def test_the_two_hwl_anchors_are_distinct_and_carry_different_row_counts() -> No
     assert a1["level_m"] == pytest.approx(46.39)
     assert a2["level_m"] == pytest.approx(46.50)
     assert a1["level_m"] != a2["level_m"]
-    assert a1["k_transient"] == 63
-    assert a2["k_transient"] == 176
-    assert a1["ratio"] == pytest.approx(26.9, abs=0.1)
+    assert a1["k_transient"] == 51
+    assert a2["k_transient"] == 130
+    assert a1["ratio"] == pytest.approx(23.6, abs=0.1)
     assert a2["ratio"] == pytest.approx(21.6, abs=0.1)
     assert a1["resolved"] and a2["resolved"]
+    assert not anchors["n1000000"]["F2_paired_rho_A1_over_A2"]["resolved"]
     assert anchors["n1000000"]["stage_separation_m"] == pytest.approx(0.11)
 
 
 def test_the_n1e5_figure_is_recorded_as_superseded_not_as_a_second_estimate() -> None:
-    """44.7 on 4 rows and 26.9 on 63 rows are the same quantity at two N.
+    """31.0 on 4 rows and 23.6 on 51 rows are the same quantity at two N.
+
+    (44.7 and 26.9 before ADR-0054 re-based the matrix d70, 2026-09-25.)
 
     The N = 1e5 cell must be present in the record (the figure draws both) and
     must fail its own resolution criteria, so nothing can present it as an
@@ -211,13 +217,16 @@ def test_the_n1e5_figure_is_recorded_as_superseded_not_as_a_second_estimate() ->
     ]
     small = anchors["n100000"]["A1"]
     assert small["k_transient"] == 4
-    assert small["ratio"] == pytest.approx(44.75, abs=0.01)
+    assert small["ratio"] == pytest.approx(31.0, abs=0.01)
     assert not small["R1_rows"] and not small["R2_width"]
     assert not small["resolved"]
 
 
 def test_kp57_4_is_a_bound_not_a_point_estimate() -> None:
-    """Two failing rows at N = 1e6: report B >= 148, lead with 42.7 at 39.50 m."""
+    """Two failing rows at N = 1e6: report B >= 37, lead with 51.2 at 39.50 m.
+
+    (B >= 148 and 42.7 on 521 rows before ADR-0054, 2026-09-25.)
+    """
     brute = _read(_require(HWL_EVIDENCE))["stages"]["A_brute_kp57_4"]
     assert brute["anchor_A1"]["k_transient"] == 2
     assert not brute["anchor_A1"]["R1_rows"]
@@ -228,21 +237,27 @@ def test_kp57_4_is_a_bound_not_a_point_estimate() -> None:
     ]
     lowest = min(resolved, key=lambda r: r["level_m"])
     assert lowest["level_m"] == pytest.approx(39.50)
-    assert lowest["ratio"] == pytest.approx(42.7, abs=0.2)
-    assert lowest["k_transient"] == 521
+    assert lowest["ratio"] == pytest.approx(51.2, abs=0.2)
+    assert lowest["k_transient"] == 163
 
 
-def test_the_kp57_4_quotable_anchor_is_itself_a_flip_level() -> None:
-    """The uncomfortable detail must survive propagation.
+def test_the_kp57_4_flip_levels_are_recorded_and_miss_the_anchors() -> None:
+    """The barrier-jump levels must survive propagation, level by level.
 
-    39.50 m is the recommended anchor AND one of the three N = 1e6 barrier-jump
-    levels. Dropping that quietly would misrepresent the number, so the record
-    is pinned and the documents of record are checked for it below.
+    Before ADR-0054 (2026-09-25) 39.50 m was the recommended anchor AND one of
+    three N = 1e6 barrier-jump levels (4 rows). On the re-based prior there are
+    14 rows at six levels from 39.75 to 41.00 m, none at 39.21, 39.25 or
+    39.50 m, each at most 1 % of its level's transient failures (the share rule
+    of the ADR-0040 amendment). The record must carry the levels, not a total.
     """
     flips = _read(_require(HWL_EVIDENCE))["stages"]["A_brute_kp57_4"]["euler_flips"]
-    text = json.dumps(flips)
-    assert "39.5" in text, "the flip levels must be recorded, not just a total"
-    assert flips["per_diagnostic_totals"]["c4b_not_c3b"] == 4
+    assert flips["per_diagnostic_totals"]["c4b_not_c3b"] == 14
+    levels = flips["offending_levels"]["c4b_not_c3b"]
+    assert sum(row["count"] for row in levels) == 14
+    stages = {row["level_m"] for row in levels}
+    assert not stages & {39.21, 39.25, 39.5}
+    assert all(row["count"] <= 0.01 * row["transient_failures"] for row in levels)
+    assert flips["pass"] is True
 
 
 # --------------------------------------------------------------------------- #

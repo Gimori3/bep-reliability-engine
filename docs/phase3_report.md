@@ -950,3 +950,34 @@ Phase 3 tables under them. They are redrawn here from the current tables, so
 they now carry both the gauge correction and the stratified intervals;
 `phase3_event_based_validation.png` is byte-unchanged, its two surface
 mechanisms being untouched by either.
+
+
+## Addendum, 2026-09-25 - the matrix d70 re-based (ADR-0054); authoritative where it differs from everything above
+
+See the matching addendum in `docs/phase2_report.md` for what ADR-0054
+changed. The Phase 3 campaign, the hazard-sampling study, the seam, the
+conductivity bracket (both sides), the drained bracket, the foreland credit
+and the climate attribution were all re-run on the re-based posteriors.
+Surface curves, hazard and every bulk-reading number are unchanged.
+
+| Quantity (matrix, posterior, 250 m, primary) | Superseded | Re-based |
+|---|---|---|
+| Annual system P_f, historical, KP 57.4 / 58.8 / 60.0 / 62.0 | 7.53e-4 / 7.45e-3 / 1.81e-3 / 1.01e-3 | **4.98e-4 / 6.18e-3 / 3.15e-4 / 9.17e-4** |
+| Annual system P_f, +4K | 9.53e-3 / 4.10e-2 / 1.42e-2 / 1.28e-2 | **7.59e-3 / 3.57e-2 / 4.22e-3 / 1.23e-2** |
+| Climate ratio | 12.7 / 5.5 / 7.9 / 12.7 | **15.3 / 5.8 / 13.4 / 13.4**; the indistinguishable pair is now KP 60.0 / KP 62.0 |
+| Piping share, historical | 1.000 / 0.974 / 1.000 / 0.81 | 1.000 / 0.969 / 1.000 / 0.79 [0.67, 0.98] |
+| Piping share, +4K | 0.91 / 0.94 / 0.998 / 0.50 | 0.89 / 0.93 / 0.995 / **0.48 [0.46, 0.51]** |
+| KP 62.0 +4K margin bep/overflow | 1.0013 (piping ahead, a tie) | **0.922 (overflow ahead, still a tie)** |
+| Canonical alternate / composition seam at KP 62.0 +4K | each reversed the ordering | each widens overflow's lead (share 0.36 / 0.441); **neither changes any ordering** |
+| Reach rank, historical | the four characterized segments top the reach; three exceed 1e-3 | KP 58.8, KP 62.0, then surface-only KP 62.2 (5.15e-4) above KP 57.4 and KP 60.0; **only KP 58.8 exceeds 1e-3** |
+| Segments dominated by overflow, +4K | 109 | 110 (KP 62.0 joins) |
+| Matrix-to-bulk factor | 1.5 to 37 (363 at KP 57.4 hist) | 1.5 to 31 (240 at KP 57.4 hist) |
+| lambda_ac 40 m factor | 1.9 to 3.4 | 1.9 to 4.4 |
+| Posterior against prior | at most 12.1 % (KP 58.8 hist) | at most 9.9 % (KP 58.8 hist), 2.2 % at KP 60.0 |
+| Foreland credit, full | at most 0.21 / 0.66 of baseline; historical share 0.06 at KP 62.0 | at most 0.23 / 0.69; historical share 0.04 at KP 62.0 |
+| Conductivity bracket, conservative reading | ordering survives at 1 of 8 cells | **survives at 0 of 8**: downward arms overturn or collapse 7 (KP 60.0 hist now collapses to zero), the upward arm reverses KP 62.0 +4K |
+| Upward-arm rejection KP 58.8 / 60.0 | 65.0 / 86.5 % | 58.7 / 62.1 %; upper bound narrows x1.88 / x2.25 (was x1.95 / x2.79) |
+| KP 62.0 +4K above attainable | 11.8 % of annual piping | 12.5 % |
+| Drained sections on the measured berm | KP 60.0 falls to last only under warming | KP 60.0 is last in both climates on both readings |
+| Climate attribution | frequency leads inside the long stratum at all four | at three; severity leads at KP 60.0, resolvably (0.37 [0.29, 0.47]) |
+| Sixty-year check | 0.65 expected, 0.52 none observed | 0.46 expected, 0.63 none observed |

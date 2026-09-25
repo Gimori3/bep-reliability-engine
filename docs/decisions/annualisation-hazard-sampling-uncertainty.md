@@ -363,6 +363,29 @@ was not touched after the numbers were seen.
 
 **The scope sentence at the top of this note applies to every number below.**
 
+> **Re-based under ADR-0054, 2026-09-25.** ADR-0054 replaced the matrix d70
+> prior means (0.70 / 0.53 / 0.26 / 0.70 mm to 0.90 / 0.65 / 0.74 / 0.75 mm at
+> KP 57.4 / 58.8 / 60.0 / 62.0), the production campaign was re-run, and this
+> study was re-executed unchanged (same estimator, R, seed and pattern
+> stratification) against the new table. The committed JSON is the re-based
+> record. The prose of sections 2.2 to 2.7 below is kept as written and carries
+> the superseded values; where it differs from this block, this block governs.
+>
+> | Quantity | Superseded | Re-based |
+> |---|---|---|
+> | Q1, climate ratios | 5 of 6 pairs resolve; only KP 57.4 and KP 62.0 (12.7 each) do not | **4 of 6** pairs resolve; KP 60.0 and KP 62.0 (13.4 each) do not, nor KP 57.4 and KP 60.0 |
+> | Climate ratios, point [95 %] | 12.7 / 5.5 / 7.9 / 12.7 | 15.3 [8.7, 36.1] / 5.8 [4.3, 8.3] / 13.4 [8.2, 26.2] / 13.4 [8.2, 26.5] |
+> | Q2, KP 62.0 warming split | TIE, margin 1.0013, share 0.500 [0.476, 0.530] | **TIE**, margin 0.922 (overflow's point estimate ahead), share 0.480 [0.457, 0.509] |
+> | Q3, historical lead | resolves at 4 of 4, two structurally degenerate | unchanged: 4 of 4, KP 57.4 and KP 60.0 degenerate; KP 62.0 share 0.793 [0.667, 0.977] |
+> | Half-widths, annual system P_f | 29 to 58 % historical, 8 to 19 % +4K | 30 to 62 % historical, 9 to 21 % +4K |
+> | SST pattern spread, max/min | 3.0 to 5.7 | 3.2 to 6.2 |
+> | Widening if the patterns were sampled | 1.8 to 3.0 | 1.7 to 2.9 |
+> | Tokachi 4 (KP 58.0 section), hist / +4K | 7.5e-3 / 4.1e-2, ratio 5.5 | 6.2e-3 [4.4, 8.2]e-3 / 3.6e-2 [3.3, 3.9]e-2, ratio 5.8 [4.3, 8.2] |
+>
+> Nothing in the method, the gates or the pre-registration moved; gate 1 again
+> reproduces all 912 production rows and gate 3 again leaves every production
+> artifact untouched.
+
 ### 2.1 Gates
 
 All four passed. Gate 0: every per-event probability vector's unresampled mean
@@ -804,6 +827,21 @@ the `stratified_attribution` block and the `Q4`, `Q5`, `Q4_compound` and
 not touched after the numbers were seen.
 
 **The scope sentence at the top of this note applies to every number below.**
+
+> **Re-based under ADR-0054, 2026-09-25** (see the block at the head of
+> section 2). The part-two prose below carries the superseded values; where it
+> differs from this block, this block governs.
+>
+> | Quantity | Superseded | Re-based |
+> |---|---|---|
+> | Q4 historical concentration, KP 58.8 / KP 60.0 | 152 / 376, the pair resolved | **184 [114, 314] / 932 [253, 11,179]**, the pair resolved |
+> | Q4 +4K concentration, four cells | 35 to 71, 3 of 6 pairs resolve | **36 to 157**, 5 of 6 pairs resolve |
+> | Q5 historical share, KP 58.8 / KP 60.0 | 89 / 93 %, COLLAPSED (the pair did not resolve) | **91 / 97 %, RANGE SUPPORTED** (the pair resolves) |
+> | Q5 +4K share, four cells | 30 to 91 % | 32 to 94 %, 5 of 6 pairs resolve (unchanged count) |
+> | Count-limited cells (3 yr in 3 members at KP 57.4; 19 yr in 14 at KP 62.0) | concentration 151 / 221 | 166 / 235, still withheld |
+> | Compound factor, historical KP 58.8 / KP 60.0 | 3.7 / 6.5, both intervals include one | 3.8 [0.2, 10.0] / 7.5 [0.01, 24.3], both include one |
+> | Compound factor, +4K | 1.6 to 22, 4 of 6 pairs resolve | 1.8 to 24, 3 of 6 pairs resolve |
+> | Q6, floor sensitivity | historical duration range the same at 10, 20 and 30 | unchanged in kind: the same at every floor |
 
 ### 4.1 Gates
 

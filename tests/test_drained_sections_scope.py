@@ -92,13 +92,18 @@ def test_delta_beta_is_the_index_difference_of_the_recorded_probabilities(
 
 
 def test_the_berm_moves_the_index_little_and_the_ratio_a_lot(record: dict) -> None:
-    """The finding the thesis quotes: shift below 0.1 index, B up 1.6 to 2.3 times."""
+    """The finding the thesis quotes: shift below 0.02 index, B up 1.6 to 2.3 times.
+
+    Since the ADR-0054 re-basing (2026-09-25) the berm's index shift is not
+    resolved from zero at either section (it was resolved and negative before,
+    -0.016 and -0.058); the ratio still rises 1.6 and 2.2 times.
+    """
     for block in record["design"].values():
         gate, berm = block["arms"]["gate"], block["arms"]["berm_only"]
-        assert abs(berm["delta_beta_shift_from_as_if_undrained"]) < 0.1
+        assert abs(berm["delta_beta_shift_from_as_if_undrained"]) < 0.02
         assert 1.6 < berm["ratio_B"] / gate["ratio_B"] < 2.3
         lo, hi = berm["shift_ci95"]
-        assert hi < 0.0
+        assert lo < 0.0 < hi
 
 
 def test_as_if_undrained_intervals_reproduce_the_published_record(record: dict) -> None:
@@ -119,7 +124,12 @@ def test_as_if_undrained_intervals_reproduce_the_published_record(record: dict) 
 
 
 def test_the_berm_reading_ranking_statement_is_the_resolved_one(record: dict) -> None:
-    """KP 60.0 falls below KP 62.0 in every resample; last only under warming."""
+    """KP 60.0 is last in every resample, in both climates, on the berm.
+
+    Before the ADR-0054 re-basing (2026-09-25) it was last historically in
+    only 89 per cent of resamples; on the re-based matrix d70 it is last on the
+    as-if-undrained reading as well (99.9 per cent historically).
+    """
     ranking = record["ranking_intervals"]
     hist = ranking["historical"]["berm_only"]
     warm = ranking["+4K"]["berm_only"]
@@ -127,8 +137,10 @@ def test_the_berm_reading_ranking_statement_is_the_resolved_one(record: dict) ->
     assert warm["rank_frequency"]["KP 58.8"]["1"] == 1.0
     assert hist["pairwise"]["KP 60.0 / KP 62.0"]["fraction_a_above_b"] == 0.0
     assert warm["rank_frequency"]["KP 60.0"]["4"] == 1.0
-    assert 0.5 < hist["rank_frequency"]["KP 60.0"]["4"] < 0.95
-    assert hist["pairwise"]["KP 57.4 / KP 60.0"]["ci95"][0] < 1.0
+    assert hist["rank_frequency"]["KP 60.0"]["4"] == 1.0
+    assert hist["pairwise"]["KP 57.4 / KP 60.0"]["ci95"][0] > 1.0
+    undrained = ranking["historical"]["as_if_undrained"]
+    assert undrained["rank_frequency"]["KP 60.0"]["4"] > 0.99
 
 
 def test_survival_part_reproduces_from_the_sidecars(record: dict) -> None:
@@ -139,11 +151,13 @@ def test_survival_part_reproduces_from_the_sidecars(record: dict) -> None:
 
 def test_survival_rejections_are_the_corrected_gauge_values(record: dict) -> None:
     rows = record["survival"]
+    # Re-based under ADR-0054 (2026-09-25); before it 0.05512, 0.03244,
+    # 0.01497 and 0.00531.
     assert math.isclose(
-        rows["KP 58.8"]["as_if_undrained"]["rejection_fraction"], 0.05512
+        rows["KP 58.8"]["as_if_undrained"]["rejection_fraction"], 0.03813
     )
     assert math.isclose(
-        rows["KP 60.0"]["as_if_undrained"]["rejection_fraction"], 0.03244
+        rows["KP 60.0"]["as_if_undrained"]["rejection_fraction"], 0.00226
     )
-    assert math.isclose(rows["KP 58.8"]["berm_only"]["rejection_fraction"], 0.01497)
-    assert math.isclose(rows["KP 60.0"]["berm_only"]["rejection_fraction"], 0.00531)
+    assert math.isclose(rows["KP 58.8"]["berm_only"]["rejection_fraction"], 0.00899)
+    assert math.isclose(rows["KP 60.0"]["berm_only"]["rejection_fraction"], 0.00014)

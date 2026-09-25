@@ -2,7 +2,7 @@
   "levels_m": [
     39.25,
     39.5,
-    39.75
+    40.0
   ],
   "alpha_minus_half": {
     "n_samples": 10000,
@@ -17,102 +17,102 @@
     "levels_m": [
       39.25,
       39.5,
-      39.75
+      40.0
     ],
     "rows": [
       {
         "level_m": 39.25,
         "hours": 24.0,
-        "analytic_failures": 188,
-        "ode_failures": 154,
-        "analytic_not_ode": 34,
+        "analytic_failures": 81,
+        "ode_failures": 64,
+        "analytic_not_ode": 17,
         "ode_not_analytic": 0
       },
       {
         "level_m": 39.25,
         "hours": 96.0,
-        "analytic_failures": 188,
-        "ode_failures": 187,
+        "analytic_failures": 81,
+        "ode_failures": 81,
+        "analytic_not_ode": 0,
+        "ode_not_analytic": 0
+      },
+      {
+        "level_m": 39.25,
+        "hours": 384.0,
+        "analytic_failures": 81,
+        "ode_failures": 81,
+        "analytic_not_ode": 0,
+        "ode_not_analytic": 0
+      },
+      {
+        "level_m": 39.25,
+        "hours": 1536.0,
+        "analytic_failures": 81,
+        "ode_failures": 81,
+        "analytic_not_ode": 0,
+        "ode_not_analytic": 0
+      },
+      {
+        "level_m": 39.5,
+        "hours": 24.0,
+        "analytic_failures": 988,
+        "ode_failures": 811,
+        "analytic_not_ode": 177,
+        "ode_not_analytic": 0
+      },
+      {
+        "level_m": 39.5,
+        "hours": 96.0,
+        "analytic_failures": 988,
+        "ode_failures": 970,
+        "analytic_not_ode": 18,
+        "ode_not_analytic": 0
+      },
+      {
+        "level_m": 39.5,
+        "hours": 384.0,
+        "analytic_failures": 988,
+        "ode_failures": 987,
         "analytic_not_ode": 1,
         "ode_not_analytic": 0
       },
       {
-        "level_m": 39.25,
-        "hours": 384.0,
-        "analytic_failures": 188,
-        "ode_failures": 188,
-        "analytic_not_ode": 0,
-        "ode_not_analytic": 0
-      },
-      {
-        "level_m": 39.25,
-        "hours": 1536.0,
-        "analytic_failures": 188,
-        "ode_failures": 188,
-        "analytic_not_ode": 0,
-        "ode_not_analytic": 0
-      },
-      {
         "level_m": 39.5,
+        "hours": 1536.0,
+        "analytic_failures": 988,
+        "ode_failures": 988,
+        "analytic_not_ode": 0,
+        "ode_not_analytic": 0
+      },
+      {
+        "level_m": 40.0,
         "hours": 24.0,
-        "analytic_failures": 1927,
-        "ode_failures": 1583,
-        "analytic_not_ode": 344,
+        "analytic_failures": 5266,
+        "ode_failures": 4490,
+        "analytic_not_ode": 776,
         "ode_not_analytic": 0
       },
       {
-        "level_m": 39.5,
+        "level_m": 40.0,
         "hours": 96.0,
-        "analytic_failures": 1927,
-        "ode_failures": 1896,
-        "analytic_not_ode": 31,
+        "analytic_failures": 5266,
+        "ode_failures": 5198,
+        "analytic_not_ode": 68,
         "ode_not_analytic": 0
       },
       {
-        "level_m": 39.5,
+        "level_m": 40.0,
         "hours": 384.0,
-        "analytic_failures": 1927,
-        "ode_failures": 1927,
-        "analytic_not_ode": 0,
+        "analytic_failures": 5266,
+        "ode_failures": 5265,
+        "analytic_not_ode": 1,
         "ode_not_analytic": 0
       },
       {
-        "level_m": 39.5,
+        "level_m": 40.0,
         "hours": 1536.0,
-        "analytic_failures": 1927,
-        "ode_failures": 1927,
-        "analytic_not_ode": 0,
-        "ode_not_analytic": 0
-      },
-      {
-        "level_m": 39.75,
-        "hours": 24.0,
-        "analytic_failures": 4901,
-        "ode_failures": 4117,
-        "analytic_not_ode": 784,
-        "ode_not_analytic": 0
-      },
-      {
-        "level_m": 39.75,
-        "hours": 96.0,
-        "analytic_failures": 4901,
-        "ode_failures": 4835,
-        "analytic_not_ode": 66,
-        "ode_not_analytic": 0
-      },
-      {
-        "level_m": 39.75,
-        "hours": 384.0,
-        "analytic_failures": 4901,
-        "ode_failures": 4901,
-        "analytic_not_ode": 0,
-        "ode_not_analytic": 0
-      },
-      {
-        "level_m": 39.75,
-        "hours": 1536.0,
-        "analytic_failures": 4901,
-        "ode_failures": 4901,
+        "analytic_failures": 5266,
+        "ode_failures": 5266,
         "analytic_not_ode": 0,
         "ode_not_analytic": 0
       }
@@ -129,41 +129,52 @@
       1536.0
     ],
     "levels_m": [
-      39.75
+      40.0
     ],
     "rows": [
       {
-        "level_m": 39.75,
+        "level_m": 40.0,
         "hours": 24.0,
-        "analytic_failures": 214,
-        "ode_failures": 194,
-        "analytic_not_ode": 20,
+        "analytic_failures": 488,
+        "ode_failures": 451,
+        "analytic_not_ode": 37,
         "ode_not_analytic": 0
       },
       {
-        "level_m": 39.75,
+        "level_m": 40.0,
         "hours": 96.0,
-        "analytic_failures": 214,
-        "ode_failures": 214,
-        "analytic_not_ode": 0,
+        "analytic_failures": 488,
+        "ode_failures": 486,
+        "analytic_not_ode": 2,
         "ode_not_analytic": 0
       },
       {
-        "level_m": 39.75,
+        "level_m": 40.0,
         "hours": 384.0,
-        "analytic_failures": 214,
-        "ode_failures": 214,
+        "analytic_failures": 488,
+        "ode_failures": 488,
         "analytic_not_ode": 0,
         "ode_not_analytic": 0
       },
       {
-        "level_m": 39.75,
+        "level_m": 40.0,
         "hours": 1536.0,
-        "analytic_failures": 214,
-        "ode_failures": 214,
+        "analytic_failures": 488,
+        "ode_failures": 488,
         "analytic_not_ode": 0,
         "ode_not_analytic": 0
       }
     ]
+  },
+  "provenance": {
+    "record": "committed copy of the live Stage 6.6 campaign artifact",
+    "source": {
+      "path": "results/stage6_6/stage6_6_kp57_4_duration_ladder.json",
+      "gitignored": true,
+      "sha256": "50e09001ee0efc957ede3ef03ce72fee3c849faca7432b54bd2efd5fe7870888"
+    },
+    "transcribed": "2026-09-25",
+    "transcribed_by": "ADR-0054 re-basing of the matrix d70; transcribed from the live artifact of the 2026-09-24 production campaign, no sweep, ladder or study was re-run for this copy",
+    "supersedes": "Replaces the copy computed on the pre-ADR-0054 matrix d70 means (0.70 / 0.53 / 0.26 / 0.70 mm at KP 57.4 / 58.8 / 60.0 / 62.0, now 0.90 / 0.65 / 0.74 / 0.75 mm). The superseded live artifacts are retained at results/superseded_d70rebase_20260924T163630/stage6_6/ (retention policy, docs/conventions.md section 10.4) and the superseded copy is in git history."
   }
 }

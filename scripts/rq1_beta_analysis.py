@@ -1176,28 +1176,25 @@ def write_markdown(record: dict[str, Any], path: Path) -> None:
         )
     add("")
     kp57 = anchors["kp57_4"]
-    kp60 = anchors["kp60_0"]
-    add("Two departures, both understood and neither a data problem:")
+    add(
+        "The plan's values were written before ADR-0054 re-based the matrix d70"
+        " (2026-09-25), which moved every anchor; the departures in the table are"
+        " that re-basing, not a data problem. One construction note stands"
+        " regardless of the inputs:"
+    )
     add("")
     add(
-        f"- **KP 57.4, {_n(kp57['delta_beta_lower_bound'])} against the plan's"
-        f" 1.28.** The plan paired the lower bound on beta_transient"
+        f"- **KP 57.4 is a bound, built from two endpoints.** The plan paired"
+        f" the lower bound on beta_transient"
         f" ({_n(kp57['beta_transient_ci'][0])}) with the POINT estimate of"
         f" beta_static ({_n(kp57['beta_static'])}). The bound quoted here"
         " instead pairs it with the upper bound on beta_static"
         f" ({_n(kp57['beta_static_ci'][1])}), which is the construction the"
-        " ratio bound B at least 148 already uses at the same anchor (static"
-        " lower endpoint over transient upper endpoint). The stricter figure is"
-        " the one to quote; the difference is 0.02 and the direction is"
-        " conservative."
-    )
-    add(
-        f"- **KP 60.0 rounding.** The plan lists beta_static -1.39 and"
-        f" beta_transient 0.49; the artifact gives"
-        f" {kp60['beta_static']:.3f} and {kp60['beta_transient']:.3f}, which"
-        f" round to {_n(kp60['beta_static'])} and {_n(kp60['beta_transient'])}."
-        f" The difference, {_n(kp60['delta_beta'])}, is unchanged, so no"
-        " downstream claim moves."
+        f" ratio bound B at least {kp57['B_ci'][0]:.0f} already uses at the same"
+        " anchor (static lower endpoint over transient upper endpoint). The"
+        " stricter figure is the one to quote; the difference is"
+        f" {_n(kp57['beta_static_ci'][1] - kp57['beta_static'])} and the"
+        " direction is conservative."
     )
     add("")
     add("## 3. dbeta against stage, and what B does over the same range")
@@ -2206,8 +2203,12 @@ def figure_kp57_dbeta_bound(record: dict[str, Any]) -> Path:
             rf"$\Delta\beta$ = {quotable['delta_beta']:.2f} "
             f"{_ci(quotable['delta_beta_ci'])}\n"
             f"on {quotable['k_transient']} transient rows, RESOLVED\n"
-            f"caveat: one of the three barrier-jump levels,\n"
-            f"{q_flips} row in {quotable['k_transient']}",
+            + (
+                f"caveat: a barrier-jump level, {q_flips} row in "
+                f"{quotable['k_transient']}"
+                if q_flips
+                else "no barrier-jump row at this level"
+            ),
         ),
     )
     for row, value, y_frac, colour, text in callouts:
@@ -2234,7 +2235,11 @@ def figure_kp57_dbeta_bound(record: dict[str, Any]) -> Path:
             },
         )
     ax.set_ylabel(r"$\Delta\beta = \beta_\mathrm{trans} - \beta_\mathrm{static}$")
-    ax.set_ylim(0.9, 2.9)
+    # The floor follows the lowest bound drawn, so no callout anchor falls
+    # below the axis and is clipped away (the design bound sank to 0.88 when
+    # ADR-0054 re-based the matrix d70).
+    lowest_bound = min(a["delta_beta_lower_bound"] for a in anchors)
+    ax.set_ylim(min(0.9, lowest_bound - 0.1), 2.9)
     figstyle.title(
         fig,
         "The index difference at KP 57.4: a bound and a resolved anchor",

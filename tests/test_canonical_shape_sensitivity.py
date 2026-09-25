@@ -149,8 +149,10 @@ def test_the_design_level_bias_at_the_drained_sections_is_recomputable() -> None
     """
     strata = _evidence()["phase1"]["strata"]
     expected = {
-        "tokachi_kp58.8_historical_matrix": (2.75, 4.87),
-        "tokachi_kp60.0_historical_matrix": (2.92, 6.03),
+        # Re-based under ADR-0054 (2026-09-25); before it (2.75, 4.87) and
+        # (2.92, 6.03).
+        "tokachi_kp58.8_historical_matrix": (3.09, 5.54),
+        "tokachi_kp60.0_historical_matrix": (6.34, 14.53),
     }
     for stem, (published, alternate) in expected.items():
         record = strata[stem]

@@ -3,7 +3,8 @@
 Date: 2026-07-12
 
 ## Status
-Accepted
+Accepted. *Amended 2026-09-25 (ADR-0054): levels re-read and the ladder
+raised one rung; see the note under Levels.*
 
 ---
 
@@ -53,6 +54,19 @@ Levels: per section, four conditioning levels spanning shoulder → design HWL
 curve (KP58.8: 40.25 / 41.00 / 41.50 / 42.50 m MSL, transient P_f ≈ 0.025 /
 0.26 / 0.49 / 0.81; KP60.0: 42.00 / 42.75 / 43.25 / 44.25, P_f ≈ 0.049 /
 0.31 / 0.53 / 0.82).
+
+*Amended 2026-09-25 (ADR-0054).* The re-based matrix d70 moved both curves, so
+the levels were re-read by the same rule: the grid points nearest the same
+shoulder / transition / upper targets, with the design HWL kept as the second
+level (KP58.8: 40.25 / 41.00 / 41.75 / 42.75 m MSL, transient P_f 0.014 /
+0.20 / 0.52 / 0.81; KP60.0: 42.50 / 42.75 / 44.25 / 45.50, P_f 0.025 / 0.056 /
+0.50 / 0.80). KP60.0's design level now sits on the lower shoulder of its
+curve. The ladder was raised one rung, N in {2^11, 2^12, 2^13, 2^14}, as the
+Budget paragraph permits at low-variance levels. Every interpreted index
+meets the 0.02 drift criterion at 2^14 except the transient indicator at
+KP58.8's 40.25 m shoulder (total-effect drift 0.024), which is read to one
+decimal only. Numbers: `bimodal-foundation-d70-study.md` Part 3; evidence
+`adr0033-gsa-study-kp58_8_matrix.json`, `adr0033-gsa-study-kp60_0_matrix.json`.
 
 **Rejected QoIs.** *Median time-to-breach*: breach time is defined only on
 the breached subset (≈ 26% at the KP58.8 design level); conditioning the

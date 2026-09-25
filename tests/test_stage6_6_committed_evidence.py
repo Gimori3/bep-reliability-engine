@@ -56,11 +56,19 @@ COMMITTED_TO_LIVE = {
     ),
 }
 
-#: Records rewritten on 2026-08-20 from the live artifact, which therefore carry
-#: a ``provenance`` block naming what they were cut from. The KP 57.4 pair was
-#: already current and was deliberately left untouched, so it carries none: the
-#: block records a replacement event, not a general schema.
+#: Records rewritten from the live artifact, which therefore carry a
+#: ``provenance`` block naming what they were cut from. The KP 62.0 pair was
+#: rewritten on 2026-08-20 (ADR-0047) and all four on 2026-09-25, when ADR-0054
+#: re-based the matrix d70 and every Stage 6.6 number moved.
 REWRITTEN = (
+    "adr0040-stage6-6-kp62_0-analysis.json",
+    "adr0040-stage6-6-kp62_0-duration-ladder.json",
+    "adr0040-stage6-6-kp57_4-analysis.json",
+    "adr0040-stage6-6-kp57_4-duration-ladder.json",
+)
+
+#: The subset that carries the KP 62.0 design-HWL pointer.
+POINTS_AT_RESOLVED_BIAS = (
     "adr0040-stage6-6-kp62_0-analysis.json",
     "adr0040-stage6-6-kp62_0-duration-ladder.json",
 )
@@ -149,17 +157,18 @@ def test_a_rewritten_copy_says_what_it_was_cut_from(committed: str) -> None:
     assert "no sweep, ladder or study was re-run" in provenance["transcribed_by"]
 
 
-@pytest.mark.parametrize("committed", REWRITTEN)
+@pytest.mark.parametrize("committed", POINTS_AT_RESOLVED_BIAS)
 def test_a_rewritten_copy_points_at_the_resolved_bias(committed: str) -> None:
     """The retired "about 21" lived in exactly these files.
 
-    Both the pre-adoption 21.0 and the post-adoption 44.75 are N = 1e5 counts
-    that ``docs/stage6_6_report.md`` section 9 tells the reader not to quote, so
-    replacing one with the other is not on its own enough: the record has to send
-    an examiner to the resolved figure.
+    The pre-adoption 21.0, the post-adoption 44.75 and the ADR-0054 31.0 are
+    N = 1e5 counts that ``docs/stage6_6_report.md`` section 9 tells the reader
+    not to quote, so replacing one with the other is not on its own enough: the
+    record has to send an examiner to the resolved figure, which since ADR-0054
+    is 23.6 [18.6, 32.0] on 51 failing rows at N = 1e6.
     """
     note = _read(DECISIONS / committed)["provenance"]["quotable_design_hwl_bias"]
-    assert "26.9" in note and "[21.6, 35.3]" in note
+    assert "23.6" in note and "[18.6, 32.0]" in note
     assert "adr0040-hwl-bias-resolution.json" in note
 
 
