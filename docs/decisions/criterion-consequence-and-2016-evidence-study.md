@@ -140,3 +140,208 @@ canonical shape, up to the attainable maximum.
   likelihood ratio of at least 10.
 
 Both directions of every prediction will be reported.
+
+---
+
+## Part 2: outcome (2026-09-25)
+
+Run: `python scripts/criterion_consequence_study.py --results-root
+D:/repositories/bep-reliability-engine/results` from the worktree, one record
+(`criterion-consequence-and-2016-evidence-study.json`). Gate 1 reproduced all
+912 production Phase 3 rows field for field (four arms, 228 rows each); gate 2
+held every surface-only segment identical across all ten branch passes; the
+hazard cache was unchanged. The gross-head replays took 17 to 22 s per section
+and reproduced the production static survival row for row.
+
+### 2.1 Verdicts on the predictions
+
+| | Prediction | Outcome |
+|---|---|---|
+| A1 | S-prior ≥ T-prior annual, and share, at every cell | **Confirmed**, 16 of 16 cells, in 100 % of paired replicates |
+| A2 | prior annual S/T in 1.5 to 30, smallest at KP 58.8, ordered as design-level B | **Range confirmed** (1.86 to 6.03). Smallest at KP 58.8 historically (2.63) but at KP 62.0 under warming (1.86). **Ordering refuted**: KP 60.0 carries the largest ratio (6.03), not KP 57.4 |
+| A3 | under S-prior KP 60.0 ranks above KP 62.0 historically | **Refuted.** KP 62.0 stays second; KP 60.0 rises from last to **third**, above KP 57.4 (95 % of replicates historically; under warming the two tie at 1.62e-2) |
+| A4 | under S-prior piping leads all eight cells | **Confirmed.** The KP 62.0 +4 K tie (piping share 0.48 [0.46, 0.51], piping ahead in 7.5 % of replicates) becomes a piping lead of 0.72 [0.69, 0.75] in 100 % |
+| A5 | static climate ratio smaller at every section | **Confirmed**: quotient 0.58 to 0.79, every interval below 1 |
+| P1 | S-post lowers KP 58.8 by more than 2×; T-post by at most 10 % | **Confirmed** on the primary (raw) evaluation: ×0.43 [0.33, 0.52]; T-post ×0.90. On the fitted evaluation the factor is 0.55, so the "more than two" margin depends on the evaluation |
+| P2 | posterior S/T at KP 58.8 below half its prior value | **Confirmed** on the primary evaluation (1.26 against 2.63); 1.59 on the fitted one. Static still higher in 99.9 % of replicates |
+| E1 | head convention carries more than half of ln LR at KP 58.8, either order | **Refuted.** Head-first 0.48, head-last 0.08, two-order average 0.28 |
+| E2 | joint LR at most 2.5 under any dependence | **Confirmed**: 1.76 (comonotone), 2.07 (independent), 2.45 (Fréchet lower) |
+| E3 | one survival at KP 58.8's attainable top carries LR ≥ 10 | **Confirmed**: 16.9 at 42.75 m |
+
+### 2.2 The fit of the static self-posterior
+
+A survival under the static rule removes every row with `H_c < h_peak - z_toe`,
+so the static posterior is exactly zero at and below the survived stage and
+rises steeply above it. The lognormal cannot follow that: at KP 58.8 it departs
+from its own raw points by up to 0.176 in probability (0.057 at KP 60.0), while
+the static prior's fit departs by at most 0.0016. The pre-registered fallback
+therefore applies: **S-post is the raw (probit-interpolated) evaluation**, and
+the fitted one is recorded as `S-post-fit`. An all-raw robustness pass
+(`T-prior-raw`, `T-post-raw`, `S-prior-raw`) moves no verdict: the prior ratios
+become 2.72 to 7.17 historically and 1.92 to 3.96 under warming. The production
+transient fits themselves sit up to 0.033 from their raw points at KP 58.8; that
+is production's evaluation policy and is left as it is.
+
+### 2.3 What the choice of criterion does to the annual numbers
+
+Matrix reading, λ_ac = 250 m, primary surface set. Brackets are the 95 %
+flood-ensemble sampling interval (hazard only, curves fixed), paired across
+branches.
+
+| | KP 57.4 | KP 58.8 | KP 60.0 | KP 62.0 |
+|---|---|---|---|---|
+| Annual, transient prior, hist. | 4.98e-4 | 6.85e-3 | 3.22e-4 | 9.17e-4 |
+| Annual, steady-state prior, hist. | 1.76e-3 | 1.80e-2 | 1.94e-3 | 2.96e-3 |
+| ratio S/T, hist. | 3.53 [3.02, 4.50] | 2.63 [2.35, 3.00] | 6.03 [5.36, 7.05] | 3.23 [2.64, 4.10] |
+| ratio S/T, +4 K | 2.13 [1.99, 2.30] | 2.07 [1.99, 2.15] | 3.79 [3.49, 4.15] | 1.86 [1.73, 2.01] |
+| annual Δβ, hist. | 0.37 | 0.37 | 0.52 | 0.36 |
+| annual Δβ, +4 K | 0.29 | 0.36 | 0.49 | 0.25 |
+| climate ratio T / S | 15.3 / 9.2 | 5.6 / 4.4 | 13.3 / 8.3 | 13.4 / 7.7 |
+| Annual, transient posterior, hist. (deliverable) | 4.98e-4 | 6.18e-3 | 3.15e-4 | 9.17e-4 |
+| Annual, steady-state self-posterior, hist. | 1.59e-3 | 7.81e-3 | 9.63e-4 | 2.95e-3 |
+| ratio S/T, posterior, hist. | 3.19 [2.80, 3.86] | 1.26 [1.11, 1.38] | 3.06 [2.33, 3.45] | 3.22 [2.64, 4.10] |
+| ratio S/T, posterior, +4 K | 2.01 | 1.34 | 2.62 | 1.86 |
+| annual Δβ, posterior, hist. | 0.34 | 0.08 [0.04, 0.12] | 0.32 | 0.36 |
+| climate ratio T / S, posterior | 15.3 / 9.6 | 5.8 / 6.1 | 13.4 / 11.5 | 13.4 / 7.7 |
+
+Six findings.
+
+1. **The annual gap is much smaller than the design-level gap, and not because
+   anything cancels.** Per event at the design level the criteria differ by
+   Δβ 0.85 to 1.22 and B 3.1 to at least 37; per year by Δβ 0.36 to 0.52 and a
+   factor of 2.6 to 6.0. The annual number is earned above the design level: at
+   KP 57.4 and KP 62.0 essentially all of it (share of the annual probability
+   from years whose peak exceeds the design level: 1.00 and 1.00), with the
+   probability-weighted peak 1.3 and 1.8 m above it; at KP 58.8 and KP 60.0,
+   0.70 and 0.43 historically. There B has already fallen to about 3 to 6, and
+   the annual ratio sits close to B at the probability-weighted stage (KP 57.4:
+   B 3.4 at 40.50 m against the annual 3.5; KP 60.0: 6.3 at 42.75 m against
+   6.0). Because annual probabilities are small, the same ratio is a smaller
+   index difference.
+2. **Ranking.** Transient, both climates, both sides of the update:
+   58.8 > 62.0 > 57.4 > 60.0 (100 % of replicates). Steady-state prior:
+   58.8 > 62.0 > 60.0 > 57.4 historically (95 %), with KP 60.0 and KP 57.4 tied
+   under warming. After each criterion is updated on 2016 in its own terms, the
+   steady-state ranking is the transient one again (100 %).
+3. **Dominance.** The criterion moves piping's share upward everywhere and
+   changes one ordering: KP 62.0 under warming, where the transient tie becomes
+   a steady-state piping lead of 0.72. Under the bulk reading it also changes
+   one (KP 57.4 +4 K, overflow to piping, share 0.38 to 0.57), and moves KP 60.0
+   to first place historically (57 % of replicates).
+4. **Climate ratio.** The transient criterion is the more climate-sensitive
+   one: its ratio is 1.3 to 1.7 times the steady-state one before updating.
+   After each criterion is updated on 2016, the two coincide at KP 58.8 (5.8
+   against 6.1, quotient 1.06 [0.97, 1.20]) and are no longer separated at
+   KP 60.0 (0.85 [0.75, 1.13]); the gap persists at the two sections the survival
+   does not reach.
+5. **The survival update closes about half of the gap where it is informative.**
+   The steady-state self-update removes 45 % and 13 % of the static prior at
+   KP 58.8 and KP 60.0 and lowers its annual probability to 0.43 and 0.50 of the
+   prior; the transient update lowers its own by 10 % and 2 %. The posterior
+   ratio falls from 2.63 to 1.26 at KP 58.8 and from 6.03 to 3.06 at KP 60.0.
+   **Much of the steady-state rule's extra probability at the informative
+   section is probability that the 2016 survival itself rules out**, and an
+   assessor who applied the steady-state rule and then updated on the survival
+   in its own terms would land much nearer the transient answer.
+6. **The deliverable's conditions carry over unchanged**: the conductivity
+   bracket, the as-if-undrained treatment of KP 58.8 and KP 60.0, the declined
+   foreland credit and the one canonical shape apply to both branches. The
+   ratios in this table are not invariant to them (conductivity alone moves B
+   by up to ×46 at KP 62.0); they are measured here at the production values
+   only.
+
+### 2.4 What the 2016 survival says between the two criteria
+
+| | KP 57.4 | KP 58.8 | KP 60.0 | KP 62.0 |
+|---|---|---|---|---|
+| rejection, steady-state (gross head) | 2.73 % | 45.22 % | 12.83 % | 0 |
+| rejection, steady-state (crack-reduced head) | 0.42 % | 28.36 % | 5.18 % | 0 |
+| rejection, transient, gross head | 0.15 % | 8.01 % | 0.73 % | 0 |
+| rejection, transient (production) | 0.016 % | 3.81 % | 0.23 % | 0 |
+| LR transient / steady-state [95 %] | 1.03 [1.03, 1.03] | **1.76 [1.75, 1.77]** | **1.14 [1.14, 1.15]** | 1.00 |
+| LR transient / crack-reduced steady-state | 1.004 | 1.34 | 1.05 | 1.00 |
+| LR on the measured berm, gross / crack-reduced | | 1.29 / 1.13 | 1.03 / 1.01 | |
+| berm rejection, steady-state / transient | | 23.2 % / 0.90 % | 2.69 % / 0.014 % | |
+
+The intervals are paired row bootstraps and are narrow because the rows are
+shared; they do not include the epistemic brackets, which move each rejection
+by factors of two to ten (record reconstruction, exit datum) and are not
+common-mode between the two criteria.
+
+1. **Direction is a theorem; only the size is evidence.** Because the transient
+   failure set is nested in the steady-state one, every survival has a
+   likelihood ratio of at least one in favour of the transient criterion and
+   every breach at most one (it favours the steady-state rule by B). The 2016
+   observation could not have come out the other way. What it supplies is how
+   much.
+2. **The size is small.** 1.76 at KP 58.8, 1.14 at KP 60.0, 1.03 and 1.00 at
+   the two sections the flood barely reached. Jointly over the four sections,
+   with the same dependence imposed under both criteria: 1.76 if the sections'
+   resistances are fully dependent, 2.07 if independent, and at most 2.45 under
+   any dependence. The survival is at most about twice as probable under the
+   transient criterion. That shifts odds; it does not validate either model, and
+   a single survival to which the steady-state rule assigns probability 0.55
+   (KP 58.8) or 0.87 (KP 60.0) is an unremarkable outcome under that rule too.
+3. **What there is of it concerns duration, not the head convention.** Remove
+   the crack decrement from the transient branch and it still gives 1.68 at
+   KP 58.8; give the crack decrement to the steady-state rule and 1.34 remains.
+   The head-convention share of ln LR is 0.08 taken last and 0.48 taken first
+   (two-order average 0.28; 0.33 at KP 60.0). The initiation gate is not the
+   channel either: 99.8 % of the realizations on which the two criteria disagree
+   about 2016 at KP 58.8 and KP 60.0 did see uplift and heave (41,318 of 41,404;
+   12,571 of 12,602). They survive the transient criterion because the pipe did
+   not traverse the seepage path before the recession. (At KP 57.4, where the
+   flood barely engaged, 15 % of the 2,711 disagreeing rows never opened the
+   gate.)
+4. **The berm weakens it further.** On the measured post-works berm the ratio is
+   1.29 at KP 58.8 and 1.03 at KP 60.0. The berm-reading static rejection is
+   **23.2 %**, not the 34 % that Chapter 6 and this repository's earlier note
+   carried (that is the superseded matrix d70), and the transient one is 0.90 %,
+   not 1.5 % or 5.4 %.
+5. **What would discriminate.** A survival high on the curves. Under the
+   canonical shape a single survival at KP 58.8 carries a ratio of 2 at
+   41.00 m, a quarter of a metre above its 2016 peak, and 16.9, 6.9, 37.6 and 14.2 at the attainable
+   tops of KP 58.8, KP 60.0, KP 57.4 and KP 62.0. The 2016 peaks sat 0.28 to
+   0.66 m below the design level at three sections and 0.45 m above it at
+   KP 57.4, whose curves engage late, which is why they discriminate so little.
+   A breach, conversely, would favour the steady-state rule by B; a boil record
+   with no breach bears on the uplift and heave gate, which the two criteria do
+   not separate here. Direct evidence on the traverse (piezometric records at
+   the landside toe during a flood, or a post-flood investigation that finds
+   partial pipes) would bear on the mechanism itself.
+
+**The plain answer.** The 2016 survival favours the transient criterion, as any
+survival must, but weakly: it is 1.76 times as probable under it at KP 58.8,
+1.14 times at KP 60.0 and indistinguishable elsewhere, at most about twice as
+probable over the four sections together, and 1.29 times at KP 58.8 on the
+measured berm. It does not validate the transient model or invalidate the
+steady-state one. What little it says concerns finite flood duration rather than
+the head convention. A single survival high on the fragility curves would carry
+ratios of 7 to 40.
+
+### 2.5 What this changes elsewhere
+
+* `survival-information-and-nesting-study.md` §2.3 decided that no Bayes factor
+  or model-selection apparatus should be introduced, and that remains right for
+  model selection. **The owner decided on 2026-09-25 (Green Light item 2) that
+  the per-section likelihood ratio is stated in the thesis**, as the quotient of
+  two survival probabilities the thesis already prints, with its joint bound
+  over dependence, and with no model prior, posterior model probability or
+  evidence scale. That note's §2.3 numbers (0.945 / 0.968 against 0.424 / 0.267,
+  and the 34 % berm figure) are the pre-rebase values; the re-based ones are
+  above.
+* `system_integration/cli.py` still hard-codes the transient branch, correctly:
+  the deliverable is transient. The steady-state annual numbers above are a
+  labelled companion, not a production change.
+
+### 2.6 Deliberately not done
+
+* No steady-state reading of the Phase 3 conductivity, grain-size or seam
+  brackets: the question is what the criterion does at the production inputs.
+* No m_p-on static self-update. With the model factor carried per row, the
+  static survival still truncates the effective resistance, because the same
+  factor applies to the observation and the prediction; softening it would need
+  a model error partly independent between events, which no part of this model
+  carries.
+* No re-evaluation of the design-level anchors: they are unchanged and already
+  recorded.
