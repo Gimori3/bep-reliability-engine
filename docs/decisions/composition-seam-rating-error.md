@@ -153,6 +153,15 @@ the section. The other two are the canonical event and the conductivity bracket.
 
 ## 5. What this licenses
 
+**2026-09-27 qualification:** the numerical prose below predates the
+ADR-0054 matrix rebase. The current companion JSON governs: no ordering at
+the four characterized sections reverses on removing overflow rating error;
+the maximum annual-system factor is 1.08 and absolute share change 0.041.
+`hydrograph-uncertainty-study.md` now measures the other direction by adding
+the source's event-constant stage residual to prior piping. That is a
+marginal sensitivity with conditional independence retained, not joint
+integration over a shared hydraulic error or a revised production posterior.
+
 * The seam is **quantified**: at most 1.26 on the annual overflow contribution
   and 1.07 on the annual system probability at the characterized sections, at
   most 0.039 on a mechanism share, and exactly zero on every piping quantity.

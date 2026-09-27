@@ -108,6 +108,22 @@ compound-event memory model.
 
 `docs/decisions/climate-attribution-and-composition-study.md` §7. The measurement above supports the **differential** claim, that one shape introduces no between-climate bias, and not the **level** claim, that one shape reproduces either ensemble's mean fragility. This ADR's own table refutes the level reading: the pinned member's `t50` is 55 h against ensemble medians of 40 h (HPB) and 35 h (HFB), deliberately in the upper duration quartile. The level effect of the shape choice is what the second approved member measures, not this finding. One direction follows and was not stated: warming shapes are the marginally *shorter*, and a shorter sharper event at equal peak lowers transient probabilities, so a shape-matched treatment would lower the warming curve and with it the climate ratio. The shared historical shape is therefore conservative for the ratio.
 
+## Qualification, 2026-09-27
+
+**Authoritative over the 2026-09-17 scope paragraph above; production
+decision unchanged.** Similar marginal
+normalized-shape statistics do not establish an unbiased climate ratio.
+Peak-shape dependence and nonlinear fragility can produce a differential
+effect even when a common waveform is a useful controlled comparison.
+The deduction that marginally shorter warming shapes make the shared-shape
+ratio conservative is withdrawn. `hydrograph-uncertainty-study.md` and its
+evidence JSON preserve actual event peaks and waveforms in a stratified
+prior screen: annual probabilities fall in both climates but point-estimate
+ratios increase. Its historical event sample is not converged, so neither
+the sign nor magnitude is adopted as a production correction. Fragility
+identity across climate tags follows from identical loading inputs by
+construction; it is not proof that one waveform integrates either ensemble.
+
 ## References
 
 - ADR-0019 §9 (scenario tags; HPB/HFB), ADR-0020 §1 (canonical event pinning)
