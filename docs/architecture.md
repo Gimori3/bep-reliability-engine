@@ -594,7 +594,7 @@ For quick reference during implementation, the architectural decisions that shou
 | r_e scope | Drives the uplift/heave gate ONLY (Pol SIE 2024 Eq. 10); neither piping head uses r_e (ADR-0027/0028) |
 | Erosion-driving head | H_erosion = (h − z_toe) − 0.3·D_bl in the ODE only, on the **raw** outer level, **no r_e** (Pol SIE 2024 Eq. (6); ADR-0027 superseding ADR-0007); uplift/heave use the r_e-attenuated Δh_blanket |
 | Static comparator hydraulic input | **raw gross head** h_peak − z_toe (Sellmeijer 2011 "critical head across structure"; no r_e, no 0.3·D_bl; ADR-0028) |
-| Climate axis | Shape-invariant: one canonical HPB shape drives all scenarios; +4K ≡ historical fragility by shape invariance; climate lives on the Phase 3 hazard side; historical-only 8-config sweep (ADR-0023) |
+| Climate axis | One canonical HPB shape drives all scenarios; historical and +4K fragilities are identical by fixed-input construction, not proof of an unbiased ensemble mean or climate ratio. Climate enters the primary calculation on the Phase 3 hazard side; historical-only 8-config sweep (ADR-0023; 2026-09-27 qualification and hydrograph-uncertainty-study.md). |
 | Fragility deliverable | Fitted lognormal where the grid brackets the transition; else raw tail points with Clopper–Pearson binomial CIs (Optional fits; ADR-0024) |
 | ODE integrator | Forward Euler (no solve_ivp) |
 | M7 backend | Restructured numpy default (bit-identical); opt-in Numba backend, < 1e-10, config-owned (ADR-0029) |

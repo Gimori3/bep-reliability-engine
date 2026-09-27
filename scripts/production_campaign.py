@@ -1103,6 +1103,17 @@ VOLATILE_JSON_KEYS = frozenset(
 #: not a reason -- say which gate runs it instead, or which input the campaign
 #: deliberately does not produce.
 COMPANION_EXCLUSIONS: dict[str, str] = {
+    "scripts/hydrograph_uncertainty_study.py": (
+        "Green Light item 5 finite-event study: requires an explicit data-repo "
+        "with the original ignored hydrograph workbooks and persisted berm "
+        "companion. Run manually after a production rebase; zero-offset flags "
+        "are checked against the supplied persisted population."
+    ),
+    "scripts/hydrograph_uncertainty_report.py": (
+        "Summarizes the manually generated item 5 rating and event arrays, "
+        "which the campaign does not produce; rerun with that study after "
+        "a production rebase."
+    ),
     "scripts/production_campaign.py": (
         "this driver itself (it is the thing doing the asserting)"
     ),
