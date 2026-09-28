@@ -7,7 +7,7 @@ All notable changes to this project are recorded here. The format follows
 The engineering record at the level of individual decisions is not duplicated
 here. It lives in three places, all tracked:
 
-* `docs/decisions/` — 53 Architecture Decision Records, gap-free, every one
+* `docs/decisions/` — 54 Architecture Decision Records, gap-free, every one
   Accepted but ADR-0007, which is superseded in place by ADR-0027, plus their
   companion evidence notes and JSON artifacts;
 * `docs/project_log.md` — a dated narrative of what was learned and when,
@@ -16,6 +16,39 @@ here. It lives in three places, all tracked:
   Stage 6.6 gap decomposition.
 
 ---
+
+## [1.2.0] - 2026-09-28
+
+The revision after the Green Light meeting. This release supersedes v1.1.0
+for the revised thesis; production matrix grain-size inputs and their results
+changed. The Bayesian posterior provenance version stays at 0.1.0.
+
+### Changed
+
+* **Foundation grain size (ADR-0054):** matrix d70 now comes from each section's
+  own aquifer gradations: 0.90, 0.65, 0.74 and 0.75 mm at KP 57.4, 58.8, 60.0
+  and 62.0. The matrix clip is 2 mm. Four matrix sweeps, their posteriors,
+  annualisation, sensitivity studies and affected figures were regenerated;
+  bulk inputs are unchanged. Superseded evidence is retained and marked.
+* **Grading and internal stability:** the fixed uniformity coefficient is
+  retained, with calibrated-range and extrapolated companions. Their effects
+  differ between probability-ratio and reliability-index metrics. Suffusion
+  susceptibility is documented without claiming a suffusion probability.
+* **Piping criterion and 2016 evidence:** annual steady-state/transient
+  comparisons and self-consistent static updating are reported as companions.
+  The observed survival weakly favours the transient criterion; it validates
+  neither criterion.
+* **Drained sections:** KP 58.8/60.0 remain explicitly as-if-undrained, with a
+  measured-berm, drain-inert companion. Neither is an unsupported present-day
+  estimate of the drainage system.
+* **Water-level uncertainty:** a loading-chain inventory, rating-error
+  companion and paired ensemble-waveform screen quantify conditional effects
+  without replacing production curves or claiming a converged climate-ratio
+  correction.
+* **Assumption overview and revision close-out:** a source-linked synthesis
+  maps assumptions to the four research questions and main conclusion,
+  distinguishes bounds from estimates, and records remaining knowledge gaps.
+
 
 ## [1.1.0] — 2026-09-22
 
@@ -228,3 +261,5 @@ computational architecture specification.
 [1.1.0]: https://github.com/Gimori3/bep-reliability-engine/releases/tag/v1.1.0
 [1.0.0]: https://github.com/Gimori3/bep-reliability-engine/releases/tag/v1.0.0
 [0.0.1]: https://github.com/Gimori3/bep-reliability-engine/releases/tag/v0.0.1
+
+[1.2.0]: https://github.com/Gimori3/bep-reliability-engine/releases/tag/v1.2.0

@@ -1,0 +1,873 @@
+{
+  "date": "2026-09-27",
+  "engine_baseline": "4b67286",
+  "thesis_baseline": "2579e92",
+  "assumptions": [
+    {
+      "group": "Soil and geometry",
+      "assumption": "Matrix versus bulk $d_{70}$; reconstructed matrix definition",
+      "questions": "1, 2, 3, 4",
+      "effect": "Matrix means 0.90/0.65/0.74/0.75~mm at KP~57.4/58.8/60.0/62.0. Bulk lowers piping probability and changes mechanism ordering. Other matrix definitions raise $H_c$ by 7 to 46~per cent.",
+      "verdict": "Q3 is conditional. Two co-primary readings are scenarios, not a probability distribution over soils. Section~\\ref{subsec: The Bimodal Foundation}.",
+      "source": "bimodal-foundation-d70-study.md"
+    },
+    {
+      "group": "Soil and geometry",
+      "assumption": "Conductivity population and mean",
+      "questions": "1, 2, 3, 4",
+      "effect": "Bracket moves $B$ by up to factors 67/56/72/46 across sections and quotable levels; higher conductivity raises piping probability. Survival narrows the annual bracket from above, by up to 2.25.",
+      "verdict": "No Q3 ordering survives the full bracket under the matrix reading. Absolute probabilities and Q4 remain conditional. Section~\\ref{sec: The Aquifer Conductivity Prior under Scrutiny}.",
+      "source": "epistemic-bracket-synthesis.json; conductivity-bracket-posterior-side.json"
+    },
+    {
+      "group": "Soil and geometry",
+      "assumption": "Seepage length $L$ and its scatter",
+      "questions": "1, 2, 3, 4",
+      "effect": "Longer paths lower piping probability; measured geometry displaces $B$ by factors 1.02 to 2.29. Prior total effect on transient failure is 0.49 to 0.81; 2016 removes at most 3.6~per cent of $\\mathrm{Var}(L)$.",
+      "verdict": "Q1 magnitude changes; Q2 remains weak on geometry. The variance share is not a posterior floor. Section~\\ref{subsec: Definition and Determination of the Seepage Length}.",
+      "source": "adr0047-dem-seepage-length-ratio.json; survival-information-and-nesting-study.json"
+    },
+    {
+      "group": "Soil and geometry",
+      "assumption": "$C_u=1.81$; internal stability",
+      "questions": "1, 2, 3, 4",
+      "effect": "Tested maximum lowers $\\Delta\\beta$ by 0.03 to 0.09; extrapolated sand/matrix terms by 0.09 to 0.27/0.28 to 0.63. Annual piping falls by up to 2.45/43.7 in those extrapolated arms, prior side.",
+      "verdict": "Q1 sign survives quotable arms; Q3 reverses at KP~62.0 historically only in the far-extrapolated matrix arm. Q4 warming increase survives, with changed ratios (Appendix~\\ref{app subsec: Uniformity Climate Ratio}); Q2 not re-run. Suffusion consequences unquantified and two-sided. Section~\\ref{subsec: Grading and Internal Stability}.",
+      "source": "uniformity-coefficient-study.json"
+    },
+    {
+      "group": "Soil and geometry",
+      "assumption": "Fixed $D_r$, KAS and particle weight",
+      "questions": "1, 2, 3, 4",
+      "effect": "$D_r=0.725$ against site mean about 0.78 implies about 2.6~per cent extra $H_c$ at that mean, by $(0.78/0.725)^{0.35}$; KAS across its tested range changes $H_c$ by less than 0.8~per cent. Particle weight is framework-derived.",
+      "verdict": "Resistance effects only, not propagated probability bounds. No robustness verdict on the answers; matrix particle weight is uncertain. Appendix~\\ref{app: Model Input Derivation}.",
+      "source": "uniformity-coefficient-study.md; thesis appendix-b fixed Sellmeijer inputs"
+    },
+    {
+      "group": "Soil and geometry",
+      "assumption": "Lognormal families and adopted CoVs",
+      "questions": "1, 2, 3, 4",
+      "effect": "Positive marginals describe within-scenario scatter. Matrix $d_{70}$ CoV 0.30; conductivity CoV 0.50; $C_e$ CoV 0.782. Shape and tail alternatives are not jointly propagated.",
+      "verdict": "Unquantified family-choice effect; sign depends on stage. Mean brackets do not establish tail robustness. Appendix~\\ref{app: Model Input Derivation}.",
+      "source": "0054-matrix-d70-from-aquifer-gradations.md; 0026-ce-prior-sie2024-field-value.md"
+    },
+    {
+      "group": "Soil and geometry",
+      "assumption": "Independent inputs; two-population soil",
+      "questions": "1, 2, 3, 4",
+      "effect": "Correlated companions give transient $P_f\\simeq0.17$ against 0.199 at the KP~58.8 design level and retain the sensitivity ranking. Other dependence and continuous sand layers are not quantified.",
+      "verdict": "The tested ranking survives; all answers still condition on the joint prior and single-aquifer geometry. No independent validation of decoupling. Section~\\ref{subsec: The Bimodal Foundation}.",
+      "source": "bimodal-foundation-d70-study.md; adr0033-gsa-study-kp58_8_matrix_companions.json"
+    },
+    {
+      "group": "Piping formulation",
+      "assumption": "Shared plane-strain scale exponent",
+      "questions": "1, 2, 3, 4",
+      "effect": "KP~62.0 design: $\\Delta\\beta=0.85$; three-dimensional exponent on the transient branch alone gives $-0.75$, on both branches 1.29.",
+      "verdict": "Q1 sign can reverse under asymmetric dimensional treatment. Neither alternative is a field calibration. Section~\\ref{subsec: The Dimensional Axis}.",
+      "source": "bimodal-foundation-d70-study.md"
+    },
+    {
+      "group": "Piping formulation",
+      "assumption": "Single-source $H_c$; omitted mean-unity model factor",
+      "questions": "1, 2, 3, 4",
+      "effect": "Factor CoV 0.12 moves $B$ by 1.09 to 1.25 and $\\Delta\\beta$ by 0.13 to 0.19 across quotable comparisons. Both branches move.",
+      "verdict": "Q1 sign survives tested arms. Near-cancellation in $B$ is not cancellation in $\\Delta\\beta$ or proof of field accuracy. Section~\\ref{subsec: Not Every Epistemic Knob Cancels in a Ratio}.",
+      "source": "metric-and-decomposition.json"
+    },
+    {
+      "group": "Piping formulation",
+      "assumption": "Terzaghi critical heave gradient",
+      "questions": "1, 2, 3, 4",
+      "effect": "$i_c=\\gamma^{\\prime}_{\\mathrm{bl}}/\\gamma_w$ makes the uplift and heave thresholds coincide. Raising the threshold can only restrict initiation; lowering it can admit more progression.",
+      "verdict": "No full alternative-gradient probability bracket. The small gate contribution at two anchors does not establish global insensitivity. Section~\\ref{sec: Transient Limit State: The Race Condition and the Kinematic LSF}.",
+      "source": "0008-terzaghi-heave-gradient-collapse.md"
+    },
+    {
+      "group": "Piping formulation",
+      "assumption": "Crack resistance $0.3D_{\\mathrm{bl}}$ and head convention",
+      "questions": "1, 2",
+      "effect": "Removing the transient decrement retains 65 to 71~per cent of $\\Delta\\beta$ at three resolved design levels; 45~per cent at KP~57.4, 39.50~m.",
+      "verdict": "Q1 sign survives these comparisons. Head-first and head-last component shares differ; neither is the unique temporal attribution. Section~\\ref{subsec: The Production Gap}.",
+      "source": "adr0051-equal-head-convention.json; rq1-beta-reexpression.json; adr0051-equal-head-convention.json"
+    },
+    {
+      "group": "Piping formulation",
+      "assumption": "Two-dimensional critical pipe length; equilibrium curve and end anchor",
+      "questions": "1, 2, 3, 4",
+      "effect": "$l_c$ bracket changes transient probability by 1.00 to 1.61 and $B$ by 1.10 to 1.37 at count-qualified levels; $\\Delta\\beta$ by at most 0.10. Static is invariant.",
+      "verdict": "Q1 sign survives measured arms. Traverse time changes, not the indefinitely sustained failure condition; field transfer remains conditional. Section~\\ref{subsec: The Dimensional Axis}.",
+      "source": "adr0049-critical-length-bracket.md; metric-and-decomposition.json"
+    },
+    {
+      "group": "Piping formulation",
+      "assumption": "Memory without recovery; field erosion-rate prior",
+      "questions": "1, 2, 3, 4",
+      "effect": "No recovery preserves pipe length, but omitted strength loss on reloading acts oppositely. $C_e$ mean 0.055 is a field prior; the laboratory-calibrated alternative is slower.",
+      "verdict": "Net memory effect unquantified. 2016 primarily tests duration, not between-peak memory. Q2 cannot validate this assumption. Section~\\ref{subsec: What the Framework Cannot Separate}.",
+      "source": "criterion-consequence-and-2016-evidence-study.md; 0026-ce-prior-sie2024-field-value.md"
+    },
+    {
+      "group": "Piping formulation",
+      "assumption": "Forward Euler, 225~s; finite samples and curve fitting",
+      "questions": "1, 2, 3, 4",
+      "effect": "Failure-flag convergence supports 225~s; pipe-length magnitude needs at most 112.5~s. KP~57.4 design supports only $\\Delta\\beta\\geq0.88$, $B\\geq37$.",
+      "verdict": "Numerical adequacy is not physical validation. Bounds stay bounds; a static self-posterior needs raw interpolation because its fit misses truncation. Section~\\ref{subsec: What Remains Unresolved}.",
+      "source": "0039-worst-case-timestep-stress-verification.md; criterion-consequence-and-2016-evidence-study.md"
+    },
+    {
+      "group": "Hydraulics and observations",
+      "assumption": "Instantaneous aquifer response; continuous blanket",
+      "questions": "1, 2, 3, 4",
+      "effect": "Elastic-response screening supports instantaneous translation for the connected aquifer. Open-entry treatment is bracketed; connectedness and discontinuities remain field limitations.",
+      "verdict": "Conditional support, not a general hydraulic validation. Lower translated gate head lowers transient probability; the static head is unaffected. Section~\\ref{subsec: What the Model Represents}.",
+      "source": "adr0032-aquifer-response-diagnostic.md; 0025-kp62-foreland-blanketed-baseline.md"
+    },
+    {
+      "group": "Hydraulics and observations",
+      "assumption": "Drained sections represented as if undrained",
+      "questions": "1, 2, 3, 4",
+      "effect": "Measured berm, drain inert: $\\Delta\\beta=1.12/1.21$ at KP~58.8/60.0; historical annual system probability falls to 0.55/0.19 of baseline. Gate relief lowers it further, sometimes only to bounds.",
+      "verdict": "Q1 sign survives; Q3 still favours piping on the berm. Q2 weakens. Neither reading is a present-day assessment without the drain role. Table~\\ref{tab: drained companion}.",
+      "source": "drained-sections-scope-study.json; bimodal-foundation-d70-study.md"
+    },
+    {
+      "group": "Hydraulics and observations",
+      "assumption": "Declined foreland seepage-length credit",
+      "questions": "1, 2, 3, 4",
+      "effect": "Full credit lowers historical piping share to 0.04 at KP~62.0 and zero at the other three; no 2016 rows are rejected in the credited arms.",
+      "verdict": "Q3 piping lead disappears. Q2 update is null there; it cannot compound with the credit. Tail zeros are not proof of zero physical risk. Appendix~\\ref{app sec: Determination of the Seepage Length}.",
+      "source": "adr0052-foreland-credit-annualisation.json; adr0052-foreland-credit-annualisation-posterior.json"
+    },
+    {
+      "group": "Hydraulics and observations",
+      "assumption": "2016 anchor, exit datum and survival criterion",
+      "questions": "2",
+      "effect": "KP~58.8 rejection: trace/rating 3.81/4.18~per cent; toe shifts of $\\mp0.3$~m give 9.43/0.97~per cent. Measured berm gives 0.90~per cent and likelihood ratio 1.29, against 1.76.",
+      "verdict": "Q2 remains local and conditional; survival validates neither criterion. No-breach is the observation, not proof of no initiation. Section~\\ref{subsec: Does the Survival Favor the Transient Criterion}.",
+      "source": "hydrograph-uncertainty-study.json; criterion-consequence-and-2016-evidence-study.json"
+    },
+    {
+      "group": "Loading and climate",
+      "assumption": "One canonical hydrograph",
+      "questions": "1, 3, 4",
+      "effect": "Shorter approved event lowers mid-curve transient probabilities 25 to 38~per cent. Paired actual-waveform screen lowers sampled annual system probability 23 to 38~per cent historically, 13 to 28~per cent under warming.",
+      "verdict": "No point dominance reversal in these comparisons. Sparse event tails preclude a production Q4 correction or a universal conservative bound. Observed 2016 replay unchanged. Appendix~\\ref{app sec: Water-Level Companion Calculations}.",
+      "source": "hydrograph-uncertainty-study.json; canonical-shape-sensitivity.json"
+    },
+    {
+      "group": "Loading and climate",
+      "assumption": "Rating error in overflow only",
+      "questions": "1, 3, 4",
+      "effect": "Adding event-constant error to piping lowers annual piping 12 to 17~per cent in the matrix-prior companion. Removing it from overflow changes system probability by at most a factor 1.08.",
+      "verdict": "No point ordering reversal. Neither arm is a joint shared-error system calculation or a new posterior. Appendix~\\ref{app sec: Water-Level Companion Calculations}.",
+      "source": "hydrograph-uncertainty-study.json"
+    },
+    {
+      "group": "Loading and climate",
+      "assumption": "Finite ensemble; fixed six SST patterns",
+      "questions": "3, 4",
+      "effect": "Hazard-only relative half-widths: 30 to 62~per cent historical, 9 to 21~per cent warming. Pattern-specific warming annuals span factors 3.2 to 6.2.",
+      "verdict": "Warming increase survives the reported sampling bands; KP~60.0/62.0 ratios are indistinguishable. Structural SST spread is not sampling error or total uncertainty. Section~\\ref{subsec: The Climate Ratios}.",
+      "source": "annualisation-hazard-sampling-uncertainty.json"
+    },
+    {
+      "group": "Loading and climate",
+      "assumption": "Climate/runoff model, event window, hourly forcing and stationary ratings",
+      "questions": "3, 4",
+      "effect": "No separate propagation of climate-model discrepancy, runoff calibration, missing events, subhourly forcing or future channel geometry. Missing-event direction depends on the estimand.",
+      "verdict": "Q4 is conditional, not a validated local forecast; $+4$\\,K is not an established bound on $+2$\\,K. Appendix~\\ref{app sec: Water-Level Uncertainty Inventory}.",
+      "source": "hydrograph-uncertainty-study.md"
+    },
+    {
+      "group": "Loading and climate",
+      "assumption": "Above-crest extension at KP~62.0",
+      "questions": "4",
+      "effect": "12.5~per cent of warming annual piping comes from the 0.13~per cent of years above the attainable maximum.",
+      "verdict": "Q4 magnitude depends on hypothetical loading. Removing that contribution is a sensitivity, not a physical above-crest model. Section~\\ref{subsec: The Climate Ratios}.",
+      "source": "bimodal-foundation-d70-study.md; phase3_report.md"
+    },
+    {
+      "group": "System and use",
+      "assumption": "Steady-state versus transient annual assessment",
+      "questions": "1, 2, 3, 4",
+      "effect": "Prior steady-state/transient annual system ratio: 2.6 to 6.0 historical, 1.9 to 3.8 warming. Static self-update gives 1.26 at KP~58.8 historically, versus 2.63 before updating.",
+      "verdict": "Q3 warming tie at KP~62.0 becomes a static piping lead; Q4 ratios change. The production posterior static branch is not a static self-update. Appendix~\\ref{app subsec: The Steady-State Branch through the Annualization}.",
+      "source": "criterion-consequence-and-2016-evidence-study.json"
+    },
+    {
+      "group": "System and use",
+      "assumption": "Conditional series independence; physical coupling",
+      "questions": "3, 4",
+      "effect": "Fixed-marginal union is bounded by the largest marginal and their sum: 0.68 to 1.31 times the composed annual probability at KP~62.0 under warming. Adverse scour--piping coupling could additionally raise the piping marginal; its probability is unquantified.",
+      "verdict": "No general conservative sign for dependence. Piping shares divide by the sum, not the union; their ordering is invariant to that denominator. Section~\\ref{subsec: What the Framework Cannot Separate}.",
+      "source": "climate-attribution-and-composition-study.json"
+    },
+    {
+      "group": "System and use",
+      "assumption": "Within-segment and between-section spatial dependence",
+      "questions": "3, 4",
+      "effect": "At 200~m segment length and 250~m correlation length, the within-segment multiplier is exactly one. Densely spaced independent segments would overcount.",
+      "verdict": "The four-section result is not a dense-reach union. Its extrapolation needs spatial information. Appendix~\\ref{app: Reach-Wide Surface Composition}.",
+      "source": "0037-length-effect-lambda-ac.md; seepage-length-L-study.md"
+    },
+    {
+      "group": "System and use",
+      "assumption": "Omitted bank retreat, conduits and alternative leakage paths",
+      "questions": "3, 4",
+      "effect": "Bank-retreat exposure is screened, not assigned a failure probability. Conduit pathways and non-foundation leakage have no probability bracket; adverse missing pathways increase total risk.",
+      "verdict": "Q3 ranks represented mechanisms only. The regional erosion record is not contradicted by that conditional ranking. Appendix~\\ref{app sec: Assumption Supporting Qualifications}.",
+      "source": "r10-foreshore-exhaustion-screening.md; thesis existing limitations register"
+    },
+    {
+      "group": "System and use",
+      "assumption": "Four characterized sections; unequal uncertainty treatment; no safety target",
+      "questions": "3, 4",
+      "effect": "110 of 114 segments have surface-only lower bounds. Surface branches lack the full soil and model brackets applied to piping. No acceptable annual probability is adopted.",
+      "verdict": "No reach-wide piping-dominance or acceptable-safety verdict. Main-question conclusions remain conditional assessments, not reinforcement prescriptions. Appendix~\\ref{app sec: Assumption Supporting Qualifications}.",
+      "source": "phase3_report.md; thesis existing scope register"
+    }
+  ],
+  "method": "Synthesis of existing evidence; no new fragility or prior. Probability metrics kept distinct.",
+  "analytic_gap": {
+    "relative_density_Hc_ratio": 1.0259231000180586,
+    "meaning": "resistance multiplier only, not propagated failure probability"
+  },
+  "source_sha256": {
+    "docs/decisions/bimodal-foundation-d70-study.md": "3ab4b0da5461b5c37e4332b6c59e07c4ae602d549b3e52dce03a2e517349eb0c",
+    "docs/decisions/epistemic-bracket-synthesis.json": "16691c31ad66e3fa7d3eb54ffdbd7a5f641d6210f18087d9ea9ef91a7e866b8c",
+    "docs/decisions/conductivity-bracket-posterior-side.json": "049b935ce98ad9b00b67e68b5519865f201459f64909d080a48d586a34cd1434",
+    "docs/decisions/adr0047-dem-seepage-length-ratio.json": "beb4309c9e1431888a66246cf7c7726719f0081910bb56eb8cf1318db321f873",
+    "docs/decisions/survival-information-and-nesting-study.json": "39f3eca884e6d0a6212b73ab7d9be65f136f8a746486ad3243b5c56bf8d0829c",
+    "docs/decisions/uniformity-coefficient-study.json": "73ad3ec54287dc1a63d28d8143aab4f500c7600ec51d7019f245d99fac4e8b20",
+    "docs/decisions/uniformity-coefficient-study.md": "0723148e13ca890d93efd2fa17381c82c092613516978f6595e92766787dbd10",
+    "docs/decisions/0054-matrix-d70-from-aquifer-gradations.md": "02d3b3cd661f86a451123cfccb39fc9a076b9c080f0937971779b1e963355a0d",
+    "docs/decisions/0026-ce-prior-sie2024-field-value.md": "ebcf26ce97c21195327522a70ac5581f19834a1d5d385295a7931fe760a9a33e",
+    "docs/decisions/adr0033-gsa-study-kp58_8_matrix_companions.json": "c2ccf370022bc6b1f05240d7e276fb67d1c83d9ef5d4e326587642890ac65fb3",
+    "docs/decisions/metric-and-decomposition.json": "2264ff8b655cca6f3c582bf462f781bf459022506f1f139259ced3f2612793c7",
+    "docs/decisions/0008-terzaghi-heave-gradient-collapse.md": "af05cd5d5f351eb6efd827d9147097ede4b4a2cca2887cb993cd2aab24e625f9",
+    "docs/decisions/rq1-beta-reexpression.json": "2d576cb3de76401a018a8b61ff3573241aa597ec3c6881b79567720ad6730267",
+    "docs/decisions/adr0049-critical-length-bracket.md": "55ec8dd722cde80f8697a1c93687c0c14b8bff10153ab139266dabc87888e43a",
+    "docs/decisions/criterion-consequence-and-2016-evidence-study.md": "fccc71f41ffe468f0d1985c267171b378384284ca2ad4fc7fe1ddaf9d31a4d6c",
+    "docs/decisions/0039-worst-case-timestep-stress-verification.md": "b512a820e7c9a047c0f302745c9e3de85886ad332d44b95cb5937b8e9ebe5cdd",
+    "docs/decisions/adr0032-aquifer-response-diagnostic.md": "4f306d7a3ab7edd44aa4bcadea2da8c5dc2f196c7bd06b3965e17d341bc0137d",
+    "docs/decisions/0025-kp62-foreland-blanketed-baseline.md": "edb5c688b86bb045316da3cb12ca47f2d04620921c2fec7746e14a2601c09fd9",
+    "docs/decisions/drained-sections-scope-study.json": "e492e30ed780b1e5537cb7d024eb577505ce063ffb35144f1e8e0f99aba81fcc",
+    "docs/decisions/adr0052-foreland-credit-annualisation.json": "68e6e0de930072727f1eb82c8bf76572c107be6f8cd09adc538b9fd1547fe9e7",
+    "docs/decisions/adr0052-foreland-credit-annualisation-posterior.json": "368ca09fb230809119d73114daf0f8073a7ee09fc0aa4da01cfc907ced77c22d",
+    "docs/decisions/hydrograph-uncertainty-study.json": "877eb5adaab274d8146b0dd0a500e7ebb4bd308e5c42d1f33a34dbaa5e006000",
+    "docs/decisions/criterion-consequence-and-2016-evidence-study.json": "6b90a61ac0cf78b66732a2655da6b583c665af104f149bf68d9677ca326259f0",
+    "docs/decisions/canonical-shape-sensitivity.json": "fa57100b696fa322bab009a394d5988b31b53326dc4c300df8373e56943bd9aa",
+    "docs/decisions/annualisation-hazard-sampling-uncertainty.json": "f565f3925a6802043ef2bae0cda3b93d68ced35f664185eb37fbfa397e854536",
+    "docs/decisions/hydrograph-uncertainty-study.md": "c29ef19b2d9006d7a4f79392f720a83c8d0551d07165fceb043509f25b3adcc8",
+    "docs/phase3_report.md": "75dabf8fcb69df594a7043eaf54067a152c7e1f57fe8d7db1909d6f96b1b95d8",
+    "docs/decisions/climate-attribution-and-composition-study.json": "e7b8214dad31c5fdb73fe4b211ef6cc189ec05a6da66256e947579a819d77601",
+    "docs/decisions/0037-length-effect-lambda-ac.md": "4f6d6381d20f6d8ca87a2cef9dd192976d2c44ba0bbdf64e05ffd7f53cd8a25f",
+    "docs/decisions/seepage-length-L-study.md": "64f8a8a0b9aa4c579c25298311f8d0a256115b3f3d874f719de3eaa71bbf7a48",
+    "docs/decisions/r10-foreshore-exhaustion-screening.md": "bbbda43378e8a9784aa1eb856d5c005100e2895b173d4a3af13776b73f90c062",
+    "docs/decisions/adr0051-equal-head-convention.json": "61fd9165d803ae6a2f63dc765948de74a5ffab73f3bc43d9d11ca715ac20650b"
+  },
+  "fixed_marginal_annual_union_bound": {
+    "source": "climate-attribution-and-composition-study.json",
+    "cell": "KP 62.0 +4K matrix posterior",
+    "factor_range": [
+      0.6816241725119162,
+      1.310020547082369
+    ]
+  },
+  "uniformity_climate_ratios": {
+    "scope": "prior, matrix, 250 m, primary surface set; arithmetic on existing annuals, not new posterior or uncertainty interval",
+    "values": {
+      "KP 57.4": {
+        "baseline": 15.249341007153241,
+        "cap": 16.877184811847524,
+        "sand": 22.711059476881925,
+        "matrix": 59.563223786334454
+      },
+      "KP 58.8": {
+        "baseline": 5.58295749141793,
+        "cap": 5.779322782964314,
+        "sand": 6.105457620496222,
+        "matrix": 8.048665816617712
+      },
+      "KP 60.0": {
+        "baseline": 13.286156616492883,
+        "cap": 14.646473334043101,
+        "sand": 18.30551957343729,
+        "matrix": 58.754979963383086
+      },
+      "KP 62.0": {
+        "baseline": 13.432118060110772,
+        "cap": 14.761458548426507,
+        "sand": 18.18747472766358,
+        "matrix": 31.65004051160585
+      }
+    }
+  },
+  "stale_claim_audit": {
+    "scope": "all mainmatter, frontmatter, appendices and bibliography; original item 1 to 5 supersessions plus overview synthesis",
+    "repaired": [
+      "B range 2.75 to >=148",
+      "resolved index range 0.9 to 1.9",
+      "model-factor maxima below count floor",
+      "two informative transient strata",
+      "reversed conductivity low-arm climate counts",
+      "two outer sections indistinguishable climate ratios",
+      "0.66 fixed-marginal lower union factor",
+      "2.1 shorter-shape ratio factor at KP60",
+      "1.1.0 release references"
+    ],
+    "retained_contextual_matches": [
+      "2.8 Sellmeijer exponent",
+      "0.53 mm individual soil tests",
+      "0.66 m observed-to-design stage difference",
+      "2.87 peak-only rejection factor",
+      "2.8 percent erosion-coefficient mean shift",
+      "historic literature and borehole values"
+    ],
+    "new_bibliography_keys": []
+  },
+  "validation": {
+    "engine_gates": {
+      "ruff": "pass",
+      "black": "pass; 183 Python files unchanged",
+      "pytest": "1124 passed, 9 warnings in 30402.31s (8:26:42)"
+    },
+    "thesis": {
+      "undefined_refs": [],
+      "duplicate_labels": {},
+      "undefined_cites": [],
+      "style": [],
+      "label_count": 418,
+      "citation_count": 109,
+      "lost_labels": []
+    },
+    "build": {
+      "command": "latexmk -xelatex -interaction=nonstopmode -halt-on-error report.tex (PowerShell, isolated faithful source copy)",
+      "result": "converged, no undefined references/citations or TeX errors",
+      "overfull_boxes": 0,
+      "source_identity_files": 27,
+      "chapter_pages": [
+        {
+          "chapter": 1,
+          "start": 1,
+          "end": 6,
+          "pages": 6
+        },
+        {
+          "chapter": 2,
+          "start": 7,
+          "end": 16,
+          "pages": 10
+        },
+        {
+          "chapter": 3,
+          "start": 17,
+          "end": 29,
+          "pages": 13
+        },
+        {
+          "chapter": 4,
+          "start": 30,
+          "end": 42,
+          "pages": 13
+        },
+        {
+          "chapter": 5,
+          "start": 43,
+          "end": 53,
+          "pages": 11
+        },
+        {
+          "chapter": 6,
+          "start": 54,
+          "end": 73,
+          "pages": 20
+        },
+        {
+          "chapter": 7,
+          "start": 74,
+          "end": 87,
+          "pages": 14
+        },
+        {
+          "chapter": 8,
+          "start": 88,
+          "end": 101,
+          "pages": 14
+        },
+        {
+          "chapter": 9,
+          "start": 102,
+          "end": 109,
+          "pages": 8
+        }
+      ],
+      "main_body_pages": 109,
+      "references_start": 110,
+      "pdf_sha256": "3af8bee8592632f0dea4d65ac32a0b593b588e8cf785b05e8284adabef3bc7b3",
+      "warnings": [
+        "Package geometry Warning: Over-specification in `h'-direction.",
+        "Package geometry Warning: Over-specification in `v'-direction.",
+        "LaTeX Warning: You have requested release `2026/06/01' of LaTeX,",
+        "LaTeX Warning: You have requested release `2026/06/01' of LaTeX,",
+        "LaTeX Warning: You have requested release `2026/06/01' of LaTeX,",
+        "Package xeCJK Warning: Fandol is being set as the default font for CJK text.",
+        "LaTeX Font Warning: Font shape `TU/IPAexMincho(0)/m/it' undefined",
+        "Package caption Warning: The option `hypcap=true' will be ignored for this",
+        "Package caption Warning: The option `hypcap=true' will be ignored for this",
+        "LaTeX Font Warning: Some font shapes were not available, defaults substituted."
+      ]
+    },
+    "figures": {
+      "engine_included": 59,
+      "external_included": 4,
+      "all_engine_copies_identical": true,
+      "all_engine_included_covered_by_successful_redraw": true,
+      "redraw_commands": 25,
+      "evidence": [
+        {
+          "thesis": "figures/study_reach_map.jpg",
+          "exists": true,
+          "engine": false,
+          "thesis_sha": "0e74bbfabf4fbc00502afde70f4876057684b741cd0856fcc82060021b8e3617",
+          "engine_sha": null
+        },
+        {
+          "thesis": "figures/adr0047_dem_seepage_length.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "c9790a9e09c691948fb0b98bba1261ae8a7dd20141c4ea995e0fb657228ab7fe",
+          "engine_sha": "c9790a9e09c691948fb0b98bba1261ae8a7dd20141c4ea995e0fb657228ab7fe"
+        },
+        {
+          "thesis": "figures/adr0039-timestep-stress.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "05c927ad47e24eaf01bf0e59e7675f64bdb3afc5220a9a48b93dd92300b492f9",
+          "engine_sha": "05c927ad47e24eaf01bf0e59e7675f64bdb3afc5220a9a48b93dd92300b492f9"
+        },
+        {
+          "thesis": "figures/validation_shikaga_m4_pattern.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "9db943f2bab2125381008797a6f4c7295f4b7ddb13d8380c8016f92ad55bbd5b",
+          "engine_sha": "9db943f2bab2125381008797a6f4c7295f4b7ddb13d8380c8016f92ad55bbd5b"
+        },
+        {
+          "thesis": "figures/validation_yabe_timeline.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "fcd06bea972779fdbb5a973a8c6392295d2eaab6918f5337c8346246537f157e",
+          "engine_sha": "fcd06bea972779fdbb5a973a8c6392295d2eaab6918f5337c8346246537f157e"
+        },
+        {
+          "thesis": "figures/gsa_indices_kp58_8_matrix.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "2feba0d5698df076b899dfd98b8e1c87911220ec68ab6ca661b38a3de0298517",
+          "engine_sha": "2feba0d5698df076b899dfd98b8e1c87911220ec68ab6ca661b38a3de0298517"
+        },
+        {
+          "thesis": "figures/gsa_interaction_kp58_8_matrix.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "ec8fcc12efbd4b8fa742eb94f992f0bdab79eb3baeae92dacf83992c7a9e1778",
+          "engine_sha": "ec8fcc12efbd4b8fa742eb94f992f0bdab79eb3baeae92dacf83992c7a9e1778"
+        },
+        {
+          "thesis": "figures/gsa_levels_kp58_8_matrix.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "69b27f764deb330febfc39599e723e150aa0b4c8c74b40c2c436a87d9a0dafb1",
+          "engine_sha": "69b27f764deb330febfc39599e723e150aa0b4c8c74b40c2c436a87d9a0dafb1"
+        },
+        {
+          "thesis": "figures/epistemic_bracket_ranking.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "f6d71de2f459a2c22556bb6e1a5f28f81543dd69e1ba86e586277025f786bb1c",
+          "engine_sha": "f6d71de2f459a2c22556bb6e1a5f28f81543dd69e1ba86e586277025f786bb1c"
+        },
+        {
+          "thesis": "figures/epistemic_vs_statistical.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "0aa8872dcc6ff33ec442119c442018308091560712d4d21be3513d116d95001c",
+          "engine_sha": "0aa8872dcc6ff33ec442119c442018308091560712d4d21be3513d116d95001c"
+        },
+        {
+          "thesis": "figures/fragility_per_section.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "29865f8a2af97be3d6d9d82e7050fdb1092467db4760f49a82cefa980b860cf2",
+          "engine_sha": "29865f8a2af97be3d6d9d82e7050fdb1092467db4760f49a82cefa980b860cf2"
+        },
+        {
+          "thesis": "figures/initiation_fragility.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "9cc08db6464135e1ffe6887fa4082d2a201693a8116fc000068f6bdc43354885",
+          "engine_sha": "9cc08db6464135e1ffe6887fa4082d2a201693a8116fc000068f6bdc43354885"
+        },
+        {
+          "thesis": "figures/fragility_comparison.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "b1c67c1d5a3275228657bc39ec5afd86f8ce1613b191463ca383482c0227b2ab",
+          "engine_sha": "b1c67c1d5a3275228657bc39ec5afd86f8ce1613b191463ca383482c0227b2ab"
+        },
+        {
+          "thesis": "figures/fragility_tail_log.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "125f7de05c74eaa4253981d3a6c735ac0302cb403da0062da3a044c3b30927e4",
+          "engine_sha": "125f7de05c74eaa4253981d3a6c735ac0302cb403da0062da3a044c3b30927e4"
+        },
+        {
+          "thesis": "figures/rq1_hwl_dbeta_resolved.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "493ea8500f39a3d1ee55348553920e45dd1baa642e7c43df4b6f6a16199cc031",
+          "engine_sha": "493ea8500f39a3d1ee55348553920e45dd1baa642e7c43df4b6f6a16199cc031"
+        },
+        {
+          "thesis": "figures/rq1_kp57_4_dbeta_bound.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "bc4ed0e5bbc6a884dc4aea34cb55b05ee7b8ae24acf11ff217c4be2bd05dcb51",
+          "engine_sha": "bc4ed0e5bbc6a884dc4aea34cb55b05ee7b8ae24acf11ff217c4be2bd05dcb51"
+        },
+        {
+          "thesis": "figures/rq1_beta_waterfall.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "06b492c282b9e5be24d094fbd2fdb8ef34607989adba1205002b75cf92e19bc3",
+          "engine_sha": "06b492c282b9e5be24d094fbd2fdb8ef34607989adba1205002b75cf92e19bc3"
+        },
+        {
+          "thesis": "figures/stage6_6_fractions_kp62_0.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "b4c2644eaf95e2305566990a86201be9901a02e0aa94b00af4108d2305796d39",
+          "engine_sha": "b4c2644eaf95e2305566990a86201be9901a02e0aa94b00af4108d2305796d39"
+        },
+        {
+          "thesis": "figures/rq1_delta_beta_vs_stage.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "1f365b3d31baa115eff02e2f3f7d9e8f588100430381f32d6660d335844f5feb",
+          "engine_sha": "1f365b3d31baa115eff02e2f3f7d9e8f588100430381f32d6660d335844f5feb"
+        },
+        {
+          "thesis": "figures/phase2_survival_update.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "8e8076f040b14f6606e23881fc5bdc759c1f4244b4c87f7b4a0bd80fac05e30c",
+          "engine_sha": "8e8076f040b14f6606e23881fc5bdc759c1f4244b4c87f7b4a0bd80fac05e30c"
+        },
+        {
+          "thesis": "figures/phase2_fragility_update_kp58_8_matrix.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "310119aa612efe931206cf17323a4717f5c9e7594cf428c13de4b048da8d26ed",
+          "engine_sha": "310119aa612efe931206cf17323a4717f5c9e7594cf428c13de4b048da8d26ed"
+        },
+        {
+          "thesis": "figures/criterion_survival_evidence.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "85bf4d82e51860a1db7d10d378b3ef569057bc0b74ddaa7dbdeabed50eb4322a",
+          "engine_sha": "85bf4d82e51860a1db7d10d378b3ef569057bc0b74ddaa7dbdeabed50eb4322a"
+        },
+        {
+          "thesis": "figures/phase2_peak_shortcut.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "3252432c25e4fb6c2d1b65d3e1ab12a87dde68f24f76012c36f8df741e467ec2",
+          "engine_sha": "3252432c25e4fb6c2d1b65d3e1ab12a87dde68f24f76012c36f8df741e467ec2"
+        },
+        {
+          "thesis": "figures/seepage_length_system_and_ceiling.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "31ab4fb988ffff16fc7ef0df3a52bfa58c7b4ffe0bdd5a79adeb53a19a25c289",
+          "engine_sha": "31ab4fb988ffff16fc7ef0df3a52bfa58c7b4ffe0bdd5a79adeb53a19a25c289"
+        },
+        {
+          "thesis": "figures/phase3_system_fragility_bep_sections.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "f1b1e13c4fd35b4bb61e25eafd61c37cb3f58dc39fb7975dace30a7274ccc15e",
+          "engine_sha": "f1b1e13c4fd35b4bb61e25eafd61c37cb3f58dc39fb7975dace30a7274ccc15e"
+        },
+        {
+          "thesis": "figures/conductivity_bracket_annual.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "27ff56bd8a7f3da8f87abef8a6558f48c4552882a94770dcc62077082f205647",
+          "engine_sha": "27ff56bd8a7f3da8f87abef8a6558f48c4552882a94770dcc62077082f205647"
+        },
+        {
+          "thesis": "figures/conductivity_bracket_both_d70.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "d2957898e25ac985629435dd16d2d8d24de0c0213471e767f081d3e303a0f9c0",
+          "engine_sha": "d2957898e25ac985629435dd16d2d8d24de0c0213471e767f081d3e303a0f9c0"
+        },
+        {
+          "thesis": "figures/phase3_rq4_four_sections.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "7130cd22450b1d1d06654c692a5d1947cb0ebe984ac1392d3de8a009775c3659",
+          "engine_sha": "7130cd22450b1d1d06654c692a5d1947cb0ebe984ac1392d3de8a009775c3659"
+        },
+        {
+          "thesis": "figures/rq4_sensitivity_brackets.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "8efa725659b7eedfac74e58edc07436da336f3a18e576d79502119031feaeab5",
+          "engine_sha": "8efa725659b7eedfac74e58edc07436da336f3a18e576d79502119031feaeab5"
+        },
+        {
+          "thesis": "figures/phase3_rq4_attribution.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "d4eb4a9c7a2a08dd8b6c5ae0f730ec943ac21b42809428a8d8a9a5017e506830",
+          "engine_sha": "d4eb4a9c7a2a08dd8b6c5ae0f730ec943ac21b42809428a8d8a9a5017e506830"
+        },
+        {
+          "thesis": "figures/r10_foreshore_exhaustion.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "5d75bc1dcb7bc9a47fa6f3bd9438d6f1f45cddfec777016ae268e8fccac41e4c",
+          "engine_sha": "5d75bc1dcb7bc9a47fa6f3bd9438d6f1f45cddfec777016ae268e8fccac41e4c"
+        },
+        {
+          "thesis": "figures/TUDelft_Logo.png",
+          "exists": true,
+          "engine": false,
+          "thesis_sha": "fc2955106c0e5e9878404c1e5708d4322e4078d72d64e5cf2da7c3c296e13e83",
+          "engine_sha": null
+        },
+        {
+          "thesis": "figures/Hokudai_Logo.png",
+          "exists": true,
+          "engine": false,
+          "thesis_sha": "e90c0ddbc17fd7dc7c958e87774b1648eb418dcca7d26ef95735ae51834f9260",
+          "engine_sha": null
+        },
+        {
+          "thesis": "figures/Rijkswaterstaat_Logo.png",
+          "exists": true,
+          "engine": false,
+          "thesis_sha": "6289873a5febe45f1086a6b664fd71354256ecd20ecb30478abe5dd27f7a95e5",
+          "engine_sha": null
+        },
+        {
+          "thesis": "figures/adr0012-kaq-d70-scatter.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "b950b3209f989b3e4e5e7563783c8d941b68d3a3154bf785bbca9c3556b3e784",
+          "engine_sha": "b950b3209f989b3e4e5e7563783c8d941b68d3a3154bf785bbca9c3556b3e784"
+        },
+        {
+          "thesis": "figures/adr0032_aquifer_response.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "91f2fa20eeff06ed5076972b9e9285b9a4f88c014dc6d1f441696256e517efe5",
+          "engine_sha": "91f2fa20eeff06ed5076972b9e9285b9a4f88c014dc6d1f441696256e517efe5"
+        },
+        {
+          "thesis": "figures/adr0031-convergence-n-ladder.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "cbb4b210db75349006e645d5b118c30304bd7985c3764cb50cf228f358d0d4a3",
+          "engine_sha": "cbb4b210db75349006e645d5b118c30304bd7985c3764cb50cf228f358d0d4a3"
+        },
+        {
+          "thesis": "figures/adr0031-convergence-n-ladder-kp60_0_matrix.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "34f2042da48ed4660943b6b707779ccdf9b19a93eb4b7fc9a0ab364e93a91666",
+          "engine_sha": "34f2042da48ed4660943b6b707779ccdf9b19a93eb4b7fc9a0ab364e93a91666"
+        },
+        {
+          "thesis": "figures/adr0031-tail-lhs-vs-crude.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "3a84c56248fc33c336c9de0bad22a05cd4b80ea72d1f25647f8f8a4a4ade7a88",
+          "engine_sha": "3a84c56248fc33c336c9de0bad22a05cd4b80ea72d1f25647f8f8a4a4ade7a88"
+        },
+        {
+          "thesis": "figures/adr0031-tail-lhs-vs-crude-kp60_0_matrix.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "e17b39f3fecb41e2281ae8d2fbcb00919faf8bb20509536dc88cbb7200fb9688",
+          "engine_sha": "e17b39f3fecb41e2281ae8d2fbcb00919faf8bb20509536dc88cbb7200fb9688"
+        },
+        {
+          "thesis": "figures/adr0029-tail-cov.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "1be6d418921198783b7299929be1455c857cae2787f3856456a05e3259b2d5f2",
+          "engine_sha": "1be6d418921198783b7299929be1455c857cae2787f3856456a05e3259b2d5f2"
+        },
+        {
+          "thesis": "figures/adr0040_tilted_is_validation.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "077bbef871a99a68867b92832fd622d135a058e7ab3b22592417d9a40c2c700f",
+          "engine_sha": "077bbef871a99a68867b92832fd622d135a058e7ab3b22592417d9a40c2c700f"
+        },
+        {
+          "thesis": "figures/gsa_convergence_kp58_8_matrix.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "1cda6acf404f9a3dbf0b679b0276f27e57b702bc02613629cef7a9371c590935",
+          "engine_sha": "1cda6acf404f9a3dbf0b679b0276f27e57b702bc02613629cef7a9371c590935"
+        },
+        {
+          "thesis": "figures/gsa_indices_kp60_0_matrix.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "e4654ca46cf47a45687b0371285fe159027d3341d0e77b876870cccbcd384bba",
+          "engine_sha": "e4654ca46cf47a45687b0371285fe159027d3341d0e77b876870cccbcd384bba"
+        },
+        {
+          "thesis": "figures/gsa_interaction_kp60_0_matrix.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "6f6fa43d3ffae09f21ca88e563ba2748438118d65603a8cc58e643f7419809a1",
+          "engine_sha": "6f6fa43d3ffae09f21ca88e563ba2748438118d65603a8cc58e643f7419809a1"
+        },
+        {
+          "thesis": "figures/gsa_levels_kp60_0_matrix.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "8c00c2c90371a2829421217fcf5b9e5dd14eb5ac8b1c0ff00cea9e67769a0f26",
+          "engine_sha": "8c00c2c90371a2829421217fcf5b9e5dd14eb5ac8b1c0ff00cea9e67769a0f26"
+        },
+        {
+          "thesis": "figures/gsa_convergence_kp60_0_matrix.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "6a3d85be85fd5e4d4617aa0a83b5b2adf86003050cc9c047e8ae2d74d9988350",
+          "engine_sha": "6a3d85be85fd5e4d4617aa0a83b5b2adf86003050cc9c047e8ae2d74d9988350"
+        },
+        {
+          "thesis": "figures/gsa_companions.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "c3944492a58d8925d4269c8c3c372c690ef1498a882c04eadcecb726a7e43044",
+          "engine_sha": "c3944492a58d8925d4269c8c3c372c690ef1498a882c04eadcecb726a7e43044"
+        },
+        {
+          "thesis": "figures/validation_gounokawa_hydrograph_2018.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "3f11462d5329eead7416eae8762a3f7fb0e69e3951620c40e1ffb979cd9ea861",
+          "engine_sha": "3f11462d5329eead7416eae8762a3f7fb0e69e3951620c40e1ffb979cd9ea861"
+        },
+        {
+          "thesis": "figures/validation_gounokawa_onset_intervals.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "5e3335281518d517added665e7d71ec1a27c24128a11037c924b6ed5351af616",
+          "engine_sha": "5e3335281518d517added665e7d71ec1a27c24128a11037c924b6ed5351af616"
+        },
+        {
+          "thesis": "figures/validation_yabe_discrimination.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "51ae0798370264a72a8eafb1c079b7dad3dfc6a2dc5efd9a98892030341e2ee0",
+          "engine_sha": "51ae0798370264a72a8eafb1c079b7dad3dfc6a2dc5efd9a98892030341e2ee0"
+        },
+        {
+          "thesis": "figures/stage6_6_waterfall_kp57_4.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "e8f7a931ea602ac5543ad12ae2535b56f3057a098f559b9d2681fa2a67ca36ca",
+          "engine_sha": "e8f7a931ea602ac5543ad12ae2535b56f3057a098f559b9d2681fa2a67ca36ca"
+        },
+        {
+          "thesis": "figures/stage6_6_fractions_kp57_4.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "5af713dc781c920fe93153dd5017a46c19467276f0bb7f2055562216c4df12ba",
+          "engine_sha": "5af713dc781c920fe93153dd5017a46c19467276f0bb7f2055562216c4df12ba"
+        },
+        {
+          "thesis": "figures/stage6_6_ladder_kp62_0.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "4847ff5e77aa2bf9e399762a630a13b2dd6f4e1e714179097064fc9b4b1d7260",
+          "engine_sha": "4847ff5e77aa2bf9e399762a630a13b2dd6f4e1e714179097064fc9b4b1d7260"
+        },
+        {
+          "thesis": "figures/stage6_6_ladder_kp57_4.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "47813a11676bdd843afb89ec90d8fcd8bed2e7773df489dcddd035eccb8f3bb8",
+          "engine_sha": "47813a11676bdd843afb89ec90d8fcd8bed2e7773df489dcddd035eccb8f3bb8"
+        },
+        {
+          "thesis": "figures/stage6_6_heq_kp62_0.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "f01c6a54695e5a521c4938e89011d9c1464203309b89902f833e8046e9618cd0",
+          "engine_sha": "f01c6a54695e5a521c4938e89011d9c1464203309b89902f833e8046e9618cd0"
+        },
+        {
+          "thesis": "figures/stage6_6_heq_kp57_4.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "add1d1018df61c035df0ccbe265652676f37872fe79570700a6aae329fb42df0",
+          "engine_sha": "add1d1018df61c035df0ccbe265652676f37872fe79570700a6aae329fb42df0"
+        },
+        {
+          "thesis": "figures/stage6_6_c2c3_kp62_0.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "910d43a253fda42d3ef73ed12edd5619d96fab2c7a47412fd45b70075f869691",
+          "engine_sha": "910d43a253fda42d3ef73ed12edd5619d96fab2c7a47412fd45b70075f869691"
+        },
+        {
+          "thesis": "figures/stage6_6_c2c3_kp57_4.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "3fcdd02ee6d39a13230b817744959b652c7d561441361287e56507c3da03d9e3",
+          "engine_sha": "3fcdd02ee6d39a13230b817744959b652c7d561441361287e56507c3da03d9e3"
+        },
+        {
+          "thesis": "figures/phase3_event_based_validation.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "e1e5f731e2596fb8c0f90574673e2258360261b0da4a436c5064dc278c7ff941",
+          "engine_sha": "e1e5f731e2596fb8c0f90574673e2258360261b0da4a436c5064dc278c7ff941"
+        },
+        {
+          "thesis": "figures/phase3_dominance_profile.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "817fbefcc8b4cf9fb99db0cf04daa7f12bdd16f26415315abd648cb6b9b13cb4",
+          "engine_sha": "817fbefcc8b4cf9fb99db0cf04daa7f12bdd16f26415315abd648cb6b9b13cb4"
+        },
+        {
+          "thesis": "figures/phase3_climate_shift.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "1c8c45c673bed6f52e00f1bc76d67ef83c75e870f50440b2219622150255f4d2",
+          "engine_sha": "1c8c45c673bed6f52e00f1bc76d67ef83c75e870f50440b2219622150255f4d2"
+        },
+        {
+          "thesis": "figures/epistemic_knobs_mp_ztoe.png",
+          "exists": true,
+          "engine": true,
+          "thesis_sha": "c80f66928266e96fdc21a5856a1f9691f27fe551f2c0e994ac5467a9da1e01b3",
+          "engine_sha": "c80f66928266e96fdc21a5856a1f9691f27fe551f2c0e994ac5467a9da1e01b3"
+        }
+      ]
+    }
+  }
+}
