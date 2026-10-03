@@ -90,21 +90,25 @@ The rules below prevent a recurrence. `tests/test_repo_hygiene.py` enforces the
 first one.
 
 **No `.tex`, `.bib` or thesis-prose file is ever created in this repository.** The
-sole authoritative thesis is `msc-thesis`.
+thesis exists in two versions, each with its own place: `msc-thesis` is the full
+original report, and `msc-thesis-final` is the shorter, more accessible rewrite the
+supervisors asked for. (Amended 2026-10-03: this rule first named `msc-thesis` as
+the sole authoritative thesis, before the rewrite existed.)
 
-**Findings reach the thesis by a targeted edit to the relevant msc-thesis chapter,
-made only when the finding is genuinely needed there.** Do not stage thesis prose
-here first. Work products of record belong in `docs/`: reports of record, ADRs in
-`docs/decisions/`, companion notes, and the provenance documents. That is where a
-finding is written down; the thesis then cites or restates whatever part of it the
-argument actually needs.
+**Findings reach a thesis by a targeted edit to the relevant chapter of whichever
+version needs them, made only when the finding is genuinely needed there.** Do not
+stage thesis prose here first. Work products of record belong in `docs/`: reports of
+record, ADRs in `docs/decisions/`, companion notes, and the provenance documents.
+That is where a finding is written down; the thesis then cites or restates whatever
+part of it the argument actually needs.
 
-**The msc-thesis report is compiled with XeLaTeX via Overleaf; the local clone is a
-Git-synced mirror.** Never introduce a package or command incompatible with XeLaTeX,
-and never compile locally. Read the current on-disk state of any chapter before
-editing it, since the author may have written in Overleaf since the last session.
+**Both versions are compiled with XeLaTeX in separate Overleaf projects; each local
+clone is a Git-synced mirror.** Never introduce a package or command incompatible
+with XeLaTeX, and never compile locally. Read the current on-disk state of any
+chapter before editing it, since the author may have written in Overleaf since the
+last session.
 
-**No Japanese script (kanji, hiragana, katakana) in the thesis report** -- main
+**No Japanese script (kanji, hiragana, katakana) in either thesis report** -- main
 body, appendices, figures, captions or bibliography. Japanese source names, place
 names, document titles and technical terms are romanised or translated there, with
 the original script recorded in this repository's provenance documents instead
@@ -118,9 +122,9 @@ source. That exception covers `references.bib` only and does not extend to any
 content. The check that keeps it that way is documented in the msc-thesis project rules.
 
 **No em dashes; ranges are written "X to Y", never "X-Y" or an en dash.** See
-the msc-thesis project rules for the full style contract (citation-key preservation,
-`\label{}` preservation, minimal surgical edits, plan-and-approve for multi-chapter
-tasks). That contract is binding on any edit to that repository.
+each thesis repository's own project rules for the full style contract (citation-key
+preservation, `\label{}` preservation, minimal surgical edits, plan-and-approve for
+multi-chapter tasks). That contract is binding on any edit to that repository.
 
 ## 9. Repository layout conventions
 

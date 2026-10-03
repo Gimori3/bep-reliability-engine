@@ -13,7 +13,9 @@ withdrawn L/lambda_in validity alarm, the refuted foreshore-width control on
 risk (ADR-0025 amendment) and the refuted LHS tail-variance advantage (fm5).
 Nothing in the test suite or the ADR process governed them, so nothing caught
 the drift. The rule and its rationale are recorded in ``docs/conventions.md``
-section 8: thesis text lives only in ``msc-thesis``.
+section 8: thesis text lives only in the two thesis repositories, ``msc-thesis``
+(the full original report) and ``msc-thesis-final`` (the shorter rewrite the
+supervisors asked for).
 """
 
 from __future__ import annotations
@@ -29,9 +31,9 @@ THESIS_SUFFIXES = {".tex", ".bib", ".cls", ".bbl", ".sty"}
 def test_no_thesis_fragments_at_the_repository_root() -> None:
     """No ``_thesis*`` .tex/.bib file may reappear at the repository root.
 
-    This is the exact shape of the retired artifacts. A finding reaches the
-    thesis by a targeted edit to the relevant msc-thesis chapter; work
-    products of record belong under ``docs/``.
+    This is the exact shape of the retired artifacts. A finding reaches a
+    thesis by a targeted edit to the relevant chapter of whichever version
+    needs it; work products of record belong under ``docs/``.
     """
     offenders = sorted(
         p.name
@@ -40,10 +42,10 @@ def test_no_thesis_fragments_at_the_repository_root() -> None:
     )
     assert not offenders, (
         "Thesis source reappeared at the engine repo root: "
-        f"{offenders}. Thesis text lives only in msc-thesis "
-        "(docs/conventions.md section 8). Write findings to docs/ instead, and "
-        "make a targeted edit to the relevant msc-thesis chapter if the thesis "
-        "genuinely needs the finding."
+        f"{offenders}. Thesis text lives only in the thesis repositories "
+        "msc-thesis and msc-thesis-final (docs/conventions.md section 8). Write "
+        "findings to docs/ instead, and make a targeted edit to the relevant "
+        "chapter of whichever version genuinely needs the finding."
     )
 
 
@@ -92,4 +94,5 @@ def test_the_conventions_document_still_carries_the_rule() -> None:
     conventions = (REPO / "docs" / "conventions.md").read_text(encoding="utf-8")
     assert "Thesis text does not live in this repository" in conventions
     assert "msc-thesis" in conventions
+    assert "msc-thesis-final" in conventions
     assert "XeLaTeX" in conventions
