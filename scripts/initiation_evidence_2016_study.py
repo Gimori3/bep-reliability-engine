@@ -1078,7 +1078,7 @@ def _fig_initiation(record: dict, fs, mirror: Path) -> Path:
     ini = record["initiation"]
     ann = record["annual"]["detection_probability_curve"]
     width = fs.TEXTWIDTH_IN
-    height = width * 0.62
+    height = width * 0.54
     scale = fs.scale_for(width)
     fs.style(scale)
     fig, (ax, bx) = plt.subplots(
