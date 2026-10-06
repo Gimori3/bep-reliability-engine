@@ -192,17 +192,25 @@ branches.
 |---|---|---|---|---|
 | Annual, transient prior, hist. | 4.98e-4 | 6.85e-3 | 3.22e-4 | 9.17e-4 |
 | Annual, steady-state prior, hist. | 1.76e-3 | 1.80e-2 | 1.94e-3 | 2.96e-3 |
-| ratio S/T, hist. | 3.53 [3.02, 4.50] | 2.63 [2.35, 3.00] | 6.03 [5.36, 7.05] | 3.23 [2.64, 4.10] |
+| ratio S/T, hist. | 3.53 [3.02, 4.50] | 2.63 [2.35, 3.00] | 6.03 [5.36, 7.05] | 3.22 [2.64, 4.10] |
 | ratio S/T, +4 K | 2.13 [1.99, 2.30] | 2.07 [1.99, 2.15] | 3.79 [3.49, 4.15] | 1.86 [1.73, 2.01] |
-| annual Δβ, hist. | 0.37 | 0.37 | 0.52 | 0.36 |
+| annual Δβ, hist. | 0.37 | 0.37 | 0.53 | 0.36 |
 | annual Δβ, +4 K | 0.29 | 0.36 | 0.49 | 0.25 |
 | climate ratio T / S | 15.3 / 9.2 | 5.6 / 4.4 | 13.3 / 8.3 | 13.4 / 7.7 |
 | Annual, transient posterior, hist. (deliverable) | 4.98e-4 | 6.18e-3 | 3.15e-4 | 9.17e-4 |
 | Annual, steady-state self-posterior, hist. | 1.59e-3 | 7.81e-3 | 9.63e-4 | 2.95e-3 |
 | ratio S/T, posterior, hist. | 3.19 [2.80, 3.86] | 1.26 [1.11, 1.38] | 3.06 [2.33, 3.45] | 3.22 [2.64, 4.10] |
-| ratio S/T, posterior, +4 K | 2.01 | 1.34 | 2.62 | 1.86 |
+| ratio S/T, posterior, +4 K | 2.01 | 1.34 | 2.61 | 1.85 |
 | annual Δβ, posterior, hist. | 0.34 | 0.08 [0.04, 0.12] | 0.32 | 0.36 |
 | climate ratio T / S, posterior | 15.3 / 9.6 | 5.8 / 6.1 | 13.4 / 11.5 | 13.4 / 7.7 |
+
+> **Rounding corrected 2026-10-06.** Four cells of this table were printed
+> rounded from rounded inputs rather than from the JSON: KP 62.0 prior ratio
+> S/T historical read 3.23 (JSON `paired_comparisons` 3.2249), KP 60.0 annual
+> Δβ historical 0.52 (0.5251), and the posterior +4 K ratios S/T at KP 60.0
+> and KP 62.0 2.62 and 1.86 (2.6145 and 1.85499). They now read 3.22, 0.53,
+> 2.61 and 1.85, which the thesis already prints. No other cell, finding or
+> verdict changes; every other cell was rechecked against the JSON.
 
 Six findings.
 
