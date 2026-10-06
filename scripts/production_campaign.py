@@ -1144,6 +1144,17 @@ COMPANION_EXCLUSIONS: dict[str, str] = {
         "by hand. Its internal-stability block reads only tracked data and is "
         "pinned by tests/test_uniformity_coefficient_study.py."
     ),
+    "scripts/time_dependence_factor_study.py": (
+        "ADR-0055 study, not a companion: it evaluates the same-head, same-gate "
+        "steady-state comparator in closed form on the persisted sweeps (gated "
+        "on reproducing every persisted static column bit for bit), re-runs the "
+        "ADR-0047 seepage-length and Green Light item 1 uniformity arms into its "
+        "own gitignored results, annualises through the production Phase 3 path "
+        "(its gate 1 asserts the production table field for field) and runs "
+        "Pol's river base case. It produces no campaign artifact and is re-run "
+        "by hand after a production re-run (about 3 h with the arm sweeps). "
+        "Pinned by tests/test_time_dependence_factor.py."
+    ),
     "scripts/criterion_consequence_study.py": (
         "Green Light item 2 study, not a companion: it annualises the static "
         "branch beside the transient one and reads the 2016 replays, and its "
@@ -2213,6 +2224,28 @@ FIGURE_DRIVERS: list[dict[str, Any]] = [
         "sources": [
             "docs/decisions/criterion-consequence-and-2016-evidence-study.json"
         ],
+    },
+    {
+        # ADR-0055: the six thesis figures of the time-dependence factor study.
+        # The two fragility-based figures read the production sweeps; the other
+        # four read the tracked evidence. Figure and evidence are written in
+        # one session, so the JSON's own stamp is the source time.
+        "label": "ADR-0055 time-dependence factor on one head and one gate",
+        "command": [PY, "scripts/time_dependence_factor_study.py", "figures"],
+        "requires": [
+            "docs/decisions/time-dependence-factor-study.json",
+            "results/tokachi_kp62.0_historical_matrix.h5",
+        ],
+        "produces": [
+            "same_head_fragility_log.png",
+            "same_head_initiation.png",
+            "same_head_survival_evidence.png",
+            "time_factor_vs_stage.png",
+            "time_factor_tokachi_rhine.png",
+            "same_head_mp_ztoe.png",
+        ],
+        "sources": ["docs/decisions/time-dependence-factor-study.json"],
+        "source_epoch": "json_generated",
     },
 ]
 

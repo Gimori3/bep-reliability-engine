@@ -143,6 +143,14 @@ comparison, and no amount of prose converts it into one. The supervisors asked f
 the experiment, and the experiment is one keyword.
 
 ### Add the crack term to the static comparator instead (make C1 the headline)
+
+> **Superseded 2026-10-06 by ADR-0055.** The owner adopted the same-head
+> comparator as the thesis headline, in its C3b form (same head and same gate),
+> answering supervisor comment 1. The verdict below is kept as written. Its
+> premise that the term is an uncalibrated convention is corrected there: TR
+> Zandmeevoerende Wellen (1999) p. 32 gives it a measured basis (about 0.6 d of
+> head loss over a fluidised sand column, credited at half).
+
 Rejected as the *only* answer, kept as a corroborating one. Crack-reducing the
 static side is the Dutch-practice reading and is exactly what Schweckendiek (2014)
 Eq. (3.14) does, so it is a legitimate equal-convention comparison — and it

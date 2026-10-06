@@ -1,7 +1,16 @@
 # ADR-0028: Static Sellmeijer Comparator Uses the Raw Gross Head (r_e Removed) — Completing ADR-0027
 
 Date: 2026-07-07
-Status: Accepted (completes ADR-0027; the static-branch counterpart)
+Status: Accepted (completes ADR-0027; the static-branch counterpart).
+**Superseded as the RQ1 comparator of record by ADR-0055 (2026-10-06).** The
+code decision below still holds: the production static branch evaluates the
+gross head and every persisted `failure_matrix_static` is this comparator. What
+no longer holds is its role as the static rule the thesis compares the
+transient model against: that is now the same-head, same-gate sustained-peak
+comparator C3b (Pol SIE 2024's instantaneous-growth reference), and this
+gross-head form is reported once, as Sellmeijer's calibrated form. The
+statement under Reasoning 3 that the gross-head comparison is "a clean temporal
+comparison" is superseded: it mixes the exit head loss into the time effect.
 
 ## Context
 
