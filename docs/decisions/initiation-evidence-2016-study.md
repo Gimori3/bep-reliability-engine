@@ -123,7 +123,7 @@ foundation's 2016 outcome on one head and one gate:
 | breach | 0.00016 | 0.038 | 0.0023 | 0 |
 | median hours with the exit open, initiated rows | 2 | 6 | 7 | 1 |
 | measured berm, inert drain | | 0.993 | 0.986 | |
-| berm, 20 / 40 / 60 / 80 % exit-gradient relief | | 0.92 / 0.47 / 0.014 / 0 | 0.88 / 0.39 / 0.009 / 0 | |
+| berm, 20 / 40 / 60 / 80 % exit-gradient relief | | 0.92 / 0.47 / 0.014 / 0 | 0.88 / 0.39 / 0.008 / 0 | |
 
 Initiation is identical under the bulk d70 reading (not a function of d70)
 and barely moves under the no-breach update (breaches are a subset of
