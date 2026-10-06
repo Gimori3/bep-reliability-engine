@@ -1165,6 +1165,18 @@ COMPANION_EXCLUSIONS: dict[str, str] = {
         "by hand after a production re-run (about 3 h with the arm sweeps and "
         "replays). Pinned by tests/test_gravel_grading_resistance_study.py."
     ),
+    "scripts/initiation_evidence_2016_study.py": (
+        "Pol comments 3, 6, 7, 9 and 11 study, not a companion: it re-runs no "
+        "sweep or replay. It reads the persisted 2016 replays (gated on the "
+        "closed-form gate reproducing every stored initiation flag), weights "
+        "the persisted rows by a detection probability for an opened exit, "
+        "annualises through the production Phase 3 path (its gate asserts the "
+        "production table field for field and the rebuilt no-breach arm "
+        "against production) and reads the hazard for return periods. It "
+        "produces no campaign artifact and is re-run by hand after a "
+        "production re-run (under a minute). Pinned by "
+        "tests/test_initiation_evidence_2016_study.py."
+    ),
     "scripts/criterion_consequence_study.py": (
         "Green Light item 2 study, not a companion: it annualises the static "
         "branch beside the transient one and reads the 2016 replays, and its "
@@ -1399,6 +1411,12 @@ COMPANION_EXCLUSIONS: dict[str, str] = {
         "the new gate firing on the first new hit that appeared after it."
     ),
     "tests/test_fragility.py": "exercised by pytest, not by this stage",
+    "tests/test_initiation_evidence_2016_study.py": (
+        "exercised by pytest, not by this stage -- the guard on the 2016 "
+        "initiation-evidence study above. One check re-derives the stored "
+        "initiation flags of the persisted KP 58.8 replay and skips when the "
+        "gitignored results are absent."
+    ),
     "tests/test_phase2_end_to_end.py": "exercised by pytest, not by this stage",
 }
 
@@ -2266,6 +2284,25 @@ FIGURE_DRIVERS: list[dict[str, Any]] = [
         "requires": ["docs/decisions/gravel-grading-resistance-study.json"],
         "produces": ["resistance_multiplier.png"],
         "sources": ["docs/decisions/gravel-grading-resistance-study.json"],
+        "source_epoch": "json_generated",
+    },
+    {
+        # Pol comments 3, 7, 9 and 11: the 2016 record against the design
+        # level and crest, and the model's 2016 exit outcomes with the weight
+        # an unrecorded boil could carry. The record figure rebuilds the
+        # observed 2016 series and the canonical flood from the raw data.
+        "label": "2016 record, initiation and the no-boil record",
+        "command": [PY, "scripts/initiation_evidence_2016_study.py", "figures"],
+        "requires": [
+            "docs/decisions/initiation-evidence-2016-study.json",
+            "data/raw/rating_curves/HQrelation_TokachiRiv_2017.csv",
+            "data/raw/hydrographs",
+        ],
+        "produces": [
+            "survival_2016_record_levels.png",
+            "initiation_2016_outcomes.png",
+        ],
+        "sources": ["docs/decisions/initiation-evidence-2016-study.json"],
         "source_epoch": "json_generated",
     },
 ]

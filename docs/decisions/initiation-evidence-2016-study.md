@@ -100,4 +100,165 @@ adds the same comparison under the no-initiation observation.
 
 ## Part 2: outcome
 
-(Written after the runs.)
+Gates (all held): the closed-form gate reproduces every stored 2016 initiation
+flag in all 18 section-configuration replays (as if undrained, bulk, measured
+berm, berm with 20 to 80 % relief); no breach lies outside initiation or
+outside same-head failure; the no-breach posterior curve rebuilt from row
+weights is identical to production (p_raw exactly, fit to 1e-12); the
+annualisation reproduces the production table (912 rows, 20 fields) and the
+rebuilt no-breach arm reproduces it field for field; surface-only segments and
+the hazard cache are untouched.
+
+### 4. What the model expected at the exit in 2016 (comment 7)
+
+Matrix reading, prior, the replayed record. Decomposition of every prior
+foundation's 2016 outcome on one head and one gate:
+
+| | KP 57.4 | KP 58.8 | KP 60.0 | KP 62.0 |
+|---|---|---|---|---|
+| Exit opened (initiation), as if undrained | **0.664** | **0.996** | **0.993** | **0.396** |
+| no exit | 0.336 | 0.0043 | 0.0070 | 0.605 |
+| exit opened, erosion head at the peak not above H_c (pipe stalls) | 0.660 | 0.712 | 0.941 | 0.396 |
+| fails the steady-state rule, survives the transient one (held only by duration) | 0.0037 | 0.245 | 0.049 | 0 |
+| breach | 0.00016 | 0.038 | 0.0023 | 0 |
+| median hours with the exit open, initiated rows | 2 | 6 | 7 | 1 |
+| measured berm, inert drain | | 0.993 | 0.986 | |
+| berm, 20 / 40 / 60 / 80 % exit-gradient relief | | 0.92 / 0.47 / 0.014 / 0 | 0.88 / 0.39 / 0.009 / 0 | |
+
+Initiation is identical under the bulk d70 reading (not a function of d70)
+and barely moves under the no-breach update (breaches are a subset of
+initiations: 0.664 / 0.996 / 0.993 / 0.396 among survivors). Toe overpressure
+over-predicted by a factor f (as if undrained): f = 1.13 gives 0.42 / 0.98 /
+0.97 / 0.22, f = 1.5 gives 0.047 / 0.73 / 0.68 / 0.020, f = 2 gives 0.0006 /
+0.19 / 0.15 / 0.0002, f = 2.67 gives 0 / 0.007 / 0.005 / 0. A breach in the
+model always opens an exit and grows a pipe, so "initiation" here is an exit
+that would eject sand.
+
+**Does it match "no boils"?** As if undrained, no: at KP 58.8 and 60.0 the
+model gives a 0.4 and 0.7 % chance that no exit opened. It matches on the
+berm with 60 % relief or more (99 % no exit), or with toe pressure
+over-predicted twofold (81 to 85 % no exit), or if the record is incomplete.
+At KP 57.4 and 62.0 the record is unremarkable (34 and 60 % no exit). Within
+the model, survival at the drained sections is mostly resistance, not
+duration: of the 99.6 % that open an exit at KP 58.8, 71 percentage points
+stall because the erosion head never exceeds H_c, 25 survive only because the
+flood fell, 3.8 breach. Pol's logic holds in the model: duration explains a
+survival only where an exit opened and H_c was exceeded (25 % of KP 58.8's
+foundations, 5 % of KP 60.0's, almost none elsewhere).
+
+### 5. Conditioning on no initiation (comment 9)
+
+The strict filter keeps 33,611 / 432 / 696 / 60,448 rows. It selects low
+conductivity and heavy, thick, permeable blankets: at KP 58.8 the retained
+mean k_aq is 27 % lower, D_bl 29 % higher, k_bl 170 % higher and L 11 %
+longer (KP 57.4: -13 / +11 / +37 / +3.5 %; KP 62.0: -15 / +5 / +18 / +3.7 %).
+H1 held: no count-qualified stage rises at any section. At the design-grid
+stage the transient probability falls from 0.166 to 0.025 at KP 58.8 and from
+0.054 to 0.013 at KP 60.0, **but these rest on 11 and 9 failing rows**, below
+the R1 floor of 30 (reached only from 41.25 and 43.25 m); the strict posterior
+is not quotable at the drained sections' design stages.
+
+A detection probability p_d for an opened exit gives every row the likelihood
+0 (breach), 1 - p_d (exit, no breach) or 1 (no exit). H3 held as a theorem:
+no probability moves by more than 1/(1 - p_d). Because 99.3 to 99.6 % of the
+drained sections' foundations open an exit, a soft observation hardly moves
+them: at p_d = 0.5 the KP 58.8 design-grid probability is 0.1649 against
+0.1655, at p_d = 0.9 it is 0.160. The no-boil record matters at the drained
+sections only if p_d exceeds about 0.98 (figure panel b).
+
+### 6. Annual consequence and mechanism ordering (comments 3 and 9)
+
+Historical annual piping relative to the adopted no-breach posterior, matrix
+reading (flood-ensemble intervals in the JSON):
+
+| | KP 57.4 | KP 58.8 | KP 60.0 | KP 62.0 |
+|---|---|---|---|---|
+| p_d = 0.5, as if undrained | 0.89 | 0.998 | 0.996 | 0.80 |
+| p_d = 0.9 | 0.67 | 0.98 | 0.97 | 0.57 |
+| strict, as if undrained | **0.56** | 0.40 (thin) | 0.24 (thin) | **0.49** |
+| strict, +4 K | 0.74 | 0.49 (thin) | 0.36 (thin) | 0.63 |
+| strict, measured berm | | 0.17 (709 rows) | 0.031 (1,366 rows) | |
+| no-breach, berm with 60 % relief | | 0.225 | 0.057 | |
+| strict, berm with 60 % relief | | 0.219 | 0.055 | |
+
+H2 held (0.56 and 0.49 at the usable sections). **H4 held: under the strict
+filter and under p_d = 0.5 piping keeps the lead in every section-and-climate
+cell where it leads now.** KP 62.0 historical falls from a share of 0.79 to
+0.65 (piping leads in 98.8 % of resamples); KP 62.0 under warming, a tie with
+overflow's point estimate ahead, moves from 0.48 to 0.37. Overflow is zero in
+every historical year at KP 57.4 and 60.0, so no piping reduction can hand it
+those cells. The relief rows show the other reading of a missing boil: with
+working drains the strict filter is nearly vacuous (98.6 and 99.2 % of rows
+retained) and the annual piping probability is set by the relief itself.
+
+### 7. Where the update is modest, and why (comment 6)
+
+Each criterion conditioned on 2016 in its own terms (same head and gate,
+`time-dependence-factor-study.json`): historical annual system probability
+after the update as a share of its own prior, 1.000 / 0.901 / 0.978 / 1.000
+for the transient rule against 0.969 / 0.577 / 0.633 / 0.998 for the
+steady-state rule; prior rejected 0.016 / 3.81 / 0.23 / 0 % against 0.39 /
+28.33 / 5.17 / 0 %. The update is modest for the transient rule only. The
+steady-state rule judges the recorded peak as if held indefinitely, so the
+survival excludes every foundation whose critical head lies below the
+erosion head at that peak; the transient rule credits the 21 hours the river
+actually stood above the toe and excludes only foundations fast enough to
+cross in them. Under the strict no-initiation observation the two rules keep
+exactly the same rows (both require an open exit), and both fall to 0.56 /
+0.37 / 0.23 / 0.60 (transient) and 0.63 / 0.50 / 0.31 / 0.66 (steady state)
+of their own priors; their annual ratio is then 2.30 / 2.43 / 4.42 / 2.98,
+larger than the prior 2.05 / 1.82 / 3.32 / 2.68 because the retained
+foundations are less conductive and their pipes slower.
+
+### 8. Where annual probability is earned against 2016 (comment 3)
+
+On the ensemble's own rating axis the 2016 flood is a 75-year event at all
+four nodes (40 of 3,000 historical years exceed it; 422 of 5,400 under +4 K,
+13 years). The trace-anchored peaks the replay uses carry local effects the
+rating does not (rating-anchored peaks 39.02 / 40.78 / 41.65 / 46.64 m against
+39.66 / 40.75 / 42.30 / 45.73 m); read on them, the return periods are 150 /
+70 / 176 / 20 years, which is where H5's pre-registered 10-to-100-year range
+fails at KP 57.4 and KP 60.0. H5's share half held: 100 / 81 / 99 / 99 % of
+the historical annual piping probability (adopted posterior; 99.6 / 82 / 90 /
+100 % on the trace axis) and 92 to 100 % of overflow's comes from years whose
+flood exceeded 2016.
+
+The 2016 peaks stood 1.05 / 1.78 / 1.95 / 2.16 m below the design crest
+(design level plus 1.5 m) and 2.67 / 3.63 / 2.81 / 2.91 m below the overflow
+model's mean crest (the design crest plus the surveyed bank-height excess,
+SD 0.002 to 1.31 m, KP 58.8 the wide one). On the canonical flood at the 2016
+peak the overflow model gives 0 / 0.0014 / 0 / 0 and the posterior piping
+branch 0.0036 / 0.098 / 0.015 / 3e-7. Piping reaches 1e-2 at 39.82 / 40.13 /
+42.20 / 47.05 m, overflow at 41.95 / 41.57 / 44.71 / 48.25 m.
+
+**The coherent answer to comment 3.** Piping carries most of the modelled
+annual probability because it engages 1.2 to 2.5 m below overflow, and almost
+all of that probability is earned in floods larger than 2016. The 2016 flood
+reached the band where piping is possible and overflow is not only at KP 58.8
+and 60.0, and even there the transient model expected a breach of only 3.8
+and 0.2 % over the record's 21 and 28 hours, so survival had little to remove.
+The no-boil record, if complete, would lower annual piping 1.8 to 4.2 times
+historically but would not change which mechanism leads, because overflow is
+remote. It weakens the absolute piping probabilities, not the ordering. Its
+weight is low on the evidence: no inspection record exists, the drained
+sections' missing boil is equally what working drains (60 % relief or more) or
+a twofold over-prediction of toe pressure would produce, and a soft likelihood
+moves the drained sections only if an opened exit would have been seen and
+recorded with probability above about 0.98.
+
+### 9. What stays as it was
+
+The adopted observation stays no breach (ADR-0036); strict and soft readings
+are named alternatives. The owner holds no patrol or river-ledger record
+(asked 2026-10-07). The river-ledger leakage and sand-boil category and the
+post-flood inspection results for KP 57 to 62 right bank would settle the
+observation's completeness and are the data request. Session 4 (why no
+piping) receives the decomposition and the pressure-factor sweep above.
+
+### 10. Corrections made with this study
+
+* ADR-0036 section 2 and `phase2_report.md` sections 4 and 5 point 6: dated
+  corrections. The committee's no-boil statements concern the three breach
+  sites only; the observation at the study sections is "no boil recorded", of
+  unknown completeness. The no-breach baseline is unchanged; the reason it
+  stays the baseline is now the evidence above.
