@@ -322,6 +322,30 @@ backward-erosion material (sand-fraction C_u 2.4 and 3.9).
 
 ### 2.6 What the evidence supports
 
+> **Dated correction, 2026-10-06 (Pol comment 5; `gravel-grading-resistance-study.md`).**
+> Items 1 and 2 below understated the evidence and drew the wrong inference
+> from the gap grading. Kept unchanged for the record; read them with this note.
+> (a) Item 1's "No experiment isolates C_u above that range for backward
+> erosion" is false: Allan (2018, UNSW PhD, chapter 8 and pp. 420 to 421) tested
+> eight graded soils with C_u 2.6 to 8.8 designed to be internally stable, found
+> the critical gradient rising roughly exponentially with C_u, and found no
+> backward erosion in the two soils at C_u 6.8 and 8.8 at gradients near 3. Her
+> refit of the Sellmeijer et al. (2011) formula over C_u 1.3 to 8.6 and d70 0.24
+> to 4.6 mm raises the uniformity exponent from 0.13 to 0.5 (pp. 406 to 411).
+> Rijkswaterstaat's 2023 piping manual (pp. 21 to 22) states that resistance
+> rises with d60/d10 and that the rule is therefore conservative there, citing
+> Allan. (b) Item 2's inference that internal instability is "the opposite of
+> the property the grading intuition relies on" is not supported for backward
+> erosion: Allan found internally stable graded soils up to 52 % weaker than the
+> internally unstable gap-graded soils of Townsend and Shiau (1986), attributing
+> the difference to fines carried toward the exit lowering the local
+> permeability. Internal instability opens suffusion as a separate path; it does
+> not cancel the grading effect on backward erosion. The production pin (C_u at
+> 1.81) stands under decision rule 1.6, because the size of the effect for a
+> gap-graded sand-gravel at whole-grading C_u 34 to 80 is still unmeasured; what
+> changes is that the direction is now established as resistance-raising, so the
+> pin is conservative, not merely "conservative against the regression".
+
 1. **The supervisors' premise is right in the direction of Sellmeijer's own
    regression and not established for these soils.** Resistance rises with C_u
    inside 1.3 to 2.6, by at most 5 % on H_c, "of the order of the scatter". No

@@ -319,7 +319,9 @@ def event_part(results_root: Path) -> dict[str, Any]:
         base_run, base = _flags(results_root / f"{stem}.h5", f"{stem}_base")
         base_tran = np.asarray(base_run.result.failure_matrix_tran, dtype=bool)
         grid = np.asarray(base_run.result.conditioning_grid, dtype=np.float64)
-        base_ev = _evidence_2016(_replay(results_root / "phase2" / f"{stem}_posterior.h5"))
+        base_ev = _evidence_2016(
+            _replay(results_root / "phase2" / f"{stem}_posterior.h5")
+        )
         base_init = _replay(results_root / "phase2" / f"{stem}_posterior.h5")[
             "initiation"
         ]
@@ -415,10 +417,19 @@ def annual_part(results_root: Path, replicates: int) -> dict[str, Any]:
     for source, branch in (("prior", "T-prior"), ("posterior", "T-post")):
         r, pe = unc.annualise_arm(campaign, context, "matrix", source)
         rows[("x1.00", branch)], per_event[("x1.00", branch)] = r, pe
+    # The gate compares all four production arms; the bulk pair is annualised
+    # only to complete it and is not used further.
+    bulk = {
+        unc._arm_key("bulk", source): unc.annualise_arm(
+            campaign, context, "bulk", source
+        )[0]
+        for source in ("prior", "posterior")
+    }
     gate = unc.gate_one(
         {
             unc._arm_key("matrix", "prior"): rows[("x1.00", "T-prior")],
             unc._arm_key("matrix", "posterior"): rows[("x1.00", "T-post")],
+            **bulk,
         }
     )
     print(f"  gate (iii) passed: {gate['rows_compared']} rows", flush=True)
@@ -476,7 +487,9 @@ def annual_part(results_root: Path, replicates: int) -> dict[str, Any]:
     store: dict[tuple, NDArray] = {}
     points: dict[tuple, float] = {}
     for scenario in campaign.SCENARIOS:
-        ids = [e.event_id for e in context["hazards"][scenario][("Tokachi", 58.8)].events]
+        ids = [
+            e.event_id for e in context["hazards"][scenario][("Tokachi", 58.8)].events
+        ]
         index, n_blocks, _ = unc.block_index(unc.block_labels(ids, "member"))
         strata = unc.stratum_columns(ids)
         mult = unc.draw_multiplicities_stratified(strata, n_blocks, replicates, rng)
@@ -542,7 +555,9 @@ def annual_part(results_root: Path, replicates: int) -> dict[str, Any]:
         r, db = r[np.isfinite(r)], db[np.isfinite(db)]
         return {
             "point": (pa / pb) if pb else None,
-            "ci95": [float(x) for x in np.percentile(r, [2.5, 97.5])] if r.size else None,
+            "ci95": (
+                [float(x) for x in np.percentile(r, [2.5, 97.5])] if r.size else None
+            ),
             "delta_beta": (
                 float(tdf._beta(pb) - tdf._beta(pa)) if pa > 0 and pb > 0 else None
             ),
@@ -714,19 +729,305 @@ def main(argv: list[str] | None = None) -> int:
     elif args.part == "resistant":
         _write_stage("resistant", resistant_part(args.results_root))
     elif args.part == "figures":
-        figures_part()
+        print(figures_part())
     elif args.part == "report":
         report_part()
     print(f"{args.part}: {time.time() - tick:.0f} s")
     return 0
 
 
-def figures_part() -> None:  # written once the parts exist
-    raise NotImplementedError
+FIGURE = "resistance_multiplier.png"
+#: Named readings drawn on the multiplier axis: (low, high, legend text).
+NAMED_READINGS = (
+    (1.125, 1.178, "uniformity term as calibrated, sand fraction"),
+    (1.577, 1.880, "uniformity term with refitted exponent, sand fraction"),
+)
 
 
-def report_part() -> None:  # assembled once the parts exist
-    raise NotImplementedError
+def figures_part() -> Path:
+    """The thesis figure: what a shared resistance multiplier does to each answer."""
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import _figstyle as fs
+    import matplotlib.pyplot as plt
+    from matplotlib.lines import Line2D
+    from matplotlib.patches import Patch
+
+    ev = json.loads(EVIDENCE.read_text(encoding="utf-8"))
+    an = ev["annual"]["cells"]
+    xs = np.array((1.0,) + LADDER)
+    width = fs.TEXTWIDTH_IN * 1.6
+    scale = fs.scale_for(width)
+    fs.style(scale)
+    fig, axes = plt.subplots(2, 2, figsize=(width, width * 0.62))
+    ax_ev, ax_ap, ax_sh, ax_sw = axes.ravel()
+    floor = 1e-6
+    band_colors = (fs.BASELINE, fs.SEQ_BLUE[0])
+
+    def decorate(ax):
+        for (lo, hi, _), col in zip(NAMED_READINGS, band_colors):
+            ax.axvspan(lo, hi, color=col, lw=0)
+        ax.axvline(DUTCH_GRAVEL, color=fs.INK_2, ls="--", lw=0.9)
+        ax.set_xscale("log")
+        ax.set_xticks([1.0, 1.25, 1.5, 1.8, 2.2, 2.7])
+        ax.set_xticklabels(["1", "1.25", "1.5", "1.8", "2.2", "2.7"])
+        ax.minorticks_off()
+        ax.set_xlim(0.97, 2.85)
+
+    for kp in KPS:
+        key = f"KP{kp:.1f}"
+        color, marker = fs.SECTION_COLORS[key], fs.SECTION_MARKERS[key]
+        sec = ev["sections"][_label(kp)]
+        rej = np.array(
+            [sec["arms"][a]["evidence_2016"]["rejected_transient"] for a in ARM_KEYS]
+        )
+        pos = rej > 0
+        ax_ev.plot(xs[pos], rej[pos], color=color, lw=1.3 * scale)
+        ax_ev.plot(xs[pos], rej[pos], marker, color=color, ms=3.4 * scale, ls="none")
+        ax_ev.plot(
+            xs[~pos],
+            np.full((~pos).sum(), floor),
+            marker,
+            color=color,
+            mfc="none",
+            ms=3.4 * scale,
+            ls="none",
+        )
+        p_bep = np.array(
+            [an[f"{a} T-post historical {_label(kp)}"]["p_bep"] for a in ARM_KEYS]
+        )
+        pos = p_bep > 0
+        ax_ap.plot(xs[pos], p_bep[pos], color=color, lw=1.3 * scale)
+        ax_ap.plot(xs[pos], p_bep[pos], marker, color=color, ms=3.4 * scale, ls="none")
+        ax_ap.plot(
+            xs[~pos],
+            np.full((~pos).sum(), 1e-10),
+            marker,
+            color=color,
+            mfc="none",
+            ms=3.4 * scale,
+            ls="none",
+        )
+        for ax, scen in ((ax_sh, "historical"), (ax_sw, "+4K")):
+            sh = np.array(
+                [
+                    (
+                        an[f"{a} T-post {scen} {_label(kp)}"]["share_bep"]
+                        if an[f"{a} T-post {scen} {_label(kp)}"]["p_bep"] > 0
+                        or an[f"{a} T-post {scen} {_label(kp)}"]["p_overflow"] > 0
+                        else np.nan
+                    )
+                    for a in ARM_KEYS
+                ],
+                dtype=float,
+            )
+            ax.plot(xs, sh, color=color, lw=1.3 * scale)
+            ax.plot(xs, sh, marker, color=color, ms=3.4 * scale, ls="none")
+    for ax in axes.ravel():
+        decorate(ax)
+    ax_ev.set_yscale("log")
+    ax_ev.set_ylim(floor * 0.6, 0.1)
+    ax_ev.set_ylabel("share rejected by 2016")
+    ax_ap.set_yscale("log")
+    ax_ap.set_ylim(1e-10 * 0.6, 3e-2)
+    ax_ap.set_ylabel("annual piping probability")
+    for ax in (ax_sh, ax_sw):
+        ax.axhline(0.5, color=fs.RED, lw=0.9)
+        ax.set_ylim(-0.03, 1.03)
+        ax.set_ylabel("piping share")
+    for ax in (ax_sh, ax_sw):
+        ax.set_xlabel("multiplier on the critical head")
+    fs.panel_title(ax_ev, "(a) 2016 survival update", scale=scale)
+    fs.panel_title(ax_ap, "(b) Annual piping probability, historical", scale=scale)
+    fs.panel_title(ax_sh, "(c) Piping share, historical", scale=scale)
+    fs.panel_title(ax_sw, "(d) Piping share, +4 K", scale=scale)
+    handles = [
+        Line2D(
+            [],
+            [],
+            color=fs.SECTION_COLORS[f"KP{kp:.1f}"],
+            marker=fs.SECTION_MARKERS[f"KP{kp:.1f}"],
+            ms=3.4 * scale,
+            lw=1.3 * scale,
+        )
+        for kp in KPS
+    ] + [
+        Patch(color=band_colors[0]),
+        Patch(color=band_colors[1]),
+        Line2D([], [], color=fs.INK_2, ls="--", lw=0.9),
+    ]
+    labels = [_label(kp) for kp in KPS] + [
+        NAMED_READINGS[0][2],
+        NAMED_READINGS[1][2],
+        "Dutch gravel allowance",
+    ]
+    fs.title(fig, "What a higher piping resistance would change", scale=scale)
+    fs.legend_below(fig, handles, labels, scale=scale, ncol=4)
+    fs.layout(fig, scale=scale, legend_rows=2)
+    return fs.save(fig, FIGURE, mirror=OUT_DIR / "figures")
+
+
+# --------------------------------------------------------------------------- #
+# Part: report                                                                  #
+# --------------------------------------------------------------------------- #
+def _r(obj: Any, sig: int = 6) -> Any:
+    """Round floats to ``sig`` significant figures, recursively."""
+    if isinstance(obj, float):
+        return float(f"{obj:.{sig}g}") if np.isfinite(obj) else None
+    if isinstance(obj, dict):
+        return {k: _r(v, sig) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_r(v, sig) for v in obj]
+    return obj
+
+
+def _qualified(lv: dict[str, Any], kp: float) -> bool:
+    """Attainable, at least R1 transient failures, and a defined index gap."""
+    return (
+        lv["stage_m"] <= ATTAINABLE_MAX[kp] + 1e-9
+        and lv["k_T"] >= R1
+        and lv["time_factor"]["dbeta"] is not None
+    )
+
+
+def _span(values: list[float]) -> list[float] | None:
+    return [float(min(values)), float(max(values))] if values else None
+
+
+def event_summary(ev: dict[str, Any]) -> dict[str, Any]:
+    """Design-grid values and the departures from baseline at shared stages."""
+    out: dict[str, Any] = {"by_arm": {}, "design_grid": {}}
+    for arm in ARM_KEYS[1:]:
+        d_db: list[float] = []
+        f_td: list[float] = []
+        n = 0
+        for lab, sec in ev["sections"].items():
+            kp = float(lab.split()[-1])
+            base = {lv["stage_m"]: lv for lv in sec["arms"]["x1.00"]["levels"]}
+            for lv in sec["arms"][arm]["levels"]:
+                b = base[lv["stage_m"]]
+                if _qualified(lv, kp) and _qualified(b, kp):
+                    n += 1
+                    d_db.append(lv["time_factor"]["dbeta"] - b["time_factor"]["dbeta"])
+                    f_td.append(lv["time_factor"]["ratio"] / b["time_factor"]["ratio"])
+        out["by_arm"][arm] = {
+            "shared_qualified_levels": n,
+            "delta_dbeta_range": _span(d_db),
+            "F_td_factor_range": _span(f_td),
+            "dbeta_fell_at_every_shared_level": bool(d_db) and max(d_db) < 0.0,
+        }
+    for lab, sec in ev["sections"].items():
+        kp = float(lab.split()[-1])
+        row: dict[str, Any] = {}
+        for arm, a in sec["arms"].items():
+            lv = next(
+                v for v in a["levels"] if abs(v["stage_m"] - DESIGN_GRID[kp]) < 1e-6
+            )
+            n_rows = 100_000
+            row[arm] = {
+                "stage_m": lv["stage_m"],
+                "P_transient": lv["k_T"] / n_rows,
+                "P_same_head": lv["k_I"] / n_rows,
+                "P_gross_static": lv["k_C0"] / n_rows,
+                "k_transient": lv["k_T"],
+                "gate_open": lv["gate_open"],
+                "dbeta": lv["time_factor"]["dbeta"] if lv["k_T"] >= R1 else None,
+                "dbeta_ci95": (
+                    lv["time_factor"]["dbeta_ci95"] if lv["k_T"] >= R1 else None
+                ),
+                "F_td": lv["time_factor"]["ratio"] if lv["k_T"] >= R1 else None,
+                "F_td_ci95": (
+                    lv["time_factor"]["ratio_ci95"] if lv["k_T"] >= R1 else None
+                ),
+            }
+        out["design_grid"][lab] = row
+    return out
+
+
+def break_even(cells: dict[str, Any], side: str = "T-post") -> dict[str, Any]:
+    """Smallest ladder multiplier at which a cell's leading mechanism changes."""
+    out: dict[str, Any] = {}
+    for scenario in ("historical", "+4K"):
+        for kp in KPS:
+            lab = _label(kp)
+            base = cells[f"x1.00 {side} {scenario} {lab}"]["leading"]
+            first = None
+            for c in LADDER:
+                if cells[f"{_ckey(c)} {side} {scenario} {lab}"]["leading"] != base:
+                    first = c
+                    break
+            out[f"{scenario} {lab}"] = {
+                "baseline_leading": base,
+                "first_change_at": first,
+            }
+    return out
+
+
+def report_part() -> None:
+    ev = _read_stage("event")
+    an = _read_stage("annual")
+    res = _read_stage("resistant")
+    rep = _read_stage("replay")
+    sections = {}
+    for lab, sec in ev["sections"].items():
+        kp = float(lab.split()[-1])
+        sections[lab] = {
+            "design_level_m": sec["design_level_m"],
+            "design_grid_m": sec["design_grid_m"],
+            "peak_2016_m": sec["peak_2016_m"],
+            "attainable_max_m": sec["attainable_max_m"],
+            "arms": {
+                arm: {
+                    "c": a["c"],
+                    "evidence_2016": a["evidence_2016"],
+                    "levels": [
+                        {
+                            "stage_m": lv["stage_m"],
+                            "k_T": lv["k_T"],
+                            "k_I": lv["k_I"],
+                            "k_C0": lv["k_C0"],
+                            "gate_open": lv["gate_open"],
+                            "F_td": lv["time_factor"]["ratio"],
+                            "dbeta": lv["time_factor"]["dbeta"],
+                            "R1": lv["time_factor"]["R1"],
+                        }
+                        for lv in a["levels"]
+                        if lv["stage_m"] <= ATTAINABLE_MAX[kp] + 1e-9
+                    ],
+                }
+                for arm, a in sec["arms"].items()
+            },
+        }
+    record = {
+        "study": "gravel-grading-resistance-study",
+        "generated": time.strftime("%Y-%m-%dT%H:%M:%S"),
+        "date": "2026-10-06",
+        "comparator": "ADR-0055: same head and same gate (C3b) against C4b",
+        "reading": "matrix d70; KP 58.8 and KP 60.0 as if undrained; N = 1e5",
+        "ladder": list(LADDER),
+        "dutch_gravel_factor": DUTCH_GRAVEL,
+        "theta_repose_deg": {_ckey(c): theta_for(c) for c in LADDER},
+        "gates": {"event": ev["gates"], "annual": an["gates"]},
+        "replay_posterior_metadata": rep,
+        "event_summary": event_summary(ev),
+        "sections": sections,
+        "annual": {
+            "replicates": an["replicates"],
+            "seed": an["seed"],
+            "cells": an["cells"],
+            "comparisons": an["comparisons"],
+            "climate_ratio": an["climate_ratio"],
+            "posterior_ranking": an["posterior_ranking"],
+            "break_even_posterior": break_even(an["cells"], "T-post"),
+            "break_even_prior": break_even(an["cells"], "T-prior"),
+        },
+        "resistant_readings": res,
+    }
+    EVIDENCE.write_text(json.dumps(_r(record), indent=1) + "\n", encoding="utf-8")
+    print(
+        f"wrote {EVIDENCE.relative_to(REPO)} ({EVIDENCE.stat().st_size / 1e3:.0f} kB)"
+    )
 
 
 if __name__ == "__main__":

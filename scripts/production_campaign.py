@@ -1155,6 +1155,16 @@ COMPANION_EXCLUSIONS: dict[str, str] = {
         "by hand after a production re-run (about 3 h with the arm sweeps). "
         "Pinned by tests/test_time_dependence_factor.py."
     ),
+    "scripts/gravel_grading_resistance_study.py": (
+        "Pol comments 4 and 5 study, not a companion: it re-runs the matrix "
+        "sweeps with an exact multiplier on the single-source H_c (the bedding "
+        "angle route of the uniformity study) into its own gitignored results, "
+        "replays 2016 with the production Phase 2 settings and annualises "
+        "through the production Phase 3 path (its gate asserts the production "
+        "table field for field). It produces no campaign artifact and is re-run "
+        "by hand after a production re-run (about 3 h with the arm sweeps and "
+        "replays). Pinned by tests/test_gravel_grading_resistance_study.py."
+    ),
     "scripts/criterion_consequence_study.py": (
         "Green Light item 2 study, not a companion: it annualises the static "
         "branch beside the transient one and reads the 2016 replays, and its "
@@ -2245,6 +2255,17 @@ FIGURE_DRIVERS: list[dict[str, Any]] = [
             "same_head_mp_ztoe.png",
         ],
         "sources": ["docs/decisions/time-dependence-factor-study.json"],
+        "source_epoch": "json_generated",
+    },
+    {
+        # Pol comments 4 and 5: what a shared multiplier on the critical head
+        # (the Dutch gravel allowance among them) does to the 2016 update and
+        # the annual mechanism ordering. Reads only the tracked evidence.
+        "label": "Gravel and grading resistance multiplier",
+        "command": [PY, "scripts/gravel_grading_resistance_study.py", "figures"],
+        "requires": ["docs/decisions/gravel-grading-resistance-study.json"],
+        "produces": ["resistance_multiplier.png"],
+        "sources": ["docs/decisions/gravel-grading-resistance-study.json"],
         "source_epoch": "json_generated",
     },
 ]
