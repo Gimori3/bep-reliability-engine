@@ -878,3 +878,7 @@ kept under `results/superseded_d70rebase_20260924T163630/`. Evidence:
 | On the measured berm (ADR-0050), KP 58.8 / 60.0 | 1.50 / 0.53 % | 0.90 / 0.01 % (899 / 14 rows) |
 | No-initiation criterion | 66.4 / 99.6 / 99.3 / 39.6 % | unchanged (initiation does not see d70) |
 | 2011 bounding replay | one realization, 0.001 %, one stratum | one realization, 0.001 %, one stratum |
+
+## Addendum, 2026-10-07 - the drained sections are not conditioned (ADR-0056); authoritative where it differs from everything above
+
+The KP 58.8 and 60.0 posteriors condition the as-if-undrained foundation on surviving 2016 through a levee with neither berm nor drain; the levee that survived had both (built 1999 to 2003). On the measured berm with an inert drain, the least protective configuration that existed, the same record rejects 0.899 % and 0.014 % (as if undrained 3.813 % and 0.226 %), and any drain relief only lowers that (`drained-section-conditioning-study.md`). By owner decision those two posteriors are no longer adopted; they are reported as the upper bound on what the survival could teach. With KP 57.4 (16 rows) and KP 62.0 (none) the 2016 survival constrains no section materially. The transient/static likelihood ratio at KP 58.8 is at most 1.34 (as if undrained), 1.13 on the berm with an inert drain.

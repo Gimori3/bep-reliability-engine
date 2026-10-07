@@ -1,0 +1,313 @@
+{
+ "study": "drained-section-conditioning-alternatives",
+ "generated_by": "scripts/results_annotations_study.py",
+ "note": "docs/decisions/drained-section-conditioning-alternatives.md",
+ "cells": {
+  "historical KP 57.4": {
+   "side": "posterior",
+   "system_by_arm": {
+    "matrix": 0.000497775,
+    "bulk": 2.07406e-06,
+    "k_aq_field_geomean": 0.0,
+    "k_aq_field_toe": 2.31837e-06,
+    "k_aq_regional_upper": 0.002684,
+    "bulk_upper": 0.00012621
+   },
+   "shares_summed": {
+    "matrix": 1.0,
+    "bulk": 1.0,
+    "k_aq_field_geomean": null,
+    "k_aq_field_toe": 1.0,
+    "k_aq_regional_upper": 1.0,
+    "bulk_upper": 1.0,
+    "credit_half": null,
+    "credit_full": null
+   },
+   "clamped": {
+    "bulk": "True",
+    "field": false
+   },
+   "conductivity_span_system": null,
+   "foreland_full_system_ratio": 0.0,
+   "foreland_half_system_ratio": 0.0,
+   "bulk_over_matrix_system": 0.00416666,
+   "climate_ratio_by_arm": {
+    "matrix": 15.2512,
+    "bulk": 586.041,
+    "k_aq_field_geomean": null,
+    "k_aq_field_toe": 500.268,
+    "k_aq_regional_upper": 7.86392,
+    "bulk_upper": 32.7728
+   }
+  },
+  "+4K KP 57.4": {
+   "side": "posterior",
+   "system_by_arm": {
+    "matrix": 0.00759168,
+    "bulk": 0.00121548,
+    "k_aq_field_geomean": 0.00091149,
+    "k_aq_field_toe": 0.0011598,
+    "k_aq_regional_upper": 0.0211068,
+    "bulk_upper": 0.00413627
+   },
+   "shares_summed": {
+    "matrix": 0.891863,
+    "bulk": 0.383629,
+    "k_aq_field_geomean": 0.000343029,
+    "k_aq_field_toe": 0.327068,
+    "k_aq_regional_upper": 0.958603,
+    "bulk_upper": 0.813763,
+    "credit_half": 0.099294,
+    "credit_full": 2.50785e-07
+   },
+   "clamped": {
+    "bulk": "True",
+    "field": false
+   },
+   "conductivity_span_system": 23.1564,
+   "foreland_full_system_ratio": 0.120057,
+   "foreland_half_system_ratio": 0.122389,
+   "bulk_over_matrix_system": 0.160107
+  },
+  "historical KP 58.8": {
+   "side": "prior",
+   "system_by_arm": {
+    "matrix": 0.0068532,
+    "bulk": 0.000198876,
+    "k_aq_field_geomean": 0.000195267,
+    "k_aq_field_toe": 0.000784301,
+    "k_aq_regional_upper": 0.0322021,
+    "bulk_upper": 0.000857903
+   },
+   "shares_summed": {
+    "matrix": 0.971969,
+    "bulk": 0.0200117,
+    "k_aq_field_geomean": 0.00101582,
+    "k_aq_field_toe": 0.756597,
+    "k_aq_regional_upper": 0.993977,
+    "bulk_upper": 0.778204,
+    "credit_half": 0.00868082,
+    "credit_full": 0.0
+   },
+   "clamped": {
+    "bulk": "True",
+    "field": false
+   },
+   "conductivity_span_system": 164.913,
+   "foreland_full_system_ratio": 0.0284652,
+   "foreland_half_system_ratio": 0.0287008,
+   "bulk_over_matrix_system": 0.0290194,
+   "climate_ratio_by_arm": {
+    "matrix": 5.58296,
+    "bulk": 13.622,
+    "k_aq_field_geomean": 13.0203,
+    "k_aq_field_toe": 9.848,
+    "k_aq_regional_upper": 3.5789,
+    "bulk_upper": 10.4139
+   }
+  },
+  "+4K KP 58.8": {
+   "side": "prior",
+   "system_by_arm": {
+    "matrix": 0.0382611,
+    "bulk": 0.00270908,
+    "k_aq_field_geomean": 0.00254245,
+    "k_aq_field_toe": 0.00772379,
+    "k_aq_regional_upper": 0.115248,
+    "bulk_upper": 0.00893415
+   },
+   "shares_summed": {
+    "matrix": 0.937181,
+    "bulk": 0.0958465,
+    "k_aq_field_geomean": 0.00808904,
+    "k_aq_field_toe": 0.703334,
+    "k_aq_regional_upper": 0.978518,
+    "bulk_upper": 0.746662,
+    "credit_half": 0.224688,
+    "credit_full": 0.000378492
+   },
+   "clamped": {
+    "bulk": "True",
+    "field": false
+   },
+   "conductivity_span_system": 45.3296,
+   "foreland_full_system_ratio": 0.0661192,
+   "foreland_half_system_ratio": 0.0777313,
+   "bulk_over_matrix_system": 0.0708052
+  },
+  "historical KP 60.0": {
+   "side": "prior",
+   "system_by_arm": {
+    "matrix": 0.000321849,
+    "bulk": 6.94646e-05,
+    "k_aq_field_geomean": 0.0,
+    "k_aq_field_toe": 4.11354e-05,
+    "k_aq_regional_upper": 0.0124501,
+    "bulk_upper": 0.00733226
+   },
+   "shares_summed": {
+    "matrix": 1.0,
+    "bulk": 1.0,
+    "k_aq_field_geomean": null,
+    "k_aq_field_toe": 1.0,
+    "k_aq_regional_upper": 1.0,
+    "bulk_upper": 1.0,
+    "credit_half": null,
+    "credit_full": null
+   },
+   "clamped": {
+    "bulk": "False",
+    "field": false
+   },
+   "conductivity_span_system": null,
+   "foreland_full_system_ratio": 0.0,
+   "foreland_half_system_ratio": 0.0,
+   "bulk_over_matrix_system": 0.21583,
+   "climate_ratio_by_arm": {
+    "matrix": 13.2862,
+    "bulk": 23.3014,
+    "k_aq_field_geomean": null,
+    "k_aq_field_toe": 25.63,
+    "k_aq_regional_upper": 5.08948,
+    "bulk_upper": 5.86183
+   }
+  },
+  "+4K KP 60.0": {
+   "side": "prior",
+   "system_by_arm": {
+    "matrix": 0.00427613,
+    "bulk": 0.00161862,
+    "k_aq_field_geomean": 2.33311e-05,
+    "k_aq_field_toe": 0.0010543,
+    "k_aq_regional_upper": 0.0633647,
+    "bulk_upper": 0.0429805
+   },
+   "shares_summed": {
+    "matrix": 0.994633,
+    "bulk": 0.985861,
+    "k_aq_field_geomean": 0.0130432,
+    "k_aq_field_toe": 0.97831,
+    "k_aq_regional_upper": 0.999637,
+    "bulk_upper": 0.999464,
+    "credit_half": 0.0899748,
+    "credit_full": 0.0
+   },
+   "clamped": {
+    "bulk": "False",
+    "field": false
+   },
+   "conductivity_span_system": 2715.89,
+   "foreland_full_system_ratio": 0.00538723,
+   "foreland_half_system_ratio": 0.00589757,
+   "bulk_over_matrix_system": 0.378525
+  },
+  "historical KP 62.0": {
+   "side": "posterior",
+   "system_by_arm": {
+    "matrix": 0.000916578,
+    "bulk": 0.000199288,
+    "k_aq_field_geomean": 0.000199285,
+    "k_aq_field_toe": 0.000352236,
+    "k_aq_regional_upper": 0.0130603,
+    "bulk_upper": 0.000412621
+   },
+   "shares_summed": {
+    "matrix": 0.793211,
+    "bulk": 8.26063e-05,
+    "k_aq_field_geomean": 7.50021e-05,
+    "k_aq_field_toe": 0.455131,
+    "k_aq_regional_upper": 0.984968,
+    "bulk_upper": 0.542242,
+    "credit_half": 0.360477,
+    "credit_full": 0.0438888
+   },
+   "clamped": {
+    "bulk": "False",
+    "field": false
+   },
+   "conductivity_span_system": 65.5357,
+   "foreland_full_system_ratio": 0.225954,
+   "foreland_half_system_ratio": 0.327605,
+   "bulk_over_matrix_system": 0.217426,
+   "climate_ratio_by_arm": {
+    "matrix": 13.4321,
+    "bulk": 42.11,
+    "k_aq_field_geomean": 42.1104,
+    "k_aq_field_toe": 26.3549,
+    "k_aq_regional_upper": 5.11708,
+    "bulk_upper": 23.4931
+   }
+  },
+  "+4K KP 62.0": {
+   "side": "posterior",
+   "system_by_arm": {
+    "matrix": 0.0123116,
+    "bulk": 0.00839201,
+    "k_aq_field_geomean": 0.00839199,
+    "k_aq_field_toe": 0.00928316,
+    "k_aq_regional_upper": 0.0668306,
+    "bulk_upper": 0.00969373
+   },
+   "shares_summed": {
+    "matrix": 0.479684,
+    "bulk": 0.00183439,
+    "k_aq_field_geomean": 0.000669302,
+    "k_aq_field_toe": 0.234931,
+    "k_aq_regional_upper": 0.888387,
+    "bulk_upper": 0.333979,
+    "credit_half": 0.225869,
+    "credit_full": 0.0774283
+   },
+   "clamped": {
+    "bulk": "False",
+    "field": false
+   },
+   "conductivity_span_system": 7.96363,
+   "foreland_full_system_ratio": 0.6867,
+   "foreland_half_system_ratio": 0.732999,
+   "bulk_over_matrix_system": 0.681635
+  }
+ },
+ "lambda_ac_factors": {
+  "historical KP 57.4": {
+   "100": 1.83669,
+   "40": 3.6855,
+   "share_bep_40": 1.0
+  },
+  "+4K KP 57.4": {
+   "100": 1.49805,
+   "40": 2.27263,
+   "share_bep_40": 0.949823
+  },
+  "historical KP 58.8": {
+   "100": 1.59371,
+   "40": 2.60762,
+   "share_bep_40": 0.98919
+  },
+  "+4K KP 58.8": {
+   "100": 1.46153,
+   "40": 2.13223,
+   "share_bep_40": 0.969904
+  },
+  "historical KP 60.0": {
+   "100": 1.93078,
+   "40": 4.37253,
+   "share_bep_40": 1.0
+  },
+  "+4K KP 60.0": {
+   "100": 1.73102,
+   "40": 3.19963,
+   "share_bep_40": 0.998319
+  },
+  "historical KP 62.0": {
+   "100": 1.68318,
+   "40": 3.29162,
+   "share_bep_40": 0.937009
+  },
+  "+4K KP 62.0": {
+   "100": 1.27023,
+   "40": 1.88333,
+   "share_bep_40": 0.728
+  }
+ }
+}

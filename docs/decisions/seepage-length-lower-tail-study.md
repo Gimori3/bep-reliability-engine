@@ -67,3 +67,111 @@ KP 58.8 and 60.0 as if undrained:
   stage; at t = 1.00 conductivity overtakes it.
 
 A prediction that fails is reported as failed.
+
+## Part 2. Outcome
+
+Run 2026-10-07 on the persisted rows (10^5 per section; the 10^6 ladders of
+`results/hwl_bias_resolution/` for the KP 57.4 and KP 62.0 anchors, truncated on
+their own persisted L). Gates: the untruncated arm reproduces the production
+annual table field for field; the sampled L means lie within 1 % of the adopted
+means; the hazard cache is unchanged.
+
+### 2.1 What the prior's lower tail is
+
+| Section | mean L (m) | CoV | 5th pct (m) | shortest sampled (m) | rows kept at t = 0.85 / 1.00 |
+|---|---|---|---|---|---|
+| KP 57.4 | 33.0 | 0.20 | 23.4 | 13.4 | 76.5 % / 46.1 % |
+| KP 58.8 | 35.0 | 0.20 | 24.8 | 14.3 | 76.5 % / 46.1 % |
+| KP 60.0 | 34.8 | 0.15 | 26.9 | 17.8 | 84.5 % / 47.0 % |
+| KP 62.0 | 40.0 | 0.20 | 28.3 | 16.3 | 76.5 % / 46.1 % |
+
+The shortest clean lidar station within 300 m of each resolvable section measures
+34, 36 and 37 m (KP 62.0, 58.8, 60.0) against local medians of 40, 42 and 43 m:
+0.85 to 0.86 of the median, before the extraction rule's 2 m short bias. No
+mechanism in the L memo places an entry or exit inside the embankment footprint.
+At t = 0.85 the bounded prior keeps every path down to 28 / 30 / 30 / 34 m.
+
+### 2.2 Per flood (matrix reading, as if undrained, prior)
+
+| Quantity | adopted | t = 0.85 | t = 1.00 |
+|---|---|---|---|
+| KP 58.8 design grid 41.00 m: P_trans / P_static | 0.197 / 0.450 | 0.106 / 0.337 | 0.045 / 0.205 |
+| KP 58.8: Δβ [95 %], F_td | 0.72 [0.72, 0.73], 2.28 | 0.83 [0.82, 0.84], 3.20 | 0.88 [0.86, 0.89], 4.59 |
+| KP 60.0 design 42.75 m: P_trans / P_static | 0.0558 / 0.216 | 0.0298 / 0.159 | 0.0098 / 0.081 |
+| KP 60.0: Δβ, F_td | 0.81 [0.80, 0.82], 3.88 | 0.88 [0.87, 0.90], 5.33 | 0.94 [0.91, 0.97], 8.26 |
+| KP 62.0 design 46.39 m, 10^6: k_static / k_trans | 350 / 51 | 3 / 0 | 0 / 0 |
+| KP 62.0 46.75 m, 10^6: k_static / k_trans | 6,089 / 972 | 419 / 26 | 42 / 1 |
+| KP 57.4 39.50 m, 10^6: k_static / k_trans | 561 / 163 | 14 / 1 | 1 / 0 |
+| lowest stage with 30 transient failures: P_trans ratio to adopted (KP order) | 1 | 0.04 / 0.04 / 0.23 / 0.03 | 0.015 / 0.018 / 0.055 / 0 |
+
+Over the 49 attainable stages where every count reaches 30, t = 0.85 multiplies
+F_td by 1.02 to 2.44 and raises Δβ by 0.04 to 0.17 (t = 1.00: 1.06 to 3.06, +0.04
+to +0.20). The lower shoulder of the transient curve, and the design levels of the
+two sections loaded deepest in their tails, rest almost entirely on paths shorter
+than any measured footprint; the time effect grows when they are removed,
+because short paths are where pipes cross fastest and both rules fail together.
+
+### 2.3 The 2016 update (as if undrained)
+
+KP 58.8 rejection 3.813 % → 1.013 % (t = 0.85) → 0.287 % (t = 1.00); LR
+1.34 → 1.20 → 1.09. KP 60.0 0.226 → 0.058 → 0.013 %. The exit still opens in
+99.5 % (KP 58.8) and 99.2 % (KP 60.0).
+
+### 2.4 Annual (adopted conditioning, ADR-0056; part `seepage_adopted`)
+
+| Cell | annual piping, t = 0.85 / adopted [95 %] | t = 1.00 / adopted | climate ratio, adopted → t = 0.85 |
+|---|---|---|---|
+| KP 57.4 hist | 0.51 [0.40, 0.57] | 0.22 | 15.3 → 22.3 |
+| KP 58.8 hist | 0.69 [0.64, 0.73] | 0.44 | 5.6 → 6.2 |
+| KP 60.0 hist | 0.60 [0.55, 0.64] | 0.24 | 13.3 → 16.4 |
+| KP 62.0 hist | 0.51 [0.45, 0.55] | 0.23 | 13.4 → 18.6 |
+| +4 K, KP order | 0.74 / 0.77 / 0.75 / 0.66 | 0.52 / 0.56 / 0.43 / 0.40 | |
+
+Leading mechanism at t = 0.85: unchanged in seven cells; KP 62.0 under +4 K
+becomes an overflow lead under every split (summed 0.38, overflow-first 0.20,
+piping-first 0.49). At t = 1.00 KP 62.0 historically becomes a tie (summed 0.47).
+The annual steady-state over transient piping factor rises from 2.05 / 1.84 /
+3.32 / 3.12 to 2.53 / 2.08 / 3.95 / 4.09 historically (posterior at all four; part
+`seepage`).
+
+### 2.5 Sensitivity ranking (first-order correlation ratio of the transient indicator)
+
+KP 58.8 design 41.00 m: L 0.24, k_aq 0.20 (adopted); k_aq 0.23, L 0.08 (t = 0.85);
+k_aq 0.20, L 0.03 (t = 1.00). KP 60.0 design: k_aq 0.16, L 0.10 → k_aq 0.16, L 0.03.
+KP 58.8 at 40.25 m: L 0.076, k_aq 0.060 → k_aq 0.031, L 0.004. Once the
+unmeasured short paths are removed, aquifer conductivity is the leading input.
+
+### 2.6 Predictions
+
+All seven failed or partly failed in size, every one in the same direction: the
+lower tail matters more than predicted.
+
+- **S1 failed in size.** At t = 0.85 the lower-shoulder transient probability is
+  0.03 to 0.23 of adopted (predicted 0.4 to 0.8); at t = 1.00 0 to 0.055 (predicted
+  0.15 to 0.5). The static probability falls proportionally less at every quotable
+  stage, as predicted.
+- **S2 partly failed.** Δβ rises by 0.107 at KP 58.8 (predicted below 0.10) and by
+  0.077 at KP 60.0; F_td by ×1.40 and ×1.37 (inside 0.8 to 1.4); no sign change. The
+  KP 57.4 and KP 62.0 design anchors become unresolved.
+- **S3 failed.** KP 58.8 rejection 1.01 % (predicted 2.0 to 3.3 %).
+- **S4 failed at KP 57.4 and 62.0** (0.51 against a predicted floor of 0.6) and, at
+  t = 1.00, at three sections.
+- **S5 failed.** At t = 0.85 KP 62.0 under +4 K turns to overflow; at t = 1.00 KP 62.0
+  historically ties.
+- **S6 failed at KP 57.4 and 62.0** (×1.46 and ×1.39 against at most 1.3).
+- **S7 failed.** At t = 0.85 conductivity, not L, leads at KP 58.8's design stage.
+
+### 2.7 Recommendation and decision
+
+Recommended to the owner, and decided on 2026-10-07: the adopted prior is kept;
+the prior bounded at the shortest measured footprint (t = 0.85) is a named
+alternative, and the unbounded lower tail joins the piping-favouring adopted
+choices. Adopting it would move every result of Chapters 5 to 7 and leave the
+KP 57.4 and KP 62.0 design comparisons unresolved.
+
+The foreshore is excluded from L because the thin foreland cover (less than a
+metre at these sections, discontinuous in the later boreholes) is unlikely to
+seal the aquifer from the river across the high-water bed; this is the study's
+own physical argument, stated without a citation, as no source read for it
+(TR Zandmeevoerende Wellen 1999 sections 4.2.1 and 4.4.2 only permit a foreland
+credit) makes it.

@@ -79,3 +79,108 @@ symmetric and piping-first piping shares of the KP 62.0 warming system probabili
   warming.
 
 A prediction that fails is reported as failed.
+
+## Part 2. Outcome
+
+Run 2026-10-07 on the production artifacts (matrix reading, adopted
+conductivity, 250 m, primary surface curves, 10,000 member-block resamples with
+the warming draw stratified by pattern). Gates: the rebuilt pipeline reproduces
+all four production arms of `rq4_annual.csv` field for field; every breach-time
+re-run reproduces M8's end state bit for bit; every overflow re-run reproduces
+the model's failure fraction exactly; the union of the interpolated marginals is
+within 0.07 % of the interpolated system curve (the largest departure, KP 62.0
+under +4 K, is interpolation between grid stages); the hazard cache is
+unchanged. Part 2 numbers are the posterior at all four sections, as the
+production table was when the study was registered; the adopted configuration
+of ADR-0056 changes them only at the drained sections (see 2.5).
+
+### 2.1 Which stages are physically meaningful
+
+| Section | Design level | Design crest | Overflow crest (mean, sd) | Grid "attainable" top | Largest +4 K peak |
+|---|---|---|---|---|---|
+| KP 57.4 | 39.21 | 40.71 | 42.33 (0.003) | 43.25 | 43.18 |
+| KP 58.8 | 41.03 | 42.53 | 44.38 (1.31) | 42.75 | 44.95 |
+| KP 60.0 | 42.75 | 44.25 | 45.11 (0.005) | 44.25 | 44.93 |
+| KP 62.0 | 46.39 | 47.89 | 48.64 (0.002) | 50.50 | 51.47 |
+
+m T.P. The overflow model's crest is the surveyed bank, 0.75 to 1.85 m above the
+design crest. KP 62.0's 50.5 m is a grid top, not a physical limit; above the
+bank the channel rating is an extrapolation that ignores spill. The per-event
+"top attainable stage" of the RQ1 drivers is a grid convention: it lies above the
+overflow crest at KP 57.4 (by 0.9 m) and KP 62.0 (by 1.9 m), at the design crest
+at KP 60.0 and 0.2 m above it at KP 58.8.
+
+### 2.2 How much rests on years that overtop
+
+Share of the annual piping contribution from years whose peak exceeds:
+
+| Section | design crest, hist / +4 K | overflow crest, hist / +4 K | years above overflow crest, hist / +4 K |
+|---|---|---|---|
+| KP 57.4 | 0.35 / 0.78 | 0 / 0.16 | 0 / 7 |
+| KP 58.8 | 0.08 / 0.27 | 0 / 0.03 | 0 / 5 |
+| KP 60.0 | 0 / 0.19 | 0 / 0 | 0 / 0 |
+| KP 62.0 | 0.72 / 0.84 | 0.21 / 0.61 | 2 / 62 |
+
+Removing the years above the overflow crest: the piping climate ratio of
+KP 62.0 falls from 10.1 to 5.1 and of KP 57.4 from 15.1 to 12.7 (others within
+3 %); the annual steady-state over transient piping factor rises at KP 62.0 under
++4 K from 2.47 to 3.21 and changes by at most 6 % elsewhere. The system
+probability does not change in any form: a year above the crest fails by
+overflow in the composition whatever piping does.
+
+### 2.3 Which mechanism breaks through first
+
+`pi(h)`, the probability that the pipe breaks through before the overflow model
+fails, both failing under the canonical flood scaled to `h` (posterior rows,
+up to 4,000 traced per stage):
+
+- KP 62.0: 0.43 at 48.0 m, 0.40 at 48.75 m (0.1 m above the overflow crest),
+  0.38 at 49.0, 0.27 at 49.5, 0.16 at 50.0, 0.09 at 50.5, 0.05 at 51.5 m.
+  Once the river stands well above the bank, overtopping erosion completes
+  within hours of the crest being passed, before most pipes have crossed.
+- KP 57.4: 0.69 to 0.83 from 41.5 to 43.25 m. Piping engages about three metres
+  below this crest, so most pipes are already far along when the bank overtops.
+- KP 58.8: 0.14 to 0.30 below 41 m (only low crest draws overflow there), rising
+  to 0.62 at 45.0 m; KP 60.0: 0.61 falling to 0.35 at 46.75 m.
+
+### 2.4 The attributions
+
+Piping share of the annual system probability (posterior at all four sections):
+
+| Cell | summed (reported) | overflow first | symmetric | **time-ordered** [95 %] | piping first | truncate at overflow crest |
+|---|---|---|---|---|---|---|
+| KP 57.4 +4 K | 0.892 | 0.880 | 0.935 | **0.962** [0.939, 0.985] | 0.990 | 0.874 |
+| KP 58.8 hist | 0.969 | 0.968 | 0.977 | **0.975** | 0.985 | 0.969 |
+| KP 58.8 +4 K | 0.933 | 0.929 | 0.957 | **0.957** | 0.985 | 0.931 |
+| KP 62.0 hist | 0.793 | 0.783 | 0.808 | **0.803** [0.673, 0.978] | 0.833 | 0.751 |
+| KP 62.0 +4 K | 0.480 | 0.319 | 0.473 | **0.387 [0.346, 0.436]** | 0.628 | 0.266 |
+
+KP 57.4 and KP 60.0 historically and KP 60.0 under +4 K stay at 1.00 (overflow is
+zero or below 0.5 %). With the overflow failure time shifted by one hour either
+way, KP 62.0 under +4 K is 0.36 to 0.41. Piping leads the time-ordered split in
+0 of 10,000 resamples there and in every resample of the other seven cells.
+
+### 2.5 Predictions
+
+- **C1 held.** Every attribution sums to the two-branch union; the system
+  probability is unchanged.
+- **C2 failed in its first half.** Within 0.5 m above the overflow crest at
+  KP 62.0, `pi(h)` is 0.38 to 0.43, not above 0.5: overtopping wins the race even
+  near the crest. The second half held (0.16 and below from 1.4 m above it).
+- **C3 held.** 0.387 [0.346, 0.436]: between 0.32 and 0.47, interval excluding 0.5.
+- **C4 failed in size, held in direction.** At KP 57.4 under +4 K the time-ordered
+  share is 0.07 above the reported one and at KP 58.8 under +4 K 0.024 above, both
+  toward piping, because the pipe there usually wins; no leading mechanism changes
+  outside KP 62.0 under +4 K.
+- **C5 held.** Removing years above the overflow crest changes the annual
+  steady-state over transient factor by at most 6 % outside KP 62.0 under +4 K
+  (+30 % there).
+
+### 2.6 Recommendation and decision
+
+Recommended to the owner, and adopted on 2026-10-07 as ADR-0057: report the
+time-ordered (first-breach) split as the adopted mechanism share. With ADR-0056
+(drained sections unconditioned) the adopted shares are 1.00 / 0.98 / 1.00 / 0.80
+historical and 0.96 / 0.96 / 1.00 / 0.39 [0.35, 0.44] under +4 K; numbers of record
+in `drained-section-conditioning-adopted.json`. The alternative-reading shares
+keep the summed-contribution measure, labelled.

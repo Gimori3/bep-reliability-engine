@@ -5,6 +5,8 @@ Date: 2026-07-12
 ## Status
 Accepted (supersedes ADR-0022 decision 2, the 1800 s Phase 2 replay timestep)
 
+**Amended 2026-10-07 by ADR-0056:** at KP 58.8 and KP 60.0 the adopted piping branch is the prior; the as-if-undrained posteriors there are an upper bound on what the 2016 survival could teach.
+
 ---
 
 ## Context

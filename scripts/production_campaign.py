@@ -1190,6 +1190,19 @@ COMPANION_EXCLUSIONS: dict[str, str] = {
         "ADR-0055 driver); it is listed so the classification is explicit. "
         "Pinned by tests/test_why_no_piping_2016_study.py."
     ),
+    "scripts/results_annotations_study.py": (
+        "Pol round-2 study (annotations A19, A13, A35), not a companion: it "
+        "re-runs no sweep or replay. It reads the persisted sweeps, the 2016 "
+        "replays and the 10^6 ladders through the session 3 driver's row "
+        "bundles, masks or reweights rows, re-runs the M7 kernel with "
+        "trajectories on failing rows only (gated against M8's end state) and "
+        "the seeded overflow draws (gated against the model), and annualises "
+        "through the production Phase 3 path (its gate asserts the production "
+        "table field for field). It records the adopted ADR-0056/0057 table. "
+        "It produces no campaign artifact and is re-run by hand after a "
+        "production re-run (about 30 min). Pinned by "
+        "tests/test_results_annotations_study.py."
+    ),
     "scripts/criterion_consequence_study.py": (
         "Green Light item 2 study, not a companion: it annualises the static "
         "branch beside the transient one and reads the 2016 replays, and its "
