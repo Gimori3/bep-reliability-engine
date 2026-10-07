@@ -145,7 +145,7 @@ survives because the flood fell.
 |---|---|---|---|---|
 | 2016 peak against today's design level / OYO's 1998 level (m) | +0.45 / +0.15 | -0.28 / -0.58 | -0.45 / -0.76 | -0.66 / -0.95 |
 | hours above the toe, 2016 / OYO's design flood | 9 / 14.5 | 21 / 38.5 | 28 / 35.9 | 6 / 22.2 |
-| OYO's toe gradient at the 2016 head (criterion 0.5, heave 0.70) | 0.05 | **1.03** | 0.38 | 0.45 |
+| OYO's toe gradient at the 2016 head (criterion 0.5, heave 0.70) | 0.045 | **1.03** | 0.38 | 0.45 |
 | exit opened, adopted (as if undrained) | 66 % | 99.6 % | 99.3 % | 40 % |
 | exit opened, OYO-matched toe pressure (factor 16.6 / 1.12 / 3.0 / 1.43) | **0** | 98 % | **0.07 %** | **3.3 %** |
 | exit opened, toe pressure / 1.13 and / 2.67 (field-case range) | 42 % / 0 | 98 % / 0.7 % | 97 % / 0.5 % | 22 % / 0 |
@@ -190,7 +190,7 @@ absence of a recorded boil, the explanation lies before progression:
 
 * **KP 57.4.** The only section loaded above its design level in 2016, but the
   one OYO never flagged for foundation leakage (toe gradient 0.04 at its 1998
-  level; 0.05 at the 2016 head; its 1998 deficiency was a rising phreatic
+  level; 0.045 at the 2016 head; its 1998 deficiency was a rising phreatic
   surface in the landside slope). The model's 66 % exits rest on a toe
   pressure 16.6 times OYO's; nearly every one stalls below H_c. A berm was
   added after 1998. Explained by: no foundation-piping load on OYO's own
