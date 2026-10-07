@@ -1177,6 +1177,19 @@ COMPANION_EXCLUSIONS: dict[str, str] = {
         "production re-run (under a minute). Pinned by "
         "tests/test_initiation_evidence_2016_study.py."
     ),
+    "scripts/why_no_piping_2016_study.py": (
+        "Pol comment 8 study, not a companion. It reads the persisted sweeps "
+        "and 2016 replays through the session 3 driver's row bundles (gated on "
+        "the closed-form gate and an M8 replay reproducing every stored 2016 "
+        "flag), evaluates gate-only diagnostics in closed form, replays 2016 "
+        "through M8 with the ADR-0050 relief knob, evaluates one design-grid "
+        "stage per section and writes only its own gitignored results and "
+        "evidence JSON. It produces no campaign artifact and is re-run by hand "
+        "after a production re-run (about a minute). Its regex footprint is "
+        "below the enumeration floor (it composes run stems through the "
+        "ADR-0055 driver); it is listed so the classification is explicit. "
+        "Pinned by tests/test_why_no_piping_2016_study.py."
+    ),
     "scripts/criterion_consequence_study.py": (
         "Green Light item 2 study, not a companion: it annualises the static "
         "branch beside the transient one and reads the 2016 replays, and its "
