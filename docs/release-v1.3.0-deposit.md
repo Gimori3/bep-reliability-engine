@@ -22,8 +22,10 @@ that contains that work. No production input or result changed.
    `RELEASE-MANIFEST.json`: `git rev-parse v1.3.0^{tree}`. If it does, the
    prepared archive is the tagged content and can be uploaded as is. If it does
    not (something else was merged), regenerate the archive from the tag with
-   `git archive --format=zip --prefix=bep-reliability-engine-v1.3.0/ -o bep-reliability-engine-v1.3.0.zip v1.3.0`
-   and update the manifest's size and SHA-256.
+   `git -c core.autocrlf=false archive --format=zip --prefix=bep-reliability-engine-v1.3.0/ -o bep-reliability-engine-v1.3.0.zip v1.3.0`
+   and update the manifest's size and SHA-256. Keep `core.autocrlf=false`: on
+   Windows the default conversion writes CRLF into the archive, so its files
+   would no longer equal the repository's.
 4. Upload the deposit (steps below).
 
 ## Files to upload
