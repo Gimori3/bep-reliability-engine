@@ -17,12 +17,14 @@ typhoon, and composes it with the other levee failure mechanisms into an
 annualised system reliability per 200 m segment under a historical and a +4 K
 climate scenario.
 
-**Status.** Version [1.2.0](https://github.com/Gimori3/bep-reliability-engine/releases/tag/v1.2.0)
-records the Green Light revision and the evidence behind the revised MSc
-thesis. The matrix grain-size inputs and their downstream results supersede
-1.1.0; companion studies qualify the grading, piping criterion, drained
-sections and hydraulic loading. See `CHANGELOG.md` and
-`docs/decisions/assumptions-overview-study.md` for the changes and limits.
+**Status.** Version [1.3.0](https://github.com/Gimori3/bep-reliability-engine/releases/tag/v1.3.0)
+is the version the final MSc thesis cites. It records the revision after the
+supervisor's comments on the Green Light thesis: the two piping criteria are
+compared on one driving head and one set of exit conditions (ADR-0055), and
+companion studies cover the gravel allowance and grading, the 2016 initiation
+evidence and why the sections showed no piping in 2016. Production inputs and
+results are those of 1.2.0, which superseded 1.1.0's matrix grain sizes. See
+`CHANGELOG.md` for the changes and the study notes for their limits.
 
 > **Reading the results.** Every headline comparison in this repository is
 > conditional, and the conditions do not cancel. The reports of record state the
@@ -148,7 +150,7 @@ verify they have the right one.
 | Path | What it is |
 |---|---|
 | `docs/architecture.md` | **The authoritative implementation spec.** Implement against it; deviate only with a documented justification. |
-| `docs/decisions/` | 54 Architecture Decision Records `NNNN-slug.md`, gap-free and all Accepted except ADR-0007, superseded in place by ADR-0027, plus `adrNNNN-*` companion notes, evidence JSONs, and un-numbered studies. `docs/conventions.md` gives the naming grammar. |
+| `docs/decisions/` | 55 Architecture Decision Records `NNNN-slug.md`, gap-free and all Accepted except ADR-0007, superseded in place by ADR-0027, plus `adrNNNN-*` companion notes, evidence JSONs, and un-numbered studies. `docs/conventions.md` gives the naming grammar. |
 | `docs/project_log.md` | Dated narrative of what was learned and when — including what was later withdrawn. |
 | `docs/*_report.md` | Reports of record: Phase 2, Phase 3, Stage 6.6. Later addenda are authoritative where they differ from earlier sections. |
 | `docs/*_YYYY-MM-DD.md` | Closed one-shot audit and campaign artifacts, dated in the filename. |
@@ -199,11 +201,11 @@ are left exact rather than relaxed, so the difference stays visible.
 
 ## Citing this work
 
-Cite version **1.2.0**, available as a tagged GitHub release. The following DOI
+Cite version **1.3.0**, available as a tagged GitHub release. The following DOI
 is reserved for its 4TU.ResearchData deposit, which remains unpublished as of
-2026-09-27. Reservation is not evidence of a published archive:
+2026-10-07. Reservation is not evidence of a published archive:
 
-> Rietman, G. M. (2026). *bep-reliability-engine* (Version 1.2.0) [Software].
+> Rietman, G. M. (2026). *bep-reliability-engine* (Version 1.3.0) [Software].
 > 4TU.ResearchData. <https://doi.org/10.4121/8ffa1f3e-942e-4852-b02a-a259b9d6d00d>
 
 The DOI is the stable identifier: this repository is the development home and
