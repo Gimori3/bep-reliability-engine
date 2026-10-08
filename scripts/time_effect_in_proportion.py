@@ -71,7 +71,9 @@ def _load(name: str) -> dict[str, Any]:
 
 
 def _sha256(name: str) -> str:
-    return hashlib.sha256((DECISIONS / name).read_bytes()).hexdigest()
+    """SHA-256 of a source's LF-normalised bytes, so any checkout agrees."""
+    data = (DECISIONS / name).read_bytes().replace(b"\r\n", b"\n")
+    return hashlib.sha256(data).hexdigest()
 
 
 def _ratio(num: float | None, den: float) -> float | None:
@@ -292,7 +294,9 @@ def build() -> dict[str, Any]:
             "prior on both sides, as published in canonical-shape-sensitivity"
         ),
         "zero_means": "no computed failure in any simulated year: an unbounded factor",
-        "sources": {k: {"file": v, "sha256": _sha256(v)} for k, v in SOURCES.items()},
+        "sources": {
+            k: {"file": v, "sha256_lf": _sha256(v)} for k, v in SOURCES.items()
+        },
         "sections": list(SECTIONS),
         "rows": [{"key": k, "label": lab, "kind": kind} for k, lab, kind in ROWS],
         **col,

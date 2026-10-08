@@ -9,27 +9,27 @@
   "sources": {
     "time_factor": {
       "file": "time-dependence-factor-study.json",
-      "sha256": "d2070b66a9da8d1073ee8933e64255ca2304433f3908831279bb03d8365a2c06"
+      "sha256_lf": "06000582c14dc492773137fcf234b0789c72c922f9ea0472fa1d8be5530ffd33"
     },
     "adopted": {
       "file": "drained-section-conditioning-adopted.json",
-      "sha256": "ea5c1007657560c9d2048738a029258556184a5dbcc5772dfcf903a53cf80928"
+      "sha256_lf": "cd6c15664768d00164eb1ab0f61e8332857db98223da988414d77cb662235090"
     },
     "alternatives": {
       "file": "drained-section-conditioning-alternatives.json",
-      "sha256": "bc07d10728689c966bea75c2fecf130e132b826b39f16ae8dfdca9729f5a6d94"
+      "sha256_lf": "bddd46c9f0295360a28baab94e83c40457533bbd645f2f90a73d97444b435a99"
     },
     "gravel": {
       "file": "gravel-grading-resistance-study.json",
-      "sha256": "ef4c902b180b3d0a5902cb186f15afba43af715fa9aef1dcc9d1791971869848"
+      "sha256_lf": "86da9cb254743680958df8e92b23d579b530cd206d4b3de883cca53abcf2aa6f"
     },
     "seepage_tail": {
       "file": "seepage-length-lower-tail-adopted.json",
-      "sha256": "3cf533bf09c5692b0eb861d2a6d803148a43946ce1ca5fd0c89f51422b1cb298"
+      "sha256_lf": "d9803b84425e7e5c01e955a88a461d9c991dc292b18f505ab1786dc2ab0b8a00"
     },
     "shape": {
       "file": "canonical-shape-sensitivity.json",
-      "sha256": "fa57100b696fa322bab009a394d5988b31b53326dc4c300df8373e56943bd9aa"
+      "sha256_lf": "e6ec59cf5e1a90bc2087439b6820106adf5522008ab8720d76e156ce0656fe16"
     }
   },
   "sections": [
