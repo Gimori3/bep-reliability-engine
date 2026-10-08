@@ -143,6 +143,12 @@ up to 4,000 traced per stage):
 - KP 58.8: 0.14 to 0.30 below 41 m (only low crest draws overflow there), rising
   to 0.62 at 45.0 m; KP 60.0: 0.61 falling to 0.35 at 46.75 m.
 
+The adopted table (`drained-section-conditioning-adopted.json`) re-traces `pi(h)`
+with an independent subsample of failing rows (seed + 1) and the drained sections'
+prior rows; at KP 57.4 and KP 62.0 its values differ from these by at most 0.021
+and 0.015 (KP 62.0: 0.37 to 0.43 up to 0.4 m above the bank, 0.10 at 50.5 m). The
+thesis quotes the adopted run.
+
 ### 2.4 The attributions
 
 Piping share of the annual system probability (posterior at all four sections):

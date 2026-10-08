@@ -102,7 +102,7 @@ At t = 0.85 the bounded prior keeps every path down to 28 / 30 / 30 / 34 m.
 | KP 62.0 design 46.39 m, 10^6: k_static / k_trans | 350 / 51 | 3 / 0 | 0 / 0 |
 | KP 62.0 46.75 m, 10^6: k_static / k_trans | 6,089 / 972 | 419 / 26 | 42 / 1 |
 | KP 57.4 39.50 m, 10^6: k_static / k_trans | 561 / 163 | 14 / 1 | 1 / 0 |
-| lowest stage with 30 transient failures: P_trans ratio to adopted (KP order) | 1 | 0.04 / 0.04 / 0.23 / 0.03 | 0.015 / 0.018 / 0.055 / 0 |
+| lowest stage with 30 transient failures: P_trans ratio to adopted (KP order) | 1 | 0.04 / 0.04 / 0.22 / 0.03 | 0.015 / 0.018 / 0.055 / 0 |
 
 Over the 49 attainable stages where every count reaches 30, t = 0.85 multiplies
 F_td by 1.02 to 2.44 and raises Δβ by 0.04 to 0.17 (t = 1.00: 1.06 to 3.06, +0.04
@@ -147,7 +147,7 @@ All seven failed or partly failed in size, every one in the same direction: the
 lower tail matters more than predicted.
 
 - **S1 failed in size.** At t = 0.85 the lower-shoulder transient probability is
-  0.03 to 0.23 of adopted (predicted 0.4 to 0.8); at t = 1.00 0 to 0.055 (predicted
+  0.03 to 0.22 of adopted (predicted 0.4 to 0.8); at t = 1.00 0 to 0.055 (predicted
   0.15 to 0.5). The static probability falls proportionally less at every quotable
   stage, as predicted.
 - **S2 partly failed.** Δβ rises by 0.107 at KP 58.8 (predicted below 0.10) and by
@@ -169,9 +169,10 @@ alternative, and the unbounded lower tail joins the piping-favouring adopted
 choices. Adopting it would move every result of Chapters 5 to 7 and leave the
 KP 57.4 and KP 62.0 design comparisons unresolved.
 
-The foreshore is excluded from L because the thin foreland cover (less than a
-metre at these sections, discontinuous in the later boreholes) is unlikely to
-seal the aquifer from the river across the high-water bed; this is the study's
+The foreshore is excluded from L because the foreland cover is unlikely to seal
+the aquifer from the river across the high-water bed: the cover measured at the
+sections is under a metre thick, and the later boreholes find the foreland cover
+discontinuous (2.8 m of silt on the KP 58.8 floodplain, none near KP 61); this is the study's
 own physical argument, stated without a citation, as no source read for it
 (TR Zandmeevoerende Wellen 1999 sections 4.2.1 and 4.4.2 only permit a foreland
 credit) makes it.
