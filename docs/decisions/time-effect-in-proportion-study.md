@@ -96,3 +96,83 @@ effect at a section" is the criterion factor at that section and climate;
 
 Part 2 states for each whether it held, failed, or partly held, and the thesis
 quotes the outcome whatever it is.
+
+## 4. Outcome (Part 2, computed after Part 1 was committed in `3bd8b3c`)
+
+Factors `P(alternative) / P(adopted)` on the historical annual system
+probability (KP 57.4 / 58.8 / 60.0 / 62.0). "none" is no computed failure in any
+simulated year, an unbounded factor; a dash means the row does not apply.
+
+| Alternative | KP 57.4 | KP 58.8 | KP 60.0 | KP 62.0 |
+|---|---|---|---|---|
+| **Steady-state criterion (the time effect)** | **2.05** | **1.82** | **3.32** | **2.68** |
+| Conductivity: field-test mean | none | 0.029 | none | 0.22 |
+| Conductivity: landside-toe test | 0.0047 | 0.11 | 0.13 | 0.38 |
+| Conductivity: regional upper value | 5.4 | 4.7 | 38.7 | 14.2 |
+| Grain size: whole sand-gravel (bulk) | 0.0042 | 0.029 | 0.22 | 0.22 |
+| Gravel allowance, H_c x1.8 | 0.020 | 0.12 | 0.0057 | 0.24 |
+| Foreland credit, half | none | 0.029 | none | 0.33 |
+| Foreland credit, full | none | 0.028 | none | 0.23 |
+| Measured berm, drain inert | - | 0.51 | 0.18 | - |
+| Measured berm, 80 % relief | - | 0.029 | none | - |
+| Seepage length bounded below | 0.51 | 0.70 | 0.60 | 0.61 |
+| Shorter canonical flood | 0.58 | 0.66 | 0.49 | 0.58 |
+| Correlation length 40 m | 3.69 | 2.61 | 4.37 | 3.29 |
+
+Conductivity span (largest over smallest arm): unbounded / 165 / unbounded / 66
+historically; 23 / 45 / 2716 / 8.0 under +4 K. The time effect under +4 K is
+1.60 / 1.64 / 2.59 / 1.65.
+
+**Verdicts.**
+
+- **P1 held.** The historical conductivity span is 90 and 24 times the time
+  effect at KP 58.8 and 62.0 and unbounded at KP 57.4 and 60.0.
+- **P2 held.** The largest historical displacement is 240-fold for the grain
+  size (KP 57.4), 177-fold for the gravel allowance (KP 60.0), and no computed
+  failure for full foreland credit (KP 57.4, 60.0) and 80 % drain relief
+  (KP 60.0), against a largest time effect of 3.3.
+- **P3 held.** The seepage-length tail (factors 0.51 to 0.70) and the shorter
+  canonical flood (0.49 to 0.66) displace the annual probability by less than the
+  time effect at every section.
+- **P4 held,** at all four sections: the 40 m correlation length raises the
+  annual probability 2.6 to 4.4 times, more than the time effect at each.
+- **P5 held.** Under +4 K the conductivity span is 4.8 (KP 62.0) to 1048
+  (KP 60.0) times the time effect.
+- **P6 held.** The time effect lowers the annual probability at every section in
+  both climates.
+
+**What it means, and what it does not.**
+
+- On the quantity a levee manager would use, the effect of modelling the time a
+  pipe needs (a factor of 1.8 to 3.3 historically, 1.6 to 2.6 under +4 K) is
+  smaller than the effect of the uncertain aquifer conductivity at every
+  section, and at three sections smaller than each of the grain-size, gravel,
+  foreland and drain alternatives. Measuring the conductivity at the scale of
+  the seepage path and establishing what the drains do would change the
+  assessment more than modelling duration does.
+- **KP 62.0 is the exception for the piping-side alternatives.** Overflow
+  carries part of its annual probability, so the grain-size, gravel and
+  foreland alternatives move its system probability only 3 to 5 times
+  historically, the size of the time effect there (2.7), and under +4 K, where
+  overflow leads, by factors of 1.4 to 1.5, less than the time effect (1.65).
+  Its conductivity span (66 historically, 8.0 under +4 K) still exceeds the time
+  effect.
+- The two choices of the seven piping-favoring ones that act through the
+  loading or the path geometry rather than the material, the seepage-length tail
+  and the flood shape, are each smaller than the time effect, and the
+  correlation length moves the other way by more than it. So the time effect is
+  not negligible beside every input: it is of the size of the smaller tested
+  alternatives and one to two orders of magnitude below the largest.
+- Per design flood the same ordering holds where the sample resolves it: at the
+  design-grid levels of KP 58.8 and 60.0 the time effect is 2.28 and 3.88,
+  whereas the regional upper conductivity raises the transient probability from
+  0.197 to 0.88 and from 0.056 to 0.95 and the field-test mean leaves no failure
+  in 10^5 draws (`time-dependence-factor-study.md`, thesis 5.4).
+- Separate alternatives are not a joint band and are not multiplied. The OYO
+  toe-pressure diagnostic has no annual value and is not a row; per design
+  flood it lowers KP 60.0's transient probability 69-fold.
+- Conductivity also sets the size of the time effect (F_td x0.22 to 27 per
+  flood), so measuring it would show how much duration matters as well.
+
+The thesis carries this as Figure 8.x in 8.4.1 and in the opening of
+Chapter 9, 9.2 and the Summary (owner decision, 2026-10-08).

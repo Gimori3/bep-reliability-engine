@@ -1,0 +1,730 @@
+{
+  "study": "time-effect-in-proportion",
+  "generated_by": "scripts/time_effect_in_proportion.py",
+  "note": "docs/decisions/time-effect-in-proportion-study.md",
+  "quantity": "annual system failure probability of each investigated 200 m segment, matrix reading, adopted conductivity, correlation length 250 m, primary surface curves, canonical event, adopted conditioning (2016 update at KP 57.4 and 62.0, prior at KP 58.8 and 60.0); factor = P(alternative) / P(adopted)",
+  "criterion_basis": "steady-state over time-dependent criterion, both before any survival update (time-dependence-factor-study annual block); at KP 57.4 and 62.0 each criterion's own update changes it by less than 3 per cent and the drained sections are not conditioned",
+  "flood_shape_basis": "prior on both sides, as published in canonical-shape-sensitivity",
+  "zero_means": "no computed failure in any simulated year: an unbounded factor",
+  "sources": {
+    "time_factor": {
+      "file": "time-dependence-factor-study.json",
+      "sha256": "d2070b66a9da8d1073ee8933e64255ca2304433f3908831279bb03d8365a2c06"
+    },
+    "adopted": {
+      "file": "drained-section-conditioning-adopted.json",
+      "sha256": "ea5c1007657560c9d2048738a029258556184a5dbcc5772dfcf903a53cf80928"
+    },
+    "alternatives": {
+      "file": "drained-section-conditioning-alternatives.json",
+      "sha256": "bc07d10728689c966bea75c2fecf130e132b826b39f16ae8dfdca9729f5a6d94"
+    },
+    "gravel": {
+      "file": "gravel-grading-resistance-study.json",
+      "sha256": "ef4c902b180b3d0a5902cb186f15afba43af715fa9aef1dcc9d1791971869848"
+    },
+    "seepage_tail": {
+      "file": "seepage-length-lower-tail-adopted.json",
+      "sha256": "3cf533bf09c5692b0eb861d2a6d803148a43946ce1ca5fd0c89f51422b1cb298"
+    },
+    "shape": {
+      "file": "canonical-shape-sensitivity.json",
+      "sha256": "fa57100b696fa322bab009a394d5988b31b53326dc4c300df8373e56943bd9aa"
+    }
+  },
+  "sections": [
+    "KP 57.4",
+    "KP 58.8",
+    "KP 60.0",
+    "KP 62.0"
+  ],
+  "rows": [
+    {
+      "key": "criterion_steady_state",
+      "label": "Steady-state criterion",
+      "kind": "criterion"
+    },
+    {
+      "key": "k_field_mean",
+      "label": "Conductivity: field-test mean",
+      "kind": "conductivity"
+    },
+    {
+      "key": "k_toe_test",
+      "label": "Conductivity: landside-toe test",
+      "kind": "conductivity"
+    },
+    {
+      "key": "k_regional_upper",
+      "label": "Conductivity: regional upper value",
+      "kind": "conductivity"
+    },
+    {
+      "key": "grain_bulk",
+      "label": "Grain size: whole sand-gravel",
+      "kind": "favoring"
+    },
+    {
+      "key": "gravel_x1_8",
+      "label": "Gravel allowance, critical head x1.8",
+      "kind": "favoring"
+    },
+    {
+      "key": "foreland_half",
+      "label": "Foreland credit, half",
+      "kind": "favoring"
+    },
+    {
+      "key": "foreland_full",
+      "label": "Foreland credit, full",
+      "kind": "favoring"
+    },
+    {
+      "key": "drain_berm_inert",
+      "label": "Measured berm, drain inert",
+      "kind": "favoring"
+    },
+    {
+      "key": "drain_berm_relief80",
+      "label": "Measured berm, 80 % drain relief",
+      "kind": "favoring"
+    },
+    {
+      "key": "seepage_tail_bounded",
+      "label": "Seepage length bounded below",
+      "kind": "favoring"
+    },
+    {
+      "key": "flood_shorter",
+      "label": "Shorter canonical flood",
+      "kind": "favoring"
+    },
+    {
+      "key": "correlation_40m",
+      "label": "Correlation length 40 m",
+      "kind": "other"
+    }
+  ],
+  "adopted_system": {
+    "historical": {
+      "KP 57.4": 0.000497775,
+      "KP 58.8": 0.0068532,
+      "KP 60.0": 0.000321849,
+      "KP 62.0": 0.000916578
+    },
+    "+4K": {
+      "KP 57.4": 0.00759168,
+      "KP 58.8": 0.0382611,
+      "KP 60.0": 0.00427613,
+      "KP 62.0": 0.0123116
+    }
+  },
+  "factors": {
+    "criterion_steady_state": {
+      "historical": {
+        "KP 57.4": 2.05385,
+        "KP 58.8": 1.82388,
+        "KP 60.0": 3.31517,
+        "KP 62.0": 2.6812
+      },
+      "+4K": {
+        "KP 57.4": 1.59717,
+        "KP 58.8": 1.63773,
+        "KP 60.0": 2.5922,
+        "KP 62.0": 1.65353
+      }
+    },
+    "k_field_mean": {
+      "historical": {
+        "KP 57.4": 0.0,
+        "KP 58.8": 0.0284928,
+        "KP 60.0": 0.0,
+        "KP 62.0": 0.217423
+      },
+      "+4K": {
+        "KP 57.4": 0.120064,
+        "KP 58.8": 0.06645,
+        "KP 60.0": 0.00545613,
+        "KP 62.0": 0.681633
+      }
+    },
+    "k_toe_test": {
+      "historical": {
+        "KP 57.4": 0.00465747,
+        "KP 58.8": 0.114443,
+        "KP 60.0": 0.12781,
+        "KP 62.0": 0.384295
+      },
+      "+4K": {
+        "KP 57.4": 0.152773,
+        "KP 58.8": 0.201871,
+        "KP 60.0": 0.246555,
+        "KP 62.0": 0.754017
+      }
+    },
+    "k_regional_upper": {
+      "historical": {
+        "KP 57.4": 5.39199,
+        "KP 58.8": 4.69884,
+        "KP 60.0": 38.683,
+        "KP 62.0": 14.249
+      },
+      "+4K": {
+        "KP 57.4": 2.78025,
+        "KP 58.8": 3.01215,
+        "KP 60.0": 14.8182,
+        "KP 62.0": 5.42826
+      }
+    },
+    "grain_bulk": {
+      "historical": {
+        "KP 57.4": 0.00416666,
+        "KP 58.8": 0.0290194,
+        "KP 60.0": 0.21583,
+        "KP 62.0": 0.217426
+      },
+      "+4K": {
+        "KP 57.4": 0.160107,
+        "KP 58.8": 0.0708052,
+        "KP 60.0": 0.378525,
+        "KP 62.0": 0.681635
+      }
+    },
+    "gravel_x1_8": {
+      "historical": {
+        "KP 57.4": 0.0199239,
+        "KP 58.8": 0.124201,
+        "KP 60.0": 0.00566219,
+        "KP 62.0": 0.239865
+      },
+      "+4K": {
+        "KP 57.4": 0.209972,
+        "KP 58.8": 0.224734,
+        "KP 60.0": 0.0472161,
+        "KP 62.0": 0.692894
+      }
+    },
+    "foreland_half": {
+      "historical": {
+        "KP 57.4": 0.0,
+        "KP 58.8": 0.0287008,
+        "KP 60.0": 0.0,
+        "KP 62.0": 0.327605
+      },
+      "+4K": {
+        "KP 57.4": 0.122389,
+        "KP 58.8": 0.0777313,
+        "KP 60.0": 0.00589757,
+        "KP 62.0": 0.732999
+      }
+    },
+    "foreland_full": {
+      "historical": {
+        "KP 57.4": 0.0,
+        "KP 58.8": 0.0284652,
+        "KP 60.0": 0.0,
+        "KP 62.0": 0.225954
+      },
+      "+4K": {
+        "KP 57.4": 0.120057,
+        "KP 58.8": 0.0661192,
+        "KP 60.0": 0.00538723,
+        "KP 62.0": 0.6867
+      }
+    },
+    "drain_berm_inert": {
+      "historical": {
+        "KP 57.4": null,
+        "KP 58.8": 0.511767,
+        "KP 60.0": 0.184935,
+        "KP 62.0": null
+      },
+      "+4K": {
+        "KP 57.4": null,
+        "KP 58.8": 0.603935,
+        "KP 60.0": 0.319095,
+        "KP 62.0": null
+      }
+    },
+    "drain_berm_relief80": {
+      "historical": {
+        "KP 57.4": null,
+        "KP 58.8": 0.0286739,
+        "KP 60.0": 0.0,
+        "KP 62.0": null
+      },
+      "+4K": {
+        "KP 57.4": null,
+        "KP 58.8": 0.0728863,
+        "KP 60.0": 0.0064271,
+        "KP 62.0": null
+      }
+    },
+    "seepage_tail_bounded": {
+      "historical": {
+        "KP 57.4": 0.510289,
+        "KP 58.8": 0.696194,
+        "KP 60.0": 0.603842,
+        "KP 62.0": 0.611826
+      },
+      "+4K": {
+        "KP 57.4": 0.745399,
+        "KP 58.8": 0.778812,
+        "KP 60.0": 0.745461,
+        "KP 62.0": 0.849061
+      }
+    },
+    "flood_shorter": {
+      "historical": {
+        "KP 57.4": 0.579222,
+        "KP 58.8": 0.659668,
+        "KP 60.0": 0.487889,
+        "KP 62.0": 0.582158
+      },
+      "+4K": {
+        "KP 57.4": 0.707764,
+        "KP 58.8": 0.711506,
+        "KP 60.0": 0.549747,
+        "KP 62.0": 0.817388
+      }
+    },
+    "correlation_40m": {
+      "historical": {
+        "KP 57.4": 3.6855,
+        "KP 58.8": 2.60762,
+        "KP 60.0": 4.37253,
+        "KP 62.0": 3.29162
+      },
+      "+4K": {
+        "KP 57.4": 2.27263,
+        "KP 58.8": 2.13223,
+        "KP 60.0": 3.19963,
+        "KP 62.0": 1.88333
+      }
+    }
+  },
+  "conductivity_span": {
+    "historical": {
+      "KP 57.4": null,
+      "KP 58.8": 164.913,
+      "KP 60.0": null,
+      "KP 62.0": 65.5358
+    },
+    "+4K": {
+      "KP 57.4": 23.1564,
+      "KP 58.8": 45.3295,
+      "KP 60.0": 2715.89,
+      "KP 62.0": 7.96362
+    }
+  },
+  "summary": {
+    "criterion_steady_state": {
+      "label": "Steady-state criterion",
+      "kind": "criterion",
+      "historical": {
+        "min_factor": 1.82388,
+        "max_factor": 3.31517,
+        "sections_with_no_computed_failure": [],
+        "max_abs_log10": 0.520506,
+        "min_positive_factor": 1.82388
+      },
+      "+4K": {
+        "min_factor": 1.59717,
+        "max_factor": 2.5922,
+        "sections_with_no_computed_failure": [],
+        "max_abs_log10": 0.413669,
+        "min_positive_factor": 1.59717
+      }
+    },
+    "k_field_mean": {
+      "label": "Conductivity: field-test mean",
+      "kind": "conductivity",
+      "historical": {
+        "min_factor": 0.0,
+        "max_factor": 0.217423,
+        "sections_with_no_computed_failure": [
+          "KP 57.4",
+          "KP 60.0"
+        ],
+        "max_abs_log10": "inf",
+        "min_positive_factor": 0.0284928
+      },
+      "+4K": {
+        "min_factor": 0.00545613,
+        "max_factor": 0.681633,
+        "sections_with_no_computed_failure": [],
+        "max_abs_log10": 2.26312,
+        "min_positive_factor": 0.00545613
+      }
+    },
+    "k_toe_test": {
+      "label": "Conductivity: landside-toe test",
+      "kind": "conductivity",
+      "historical": {
+        "min_factor": 0.00465747,
+        "max_factor": 0.384295,
+        "sections_with_no_computed_failure": [],
+        "max_abs_log10": 2.33185,
+        "min_positive_factor": 0.00465747
+      },
+      "+4K": {
+        "min_factor": 0.152773,
+        "max_factor": 0.754017,
+        "sections_with_no_computed_failure": [],
+        "max_abs_log10": 0.815955,
+        "min_positive_factor": 0.152773
+      }
+    },
+    "k_regional_upper": {
+      "label": "Conductivity: regional upper value",
+      "kind": "conductivity",
+      "historical": {
+        "min_factor": 4.69884,
+        "max_factor": 38.683,
+        "sections_with_no_computed_failure": [],
+        "max_abs_log10": 1.58752,
+        "min_positive_factor": 4.69884
+      },
+      "+4K": {
+        "min_factor": 2.78025,
+        "max_factor": 14.8182,
+        "sections_with_no_computed_failure": [],
+        "max_abs_log10": 1.1708,
+        "min_positive_factor": 2.78025
+      }
+    },
+    "grain_bulk": {
+      "label": "Grain size: whole sand-gravel",
+      "kind": "favoring",
+      "historical": {
+        "min_factor": 0.00416666,
+        "max_factor": 0.217426,
+        "sections_with_no_computed_failure": [],
+        "max_abs_log10": 2.38021,
+        "min_positive_factor": 0.00416666
+      },
+      "+4K": {
+        "min_factor": 0.0708052,
+        "max_factor": 0.681635,
+        "sections_with_no_computed_failure": [],
+        "max_abs_log10": 1.14993,
+        "min_positive_factor": 0.0708052
+      }
+    },
+    "gravel_x1_8": {
+      "label": "Gravel allowance, critical head x1.8",
+      "kind": "favoring",
+      "historical": {
+        "min_factor": 0.00566219,
+        "max_factor": 0.239865,
+        "sections_with_no_computed_failure": [],
+        "max_abs_log10": 2.24702,
+        "min_positive_factor": 0.00566219
+      },
+      "+4K": {
+        "min_factor": 0.0472161,
+        "max_factor": 0.692894,
+        "sections_with_no_computed_failure": [],
+        "max_abs_log10": 1.32591,
+        "min_positive_factor": 0.0472161
+      }
+    },
+    "foreland_half": {
+      "label": "Foreland credit, half",
+      "kind": "favoring",
+      "historical": {
+        "min_factor": 0.0,
+        "max_factor": 0.327605,
+        "sections_with_no_computed_failure": [
+          "KP 57.4",
+          "KP 60.0"
+        ],
+        "max_abs_log10": "inf",
+        "min_positive_factor": 0.0287008
+      },
+      "+4K": {
+        "min_factor": 0.00589757,
+        "max_factor": 0.732999,
+        "sections_with_no_computed_failure": [],
+        "max_abs_log10": 2.22933,
+        "min_positive_factor": 0.00589757
+      }
+    },
+    "foreland_full": {
+      "label": "Foreland credit, full",
+      "kind": "favoring",
+      "historical": {
+        "min_factor": 0.0,
+        "max_factor": 0.225954,
+        "sections_with_no_computed_failure": [
+          "KP 57.4",
+          "KP 60.0"
+        ],
+        "max_abs_log10": "inf",
+        "min_positive_factor": 0.0284652
+      },
+      "+4K": {
+        "min_factor": 0.00538723,
+        "max_factor": 0.6867,
+        "sections_with_no_computed_failure": [],
+        "max_abs_log10": 2.26863,
+        "min_positive_factor": 0.00538723
+      }
+    },
+    "drain_berm_inert": {
+      "label": "Measured berm, drain inert",
+      "kind": "favoring",
+      "historical": {
+        "min_factor": 0.184935,
+        "max_factor": 0.511767,
+        "sections_with_no_computed_failure": [],
+        "max_abs_log10": 0.73298,
+        "min_positive_factor": 0.184935
+      },
+      "+4K": {
+        "min_factor": 0.319095,
+        "max_factor": 0.603935,
+        "sections_with_no_computed_failure": [],
+        "max_abs_log10": 0.496081,
+        "min_positive_factor": 0.319095
+      }
+    },
+    "drain_berm_relief80": {
+      "label": "Measured berm, 80 % drain relief",
+      "kind": "favoring",
+      "historical": {
+        "min_factor": 0.0,
+        "max_factor": 0.0286739,
+        "sections_with_no_computed_failure": [
+          "KP 60.0"
+        ],
+        "max_abs_log10": "inf",
+        "min_positive_factor": 0.0286739
+      },
+      "+4K": {
+        "min_factor": 0.0064271,
+        "max_factor": 0.0728863,
+        "sections_with_no_computed_failure": [],
+        "max_abs_log10": 2.19199,
+        "min_positive_factor": 0.0064271
+      }
+    },
+    "seepage_tail_bounded": {
+      "label": "Seepage length bounded below",
+      "kind": "favoring",
+      "historical": {
+        "min_factor": 0.510289,
+        "max_factor": 0.696194,
+        "sections_with_no_computed_failure": [],
+        "max_abs_log10": 0.292184,
+        "min_positive_factor": 0.510289
+      },
+      "+4K": {
+        "min_factor": 0.745399,
+        "max_factor": 0.849061,
+        "sections_with_no_computed_failure": [],
+        "max_abs_log10": 0.127611,
+        "min_positive_factor": 0.745399
+      }
+    },
+    "flood_shorter": {
+      "label": "Shorter canonical flood",
+      "kind": "favoring",
+      "historical": {
+        "min_factor": 0.487889,
+        "max_factor": 0.659668,
+        "sections_with_no_computed_failure": [],
+        "max_abs_log10": 0.311679,
+        "min_positive_factor": 0.487889
+      },
+      "+4K": {
+        "min_factor": 0.549747,
+        "max_factor": 0.817388,
+        "sections_with_no_computed_failure": [],
+        "max_abs_log10": 0.259837,
+        "min_positive_factor": 0.549747
+      }
+    },
+    "correlation_40m": {
+      "label": "Correlation length 40 m",
+      "kind": "other",
+      "historical": {
+        "min_factor": 2.60762,
+        "max_factor": 4.37253,
+        "sections_with_no_computed_failure": [],
+        "max_abs_log10": 0.640733,
+        "min_positive_factor": 2.60762
+      },
+      "+4K": {
+        "min_factor": 1.88333,
+        "max_factor": 3.19963,
+        "sections_with_no_computed_failure": [],
+        "max_abs_log10": 0.5051,
+        "min_positive_factor": 1.88333
+      }
+    }
+  },
+  "verdicts": {
+    "P1": {
+      "cells": {
+        "KP 57.4": {
+          "span": null,
+          "time_effect": 2.05385,
+          "span_over_time_effect": null,
+          "holds": true
+        },
+        "KP 58.8": {
+          "span": 164.913,
+          "time_effect": 1.82388,
+          "span_over_time_effect": 90.4189,
+          "holds": true
+        },
+        "KP 60.0": {
+          "span": null,
+          "time_effect": 3.31517,
+          "span_over_time_effect": null,
+          "holds": true
+        },
+        "KP 62.0": {
+          "span": 65.5358,
+          "time_effect": 2.6812,
+          "span_over_time_effect": 24.4427,
+          "holds": true
+        }
+      },
+      "holds": true
+    },
+    "P2": {
+      "largest_time_effect": 3.31517,
+      "rows": {
+        "grain_bulk": {
+          "max_abs_log10": 2.38021,
+          "threshold_abs_log10": 1.56152,
+          "holds": true
+        },
+        "gravel_x1_8": {
+          "max_abs_log10": 2.24702,
+          "threshold_abs_log10": 1.56152,
+          "holds": true
+        },
+        "foreland_full": {
+          "max_abs_log10": "inf",
+          "threshold_abs_log10": 1.56152,
+          "holds": true
+        },
+        "drain_berm_relief80": {
+          "max_abs_log10": "inf",
+          "threshold_abs_log10": 1.56152,
+          "holds": true
+        }
+      },
+      "holds": true
+    },
+    "P3": {
+      "rows": {
+        "seepage_tail_bounded": {
+          "cells": {
+            "KP 57.4": {
+              "factor": 0.510289,
+              "time_effect": 2.05385,
+              "holds": true
+            },
+            "KP 58.8": {
+              "factor": 0.696194,
+              "time_effect": 1.82388,
+              "holds": true
+            },
+            "KP 60.0": {
+              "factor": 0.603842,
+              "time_effect": 3.31517,
+              "holds": true
+            },
+            "KP 62.0": {
+              "factor": 0.611826,
+              "time_effect": 2.6812,
+              "holds": true
+            }
+          },
+          "holds": true
+        },
+        "flood_shorter": {
+          "cells": {
+            "KP 57.4": {
+              "factor": 0.579222,
+              "time_effect": 2.05385,
+              "holds": true
+            },
+            "KP 58.8": {
+              "factor": 0.659668,
+              "time_effect": 1.82388,
+              "holds": true
+            },
+            "KP 60.0": {
+              "factor": 0.487889,
+              "time_effect": 3.31517,
+              "holds": true
+            },
+            "KP 62.0": {
+              "factor": 0.582158,
+              "time_effect": 2.6812,
+              "holds": true
+            }
+          },
+          "holds": true
+        }
+      },
+      "holds": true
+    },
+    "P4": {
+      "cells": {
+        "KP 57.4": true,
+        "KP 58.8": true,
+        "KP 60.0": true,
+        "KP 62.0": true
+      },
+      "holds": true
+    },
+    "P5": {
+      "cells": {
+        "KP 57.4": {
+          "span": 23.1564,
+          "time_effect": 1.59717,
+          "span_over_time_effect": 14.4984,
+          "holds": true
+        },
+        "KP 58.8": {
+          "span": 45.3295,
+          "time_effect": 1.63773,
+          "span_over_time_effect": 27.6783,
+          "holds": true
+        },
+        "KP 60.0": {
+          "span": 2715.89,
+          "time_effect": 2.5922,
+          "span_over_time_effect": 1047.72,
+          "holds": true
+        },
+        "KP 62.0": {
+          "span": 7.96362,
+          "time_effect": 1.65353,
+          "span_over_time_effect": 4.81613,
+          "holds": true
+        }
+      },
+      "holds": true
+    },
+    "P6": {
+      "cells": {
+        "historical KP 57.4": true,
+        "historical KP 58.8": true,
+        "historical KP 60.0": true,
+        "historical KP 62.0": true,
+        "+4K KP 57.4": true,
+        "+4K KP 58.8": true,
+        "+4K KP 60.0": true,
+        "+4K KP 62.0": true
+      },
+      "holds": true
+    }
+  }
+}

@@ -1210,6 +1210,13 @@ COMPANION_EXCLUSIONS: dict[str, str] = {
         "touches no sweep, replay, posterior or annual table. Its figures are a "
         "FIGURE_DRIVERS entry. Pinned by tests/test_loading_context_study.py."
     ),
+    "scripts/time_effect_in_proportion.py": (
+        "Pol round-2 study (annotation A24 with A10), not a companion: it reads "
+        "only committed evidence JSON under docs/decisions/, sets the time "
+        "effect and every tested input alternative on the adopted annual "
+        "system probability, and re-runs nothing. Its figure is a "
+        "FIGURE_DRIVERS entry. Pinned by tests/test_time_effect_in_proportion.py."
+    ),
     "scripts/fetch_tokoro_2016_stage.py": (
         "One-off network fetch of the public August 2016 Futochanae (Tokoro) "
         "record into data/processed/2016_event/; no model evaluation. Run only "
@@ -2362,6 +2369,23 @@ FIGURE_DRIVERS: list[dict[str, Any]] = [
         ],
         "sources": ["docs/decisions/loading-context-study.json"],
         "source_epoch": "json_generated",
+    },
+    {
+        # Pol round 2, A24 with A10: the time effect beside every tested input
+        # alternative, as factors on the adopted annual system probability.
+        # Reads committed evidence JSON only and writes its own study JSON.
+        "label": "Time effect in proportion to the input alternatives",
+        "command": [PY, "scripts/time_effect_in_proportion.py"],
+        "requires": [
+            "docs/decisions/time-dependence-factor-study.json",
+            "docs/decisions/drained-section-conditioning-adopted.json",
+            "docs/decisions/drained-section-conditioning-alternatives.json",
+            "docs/decisions/gravel-grading-resistance-study.json",
+            "docs/decisions/seepage-length-lower-tail-adopted.json",
+            "docs/decisions/canonical-shape-sensitivity.json",
+        ],
+        "produces": ["time_effect_in_proportion.png"],
+        "sources": ["docs/decisions/time-effect-in-proportion-study.json"],
     },
 ]
 
