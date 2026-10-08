@@ -20,10 +20,13 @@ climate scenario.
 **Status.** Version [1.3.0](https://github.com/Gimori3/bep-reliability-engine/releases/tag/v1.3.0)
 is the version the final MSc thesis cites. It records the revision after the
 supervisor's comments on the Green Light thesis: the two piping criteria are
-compared on one driving head and one set of exit conditions (ADR-0055), and
-companion studies cover the gravel allowance and grading, the 2016 initiation
-evidence and why the sections showed no piping in 2016. Production inputs and
-results are those of 1.2.0, which superseded 1.1.0's matrix grain sizes. See
+compared on one driving head and one set of exit conditions (ADR-0055), the
+drained sections keep their prior (ADR-0056), the piping share is the
+first-breach split (ADR-0057), and companion studies cover the gravel allowance
+and grading, the 2016 initiation evidence, why the sections showed no piping in
+2016, the seepage-length lower tail, the loading context and the time effect in
+proportion. Production inputs and persisted results are those of 1.2.0, which
+superseded 1.1.0's matrix grain sizes. See
 `CHANGELOG.md` for the changes and the study notes for their limits.
 
 > **Reading the results.** Every headline comparison in this repository is
@@ -203,7 +206,7 @@ are left exact rather than relaxed, so the difference stays visible.
 
 Cite version **1.3.0**, available as a tagged GitHub release. The following DOI
 is reserved for its 4TU.ResearchData deposit, which remains unpublished as of
-2026-10-07. Reservation is not evidence of a published archive:
+2026-10-08. Reservation is not evidence of a published archive:
 
 > Rietman, G. M. (2026). *bep-reliability-engine* (Version 1.3.0) [Software].
 > 4TU.ResearchData. <https://doi.org/10.4121/8ffa1f3e-942e-4852-b02a-a259b9d6d00d>

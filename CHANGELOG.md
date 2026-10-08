@@ -7,7 +7,7 @@ All notable changes to this project are recorded here. The format follows
 The engineering record at the level of individual decisions is not duplicated
 here. It lives in three places, all tracked:
 
-* `docs/decisions/` — 55 Architecture Decision Records, gap-free, every one
+* `docs/decisions/` — 57 Architecture Decision Records, gap-free, every one
   Accepted but ADR-0007, which is superseded in place by ADR-0027, plus their
   companion evidence notes and JSON artifacts;
 * `docs/project_log.md` — a dated narrative of what was learned and when,
@@ -17,14 +17,20 @@ here. It lives in three places, all tracked:
 
 ---
 
-## [1.3.0] - 2026-10-07
+## [1.3.0] - 2026-10-08
 
-The revision after the supervisor's written comments on the Green Light thesis
-(J. Pol, October 2026). The final thesis now compares the two piping criteria
-on one driving head and one set of exit conditions, and quotes four new
+The revision after the supervisor's comments on the Green Light thesis
+(J. Pol, October 2026): eleven written comments (round 1) and 49 annotations on
+the long thesis (round 2). The final thesis now compares the two piping
+criteria on one driving head and one set of exit conditions, conditions only
+the sections whose survival the model can represent, credits each both-fail
+year to the mechanism that breaks through first, and quotes eight new
 companion studies; this release supersedes 1.2.0 as the version the thesis
-cites. No production input, default, prior, sweep, posterior or published
-annual table changed. The Bayesian posterior provenance version stays at 0.1.0.
+cites. No production input, default, prior, persisted sweep, Phase 2 posterior
+or row of the Phase 3 annual table changed; two reported definitions did
+(ADR-0056 and ADR-0057). The Bayesian posterior provenance version stays at
+0.1.0. Prepared on 2026-10-07 after round 1 and rebuilt on 2026-10-08 after
+round 2; it was never tagged or published in between.
 
 ### Changed
 
@@ -37,6 +43,21 @@ annual table changed. The Bayesian posterior provenance version stays at 0.1.0.
   to 6.9 (KP 57.4's design level unresolved); historical annual factor 1.8 to
   3.3. The persisted gross-head branch is reported once, as Sellmeijer's
   calibrated form. Study: `docs/decisions/time-dependence-factor-study.md`.
+* **Drained sections not conditioned on 2016 (ADR-0056):** at KP 58.8 and
+  KP 60.0, whose 2016 survival was carried by berms and drains the
+  as-if-undrained model omits, the adopted annual piping branch is the prior
+  for both criteria; the as-if-undrained update is reported as an upper bound
+  on what the survival could teach (it would lower their historical annual
+  system probability by 10 and 2 per cent). Study:
+  `docs/decisions/drained-section-conditioning-study.md`, adopted table
+  `drained-section-conditioning-adopted.json`.
+* **First-breach mechanism attribution (ADR-0057):** the reported piping share
+  divides the annual system probability and credits a year in which both
+  piping and overflow would fail to the one that breaks through first (M7
+  pipe-crossing times against the overflow model's failure times on the scaled
+  canonical flood). KP 62.0 under +4 K becomes an overflow lead, 0.39
+  [0.35, 0.44]; the summed share is kept for ranking alternatives. Study:
+  `docs/decisions/crest-attribution-study.md`.
 
 ### Added
 
@@ -56,6 +77,20 @@ annual table changed. The Bayesian posterior provenance version stays at 0.1.0.
   against OYO's design model, the antecedent river state and the Tokoro
   contrast (dated note in ADR-0032). Study:
   `docs/decisions/why-no-piping-2016-study.md`.
+* **Seepage-length lower tail (companion):** the lognormal L bounded at the
+  shortest toe-to-toe footprint measured near the sections (0.85 of the
+  adopted length), a named alternative and the sixth piping-favoring adopted
+  choice. Study: `docs/decisions/seepage-length-lower-tail-study.md`.
+* **Loading context (companion):** the August 2016 floods of the Tokoro,
+  Satsunai and Tokachi against their design levels (the public Futochanae
+  record is now committed in `data/processed/2016_event/`), the d4PDF annual
+  floods in both climates, and the rank of the canonical flood among floods of
+  its height (long at the toe: the seventh piping-favoring choice). Study:
+  `docs/decisions/loading-context-study.md`.
+* **The time effect in proportion (companion):** the effect of duration set
+  beside every tested input alternative on one quantity, the adopted annual
+  system probability, from committed evidence only. Study:
+  `docs/decisions/time-effect-in-proportion-study.md`.
 
 ### Fixed
 

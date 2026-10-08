@@ -1,16 +1,19 @@
 # 4TU.ResearchData deposit package for v1.3.0
 
-Prepared 2026-10-07. **Not submitted or published.** It replaces the v1.2.0
-package (`docs/release-v1.2.0-deposit.md`) in the same unpublished draft with
-reserved DOI `10.4121/8ffa1f3e-942e-4852-b02a-a259b9d6d00d`; do not create a
-second deposit. The DOI returned 404 on 6 October 2026, consistent with
-reservation. The thesis title page and Appendix D cite Version 1.3.0 and this
-DOI.
+Prepared 2026-10-07 and rebuilt 2026-10-08 after the supervisor's second
+round of comments; the 2026-10-07 package was never uploaded and is superseded.
+**Not submitted or published.** It replaces the v1.2.0 package
+(`docs/release-v1.2.0-deposit.md`) in the same unpublished draft with reserved
+DOI `10.4121/8ffa1f3e-942e-4852-b02a-a259b9d6d00d`; do not create a second
+deposit. The DOI returned 404 on 8 October 2026, consistent with reservation.
+The thesis title page and Appendix D cite Version 1.3.0 and this DOI.
 
 Why 1.3.0: the final thesis quotes engine work made after the v1.2.0 tag
-(ADR-0055 and the gravel-grading, 2016-initiation and why-no-piping studies),
-so its statement that all calculations used the cited release needs a release
-that contains that work. No production input or result changed.
+(ADR-0055 to ADR-0057 and eight companion studies), so its statement that all
+calculations used the cited release needs a release that contains that work.
+No production input, prior, persisted sweep, Phase 2 posterior or row of the
+Phase 3 annual table changed; two reported definitions did (the drained
+sections keep their prior, and the piping share is the first-breach split).
 
 ## Release order
 
@@ -73,9 +76,13 @@ overflow and fluvial scour into annual system failure probability under
 historical and +4 K climate ensembles. Version 1.3.0 records the revision after
 the supervisor's comments on the Green Light thesis: the two criteria are
 compared on one driving head and one set of exit conditions, so their
-difference is the effect of finite flood duration, and companion studies cover
-a gravel allowance and grading resistance, the evidence of the 2016 flood on
-initiation, and why the investigated sections showed no piping in 2016.
+difference is the effect of finite flood duration; sections whose survival was
+carried by drains are not conditioned on it; a year in which two mechanisms
+would fail is credited to the one that breaks through first; and companion
+studies cover a gravel allowance and grading resistance, the 2016 flood's
+evidence on initiation, why the investigated sections showed no piping in
+2016, the seepage-length lower tail, the loading context and the size of the
+time effect beside the input uncertainty.
 Probabilities are conditional on the stated model, soil, geometry, loading and
 drainage assumptions. Restricted third-party raw inputs and large machine-local
 production arrays are excluded; the archive documents their provenance and the
