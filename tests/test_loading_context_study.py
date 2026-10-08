@@ -131,6 +131,16 @@ def test_evidence_records_the_reproduction_gate_and_the_verdicts() -> None:
     assert same["record_2016_hours"] == 21 and same["record_2016_percentile"] == 0
     hours = rec["post_hoc"]["amplitude_adjusted_hours_above_toe"]
     assert all(0.9 <= v["ratio"] <= 1.05 for v in hours.values())
+    # Thesis 3.4 and A.3: the canonical event is long mid-rise, typical near
+    # its peak; the alternative is shorter than 97 % of members at every level.
+    ranks = rec["ensemble"]["member_rank_by_fraction_of_rise"]
+    canon = {k: v["share_strictly_shorter"] for k, v in ranks["HPB_m064_1987"].items()}
+    assert [round(100 * canon[f]) for f in ("0.50", "0.75", "0.90")] == [76, 57, 49]
+    alt = ranks["HPB_m067_1978"]
+    assert min(v["share_strictly_longer"] for v in alt.values()) >= 0.97
+    canon_rank = rec["post_hoc"]["canonical_time_above_toe_rank"]
+    shares = [r["share_shorter_than_canonical"] for v in canon_rank.values() for r in v]
+    assert round(100 * min(shares)) == 80 and round(100 * max(shares)) == 98
 
 
 def test_hazard_statistics_reproduce_from_the_hazard_files() -> None:

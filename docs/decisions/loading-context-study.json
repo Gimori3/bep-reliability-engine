@@ -1,9 +1,75 @@
 {
  "study": "loading-context-study",
- "generated": "2026-10-08T09:48:12",
+ "generated": "2026-10-08T10:09:55",
  "pre_registration_commit": "20e2330",
  "ensemble_shape_kp": 57.4,
  "ensemble": {
+  "member_rank_by_fraction_of_rise": {
+   "HPB_m064_1987": {
+    "0.25": {
+     "hours": 80,
+     "median_hours": 85.0,
+     "share_strictly_shorter": 0.415667,
+     "share_strictly_longer": 0.568667
+    },
+    "0.50": {
+     "hours": 55,
+     "median_hours": 40.0,
+     "share_strictly_shorter": 0.755667,
+     "share_strictly_longer": 0.231333
+    },
+    "0.60": {
+     "hours": 36,
+     "median_hours": 29.0,
+     "share_strictly_shorter": 0.667333,
+     "share_strictly_longer": 0.316667
+    },
+    "0.75": {
+     "hours": 20,
+     "median_hours": 18.0,
+     "share_strictly_shorter": 0.566333,
+     "share_strictly_longer": 0.377667
+    },
+    "0.90": {
+     "hours": 10,
+     "median_hours": 10.0,
+     "share_strictly_shorter": 0.494667,
+     "share_strictly_longer": 0.383667
+    }
+   },
+   "HPB_m067_1978": {
+    "0.25": {
+     "hours": 44,
+     "median_hours": 85.0,
+     "share_strictly_shorter": 0.002,
+     "share_strictly_longer": 0.996667
+    },
+    "0.50": {
+     "hours": 21,
+     "median_hours": 40.0,
+     "share_strictly_shorter": 0.005,
+     "share_strictly_longer": 0.989
+    },
+    "0.60": {
+     "hours": 15,
+     "median_hours": 29.0,
+     "share_strictly_shorter": 0.00166667,
+     "share_strictly_longer": 0.993667
+    },
+    "0.75": {
+     "hours": 10,
+     "median_hours": 18.0,
+     "share_strictly_shorter": 0.002,
+     "share_strictly_longer": 0.984
+    },
+    "0.90": {
+     "hours": 5,
+     "median_hours": 10.0,
+     "share_strictly_shorter": 0.00133333,
+     "share_strictly_longer": 0.976333
+    }
+   }
+  },
   "historical": {
    "members": 3000,
    "t50_median_h": 40.0,

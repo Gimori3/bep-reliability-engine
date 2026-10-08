@@ -62,6 +62,7 @@ DURATION_KP = 58.8  # panel (b) and P6
 BAND = "Tokachi Riv. KP056.20-KP061.80"
 CANONICAL = "HPB_m064_1987"
 ALTERNATE = "HPB_m067_1978"
+SHAPE_FRACTIONS: tuple[float, ...] = (0.25, 0.5, 0.6, 0.75, 0.9)
 PEAK_HEIGHT = 0.3
 PEAK_PROMINENCE = 0.2
 WINDOW_H = 192
@@ -268,6 +269,32 @@ def _ensemble_part() -> tuple[dict[str, Any], dict[str, NDArray]]:
             if special in members:
                 s = stage_shape(members[special])
                 cache[f"shape_{special}"] = s
+        if scenario == "historical":
+            # Where the canonical and alternate members sit among all members
+            # in hours at or above each fraction of the rise.
+            durations = {
+                f: np.asarray(
+                    [np.count_nonzero(stage_shape(members[i]) >= f) for i in ids]
+                )
+                for f in SHAPE_FRACTIONS
+            }
+            ranks: dict[str, Any] = {}
+            for special in (CANONICAL, ALTERNATE):
+                s = stage_shape(members[special])
+                ranks[special] = {
+                    f"{f:.2f}": {
+                        "hours": int(np.count_nonzero(s >= f)),
+                        "median_hours": float(np.median(durations[f])),
+                        "share_strictly_shorter": float(
+                            np.mean(durations[f] < np.count_nonzero(s >= f))
+                        ),
+                        "share_strictly_longer": float(
+                            np.mean(durations[f] > np.count_nonzero(s >= f))
+                        ),
+                    }
+                    for f in SHAPE_FRACTIONS
+                }
+            stats["member_rank_by_fraction_of_rise"] = ranks
         stats[scenario] = {
             "members": int(ids.size),
             "t50_median_h": float(np.median(t50)),

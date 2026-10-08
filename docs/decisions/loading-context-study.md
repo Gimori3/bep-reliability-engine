@@ -164,8 +164,8 @@ the peak and within an hour above the design level.
    historical members): the canonical is longer than 42 / 76 / 67 / 57 / 50 %
    of members at 25 / 50 / 60 / 75 / 90 % of its rise, so it is long in the
    middle of its rise, where its trough between two peaks sits, and typical
-   near its peak. The shorter alternative is shorter than 98 to 99.9 % of
-   members at every fraction.
+   near its peak. The shorter alternative is shorter than 97.6 to 99.7 % of
+   members at every fraction (`member_rank_by_fraction_of_rise` in the JSON).
 
 ## 8. What the 2016 sequence was, in the ensemble's terms (A32)
 
@@ -208,6 +208,6 @@ the peak and within an hour above the design level.
    shorter event 32 to 38 % at mid-curve; the members' own waveforms 13 to
    38 % annually, unconverged), and the ensemble places it above 80 to 98 % of
    same-height floods in time above the toe. The shorter alternative is among
-   the shortest 2 % of members, so the flood-shape lever on the index
+   the shortest 3 % of members, so the flood-shape lever on the index
    difference (+0.26 to +0.53) brackets toward an extreme, not a typical, flood.
 5. No production value changes.
