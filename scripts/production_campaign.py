@@ -1203,6 +1203,18 @@ COMPANION_EXCLUSIONS: dict[str, str] = {
         "production re-run (about 30 min). Pinned by "
         "tests/test_results_annotations_study.py."
     ),
+    "scripts/loading_context_study.py": (
+        "Pol round-2 study (annotations A25, A29, A32), not a companion: it "
+        "reads the d4PDF band workbook, the Phase 3 hazard files and the 2016 "
+        "gauge records, reproduces the ADR-0023 shape statistics as a gate, and "
+        "touches no sweep, replay, posterior or annual table. Its figures are a "
+        "FIGURE_DRIVERS entry. Pinned by tests/test_loading_context_study.py."
+    ),
+    "scripts/fetch_tokoro_2016_stage.py": (
+        "One-off network fetch of the public August 2016 Futochanae (Tokoro) "
+        "record into data/processed/2016_event/; no model evaluation. Run only "
+        "to reproduce the committed extract."
+    ),
     "scripts/criterion_consequence_study.py": (
         "Green Light item 2 study, not a companion: it annualises the static "
         "branch beside the transient one and reads the 2016 replays, and its "
@@ -2329,6 +2341,26 @@ FIGURE_DRIVERS: list[dict[str, Any]] = [
             "initiation_2016_outcomes.png",
         ],
         "sources": ["docs/decisions/initiation-evidence-2016-study.json"],
+        "source_epoch": "json_generated",
+    },
+    {
+        # Pol round 2, A25 and A29: the August 2016 records of the Tokoro,
+        # Satsunai and Tokachi against their design levels, and the d4PDF
+        # annual-maximum hydrographs in both climates. The stats part writes
+        # the evidence JSON and the gitignored shape cache the figures read.
+        "label": "Loading context: 2016 on three rivers, d4PDF hydrographs",
+        "command": [PY, "scripts/loading_context_study.py", "figures"],
+        "requires": [
+            "docs/decisions/loading-context-study.json",
+            "results/loading_context/shapes.npz",
+            "data/raw/rating_curves/HQrelation_TokachiRiv_2017.csv",
+            "data/raw/hydrographs",
+        ],
+        "produces": [
+            "loading_2016_three_rivers.png",
+            "loading_d4pdf_hydrographs.png",
+        ],
+        "sources": ["docs/decisions/loading-context-study.json"],
         "source_epoch": "json_generated",
     },
 ]
