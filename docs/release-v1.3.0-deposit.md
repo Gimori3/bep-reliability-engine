@@ -1,7 +1,10 @@
 # 4TU.ResearchData deposit package for v1.3.0
 
-Prepared 2026-10-07 and rebuilt 2026-10-08 after the supervisor's second
-round of comments; the 2026-10-07 package was never uploaded and is superseded.
+Prepared 2026-10-07, rebuilt 2026-10-08 after the supervisor's second round
+of comments, and rebuilt again 2026-10-12 after the three-session final audit
+of the thesis (ADR-0058 and its study, figure modes, one dated note
+correction). The 2026-10-07 and 2026-10-08 packages were never uploaded and
+are superseded.
 **Not submitted or published.** It replaces the v1.2.0 package
 (`docs/release-v1.2.0-deposit.md`) in the same unpublished draft with reserved
 DOI `10.4121/8ffa1f3e-942e-4852-b02a-a259b9d6d00d`; do not create a second
@@ -9,11 +12,12 @@ deposit. The DOI returned 404 on 8 October 2026, consistent with reservation.
 The thesis title page and Appendix D cite Version 1.3.0 and this DOI.
 
 Why 1.3.0: the final thesis quotes engine work made after the v1.2.0 tag
-(ADR-0055 to ADR-0057 and eight companion studies), so its statement that all
+(ADR-0055 to ADR-0058 and nine companion studies), so its statement that all
 calculations used the cited release needs a release that contains that work.
 No production input, prior, persisted sweep, Phase 2 posterior or row of the
-Phase 3 annual table changed; two reported definitions did (the drained
-sections keep their prior, and the piping share is the first-breach split).
+Phase 3 annual table changed; three reported definitions did (the drained
+sections keep their prior, the piping share is the first-breach split, and the
+alternative readings are ranked on that same share).
 
 ## Release order
 
@@ -39,7 +43,8 @@ sections keep their prior, and the piping share is the first-breach split).
 * `README-DEPOSIT.md`: archive contents, installation, validation and input
   access conditions.
 
-The local delivery directory is `D:/repositories/pol_feedback_2026-10-06/deposit-v1.3.0/`.
+The local delivery directory is `D:/repositories/thesis_final_audit_2026-10-11/deposit-v1.3.0/`
+(the earlier `pol_feedback_2026-10-06/deposit-v1.3.0/` is superseded).
 The archive contains tracked source, tests, processed input tables, figures,
 documentation and compact evidence. It excludes machine-local agent files,
 the thesis source and PDF, credentials, third-party raw data, reference PDFs

@@ -134,6 +134,12 @@ The annual steady-state over transient piping factor rises from 2.05 / 1.84 /
 3.32 / 3.12 to 2.53 / 2.08 / 3.95 / 4.09 historically (posterior at all four; part
 `seepage`).
 
+*Correction (2026-10-12, final thesis audit, session 3):* "posterior at all four" is wrong. The driver
+(`scripts/results_annotations_study.py`, part `seepage`, key `annual_S_over_T_prior_bep`) divides the
+static by the transient annual piping contribution with both criteria on the truncated PRIOR at all four
+sections, before any 2016 update, piping only. The values above are unchanged; only their conditioning
+label was wrong. The thesis quotes them as the factor before any update (Appendix C.3, Section 7.4).
+
 ### 2.5 Sensitivity ranking (first-order correlation ratio of the transient indicator)
 
 KP 58.8 design 41.00 m: L 0.24, k_aq 0.20 (adopted); k_aq 0.23, L 0.08 (t = 0.85);

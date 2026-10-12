@@ -17,7 +17,7 @@ here. It lives in three places, all tracked:
 
 ---
 
-## [1.3.0] - 2026-10-08
+## [1.3.0] - 2026-10-12
 
 The revision after the supervisor's comments on the Green Light thesis
 (J. Pol, October 2026): eleven written comments (round 1) and 49 annotations on
@@ -27,10 +27,11 @@ the sections whose survival the model can represent, credits each both-fail
 year to the mechanism that breaks through first, and quotes eight new
 companion studies; this release supersedes 1.2.0 as the version the thesis
 cites. No production input, default, prior, persisted sweep, Phase 2 posterior
-or row of the Phase 3 annual table changed; two reported definitions did
-(ADR-0056 and ADR-0057). The Bayesian posterior provenance version stays at
-0.1.0. Prepared on 2026-10-07 after round 1 and rebuilt on 2026-10-08 after
-round 2; it was never tagged or published in between.
+or row of the Phase 3 annual table changed; three reported definitions did
+(ADR-0056 to ADR-0058). The Bayesian posterior provenance version stays at
+0.1.0. Prepared on 2026-10-07 after round 1, rebuilt on 2026-10-08 after
+round 2 and on 2026-10-12 after the three-session final audit of the thesis;
+it was never tagged or published in between.
 
 ### Changed
 
@@ -56,8 +57,16 @@ round 2; it was never tagged or published in between.
   piping and overflow would fail to the one that breaks through first (M7
   pipe-crossing times against the overflow model's failure times on the scaled
   canonical flood). KP 62.0 under +4 K becomes an overflow lead, 0.39
-  [0.35, 0.44]; the summed share is kept for ranking alternatives. Study:
-  `docs/decisions/crest-attribution-study.md`.
+  [0.35, 0.44]. Study: `docs/decisions/crest-attribution-study.md`.
+* **First-breach share for every alternative reading (ADR-0058):** each
+  alternative (bulk reading, conductivity means, foreland credit, the
+  critical-head ladder, the bounded seepage tail, the steady-state criterion,
+  the 100 and 40 m correlation lengths, the uniformity-term arms) is ranked on
+  the same first-breach share with its own pipe breach times, on the adopted
+  conditioning. No cell of any alternative changes its leading mechanism;
+  values move, most at KP 62.0 under warming. The summed share survives only,
+  named, where no first-breach value exists. Study:
+  `docs/decisions/first-breach-alternatives-study.md`.
 
 ### Added
 
@@ -94,6 +103,13 @@ round 2; it was never tagged or published in between.
 
 ### Fixed
 
+* `docs/decisions/seepage-length-lower-tail-study.md`: the annual
+  steady-state over transient piping factor (2.05 / 1.84 / 3.32 / 3.12 to
+  2.53 / 2.08 / 3.95 / 4.09) is computed on the prior at all four sections, not
+  the posterior as the note said (dated correction; values unchanged).
+* `phase3_figures.py`, `seepage_length_figures.py` and the gravel figure gain
+  an opt-in `--adopted` mode that draws the thesis figures on the adopted
+  configuration; default output is byte-identical.
 * `tests/test_drained_sections_scope.py`: the survival re-derivation now skips
   unless both untracked result trees it reads are present, instead of failing
   in a checkout that holds only `results/phase2`.
