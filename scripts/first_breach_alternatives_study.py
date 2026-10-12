@@ -92,6 +92,8 @@ SEED = 20261011
 REPLICATES = ras.REPLICATES
 BREACH_ROWS = ras.BREACH_ROWS
 SEGMENT_LENGTH_M = 200.0
+#: Committed decision records hold six significant figures (``ras._round``).
+GATE_RTOL = 1e-5
 CRACK = 0.3  # Pol SIE 2024 Eq. (6), the adopted crack coefficient (ADR-0055)
 
 OUT_DIR = REPO / "results" / "first_breach_alternatives"
@@ -114,6 +116,10 @@ ROW_ARMS: tuple[str, ...] = (
     "gravel_x1.80",
     "bulk_k_aq_field_geomean",
     "bulk_k_aq_field_toe",
+    "gravel_x1.25",
+    "gravel_x1.50",
+    "gravel_x2.20",
+    "gravel_x2.70",
 )
 #: Every traced arm, in the fixed order that sets its seed
 #: (``SEED + 101 * (position + 1)``), whatever subset a run traces.
@@ -131,7 +137,26 @@ ALL_ARMS: tuple[str, ...] = (
     "lambda_ac",
     "bulk_k_aq_field_geomean",
     "bulk_k_aq_field_toe",
+    "gravel_x1.25",
+    "gravel_x1.50",
+    "gravel_x2.20",
+    "gravel_x2.70",
+    "prior_baseline",
+    "cu_cap",
+    "cu_sand",
+    "cu_matrix",
 )
+#: Arms evaluated without the 2016 update at any section (the uniformity-term
+#: arms of ``uniformity-coefficient-study.md`` are prior-only, and the thesis
+#: states them so), with the prior baseline they are compared against.
+PRIOR_ARMS: tuple[str, ...] = ("prior_baseline", "cu_cap", "cu_sand", "cu_matrix")
+#: Where the uniformity-term sweeps live (``time_dependence_factor_study`` arms).
+UNIFORMITY_ROOT = Path(
+    "D:/repositories/pol_feedback_2026-10-06/artifacts/"
+    "session1_time_dependence_factor/u_arms"
+)
+UNIFORMITY = DECISIONS / "uniformity-coefficient-study.json"
+TDF = DECISIONS / "time-dependence-factor-study.json"
 LABELS: dict[str, str] = {
     "adopted": "adopted (matrix, adopted conductivity, no foreland credit)",
     "bulk": "bulk d70 reading",
@@ -144,10 +169,18 @@ LABELS: dict[str, str] = {
     "credit_half": "foreland credit, half of lambda_out_eff",
     "credit_full": "foreland credit, all of lambda_out_eff",
     "gravel_x1.80": "critical head x 1.8 (Dutch gravel allowance)",
+    "gravel_x1.25": "critical head x 1.25 (resistance ladder)",
+    "gravel_x1.50": "critical head x 1.5 (resistance ladder)",
+    "gravel_x2.20": "critical head x 2.2 (resistance ladder)",
+    "gravel_x2.70": "critical head x 2.7 (resistance ladder)",
     "seepage_tail_0.85": "seepage length bounded at 0.85 of its mean",
     "steady_state": "steady-state criterion, same head and gate (instantaneous growth)",
     "lambda_ac_100": "correlation length 100 m (two independent stretches)",
     "lambda_ac_40": "correlation length 40 m (five independent stretches)",
+    "prior_baseline": "adopted inputs before any 2016 update (uniformity baseline)",
+    "cu_cap": "uniformity term at its tested maximum (prior)",
+    "cu_sand": "uniformity term extrapolated to the sand fraction (prior)",
+    "cu_matrix": "uniformity term extrapolated to the matrix with fines (prior)",
 }
 
 
@@ -178,11 +211,16 @@ def _paths(results_root: Path, gravel_root: Path, arm: str, kp: float):
     if arm.startswith("credit_"):
         d = sens / "adr0052_foreland_credit"
         return d / f"{s}_{arm}.h5", d / "phase2" / f"{s}_{arm}_posterior.h5"
-    if arm == "gravel_x1.80":
+    if arm.startswith("gravel_x"):
+        c = arm[len("gravel_") :]
         return (
-            gravel_root / "arms" / f"{s}_hc_x1.80.h5",
-            gravel_root / "phase2" / f"{s}_hc_x1.80_posterior.h5",
+            gravel_root / "arms" / f"{s}_hc_{c}.h5",
+            gravel_root / "phase2" / f"{s}_hc_{c}_posterior.h5",
         )
+    if arm == "prior_baseline":
+        return results_root / f"{s}.h5", None
+    if arm.startswith("cu_"):
+        return UNIFORMITY_ROOT / f"{s}_{arm}.h5", None
     raise KeyError(arm)
 
 
@@ -211,12 +249,21 @@ def _arm_bundle(prior: Path, post: Path, label: str):
 
     run = load_phase1_run(prior)
     theta = np.asarray(run.theta, dtype=np.float64)
-    with h5py.File(post, "r") as h5:
-        (event,) = list(h5["events"].keys())
-        accept = np.asarray(h5["events"][event]["accept_trans"][:]).astype(bool)
-        names = [x.decode() if isinstance(x, bytes) else x for x in h5["param_names"]]
-        if not np.array_equal(np.asarray(h5["theta_matrix"][:]), theta):
-            raise SystemExit(f"{post.name}: theta differs from its Phase 1 run")
+    if post is None:  # a prior-only arm: every row is kept
+        with h5py.File(prior, "r") as h5:
+            names = [
+                x.decode() if isinstance(x, bytes) else x for x in h5["param_names"]
+            ]
+        accept = np.ones(theta.shape[0], dtype=bool)
+    else:
+        with h5py.File(post, "r") as h5:
+            (event,) = list(h5["events"].keys())
+            accept = np.asarray(h5["events"][event]["accept_trans"][:]).astype(bool)
+            names = [
+                x.decode() if isinstance(x, bytes) else x for x in h5["param_names"]
+            ]
+            if not np.array_equal(np.asarray(h5["theta_matrix"][:]), theta):
+                raise SystemExit(f"{post.name}: theta differs from its Phase 1 run")
     tran = np.asarray(run.result.failure_matrix_tran, dtype=bool)
     return SimpleNamespace(
         run=run,
@@ -433,6 +480,10 @@ def trace_part(results_root: Path, gravel_root: Path, arms: list[str]) -> dict:
                 b = _arm_bundle(prior, post, arm)
                 keep = np.ones(b.n, bool) if kp in UNCONDITIONED else b.accept
                 res[_label(kp)] = _time_order_masked(b, kp, keep, rng)
+            elif arm in PRIOR_ARMS:
+                prior, _ = _paths(results_root, gravel_root, arm, kp)
+                b = _arm_bundle(prior, None, arm)
+                res[_label(kp)] = _time_order_masked(b, kp, b.accept, rng)
             elif arm == "seepage_tail_0.85":
                 b = ie.Bundle(results_root, "undrained", kp)
                 m = b.L >= 0.85 * float(b.run.geometry["L"])
@@ -497,13 +548,14 @@ def _committed_system(arm: str) -> dict[tuple[str, str], float]:
                 out[(_label(kp), scen)] = float(
                     cell["arms"][arm[len("bulk_") :]]["p_annual_system"]
                 )
-    elif arm == "gravel_x1.80":
+    elif arm.startswith("gravel_x"):
         cells = json.loads(GRAVEL.read_text(encoding="utf-8"))["annual"]["cells"]
+        c = arm[len("gravel_") :]
         for kp in KPS:
             br = "T-prior" if kp in UNCONDITIONED else "T-post"
             for scen in ("historical", "+4K"):
                 out[(_label(kp), scen)] = float(
-                    cells[f"x1.80 {br} {scen} {_label(kp)}"]["p_system"]
+                    cells[f"{c} {br} {scen} {_label(kp)}"]["p_system"]
                 )
     elif arm == "seepage_tail_0.85":
         cells = json.loads(SEEPAGE_ADOPTED.read_text(encoding="utf-8"))["annual"]
@@ -511,6 +563,40 @@ def _committed_system(arm: str) -> dict[tuple[str, str], float]:
             for scen in ("historical", "+4K"):
                 out[(_label(kp), scen)] = float(
                     cells[f"t0.85 {scen} {_label(kp)}"]["p_system"]
+                )
+    elif arm in PRIOR_ARMS:
+        uc = json.loads(UNIFORMITY.read_text(encoding="utf-8"))["phase3"]["cells"]
+        for cell in uc:
+            entry = (
+                cell["baseline"]
+                if arm == "prior_baseline"
+                else cell["arms"][arm[len("cu_") :]]
+            )
+            out[(cell["section"], cell["scenario"])] = float(entry["p_system"])
+    elif arm.startswith("credit_"):
+        # ADR-0052 foreland credit: the prior-side record at the drained
+        # sections, the posterior side elsewhere (ADR-0056).
+        sides = {
+            "prior": ras._foreland_cells(
+                DECISIONS / "adr0052-foreland-credit-annualisation.json"
+            ),
+            "posterior": ras._foreland_cells(
+                DECISIONS / "adr0052-foreland-credit-annualisation-posterior.json"
+            ),
+        }
+        for kp in KPS:
+            side = "prior" if kp in UNCONDITIONED else "posterior"
+            for scen in ("historical", "+4K"):
+                cell = sides[side][(_label(kp), scen)]
+                out[(_label(kp), scen)] = float(cell["arms"][arm]["p_annual_system"])
+    elif arm == "steady_state":
+        # ADR-0055's annual steady-state branch before any update (thesis
+        # Table 7.4), as committed by time_dependence_factor_study.py.
+        br = json.loads(TDF.read_text(encoding="utf-8"))["annual"]["matrix"]
+        for kp in KPS:
+            for scen in ("historical", "+4K"):
+                out[(_label(kp), scen)] = float(
+                    br["branches"]["I-prior"][scen][_label(kp)]["p_annual_system"]
                 )
     return out
 
@@ -524,6 +610,9 @@ def _curves(A, results_root: Path, gravel_root: Path, arm: str) -> dict[float, A
             prior, post = _paths(results_root, gravel_root, arm, kp)
             src = prior if kp in UNCONDITIONED else post
             curves[kp] = load_bep_curve(src, branch="transient")
+        elif arm in PRIOR_ARMS:
+            prior, _ = _paths(results_root, gravel_root, arm, kp)
+            curves[kp] = load_bep_curve(prior, branch="transient")
         elif arm == "seepage_tail_0.85":
             b = ie.Bundle(results_root, "undrained", kp)
             m = b.L >= 0.85 * float(b.run.geometry["L"])
@@ -576,6 +665,22 @@ def _cell(A, pe_key, pe, peaks, table, packs, scenario) -> dict[str, Any]:
     }
 
 
+def _slim_order(order: Any) -> Any:
+    """Keep stage, pi and the failure count of every traced level."""
+    if isinstance(order, list):
+        return [
+            {
+                k: e[k]
+                for k in ("stage_m", "pi_pipe_first", "n_pipe_failures", "p_stretch")
+                if k in e
+            }
+            for e in order
+        ]
+    if isinstance(order, dict):
+        return {k: _slim_order(v) for k, v in order.items()}
+    return order
+
+
 def _leader(cell: dict[str, Any], key: str) -> str | None:
     s = cell.get(key)
     if cell["p_system"] <= 0.0 or s is None:
@@ -626,7 +731,7 @@ def annual_part(results_root: Path, gravel_root: Path, replicates: int) -> dict:
                         if c[f] is None or cell[f] is None:
                             if c[f] != cell[f]:
                                 raise SystemExit(f"adopted {f} differs {key}")
-                        elif abs(cell[f] / c[f] - 1) > 1e-9:
+                        elif abs(cell[f] / c[f] - 1) > GATE_RTOL:
                             raise SystemExit(f"adopted {f} differs {key}")
                 elif (_label(kp), scenario) in want:
                     w = want[(_label(kp), scenario)]
@@ -636,7 +741,7 @@ def annual_part(results_root: Path, gravel_root: Path, replicates: int) -> dict:
                         else abs(cell["p_system"])
                     )
                     worst = max(worst, d)
-                    if d > 1e-9:
+                    if d > GATE_RTOL:
                         raise SystemExit(
                             f"{arm} {key} system {cell['p_system']} != committed {w}"
                         )
@@ -649,7 +754,9 @@ def annual_part(results_root: Path, gravel_root: Path, replicates: int) -> dict:
 
     run_arm("adopted", adopted_curves, trace["adopted"])
     for arm in [
-        a for a in ROW_ARMS + ("seepage_tail_0.85", "steady_state") if a in trace
+        a
+        for a in ROW_ARMS + ("seepage_tail_0.85", "steady_state") + PRIOR_ARMS
+        if a in trace
     ]:
         run_arm(arm, _curves(A, results_root, gravel_root, arm), trace[arm])
     # Correlation length: the production length effect on the adopted curves.
@@ -686,7 +793,7 @@ def annual_part(results_root: Path, gravel_root: Path, replicates: int) -> dict:
                         fac = alt["lambda_ac_factors"][f"{scenario} {_label(kp)}"][
                             f"{lam:g}"
                         ]
-                        if abs(cell["p_system"] / (base * fac) - 1) > 1e-9:
+                        if abs(cell["p_system"] / (base * fac) - 1) > 2 * GATE_RTOL:
                             raise SystemExit(f"{arm} {key} differs from committed")
                         cell["bep_clamped_above_grid"] = rows[key][
                             "bep_clamped_above_grid"
@@ -716,6 +823,26 @@ def annual_part(results_root: Path, gravel_root: Path, replicates: int) -> dict:
                     ],
                 }
         orderings[arm] = rec
+    # Resistance ladder: the first common multiplier on H_c at which overflow
+    # leads on the first-breach share (gravel_grading_resistance_study's
+    # break-even, which used the summed share).
+    ladder = [("adopted", 1.0)] + [
+        (f"gravel_x{c:.2f}", c) for c in (1.25, 1.5, 1.8, 2.2, 2.7)
+    ]
+    break_even: dict[str, Any] = {}
+    for scenario in A.scenarios:
+        for kp in KPS:
+            shares = [
+                (c, cells[f"{a} {scenario} {_label(kp)}"]["first_breach_share_bep"])
+                for a, c in ladder
+                if f"{a} {scenario} {_label(kp)}" in cells
+            ]
+            break_even[f"{scenario} {_label(kp)}"] = {
+                "shares": shares,
+                "first_overflow_lead_at": next(
+                    (c for c, s in shares if s is not None and s < 0.5), None
+                ),
+            }
     return {
         "definition": {
             "share": "first-breach split of the two-branch union (ADR-0057), "
@@ -735,9 +862,14 @@ def annual_part(results_root: Path, gravel_root: Path, replicates: int) -> dict:
             "hazard_cache_unchanged": True,
         },
         "replicates": replicates,
-        "time_order": {k: v for k, v in trace.items() if k not in ("runtime_s",)},
+        # pi(h) per stage only; the quartiles and per-stage diagnostics stay in
+        # the gitignored stage file (the record must stay under 500 KB).
+        "time_order": _slim_order(
+            {k: v for k, v in trace.items() if k not in ("runtime_s",)}
+        ),
         "cells": cells,
         "orderings": orderings,
+        "resistance_ladder_break_even": break_even,
     }
 
 

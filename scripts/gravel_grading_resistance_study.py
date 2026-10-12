@@ -716,6 +716,13 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--n-jobs", type=int, default=4)
     parser.add_argument("--replicates", type=int, default=10_000)
+    parser.add_argument(
+        "--adopted",
+        action="store_true",
+        help="figures only: draw panels (b) to (d) on the adopted conditioning "
+        "(ADR-0056) and the shares on the first-breach measure (ADR-0058), as "
+        "resistance_multiplier_adopted.png.",
+    )
     args = parser.parse_args(argv)
     tick = time.time()
     if args.part == "arms":
@@ -729,7 +736,7 @@ def main(argv: list[str] | None = None) -> int:
     elif args.part == "resistant":
         _write_stage("resistant", resistant_part(args.results_root))
     elif args.part == "figures":
-        print(figures_part())
+        print(figures_part(adopted=args.adopted))
     elif args.part == "report":
         report_part()
     print(f"{args.part}: {time.time() - tick:.0f} s")
@@ -744,8 +751,20 @@ NAMED_READINGS = (
 )
 
 
-def figures_part() -> Path:
-    """The thesis figure: what a shared resistance multiplier does to each answer."""
+#: Sections whose adopted piping branch is the prior (ADR-0056).
+UNCONDITIONED = (58.8, 60.0)
+FIRST_BREACH = REPO / "docs" / "decisions" / "first-breach-alternatives-study.json"
+
+
+def figures_part(adopted: bool = False) -> Path:
+    """The thesis figure: what a shared resistance multiplier does to each answer.
+
+    ``adopted`` (2026-10-11): panels (b) to (d) read the prior branch at the
+    drained sections (ADR-0056) and the shares are the first-breach shares of
+    ``first-breach-alternatives-study.json`` (ADR-0058); panel (a), the 2016
+    rejection, is the as-if-undrained update in both modes. Written as
+    ``resistance_multiplier_adopted.png``; the default figure is unchanged.
+    """
     import matplotlib
 
     matplotlib.use("Agg")
@@ -756,6 +775,27 @@ def figures_part() -> Path:
 
     ev = json.loads(EVIDENCE.read_text(encoding="utf-8"))
     an = ev["annual"]["cells"]
+    fb = (
+        json.loads(FIRST_BREACH.read_text(encoding="utf-8"))["cells"]
+        if adopted
+        else None
+    )
+
+    def side(kp: float) -> str:
+        return "T-prior" if adopted and kp in UNCONDITIONED else "T-post"
+
+    def share(a: str, scen: str, kp: float) -> float:
+        cell = an[f"{a} {side(kp)} {scen} {_label(kp)}"]
+        if not (cell["p_bep"] > 0 or cell["p_overflow"] > 0):
+            return np.nan
+        if not adopted:
+            return cell["share_bep"]
+        arm = "adopted" if a == "x1.00" else f"gravel_{a}"
+        rec = fb[f"{arm} {scen} {_label(kp)}"]
+        if abs(rec["p_bep"] / cell["p_bep"] - 1) > 1e-5:
+            raise SystemExit(f"{arm} {scen} {_label(kp)}: P_BEP differs")
+        return rec["first_breach_share_bep"]
+
     xs = np.array((1.0,) + LADDER)
     width = fs.TEXTWIDTH_IN * 1.6
     scale = fs.scale_for(width)
@@ -795,7 +835,7 @@ def figures_part() -> Path:
             ls="none",
         )
         p_bep = np.array(
-            [an[f"{a} T-post historical {_label(kp)}"]["p_bep"] for a in ARM_KEYS]
+            [an[f"{a} {side(kp)} historical {_label(kp)}"]["p_bep"] for a in ARM_KEYS]
         )
         pos = p_bep > 0
         ax_ap.plot(xs[pos], p_bep[pos], color=color, lw=1.3 * scale)
@@ -810,18 +850,7 @@ def figures_part() -> Path:
             ls="none",
         )
         for ax, scen in ((ax_sh, "historical"), (ax_sw, "+4K")):
-            sh = np.array(
-                [
-                    (
-                        an[f"{a} T-post {scen} {_label(kp)}"]["share_bep"]
-                        if an[f"{a} T-post {scen} {_label(kp)}"]["p_bep"] > 0
-                        or an[f"{a} T-post {scen} {_label(kp)}"]["p_overflow"] > 0
-                        else np.nan
-                    )
-                    for a in ARM_KEYS
-                ],
-                dtype=float,
-            )
+            sh = np.array([share(a, scen, kp) for a in ARM_KEYS], dtype=float)
             ax.plot(xs, sh, color=color, lw=1.3 * scale)
             ax.plot(xs, sh, marker, color=color, ms=3.4 * scale, ls="none")
     for ax in axes.ravel():
@@ -865,7 +894,8 @@ def figures_part() -> Path:
     fs.title(fig, "What a higher piping resistance would change", scale=scale)
     fs.legend_below(fig, handles, labels, scale=scale, ncol=4)
     fs.layout(fig, scale=scale, legend_rows=2)
-    return fs.save(fig, FIGURE, mirror=OUT_DIR / "figures")
+    name = FIGURE.replace(".png", "_adopted.png") if adopted else FIGURE
+    return fs.save(fig, name, mirror=OUT_DIR / "figures")
 
 
 # --------------------------------------------------------------------------- #

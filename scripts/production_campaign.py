@@ -1217,6 +1217,22 @@ COMPANION_EXCLUSIONS: dict[str, str] = {
         "system probability, and re-runs nothing. Its figure is a "
         "FIGURE_DRIVERS entry. Pinned by tests/test_time_effect_in_proportion.py."
     ),
+    "scripts/first_breach_alternatives_study.py": (
+        "Final-audit study (ADR-0058), not a companion: it re-runs no sweep or "
+        "replay. It reads the persisted alternative sweeps and their 2016 "
+        "replays, re-traces pipe breach times with the ADR-0057 machinery of "
+        "results_annotations_study.py (gated against M8's end state and the "
+        "committed adopted time order), and annualises through the production "
+        "Phase 3 path with each alternative's curve swapped in (gated against "
+        "the committed annual values). It produces no campaign artifact and is "
+        "re-run by hand after a production re-run (about an hour). Pinned by "
+        "tests/test_first_breach_alternatives_study.py."
+    ),
+    "scripts/adopted_alternatives_figures.py": (
+        "Figure driver (final audit, ADR-0056/0058): draws the conductivity-"
+        "bracket figures on the adopted configuration from committed evidence "
+        "JSON only. A FIGURE_DRIVERS entry."
+    ),
     "scripts/fetch_tokoro_2016_stage.py": (
         "One-off network fetch of the public August 2016 Futochanae (Tokoro) "
         "record into data/processed/2016_event/; no model evaluation. Run only "
@@ -1900,7 +1916,16 @@ FIGURE_DRIVERS: list[dict[str, Any]] = [
         "label": "phase 3 RQ3+RQ4",
         "command": [PY, "scripts/phase3_figures.py"],
         "requires": ["results/system_integration/phase3/rq4_annual.csv"],
-        "produces": ["phase3_*.png"],
+        # Exact names since 2026-10-11: the adopted-configuration entry below
+        # draws phase3_*_adopted.png, and a glob here would claim them too.
+        "produces": [
+            "phase3_dominance_profile.png",
+            "phase3_system_fragility_bep_sections.png",
+            "phase3_rq4_four_sections.png",
+            "phase3_climate_shift.png",
+            "phase3_rq4_attribution.png",
+            "phase3_event_based_validation.png",
+        ],
         # The RQ4 headline figure also depicts the committed hazard-sampling
         # intervals (2026-08-20), so staleness in that record must redraw it
         # too. The driver additionally refuses to draw if the record's point
@@ -1924,7 +1949,11 @@ FIGURE_DRIVERS: list[dict[str, Any]] = [
         "label": "seepage-length L study",
         "command": [PY, "scripts/seepage_length_figures.py"],
         "requires": ["docs/decisions/seepage-length-L-study.md"],
-        "produces": ["seepage_length_*.png"],
+        "produces": [
+            "seepage_length_marginal.png",
+            "seepage_length_marginal_ratio.png",
+            "seepage_length_system_and_ceiling.png",
+        ],
         "sources": ["results/sensitivity/seepage_length/*.json"],
     },
     {
@@ -2386,6 +2415,91 @@ FIGURE_DRIVERS: list[dict[str, Any]] = [
         ],
         "produces": ["time_effect_in_proportion.png"],
         "sources": ["docs/decisions/time-effect-in-proportion-study.json"],
+    },
+    {
+        # Final audit (ADR-0056): the Phase 3 figures with the prior piping
+        # branch at the drained sections. Exact names: the production entry's
+        # ``phase3_*.png`` glob also matches them, and this entry is what
+        # redraws them, with the adopted records among its sources.
+        "label": "Phase 3 figures on the adopted configuration",
+        "command": [PY, "scripts/phase3_figures.py", "--adopted"],
+        "requires": [
+            "results/system_integration/phase3/rq4_annual.csv",
+            "results/system_integration/phase3/rq3_segment_curves_matrix_prior.json",
+            "docs/decisions/drained-section-conditioning-adopted.json",
+        ],
+        "produces": [
+            "phase3_dominance_profile_adopted.png",
+            "phase3_system_fragility_bep_sections_adopted.png",
+            "phase3_climate_shift_adopted.png",
+            "phase3_rq4_attribution_adopted.png",
+        ],
+        "sources": [
+            "results/system_integration/phase3/*.json",
+            "results/system_integration/phase3/rq4_annual.csv",
+            "docs/decisions/drained-section-conditioning-adopted.json",
+            "docs/decisions/drained-section-conditioning-alternatives.json",
+        ],
+    },
+    {
+        # Final audit (ADR-0056): panel B of the seepage-length system figure
+        # composed on the adopted configuration.
+        "label": "Seepage-length system figure on the adopted configuration",
+        "command": [PY, "scripts/seepage_length_figures.py", "--adopted"],
+        "requires": [
+            "docs/decisions/seepage-length-L-study.md",
+            "results/system_integration/phase3/rq4_annual.csv",
+        ],
+        "produces": ["seepage_length_system_and_ceiling_adopted.png"],
+        "sources": [
+            "results/sensitivity/seepage_length/*.json",
+            "results/system_integration/phase3/rq4_annual.csv",
+        ],
+    },
+    {
+        # Final audit (ADR-0056, ADR-0058): the conductivity-bracket figures
+        # on the adopted conditioning, shares on the first-breach measure.
+        "label": "Conductivity bracket on the adopted configuration",
+        "command": [
+            PY,
+            "scripts/adopted_alternatives_figures.py",
+            "--share",
+            "first_breach",
+        ],
+        "requires": [
+            "docs/decisions/conductivity-bracket-annualisation.json",
+            "docs/decisions/conductivity-bracket-posterior-side.json",
+            "docs/decisions/first-breach-alternatives-study.json",
+        ],
+        "produces": [
+            "conductivity_bracket_annual_span_adopted.png",
+            "conductivity_bracket_both_d70_adopted.png",
+        ],
+        "sources": [
+            "docs/decisions/conductivity-bracket-annualisation*.json",
+            "docs/decisions/conductivity-bracket-posterior-side*.json",
+            "docs/decisions/first-breach-alternatives-study.json",
+        ],
+    },
+    {
+        # Final audit (ADR-0056, ADR-0058): the resistance-multiplier figure
+        # with the adopted conditioning and first-breach shares.
+        "label": "Resistance multiplier on the adopted configuration",
+        "command": [
+            PY,
+            "scripts/gravel_grading_resistance_study.py",
+            "figures",
+            "--adopted",
+        ],
+        "requires": [
+            "docs/decisions/gravel-grading-resistance-study.json",
+            "docs/decisions/first-breach-alternatives-study.json",
+        ],
+        "produces": ["resistance_multiplier_adopted.png"],
+        "sources": [
+            "docs/decisions/gravel-grading-resistance-study.json",
+            "docs/decisions/first-breach-alternatives-study.json",
+        ],
     },
 ]
 

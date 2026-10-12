@@ -152,9 +152,52 @@ def fig_marginal_ratio() -> None:
     print("wrote", out)
 
 
+#: ``--adopted`` (final audit, 2026-10-11): panel B composes the four sections
+#: on the adopted configuration of ADR-0056 (prior piping branch at KP 58.8 and
+#: 60.0, posterior elsewhere) and the figure is written as
+#: ``seepage_length_system_and_ceiling_adopted.png``. Panel C is the 2016
+#: update as if undrained in both modes. Off by default.
+ADOPTED = False
+RQ4_CSV = REPO / "results" / "system_integration" / "phase3" / "rq4_annual.csv"
+
+
+def _adopted_reach_bounds() -> dict[str, dict[str, float]]:
+    """Independent and comonotone unions of the four adopted piping branches."""
+    import csv
+
+    out: dict[str, dict[str, float]] = {}
+    with open(RQ4_CSV, encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    for scenario in ("historical", "+4K"):
+        pf = []
+        for kp in (57.4, 58.8, 60.0, 62.0):
+            source = "prior" if kp in (58.8, 60.0) else "posterior"
+            (row,) = [
+                r
+                for r in rows
+                if r["scenario"] == scenario
+                and r["river"] == "Tokachi"
+                and abs(float(r["kp"]) - kp) < 1e-9
+                and r["bep_source"] == source
+                and r["d70"] == "matrix"
+                and r["lambda_ac_m"] == "250.0"
+                and r["surface_variant"] == "primary"
+            ]
+            pf.append(float(row["p_annual_bep"]))
+        arr = np.asarray(pf, float)
+        out[f"{scenario}/adopted"] = {
+            "p_bep_nodes": arr.tolist(),
+            "reach_union_independent": float(1.0 - np.prod(1.0 - arr)),
+            "reach_union_comonotone": float(arr.max()),
+        }
+    return out
+
+
 def fig_system_and_ceiling() -> None:
     sysd = json.loads((REC / "system_correlation.json").read_text())
     ceil = json.loads((REC / "phase2_ceiling.json").read_text())
+    if ADOPTED:
+        sysd["reach_union_bounds_from_rq4"] = _adopted_reach_bounds()
     scale = fs.scale_for(14, 1.0)
     fs.style(scale)
     fig, axes = plt.subplots(1, 3, figsize=(14, 4.6), gridspec_kw={"wspace": 0.42})
@@ -184,7 +227,8 @@ def fig_system_and_ceiling() -> None:
     # Panel B: production 4-node reach union — independent vs comonotone.
     ax = axes[1]
     b = sysd["reach_union_bounds_from_rq4"]
-    keys = [k for k in ("historical/posterior", "+4K/posterior") if k in b]
+    src = "adopted" if ADOPTED else "posterior"
+    keys = [k for k in (f"historical/{src}", f"+4K/{src}") if k in b]
     x = np.arange(len(keys))
     ind = [b[k]["reach_union_independent"] for k in keys]
     com = [b[k]["reach_union_comonotone"] for k in keys]
@@ -231,18 +275,30 @@ def fig_system_and_ceiling() -> None:
         fig, "Seepage length, reach probability and survival updating", scale=scale
     )
     fs.layout(fig, scale=scale, legend_rows=1)
-    out = FIG / "seepage_length_system_and_ceiling.png"
+    name = "seepage_length_system_and_ceiling"
+    out = FIG / (f"{name}_adopted.png" if ADOPTED else f"{name}.png")
     fig.savefig(out, dpi=160, bbox_inches="tight")
     plt.close(fig)
     print("wrote", out)
 
 
 def main() -> None:
-    # This driver takes no arguments. The parser exists so that a probe
-    # (--help, a stray flag) is inert instead of redrawing the figures.
-    argparse.ArgumentParser(description=__doc__.splitlines()[0]).parse_args()
+    # Without arguments the driver redraws its three figures; the parser also
+    # makes a probe (--help, a stray flag) inert.
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument(
+        "--adopted",
+        action="store_true",
+        help="Redraw only the system figure with panel B on the adopted "
+        "configuration of ADR-0056, as *_adopted.png.",
+    )
+    global ADOPTED
+    ADOPTED = parser.parse_args().adopted
 
     FIG.mkdir(parents=True, exist_ok=True)
+    if ADOPTED:
+        fig_system_and_ceiling()
+        return
     fig_marginal()
     fig_marginal_ratio()
     fig_system_and_ceiling()

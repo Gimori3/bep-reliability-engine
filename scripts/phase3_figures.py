@@ -21,6 +21,11 @@ committed surface curves and renders six figures to ``docs/figures/``:
 
 Usage: ``python scripts/phase3_figures.py`` (after ``phase3_campaign.py``
 and ``validate_event_based_surface.py``).
+
+``python scripts/phase3_figures.py --adopted`` (2026-10-11) redraws figures 1,
+2, 4 and 5 on the adopted configuration of ADR-0056 (the piping branch is the
+prior at KP 58.8 and 60.0 and the 2016 posterior at KP 57.4 and 62.0) as
+``*_adopted.png``; the production figures are not touched.
 """
 
 from __future__ import annotations
@@ -136,10 +141,41 @@ def style() -> None:
     )
 
 
+#: ``--adopted`` (final audit, 2026-10-11): draw the figures on the adopted
+#: configuration of ADR-0056, with the prior piping branch at the two drained
+#: sections and the 2016 posterior elsewhere, and write them beside the
+#: production figures with an ``_adopted`` suffix. Off by default, so the
+#: production figures are unchanged.
+ADOPTED = False
+UNCONDITIONED_KPS = (58.8, 60.0)
+ADOPTED_RECORD = REPO / "docs/decisions/drained-section-conditioning-adopted.json"
+ALTERNATIVES_RECORD = (
+    REPO / "docs/decisions/drained-section-conditioning-alternatives.json"
+)
+
+
+def _out(name: str) -> Path:
+    """Output path, suffixed ``_adopted`` in the adopted mode."""
+    if ADOPTED:
+        stem, ext = name.rsplit(".", 1)
+        name = f"{stem}_adopted.{ext}"
+    return FIGS / name
+
+
+def _source_mask(df: pd.DataFrame) -> pd.Series:
+    """The piping branch each row composes: posterior, or ADR-0056's prior."""
+    if not ADOPTED:
+        return df.bep_source == "posterior"
+    drained = (df.river == "Tokachi") & df.kp.round(1).isin(UNCONDITIONED_KPS)
+    return (drained & (df.bep_source == "prior")) | (
+        ~drained & (df.bep_source == "posterior")
+    )
+
+
 def _primary(df: pd.DataFrame) -> pd.DataFrame:
     return df[
         (df.d70 == "matrix")
-        & (df.bep_source == "posterior")
+        & _source_mask(df)
         & (df.lambda_ac_m == 250.0)
         & (df.surface_variant == "primary")
     ]
@@ -270,7 +306,7 @@ def fig_dominance_profile(df: pd.DataFrame) -> None:
         scale=scale,
     )
     fs.layout(fig, scale=scale, legend_rows=1)
-    fig.savefig(FIGS / "phase3_dominance_profile.png", dpi=160, bbox_inches="tight")
+    fig.savefig(_out("phase3_dominance_profile.png"), dpi=160, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -343,7 +379,7 @@ def fig_bep_sections(curves: dict) -> None:
     )
     fs.layout(fig, scale=scale, legend_rows=1)
     fig.savefig(
-        FIGS / "phase3_system_fragility_bep_sections.png",
+        _out("phase3_system_fragility_bep_sections.png"),
         dpi=160,
         bbox_inches="tight",
     )
@@ -395,6 +431,8 @@ def fig_climate_shift(df: pd.DataFrame) -> None:
             & (df.surface_variant == "primary")
             & (df.lambda_ac_m == 40.0)
         ]
+        if ADOPTED:
+            brack = _adopted_lambda40(base, river)
         for scen in ("historical", "+4K"):
             color = SCEN_COLORS[scen]
             b = brack[brack.scenario == scen].sort_values("kp")
@@ -440,8 +478,62 @@ def fig_climate_shift(df: pd.DataFrame) -> None:
         scale=scale,
     )
     fs.layout(fig, scale=scale, legend_rows=2)
-    fig.savefig(FIGS / "phase3_climate_shift.png", dpi=160, bbox_inches="tight")
+    fig.savefig(_out("phase3_climate_shift.png"), dpi=160, bbox_inches="tight")
     plt.close(fig)
+
+
+def _adopted_lambda40(base: pd.DataFrame, river: str) -> pd.DataFrame:
+    """The 40 m bracket on the adopted rows, from the committed factors.
+
+    Production carries the correlation-length bracket for the posterior arm
+    only; ``results_annotations_study.py alternatives`` recomposed it on the
+    adopted rows and recorded the factor on the annual system probability,
+    gated against the production posterior rows.
+    """
+    factors = json.loads(ALTERNATIVES_RECORD.read_text(encoding="utf-8"))[
+        "lambda_ac_factors"
+    ]
+    rows = base[(base.river == river) & base.mechanisms.str.contains("bep")].copy()
+    if rows.empty:
+        return rows
+    vals = []
+    for _, r in rows.iterrows():
+        key = f"{r.scenario} KP {float(r.kp):.1f}"
+        vals.append(float(r.p_annual_system) * float(factors[key]["40"]))
+    rows["p_annual_system"] = vals
+    return rows
+
+
+def _adopted_attribution(attr: dict) -> dict:
+    """Duration and compound strata of the adopted annual system probability.
+
+    From ``drained-section-conditioning-adopted.json`` /strata (the same
+    per-year system values as Table 7.5); gate: at KP 57.4 and 62.0, where the
+    adopted branch is the production posterior, the record reproduces
+    ``rq4_attribution.json``.
+    """
+    strata = json.loads(ADOPTED_RECORD.read_text(encoding="utf-8"))["strata"]
+    out: dict = {}
+    for key in attr:
+        label = f"KP {float(key.split('KP')[-1]):.1f}"
+        dur, comp = strata[f"{label} duration"], strata[f"{label} compound"]
+        out[key] = {}
+        for scen, tag in (("historical", "hist"), ("+4K", "warm")):
+            mine = {
+                "p_f_long_loading": dur[f"p_long_{tag}"]["point"],
+                "p_f_short_loading": dur[f"p_short_{tag}"]["point"],
+                "p_f_compound": comp[f"p_long_{tag}"]["point"],
+            }
+            if float(key.split("KP")[-1]) not in UNCONDITIONED_KPS:
+                for name, value in mine.items():
+                    ref = attr[key][scen][name]
+                    if abs(value / ref - 1.0) > 1e-5:
+                        raise AssertionError(
+                            f"adopted strata differ from rq4_attribution.json at "
+                            f"{key} {scen} {name}: {value} against {ref}"
+                        )
+            out[key][scen] = mine
+    return out
 
 
 def fig_rq4_four_sections(df: pd.DataFrame) -> None:
@@ -663,7 +755,7 @@ def fig_attribution(attr: dict) -> None:
         scale=scale,
     )
     fs.layout(fig, scale=scale, legend_rows=1)
-    fig.savefig(FIGS / "phase3_rq4_attribution.png", dpi=160, bbox_inches="tight")
+    fig.savefig(_out("phase3_rq4_attribution.png"), dpi=160, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -779,15 +871,37 @@ def fig_event_validation(df: pd.DataFrame, val: dict) -> None:
 
 
 def main() -> None:
-    # This driver takes no arguments. The parser exists so that a probe
-    # (--help, a stray flag) is inert instead of running the whole study.
-    argparse.ArgumentParser(description=__doc__.splitlines()[0]).parse_args()
+    # Without arguments the driver renders the production figures; the parser
+    # also makes a probe (--help, a stray flag) inert.
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument(
+        "--adopted",
+        action="store_true",
+        help="Draw the adopted configuration of ADR-0056 (prior piping branch at "
+        "KP 58.8 and 60.0) into *_adopted.png beside the production figures.",
+    )
+    global ADOPTED
+    ADOPTED = parser.parse_args().adopted
 
     style()
     FIGS.mkdir(parents=True, exist_ok=True)
     df = pd.read_csv(P3 / "rq4_annual.csv")
     curves = json.loads((P3 / "rq3_segment_curves_matrix_posterior.json").read_text())
     attr = json.loads((P3 / "rq4_attribution.json").read_text())
+    if ADOPTED:
+        # The piping branch is no longer the posterior at every section.
+        global MECH_LABELS
+        MECH_LABELS = {**MECH_LABELS, "bep": "BEP (transient, adopted conditioning)"}
+        prior = json.loads((P3 / "rq3_segment_curves_matrix_prior.json").read_text())
+        for key in ("Tokachi_KP58.8", "Tokachi_KP60"):
+            curves[key] = prior[key]
+        attr = _adopted_attribution(attr)
+        fig_dominance_profile(df)
+        fig_bep_sections(curves)
+        fig_climate_shift(df)
+        fig_attribution(attr)
+        print(f"adopted-configuration figures written to {FIGS}")
+        return
 
     fig_dominance_profile(df)
     fig_bep_sections(curves)

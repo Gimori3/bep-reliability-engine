@@ -57,7 +57,9 @@ total risk figure."* `crest-attribution-study.md` found:
    mechanism) are still reported beside the share.
 3. The alternative-reading companions keep the summed-contribution share as their
    ranking measure, labelled as such; a cell within about 0.1 of one half is not
-   called resolved on it.
+   called resolved on it. *(Superseded 2026-10-11 by ADR-0058: the alternatives
+   are ranked by the first-breach share too, measured in
+   `first-breach-alternatives-study.md`; no ordering changed.)*
 4. Every per-event statement at a section's "top attainable stage" names whether
    that stage lies above the overflow crest (it does at KP 57.4 and KP 62.0).
 
