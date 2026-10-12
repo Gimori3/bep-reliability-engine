@@ -981,3 +981,11 @@ Surface curves, hazard and every bulk-reading number are unchanged.
 | Drained sections on the measured berm | KP 60.0 falls to last only under warming | KP 60.0 is last in both climates on both readings |
 | Climate attribution | frequency leads inside the long stratum at all four | at three; severity leads at KP 60.0, resolvably (0.37 [0.29, 0.47]) |
 | Sixty-year check | 0.65 expected, 0.52 none observed | 0.46 expected, 0.63 none observed |
+
+## Addendum, 2026-10-07 - drained sections unconditioned (ADR-0056) and first-breach shares (ADR-0057); authoritative where it differs from everything above
+
+**Adopted piping branch.** At KP 58.8 and 60.0 the adopted annual piping branch is the Phase 1 prior (the `matrix`/`prior` rows of `rq4_annual.csv`); at KP 57.4 and 62.0 it stays the posterior. The `matrix`/`posterior` rows at the drained sections are the update as if the levee had neither berm nor drain, an upper bound on what the 2016 survival could teach. Historical annual system probability 6.85e-3 [4.96, 8.94] and 0.322e-3 [0.17, 0.50] (was 6.18 and 0.315); +4 K 38.3e-3 and 4.28e-3; climate ratios 15.3 / 5.6 / 13.3 / 13.4. Ranks among the four sections and among the 114 nodes, and every leading mechanism under the summed measure, are unchanged.
+
+**Mechanism shares.** The adopted share divides the annual system probability by first breach (`crest-attribution-study.md`): historical 1.00 / 0.98 / 1.00 / 0.80, +4 K 0.96 / 0.96 / 1.00 / **0.39 [0.35, 0.44]**. The KP 62.0 warming cell is an **overflow lead**, not a tie: 61 % of its piping contribution comes from years above the overflow model's crest, where overtopping usually breaches first. The summed-contribution share (`dominance_share`, the `share_bep` column) is unchanged and stays the ranking measure for the alternative-reading companions.
+
+**What did not change.** The system probability, its intervals, every curve, every persisted artifact and every companion JSON. Numbers of record: `docs/decisions/drained-section-conditioning-adopted.json` (Table 7.1 values, first-breach shares, ranks, two-stratum terms, drained-section readings, sixty-year check) and `drained-section-conditioning-alternatives.json` (alternative readings with the prior side at the drained sections).

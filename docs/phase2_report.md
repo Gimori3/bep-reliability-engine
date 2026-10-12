@@ -191,6 +191,12 @@ its caveats (the M5 gate models blanket initiation, not boil visibility;
 reach-scale survey; deliberately conservative Terzaghi collapse) are in
 ADR-0036 and keep it a sensitivity, not the baseline.
 
+> **Dated correction (2026-10-07).** The committee report documents the
+> absence of sand boils only near the three breach sites, not at the study
+> reaches, and no reach-scale survey of KP 57 to 62 is on record; the
+> observation is "no boil recorded" (`initiation-evidence-2016-study.md`
+> section 2, ADR-0036 dated correction).
+
 ---
 
 ## 5. Architectural decisions (full list in ADR-0034/0035/0036)
@@ -391,10 +397,18 @@ the stage record).
    Production N = 1e5 shrinks this by a factor of 5.
 5. **The initiation variant's observational basis** (no sand boils) is
    reach-scale, not per-section; it stays a sensitivity.
+   *Dated correction (2026-10-07):* there is no reach-scale survey on
+   record either; see point 6 and `initiation-evidence-2016-study.md`.
 6. **Survival evidence is treated as certain.** No likelihood softening
    for the possibility of unobserved distress; with the committee report
    explicit about the study reaches, this is the thesis's stated
    position.
+   *Dated correction (2026-10-07):* the committee report is not explicit
+   about the study reaches (its no-boil statements cover the breach sites
+   only). The no-breach observation itself is certain (the report lists the
+   system's only three breaches); the no-boil observation is not, and
+   `initiation-evidence-2016-study.md` softens it with a detection
+   probability.
 
 ---
 
@@ -556,7 +570,9 @@ zero, i.e. the initiation margin and the progression margin separate
 cleanly at the governing section. As documented in ADR-0036 and
 section 5, the strict no-initiation reading of the reach-scale no-boil
 survey is far too strong for these gate priors; it stays a qualitative
-sensitivity and is not a deliverable posterior.
+sensitivity and is not a deliverable posterior. (Dated correction 2026-10-07: "no-boil
+record", not "survey"; the strict and soft readings are now measured in
+`initiation-evidence-2016-study.md`.)
 
 **C_e prior (evidence-conditionality sensitivity; 2026-07-19,
 `docs/decisions/adr0026-ce-prior-study.md`).** The two headline numbers of
@@ -862,3 +878,7 @@ kept under `results/superseded_d70rebase_20260924T163630/`. Evidence:
 | On the measured berm (ADR-0050), KP 58.8 / 60.0 | 1.50 / 0.53 % | 0.90 / 0.01 % (899 / 14 rows) |
 | No-initiation criterion | 66.4 / 99.6 / 99.3 / 39.6 % | unchanged (initiation does not see d70) |
 | 2011 bounding replay | one realization, 0.001 %, one stratum | one realization, 0.001 %, one stratum |
+
+## Addendum, 2026-10-07 - the drained sections are not conditioned (ADR-0056); authoritative where it differs from everything above
+
+The KP 58.8 and 60.0 posteriors condition the as-if-undrained foundation on surviving 2016 through a levee with neither berm nor drain; the levee that survived had both (built 1999 to 2003). On the measured berm with an inert drain, the least protective configuration that existed, the same record rejects 0.899 % and 0.014 % (as if undrained 3.813 % and 0.226 %), and any drain relief only lowers that (`drained-section-conditioning-study.md`). By owner decision those two posteriors are no longer adopted; they are reported as the upper bound on what the survival could teach. With KP 57.4 (16 rows) and KP 62.0 (none) the 2016 survival constrains no section materially. The transient/static likelihood ratio at KP 58.8 is at most 1.34 (as if undrained), 1.13 on the berm with an inert drain.

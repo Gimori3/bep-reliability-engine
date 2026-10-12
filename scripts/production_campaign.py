@@ -1144,6 +1144,100 @@ COMPANION_EXCLUSIONS: dict[str, str] = {
         "by hand. Its internal-stability block reads only tracked data and is "
         "pinned by tests/test_uniformity_coefficient_study.py."
     ),
+    "scripts/time_dependence_factor_study.py": (
+        "ADR-0055 study, not a companion: it evaluates the same-head, same-gate "
+        "steady-state comparator in closed form on the persisted sweeps (gated "
+        "on reproducing every persisted static column bit for bit), re-runs the "
+        "ADR-0047 seepage-length and Green Light item 1 uniformity arms into its "
+        "own gitignored results, annualises through the production Phase 3 path "
+        "(its gate 1 asserts the production table field for field) and runs "
+        "Pol's river base case. It produces no campaign artifact and is re-run "
+        "by hand after a production re-run (about 3 h with the arm sweeps). "
+        "Pinned by tests/test_time_dependence_factor.py."
+    ),
+    "scripts/gravel_grading_resistance_study.py": (
+        "Pol comments 4 and 5 study, not a companion: it re-runs the matrix "
+        "sweeps with an exact multiplier on the single-source H_c (the bedding "
+        "angle route of the uniformity study) into its own gitignored results, "
+        "replays 2016 with the production Phase 2 settings and annualises "
+        "through the production Phase 3 path (its gate asserts the production "
+        "table field for field). It produces no campaign artifact and is re-run "
+        "by hand after a production re-run (about 3 h with the arm sweeps and "
+        "replays). Pinned by tests/test_gravel_grading_resistance_study.py."
+    ),
+    "scripts/initiation_evidence_2016_study.py": (
+        "Pol comments 3, 6, 7, 9 and 11 study, not a companion: it re-runs no "
+        "sweep or replay. It reads the persisted 2016 replays (gated on the "
+        "closed-form gate reproducing every stored initiation flag), weights "
+        "the persisted rows by a detection probability for an opened exit, "
+        "annualises through the production Phase 3 path (its gate asserts the "
+        "production table field for field and the rebuilt no-breach arm "
+        "against production) and reads the hazard for return periods. It "
+        "produces no campaign artifact and is re-run by hand after a "
+        "production re-run (under a minute). Pinned by "
+        "tests/test_initiation_evidence_2016_study.py."
+    ),
+    "scripts/why_no_piping_2016_study.py": (
+        "Pol comment 8 study, not a companion. It reads the persisted sweeps "
+        "and 2016 replays through the session 3 driver's row bundles (gated on "
+        "the closed-form gate and an M8 replay reproducing every stored 2016 "
+        "flag), evaluates gate-only diagnostics in closed form, replays 2016 "
+        "through M8 with the ADR-0050 relief knob, evaluates one design-grid "
+        "stage per section and writes only its own gitignored results and "
+        "evidence JSON. It produces no campaign artifact and is re-run by hand "
+        "after a production re-run (about a minute). Its regex footprint is "
+        "below the enumeration floor (it composes run stems through the "
+        "ADR-0055 driver); it is listed so the classification is explicit. "
+        "Pinned by tests/test_why_no_piping_2016_study.py."
+    ),
+    "scripts/results_annotations_study.py": (
+        "Pol round-2 study (annotations A19, A13, A35), not a companion: it "
+        "re-runs no sweep or replay. It reads the persisted sweeps, the 2016 "
+        "replays and the 10^6 ladders through the session 3 driver's row "
+        "bundles, masks or reweights rows, re-runs the M7 kernel with "
+        "trajectories on failing rows only (gated against M8's end state) and "
+        "the seeded overflow draws (gated against the model), and annualises "
+        "through the production Phase 3 path (its gate asserts the production "
+        "table field for field). It records the adopted ADR-0056/0057 table. "
+        "It produces no campaign artifact and is re-run by hand after a "
+        "production re-run (about 30 min). Pinned by "
+        "tests/test_results_annotations_study.py."
+    ),
+    "scripts/loading_context_study.py": (
+        "Pol round-2 study (annotations A25, A29, A32), not a companion: it "
+        "reads the d4PDF band workbook, the Phase 3 hazard files and the 2016 "
+        "gauge records, reproduces the ADR-0023 shape statistics as a gate, and "
+        "touches no sweep, replay, posterior or annual table. Its figures are a "
+        "FIGURE_DRIVERS entry. Pinned by tests/test_loading_context_study.py."
+    ),
+    "scripts/time_effect_in_proportion.py": (
+        "Pol round-2 study (annotation A24 with A10), not a companion: it reads "
+        "only committed evidence JSON under docs/decisions/, sets the time "
+        "effect and every tested input alternative on the adopted annual "
+        "system probability, and re-runs nothing. Its figure is a "
+        "FIGURE_DRIVERS entry. Pinned by tests/test_time_effect_in_proportion.py."
+    ),
+    "scripts/first_breach_alternatives_study.py": (
+        "Final-audit study (ADR-0058), not a companion: it re-runs no sweep or "
+        "replay. It reads the persisted alternative sweeps and their 2016 "
+        "replays, re-traces pipe breach times with the ADR-0057 machinery of "
+        "results_annotations_study.py (gated against M8's end state and the "
+        "committed adopted time order), and annualises through the production "
+        "Phase 3 path with each alternative's curve swapped in (gated against "
+        "the committed annual values). It produces no campaign artifact and is "
+        "re-run by hand after a production re-run (about an hour). Pinned by "
+        "tests/test_first_breach_alternatives_study.py."
+    ),
+    "scripts/adopted_alternatives_figures.py": (
+        "Figure driver (final audit, ADR-0056/0058): draws the conductivity-"
+        "bracket figures on the adopted configuration from committed evidence "
+        "JSON only. A FIGURE_DRIVERS entry."
+    ),
+    "scripts/fetch_tokoro_2016_stage.py": (
+        "One-off network fetch of the public August 2016 Futochanae (Tokoro) "
+        "record into data/processed/2016_event/; no model evaluation. Run only "
+        "to reproduce the committed extract."
+    ),
     "scripts/criterion_consequence_study.py": (
         "Green Light item 2 study, not a companion: it annualises the static "
         "branch beside the transient one and reads the 2016 replays, and its "
@@ -1378,6 +1472,12 @@ COMPANION_EXCLUSIONS: dict[str, str] = {
         "the new gate firing on the first new hit that appeared after it."
     ),
     "tests/test_fragility.py": "exercised by pytest, not by this stage",
+    "tests/test_initiation_evidence_2016_study.py": (
+        "exercised by pytest, not by this stage -- the guard on the 2016 "
+        "initiation-evidence study above. One check re-derives the stored "
+        "initiation flags of the persisted KP 58.8 replay and skips when the "
+        "gitignored results are absent."
+    ),
     "tests/test_phase2_end_to_end.py": "exercised by pytest, not by this stage",
 }
 
@@ -1816,7 +1916,16 @@ FIGURE_DRIVERS: list[dict[str, Any]] = [
         "label": "phase 3 RQ3+RQ4",
         "command": [PY, "scripts/phase3_figures.py"],
         "requires": ["results/system_integration/phase3/rq4_annual.csv"],
-        "produces": ["phase3_*.png"],
+        # Exact names since 2026-10-11: the adopted-configuration entry below
+        # draws phase3_*_adopted.png, and a glob here would claim them too.
+        "produces": [
+            "phase3_dominance_profile.png",
+            "phase3_system_fragility_bep_sections.png",
+            "phase3_rq4_four_sections.png",
+            "phase3_climate_shift.png",
+            "phase3_rq4_attribution.png",
+            "phase3_event_based_validation.png",
+        ],
         # The RQ4 headline figure also depicts the committed hazard-sampling
         # intervals (2026-08-20), so staleness in that record must redraw it
         # too. The driver additionally refuses to draw if the record's point
@@ -1840,7 +1949,11 @@ FIGURE_DRIVERS: list[dict[str, Any]] = [
         "label": "seepage-length L study",
         "command": [PY, "scripts/seepage_length_figures.py"],
         "requires": ["docs/decisions/seepage-length-L-study.md"],
-        "produces": ["seepage_length_*.png"],
+        "produces": [
+            "seepage_length_marginal.png",
+            "seepage_length_marginal_ratio.png",
+            "seepage_length_system_and_ceiling.png",
+        ],
         "sources": ["results/sensitivity/seepage_length/*.json"],
     },
     {
@@ -2212,6 +2325,180 @@ FIGURE_DRIVERS: list[dict[str, Any]] = [
         "produces": ["criterion_survival_evidence.png"],
         "sources": [
             "docs/decisions/criterion-consequence-and-2016-evidence-study.json"
+        ],
+    },
+    {
+        # ADR-0055: the six thesis figures of the time-dependence factor study.
+        # The two fragility-based figures read the production sweeps; the other
+        # four read the tracked evidence. Figure and evidence are written in
+        # one session, so the JSON's own stamp is the source time.
+        "label": "ADR-0055 time-dependence factor on one head and one gate",
+        "command": [PY, "scripts/time_dependence_factor_study.py", "figures"],
+        "requires": [
+            "docs/decisions/time-dependence-factor-study.json",
+            "results/tokachi_kp62.0_historical_matrix.h5",
+        ],
+        "produces": [
+            "same_head_fragility_log.png",
+            "same_head_initiation.png",
+            "same_head_survival_evidence.png",
+            "time_factor_vs_stage.png",
+            "time_factor_tokachi_rhine.png",
+            "same_head_mp_ztoe.png",
+        ],
+        "sources": ["docs/decisions/time-dependence-factor-study.json"],
+        "source_epoch": "json_generated",
+    },
+    {
+        # Pol comments 4 and 5: what a shared multiplier on the critical head
+        # (the Dutch gravel allowance among them) does to the 2016 update and
+        # the annual mechanism ordering. Reads only the tracked evidence.
+        "label": "Gravel and grading resistance multiplier",
+        "command": [PY, "scripts/gravel_grading_resistance_study.py", "figures"],
+        "requires": ["docs/decisions/gravel-grading-resistance-study.json"],
+        "produces": ["resistance_multiplier.png"],
+        "sources": ["docs/decisions/gravel-grading-resistance-study.json"],
+        "source_epoch": "json_generated",
+    },
+    {
+        # Pol comments 3, 7, 9 and 11: the 2016 record against the design
+        # level and crest, and the model's 2016 exit outcomes with the weight
+        # an unrecorded boil could carry. The record figure rebuilds the
+        # observed 2016 series and the canonical flood from the raw data.
+        "label": "2016 record, initiation and the no-boil record",
+        "command": [PY, "scripts/initiation_evidence_2016_study.py", "figures"],
+        "requires": [
+            "docs/decisions/initiation-evidence-2016-study.json",
+            "data/raw/rating_curves/HQrelation_TokachiRiv_2017.csv",
+            "data/raw/hydrographs",
+        ],
+        "produces": [
+            "survival_2016_record_levels.png",
+            "initiation_2016_outcomes.png",
+        ],
+        "sources": ["docs/decisions/initiation-evidence-2016-study.json"],
+        "source_epoch": "json_generated",
+    },
+    {
+        # Pol round 2, A25 and A29: the August 2016 records of the Tokoro,
+        # Satsunai and Tokachi against their design levels, and the d4PDF
+        # annual-maximum hydrographs in both climates. The stats part writes
+        # the evidence JSON and the gitignored shape cache the figures read.
+        "label": "Loading context: 2016 on three rivers, d4PDF hydrographs",
+        "command": [PY, "scripts/loading_context_study.py", "figures"],
+        "requires": [
+            "docs/decisions/loading-context-study.json",
+            "results/loading_context/shapes.npz",
+            "data/raw/rating_curves/HQrelation_TokachiRiv_2017.csv",
+            "data/raw/hydrographs",
+        ],
+        "produces": [
+            "loading_2016_three_rivers.png",
+            "loading_d4pdf_hydrographs.png",
+        ],
+        "sources": ["docs/decisions/loading-context-study.json"],
+        "source_epoch": "json_generated",
+    },
+    {
+        # Pol round 2, A24 with A10: the time effect beside every tested input
+        # alternative, as factors on the adopted annual system probability.
+        # Reads committed evidence JSON only and writes its own study JSON.
+        "label": "Time effect in proportion to the input alternatives",
+        "command": [PY, "scripts/time_effect_in_proportion.py"],
+        "requires": [
+            "docs/decisions/time-dependence-factor-study.json",
+            "docs/decisions/drained-section-conditioning-adopted.json",
+            "docs/decisions/drained-section-conditioning-alternatives.json",
+            "docs/decisions/gravel-grading-resistance-study.json",
+            "docs/decisions/seepage-length-lower-tail-adopted.json",
+            "docs/decisions/canonical-shape-sensitivity.json",
+        ],
+        "produces": ["time_effect_in_proportion.png"],
+        "sources": ["docs/decisions/time-effect-in-proportion-study.json"],
+    },
+    {
+        # Final audit (ADR-0056): the Phase 3 figures with the prior piping
+        # branch at the drained sections. Exact names: the production entry's
+        # ``phase3_*.png`` glob also matches them, and this entry is what
+        # redraws them, with the adopted records among its sources.
+        "label": "Phase 3 figures on the adopted configuration",
+        "command": [PY, "scripts/phase3_figures.py", "--adopted"],
+        "requires": [
+            "results/system_integration/phase3/rq4_annual.csv",
+            "results/system_integration/phase3/rq3_segment_curves_matrix_prior.json",
+            "docs/decisions/drained-section-conditioning-adopted.json",
+        ],
+        "produces": [
+            "phase3_dominance_profile_adopted.png",
+            "phase3_system_fragility_bep_sections_adopted.png",
+            "phase3_climate_shift_adopted.png",
+            "phase3_rq4_attribution_adopted.png",
+        ],
+        "sources": [
+            "results/system_integration/phase3/*.json",
+            "results/system_integration/phase3/rq4_annual.csv",
+            "docs/decisions/drained-section-conditioning-adopted.json",
+            "docs/decisions/drained-section-conditioning-alternatives.json",
+        ],
+    },
+    {
+        # Final audit (ADR-0056): panel B of the seepage-length system figure
+        # composed on the adopted configuration.
+        "label": "Seepage-length system figure on the adopted configuration",
+        "command": [PY, "scripts/seepage_length_figures.py", "--adopted"],
+        "requires": [
+            "docs/decisions/seepage-length-L-study.md",
+            "results/system_integration/phase3/rq4_annual.csv",
+        ],
+        "produces": ["seepage_length_system_and_ceiling_adopted.png"],
+        "sources": [
+            "results/sensitivity/seepage_length/*.json",
+            "results/system_integration/phase3/rq4_annual.csv",
+        ],
+    },
+    {
+        # Final audit (ADR-0056, ADR-0058): the conductivity-bracket figures
+        # on the adopted conditioning, shares on the first-breach measure.
+        "label": "Conductivity bracket on the adopted configuration",
+        "command": [
+            PY,
+            "scripts/adopted_alternatives_figures.py",
+            "--share",
+            "first_breach",
+        ],
+        "requires": [
+            "docs/decisions/conductivity-bracket-annualisation.json",
+            "docs/decisions/conductivity-bracket-posterior-side.json",
+            "docs/decisions/first-breach-alternatives-study.json",
+        ],
+        "produces": [
+            "conductivity_bracket_annual_span_adopted.png",
+            "conductivity_bracket_both_d70_adopted.png",
+        ],
+        "sources": [
+            "docs/decisions/conductivity-bracket-annualisation*.json",
+            "docs/decisions/conductivity-bracket-posterior-side*.json",
+            "docs/decisions/first-breach-alternatives-study.json",
+        ],
+    },
+    {
+        # Final audit (ADR-0056, ADR-0058): the resistance-multiplier figure
+        # with the adopted conditioning and first-breach shares.
+        "label": "Resistance multiplier on the adopted configuration",
+        "command": [
+            PY,
+            "scripts/gravel_grading_resistance_study.py",
+            "figures",
+            "--adopted",
+        ],
+        "requires": [
+            "docs/decisions/gravel-grading-resistance-study.json",
+            "docs/decisions/first-breach-alternatives-study.json",
+        ],
+        "produces": ["resistance_multiplier_adopted.png"],
+        "sources": [
+            "docs/decisions/gravel-grading-resistance-study.json",
+            "docs/decisions/first-breach-alternatives-study.json",
         ],
     },
 ]

@@ -423,6 +423,19 @@ changes:
   transient P_f, concentrated at the fragility shoulder — see the production
   judgment in `docs/validation/shikaga-case.md` §3, including the registered
   KP58.8 r_e-halved QA member (`scripts/run_sweep.py`).
+- **[Dated note 2026-10-07, `docs/decisions/why-no-piping-2016-study.md`
+  sections 8 and 10: the confirmation above is weaker than stated.]** The
+  base-flow trough it cites is a river stage, 1.7 to 4.3 m below the four
+  landside toes in OYO's 1998 design floods, and the only base-flow water
+  table measured in the reach (Satsunai confluence, provenance 8.7) lies 0.7
+  to 2.8 m below the top of the gravel. Before the final 2016 rise the river
+  stood on average 1.4 to 2.7 m below the toes for two days. So "initial heads
+  well below the exit datum" cannot be excluded at these sections, for
+  production floods or for the 2016 replay; the refill it implies is not
+  represented and would lower and delay the toe pressure (fewer exits). Since
+  ADR-0055 the gate is shared by both piping criteria, so this acts on both.
+  No default changes; the study measures the gate under a design-model toe
+  pressure as a named diagnostic.
 
 ---
 

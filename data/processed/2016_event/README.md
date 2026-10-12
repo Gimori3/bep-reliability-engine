@@ -14,6 +14,7 @@ Re-run the script after any change to the raw drop; do not hand-edit.
 | `discharge_hourly_{river}_201608.csv` | Hourly published discharge [m^3/s], August 2016, same stations |
 | `discharge_hourly_{river}_201609.csv` | Hourly published discharge [m^3/s], September 2016 (recession; sparse after 2016-09-06) |
 | `flood_trace_2016.csv` | Post-flood trace survey (September 2016): per-KP left/right levee trace elevations [m MSL] and design HWL, 0.2 km spacing |
+| `stage_hourly_Tokoro_201608.csv` | Hourly observed stage [m T.P.] of the Tokoro River at Futochanae (KP 18.9), August 2016, same 744-sample window. **Not from the raw drop**: fetched from the public MLIT Water Information System (station 301111281108060, gauge zero T.P. 0.000 m) by `scripts/fetch_tokoro_2016_stage.py` on 2026-10-08, for the loading-context study (`docs/decisions/loading-context-study.md`). The Tokoro is not a study river. |
 
 Rivers extracted: Tokachi (十勝川) and Satsunai (札内川), the two study
 rivers. Station column names are romanized ASCII; the Japanese originals and

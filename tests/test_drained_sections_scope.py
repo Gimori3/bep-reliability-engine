@@ -144,8 +144,9 @@ def test_the_berm_reading_ranking_statement_is_the_resolved_one(record: dict) ->
 
 
 def test_survival_part_reproduces_from_the_sidecars(record: dict) -> None:
-    if not (RESULTS / "phase2").is_dir():
-        pytest.skip("untracked results/ absent (fresh clone)")
+    needed = (RESULTS / "phase2", RESULTS / study.BRACKET_DIR / "phase2")
+    if not all(path.is_dir() for path in needed):
+        pytest.skip("untracked results/ sidecars absent (fresh or partial checkout)")
     assert record["survival"] == json.loads(json.dumps(study.survival_part(RESULTS)))
 
 

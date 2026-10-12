@@ -213,6 +213,8 @@ section's attainable maximum.
 pointer beside the superseded parenthetical, which is itself left standing
 verbatim; that item is otherwise byte-identical to the 2026-07-03 text.
 
+**[Pointer added 2026-10-07: 50.5 m is a grid top, not a physical limit. It lies 2.6 m above KP 62.0's design crest and 1.86 m above the crest the overflow model carries (48.64 m); the per-event "attainable" tops of the RQ1 drivers likewise lie above the overflow crest at KP 57.4. Years above that crest carry 61 % of KP 62.0's warming piping contribution; see `crest-attribution-study.md` and ADR-0057.]**
+
 **What a reader of this ADR should do.** Treat 50.5 m MSL as KP 62.0's attainable
 maximum (it is the last non-hypothetical conditioning level, pinned as
 `attainable_max_m` in `scripts/stage6_6_gap_decomposition.py` and

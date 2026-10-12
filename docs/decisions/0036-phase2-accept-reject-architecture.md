@@ -5,6 +5,8 @@ Date: 2026-07-12
 ## Status
 Accepted (supersedes ADR-0022 decision 2, the 1800 s Phase 2 replay timestep)
 
+**Amended 2026-10-07 by ADR-0056:** at KP 58.8 and KP 60.0 the adopted piping branch is the prior; the as-if-undrained posteriors there are an upper bound on what the 2016 survival could teach.
+
 ---
 
 ## Context
@@ -57,6 +59,17 @@ surface; the no-boil observation is a reach-scale survey, not a
 per-section instrument record; and under the ADR-0008 Terzaghi collapse
 the gate is deliberately conservative. The baseline therefore remains
 no-breach, and the strict variant exists for sensitivity.
+
+> **Dated correction (2026-10-07, `initiation-evidence-2016-study.md`
+> section 2).** "Committee-documented absence of sand boils at the study
+> reaches" and "a reach-scale survey" overstate the source. The 2017
+> committee report's no-boil statements cover only the vicinity of the three
+> breach sites (Satsunai KP 25.0 and 40.5, Otofuke KP 21.2); the Tokachi right
+> bank at KP 57 to 62 does not appear in it (first found 2026-08-28, project
+> log; this ADR was not corrected then). The observation at the study
+> sections is "no boil recorded", of unknown completeness: no inspection
+> record has been obtained. The baseline stays no-breach; the study measures
+> the strict variant and a detection-probability likelihood beside it.
 
 ### 3. Identical-assumptions replay, provenance-verified
 

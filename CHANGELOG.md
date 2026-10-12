@@ -7,7 +7,7 @@ All notable changes to this project are recorded here. The format follows
 The engineering record at the level of individual decisions is not duplicated
 here. It lives in three places, all tracked:
 
-* `docs/decisions/` — 54 Architecture Decision Records, gap-free, every one
+* `docs/decisions/` — 57 Architecture Decision Records, gap-free, every one
   Accepted but ADR-0007, which is superseded in place by ADR-0027, plus their
   companion evidence notes and JSON artifacts;
 * `docs/project_log.md` — a dated narrative of what was learned and when,
@@ -16,6 +16,104 @@ here. It lives in three places, all tracked:
   Stage 6.6 gap decomposition.
 
 ---
+
+## [1.3.0] - 2026-10-12
+
+The revision after the supervisor's comments on the Green Light thesis
+(J. Pol, October 2026): eleven written comments (round 1) and 49 annotations on
+the long thesis (round 2). The final thesis now compares the two piping
+criteria on one driving head and one set of exit conditions, conditions only
+the sections whose survival the model can represent, credits each both-fail
+year to the mechanism that breaks through first, and quotes eight new
+companion studies; this release supersedes 1.2.0 as the version the thesis
+cites. No production input, default, prior, persisted sweep, Phase 2 posterior
+or row of the Phase 3 annual table changed; three reported definitions did
+(ADR-0056 to ADR-0058). The Bayesian posterior provenance version stays at
+0.1.0. Prepared on 2026-10-07 after round 1, rebuilt on 2026-10-08 after
+round 2 and on 2026-10-12 after the three-session final audit of the thesis;
+it was never tagged or published in between.
+
+### Changed
+
+* **Steady-state comparator of record (ADR-0055):** the static rule the thesis
+  compares against is the transient model with instantaneous pipe growth, on
+  the same erosion head (`h - z_toe - 0.3 D_bl`) and the same uplift and heave
+  gate, evaluated in closed form by `scripts/time_dependence_factor_study.py`.
+  The criterion ratio is then Pol's time-dependence factor per flood: at the
+  resolved design or near-design anchors delta-beta 0.50 to 0.81 and F_td 2.3
+  to 6.9 (KP 57.4's design level unresolved); historical annual factor 1.8 to
+  3.3. The persisted gross-head branch is reported once, as Sellmeijer's
+  calibrated form. Study: `docs/decisions/time-dependence-factor-study.md`.
+* **Drained sections not conditioned on 2016 (ADR-0056):** at KP 58.8 and
+  KP 60.0, whose 2016 survival was carried by berms and drains the
+  as-if-undrained model omits, the adopted annual piping branch is the prior
+  for both criteria; the as-if-undrained update is reported as an upper bound
+  on what the survival could teach (it would lower their historical annual
+  system probability by 10 and 2 per cent). Study:
+  `docs/decisions/drained-section-conditioning-study.md`, adopted table
+  `drained-section-conditioning-adopted.json`.
+* **First-breach mechanism attribution (ADR-0057):** the reported piping share
+  divides the annual system probability and credits a year in which both
+  piping and overflow would fail to the one that breaks through first (M7
+  pipe-crossing times against the overflow model's failure times on the scaled
+  canonical flood). KP 62.0 under +4 K becomes an overflow lead, 0.39
+  [0.35, 0.44]. Study: `docs/decisions/crest-attribution-study.md`.
+* **First-breach share for every alternative reading (ADR-0058):** each
+  alternative (bulk reading, conductivity means, foreland credit, the
+  critical-head ladder, the bounded seepage tail, the steady-state criterion,
+  the 100 and 40 m correlation lengths, the uniformity-term arms) is ranked on
+  the same first-breach share with its own pipe breach times, on the adopted
+  conditioning. No cell of any alternative changes its leading mechanism;
+  values move, most at KP 62.0 under warming. The summed share survives only,
+  named, where no first-breach value exists. Study:
+  `docs/decisions/first-breach-alternatives-study.md`.
+
+### Added
+
+* **Gravel allowance and grading resistance (companion):** an exact multiplier
+  on the shared critical head, including the Dutch gravel factor 1.8, through
+  both criteria, the 2016 replay and the annual composition. The argument that
+  gap grading cancels grading resistance is withdrawn (dated correction in
+  `uniformity-coefficient-study.md`). Study:
+  `docs/decisions/gravel-grading-resistance-study.md`.
+* **2016 initiation evidence (companion):** the modelled probability that an
+  exit opened in 2016, the strict and soft no-boil observations, where annual
+  probability is earned, and the 2016 hydrograph figure. "No boils" is "none
+  recorded" (dated corrections in ADR-0036 and `phase2_report.md`). Study:
+  `docs/decisions/initiation-evidence-2016-study.md`.
+* **Why the sections showed no piping in 2016 (companion):** OYO's 1998 check
+  against the 2016 loads, the drains as designed, a toe-pressure diagnostic
+  against OYO's design model, the antecedent river state and the Tokoro
+  contrast (dated note in ADR-0032). Study:
+  `docs/decisions/why-no-piping-2016-study.md`.
+* **Seepage-length lower tail (companion):** the lognormal L bounded at the
+  shortest toe-to-toe footprint measured near the sections (0.85 of the
+  adopted length), a named alternative and the sixth piping-favoring adopted
+  choice. Study: `docs/decisions/seepage-length-lower-tail-study.md`.
+* **Loading context (companion):** the August 2016 floods of the Tokoro,
+  Satsunai and Tokachi against their design levels (the public Futochanae
+  record is now committed in `data/processed/2016_event/`), the d4PDF annual
+  floods in both climates, and the rank of the canonical flood among floods of
+  its height (long at the toe: the seventh piping-favoring choice). Study:
+  `docs/decisions/loading-context-study.md`.
+* **The time effect in proportion (companion):** the effect of duration set
+  beside every tested input alternative on one quantity, the adopted annual
+  system probability, from committed evidence only. Study:
+  `docs/decisions/time-effect-in-proportion-study.md`.
+
+### Fixed
+
+* `docs/decisions/seepage-length-lower-tail-study.md`: the annual
+  steady-state over transient piping factor (2.05 / 1.84 / 3.32 / 3.12 to
+  2.53 / 2.08 / 3.95 / 4.09) is computed on the prior at all four sections, not
+  the posterior as the note said (dated correction; values unchanged).
+* `phase3_figures.py`, `seepage_length_figures.py` and the gravel figure gain
+  an opt-in `--adopted` mode that draws the thesis figures on the adopted
+  configuration; default output is byte-identical.
+* `tests/test_drained_sections_scope.py`: the survival re-derivation now skips
+  unless both untracked result trees it reads are present, instead of failing
+  in a checkout that holds only `results/phase2`.
+
 
 ## [1.2.0] - 2026-09-28
 
@@ -262,4 +360,5 @@ computational architecture specification.
 [1.0.0]: https://github.com/Gimori3/bep-reliability-engine/releases/tag/v1.0.0
 [0.0.1]: https://github.com/Gimori3/bep-reliability-engine/releases/tag/v0.0.1
 
+[1.3.0]: https://github.com/Gimori3/bep-reliability-engine/releases/tag/v1.3.0
 [1.2.0]: https://github.com/Gimori3/bep-reliability-engine/releases/tag/v1.2.0

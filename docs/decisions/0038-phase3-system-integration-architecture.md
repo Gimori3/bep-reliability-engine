@@ -5,6 +5,8 @@ Date: 2026-07-13
 ## Status
 Accepted
 
+**Amended 2026-10-07:** ADR-0056 (the drained sections' adopted piping branch is the prior) and ADR-0057 (the reported mechanism share divides the annual system probability by first breach; `dominance_share` stays the ranking measure for companions).
+
 ---
 
 ## Context
