@@ -86,9 +86,11 @@ are a model property, not an observed timing.
   error (KP 57.4 41.50 m: 62.4 / 11.5 / 26.2 against 62.6 / 11.3 / 26.1).
 * An independent route through the frozen scalar API (`evaluate_realization`
   with `store_trajectory=True`, called per row with the sampled L as Phase 2
-  does) reproduces the KP 57.4 40.00 m shares exactly on all 1,809 rows; its
-  5,000-row subsample at KP 57.4 41.50 m gives 61.6 / 11.6 / 26.9, within
-  sampling error. The scalar check is a session record, not a tracked driver.
+  does) reproduces the shares exactly on every row at KP 57.4 40.00 m (1,809),
+  KP 58.8 41.00 m (19,736) and KP 60.0 42.75 m (5,579); its 5,000-row
+  subsamples at KP 57.4 41.50 m, KP 58.8 41.50 m and 42.00 m agree within
+  sampling error (for example 61.6 / 11.6 / 26.9 against 62.6 / 11.3 / 26.1).
+  The scalar check is a session record, not a tracked driver.
 
 ## 5. Scope and limits
 
