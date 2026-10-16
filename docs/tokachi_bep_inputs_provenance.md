@@ -674,7 +674,8 @@ cross-check that used them as corroboration; it is withdrawn. Evidence:
   geological cross-section 図4-1-1 legend (report PDF p.34, "堤体下面に層厚 0.8m 程度で分布する",
   homogeneous silt, N=3) and corroborated by landside-toe borehole B-2 in 様式-4 (shallow
   samples sand/gravel-with-fines, no clay). The earlier 2.5 m matched neither the legend nor
-  the 様式-5 lumped cohesive layer (about 0.6 to 1.0 m); resolved (3.8).- `k_aq_mps` 3.0e-3, `k_bl_mps` 1.6e-6: Form 5, cm/s divided by 100.
+  the 様式-5 lumped cohesive layer (about 0.6 to 1.0 m); resolved (3.8). **[2026-10-16, under review, value unchanged: `D_aq_m` 7 m is below OYO's A_g + N_s thickness to the K_1p base at both borings: about 13.4 m at the landside-toe boring B-2 and 10.4 m at riverside B-1 (様式-3 panel, geological section 図4-1-1 and 様式-5 seepage model; the panels draw the high-water bed on the left), against this table's definition "combined A_g + N_s to K_1p base". At their landside-toe borings the other three sections agree within about 15 per cent (B-4 8.3 m against 8, B-6 8.6 against 9, B-9 8.6 against 10). Raising the mean to 10 m (same seed) multiplies the transient P_f by 1.8 at 40.00 m and 4 at 39.50 m; to 13 m, by 2.7 and 6. Owner decision: re-base KP 57.4 in a separate session (thesis ISSUES I278).]**
+- `k_aq_mps` 3.0e-3, `k_bl_mps` 1.6e-6: Form 5, cm/s divided by 100.
 - `d70_m` 7.0e-4: matrix, from B-2-1 (d_60 = 0.635 mm). Bulk co-primary 5.5 mm. **[2026-09-24, ADR-0054: now 9.0e-4 m, the median of this section's Ag matrix; the source above is embankment fill (3.3).]**
 - `gamma_sub_kNm3` 16.84: from B-2-1/2/3 G_s.
 - `foreshore_width_m` 200: 様式-3 `高水敷幅` annotation, verified verbatim 2026-07-28;

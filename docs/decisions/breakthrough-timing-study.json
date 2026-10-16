@@ -1,0 +1,325 @@
+{
+  "study": "breakthrough-timing-study",
+  "criterion": "transient (adopted), prior, matrix reading, KP 58.8 and 60.0 as if undrained",
+  "loading": "canonical event HPB_m064_1987 scaled to each grid stage",
+  "time_contract": "ADR-0053: breakthrough at the end of the completing hourly interval",
+  "bins": {
+    "before_peak": "t <= t_peak",
+    "in_peak_hour": "t_peak < t <= t_peak + 1 h",
+    "after_peak_hour": "t > t_peak + 1 h"
+  },
+  "sections": {
+    "57.4": [
+      {
+        "stage_m": 40.0,
+        "n_realizations": 100000,
+        "n_transient_fail": 1809,
+        "t_peak_h": 36.0,
+        "n_before_peak": 508,
+        "n_in_peak_hour": 422,
+        "n_after_peak_hour": 879,
+        "breach_h_rel_peak_percentiles_5_25_50_75_95": [
+          -1.6875,
+          -0.0625,
+          1.0,
+          2.0,
+          3.3125
+        ],
+        "share_before_peak": 0.2808181315644002,
+        "share_in_peak_hour": 0.23327805417357655,
+        "share_after_peak_hour": 0.4859038142620232
+      },
+      {
+        "stage_m": 40.5,
+        "n_realizations": 100000,
+        "n_transient_fail": 13377,
+        "t_peak_h": 36.0,
+        "n_before_peak": 5411,
+        "n_in_peak_hour": 2490,
+        "n_after_peak_hour": 5476,
+        "breach_h_rel_peak_percentiles_5_25_50_75_95": [
+          -2.9375,
+          -0.875,
+          0.5625,
+          2.0,
+          3.75
+        ],
+        "share_before_peak": 0.4045002616431188,
+        "share_in_peak_hour": 0.18614039022202286,
+        "share_after_peak_hour": 0.40935934813485836
+      },
+      {
+        "stage_m": 41.0,
+        "n_realizations": 100000,
+        "n_transient_fail": 35726,
+        "t_peak_h": 36.0,
+        "n_before_peak": 18435,
+        "n_in_peak_hour": 5300,
+        "n_after_peak_hour": 11991,
+        "breach_h_rel_peak_percentiles_5_25_50_75_95": [
+          -4.1875,
+          -1.875,
+          -0.0625,
+          1.6875,
+          3.9375
+        ],
+        "share_before_peak": 0.5160107484745003,
+        "share_in_peak_hour": 0.14835134076023065,
+        "share_after_peak_hour": 0.335637910765269
+      },
+      {
+        "stage_m": 41.5,
+        "n_realizations": 100000,
+        "n_transient_fail": 58726,
+        "t_peak_h": 36.0,
+        "n_before_peak": 36784,
+        "n_in_peak_hour": 6610,
+        "n_after_peak_hour": 15332,
+        "breach_h_rel_peak_percentiles_5_25_50_75_95": [
+          -5.25,
+          -3.0,
+          -1.0,
+          1.125,
+          4.0
+        ],
+        "share_before_peak": 0.6263665156830024,
+        "share_in_peak_hour": 0.11255661887409325,
+        "share_after_peak_hour": 0.2610768654429043
+      }
+    ],
+    "58.8": [
+      {
+        "stage_m": 41.0,
+        "n_realizations": 100000,
+        "n_transient_fail": 19736,
+        "t_peak_h": 36.0,
+        "n_before_peak": 8815,
+        "n_in_peak_hour": 2637,
+        "n_after_peak_hour": 8284,
+        "breach_h_rel_peak_percentiles_5_25_50_75_95": [
+          -4.125,
+          -1.5625,
+          0.4375,
+          2.375,
+          4.75
+        ],
+        "share_before_peak": 0.4466457235508715,
+        "share_in_peak_hour": 0.1336137008512363,
+        "share_after_peak_hour": 0.4197405755978922
+      },
+      {
+        "stage_m": 41.5,
+        "n_realizations": 100000,
+        "n_transient_fail": 41240,
+        "t_peak_h": 36.0,
+        "n_before_peak": 22376,
+        "n_in_peak_hour": 4737,
+        "n_after_peak_hour": 14127,
+        "breach_h_rel_peak_percentiles_5_25_50_75_95": [
+          -5.1875,
+          -2.5625,
+          -0.3125,
+          2.0,
+          4.9375
+        ],
+        "share_before_peak": 0.5425800193986421,
+        "share_in_peak_hour": 0.11486420950533463,
+        "share_after_peak_hour": 0.34255577109602325
+      },
+      {
+        "stage_m": 42.0,
+        "n_realizations": 100000,
+        "n_transient_fail": 61331,
+        "t_peak_h": 36.0,
+        "n_before_peak": 38542,
+        "n_in_peak_hour": 5532,
+        "n_after_peak_hour": 17257,
+        "breach_h_rel_peak_percentiles_5_25_50_75_95": [
+          -6.0625,
+          -3.5625,
+          -1.25,
+          1.4375,
+          5.0625
+        ],
+        "share_before_peak": 0.6284260814270108,
+        "share_in_peak_hour": 0.09019908366079145,
+        "share_after_peak_hour": 0.2813748349121977
+      },
+      {
+        "stage_m": 42.5,
+        "n_realizations": 100000,
+        "n_transient_fail": 75949,
+        "t_peak_h": 36.0,
+        "n_before_peak": 53422,
+        "n_in_peak_hour": 5435,
+        "n_after_peak_hour": 17092,
+        "breach_h_rel_peak_percentiles_5_25_50_75_95": [
+          -6.8125,
+          -4.5,
+          -2.1875,
+          0.6875,
+          5.125
+        ],
+        "share_before_peak": 0.7033930663998209,
+        "share_in_peak_hour": 0.0715611792123662,
+        "share_after_peak_hour": 0.22504575438781288
+      }
+    ],
+    "60.0": [
+      {
+        "stage_m": 42.75,
+        "n_realizations": 100000,
+        "n_transient_fail": 5579,
+        "t_peak_h": 36.0,
+        "n_before_peak": 1724,
+        "n_in_peak_hour": 792,
+        "n_after_peak_hour": 3063,
+        "breach_h_rel_peak_percentiles_5_25_50_75_95": [
+          -3.125,
+          -0.4375,
+          1.375,
+          3.1875,
+          5.3125
+        ],
+        "share_before_peak": 0.3090159526796917,
+        "share_in_peak_hour": 0.14196092489693493,
+        "share_after_peak_hour": 0.5490231224233734
+      },
+      {
+        "stage_m": 43.25,
+        "n_realizations": 100000,
+        "n_transient_fail": 16841,
+        "t_peak_h": 36.0,
+        "n_before_peak": 6435,
+        "n_in_peak_hour": 2136,
+        "n_after_peak_hour": 8270,
+        "breach_h_rel_peak_percentiles_5_25_50_75_95": [
+          -3.9375,
+          -1.125,
+          0.9375,
+          3.0625,
+          5.625
+        ],
+        "share_before_peak": 0.38210320052253427,
+        "share_in_peak_hour": 0.12683332343685055,
+        "share_after_peak_hour": 0.4910634760406152
+      },
+      {
+        "stage_m": 43.75,
+        "n_realizations": 100000,
+        "n_transient_fail": 33185,
+        "t_peak_h": 36.0,
+        "n_before_peak": 14850,
+        "n_in_peak_hour": 3782,
+        "n_after_peak_hour": 14553,
+        "breach_h_rel_peak_percentiles_5_25_50_75_95": [
+          -4.75,
+          -1.875,
+          0.5,
+          2.9375,
+          6.125
+        ],
+        "share_before_peak": 0.44749133644718997,
+        "share_in_peak_hour": 0.11396715383456381,
+        "share_after_peak_hour": 0.4385415097182462
+      },
+      {
+        "stage_m": 44.25,
+        "n_realizations": 100000,
+        "n_transient_fail": 50062,
+        "t_peak_h": 36.0,
+        "n_before_peak": 25864,
+        "n_in_peak_hour": 4889,
+        "n_after_peak_hour": 19309,
+        "breach_h_rel_peak_percentiles_5_25_50_75_95": [
+          -5.5,
+          -2.625,
+          -0.125,
+          2.625,
+          6.5
+        ],
+        "share_before_peak": 0.516639367184691,
+        "share_in_peak_hour": 0.0976589029603292,
+        "share_after_peak_hour": 0.3857017298549798
+      }
+    ],
+    "62.0": [
+      {
+        "stage_m": 46.5,
+        "n_realizations": 100000,
+        "n_transient_fail": 13,
+        "t_peak_h": 36.0,
+        "n_before_peak": 3,
+        "n_in_peak_hour": 0,
+        "n_after_peak_hour": 10,
+        "breach_h_rel_peak_percentiles_5_25_50_75_95": [
+          -0.5249999999999999,
+          1.3125,
+          1.625,
+          2.9375,
+          4.162499999999999
+        ],
+        "share_before_peak": 0.23076923076923078,
+        "share_in_peak_hour": 0.0,
+        "share_after_peak_hour": 0.7692307692307693
+      },
+      {
+        "stage_m": 47.0,
+        "n_realizations": 100000,
+        "n_transient_fail": 411,
+        "t_peak_h": 36.0,
+        "n_before_peak": 89,
+        "n_in_peak_hour": 66,
+        "n_after_peak_hour": 256,
+        "breach_h_rel_peak_percentiles_5_25_50_75_95": [
+          -1.375,
+          0.21875,
+          1.6875,
+          2.8125,
+          4.0625
+        ],
+        "share_before_peak": 0.21654501216545013,
+        "share_in_peak_hour": 0.16058394160583941,
+        "share_after_peak_hour": 0.6228710462287105
+      },
+      {
+        "stage_m": 47.5,
+        "n_realizations": 100000,
+        "n_transient_fail": 2760,
+        "t_peak_h": 36.0,
+        "n_before_peak": 717,
+        "n_in_peak_hour": 457,
+        "n_after_peak_hour": 1586,
+        "breach_h_rel_peak_percentiles_5_25_50_75_95": [
+          -2.440624999999999,
+          -0.0625,
+          1.4375,
+          2.875,
+          4.625
+        ],
+        "share_before_peak": 0.2597826086956522,
+        "share_in_peak_hour": 0.16557971014492753,
+        "share_after_peak_hour": 0.5746376811594203
+      },
+      {
+        "stage_m": 48.0,
+        "n_realizations": 100000,
+        "n_transient_fail": 8951,
+        "t_peak_h": 36.0,
+        "n_before_peak": 3036,
+        "n_in_peak_hour": 1265,
+        "n_after_peak_hour": 4650,
+        "breach_h_rel_peak_percentiles_5_25_50_75_95": [
+          -3.25,
+          -0.6875,
+          1.1875,
+          2.9375,
+          5.125
+        ],
+        "share_before_peak": 0.339179979890515,
+        "share_in_peak_hour": 0.14132499162104792,
+        "share_after_peak_hour": 0.5194950284884371
+      }
+    ]
+  }
+}
