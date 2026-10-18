@@ -344,7 +344,11 @@ def test_the_record_matches_the_live_production_table() -> None:
 # 4. The pre-registered questions                                               #
 # --------------------------------------------------------------------------- #
 def test_q1_records_which_pairs_of_climate_ratios_resolve() -> None:
-    """Four of the six pairs resolve; the two 13.4s do not, nor KP 57.4 / KP 60.0.
+    """Three of the six pairs resolve: KP 58.8 against each of the others.
+
+    Since ADR-0059 (2026-10-17, KP 57.4's aquifer thickness 7 m to 12 m) KP 57.4's
+    ratio is 12.0 and no longer separates from KP 62.0 either; before it four
+    pairs resolved and only KP 60.0 / KP 62.0 and KP 57.4 / KP 60.0 did not.
 
     The unresolved pairs are the study's most quotable negative: KP 60.0 and
     KP 62.0 rise by factors this ensemble cannot tell apart, so their
@@ -354,10 +358,10 @@ def test_q1_records_which_pairs_of_climate_ratios_resolve() -> None:
     """
     q1 = _evidence()["preregistration_outcome"]["Q1"]
     assert q1["n_pairs"] == 6
-    assert q1["n_resolved"] == 4
+    assert q1["n_resolved"] == 3
     assert q1["verdict"].startswith("PARTIAL")
     unresolved = [key for key, entry in q1["pairs"].items() if not entry["resolved"]]
-    assert unresolved == ["KP 57.4 - KP 60.0", "KP 60.0 - KP 62.0"]
+    assert unresolved == ["KP 57.4 - KP 60.0", "KP 57.4 - KP 62.0", "KP 60.0 - KP 62.0"]
     for entry in q1["pairs"].values():
         assert entry["n_replicates_paired"] == _evidence()["estimator"]["replicates"], (
             "the between-section difference must be paired on every replicate; "
@@ -1054,12 +1058,15 @@ def test_the_correction_moved_no_point_estimate_and_no_historical_number() -> No
     Since ADR-0054 (2026-09-25) re-based the matrix d70, the matrix arms of the
     current record describe a different production than the kept pooled-draw
     record, so the invariance is checked on the two bulk arms, whose production
-    that re-basing left bit-identical.
+    that re-basing left bit-identical. KP 57.4 is excluded since ADR-0059
+    (2026-10-17) corrected its aquifer thickness in both readings.
     """
     old = json.loads(_require(SUPERSEDED).read_text(encoding="utf-8"))
     new = _evidence()
     arms = ("bulk/posterior", "bulk/prior")
     for label in SECTIONS:
+        if label == "KP 57.4":
+            continue
         for arm in arms:
             for scenario in SCENARIOS:
                 a = old["sections"][label][arm][scenario]

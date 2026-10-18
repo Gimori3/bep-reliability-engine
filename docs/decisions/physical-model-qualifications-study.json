@@ -9,16 +9,16 @@
    "design_level_1998_m": 39.51,
    "head_1998_m": 1.2100000000000009,
    "D_bl_m": 0.8,
-   "lambda_in_m": 102.46950765959599,
-   "lambda_out_eff_m": 98.41777869613682,
-   "r_e_under_levee": 0.4381149110590994,
-   "r_e_foreshore_spanning": 0.23616619081017262,
-   "i_v_model_under_levee": 0.6626488029768882,
-   "i_v_model_foreshore_spanning": 0.35720136360038635,
+   "lambda_in_m": 134.1640786499874,
+   "lambda_out_eff_m": 121.21129712568315,
+   "r_e_under_levee": 0.46524110558716597,
+   "r_e_foreshore_spanning": 0.27471507636292886,
+   "i_v_model_under_levee": 0.7036771722005889,
+   "i_v_model_foreshore_spanning": 0.4155065529989302,
    "i_v_reported_1998": 0.04,
-   "ratio_under_levee_to_reported": 16.566220074422205,
-   "ratio_spanning_to_reported": 8.93003409000966,
-   "i_h_model_under_levee": 0.005173432121315227,
+   "ratio_under_levee_to_reported": 17.591929305014723,
+   "ratio_spanning_to_reported": 10.387663824973254,
+   "i_h_model_under_levee": 0.004195919976680912,
    "i_h_reported_1998": 0.05,
    "mean_horizontal_gradient_over_L_plus_Bf": 0.005193133047210304
   },
@@ -90,15 +90,15 @@
   {
    "kp": "57.4",
    "L_m": 33.0,
-   "D_aq_over_L": 0.21212121212121213,
-   "H_c_m": 2.2493679591451237,
-   "critical_gradient_H_c_over_L": 0.0681626654286401,
-   "local_exponent_dlnHc_dlnL": 0.8941151556748861,
-   "credited_L_m": 131.41777869613682,
-   "H_c_at_credited_L_m": 7.830655778864017,
-   "kappa_H_c_ratio": 3.481269370370187,
-   "secant_exponent_over_credited_range": 0.9026851475128687,
-   "critical_gradient_at_credited_L": 0.059585969695698474
+   "D_aq_over_L": 0.36363636363636365,
+   "H_c_m": 2.0002692418908743,
+   "critical_gradient_H_c_over_L": 0.06061421945123861,
+   "local_exponent_dlnHc_dlnL": 0.8714659500966316,
+   "credited_L_m": 154.21129712568313,
+   "H_c_at_credited_L_m": 7.956905523051269,
+   "kappa_H_c_ratio": 3.9779172505444955,
+   "secant_exponent_over_credited_range": 0.8955402170829443,
+   "critical_gradient_at_credited_L": 0.05159742296030584
   },
   {
    "kp": "58.8",
@@ -146,9 +146,9 @@
     "kp": "57.4",
     "nominal_L_m": 33.0,
     "median_sampled_L_m": 32.35920206346015,
-    "median_H_c_m": 2.2581995695801096,
-    "median_H_c_at_L_40m": 2.682637882129671,
-    "length_factor": 1.1879542969838053,
+    "median_H_c_m": 2.0101029493847653,
+    "median_H_c_at_L_40m": 2.3785549646978,
+    "length_factor": 1.1833000719817894,
     "d_70_m": 0.0009,
     "k_aq_mps": 0.003
    },
@@ -186,16 +186,16 @@
   "elevation_over_others": [
    1.102720750397931,
    1.4296164180506223,
-   1.469396044884137
+   1.6507560058631205
   ],
   "residual_after_equalising_L": [
    0.9742547346111415,
-   1.2369129423706848,
-   1.2690577499636047
+   1.2690577499636047,
+   1.3950442875393698
   ],
   "length_share_of_log_elevation": [
    0.3333223752130795,
-   0.44753045371928923,
+   0.3357861165430401,
    1.2667450624492171
   ]
  },

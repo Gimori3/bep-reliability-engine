@@ -52,6 +52,13 @@ ADR-0025 open-entry sensitivity executed and found immaterial. New section 3.9; 
 | 4 | 62.00 | Tokachi | right | B-7, B-8, B-9 | 62.0-1, B-9-1, B-9-2 |
 | 5 | 63.40 | Tokachi | right | NO-1, NO-2, NO-3 (lab series B-2, B-3) | B-2-2, B-2-6, B-3-2, B-3-4 |
 
+**[2026-10-17, ADR-0059: the boring column header above is in reverse order for rows 1 to 4.
+Every OYO 図4-1-X section, 様式-3 panel and 様式-5 model draws the river on the left (high-water
+bed width, mean riverbed and HWL marker on the left), so the listed order is riverside / crest /
+landside toe: B-1 / H8-B-3 / B-2 (57.4), B-3 / H8-B-4 / B-4 (58.8), B-5 / H8-B-5 / B-6 (60.0),
+B-7 (riverside slope) / B-8 / B-9 (62.0). Sections 3.8 and 4 already name B-2, B-4, B-6 and B-9
+as the landside-toe borings, which is correct. Row 5 (KP 63.4) was not re-checked.]**
+
 Count: 5 cross-sections, all Tokachi right bank, KP 57.40 to 63.40, within the OYO survey
 strip KP 56.0 to 66.2.
 
@@ -72,7 +79,7 @@ methodology, which is a modeling step, not data transcription.
 | `river` | study-reach definition | none | Tokachi all rows |
 | `bank` | OYO survey side | none | right all rows |
 | `L_m` | L memo, sections 3 and 6 | none (already m) | under-levee confined-path convention; pre-remediation 1998 geometry; see 3.1 |
-| `D_aq_m` | thickness table | none | combined A_g + N_s to K_1p base |
+| `D_aq_m` | thickness table | none | combined A_g + N_s to K_1p base **[2026-10-17, ADR-0059: KP 57.4's 7 was the A_g alone and is corrected to 12; the other three rows lie within 1.25 m of their own combined thickness at every position and are unchanged; see 4]** |
 | `k_aq_mps` | Form 5, A_g layer | cm/s to m/s, divide by 100 | analysis constants, not field/lab |
 | `d70_m` | derived, not measured | mm to m, x 1e-3 | matrix-fraction interpretation; see 3.3 |
 | `D_bl_m` | thickness table, corrected against OYO 図4-1-X legends | none | A_c thickness at landside toe; all four confined sections corrected to the mapped competent A_c (57.4 = 0.80, 58.8 = 0.85, 60.0 = 0.85, 62.0 = 0.45 m), see 3.8 |
@@ -674,7 +681,7 @@ cross-check that used them as corroboration; it is withdrawn. Evidence:
   geological cross-section 図4-1-1 legend (report PDF p.34, "堤体下面に層厚 0.8m 程度で分布する",
   homogeneous silt, N=3) and corroborated by landside-toe borehole B-2 in 様式-4 (shallow
   samples sand/gravel-with-fines, no clay). The earlier 2.5 m matched neither the legend nor
-  the 様式-5 lumped cohesive layer (about 0.6 to 1.0 m); resolved (3.8). **[2026-10-16, under review, value unchanged: `D_aq_m` 7 m is below OYO's A_g + N_s thickness to the K_1p base at both borings: about 13.4 m at the landside-toe boring B-2 and 10.4 m at riverside B-1 (様式-3 panel, geological section 図4-1-1 and 様式-5 seepage model; the panels draw the high-water bed on the left), against this table's definition "combined A_g + N_s to K_1p base". At their landside-toe borings the other three sections agree within about 15 per cent (B-4 8.3 m against 8, B-6 8.6 against 9, B-9 8.6 against 10). Raising the mean to 10 m (same seed) multiplies the transient P_f by 1.8 at 40.00 m and 4 at 39.50 m; to 13 m, by 2.7 and 6. Owner decision: re-base KP 57.4 in a separate session (thesis ISSUES I278).]**
+  the 様式-5 lumped cohesive layer (about 0.6 to 1.0 m); resolved (3.8). **[2026-10-16, under review, value unchanged: `D_aq_m` 7 m is below OYO's A_g + N_s thickness to the K_1p base at both borings: about 13.4 m at the landside-toe boring B-2 and 10.4 m at riverside B-1 (様式-3 panel, geological section 図4-1-1 and 様式-5 seepage model; the panels draw the high-water bed on the left), against this table's definition "combined A_g + N_s to K_1p base". At their landside-toe borings the other three sections agree within about 15 per cent (B-4 8.3 m against 8, B-6 8.6 against 9, B-9 8.6 against 10). Raising the mean to 10 m (same seed) multiplies the transient P_f by 1.8 at 40.00 m and 4 at 39.50 m; to 13 m, by 2.7 and 6. Owner decision: re-base KP 57.4 in a separate session (thesis ISSUES I278).]** **[2026-10-17, RESOLVED by ADR-0059: `D_aq_m` corrected from 7 to 12 m. The 7 m was the A_g gravel alone (7.4 m at riverside B-1). An independent re-reading (colour classification of 図4-1-1 against its own legend, the 様式-5 model lines and the report's longitudinal profile, PDF p. 247; evidence `docs/decisions/adr0059-kp57-aquifer-thickness.json`) gives A_g + N_s = 10.3 m at riverside-toe B-1, 12.5 m under the crest (H8-B-3) and 13.35 m at landside-toe B-2 (A_c base about 37.1 m, A_g/N_s 28.85 m, K_1p top 23.75 m, EL = T.P.); OYO's own model gives N_s the A_g conductivity (3.00E-01 cm/s, layers 4 and 5) over volcanic ash at 8.00E-05 cm/s. 12 m is the owner-chosen mean over the seepage path (three-position mean 12.05 m; the 様式-5 model 11.9 m), integer like the other rows; CoV 0.10 unchanged. No printed boring log exists in the sources (様式-4 is the soil-test table only), so the value rests on the drawings, read to +/-0.3 m. The nearest independent hole, Kunijiban KP1.8R-1 (section 8.2), logs an 11.7 m aquifer.]**
 - `k_aq_mps` 3.0e-3, `k_bl_mps` 1.6e-6: Form 5, cm/s divided by 100.
 - `d70_m` 7.0e-4: matrix, from B-2-1 (d_60 = 0.635 mm). Bulk co-primary 5.5 mm. **[2026-09-24, ADR-0054: now 9.0e-4 m, the median of this section's Ag matrix; the source above is embankment fill (3.3).]**
 - `gamma_sub_kNm3` 16.84: from B-2-1/2/3 G_s.
@@ -887,7 +894,7 @@ corroboration only — **no prior in the engine is derived from it**):
 
 | | CSV | Chiyoda |
 |---|---|---|
-| `D_aq_m` | 7–11 | 15–20 |
+| `D_aq_m` | 7–11 **[2026-10-17, ADR-0059: 8 to 12 at the four confined sections, 11 at KP 63.4]** | 15–20 |
 | `k_aq_mps` | 6e-5 – 3.0e-3 | 1e-3 – 1e-2 |
 
 **Open concern.** With mean `k_aq` = 3.0e-3 and CoV 0.50, the lognormal 95th
@@ -1185,6 +1192,12 @@ The base rises upstream at +3.13 m/km (KP 56.5 to 58.8) and +1.07 m/km (58.8 to 
 the right order for this valley floor, so the three holes are mutually consistent rather
 than three isolated readings. **M4's Mazure leaky-aquifer schematization assumes exactly
 this impermeable base**; it can now be named (Nagareyama Fm.) and its elevation quoted.
+
+**[2026-10-17, ADR-0059: the same base trend interpolates to EL about 23.9 m at KP 57.4,
+where OYO's K_1p top lies at 26.6 (riverside B-1), 24.4 (crest) and 23.75 m (landside B-2);
+KP1.8R-1, about 0.9 km downstream of KP 57.4, logs 11.7 m of aquifer (EL 32.75 to 21.05 m).
+Both support the corrected 12 m against the earlier 7 m, which would have put the base near
+EL 30 m, above the base at KP 58.8.]**
 
 `D_aq_m` at KP 61.0 would be 9.95 m from B5, which interpolates cleanly between the
 tabulated 9 (KP 60.0) and 10 (KP 62.0). No row exists at KP 61.0 and none is added.

@@ -516,8 +516,9 @@ def test_the_upward_arm_is_the_one_that_contests_the_ordering_under_bulk() -> No
 def test_the_two_brackets_offset_rather_than_compound() -> None:
     """The compound-or-overlap answer, pinned at the cells that carry it.
 
-    The bulk grain-size reading hands the lead to overflow at five cells; the
-    upward conductivity arm restores piping at four of them. A later change that
+    The bulk grain-size reading hands the lead to overflow at four cells; the
+    upward conductivity arm restores piping at three of them (five and four before
+    ADR-0059 of 2026-10-17, when KP 57.4 +4K was overflow-led). A later change that
     left this list empty would turn an "offset" conclusion into a "compound" one
     without anyone editing the prose.
     """
@@ -529,7 +530,6 @@ def test_the_two_brackets_offset_rather_than_compound() -> None:
         for c in outcome["C1"]["cells_restored_to_piping_by_the_upward_arm"]
     }
     assert restored == {
-        ("KP 57.4", "+4K"),
         ("KP 58.8", "historical"),
         ("KP 58.8", "+4K"),
         ("KP 62.0", "historical"),

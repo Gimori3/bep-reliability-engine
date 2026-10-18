@@ -39,8 +39,8 @@
       "scenario": "historical",
       "mechanisms": "bep|overflow|fluvial_scour",
       "baseline": {
-        "p_annual_system": 0.0004979251062096787,
-        "p_annual_bep": 0.0004979251062096787,
+        "p_annual_system": 0.0008553382848114217,
+        "p_annual_bep": 0.0008553382848114217,
         "p_annual_overflow": 0.0,
         "p_annual_fluvial_scour": 0.0,
         "share_bep": 1.0,
@@ -77,36 +77,36 @@
       "scenario": "+4K",
       "mechanisms": "bep|overflow|fluvial_scour",
       "baseline": {
-        "p_annual_system": 0.007593029740614387,
-        "p_annual_bep": 0.007518481128340701,
+        "p_annual_system": 0.01026119934826964,
+        "p_annual_bep": 0.01022187480706147,
         "p_annual_overflow": 0.0009114344650738865,
         "p_annual_fluvial_scour": 0.0,
-        "share_bep": 0.8918809500553131,
-        "share_overflow": 0.10811904994468688,
+        "share_bep": 0.918134451958948,
+        "share_overflow": 0.08186554804105198,
         "bep_clamped_above_grid": false
       },
       "arms": {
         "credit_half": {
-          "p_annual_system": 0.0009291388037062896,
-          "p_annual_bep": 0.00010047665736120547,
+          "p_annual_system": 0.0009356238366356673,
+          "p_annual_bep": 0.00012582773187272235,
           "p_annual_overflow": 0.0009114344650738865,
           "p_annual_fluvial_scour": 0.0,
-          "share_bep": 0.09929395490724081,
-          "share_overflow": 0.9007060450927591,
+          "share_bep": 0.12130754619528382,
+          "share_overflow": 0.8786924538047162,
           "bep_clamped_above_grid": true,
-          "system_ratio_to_baseline": 0.12236733365291794,
-          "bep_ratio_to_baseline": 0.01336395684794121
+          "system_ratio_to_baseline": 0.09118074845641147,
+          "bep_ratio_to_baseline": 0.01230965299886065
         },
         "credit_full": {
-          "p_annual_system": 0.000911434471953962,
-          "p_annual_bep": 2.285739341505526e-10,
+          "p_annual_system": 0.0009114344946221668,
+          "p_annual_bep": 9.816704373135288e-10,
           "p_annual_overflow": 0.0009114344650738865,
           "p_annual_fluvial_scour": 0.0,
-          "share_bep": 2.507847635640627e-07,
-          "share_overflow": 0.9999997492152364,
+          "share_bep": 1.0770597531839326e-06,
+          "share_overflow": 0.9999989229402468,
           "bep_clamped_above_grid": true,
-          "system_ratio_to_baseline": 0.12003567786371053,
-          "bep_ratio_to_baseline": 3.0401610411569654e-08
+          "system_ratio_to_baseline": 0.08882338834747064,
+          "bep_ratio_to_baseline": 9.603624147650212e-08
         }
       }
     },
@@ -343,7 +343,7 @@
     "claim": "piping accounts for 81 to 100 per cent of the summed annual contribution at the four BEP sections",
     "baseline_shares": {
       "KP 57.4 historical": 1.0,
-      "KP 57.4 +4K": 0.8918809500553131,
+      "KP 57.4 +4K": 0.918134451958948,
       "KP 58.8 historical": 0.971968880151867,
       "KP 58.8 +4K": 0.9371813166798804,
       "KP 60.0 historical": 1.0,
@@ -357,8 +357,8 @@
         "credit_full": 0.0
       },
       "KP 57.4 +4K": {
-        "credit_half": 0.09929395490724081,
-        "credit_full": 2.507847635640627e-07
+        "credit_half": 0.12130754619528382,
+        "credit_full": 1.0770597531839326e-06
       },
       "KP 58.8 historical": {
         "credit_half": 0.008680819179571671,
@@ -403,5 +403,5 @@
       }
     }
   },
-  "total_runtime_s": 25.5
+  "total_runtime_s": 22.4
 }

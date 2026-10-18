@@ -2,8 +2,8 @@
   "study": "climate attribution and system composition",
   "note": "docs/decisions/climate-attribution-and-composition-study.md",
   "driver": "scripts/climate_attribution_decomposition.py",
-  "generated": "2026-09-25T04:04:43+00:00",
-  "elapsed_s": 36.7,
+  "generated": "2026-10-17T18:24:35+00:00",
+  "elapsed_s": 52.3,
   "scope": "Point quantities are exact arithmetic on the committed Phase 3 artifacts. Intervals are hazard-sampling uncertainty ONLY, the finite-ensemble spread of the d4PDF peak-stage distribution with the fragility curves held fixed, and are far narrower than the aquifer-conductivity bracket, which does not cancel. Quote that scope wherever any interval here is quoted.",
   "arm": {
     "d70": "matrix",
@@ -20,8 +20,8 @@
     "occupancy_floor_blocks": 20
   },
   "inputs": {
-    "results/system_integration/phase3/rq4_annual.csv": "ce2edf026f0c44132c95d1fc28f5366ca4249bdf532dabfd0dc752d0609ece1d",
-    "results/system_integration/phase3/rq4_attribution.json": "d728de62e56ab6f673ddc07600c9acc33cfa2c5ffaf62da52fefe38d40bb4a80"
+    "results/system_integration/phase3/rq4_annual.csv": "ba8740f4e7d1f0939444e00969a4fc5c75196f82534e4cb8cbfe678aa7a0391b",
+    "results/system_integration/phase3/rq4_attribution.json": "54cd9c8524d9137e3aa536be90d6765254981685585a0603b56b599cbfab08ce"
   },
   "identities": {
     "1_partition": "P = w_in p_in + (1 - w_in) p_out",
@@ -35,16 +35,16 @@
         "definition": "hours_above_datum > 24 h",
         "historical": {
           "w_inside": 0.001,
-          "p_f_inside": 0.0708303263115657,
-          "p_f_outside": 0.0004273719331275188,
+          "p_f_inside": 0.10949364832151583,
+          "p_f_outside": 0.0007445333797901046,
           "n_inside": 3,
           "n_years": 3000,
-          "contribution_inside": 7.083032631156571e-05,
-          "contribution_outside": 0.00042694456119439126,
-          "p_annual_reconstructed": 0.0004977748875059569,
-          "p_annual_published": 0.0004977748875059569,
-          "reconstruction_relative_deviation": 0.0,
-          "share_of_annual_total": 0.14229389245900453,
+          "contribution_inside": 0.00010949364832151583,
+          "contribution_outside": 0.0007437888464103145,
+          "p_annual_reconstructed": 0.0008532824947318303,
+          "p_annual_published": 0.0008532824947318301,
+          "reconstruction_relative_deviation": 2.541250240522625e-16,
+          "share_of_annual_total": 0.12832051401210043,
           "occupancy": {
             "n_years": 3,
             "n_carrying_member_blocks": 3,
@@ -63,16 +63,16 @@
         },
         "+4K": {
           "w_inside": 0.0077777777777777776,
-          "p_f_inside": 0.3172119992389113,
-          "p_f_outside": 0.005164649924048795,
+          "p_f_inside": 0.38071153648785205,
+          "p_f_outside": 0.007344722796476065,
           "n_inside": 42,
           "n_years": 5400,
-          "contribution_inside": 0.0024672044385248655,
-          "contribution_outside": 0.0051244804246395265,
-          "p_annual_reconstructed": 0.007591684863164392,
-          "p_annual_published": 0.007591684863164393,
-          "reconstruction_relative_deviation": 1.1425154674121533e-16,
-          "share_of_annual_total": 0.3249877310497945,
+          "contribution_inside": 0.002961089728238849,
+          "contribution_outside": 0.007287597174725696,
+          "p_annual_reconstructed": 0.010248686902964545,
+          "p_annual_published": 0.010248686902964545,
+          "reconstruction_relative_deviation": 0.0,
+          "share_of_annual_total": 0.28892381592634286,
           "occupancy": {
             "n_years": 42,
             "n_carrying_member_blocks": 33,
@@ -91,36 +91,36 @@
             "floor_failures": []
           }
         },
-        "ratio_total": 15.251241180931494,
-        "ratio_inside_contribution": 34.83260020110908,
-        "ratio_outside_contribution": 12.002683463875558,
-        "historical_share_inside": 0.14229389245900453,
-        "mixture_reconstruction": 15.251241180931494,
-        "mixture_relative_deviation": 0.0,
+        "ratio_total": 12.010895531362687,
+        "ratio_inside_contribution": 27.043484016022013,
+        "ratio_outside_contribution": 9.79793823192861,
+        "historical_share_inside": 0.12832051401210043,
+        "mixture_reconstruction": 12.010895531362689,
+        "mixture_relative_deviation": 1.4789545332084954e-16,
         "frequency_factor_inside": 7.777777777777778,
-        "severity_factor_inside": 4.478477168714026,
-        "product_inside": 34.83260020110909,
-        "product_over_total_ratio": 2.2839190455305376,
-        "frequency_share_of_log_inside": 0.577732606639026,
-        "counterfactual_frequency_only": 0.000974950467182038,
-        "counterfactual_severity_only": 0.005476697273363658,
+        "severity_factor_inside": 3.4770193734885453,
+        "product_inside": 27.043484016022017,
+        "product_over_total_ratio": 2.2515793219087152,
+        "frequency_share_of_log_inside": 0.6220786053696602,
+        "counterfactual_frequency_only": 0.0015903598293368602,
+        "counterfactual_severity_only": 0.007718089610167442,
         "attribution_log": {
-          "log_total": 2.7246608886550634,
-          "frequency_first": 0.6722387251108047,
-          "frequency_last": 0.32655131945073584,
-          "frequency_shapley": 0.49939502228077026,
-          "severity_first": 2.3981095692043275,
-          "severity_last": 2.0524221635442585,
-          "severity_shapley": 2.225265866374293,
-          "frequency_share_first": 0.24672381356148604,
-          "frequency_share_last": 0.11985026129689366,
-          "frequency_share_shapley": 0.18328703742918984
+          "log_total": 2.4858141987876863,
+          "frequency_first": 0.6226249068249579,
+          "frequency_last": 0.2835827167595812,
+          "frequency_shapley": 0.45310381179226955,
+          "severity_first": 2.202231482028105,
+          "severity_last": 1.8631892919627282,
+          "severity_shapley": 2.0327103869954164,
+          "frequency_share_first": 0.25047121668570704,
+          "frequency_share_last": 0.11408041554267509,
+          "frequency_share_shapley": 0.18227581611419108
         },
         "attribution_additive": {
-          "delta_total": 0.007093909975658435,
-          "frequency": 0.0012960815847384076,
-          "severity": 0.005797828390920027,
-          "frequency_share": 0.18270341591388878
+          "delta_total": 0.009395404408232715,
+          "frequency": 0.0016338373137010666,
+          "severity": 0.007761567094531648,
+          "frequency_share": 0.17389749740515886
         },
         "both_strata_clear_floor": false,
         "intervals": {
@@ -502,17 +502,17 @@
     "KP 57.4": {
       "historical": {
         "marginals": {
-          "bep": 0.0004977748875059569,
+          "bep": 0.0008532824947318301,
           "overflow": 0.0,
           "fluvial_scour": 0.0
         },
-        "p_annual_union": 0.0004977748875059569,
-        "sum_of_marginals": 0.0004977748875059569,
-        "largest_marginal": 0.0004977748875059569,
+        "p_annual_union": 0.0008532824947318301,
+        "sum_of_marginals": 0.0008532824947318301,
+        "largest_marginal": 0.0008532824947318301,
         "sum_over_union": 1.0,
         "union_over_largest": 1.0,
-        "frechet_lower": 0.0004977748875059569,
-        "frechet_upper": 0.0004977748875059569,
+        "frechet_lower": 0.0008532824947318301,
+        "frechet_upper": 0.0008532824947318301,
         "dependence_factor_range": [
           1.0,
           1.0
@@ -530,29 +530,29 @@
       },
       "+4K": {
         "marginals": {
-          "bep": 0.007517103321678081,
+          "bep": 0.01020933077126393,
           "overflow": 0.0009114344650738865,
           "fluvial_scour": 0.0
         },
-        "p_annual_union": 0.007591684863164393,
-        "sum_of_marginals": 0.008428537786751967,
-        "largest_marginal": 0.007517103321678081,
-        "sum_over_union": 1.110232832193558,
-        "union_over_largest": 1.0099215799350836,
-        "frechet_lower": 0.007517103321678081,
-        "frechet_upper": 0.008428537786751967,
+        "p_annual_union": 0.010248686902964545,
+        "sum_of_marginals": 0.011120765236337817,
+        "largest_marginal": 0.01020933077126393,
+        "sum_over_union": 1.0850917138585836,
+        "union_over_largest": 1.00385491787683,
+        "frechet_lower": 0.01020933077126393,
+        "frechet_upper": 0.011120765236337817,
         "dependence_factor_range": [
-          0.9901758907501299,
-          1.110232832193558
+          0.9961598854494003,
+          1.0850917138585836
         ],
         "sum_normalised_shares": {
-          "bep": 0.8918632759164364,
-          "overflow": 0.1081367240835635,
+          "bep": 0.9180421090002228,
+          "overflow": 0.08195789099977722,
           "fluvial_scour": 0.0
         },
         "union_normalised_marginals": {
-          "bep": 0.9901758907501299,
-          "overflow": 0.12005694144342804,
+          "bep": 0.9961598854494003,
+          "overflow": 0.08893182840918325,
           "fluvial_scour": 0.0
         }
       }
@@ -734,24 +734,24 @@
   },
   "historical_consistency": {
     "per_section_annual_bep": {
-      "KP 57.4": 0.0004977748875059569,
+      "KP 57.4": 0.0008532824947318301,
       "KP 58.8": 0.00608432780046243,
       "KP 60.0": 0.00031469129653997945,
       "KP 62.0": 0.0007643846350220552
     },
     "years": 60,
-    "reach_annual_series_union": 0.00765081171084403,
-    "reach_annual_sum": 0.007661178619530423,
+    "reach_annual_series_union": 0.008003775092612853,
+    "reach_annual_sum": 0.008016686226756295,
     "reach_annual_largest": 0.00608432780046243,
-    "union_over_largest": 1.2574621160718102,
-    "expected_failures": 0.4590487026506418,
-    "p_no_failure": 0.630770141878826,
+    "union_over_largest": 1.3154740104575788,
+    "expected_failures": 0.48022650555677115,
+    "p_no_failure": 0.617449105274537,
     "exclusion_upper_95_exact": 0.04870291331009746,
     "exclusion_upper_95_rule_of_three": 0.05,
-    "exact_upper_over_reported": 6.365718455868862,
-    "rule_of_three_over_reported": 6.535254282775187,
+    "exact_upper_over_reported": 6.084992737370669,
+    "rule_of_three_over_reported": 6.247052099970662,
     "assumptions": {
-      "inter_section_independence": "the series union assumes the four sections fail independently given the year. They share one flood, so positive dependence is expected; under it the reach union falls toward the largest single-section value, here a factor of 1.257 below the independent composition. The independent composition therefore OVER-states the reach probability, which makes the check conservative.",
+      "inter_section_independence": "the series union assumes the four sections fail independently given the year. They share one flood, so positive dependence is expected; under it the reach union falls toward the largest single-section value, here a factor of 1.315 below the independent composition. The independent composition therefore OVER-states the reach probability, which makes the check conservative.",
       "persistent_epistemic_uncertainty": "the sixty years are treated as independent Bernoulli trials at a known p. The soil and conductivity uncertainty is persistent, so p is one uncertain number held fixed across the sixty years. (1 - p)^60 is convex in p, so E[(1 - p)^60] >= (1 - E[p])^60 by Jensen: the reported no-failure probability is a LOWER bound on the one a persistent-epistemic treatment gives, and the record is therefore at least as consistent with the model as stated.",
       "not_calibration": "the check constrains over-prediction only. It excludes nothing below its threshold and cannot confirm the reported value."
     }
@@ -775,7 +775,7 @@
     "3_attribution_terms_sum_to_log_ratio": {
       "passed": true,
       "tolerance": 1e-12,
-      "worst_relative_deviation": 1.265107762646302e-16
+      "worst_relative_deviation": 1.786493978780239e-16
     },
     "4_inside_product_reconstructs_inside_ratio": {
       "passed": true,
@@ -785,7 +785,7 @@
     "5_defect_present": {
       "passed": true,
       "criterion": "the inside-stratum product must miss the total ratio by more than 1e-06 somewhere",
-      "worst_relative_departure": 1.2839190455305376
+      "worst_relative_departure": 1.2515793219087152
     },
     "6_read_only": {
       "passed": true,

@@ -989,3 +989,46 @@ Surface curves, hazard and every bulk-reading number are unchanged.
 **Mechanism shares.** The adopted share divides the annual system probability by first breach (`crest-attribution-study.md`): historical 1.00 / 0.98 / 1.00 / 0.80, +4 K 0.96 / 0.96 / 1.00 / **0.39 [0.35, 0.44]**. The KP 62.0 warming cell is an **overflow lead**, not a tie: 61 % of its piping contribution comes from years above the overflow model's crest, where overtopping usually breaches first. The summed-contribution share (`dominance_share`, the `share_bep` column) is unchanged and stays the ranking measure for the alternative-reading companions.
 
 **What did not change.** The system probability, its intervals, every curve, every persisted artifact and every companion JSON. Numbers of record: `docs/decisions/drained-section-conditioning-adopted.json` (Table 7.1 values, first-breach shares, ranks, two-stratum terms, drained-section readings, sixty-year check) and `drained-section-conditioning-alternatives.json` (alternative readings with the prior side at the drained sections).
+
+## Addendum, 2026-10-17 - KP 57.4 aquifer thickness corrected (ADR-0059); authoritative where it differs from everything above at KP 57.4
+
+ADR-0059 corrects KP 57.4's aquifer-thickness prior mean from 7 m (the A_g gravel
+alone) to 12 m (the combined A_g + N_s thickness over the seepage path). The Phase 1
+sweeps, the Phase 2 posteriors and every Phase 3 product carrying KP 57.4 were
+re-run; the superseded tree is `results/superseded_kp57daq_20261017T135158/`. Surface
+curves, hazard and every value at KP 58.8, 60.0 and 62.0 are unchanged: only 20 of the
+2,280 rows of `rq4_annual.csv` changed, all at KP 57.4. Adopted conditioning as in the
+2026-10-07 addendum (matrix/posterior at KP 57.4 and 62.0, matrix/prior at the drained
+sections). Numbers of record: `docs/decisions/drained-section-conditioning-adopted.json`
+and the regenerated study records named below.
+
+| Quantity (adopted conditioning) | Before ADR-0059 | After |
+|---|---|---|
+| KP 57.4 annual system P_f, historical [95 % hazard-sampling interval] | 4.98e-4 [2.2, 8.3]e-4 | **8.53e-4 [4.0, 13.8]e-4** |
+| KP 57.4 annual system P_f, +4K | 7.59e-3 [6.1, 9.2]e-3 | **1.025e-2 [8.4, 12.2]e-3** |
+| KP 57.4 climate ratio | 15.3 [8.7, 36.1] | **12.0 [7.1, 26.1]**; the range over the four sections is now 5.6 to 13.4 |
+| KP 57.4 first-breach piping share, historical / +4K | 1.00 / 0.96 [0.94, 0.98] | 1.00 / **0.98 [0.97, 0.99]** |
+| Pipe first when both would fail, KP 57.4 | 0.69 to 0.83 | 0.75 to 0.86 |
+| Rank among the 114 nodes, KP 57.4, historical / +4K | 4 / 5 | **3 / 4** (ahead of surface-only KP 62.2 historically, behind it under warming) |
+| Order of the four sections | 58.8, 62.0, 57.4, 60.0 in 99.8 % of resamples | unchanged order, historically in 97.0 % (KP 57.4 and 62.0 swap in 3.0 %) |
+| Climate-ratio pairs resolved (`annualisation-hazard-sampling-uncertainty.json` Q1) | 4 of 6 | **3 of 6**: KP 57.4 and 62.0 no longer separate |
+| Relative half-widths, historical / +4K | 29 to 62 % / 8 to 21 % | 29 to 58 % / 8 to 20 % |
+| Matrix-to-bulk factor, KP 57.4 historical | 240 | **104** |
+| Bulk reading, KP 57.4 +4K first-breach share | 0.34 (lower bound) | **0.54** (curve now reaches its transition): overflow leads **4** of the 8 bulk cells (was 5); the upper conductivity value restores piping at 3 of the 4 |
+| Static criterion, annual S/T at KP 57.4, historical / +4K | 2.05 / 1.60 | **1.91 / 1.54**; warming range 1.5 to 2.6 (was 1.6 to 2.6); the static criterion **no longer changes the order of the sections** (KP 60.0 stays last, 99.99 % of resamples) |
+| Gravel x1.8, KP 57.4 +4K first-breach share / climate ratio | 0.55 / 161 | 0.72 / 78.1 |
+| Conductivity bracket, KP 57.4 | historical span unbounded; +4K 23.2 | historical still unbounded (field-test mean: no failure); +4K 27.6; landside-toe climate ratio 199 (was 500), upper 7.2 (was 7.9) |
+| Share of KP 57.4 +4K piping from years above the overflow crest | 16 % | 12 % |
+| Sixty-year non-breach check (four sections, drained as if undrained) | 8.34e-3; 0.50 expected; P(none) 0.61 | 8.69e-3; 0.52; 0.59 |
+| Two-stratum terms, KP 57.4 (long share, long severity, short severity) | 0.14, 4.5, 12.1 | 0.13, 3.5, 9.9 |
+| Rating-error companion, KP 57.4 piping factor hist / +4K | 0.826 / 0.870 | 0.819 / 0.872 (range 12 to 18 % lower, was 12 to 17) |
+| Waveform screen control at KP 57.4 | 47 % of the historical value | 55 % (still not converged) |
+
+**What did not change.** Every surface curve, the hazard, every value at the other three
+sections, the piping lead of the adopted calculation in every cell, and the KP 62.0
+warming overflow lead. Two pre-existing random-stream couplings move values at other
+sections within Monte Carlo noise and change no printed digit: the first-breach study
+seeds one stream per alternative and walks the sections in KP order from KP 57.4 (largest
+shift 0.0005 in a share), and the reach-interval bootstrap of
+`annualisation_uncertainty_study.py` (gitignored `reach_intervals.json`, interval ends at
+other nodes by about 1 to 3 %).

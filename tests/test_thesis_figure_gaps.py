@@ -682,9 +682,10 @@ def test_m_p_is_the_only_bracket_that_cancels_in_the_ratio() -> None:
 def test_the_contaminated_kp57_4_length_arm_is_excluded_by_name() -> None:
     """ADR-0047: the all-station median at KP 57.4 measures road fill.
 
-    Including it would put the L bracket's departure at 9.1 instead of the
-    1.33 the re-based synthesis records (10.7 against 2.25 before ADR-0054,
-    2026-09-25), and would attribute a road embankment's geometry to the levee.
+    Including it would put the L bracket's departure at 10.3 instead of the
+    1.68 the synthesis records since ADR-0059 (2026-10-17; 9.1 against 1.33
+    before it, 10.7 against 2.25 before ADR-0054, 2026-09-25), and would
+    attribute a road embankment's geometry to the levee.
     """
     from thesis_figure_gaps import (
         CANCELLATION_ARM_EXCLUSIONS,
@@ -692,7 +693,7 @@ def test_the_contaminated_kp57_4_length_arm_is_excluded_by_name() -> None:
     )
 
     assert "L_dem_all_stations_median" in CANCELLATION_ARM_EXCLUSIONS
-    published = {"KP57.4": 1.33, "KP58.8": 1.78, "KP60.0": 2.29, "KP62.0": 1.87}
+    published = {"KP57.4": 1.68, "KP58.8": 1.78, "KP60.0": 2.29, "KP62.0": 1.87}
     for section in _read(_require(SYNTHESIS))["sections"]:
         worst = _cancellation_by_bracket(section)["L_measurement"]
         assert worst["max_resolved_departure_factor"] == pytest.approx(
@@ -721,7 +722,7 @@ def test_the_ranking_order_is_computed_from_the_evidence() -> None:
 # --------------------------------------------------------------------------- #
 
 
-def test_the_kp57_4_bound_reproduces_the_published_37_and_69() -> None:
+def test_the_kp57_4_bound_reproduces_the_published_95_and_98() -> None:
     """Recomputed from the counts with the repo's own Clopper-Pearson helper.
 
     The companion note's bound divides the static branch's 95 % lower endpoint
@@ -734,23 +735,24 @@ def test_the_kp57_4_bound_reproduces_the_published_37_and_69() -> None:
     brute = _read(_require(HWL_EVIDENCE))["stages"]["A_brute_kp57_4"]
     n = int(brute["n_samples"])
     a1, a2 = brute["anchor_A1"], brute["anchor_A2"]
-    # Re-based 2026-09-25 (ADR-0054); superseded 148 and 101.
-    assert round(_clopper_pearson_bound(a1["k_static"], a1["k_transient"], n)) == 37
-    assert round(_clopper_pearson_bound(a2["k_static"], a2["k_transient"], n)) == 69
+    # ADR-0059 (2026-10-17): superseded 37 and 69 (ADR-0054), 148 and 101 before.
+    assert round(_clopper_pearson_bound(a1["k_static"], a1["k_transient"], n)) == 95
+    assert round(_clopper_pearson_bound(a2["k_static"], a2["k_transient"], n)) == 98
 
 
 def test_the_two_kp57_4_anchors_stay_distinct_and_unresolved() -> None:
-    """A1 is 39.21 m on 2 rows, A2 is 39.25 m on 2 (10 before ADR-0054)."""
+    """A1 is 39.21 m on 5 rows, A2 is 39.25 m on 11 (2 and 2 before ADR-0059,
+    2026-10-17; 2 and 10 before ADR-0054)."""
     rows = {
         row["role"]: row
         for row in _rows(FIGURE_TO_CSV["adr0040_kp57_4_bound.png"])
         if row["role"]
     }
     assert float(rows["A1_design_hwl"]["level_m_msl"]) == pytest.approx(39.21)
-    assert int(rows["A1_design_hwl"]["k_transient"]) == 2
+    assert int(rows["A1_design_hwl"]["k_transient"]) == 5
     assert rows["A1_design_hwl"]["resolved"] == "False"
     assert float(rows["A2_nearest_grid_level"]["level_m_msl"]) == pytest.approx(39.25)
-    assert int(rows["A2_nearest_grid_level"]["k_transient"]) == 2
+    assert int(rows["A2_nearest_grid_level"]["k_transient"]) == 11
     assert rows["A2_nearest_grid_level"]["resolved"] == "False"
     assert (
         rows["A1_design_hwl"]["level_m_msl"]
@@ -765,7 +767,9 @@ def test_the_quotable_anchor_states_its_flip_status() -> None:
     in 521 biasing B down about 0.2 %. On the re-based prior it carries none,
     and the callout says so rather than keeping the old caveat or dropping the
     line; the caveat branch stays in the driver for any rerun that brings a
-    flip back.
+    flip back. Since ADR-0059 (2026-10-17, aquifer thickness 7 m to 12 m) the
+    anchor rests on 712 rows at B = 33.5 (163 rows and 51.2 before), still with
+    no flip.
     """
     (row,) = [
         row
@@ -773,8 +777,8 @@ def test_the_quotable_anchor_states_its_flip_status() -> None:
         if row["role"] == "A3_quotable_anchor"
     ]
     assert float(row["level_m_msl"]) == pytest.approx(39.50)
-    assert int(row["k_transient"]) == 163
-    assert float(row["bias_B"]) == pytest.approx(51.2, abs=0.05)
+    assert int(row["k_transient"]) == 712
+    assert float(row["bias_B"]) == pytest.approx(33.5, abs=0.05)
     assert row["resolved"] == "True"
     assert int(row["euler_barrier_jump_rows"]) == 0
     source = DRIVER.read_text(encoding="utf-8")
@@ -783,7 +787,8 @@ def test_the_quotable_anchor_states_its_flip_status() -> None:
 
 
 def test_the_euler_flip_levels_are_an_n1e6_statement() -> None:
-    """Fourteen rows in 1e6 (four before ADR-0054); 1.4 expected at N = 1e5.
+    """One row in 1e6 since ADR-0059 (2026-10-17); fourteen on the ADR-0054
+    prior and four before it. At most 0.1 expected at N = 1e5.
 
     An unqualified "all Euler-flip counts are 0" reads as a statement about the
     discretisation when it is a statement about the sample size, so the figure
@@ -794,8 +799,8 @@ def test_the_euler_flip_levels_are_an_n1e6_statement() -> None:
         for row in _rows(FIGURE_TO_CSV["adr0040_kp57_4_bound.png"])
         if int(row["euler_barrier_jump_rows"]) > 0
     }
-    assert flips == {39.75: 4, 40.0: 2, 40.25: 3, 40.5: 3, 40.75: 1, 41.0: 1}
-    assert sum(flips.values()) == 14
+    assert flips == {40.0: 1}
+    assert sum(flips.values()) == 1
     source = DRIVER.read_text(encoding="utf-8")
     assert "$N = 10^5$" in source and "$N = 10^6$" in source
 

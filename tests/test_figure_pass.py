@@ -223,12 +223,14 @@ def test_the_n1e5_figure_is_recorded_as_superseded_not_as_a_second_estimate() ->
 
 
 def test_kp57_4_is_a_bound_not_a_point_estimate() -> None:
-    """Two failing rows at N = 1e6: report B >= 37, lead with 51.2 at 39.50 m.
+    """Five failing rows at N = 1e6: report B >= 94.6, lead with 33.5 at 39.50 m.
 
-    (B >= 148 and 42.7 on 521 rows before ADR-0054, 2026-09-25.)
+    (B >= 37 and 51.2 on 163 rows before ADR-0059, 2026-10-17, which corrected
+    KP 57.4's aquifer thickness from 7 m to 12 m; B >= 148 and 42.7 on 521 rows
+    before ADR-0054, 2026-09-25.)
     """
     brute = _read(_require(HWL_EVIDENCE))["stages"]["A_brute_kp57_4"]
-    assert brute["anchor_A1"]["k_transient"] == 2
+    assert brute["anchor_A1"]["k_transient"] == 5
     assert not brute["anchor_A1"]["R1_rows"]
     resolved = [
         row
@@ -237,23 +239,26 @@ def test_kp57_4_is_a_bound_not_a_point_estimate() -> None:
     ]
     lowest = min(resolved, key=lambda r: r["level_m"])
     assert lowest["level_m"] == pytest.approx(39.50)
-    assert lowest["ratio"] == pytest.approx(51.2, abs=0.2)
-    assert lowest["k_transient"] == 163
+    assert lowest["ratio"] == pytest.approx(33.5, abs=0.2)
+    assert lowest["k_transient"] == 712
 
 
 def test_the_kp57_4_flip_levels_are_recorded_and_miss_the_anchors() -> None:
     """The barrier-jump levels must survive propagation, level by level.
 
     Before ADR-0054 (2026-09-25) 39.50 m was the recommended anchor AND one of
-    three N = 1e6 barrier-jump levels (4 rows). On the re-based prior there are
-    14 rows at six levels from 39.75 to 41.00 m, none at 39.21, 39.25 or
-    39.50 m, each at most 1 % of its level's transient failures (the share rule
-    of the ADR-0040 amendment). The record must carry the levels, not a total.
+    three N = 1e6 barrier-jump levels (4 rows). On the re-based prior there were
+    14 rows at six levels from 39.75 to 41.00 m. Since ADR-0059 (2026-10-17,
+    aquifer thickness 7 m to 12 m) there is one, at 40.00 m (1 of 43,280
+    transient failures), plus one on the alpha = -1/2 branch at 39.75 m; none at
+    39.21, 39.25 or 39.50 m, each at most 1 % of its level's transient failures
+    (the share rule of the ADR-0040 amendment). The record must carry the
+    levels, not a total.
     """
     flips = _read(_require(HWL_EVIDENCE))["stages"]["A_brute_kp57_4"]["euler_flips"]
-    assert flips["per_diagnostic_totals"]["c4b_not_c3b"] == 14
+    assert flips["per_diagnostic_totals"]["c4b_not_c3b"] == 1
     levels = flips["offending_levels"]["c4b_not_c3b"]
-    assert sum(row["count"] for row in levels) == 14
+    assert sum(row["count"] for row in levels) == 1
     stages = {row["level_m"] for row in levels}
     assert not stages & {39.21, 39.25, 39.5}
     assert all(row["count"] <= 0.01 * row["transient_failures"] for row in levels)

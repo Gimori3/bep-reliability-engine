@@ -882,3 +882,23 @@ kept under `results/superseded_d70rebase_20260924T163630/`. Evidence:
 ## Addendum, 2026-10-07 - the drained sections are not conditioned (ADR-0056); authoritative where it differs from everything above
 
 The KP 58.8 and 60.0 posteriors condition the as-if-undrained foundation on surviving 2016 through a levee with neither berm nor drain; the levee that survived had both (built 1999 to 2003). On the measured berm with an inert drain, the least protective configuration that existed, the same record rejects 0.899 % and 0.014 % (as if undrained 3.813 % and 0.226 %), and any drain relief only lowers that (`drained-section-conditioning-study.md`). By owner decision those two posteriors are no longer adopted; they are reported as the upper bound on what the survival could teach. With KP 57.4 (16 rows) and KP 62.0 (none) the 2016 survival constrains no section materially. The transient/static likelihood ratio at KP 58.8 is at most 1.34 (as if undrained), 1.13 on the berm with an inert drain.
+
+## Addendum, 2026-10-17 - KP 57.4 aquifer thickness corrected (ADR-0059); authoritative where it differs from everything above
+
+ADR-0059 corrected KP 57.4's aquifer-thickness prior mean from 7 m (the A_g gravel alone) to 12 m (the combined A_g + N_s to the K_1p base that the input table defines); the other three sections are unchanged. The two KP 57.4 sweeps and their posteriors (baseline, rating anchor, no-initiation criterion) were re-run with `--verify` (zero flag mismatches, exact curve agreement); the superseded files are kept under `results/superseded_kp57daq_20261017T135158/`. Every KP 58.8, 60.0 and 62.0 posterior is untouched.
+
+| Quantity, KP 57.4 (no-breach, trace-anchored) | Superseded (D_aq 7 m) | Re-based (D_aq 12 m) |
+|---|---|---|
+| Transient rejection, matrix | 0.016 % (16 rows) | **0.076 % (76 rows)** |
+| Same-head (C3b) static rejection, matrix | 0.39 % | 1.235 % |
+| Gross-head static rejection, matrix | 2.73 % | 6.67 % |
+| Marginal transient rejection | 0 | 0 (nesting holds) |
+| Transient / same-head likelihood ratio | 1.00 | 1.012 [1.011, 1.012] |
+| Joint likelihood ratio, comonotone / independent / Frechet bound | 1.34 / 1.42 / 1.45 | 1.34 / 1.43 / 1.47 |
+| Rating anchor | 0 | 0 |
+| Exit datum -0.30 m / +0.30 m | 0.351 / 0 % | 0.885 / 0 % |
+| Bulk reading | 0 transient | 0 transient (1 gross static row) |
+| No-initiation criterion: rejected / retained | 66.4 % / 33,611 | 76.8 % / 23,241 (k_aq mean -17 %) |
+| Largest change of the transient curve under the update | 0.016 percentage points | 0.075 percentage points (39.50 m: 75 to 16 failures) |
+
+The update stays non-informative at KP 57.4: it removes 76 of 100,000 realizations and moves no stage of the transient curve by more than 0.075 percentage points. Statements of the 2026-10-07 addendum that rest on KP 57.4's 16 rows now read 76. Evidence: `docs/decisions/time-dependence-factor-study.json` (evidence block), `docs/decisions/adr0046-ztoe-companion.json`, `docs/decisions/adr0059-kp57-aquifer-thickness.json`.

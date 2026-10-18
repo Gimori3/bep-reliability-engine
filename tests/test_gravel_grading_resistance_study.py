@@ -115,7 +115,8 @@ def test_dutch_factor_values_quoted_in_the_thesis(record) -> None:
     assert round(dg["dbeta"], 2) == 0.26
     assert [round(x, 2) for x in dg["dbeta_ci95"]] == [0.24, 0.29]
     arm = record["event_summary"]["by_arm"]["x1.80"]
-    assert [round(x, 2) for x in arm["delta_dbeta_range"]] == [-0.82, -0.39]
+    # [-0.82, -0.39] before ADR-0059 (2026-10-17).
+    assert [round(x, 2) for x in arm["delta_dbeta_range"]] == [-0.84, -0.40]
     assert [round(x, 2) for x in arm["F_td_factor_range"]] == [0.73, 1.53]
     ev = record["sections"]["KP 58.8"]["arms"]["x1.80"]["evidence_2016"]
     assert round(100 * ev["rejected_transient"], 3) == 0.037

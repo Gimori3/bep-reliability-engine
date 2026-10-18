@@ -127,15 +127,16 @@ class TestTheTotalRatioIsAMixtureAndNotTheProduct:
     def test_the_product_is_not_the_total_ratio_where_the_stratum_is_a_minority(
         self, duration: dict
     ) -> None:
-        """KP 57.4 carries 14 per cent of its historical probability in the long
+        """KP 57.4 carries 13 per cent of its historical probability in the long
         stratum, and there the product overshoots the total by a factor above 2
-        (2.28 since the ADR-0054 re-basing of 2026-09-25; 2.26 before it).
+        (2.25 since ADR-0059 of 2026-10-17; 2.28 after the ADR-0054 re-basing of
+        2026-09-25; 2.26 before it).
         This is the measured defect; if it ever disappears, the correction in
         Chapter 7 has lost its subject."""
         worst = max(block["product_over_total_ratio"] for block in duration.values())
         assert worst > 2.0
         assert duration["KP 57.4"]["product_over_total_ratio"] == pytest.approx(
-            2.28, abs=0.01
+            2.25, abs=0.01
         )
 
     def test_the_error_of_the_product_has_its_exact_closed_form(
@@ -301,10 +302,11 @@ class TestHistoricalNonBreachCheck:
         assert c["reach_annual_series_union"] == pytest.approx(series, rel=EXACT)
         assert c["expected_failures"] == pytest.approx(60.0 * series, rel=EXACT)
         assert c["p_no_failure"] == pytest.approx((1.0 - series) ** 60, rel=EXACT)
-        # Re-based under ADR-0054 (2026-09-25); before it 0.0108, 0.645, 0.523.
-        assert round(c["reach_annual_series_union"], 4) == 0.0077
-        assert c["expected_failures"] == pytest.approx(0.459, abs=0.001)
-        assert c["p_no_failure"] == pytest.approx(0.631, abs=0.001)
+        # ADR-0059 (2026-10-17); 0.0077, 0.459, 0.631 after the ADR-0054 re-basing
+        # (2026-09-25); before it 0.0108, 0.645, 0.523.
+        assert round(c["reach_annual_series_union"], 4) == 0.0080
+        assert c["expected_failures"] == pytest.approx(0.480, abs=0.001)
+        assert c["p_no_failure"] == pytest.approx(0.617, abs=0.001)
 
     def test_exact_one_sided_bound_is_below_the_rule_of_three(
         self, record: dict
@@ -317,12 +319,14 @@ class TestHistoricalNonBreachCheck:
         )
         assert c["exclusion_upper_95_exact"] == pytest.approx(0.0487, abs=0.0001)
         assert c["exclusion_upper_95_exact"] < c["exclusion_upper_95_rule_of_three"]
-        assert c["exact_upper_over_reported"] == pytest.approx(6.37, abs=0.01)
+        # 6.37 before ADR-0059 (2026-10-17).
+        assert c["exact_upper_over_reported"] == pytest.approx(6.08, abs=0.01)
 
     def test_independence_over_states_the_reach_probability(self, record: dict) -> None:
         c = record["historical_consistency"]
         assert c["reach_annual_series_union"] > c["reach_annual_largest"]
-        assert c["union_over_largest"] == pytest.approx(1.26, abs=0.01)
+        # 1.26 before ADR-0059 (2026-10-17).
+        assert c["union_over_largest"] == pytest.approx(1.32, abs=0.01)
 
     def test_both_assumptions_are_recorded_with_their_directions(
         self, record: dict

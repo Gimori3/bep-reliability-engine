@@ -177,10 +177,11 @@ BIG_LEVELS: dict[str, tuple[float, ...]] = {
 #: The gate values, read from the persisted ladder before this study ran. Re-read
 #: on 2026-09-25 from the ladder ADR-0054 regenerated (docs/decisions/
 #: adr0040-hwl-bias-resolution.json, stage A, N = 1e6, k_static); the
-#: pre-ADR-0054 values were 1696 and 1132.
+#: pre-ADR-0054 values were 1696 and 1132. KP 57.4 re-read on 2026-10-17 from the
+#: ladder ADR-0059 regenerated (aquifer thickness 7 m to 12 m); it was 302.
 BIG_STATIC_GATE: dict[tuple[str, float], int] = {
     ("KP62.0", 46.39): 1203,
-    ("KP57.4", 39.21): 302,
+    ("KP57.4", 39.21): 1170,
 }
 
 OUT_DIR = REPO_ROOT / "results" / "equal_head_convention"

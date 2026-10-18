@@ -6,12 +6,12 @@
   "historical KP 57.4": {
    "side": "posterior",
    "system_by_arm": {
-    "matrix": 0.000497775,
-    "bulk": 2.07406e-06,
+    "matrix": 0.000853282,
+    "bulk": 8.2043e-06,
     "k_aq_field_geomean": 0.0,
-    "k_aq_field_toe": 2.31837e-06,
-    "k_aq_regional_upper": 0.002684,
-    "bulk_upper": 0.00012621
+    "k_aq_field_toe": 7.06351e-06,
+    "k_aq_regional_upper": 0.00347214,
+    "bulk_upper": 0.000269952
    },
    "shares_summed": {
     "matrix": 1.0,
@@ -24,50 +24,50 @@
     "credit_full": null
    },
    "clamped": {
-    "bulk": "True",
+    "bulk": "False",
     "field": false
    },
    "conductivity_span_system": null,
    "foreland_full_system_ratio": 0.0,
    "foreland_half_system_ratio": 0.0,
-   "bulk_over_matrix_system": 0.00416666,
+   "bulk_over_matrix_system": 0.00961498,
    "climate_ratio_by_arm": {
-    "matrix": 15.2512,
-    "bulk": 586.041,
+    "matrix": 12.0109,
+    "bulk": 188.532,
     "k_aq_field_geomean": null,
-    "k_aq_field_toe": 500.268,
-    "k_aq_regional_upper": 7.86392,
-    "bulk_upper": 32.7728
+    "k_aq_field_toe": 198.877,
+    "k_aq_regional_upper": 7.24977,
+    "bulk_upper": 22.0509
    }
   },
   "+4K KP 57.4": {
    "side": "posterior",
    "system_by_arm": {
-    "matrix": 0.00759168,
-    "bulk": 0.00121548,
-    "k_aq_field_geomean": 0.00091149,
-    "k_aq_field_toe": 0.0011598,
-    "k_aq_regional_upper": 0.0211068,
-    "bulk_upper": 0.00413627
+    "matrix": 0.0102487,
+    "bulk": 0.00154677,
+    "k_aq_field_geomean": 0.000911676,
+    "k_aq_field_toe": 0.00140477,
+    "k_aq_regional_upper": 0.0251722,
+    "bulk_upper": 0.00595268
    },
    "shares_summed": {
-    "matrix": 0.891863,
-    "bulk": 0.383629,
-    "k_aq_field_geomean": 0.000343029,
-    "k_aq_field_toe": 0.327068,
-    "k_aq_regional_upper": 0.958603,
-    "bulk_upper": 0.813763,
-    "credit_half": 0.099294,
-    "credit_full": 2.50785e-07
+    "matrix": 0.918042,
+    "bulk": 0.531664,
+    "k_aq_field_geomean": 0.00118985,
+    "k_aq_field_toe": 0.461951,
+    "k_aq_regional_upper": 0.965057,
+    "bulk_upper": 0.865698,
+    "credit_half": 0.121308,
+    "credit_full": 1.07706e-06
    },
    "clamped": {
-    "bulk": "True",
+    "bulk": "False",
     "field": false
    },
-   "conductivity_span_system": 23.1564,
-   "foreland_full_system_ratio": 0.120057,
-   "foreland_half_system_ratio": 0.122389,
-   "bulk_over_matrix_system": 0.160107
+   "conductivity_span_system": 27.6109,
+   "foreland_full_system_ratio": 0.0889318,
+   "foreland_half_system_ratio": 0.0912921,
+   "bulk_over_matrix_system": 0.150924
   },
   "historical KP 58.8": {
    "side": "prior",
@@ -270,14 +270,14 @@
  },
  "lambda_ac_factors": {
   "historical KP 57.4": {
-   "100": 1.83669,
-   "40": 3.6855,
+   "100": 1.7649,
+   "40": 3.25982,
    "share_bep_40": 1.0
   },
   "+4K KP 57.4": {
-   "100": 1.49805,
-   "40": 2.27263,
-   "share_bep_40": 0.949823
+   "100": 1.46146,
+   "40": 2.13486,
+   "share_bep_40": 0.960009
   },
   "historical KP 58.8": {
    "100": 1.59371,

@@ -5,12 +5,12 @@
  "replicates": 10000,
  "annual": {
   "t0.00 historical KP 57.4": {
-   "p_system": 0.000497775,
+   "p_system": 0.000853282,
    "system_ci95": [
-    0.000215774,
-    0.000831173
+    0.000399342,
+    0.00138047
    ],
-   "p_bep": 0.000497775,
+   "p_bep": 0.000853282,
    "p_overflow": 0.0,
    "summed_share_bep": 1.0,
    "overflow_first_share_bep": 1.0,
@@ -21,10 +21,10 @@
     1.0,
     1.0
    ],
-   "climate_ratio": 15.2512,
+   "climate_ratio": 12.0109,
    "climate_ratio_ci95": [
-    8.67097,
-    36.148
+    7.12428,
+    26.1446
    ]
   },
   "t0.00 historical KP 58.8": {
@@ -97,16 +97,16 @@
    ]
   },
   "t0.00 +4K KP 57.4": {
-   "p_system": 0.00759168,
+   "p_system": 0.0102487,
    "system_ci95": [
-    0.00605955,
-    0.00923566
+    0.00837404,
+    0.0122197
    ],
-   "p_bep": 0.0075171,
+   "p_bep": 0.0102093,
    "p_overflow": 0.000911434,
-   "summed_share_bep": 0.891863,
-   "overflow_first_share_bep": 0.879955,
-   "piping_first_share_bep": 0.990075,
+   "summed_share_bep": 0.918042,
+   "overflow_first_share_bep": 0.911073,
+   "piping_first_share_bep": 0.996111,
    "fraction_replicates_piping_leads_summed": 1.0,
    "bep_relative_to_adopted": 1.0,
    "bep_relative_ci95": [
@@ -169,26 +169,26 @@
    ]
   },
   "t0.85 historical KP 57.4": {
-   "p_system": 0.000254009,
+   "p_system": 0.000512213,
    "system_ci95": [
-    9.26621e-05,
-    0.000453496
+    0.000214275,
+    0.000866839
    ],
-   "p_bep": 0.000254009,
+   "p_bep": 0.000512213,
    "p_overflow": 0.0,
    "summed_share_bep": 1.0,
    "overflow_first_share_bep": 1.0,
    "piping_first_share_bep": 1.0,
    "fraction_replicates_piping_leads_summed": 1.0,
-   "bep_relative_to_adopted": 0.510288,
+   "bep_relative_to_adopted": 0.600286,
    "bep_relative_ci95": [
-    0.402935,
-    0.570403
+    0.507316,
+    0.659231
    ],
-   "climate_ratio": 22.2781,
+   "climate_ratio": 15.5946,
    "climate_ratio_ci95": [
-    11.7783,
-    62.4361
+    8.75947,
+    38.071
    ]
   },
   "t0.85 historical KP 58.8": {
@@ -261,21 +261,21 @@
    ]
   },
   "t0.85 +4K KP 57.4": {
-   "p_system": 0.00565883,
+   "p_system": 0.00798777,
    "system_ci95": [
-    0.00437585,
-    0.00704747
+    0.00637469,
+    0.0097158
    ],
-   "p_bep": 0.00556325,
+   "p_bep": 0.00793716,
    "p_overflow": 0.000911434,
-   "summed_share_bep": 0.859231,
-   "overflow_first_share_bep": 0.838964,
-   "piping_first_share_bep": 0.982936,
+   "summed_share_bep": 0.896997,
+   "overflow_first_share_bep": 0.885906,
+   "piping_first_share_bep": 0.993582,
    "fraction_replicates_piping_leads_summed": 1.0,
-   "bep_relative_to_adopted": 0.740079,
+   "bep_relative_to_adopted": 0.777442,
    "bep_relative_ci95": [
-    0.708281,
-    0.767353
+    0.752216,
+    0.799383
    ]
   },
   "t0.85 +4K KP 58.8": {
@@ -333,26 +333,26 @@
    ]
   },
   "t1.00 historical KP 57.4": {
-   "p_system": 0.000111056,
+   "p_system": 0.000265144,
    "system_ci95": [
-    3.25498e-05,
-    0.000211661
+    9.49516e-05,
+    0.000475525
    ],
-   "p_bep": 0.000111056,
+   "p_bep": 0.000265144,
    "p_overflow": 0.0,
    "summed_share_bep": 1.0,
    "overflow_first_share_bep": 1.0,
    "piping_first_share_bep": 1.0,
    "fraction_replicates_piping_leads_summed": 1.0,
-   "bep_relative_to_adopted": 0.223105,
+   "bep_relative_to_adopted": 0.310734,
    "bep_relative_ci95": [
-    0.133403,
-    0.276301
+    0.212897,
+    0.375642
    ],
-   "climate_ratio": 36.1971,
+   "climate_ratio": 22.1922,
    "climate_ratio_ci95": [
-    17.6661,
-    127.146
+    11.7017,
+    62.7676
    ]
   },
   "t1.00 historical KP 58.8": {
@@ -425,21 +425,21 @@
    ]
   },
   "t1.00 +4K KP 57.4": {
-   "p_system": 0.0040199,
+   "p_system": 0.00588413,
    "system_ci95": [
-    0.00296943,
-    0.00518737
+    0.00456021,
+    0.00731985
    ],
-   "p_bep": 0.00387274,
+   "p_bep": 0.00580337,
    "p_overflow": 0.000911434,
-   "summed_share_bep": 0.80949,
-   "overflow_first_share_bep": 0.773344,
-   "piping_first_share_bep": 0.963075,
+   "summed_share_bep": 0.864265,
+   "overflow_first_share_bep": 0.845128,
+   "piping_first_share_bep": 0.986118,
    "fraction_replicates_piping_leads_summed": 1.0,
-   "bep_relative_to_adopted": 0.515191,
+   "bep_relative_to_adopted": 0.568438,
    "bep_relative_ci95": [
-    0.466433,
-    0.558186
+    0.52775,
+    0.604861
    ]
   },
   "t1.00 +4K KP 58.8": {

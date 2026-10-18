@@ -1,6 +1,6 @@
 {
  "record": "WBI+ peak-only shortcut against the full transient replay",
- "generated": "2026-09-25T03:49:13",
+ "generated": "2026-10-17T20:28:50",
  "generated_by": "scripts/thesis_figure_gaps.py extract",
  "note": "Inventory row 4.7, the RQ2 clause 'what the time-resolved replay adds over a peak-only reading'. docs/phase2_report.md section 11.1 carries this comparison in prose only; this record is the artifact behind it. The peak-only column is the Phase 1 PRIOR TRANSIENT fragility linearly interpolated on its raw Monte Carlo points at the observed 2016 peak -- the reading a peak-based (WBI+, Zethof et al. 2023) survival update would take. The replay column is the Phase 2 posterior's rejection fraction over the same N = 1e5 prior sample. Both are transient, so this compares method against method on one sample. The mechanism is the loading shape: the Phase 1 curves condition on the canonical d4PDF compound shape scaled to each level, which carries far more above-toe exposure than the real 2016 event did at the same peak, so the peak-only reading rejects realizations the full replay retains. over_rejection_factor is null where the replay rejects nothing -- not defined, never 1.",
  "method": {
@@ -12,22 +12,22 @@
  "sources": [
   {
    "path": "results/tokachi_kp57.4_historical_matrix.h5",
-   "sha256": "4848520ff71ddfc68197a99275f1856611bafd9dd142c2d70541cb29756be03c",
+   "sha256": "a38af0f6954da7e8b18df08c10a9f575205960585152dc913588e91189e2b827",
    "gitignored": true
   },
   {
    "path": "results/phase2/tokachi_kp57.4_historical_matrix_posterior.json",
-   "sha256": "528bb38ae555cf1e64ed40e60e94475a95253b5975f759d67f08e12b7b0eb4a5",
+   "sha256": "e26c13d5862c86011993d41cde7e605907fabd16149a215fd6ef63c9bc8ae32f",
    "gitignored": true
   },
   {
    "path": "results/tokachi_kp57.4_historical_bulk.h5",
-   "sha256": "4007b69b8702026c7be29907a9ed9704efdf4a4e896d2196cc6279d4e6c3a2fd",
+   "sha256": "a052b3d1423ca5b566bbb0499b9849a5174ce16ed6a27e2e39bca30fd2b82994",
    "gitignored": true
   },
   {
    "path": "results/phase2/tokachi_kp57.4_historical_bulk_posterior.json",
-   "sha256": "cbc605d83cae9750a9446698f66662e23f387d8677a58d011bb8c1c92d348c4e",
+   "sha256": "1d4c06aaa1328ab4cee9b0564e6e594b21158df06a5034ab71f0422ada0840c4",
    "gitignored": true
   },
   {
@@ -101,11 +101,11 @@
    "z_toe_m_msl": 38.3,
    "grid_min_m_msl": 34.75,
    "grid_max_m_msl": 43.25,
-   "f_peak_only_transient": 0.001915920000000014,
-   "f_replay_transient": 0.000160000000000049,
-   "over_rejection_factor": 11.974499999996421,
-   "n_rejected_replay": 16,
-   "n_peak_only_expected": 192,
+   "f_peak_only_transient": 0.00592608000000004,
+   "f_replay_transient": 0.0007599999999999829,
+   "over_rejection_factor": 7.797473684210755,
+   "n_rejected_replay": 76,
+   "n_peak_only_expected": 593,
    "small_number_regime": true
   },
   {

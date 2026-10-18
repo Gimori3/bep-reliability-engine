@@ -572,7 +572,7 @@ def test_the_recorded_lambda_split_traces_to_the_part_1_gate() -> None:
     record = _evidence()
     # Section keys are the record's own, without the space (``KP57.4``).
     expected_r_e = {
-        "KP57.4": 0.4381,
+        "KP57.4": 0.4652,  # 0.4381 before ADR-0059 (2026-10-17)
         "KP58.8": 0.4362,
         "KP60.0": 0.4170,
         "KP62.0": 0.3514,
