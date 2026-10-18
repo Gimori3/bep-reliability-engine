@@ -1012,7 +1012,7 @@ and the regenerated study records named below.
 | Rank among the 114 nodes, KP 57.4, historical / +4K | 4 / 5 | **3 / 4** (ahead of surface-only KP 62.2 historically, behind it under warming) |
 | Order of the four sections | 58.8, 62.0, 57.4, 60.0 in 99.8 % of resamples | unchanged order, historically in 97.0 % (KP 57.4 and 62.0 swap in 3.0 %) |
 | Climate-ratio pairs resolved (`annualisation-hazard-sampling-uncertainty.json` Q1) | 4 of 6 | **3 of 6**: KP 57.4 and 62.0 no longer separate |
-| Relative half-widths, historical / +4K | 29 to 62 % / 8 to 21 % | 29 to 58 % / 8 to 20 % |
+| Relative half-widths, historical / +4K | 29 to 62 % / 8 to 21 % | 29 to 57 % / 8 to 20 % |
 | Matrix-to-bulk factor, KP 57.4 historical | 240 | **104** |
 | Bulk reading, KP 57.4 +4K first-breach share | 0.34 (lower bound) | **0.54** (curve now reaches its transition): overflow leads **4** of the 8 bulk cells (was 5); the upper conductivity value restores piping at 3 of the 4 |
 | Static criterion, annual S/T at KP 57.4, historical / +4K | 2.05 / 1.60 | **1.91 / 1.54**; warming range 1.5 to 2.6 (was 1.6 to 2.6); the static criterion **no longer changes the order of the sections** (KP 60.0 stays last, 99.99 % of resamples) |

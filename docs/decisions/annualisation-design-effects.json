@@ -1,0 +1,246 @@
+{
+ "study": "hazard-sampling-design-effects",
+ "generated": "2026-10-18T12:10:54",
+ "estimator": "one-way ANOVA ICC of P_sys(peak_j) over balanced groups; design effect 1 + (m - 1) ICC, floored at 1.00 as section 0b of annualisation-hazard-sampling-uncertainty.md prints it",
+ "curves": "rq3_segment_curves_matrix_{posterior,prior}.json, linear, clamped",
+ "cells": {
+  "adopted historical KP 57.4": {
+   "curve": "posterior",
+   "by_member": {
+    "icc": -0.0006843562432385981,
+    "design_effect": 0.9596229816489227,
+    "design_effect_floored": 1.0,
+    "groups": 50,
+    "per_group": 60
+   }
+  },
+  "adopted +4K KP 57.4": {
+   "curve": "posterior",
+   "by_member": {
+    "icc": 0.0037436117889979893,
+    "design_effect": 1.2208730955508813,
+    "design_effect_floored": 1.2208730955508813,
+    "groups": 90,
+    "per_group": 60
+   },
+   "by_sst_pattern": {
+    "icc": 0.0033560417263643824,
+    "design_effect": 4.01708151200158,
+    "design_effect_floored": 4.01708151200158,
+    "groups": 6,
+    "per_group": 900
+   }
+  },
+  "adopted historical KP 58.8": {
+   "curve": "prior",
+   "by_member": {
+    "icc": 0.0034417713804218326,
+    "design_effect": 1.2030645114448881,
+    "design_effect_floored": 1.2030645114448881,
+    "groups": 50,
+    "per_group": 60
+   }
+  },
+  "adopted +4K KP 58.8": {
+   "curve": "prior",
+   "by_member": {
+    "icc": 0.004985967453389619,
+    "design_effect": 1.2941720797499876,
+    "design_effect_floored": 1.2941720797499876,
+    "groups": 90,
+    "per_group": 60
+   },
+   "by_sst_pattern": {
+    "icc": 0.008768801178959994,
+    "design_effect": 8.883152259885033,
+    "design_effect_floored": 8.883152259885033,
+    "groups": 6,
+    "per_group": 900
+   }
+  },
+  "adopted historical KP 60.0": {
+   "curve": "prior",
+   "by_member": {
+    "icc": -0.0003237550772505962,
+    "design_effect": 0.9808984504422148,
+    "design_effect_floored": 1.0,
+    "groups": 50,
+    "per_group": 60
+   }
+  },
+  "adopted +4K KP 60.0": {
+   "curve": "prior",
+   "by_member": {
+    "icc": 0.002643150765000067,
+    "design_effect": 1.155945895135004,
+    "design_effect_floored": 1.155945895135004,
+    "groups": 90,
+    "per_group": 60
+   },
+   "by_sst_pattern": {
+    "icc": 0.0024339948504004173,
+    "design_effect": 3.188161370509975,
+    "design_effect_floored": 3.188161370509975,
+    "groups": 6,
+    "per_group": 900
+   }
+  },
+  "adopted historical KP 62.0": {
+   "curve": "posterior",
+   "by_member": {
+    "icc": -0.000817686458204861,
+    "design_effect": 0.9517564989659132,
+    "design_effect_floored": 1.0,
+    "groups": 50,
+    "per_group": 60
+   }
+  },
+  "adopted +4K KP 62.0": {
+   "curve": "posterior",
+   "by_member": {
+    "icc": 0.002986621970480844,
+    "design_effect": 1.1762106962583698,
+    "design_effect_floored": 1.1762106962583698,
+    "groups": 90,
+    "per_group": 60
+   },
+   "by_sst_pattern": {
+    "icc": 0.0033489672317550245,
+    "design_effect": 4.010721541347767,
+    "design_effect_floored": 4.010721541347767,
+    "groups": 6,
+    "per_group": 900
+   }
+  },
+  "all_posterior historical KP 57.4": {
+   "curve": "posterior",
+   "by_member": {
+    "icc": -0.0006843562432385981,
+    "design_effect": 0.9596229816489227,
+    "design_effect_floored": 1.0,
+    "groups": 50,
+    "per_group": 60
+   }
+  },
+  "all_posterior +4K KP 57.4": {
+   "curve": "posterior",
+   "by_member": {
+    "icc": 0.0037436117889979893,
+    "design_effect": 1.2208730955508813,
+    "design_effect_floored": 1.2208730955508813,
+    "groups": 90,
+    "per_group": 60
+   },
+   "by_sst_pattern": {
+    "icc": 0.0033560417263643824,
+    "design_effect": 4.01708151200158,
+    "design_effect_floored": 4.01708151200158,
+    "groups": 6,
+    "per_group": 900
+   }
+  },
+  "all_posterior historical KP 58.8": {
+   "curve": "posterior",
+   "by_member": {
+    "icc": 0.003284411858653306,
+    "design_effect": 1.193780299660545,
+    "design_effect_floored": 1.193780299660545,
+    "groups": 50,
+    "per_group": 60
+   }
+  },
+  "all_posterior +4K KP 58.8": {
+   "curve": "posterior",
+   "by_member": {
+    "icc": 0.005023029916586688,
+    "design_effect": 1.2963587650786146,
+    "design_effect_floored": 1.2963587650786146,
+    "groups": 90,
+    "per_group": 60
+   },
+   "by_sst_pattern": {
+    "icc": 0.008456134466900836,
+    "design_effect": 8.602064885743852,
+    "design_effect_floored": 8.602064885743852,
+    "groups": 6,
+    "per_group": 900
+   }
+  },
+  "all_posterior historical KP 60.0": {
+   "curve": "posterior",
+   "by_member": {
+    "icc": -0.0003456258875800382,
+    "design_effect": 0.9796080726327777,
+    "design_effect_floored": 1.0,
+    "groups": 50,
+    "per_group": 60
+   }
+  },
+  "all_posterior +4K KP 60.0": {
+   "curve": "posterior",
+   "by_member": {
+    "icc": 0.0026025560717335403,
+    "design_effect": 1.153550808232279,
+    "design_effect_floored": 1.153550808232279,
+    "groups": 90,
+    "per_group": 60
+   },
+   "by_sst_pattern": {
+    "icc": 0.0023990440983603346,
+    "design_effect": 3.1567406444259407,
+    "design_effect_floored": 3.1567406444259407,
+    "groups": 6,
+    "per_group": 900
+   }
+  },
+  "all_posterior historical KP 62.0": {
+   "curve": "posterior",
+   "by_member": {
+    "icc": -0.000817686458204861,
+    "design_effect": 0.9517564989659132,
+    "design_effect_floored": 1.0,
+    "groups": 50,
+    "per_group": 60
+   }
+  },
+  "all_posterior +4K KP 62.0": {
+   "curve": "posterior",
+   "by_member": {
+    "icc": 0.002986621970480844,
+    "design_effect": 1.1762106962583698,
+    "design_effect_floored": 1.1762106962583698,
+    "groups": 90,
+    "per_group": 60
+   },
+   "by_sst_pattern": {
+    "icc": 0.0033489672317550245,
+    "design_effect": 4.010721541347767,
+    "design_effect_floored": 4.010721541347767,
+    "groups": 6,
+    "per_group": 900
+   }
+  }
+ },
+ "summary": {
+  "adopted": {
+   "member_range": [
+    1.0,
+    1.2941720797499876
+   ],
+   "sst_pattern_range": [
+    3.188161370509975,
+    8.883152259885033
+   ]
+  },
+  "all_posterior": {
+   "member_range": [
+    1.0,
+    1.2963587650786146
+   ],
+   "sst_pattern_range": [
+    3.1567406444259407,
+    8.602064885743852
+   ]
+  }
+ }
+}

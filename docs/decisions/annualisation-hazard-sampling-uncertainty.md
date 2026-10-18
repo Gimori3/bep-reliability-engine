@@ -110,6 +110,16 @@ promise of a much wider interval. But the +4K **SST-pattern** grouping carries a
 design effect of 3.8 to 9.0, because 5,400 events sit in only six SST families.
 That axis is treated in section 1.6 and is deliberately not the headline.
 
+> **2026-10-18 (ADR-0059 follow-up).** The table above is a one-off measurement of
+> 2026-09-14 that no driver regenerated; it predates the ADR-0054 matrix d70 re-basing
+> and the ADR-0059 KP 57.4 correction and is kept as a record of its date.
+> `scripts/hazard_sampling_design_effects.py` now recomputes it with the estimator stated
+> here (one-way ANOVA ICC of `P_sys(peak_j)`, design effect `1 + (m - 1) ICC`, floored at
+> 1.00) on the current curves, record `annualisation-design-effects.json`: on the adopted
+> conditioning (ADR-0056) the member design effect is **1.00 to 1.29** and the SST-pattern
+> design effect **3.2 to 8.9** (KP 57.4 under warming 4.02); on the posterior at all four
+> sections 1.00 to 1.30 and 3.2 to 8.6. The thesis (Appendix B.1) quotes the adopted values.
+
 ### 0c. The stratified counts. Confirmed.
 
 From `rq4_attribution.json`, historical, long-duration stratum
