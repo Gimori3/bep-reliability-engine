@@ -17,8 +17,10 @@ typhoon, and composes it with the other levee failure mechanisms into an
 annualised system reliability per 200 m segment under a historical and a +4 K
 climate scenario.
 
-**Status.** Version [1.3.0](https://github.com/Gimori3/bep-reliability-engine/releases/tag/v1.3.0)
-is the version the final MSc thesis cites. It records the revision after the
+**Status.** Version [1.4.0](https://github.com/Gimori3/bep-reliability-engine/releases/tag/v1.4.0)
+is the version the final MSc thesis cites. It corrects KP 57.4's aquifer
+thickness (ADR-0059) and re-runs every result that depends on it; with 1.3.0
+before it, it records the revision after the
 supervisor's comments on the Green Light thesis: the two piping criteria are
 compared on one driving head and one set of exit conditions (ADR-0055), the
 drained sections keep their prior (ADR-0056), the piping share is the
@@ -205,11 +207,11 @@ are left exact rather than relaxed, so the difference stays visible.
 
 ## Citing this work
 
-Cite version **1.3.0**, available as a tagged GitHub release. The following DOI
+Cite version **1.4.0**, available as a tagged GitHub release. The following DOI
 is reserved for its 4TU.ResearchData deposit, which remains unpublished as of
-2026-10-12. Reservation is not evidence of a published archive:
+2026-10-18. Reservation is not evidence of a published archive:
 
-> Rietman, G. M. (2026). *bep-reliability-engine* (Version 1.3.0) [Software].
+> Rietman, G. M. (2026). *bep-reliability-engine* (Version 1.4.0) [Software].
 > 4TU.ResearchData. <https://doi.org/10.4121/8ffa1f3e-942e-4852-b02a-a259b9d6d00d>
 
 The DOI is the stable identifier: this repository is the development home and

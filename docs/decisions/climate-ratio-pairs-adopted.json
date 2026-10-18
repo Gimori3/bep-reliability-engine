@@ -1,0 +1,72 @@
+{
+ "study": "climate-ratio-pairs-adopted",
+ "generated": "2026-10-18T21:41:07",
+ "generated_by": "scripts/climate_ratio_pairs_adopted.py",
+ "parent": "docs/decisions/annualisation-hazard-sampling-uncertainty.md, Q1",
+ "conditioning": {
+  "KP 57.4": "matrix/posterior",
+  "KP 58.8": "matrix/prior",
+  "KP 60.0": "matrix/prior",
+  "KP 62.0": "matrix/posterior"
+ },
+ "seed": 20260820,
+ "replicates": 10000,
+ "scope": "hazard-sampling uncertainty only: the finite-ensemble spread of the d4PDF peak-stage distribution with the fragility curves held fixed",
+ "climate_ratio_points": {
+  "KP 57.4": 12.010895531362689,
+  "KP 58.8": 5.58295749141793,
+  "KP 60.0": 13.286156616492883,
+  "KP 62.0": 13.432118060110772
+ },
+ "q1": {
+  "question": "are the four per-section climate ratios resolvably different from one another",
+  "rule": "a pair resolves iff the 95 % percentile interval of the paired bootstrap difference of ratios excludes zero",
+  "pairs": {
+   "KP 57.4 - KP 58.8": {
+    "point": 6.427938039944759,
+    "ci_low": 2.346416484685442,
+    "ci_high": 19.13126043366386,
+    "resolved": true,
+    "n_replicates_paired": 10000
+   },
+   "KP 57.4 - KP 60.0": {
+    "point": -1.2752610851301949,
+    "ci_low": -2.403018339403201,
+    "ci_high": 1.0801586422758565,
+    "resolved": false,
+    "n_replicates_paired": 10000
+   },
+   "KP 57.4 - KP 62.0": {
+    "point": -1.4212225287480837,
+    "ci_low": -2.739903628385368,
+    "ci_high": 0.45182370917365783,
+    "resolved": false,
+    "n_replicates_paired": 10000
+   },
+   "KP 58.8 - KP 60.0": {
+    "point": -7.703199125074954,
+    "ci_low": -18.782992932803914,
+    "ci_high": -3.492230941212423,
+    "resolved": true,
+    "n_replicates_paired": 10000
+   },
+   "KP 58.8 - KP 62.0": {
+    "point": -7.8491605686928425,
+    "ci_low": -19.433241580511847,
+    "ci_high": -3.4208538905794423,
+    "resolved": true,
+    "n_replicates_paired": 10000
+   },
+   "KP 60.0 - KP 62.0": {
+    "point": -0.14596144361788888,
+    "ci_low": -1.9193144571771794,
+    "ci_high": 1.2316241049298151,
+    "resolved": false,
+    "n_replicates_paired": 10000
+   }
+  },
+  "n_resolved": 3,
+  "n_pairs": 6,
+  "verdict": "PARTIAL: 3 of 6 pairs resolve"
+ }
+}

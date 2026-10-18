@@ -17,6 +17,14 @@ ADR number. See section 1.8 for that judgement in full.
 > `0059-kp57-aquifer-thickness-correction.md` and the dated addenda of
 > `docs/phase2_report.md`, `docs/phase3_report.md` and `docs/stage6_6_report.md`.
 
+
+> **Q1 on the adopted conditioning, 2026-10-18 (thesis campaign session S41).** Q1 below
+> runs on the study's primary arm, the matrix posterior at all four sections. Since
+> ADR-0056 the adopted conditioning keeps the prior at KP 58.8 and 60.0, and the thesis
+> states which climate-ratio pairs separate on that mix. `scripts/climate_ratio_pairs_adopted.py`
+> repeats Q1 on it with this study's functions, seed, replicates and paired block draw,
+> record `climate-ratio-pairs-adopted.json`: **3 of 6 pairs resolve, KP 58.8 against each
+> of the other three**, the same pairs as on the primary arm.
 ---
 
 ## Scope of the claim
