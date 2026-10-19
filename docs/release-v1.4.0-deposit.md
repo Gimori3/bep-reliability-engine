@@ -2,7 +2,11 @@
 
 Prepared 2026-10-18 in thesis campaign session S41 and rebuilt 2026-10-19 in
 session S42, after three figure labels changed (`CHANGELOG.md`, `[1.4.0]`);
-`RELEASE-MANIFEST.json` names the release commit and tree. **Not submitted or
+`RELEASE-MANIFEST.json` names the release commit and tree. Rebuilt again on
+2026-10-19 after the release: the first `v1.4.0` tag (tree `31b0763`) carried
+`pyproject.toml` version 1.3.0, so the tag and GitHub release were withdrawn
+and re-cut on the commit that sets it to 1.4.0, and the archive was regenerated
+from the new tag (`docs/project_log.md`, same date). **Not submitted or
 published.** It replaces the v1.3.0 package (`docs/release-v1.3.0-deposit.md`),
 which was never uploaded, in the same unpublished draft with reserved DOI
 `10.4121/8ffa1f3e-942e-4852-b02a-a259b9d6d00d`; do not create a second deposit.
@@ -21,7 +25,8 @@ KP 58.8, 60.0 and 62.0 are unchanged; see the `[1.4.0]` section of
 ## Release order
 
 1. Merge `develop` into `main` with a pull request (text below). `main` is
-   protected; the merge is the owner's.
+   protected, so a direct push is refused; push the tag only after the pull
+   request has merged, or it lands on a commit that is not on `main`.
 2. Create the annotated tag `v1.4.0` on the merge commit and publish the
    GitHub release from it (notes: the `[1.4.0]` section of `CHANGELOG.md`).
 3. Check that the tag's tree equals the tree recorded in
@@ -36,7 +41,7 @@ KP 58.8, 60.0 and 62.0 are unchanged; see the `[1.4.0]` section of
 
 Pull request title: **Release 1.4.0: KP 57.4 aquifer thickness (ADR-0059) and
 the records the final thesis quotes.** Body: the `[1.4.0]` section of
-`CHANGELOG.md`, followed by "CI: ruff, black and pytest (1,213 passed) green on
+`CHANGELOG.md`, followed by "CI: ruff, black and pytest (1,216 passed) green on
 `develop` at the release commit."
 
 ## Files to upload
