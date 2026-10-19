@@ -1,6 +1,8 @@
 # 4TU.ResearchData deposit package for v1.4.0
 
-Prepared 2026-10-18 in thesis campaign session S41. **Not submitted or
+Prepared 2026-10-18 in thesis campaign session S41 and rebuilt 2026-10-19 in
+session S42, after three figure labels changed (`CHANGELOG.md`, `[1.4.0]`);
+`RELEASE-MANIFEST.json` names the release commit and tree. **Not submitted or
 published.** It replaces the v1.3.0 package (`docs/release-v1.3.0-deposit.md`),
 which was never uploaded, in the same unpublished draft with reserved DOI
 `10.4121/8ffa1f3e-942e-4852-b02a-a259b9d6d00d`; do not create a second deposit.

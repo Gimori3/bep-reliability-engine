@@ -26,7 +26,9 @@ in it rests on the corrected input, which 1.3.0 does not contain. Production
 inputs, persisted sweeps, Phase 2 posteriors and Phase 3 rows at KP 58.8, 60.0
 and 62.0 are unchanged, proven row by row against the archive; aggregates,
 ranges and orderings that include KP 57.4 changed with it. The Bayesian
-posterior provenance version stays at 0.1.0.
+posterior provenance version stays at 0.1.0. Prepared on 2026-10-18 and rebuilt
+on 2026-10-19 after three figure labels changed; it was never tagged or
+published in between.
 
 ### Changed
 
@@ -48,6 +50,16 @@ posterior provenance version stays at 0.1.0.
   sections, and under the bulk reading overflow leads 4 of 8 cells. Evidence:
   `docs/decisions/adr0059-kp57-aquifer-thickness.json` and the dated addenda of
   the phase 2, phase 3 and Stage 6.6 reports.
+* **Three figure labels the final thesis prints (2026-10-19):** the 2016 outcome
+  figure's right-hand axis names its reference, the no-breach update with the
+  drained sections as if undrained, instead of "the adopted update", which
+  keeps the prior at KP 58.8 and 60.0; the composed-fragility band reads "above
+  the largest simulated +4 K peak", because the thesis reserves "attainable"
+  for the top of the regular stage grid; the foreshore figure is titled
+  "Bank-retreat exposure screen", and at the author's request its keys and
+  in-panel labels print at the 7 pt floor, with both keys below the panels.
+  Drawing only: every other figure the three drivers write is byte-identical,
+  and no record changed.
 
 ### Added
 

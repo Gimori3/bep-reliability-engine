@@ -426,7 +426,11 @@ T6, the 7 pt printed floor, is met at every figure except two, and both misses
 are recorded authorial decisions rather than defects: the timestep stress figure
 at 4.9 pt, whose composition the author chose and whose floor-lifted build
 collides, and the foreshore figure at 3.1 pt, whose eight-entry key the author
-asked to keep in the panel. The annotated cross-section prints at 5.0 pt, which
+asked to keep in the panel. [2026-10-19: withdrawn at the author's request. At
+7 pt that key needs about 1.4 times its panel's width, so it and the section
+key now stand below the panels, one under each as for 6.12, and both keys and
+the in-panel labels print at 7 pt; the figure's ticks and axis labels are
+unchanged at about 5 pt.] The annotated cross-section prints at 5.0 pt, which
 is the document's own ``\tiny`` rather than a reduction artefact; its 7 pt
 version was built, read and reverted.
 

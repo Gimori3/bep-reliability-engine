@@ -1146,7 +1146,10 @@ def _fig_initiation(record: dict, fs, mirror: Path) -> Path:
     bx.set_xticklabels([f"{p:g}" for p in PD_SHOWN])
     bx.set_ylim(0, 1.05)
     bx.set_xlabel("chance that an opened exit was seen and recorded")
-    bx.set_ylabel("annual piping probability,\nrelative to the adopted update")
+    # The reference is the no-breach update with the drained sections as if
+    # undrained (``relative_to_no_breach``); the adopted calculation keeps the
+    # prior at KP 58.8 and 60.0 (ADR-0056), so the axis names the update itself.
+    bx.set_ylabel("annual piping probability,\nrelative to the no-breach update")
     fs.panel_title(bx, "What the no-boil record could change", scale=scale, letter="b")
     handles = [Patch(facecolor=c, lw=0) for _, c, _ in parts]
     labels = [lab for _, _, lab in parts]
