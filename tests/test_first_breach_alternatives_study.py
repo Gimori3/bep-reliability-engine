@@ -54,7 +54,8 @@ def test_no_alternative_changes_its_leader_between_the_two_shares(ev: dict) -> N
 def test_the_thesis_counts_hold_on_the_first_breach_share(ev: dict) -> None:
     o = ev["orderings"]
     bulk_overflow = [c for c in CELLS if o["bulk"][c]["first_breach"] == "overflow"]
-    assert len(bulk_overflow) == 5
+    # 5 before ADR-0059 (2026-10-17): KP 57.4 +4K is now piping-led (0.54).
+    assert len(bulk_overflow) == 4
     half = [c for c in CELLS if o["credit_half"][c]["first_breach"] == "piping"]
     assert half == []
     gravel = [c for c in CELLS if o["gravel_x1.80"][c]["first_breach"] == "piping"]

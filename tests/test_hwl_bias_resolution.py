@@ -418,7 +418,8 @@ def test_theta_override_shape_is_validated(small_config) -> None:
 
 
 def test_documented_flip_share_rule_is_narrow():
-    """ADR-0040 section 2.7 / ADR-0054: only KP 57.4's c4b_not_c3b is tolerated.
+    """ADR-0040 section 2.7 / ADR-0054 / ADR-0059: only KP 57.4's barrier-jump
+    classes c4b_not_c3b and c4a_not_c3a are tolerated.
 
     It passes where flips are at most 1 per cent of the level's transient
     failures; any other diagnostic or section with a flip fails.
@@ -432,3 +433,13 @@ def test_documented_flip_share_rule_is_narrow():
         "kp57_4", "c4b_not_c3b", np.array([0, 40, 0, 0]), trans
     )
     assert H.documented_flip_share_ok("kp62_0", "c4b_not_c0", np.zeros(4), trans)
+    # ADR-0059: the same barrier jump on the alpha = -1/2 branch is admitted at
+    # KP 57.4 only, under the same share rule, against its own branch (C4a).
+    assert H.documented_flip_share_ok("kp57_4", "c4a_not_c3a", flips, trans)
+    assert not H.documented_flip_share_ok("kp62_0", "c4a_not_c3a", flips, trans)
+    assert not H.documented_flip_share_ok(
+        "kp57_4", "c4a_not_c3a", np.array([0, 40, 0, 0]), trans
+    )
+    assert not H.documented_flip_share_ok("kp57_4", "c4d_not_c4a", flips, trans)
+    assert H._flip_branch("c4a_not_c3a") == "C4a"
+    assert H._flip_branch("c4b_not_c3b") == "C4b"

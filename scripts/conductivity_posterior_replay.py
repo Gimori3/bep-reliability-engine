@@ -88,7 +88,13 @@ ARMS: tuple[str, ...] = (
 #: every array the Phase 3 annualisation consumes is bit-identical with tracing
 #: on and off. The arm posteriors therefore carry no breach-time diagnostic,
 #: which is a loss of a diagnostic and not of a result.
-_OVERRIDDEN = frozenset({"output_dir", "trace_breach_times"})
+#:
+#: ``overwrite`` is file handling, not a replay setting (ADR-0059, 2026-10-17):
+#: the KP 57.4 production posteriors the reference is read from were regenerated
+#: in place with ``--overwrite`` after the aquifer-thickness correction, so the
+#: flag differs from the campaign's fresh write while every physics setting is
+#: identical. The arm replays below always write fresh (``overwrite=False``).
+_OVERRIDDEN = frozenset({"output_dir", "trace_breach_times", "overwrite"})
 
 
 def _stem(kp: float, d70: str) -> str:

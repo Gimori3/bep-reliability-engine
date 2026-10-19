@@ -151,10 +151,10 @@ ALL_ARMS: tuple[str, ...] = (
 #: states them so), with the prior baseline they are compared against.
 PRIOR_ARMS: tuple[str, ...] = ("prior_baseline", "cu_cap", "cu_sand", "cu_matrix")
 #: Where the uniformity-term sweeps live (``time_dependence_factor_study`` arms).
-UNIFORMITY_ROOT = Path(
-    "D:/repositories/pol_feedback_2026-10-06/artifacts/"
-    "session1_time_dependence_factor/u_arms"
-)
+#: Its own output directory since the ADR-0059 re-base (2026-10-17): the earlier
+#: hard-coded copy under a session artifacts folder held the pre-re-base KP 57.4
+#: arms, so reading it would have mixed D_aq = 7 m arms into re-based results.
+UNIFORMITY_ROOT = tdf.OUT_DIR / "u_arms"
 UNIFORMITY = DECISIONS / "uniformity-coefficient-study.json"
 TDF = DECISIONS / "time-dependence-factor-study.json"
 LABELS: dict[str, str] = {

@@ -9,27 +9,27 @@
   "sources": {
     "time_factor": {
       "file": "time-dependence-factor-study.json",
-      "sha256_lf": "06000582c14dc492773137fcf234b0789c72c922f9ea0472fa1d8be5530ffd33"
+      "sha256_lf": "c71d8588465654a523e231c0299a8f448cfdecc3bf5503cb74a965fd164a1644"
     },
     "adopted": {
       "file": "drained-section-conditioning-adopted.json",
-      "sha256_lf": "cd6c15664768d00164eb1ab0f61e8332857db98223da988414d77cb662235090"
+      "sha256_lf": "d898141fde1801f1e896f1589457e4c3d2adc0fda865a66cc98395c1e122f987"
     },
     "alternatives": {
       "file": "drained-section-conditioning-alternatives.json",
-      "sha256_lf": "bddd46c9f0295360a28baab94e83c40457533bbd645f2f90a73d97444b435a99"
+      "sha256_lf": "ee34069e2a3c8b58c16691500c2035bf160445531bcc3aacb9d097a9f1fffd89"
     },
     "gravel": {
       "file": "gravel-grading-resistance-study.json",
-      "sha256_lf": "86da9cb254743680958df8e92b23d579b530cd206d4b3de883cca53abcf2aa6f"
+      "sha256_lf": "019202566f7c0bfb047125e5c5ad5607e9f758c0eb52e872b4296099b8fde030"
     },
     "seepage_tail": {
       "file": "seepage-length-lower-tail-adopted.json",
-      "sha256_lf": "d9803b84425e7e5c01e955a88a461d9c991dc292b18f505ab1786dc2ab0b8a00"
+      "sha256_lf": "d9f12cf8aa2a3891617f3d5ddb0497f00da03b0563eea49f51b43cd8b208a52e"
     },
     "shape": {
       "file": "canonical-shape-sensitivity.json",
-      "sha256_lf": "e6ec59cf5e1a90bc2087439b6820106adf5522008ab8720d76e156ce0656fe16"
+      "sha256_lf": "5a0af80cf11f13ce2f3968817e290035662d945ac581cc9d37cf331e2c0937b4"
     }
   },
   "sections": [
@@ -107,13 +107,13 @@
   ],
   "adopted_system": {
     "historical": {
-      "KP 57.4": 0.000497775,
+      "KP 57.4": 0.000853282,
       "KP 58.8": 0.0068532,
       "KP 60.0": 0.000321849,
       "KP 62.0": 0.000916578
     },
     "+4K": {
-      "KP 57.4": 0.00759168,
+      "KP 57.4": 0.0102487,
       "KP 58.8": 0.0382611,
       "KP 60.0": 0.00427613,
       "KP 62.0": 0.0123116
@@ -122,13 +122,13 @@
   "factors": {
     "criterion_steady_state": {
       "historical": {
-        "KP 57.4": 2.05385,
+        "KP 57.4": 1.91456,
         "KP 58.8": 1.82388,
         "KP 60.0": 3.31517,
         "KP 62.0": 2.6812
       },
       "+4K": {
-        "KP 57.4": 1.59717,
+        "KP 57.4": 1.53771,
         "KP 58.8": 1.63773,
         "KP 60.0": 2.5922,
         "KP 62.0": 1.65353
@@ -142,7 +142,7 @@
         "KP 62.0": 0.217423
       },
       "+4K": {
-        "KP 57.4": 0.120064,
+        "KP 57.4": 0.0889553,
         "KP 58.8": 0.06645,
         "KP 60.0": 0.00545613,
         "KP 62.0": 0.681633
@@ -150,13 +150,13 @@
     },
     "k_toe_test": {
       "historical": {
-        "KP 57.4": 0.00465747,
+        "KP 57.4": 0.00827805,
         "KP 58.8": 0.114443,
         "KP 60.0": 0.12781,
         "KP 62.0": 0.384295
       },
       "+4K": {
-        "KP 57.4": 0.152773,
+        "KP 57.4": 0.137068,
         "KP 58.8": 0.201871,
         "KP 60.0": 0.246555,
         "KP 62.0": 0.754017
@@ -164,13 +164,13 @@
     },
     "k_regional_upper": {
       "historical": {
-        "KP 57.4": 5.39199,
+        "KP 57.4": 4.06916,
         "KP 58.8": 4.69884,
         "KP 60.0": 38.683,
         "KP 62.0": 14.249
       },
       "+4K": {
-        "KP 57.4": 2.78025,
+        "KP 57.4": 2.45614,
         "KP 58.8": 3.01215,
         "KP 60.0": 14.8182,
         "KP 62.0": 5.42826
@@ -178,13 +178,13 @@
     },
     "grain_bulk": {
       "historical": {
-        "KP 57.4": 0.00416666,
+        "KP 57.4": 0.00961498,
         "KP 58.8": 0.0290194,
         "KP 60.0": 0.21583,
         "KP 62.0": 0.217426
       },
       "+4K": {
-        "KP 57.4": 0.160107,
+        "KP 57.4": 0.150924,
         "KP 58.8": 0.0708052,
         "KP 60.0": 0.378525,
         "KP 62.0": 0.681635
@@ -192,13 +192,13 @@
     },
     "gravel_x1_8": {
       "historical": {
-        "KP 57.4": 0.0199239,
+        "KP 57.4": 0.0330436,
         "KP 58.8": 0.124201,
         "KP 60.0": 0.00566219,
         "KP 62.0": 0.239865
       },
       "+4K": {
-        "KP 57.4": 0.209972,
+        "KP 57.4": 0.214789,
         "KP 58.8": 0.224734,
         "KP 60.0": 0.0472161,
         "KP 62.0": 0.692894
@@ -212,7 +212,7 @@
         "KP 62.0": 0.327605
       },
       "+4K": {
-        "KP 57.4": 0.122389,
+        "KP 57.4": 0.0912921,
         "KP 58.8": 0.0777313,
         "KP 60.0": 0.00589757,
         "KP 62.0": 0.732999
@@ -226,7 +226,7 @@
         "KP 62.0": 0.225954
       },
       "+4K": {
-        "KP 57.4": 0.120057,
+        "KP 57.4": 0.0889318,
         "KP 58.8": 0.0661192,
         "KP 60.0": 0.00538723,
         "KP 62.0": 0.6867
@@ -262,13 +262,13 @@
     },
     "seepage_tail_bounded": {
       "historical": {
-        "KP 57.4": 0.510289,
+        "KP 57.4": 0.600286,
         "KP 58.8": 0.696194,
         "KP 60.0": 0.603842,
         "KP 62.0": 0.611826
       },
       "+4K": {
-        "KP 57.4": 0.745399,
+        "KP 57.4": 0.779393,
         "KP 58.8": 0.778812,
         "KP 60.0": 0.745461,
         "KP 62.0": 0.849061
@@ -276,13 +276,13 @@
     },
     "flood_shorter": {
       "historical": {
-        "KP 57.4": 0.579222,
+        "KP 57.4": 0.592511,
         "KP 58.8": 0.659668,
         "KP 60.0": 0.487889,
         "KP 62.0": 0.582158
       },
       "+4K": {
-        "KP 57.4": 0.707764,
+        "KP 57.4": 0.710169,
         "KP 58.8": 0.711506,
         "KP 60.0": 0.549747,
         "KP 62.0": 0.817388
@@ -290,13 +290,13 @@
     },
     "correlation_40m": {
       "historical": {
-        "KP 57.4": 3.6855,
+        "KP 57.4": 3.25982,
         "KP 58.8": 2.60762,
         "KP 60.0": 4.37253,
         "KP 62.0": 3.29162
       },
       "+4K": {
-        "KP 57.4": 2.27263,
+        "KP 57.4": 2.13486,
         "KP 58.8": 2.13223,
         "KP 60.0": 3.19963,
         "KP 62.0": 1.88333
@@ -311,7 +311,7 @@
       "KP 62.0": 65.5358
     },
     "+4K": {
-      "KP 57.4": 23.1564,
+      "KP 57.4": 27.6109,
       "KP 58.8": 45.3295,
       "KP 60.0": 2715.89,
       "KP 62.0": 7.96362
@@ -329,11 +329,11 @@
         "min_positive_factor": 1.82388
       },
       "+4K": {
-        "min_factor": 1.59717,
+        "min_factor": 1.53771,
         "max_factor": 2.5922,
         "sections_with_no_computed_failure": [],
         "max_abs_log10": 0.413669,
-        "min_positive_factor": 1.59717
+        "min_positive_factor": 1.53771
       }
     },
     "k_field_mean": {
@@ -361,47 +361,47 @@
       "label": "Conductivity: landside-toe test",
       "kind": "conductivity",
       "historical": {
-        "min_factor": 0.00465747,
+        "min_factor": 0.00827805,
         "max_factor": 0.384295,
         "sections_with_no_computed_failure": [],
-        "max_abs_log10": 2.33185,
-        "min_positive_factor": 0.00465747
+        "max_abs_log10": 2.08207,
+        "min_positive_factor": 0.00827805
       },
       "+4K": {
-        "min_factor": 0.152773,
+        "min_factor": 0.137068,
         "max_factor": 0.754017,
         "sections_with_no_computed_failure": [],
-        "max_abs_log10": 0.815955,
-        "min_positive_factor": 0.152773
+        "max_abs_log10": 0.863064,
+        "min_positive_factor": 0.137068
       }
     },
     "k_regional_upper": {
       "label": "Conductivity: regional upper value",
       "kind": "conductivity",
       "historical": {
-        "min_factor": 4.69884,
+        "min_factor": 4.06916,
         "max_factor": 38.683,
         "sections_with_no_computed_failure": [],
         "max_abs_log10": 1.58752,
-        "min_positive_factor": 4.69884
+        "min_positive_factor": 4.06916
       },
       "+4K": {
-        "min_factor": 2.78025,
+        "min_factor": 2.45614,
         "max_factor": 14.8182,
         "sections_with_no_computed_failure": [],
         "max_abs_log10": 1.1708,
-        "min_positive_factor": 2.78025
+        "min_positive_factor": 2.45614
       }
     },
     "grain_bulk": {
       "label": "Grain size: whole sand-gravel",
       "kind": "favoring",
       "historical": {
-        "min_factor": 0.00416666,
+        "min_factor": 0.00961498,
         "max_factor": 0.217426,
         "sections_with_no_computed_failure": [],
-        "max_abs_log10": 2.38021,
-        "min_positive_factor": 0.00416666
+        "max_abs_log10": 2.01705,
+        "min_positive_factor": 0.00961498
       },
       "+4K": {
         "min_factor": 0.0708052,
@@ -513,18 +513,18 @@
       "label": "Seepage length bounded below",
       "kind": "favoring",
       "historical": {
-        "min_factor": 0.510289,
+        "min_factor": 0.600286,
         "max_factor": 0.696194,
         "sections_with_no_computed_failure": [],
-        "max_abs_log10": 0.292184,
-        "min_positive_factor": 0.510289
+        "max_abs_log10": 0.221642,
+        "min_positive_factor": 0.600286
       },
       "+4K": {
-        "min_factor": 0.745399,
+        "min_factor": 0.745461,
         "max_factor": 0.849061,
         "sections_with_no_computed_failure": [],
-        "max_abs_log10": 0.127611,
-        "min_positive_factor": 0.745399
+        "max_abs_log10": 0.127575,
+        "min_positive_factor": 0.745461
       }
     },
     "flood_shorter": {
@@ -569,7 +569,7 @@
       "cells": {
         "KP 57.4": {
           "span": null,
-          "time_effect": 2.05385,
+          "time_effect": 1.91456,
           "span_over_time_effect": null,
           "holds": true
         },
@@ -598,7 +598,7 @@
       "largest_time_effect": 3.31517,
       "rows": {
         "grain_bulk": {
-          "max_abs_log10": 2.38021,
+          "max_abs_log10": 2.01705,
           "threshold_abs_log10": 1.56152,
           "holds": true
         },
@@ -625,8 +625,8 @@
         "seepage_tail_bounded": {
           "cells": {
             "KP 57.4": {
-              "factor": 0.510289,
-              "time_effect": 2.05385,
+              "factor": 0.600286,
+              "time_effect": 1.91456,
               "holds": true
             },
             "KP 58.8": {
@@ -650,8 +650,8 @@
         "flood_shorter": {
           "cells": {
             "KP 57.4": {
-              "factor": 0.579222,
-              "time_effect": 2.05385,
+              "factor": 0.592511,
+              "time_effect": 1.91456,
               "holds": true
             },
             "KP 58.8": {
@@ -687,9 +687,9 @@
     "P5": {
       "cells": {
         "KP 57.4": {
-          "span": 23.1564,
-          "time_effect": 1.59717,
-          "span_over_time_effect": 14.4984,
+          "span": 27.6109,
+          "time_effect": 1.53771,
+          "span_over_time_effect": 17.9559,
           "holds": true
         },
         "KP 58.8": {

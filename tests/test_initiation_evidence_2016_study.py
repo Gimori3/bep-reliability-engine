@@ -86,7 +86,8 @@ def test_decomposition_sums_to_one(record) -> None:
 
 def test_initiation_shares_as_quoted(record) -> None:
     s = record["summary"]["P_initiation_2016_as_if_undrained"]
-    assert [round(100 * s[kp], 1) for kp in KPS] == [66.4, 99.6, 99.3, 39.6]
+    # KP 57.4 66.4 before ADR-0059 (2026-10-17, aquifer thickness 7 m to 12 m).
+    assert [round(100 * s[kp], 1) for kp in KPS] == [76.8, 99.6, 99.3, 39.6]
     berm = record["summary"]["P_initiation_2016_berm_relief"]
     assert berm["berm_relief_60pct KP 58.8"] < 0.02
     assert berm["berm_relief_60pct KP 60.0"] < 0.01
@@ -115,7 +116,8 @@ def test_detection_probability_bound(record) -> None:
 def test_strict_filter_lowers_but_keeps_piping_leading(record) -> None:
     rel = record["summary"]["annual_bep_relative_to_no_breach_historical"]
     strict = rel["undrained pd1 T"]
-    assert [round(strict[kp], 2) for kp in KPS] == [0.56, 0.40, 0.24, 0.49]
+    # KP 57.4 0.56 before ADR-0059 (2026-10-17).
+    assert [round(strict[kp], 2) for kp in KPS] == [0.53, 0.40, 0.24, 0.49]
     half = rel["undrained pd0.5 T"]
     assert half["KP 58.8"] > 0.99 and half["KP 60.0"] > 0.99
     lead = record["summary"]["leading_mechanism"]

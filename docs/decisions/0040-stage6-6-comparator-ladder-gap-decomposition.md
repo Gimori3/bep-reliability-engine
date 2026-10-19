@@ -199,6 +199,14 @@ that one section where it is at most 1 per cent of the transient failures at
 every level (`hwl_bias_resolution.documented_flip_share_ok`); every other
 diagnostic and section must still be exactly zero. KP 62.0 stays clean at both N.
 
+*Amended 2026-10-17 (ADR-0059).* With KP 57.4's aquifer thickness corrected from
+7 to 12 m the rate falls: 0 rows at N = 1e5 (production, Stage 6.6 and the
+ADR-0040 verify ladder), and at N = 1e6 one `c4b_not_c3b` row (40.00 m, 1 of
+43 280 transient failures) and one `c4a_not_c3a` row (39.75 m, the alpha = -1/2
+branch, 1 of 155 380 C4a failures). The second is the same barrier jump on the
+three-dimensional-exponent branch; the share rule now admits both classes at
+KP 57.4, each measured against its own transient branch, and nothing else.
+
 *Amended 2026-09-25 (ADR-0054), finite-T ladder.* One realization of 1,517 at
 KP 62.0, 46.50 m, alpha = -1/2 satisfies the sustained-peak limit but has not
 breached after the longest hold of the duration ladder, 1536 h. The limit

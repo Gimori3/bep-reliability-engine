@@ -8,6 +8,23 @@ throughout and it re-tunes nothing in Part 1.** Un-numbered companion study: it 
 changes no default and alters no persisted production result, so it consumes no
 ADR number. See section 1.8 for that judgement in full.
 
+> **Re-based at KP 57.4 under ADR-0059, 2026-10-17.** KP 57.4's aquifer-thickness
+> prior mean was corrected from 7 m (the A_g gravel alone) to 12 m (the combined
+> A_g + N_s thickness) and the evidence this note reads was regenerated (`annualisation-hazard-sampling-uncertainty.json`).
+> Every KP 57.4 value in the prose below, and every range, ordering or count that
+> includes KP 57.4, predates the correction and is kept as written; the committed
+> JSON is the record and governs. Values at KP 58.8, 60.0 and 62.0 are unchanged, except that the gitignored reach-interval bootstrap shares one random stream across nodes, so interval ends at other nodes move by about 1 to 3 per cent. Summary and headline values:
+> `0059-kp57-aquifer-thickness-correction.md` and the dated addenda of
+> `docs/phase2_report.md`, `docs/phase3_report.md` and `docs/stage6_6_report.md`.
+
+
+> **Q1 on the adopted conditioning, 2026-10-18 (thesis campaign session S41).** Q1 below
+> runs on the study's primary arm, the matrix posterior at all four sections. Since
+> ADR-0056 the adopted conditioning keeps the prior at KP 58.8 and 60.0, and the thesis
+> states which climate-ratio pairs separate on that mix. `scripts/climate_ratio_pairs_adopted.py`
+> repeats Q1 on it with this study's functions, seed, replicates and paired block draw,
+> record `climate-ratio-pairs-adopted.json`: **3 of 6 pairs resolve, KP 58.8 against each
+> of the other three**, the same pairs as on the primary arm.
 ---
 
 ## Scope of the claim
@@ -100,6 +117,16 @@ structural correctness of the block choice is an argument about validity, not a
 promise of a much wider interval. But the +4K **SST-pattern** grouping carries a
 design effect of 3.8 to 9.0, because 5,400 events sit in only six SST families.
 That axis is treated in section 1.6 and is deliberately not the headline.
+
+> **2026-10-18 (ADR-0059 follow-up).** The table above is a one-off measurement of
+> 2026-09-14 that no driver regenerated; it predates the ADR-0054 matrix d70 re-basing
+> and the ADR-0059 KP 57.4 correction and is kept as a record of its date.
+> `scripts/hazard_sampling_design_effects.py` now recomputes it with the estimator stated
+> here (one-way ANOVA ICC of `P_sys(peak_j)`, design effect `1 + (m - 1) ICC`, floored at
+> 1.00) on the current curves, record `annualisation-design-effects.json`: on the adopted
+> conditioning (ADR-0056) the member design effect is **1.00 to 1.29** and the SST-pattern
+> design effect **3.2 to 8.9** (KP 57.4 under warming 4.02); on the posterior at all four
+> sections 1.00 to 1.30 and 3.2 to 8.6. The thesis (Appendix B.1) quotes the adopted values.
 
 ### 0c. The stratified counts. Confirmed.
 

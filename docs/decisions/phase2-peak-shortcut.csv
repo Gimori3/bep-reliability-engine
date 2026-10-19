@@ -1,5 +1,5 @@
 section,d70,n_prior,event_peak_m_msl,z_toe_m_msl,peak_only_transient_pct,replay_transient_pct,over_rejection_factor,n_rejected_replay,n_peak_only_expected,small_number_regime
-KP57.4,matrix,100000,39.658,38.3,0.1916,0.016,11.974,16,192,True
+KP57.4,matrix,100000,39.658,38.3,0.5926,0.076,7.797,76,593,True
 KP57.4,bulk,100000,39.658,38.3,0.0,0.0,not defined,0,0,False
 KP58.8,matrix,100000,40.75,38.5,10.943,3.813,2.87,3813,10943,False
 KP58.8,bulk,100000,40.75,38.5,0.0,0.0,not defined,0,0,False

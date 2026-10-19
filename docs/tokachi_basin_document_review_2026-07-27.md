@@ -501,7 +501,7 @@ well census 2001-11):
 
 | | Engine (`tokachi_bep_inputs.csv`) | Chiyoda measurement |
 |---|---|---|
-| $D_{aq}$ | 7, 8, 9, 10, 11 m | **15–20 m** |
+| $D_{aq}$ | 7, 8, 9, 10, 11 m **[2026-10-17, ADR-0059: KP 57.4 now 12 m, so 12, 8, 9, 10, 11]** | **15–20 m** |
 | $k_{aq}$ | 3e-3, 2e-3, 1e-3, 1e-3, 6e-5 m/s | **1e-3 – 1e-2 m/s** |
 
 **Both are higher than the engine's central values.** With mean $k_{aq}$ = 3e-3

@@ -34,7 +34,7 @@
       "flip_totals": {
         "c4a_not_c3a": 0,
         "c4b_not_c0": 0,
-        "c4b_not_c3b": 1,
+        "c4b_not_c3b": 0,
         "c4c_not_c4b": 0,
         "c4d_not_c4a": 0
       },
@@ -52,13 +52,19 @@
     "checked_against": {
       "path": "results/stage6_6/stage6_6_summary.json",
       "gitignored": true,
-      "sha256": "2bc85728a2c4dd152226f3cb657c5e238c2a41fa77472de4f6f2d45d32a2b927",
-      "result": "Re-checked 2026-09-25 against the ADR-0054 campaign summary. Every key present in both records is identical except one, which is updated here: KP 57.4's c4b_not_c3b flip total, 0 -> 1. That is the single documented forward-Euler barrier-jump row of ADR-0040's 2026-09-25 amendment (40.50 m, well under the one-per-cent share rule). Both sections' production_verification status, levels_checked and theta_identical are unchanged.",
+      "sha256": "593cc3ec7531afb94bac7fb9a4c769f0bc223a4106a6a99324be971e574a1b59",
+      "result": "Re-checked 2026-10-17 against the ADR-0059 KP 57.4 re-run summary (aquifer thickness 7 m to 12 m). Every key present in both records is identical except one, which is updated here: KP 57.4's c4b_not_c3b flip total at N = 1e5, 1 -> 0 (the single 40.50 m barrier-jump row of the ADR-0054 run does not recur on the corrected thickness; the N = 1e6 brute ladder's own flips are recorded in adr0040-hwl-bias-resolution.json). Both sections' production_verification status, levels_checked and theta_identical are unchanged.",
       "previous_check": {
         "path": "results/stage6_6/stage6_6_summary.json",
         "gitignored": true,
-        "sha256": "567ca4ea1129a5e6598a5a27f10974d540af645d040158feb173530b0ced1342",
-        "result": "every key present in both records is identical: both sections' production_verification status (bit_identical), levels_checked (38 / 23), theta_identical, and all five flip_totals (0). This record carries no superseded number, which is why it was not replaced when the two KP 62.0 records were, on 2026-08-20."
+        "sha256": "2bc85728a2c4dd152226f3cb657c5e238c2a41fa77472de4f6f2d45d32a2b927",
+        "result": "Re-checked 2026-09-25 against the ADR-0054 campaign summary. Every key present in both records is identical except one, which is updated here: KP 57.4's c4b_not_c3b flip total, 0 -> 1. That is the single documented forward-Euler barrier-jump row of ADR-0040's 2026-09-25 amendment (40.50 m, well under the one-per-cent share rule). Both sections' production_verification status, levels_checked and theta_identical are unchanged.",
+        "previous_check": {
+          "path": "results/stage6_6/stage6_6_summary.json",
+          "gitignored": true,
+          "sha256": "567ca4ea1129a5e6598a5a27f10974d540af645d040158feb173530b0ced1342",
+          "result": "every key present in both records is identical: both sections' production_verification status (bit_identical), levels_checked (38 / 23), theta_identical, and all five flip_totals (0). This record carries no superseded number, which is why it was not replaced when the two KP 62.0 records were, on 2026-08-20."
+        }
       }
     },
     "keys_the_live_record_does_not_carry": {

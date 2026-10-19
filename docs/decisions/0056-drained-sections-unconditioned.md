@@ -2,6 +2,15 @@
 
 Date: 2026-10-07
 
+> **Re-based at KP 57.4 under ADR-0059, 2026-10-17.** KP 57.4's aquifer-thickness
+> prior mean was corrected from 7 m (the A_g gravel alone) to 12 m (the combined
+> A_g + N_s thickness) and the evidence this note reads was regenerated (`drained-section-conditioning-adopted.json`).
+> Every KP 57.4 value in the prose below, and every range, ordering or count that
+> includes KP 57.4, predates the correction and is kept as written; the committed
+> JSON is the record and governs. Values at KP 58.8, 60.0 and 62.0 are unchanged. Summary and headline values:
+> `0059-kp57-aquifer-thickness-correction.md` and the dated addenda of
+> `docs/phase2_report.md`, `docs/phase3_report.md` and `docs/stage6_6_report.md`.
+
 ## Status
 Accepted (owner decision, 2026-10-07, answering annotation A13 of Joost Pol on
 the pre-Green-Light thesis). Amends ADR-0036 and ADR-0038 **for KP 58.8 and

@@ -36,8 +36,8 @@
       "kp": 57.4,
       "scenario": "historical",
       "primary": {
-        "p_annual_system": 0.0004977748875059569,
-        "p_annual_bep": 0.0004977748875059569,
+        "p_annual_system": 0.0008532824947318301,
+        "p_annual_bep": 0.0008532824947318301,
         "share_bep": 1.0,
         "p_annual_overflow": 0.0,
         "share_overflow": 0.0,
@@ -45,8 +45,8 @@
         "share_fluvial_scour": 0.0
       },
       "no_rating_error": {
-        "p_annual_system": 0.0004977748875059569,
-        "p_annual_bep": 0.0004977748875059569,
+        "p_annual_system": 0.0008532824947318301,
+        "p_annual_bep": 0.0008532824947318301,
         "share_bep": 1.0,
         "p_annual_overflow": 0.0,
         "share_overflow": 0.0,
@@ -152,29 +152,29 @@
       "kp": 57.4,
       "scenario": "+4K",
       "primary": {
-        "p_annual_system": 0.007591684863164393,
-        "p_annual_bep": 0.007517103321678081,
-        "share_bep": 0.8918632759164364,
+        "p_annual_system": 0.010248686902964545,
+        "p_annual_bep": 0.01020933077126393,
+        "share_bep": 0.9180421090002228,
         "p_annual_overflow": 0.0009114344650738865,
-        "share_overflow": 0.1081367240835635,
+        "share_overflow": 0.08195789099977722,
         "p_annual_fluvial_scour": 0.0,
         "share_fluvial_scour": 0.0
       },
       "no_rating_error": {
-        "p_annual_system": 0.007610137625142372,
-        "p_annual_bep": 0.007517103321678081,
-        "share_bep": 0.8693022681421735,
+        "p_annual_system": 0.010258123670712662,
+        "p_annual_bep": 0.01020933077126393,
+        "share_bep": 0.9003325318892555,
         "p_annual_overflow": 0.0011301803645168643,
-        "share_overflow": 0.1306977318578265,
+        "share_overflow": 0.09966746811074449,
         "p_annual_fluvial_scour": 0.0,
         "share_fluvial_scour": 0.0
       },
       "displacement": {
-        "p_annual_system": 1.0024306543686388,
+        "p_annual_system": 1.0009207782262708,
         "p_annual_overflow": 1.24000178600361,
         "p_annual_bep": 1.0,
-        "delta_share_bep": -0.022561007774262953,
-        "delta_share_overflow": 0.02256100777426298
+        "delta_share_bep": -0.017709577110967212,
+        "delta_share_overflow": 0.017709577110967267
       }
     },
     {
@@ -310,5 +310,5 @@
       }
     }
   },
-  "runtime_s": 24.4
+  "runtime_s": 6.0
 }

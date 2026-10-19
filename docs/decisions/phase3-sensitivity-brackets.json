@@ -1,6 +1,6 @@
 {
  "record": "Phase 3 RQ4 sensitivity brackets at the four BEP sections",
- "generated": "2026-09-25T03:48:19",
+ "generated": "2026-10-17T22:11:50",
  "generated_by": "scripts/thesis_figure_gaps.py extract",
  "note": "Committed slice of results/system_integration/phase3/rq4_annual.csv (2280 rows, gitignored), restricted to the four geotechnically characterised sections -- the scope campaign decision 5 sets for RQ3/RQ4. The baseline arm is the production deliverable: matrix d70, posterior BEP source, lambda_ac = 250 m, primary surface variant. Ratios are computed here; every P_f is copied verbatim. The recorded SHA-256 identifies which CSV this was cut from; the gate is that re-extracting from the live artifact reproduces this record's `sections` block exactly.",
  "baseline_arm": {
@@ -11,7 +11,7 @@
  },
  "source": {
   "path": "results/system_integration/phase3/rq4_annual.csv",
-  "sha256": "ce2edf026f0c44132c95d1fc28f5366ca4249bdf532dabfd0dc752d0609ece1d",
+  "sha256": "ba8740f4e7d1f0939444e00969a4fc5c75196f82534e4cb8cbfe678aa7a0391b",
   "gitignored": true,
   "n_rows_total": 2280
  },
@@ -23,46 +23,46 @@
      "scenario": "historical",
      "n_years": 3000,
      "baseline": {
-      "p_annual_system": 0.0004977748875059569,
-      "p_annual_bep": 0.0004977748875059569,
+      "p_annual_system": 0.0008532824947318301,
+      "p_annual_bep": 0.0008532824947318301,
       "share_bep": 1.0,
       "bep_clamped_above_grid": false
      },
      "arms": [
       {
        "arm": "lambda_ac_100m",
-       "p_annual_system": 0.0009142601991950831,
-       "p_annual_bep": 0.0009142601991950831,
+       "p_annual_system": 0.0015059554787497883,
+       "p_annual_bep": 0.0015059554787497883,
        "share_bep": 1.0,
-       "ratio_system_to_baseline": 1.8366941003711081,
-       "ratio_bep_to_baseline": 1.8366941003711081,
+       "ratio_system_to_baseline": 1.764896723005059,
+       "ratio_bep_to_baseline": 1.764896723005059,
        "bep_clamped_above_grid": false
       },
       {
        "arm": "lambda_ac_40m",
-       "p_annual_system": 0.0018345512610893075,
-       "p_annual_bep": 0.0018345512610893075,
+       "p_annual_system": 0.002781544058083879,
+       "p_annual_bep": 0.002781544058083879,
        "share_bep": 1.0,
-       "ratio_system_to_baseline": 3.6855038434765417,
-       "ratio_bep_to_baseline": 3.6855038434765417,
+       "ratio_system_to_baseline": 3.259816151458801,
+       "ratio_bep_to_baseline": 3.259816151458801,
        "bep_clamped_above_grid": false
       },
       {
        "arm": "bulk_d70",
-       "p_annual_system": 2.074058746414729e-06,
-       "p_annual_bep": 2.074058746414729e-06,
+       "p_annual_system": 8.204296032593944e-06,
+       "p_annual_bep": 8.204296032593944e-06,
        "share_bep": 1.0,
-       "ratio_system_to_baseline": 0.0041666600675790595,
-       "ratio_bep_to_baseline": 0.0041666600675790595,
-       "bep_clamped_above_grid": true
+       "ratio_system_to_baseline": 0.009614982240052156,
+       "ratio_bep_to_baseline": 0.009614982240052156,
+       "bep_clamped_above_grid": false
       },
       {
        "arm": "prior_bep",
-       "p_annual_system": 0.0004979251062096787,
-       "p_annual_bep": 0.0004979251062096787,
+       "p_annual_system": 0.0008553382848114217,
+       "p_annual_bep": 0.0008553382848114217,
        "share_bep": 1.0,
-       "ratio_system_to_baseline": 1.0003017803981122,
-       "ratio_bep_to_baseline": 1.0003017803981122,
+       "ratio_system_to_baseline": 1.0024092725355134,
+       "ratio_bep_to_baseline": 1.0024092725355134,
        "bep_clamped_above_grid": false
       }
      ]
@@ -71,46 +71,46 @@
      "scenario": "+4K",
      "n_years": 5400,
      "baseline": {
-      "p_annual_system": 0.007591684863164393,
-      "p_annual_bep": 0.007517103321678081,
-      "share_bep": 0.8918632759164364,
+      "p_annual_system": 0.010248686902964545,
+      "p_annual_bep": 0.01020933077126393,
+      "share_bep": 0.9180421090002228,
       "bep_clamped_above_grid": false
      },
      "arms": [
       {
        "arm": "lambda_ac_100m",
-       "p_annual_system": 0.011372732676444767,
-       "p_annual_bep": 0.01136542933072786,
-       "share_bep": 0.925759992109258,
-       "ratio_system_to_baseline": 1.498051207529226,
-       "ratio_bep_to_baseline": 1.5119426784984908,
+       "p_annual_system": 0.01497802098324079,
+       "p_annual_bep": 0.014975841529627804,
+       "share_bep": 0.9426311681513028,
+       "ratio_system_to_baseline": 1.4614575628130697,
+       "ratio_bep_to_baseline": 1.4668778850598228,
        "bep_clamped_above_grid": false
       },
       {
        "arm": "lambda_ac_40m",
-       "p_annual_system": 0.017253100841943123,
-       "p_annual_bep": 0.017253071790015215,
-       "share_bep": 0.949823328403516,
-       "ratio_system_to_baseline": 2.2726313266317044,
-       "ratio_bep_to_baseline": 2.2951755552248714,
+       "p_annual_system": 0.02187952292446591,
+       "p_annual_bep": 0.02187952006557793,
+       "share_bep": 0.9600089384651228,
+       "ratio_system_to_baseline": 2.1348610930964256,
+       "ratio_bep_to_baseline": 2.14309052726178,
        "bep_clamped_above_grid": false
       },
       {
        "arm": "bulk_d70",
-       "p_annual_system": 0.001215482719636291,
-       "p_annual_bep": 0.0005672769561485688,
-       "share_bep": 0.3836292517978925,
-       "ratio_system_to_baseline": 0.16010710949474913,
-       "ratio_bep_to_baseline": 0.07546483424175321,
-       "bep_clamped_above_grid": true
+       "p_annual_system": 0.001546769859260501,
+       "p_annual_bep": 0.0010346783941512436,
+       "share_bep": 0.5316641269012601,
+       "ratio_system_to_baseline": 0.15092371090125514,
+       "ratio_bep_to_baseline": 0.10134634848579295,
+       "bep_clamped_above_grid": false
       },
       {
        "arm": "prior_bep",
-       "p_annual_system": 0.007593029740614387,
-       "p_annual_bep": 0.007518481128340701,
-       "share_bep": 0.8918809500553131,
-       "ratio_system_to_baseline": 1.0001771513799946,
-       "ratio_bep_to_baseline": 1.0001832895736111,
+       "p_annual_system": 0.01026119934826964,
+       "p_annual_bep": 0.01022187480706147,
+       "share_bep": 0.918134451958948,
+       "ratio_system_to_baseline": 1.0012208827748923,
+       "ratio_bep_to_baseline": 1.0012286834542423,
        "bep_clamped_above_grid": false
       }
      ]

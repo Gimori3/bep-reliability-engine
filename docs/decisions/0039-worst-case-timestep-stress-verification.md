@@ -3,6 +3,24 @@
 Date: 2026-07-13
 Status: Accepted (verification executed 2026-07-13; production Δt unchanged)
 
+> **Re-based at KP 57.4 under ADR-0059, 2026-10-17.** KP 57.4's aquifer-thickness
+> prior mean was corrected from 7 m (the A_g gravel alone) to 12 m (the combined
+> A_g + N_s thickness) and the evidence this note reads was regenerated (`adr0039-timestep-stress.json`).
+> Every KP 57.4 value in the prose below, and every range, ordering or count that
+> includes KP 57.4, predates the correction and is kept as written; the committed
+> JSON is the record and governs. Values at KP 58.8, 60.0 and 62.0 are unchanged. Summary and headline values:
+> `0059-kp57-aquifer-thickness-correction.md` and the dated addenda of
+> `docs/phase2_report.md`, `docs/phase3_report.md` and `docs/stage6_6_report.md`.
+
+> **Amended under ADR-0059, 2026-10-17.** KP 57.4's aquifer thickness was corrected
+> from 7 m to 12 m and the stress test re-run (`scripts/timestep_convergence_stress.py`).
+> On the corrected prior the literal 1 % terminal-l_e criterion at KP 57.4 first passes
+> at **56.25 s** (2.4 % at 225 s on the refined grid), against 112.5 s before; KP 58.8 is
+> unchanged. From 225 s down no stall-or-breach flag changes and the breach threshold
+> does not move, so the production 225 s and every failure indicator stand. The
+> 112.5 s statements below are kept as written; the l_e-magnitude rider now reads
+> 56.25 s at KP 57.4.
+>
 > **Re-based under ADR-0054, 2026-09-25.** The evidence this note reads was regenerated on the re-based
 > matrix d70 (0.70 / 0.53 / 0.26 / 0.70 mm became 0.90 / 0.65 / 0.74 /
 > 0.75 mm at KP 57.4 / 58.8 / 60.0 / 62.0; bulk unchanged). The committed
@@ -127,7 +145,7 @@ and breach threshold h\*:
    14 s. No re-sweep; the existing 225 s campaign (8 sweeps, Phase 2
    posterior, ADR-0031/0032/0033 studies) remains valid.
 2. **Analyses that consume l_e magnitudes (not failure flags) at
-   partial-progression levels must integrate at Δt ≤ 112.5 s** — the first
+   partial-progression levels must integrate at Δt ≤ 112.5 s** [2026-10-17, ADR-0059: with KP 57.4's corrected aquifer thickness the regenerated `adr0039-timestep-stress.json` places KP 57.4's first converged rung at 56.25 s; KP 58.8 unchanged; no flag changes] — the first
    rung meeting the literal spec §11 1% criterion at every tested level,
    section, and L variant. This rider binds trajectory
    diagnostics/visualisation subsets and any future l_e-based quantitative

@@ -11,6 +11,15 @@ max |ΔP_f,trans| = 2.3e-4 (KP 62.0, matrix, N = 1e5) with the static branch exa
 invariant. See "Sensitivity executed" below and the companion note
 `adr0025-foreshore-width-and-sensitivity.md`.
 
+> **Re-based at KP 57.4 under ADR-0059, 2026-10-17.** KP 57.4's aquifer-thickness
+> prior mean was corrected from 7 m (the A_g gravel alone) to 12 m (the combined
+> A_g + N_s thickness) and the evidence this note reads was regenerated (`adr0025-foreshore-sensitivity.json`).
+> Every KP 57.4 value in the prose below, and every range, ordering or count that
+> includes KP 57.4, predates the correction and is kept as written; the committed
+> JSON is the record and governs. Values at KP 58.8, 60.0 and 62.0 are unchanged. Summary and headline values:
+> `0059-kp57-aquifer-thickness-correction.md` and the dated addenda of
+> `docs/phase2_report.md`, `docs/phase3_report.md` and `docs/stage6_6_report.md`.
+
 **Second amendment 2026-07-28 (borehole evidence; ADR-0048 drop).** New independent
 evidence bears directly on the phrase "evidence-disfavored", and the honest position is
 that it **weakens that phrase while leaving the decision untouched**. Kunijiban borehole

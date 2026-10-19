@@ -96,6 +96,20 @@ _SEEPAGE_LENGTH_M = {
     "62.0": 40.0,  # ADR-0047: adopted; was 47.0 (withdrawn, berm never present)
 }
 
+# Aquifer thicknesses D_aq [m] (combined A_g + N_s to the K_1p base, provenance
+# section 2) pinned in absolute terms, as L is above. KP 57.4 is the ADR-0059
+# correction (2026-10-17): the earlier 7 m was the A_g gravel alone; OYO's three
+# drawings give the combined 10.3 m at the riverside toe, 12.5 m under the crest
+# and 13.35 m at the landside toe, and 12 m is the owner-chosen mean over the
+# seepage path. The other three rows are unchanged; each lies within 1.25 m of
+# its own combined thickness at every position on its section.
+_AQUIFER_THICKNESS_M = {
+    "57.4": 12.0,  # ADR-0059: was 7.0 (A_g alone)
+    "58.8": 8.0,
+    "60.0": 9.0,
+    "62.0": 10.0,
+}
+
 # ADR-0021 landside-toe elevations [m MSL / T.P.] (OYO 1999 transverse sections,
 # +/-0.3 m). These serve as BOTH the head-translation datum z_toe and the exit
 # reference h_e (ADR-0007 z_toe == h_e); the PROVISIONAL 0.0 is retired.
@@ -204,6 +218,7 @@ def test_config_matches_csv_and_thesis_priors(path: Path) -> None:
     )
     assert cfg.priors.k_aq.mean == pytest.approx(float(row["k_aq_mps"]))
     assert cfg.priors.D_aq.mean == pytest.approx(float(row["D_aq_m"]))
+    assert cfg.priors.D_aq.mean == pytest.approx(_AQUIFER_THICKNESS_M[kp])
     assert cfg.priors.D_bl.mean == pytest.approx(float(row["D_bl_m"]))
     assert cfg.priors.k_bl.mean == pytest.approx(float(row["k_bl_mps"]))
     # D_fore / k_fore are the landside-blanket proxy (ADR-0005), so they track

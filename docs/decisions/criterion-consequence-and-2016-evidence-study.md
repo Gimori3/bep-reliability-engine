@@ -145,6 +145,21 @@ Both directions of every prediction will be reported.
 
 ## Part 2: outcome (2026-09-25)
 
+> **Re-based at KP 57.4 under ADR-0059, 2026-10-17.** KP 57.4's aquifer-thickness
+> prior mean was corrected from 7 m (the A_g gravel alone) to 12 m (the combined
+> A_g + N_s thickness) and the evidence this note reads was regenerated (`criterion-consequence-and-2016-evidence-study.json`).
+> Every KP 57.4 value in the prose below, and every range, ordering or count that
+> includes KP 57.4, predates the correction and is kept as written; the committed
+> JSON is the record and governs. Values at KP 58.8, 60.0 and 62.0 are unchanged. Summary and headline values:
+> `0059-kp57-aquifer-thickness-correction.md` and the dated addenda of
+> `docs/phase2_report.md`, `docs/phase3_report.md` and `docs/stage6_6_report.md`.
+> Two pre-registered outcomes move on the corrected input. **E2 now fails**: the joint
+> gross-head likelihood ratio is 1.76 comonotone, 2.15 independent and 2.72 at the Frechet
+> bound, above 2.5, because KP 57.4's own ratio rose from 1.03 to 1.07. E2 concerns the
+> gross-head comparison, not the same-head comparator of record (ADR-0055), whose joint
+> bound is 1.47. Under A3, KP 60.0 **no longer rises to third**: the steady-state order
+> equals the transient one (99.99 % of replicates historically); A3 itself stays refuted.
+
 Run: `python scripts/criterion_consequence_study.py --results-root
 D:/repositories/bep-reliability-engine/results` from the worktree, one record
 (`criterion-consequence-and-2016-evidence-study.json`). Gate 1 reproduced all

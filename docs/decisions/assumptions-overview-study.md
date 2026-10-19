@@ -4,6 +4,15 @@ Date: 2026-09-27. Green Light item 6. Documentation synthesis and arithmetic
 on existing evidence; no physics, prior, configuration or production output
 changes. Evidence: `assumptions-overview-study.json` beside this note.
 
+> **Re-based at KP 57.4 under ADR-0059, 2026-10-17.** KP 57.4's aquifer-thickness
+> prior mean was corrected from 7 m (the A_g gravel alone) to 12 m (the combined
+> A_g + N_s thickness) and the evidence this note reads was regenerated (`adr0045-mp-companion.json`).
+> Every KP 57.4 value in the prose below, and every range, ordering or count that
+> includes KP 57.4, predates the correction and is kept as written; the committed
+> JSON is the record and governs. Values at KP 58.8, 60.0 and 62.0 are unchanged. Summary and headline values:
+> `0059-kp57-aquifer-thickness-correction.md` and the dated addenda of
+> `docs/phase2_report.md`, `docs/phase3_report.md` and `docs/stage6_6_report.md`.
+
 ## Investigation and verdict
 
 Engine baseline `60fedba`, thesis baseline `2579e92`. Read the five completed

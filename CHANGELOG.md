@@ -7,7 +7,7 @@ All notable changes to this project are recorded here. The format follows
 The engineering record at the level of individual decisions is not duplicated
 here. It lives in three places, all tracked:
 
-* `docs/decisions/` — 57 Architecture Decision Records, gap-free, every one
+* `docs/decisions/` — 59 Architecture Decision Records, gap-free, every one
   Accepted but ADR-0007, which is superseded in place by ADR-0027, plus their
   companion evidence notes and JSON artifacts;
 * `docs/project_log.md` — a dated narrative of what was learned and when,
@@ -16,6 +16,79 @@ here. It lives in three places, all tracked:
   Stage 6.6 gap decomposition.
 
 ---
+
+## [1.4.0] - 2026-10-18
+
+The correction of KP 57.4's aquifer thickness found by the thesis's appendix
+audit, and three records the final thesis quotes that postdate 1.3.0. This
+release supersedes 1.3.0 as the version the thesis cites: every KP 57.4 number
+in it rests on the corrected input, which 1.3.0 does not contain. Production
+inputs, persisted sweeps, Phase 2 posteriors and Phase 3 rows at KP 58.8, 60.0
+and 62.0 are unchanged, proven row by row against the archive; aggregates,
+ranges and orderings that include KP 57.4 changed with it. The Bayesian
+posterior provenance version stays at 0.1.0. Prepared on 2026-10-18 and rebuilt
+on 2026-10-19 after three figure labels changed; it was never tagged or
+published in between.
+
+### Changed
+
+* **KP 57.4 aquifer thickness (ADR-0059):** the input table defines `D_aq_m` as
+  the combined A_g + N_s thickness to the K_1p base, but KP 57.4 carried the A_g
+  gravel alone, 7 m. An independent re-reading of OYO (1999) gives 10.3, 12.5
+  and 13.35 m at the riverside toe, crest and landside toe; the prior mean is
+  now their path mean, 12 m (CoV 0.10 kept). Both KP 57.4 sweeps, Phase 2,
+  Stage 6.6, Phase 3 and every companion study with a KP 57.4 arm were re-run
+  through their own drivers and gates; superseded artifacts are archived locally
+  under `results/superseded_kp57daq_20261017T135158/`. Headlines at KP 57.4: the
+  resolved 39.50 m anchor has delta-beta 0.35 [0.33, 0.36] and F_td 3.1
+  [2.9, 3.3]; the design level stays unresolved (17 against 5 failures in
+  10^6); the annual system probability is 8.53e-4 historically and 1.025e-2
+  under +4 K (climate ratio 12.0). The four-section climate-ratio range is 5.6
+  to 13.4, the annual static-over-transient factor stays 1.8 to 3.3
+  historically (1.5 to 2.6 under +4 K), and the 2016 joint likelihood ratio is
+  1.34 / 1.43 / 1.47. The steady-state criterion no longer reorders the
+  sections, and under the bulk reading overflow leads 4 of 8 cells. Evidence:
+  `docs/decisions/adr0059-kp57-aquifer-thickness.json` and the dated addenda of
+  the phase 2, phase 3 and Stage 6.6 reports.
+* **Three figure labels the final thesis prints (2026-10-19):** the 2016 outcome
+  figure's right-hand axis names its reference, the no-breach update with the
+  drained sections as if undrained, instead of "the adopted update", which
+  keeps the prior at KP 58.8 and 60.0; the composed-fragility band reads "above
+  the largest simulated +4 K peak", because the thesis reserves "attainable"
+  for the top of the regular stage grid; the foreshore figure is titled
+  "Bank-retreat exposure screen", and at the author's request its keys and
+  in-panel labels print at the 7 pt floor, with both keys below the panels.
+  Drawing only: every other figure the three drivers write is byte-identical,
+  and no record changed.
+
+### Added
+
+* **Breakthrough timing against the flood peak:** un-numbered study
+  `docs/decisions/breakthrough-timing-study.md`, driver
+  `scripts/breakthrough_timing_study.py`, record `breakthrough-timing-study.json`.
+  At the design-grid stages of KP 58.8 and KP 60.0, as if undrained, 42.0 and
+  54.9 per cent of breakthroughs complete more than an hour after the canonical
+  peak; the share falls with stage at every section.
+* **Design effects of the ensemble nesting:** `scripts/hazard_sampling_design_effects.py`
+  regenerates the member and SST-pattern design effects that section 0b of the
+  hazard-sampling note measured by hand, record
+  `docs/decisions/annualisation-design-effects.json` (adopted conditioning:
+  member 1.00 to 1.29, SST pattern 3.2 to 8.9).
+* **Climate-ratio pairs on the adopted conditioning:**
+  `scripts/climate_ratio_pairs_adopted.py` repeats the hazard-sampling study's
+  Q1 with the drained sections on their prior (ADR-0056), same seed, replicates
+  and paired member-block draw, record
+  `docs/decisions/climate-ratio-pairs-adopted.json`: 3 of 6 pairs resolve, KP
+  58.8 against each of the other three, the same verdict as on the study's
+  primary arm.
+
+### Known issues
+
+* Two drivers seed their bootstrap intervals with Python's salted `hash()`, so
+  interval ends (never points or counts) can differ between runs; the
+  first-breach study and the reach bootstrap share one random stream across
+  sections. Recorded in ADR-0059's consequences; no reported verdict depends on
+  either.
 
 ## [1.3.0] - 2026-10-12
 

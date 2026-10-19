@@ -93,7 +93,10 @@ def test_joint_bounds_are_ordered_by_dependence(record: dict) -> None:
     ind = joint["independent"]["LR"]
     lower = joint["Frechet lower (maximal negative dependence)"]["LR"]
     assert como <= ind <= lower
-    assert lower < 2.5  # pre-registered E2
+    # Pre-registered E2 (at most 2.5 under any dependence) held at 2.45 until
+    # ADR-0059 (2026-10-17); on the corrected KP 57.4 thickness the Frechet bound
+    # is 2.72, so E2 now fails. It concerns the gross-head comparison only.
+    assert lower == pytest.approx(2.72, abs=0.005)
 
 
 def test_disagreement_about_2016_is_duration_not_initiation(record: dict) -> None:
@@ -117,7 +120,7 @@ def test_transient_posterior_is_the_published_deliverable(record: dict) -> None:
     """The production numbers Chapter 7 prints (Table 7.2)."""
     t = record["annual"]["matrix"]["branches"]["T-post"]
     printed = {
-        ("KP 57.4", "historical"): 4.98e-4,
+        ("KP 57.4", "historical"): 8.53e-4,  # 4.98e-4 before ADR-0059
         ("KP 58.8", "historical"): 6.18e-3,
         ("KP 60.0", "historical"): 3.15e-4,
         ("KP 62.0", "historical"): 9.17e-4,

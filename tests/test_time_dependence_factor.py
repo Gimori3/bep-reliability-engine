@@ -173,11 +173,14 @@ def test_design_anchors_quoted_in_the_thesis(record) -> None:
         0.72, abs=0.005
     )
     assert a["KP 60.0 design"]["time_factor"]["dbeta"] == pytest.approx(0.81, abs=0.005)
+    # KP 57.4 since ADR-0059 (2026-10-17, aquifer thickness 7 m to 12 m); before
+    # it 0.34 on 561 / 163, design 4 against 2 with an upper bound of 0.77.
     resolved = a["KP 57.4 resolved"]
-    assert resolved["time_factor"]["dbeta"] == pytest.approx(0.34, abs=0.005)
+    assert resolved["time_factor"]["dbeta"] == pytest.approx(0.35, abs=0.005)
+    assert (resolved["k_same_head"], resolved["k_transient"]) == (2223, 712)
     design = a["KP 57.4 design"]
-    assert (design["k_same_head"], design["k_transient"]) == (4, 2)
-    assert design["bounds_union"]["dbeta_upper"] == pytest.approx(0.77, abs=0.005)
+    assert (design["k_same_head"], design["k_transient"]) == (17, 5)
+    assert design["bounds_union"]["dbeta_upper"] == pytest.approx(0.62, abs=0.005)
 
 
 def test_survival_ratio_quoted_in_the_thesis(record) -> None:
@@ -186,26 +189,30 @@ def test_survival_ratio_quoted_in_the_thesis(record) -> None:
     assert kp58["LR_transient_over_gross_static"] == pytest.approx(1.76, abs=0.005)
     joint = record["evidence"]["joint"]
     assert joint["comonotone"] == pytest.approx(1.34, abs=0.005)
-    assert joint["frechet_lower"] == pytest.approx(1.45, abs=0.005)
+    # 1.45 before ADR-0059 (2026-10-17): KP 57.4's own ratio rose from 1.00 to 1.01.
+    assert joint["frechet_lower"] == pytest.approx(1.47, abs=0.005)
 
 
 def test_appendix_brackets_quoted_in_the_thesis(record) -> None:
     """Thesis Appendix C.3 values on one head and gate (Tables C.5 and C.6)."""
     d = record["derived"]
     gain = d["pairing_variance_gain"]
-    assert gain["n_levels"] == 53
-    assert (round(gain["min"], 2), round(gain["max"], 2)) == (1.14, 2.48)
+    # ADR-0059 (2026-10-17): 53 levels, 1.14 to 2.48 before.
+    assert gain["n_levels"] == 54
+    assert (round(gain["min"], 2), round(gain["max"], 2)) == (1.06, 2.47)
     mp = [
         round(d["single_branch_ratios"][f"{kp} m_p"]["same_head_ratio_max"], 2)
         for kp in ("KP 57.4", "KP 58.8", "KP 60.0", "KP 62.0")
     ]
-    assert mp == [2.19, 2.24, 2.42, 2.22]
+    # KP 57.4 2.19 before ADR-0059 (2026-10-17).
+    assert mp == [2.01, 2.24, 2.42, 2.22]
     matrix = d["uniformity"]["cu_matrix"]
-    assert round(matrix["dbeta_displacement_min"], 2) == -0.63
+    # -0.63 and 0.79 before ADR-0059 (both KP 57.4 extremes).
+    assert round(matrix["dbeta_displacement_min"], 2) == -0.65
     assert (
         round(matrix["time_factor_ratio_min"], 2),
         round(matrix["time_factor_ratio_max"], 2),
-    ) == (0.79, 1.44)
+    ) == (0.75, 1.44)
     # Relief reaches both criteria through the shared gate, so the
     # as-if-undrained index difference sits at the top of the drained ladder.
     ladder = d["drained_ladder"]["KP 58.8 41.00 m"]

@@ -274,7 +274,9 @@ def test_critical_length_window_under_the_thirty_row_floor():
     realizations in its smallest contingency cell, four levels fall below the
     thirty-row floor, and the maximum over levels where every cell clears 30 is
     1.3663. (Before the re-basing: 176 levels, one below the floor, 1.6667 on
-    15 rows, qualified maximum 1.3846, shorter arm 1.2264.)
+    15 rows, qualified maximum 1.3846, shorter arm 1.2264.) Since ADR-0059
+    (2026-10-17) one more KP 57.4 level resolves and three fall below the floor
+    (173 / 170); both maxima are unchanged.
     """
     payload = _lc_companion()
     rows = []
@@ -287,9 +289,9 @@ def test_critical_length_window_under_the_thirty_row_floor():
                 departure = max(rho["rho"], 1.0 / rho["rho"])
                 rows.append((departure, int(level["min_cell_failures"]), arm))
 
-    assert len(rows) == 172
+    assert len(rows) == 173
     qualified = [r for r in rows if r[1] >= 30]
-    assert len(qualified) == 168  # four levels fall below the floor
+    assert len(qualified) == 170  # three levels fall below the floor
 
     unfiltered_max = max(r[0] for r in rows)
     qualified_max = max(r[0] for r in qualified)

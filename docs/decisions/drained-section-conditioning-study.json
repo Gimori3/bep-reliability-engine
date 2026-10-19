@@ -13,7 +13,7 @@
     "bulk/prior": 228
    },
    "fields_compared": 20,
-   "table": "D:/repositories/bep-reliability-engine/results/system_integration/phase3/rq4_annual.csv",
+   "table": "results/system_integration/phase3/rq4_annual.csv",
    "criterion": "every field string-identical to the published table"
   },
   "rows_aligned_theta_and_L": true,
@@ -259,18 +259,18 @@
  },
  "annual": {
   "prior historical KP 57.4": {
-   "p_system": 0.000497775,
-   "p_bep": 0.000497775,
+   "p_system": 0.000853282,
+   "p_bep": 0.000853282,
    "p_overflow": 0.0,
    "share_bep": 1.0,
    "system_ci95": [
-    0.000215774,
-    0.000831173
+    0.000399342,
+    0.00138047
    ],
    "fraction_replicates_piping_leads": 1.0,
    "rank": 3,
-   "rank_replicate_share": 0.9981,
-   "climate_ratio": 15.2512
+   "rank_replicate_share": 0.9703,
+   "climate_ratio": 12.0109
   },
   "prior historical KP 58.8": {
    "p_system": 0.0068532,
@@ -299,7 +299,7 @@
    "fraction_replicates_piping_leads": 1.0,
    "annual_S_over_T_bep_own_update": 3.31517,
    "rank": 4,
-   "rank_replicate_share": 0.9981,
+   "rank_replicate_share": 1.0,
    "climate_ratio": 13.2862
   },
   "prior historical KP 62.0": {
@@ -313,22 +313,22 @@
    ],
    "fraction_replicates_piping_leads": 1.0,
    "rank": 2,
-   "rank_replicate_share": 1.0,
+   "rank_replicate_share": 0.9703,
    "climate_ratio": 13.4321
   },
   "berm_inert historical KP 57.4": {
-   "p_system": 0.000497775,
-   "p_bep": 0.000497775,
+   "p_system": 0.000853282,
+   "p_bep": 0.000853282,
    "p_overflow": 0.0,
    "share_bep": 1.0,
    "system_ci95": [
-    0.000215774,
-    0.000831173
+    0.000399342,
+    0.00138047
    ],
    "fraction_replicates_piping_leads": 1.0,
    "rank": 3,
-   "rank_replicate_share": 0.9982,
-   "climate_ratio": 15.2512
+   "rank_replicate_share": 0.9703,
+   "climate_ratio": 12.0109
   },
   "berm_inert historical KP 58.8": {
    "p_system": 0.00667036,
@@ -357,7 +357,7 @@
    "fraction_replicates_piping_leads": 1.0,
    "annual_S_over_T_bep_own_update": 3.14417,
    "rank": 4,
-   "rank_replicate_share": 0.9982,
+   "rank_replicate_share": 1.0,
    "climate_ratio": 13.2933
   },
   "berm_inert historical KP 62.0": {
@@ -371,22 +371,22 @@
    ],
    "fraction_replicates_piping_leads": 1.0,
    "rank": 2,
-   "rank_replicate_share": 1.0,
+   "rank_replicate_share": 0.9703,
    "climate_ratio": 13.4321
   },
   "berm_relief_40pct historical KP 57.4": {
-   "p_system": 0.000497775,
-   "p_bep": 0.000497775,
+   "p_system": 0.000853282,
+   "p_bep": 0.000853282,
    "p_overflow": 0.0,
    "share_bep": 1.0,
    "system_ci95": [
-    0.000215774,
-    0.000831173
+    0.000399342,
+    0.00138047
    ],
    "fraction_replicates_piping_leads": 1.0,
    "rank": 3,
-   "rank_replicate_share": 0.9981,
-   "climate_ratio": 15.2512
+   "rank_replicate_share": 0.9703,
+   "climate_ratio": 12.0109
   },
   "berm_relief_40pct historical KP 58.8": {
    "p_system": 0.00676471,
@@ -415,7 +415,7 @@
    "fraction_replicates_piping_leads": 1.0,
    "annual_S_over_T_bep_own_update": 3.18163,
    "rank": 4,
-   "rank_replicate_share": 0.9981,
+   "rank_replicate_share": 1.0,
    "climate_ratio": 13.2892
   },
   "berm_relief_40pct historical KP 62.0": {
@@ -429,22 +429,22 @@
    ],
    "fraction_replicates_piping_leads": 1.0,
    "rank": 2,
-   "rank_replicate_share": 1.0,
+   "rank_replicate_share": 0.9703,
    "climate_ratio": 13.4321
   },
   "berm_relief_60pct historical KP 57.4": {
-   "p_system": 0.000497775,
-   "p_bep": 0.000497775,
+   "p_system": 0.000853282,
+   "p_bep": 0.000853282,
    "p_overflow": 0.0,
    "share_bep": 1.0,
    "system_ci95": [
-    0.000215774,
-    0.000831173
+    0.000399342,
+    0.00138047
    ],
    "fraction_replicates_piping_leads": 1.0,
    "rank": 3,
-   "rank_replicate_share": 0.9981,
-   "climate_ratio": 15.2512
+   "rank_replicate_share": 0.9703,
+   "climate_ratio": 12.0109
   },
   "berm_relief_60pct historical KP 58.8": {
    "p_system": 0.00685032,
@@ -473,7 +473,7 @@
    "fraction_replicates_piping_leads": 1.0,
    "annual_S_over_T_bep_own_update": 3.30689,
    "rank": 4,
-   "rank_replicate_share": 0.9981,
+   "rank_replicate_share": 1.0,
    "climate_ratio": 13.287
   },
   "berm_relief_60pct historical KP 62.0": {
@@ -487,22 +487,22 @@
    ],
    "fraction_replicates_piping_leads": 1.0,
    "rank": 2,
-   "rank_replicate_share": 1.0,
+   "rank_replicate_share": 0.9703,
    "climate_ratio": 13.4321
   },
   "berm_relief_80pct historical KP 57.4": {
-   "p_system": 0.000497775,
-   "p_bep": 0.000497775,
+   "p_system": 0.000853282,
+   "p_bep": 0.000853282,
    "p_overflow": 0.0,
    "share_bep": 1.0,
    "system_ci95": [
-    0.000215774,
-    0.000831173
+    0.000399342,
+    0.00138047
    ],
    "fraction_replicates_piping_leads": 1.0,
    "rank": 3,
-   "rank_replicate_share": 0.9981,
-   "climate_ratio": 15.2512
+   "rank_replicate_share": 0.9703,
+   "climate_ratio": 12.0109
   },
   "berm_relief_80pct historical KP 58.8": {
    "p_system": 0.0068532,
@@ -531,7 +531,7 @@
    "fraction_replicates_piping_leads": 1.0,
    "annual_S_over_T_bep_own_update": 3.31517,
    "rank": 4,
-   "rank_replicate_share": 0.9981,
+   "rank_replicate_share": 1.0,
    "climate_ratio": 13.2862
   },
   "berm_relief_80pct historical KP 62.0": {
@@ -545,22 +545,22 @@
    ],
    "fraction_replicates_piping_leads": 1.0,
    "rank": 2,
-   "rank_replicate_share": 1.0,
+   "rank_replicate_share": 0.9703,
    "climate_ratio": 13.4321
   },
   "as_if_undrained historical KP 57.4": {
-   "p_system": 0.000497775,
-   "p_bep": 0.000497775,
+   "p_system": 0.000853282,
+   "p_bep": 0.000853282,
    "p_overflow": 0.0,
    "share_bep": 1.0,
    "system_ci95": [
-    0.000215774,
-    0.000831173
+    0.000399342,
+    0.00138047
    ],
    "fraction_replicates_piping_leads": 1.0,
    "rank": 3,
-   "rank_replicate_share": 0.9988,
-   "climate_ratio": 15.2512
+   "rank_replicate_share": 0.9703,
+   "climate_ratio": 12.0109
   },
   "as_if_undrained historical KP 58.8": {
    "p_system": 0.00617722,
@@ -589,7 +589,7 @@
    "fraction_replicates_piping_leads": 1.0,
    "annual_S_over_T_bep_own_update": 2.72573,
    "rank": 4,
-   "rank_replicate_share": 0.9988,
+   "rank_replicate_share": 1.0,
    "climate_ratio": 13.4213
   },
   "as_if_undrained historical KP 62.0": {
@@ -603,17 +603,17 @@
    ],
    "fraction_replicates_piping_leads": 1.0,
    "rank": 2,
-   "rank_replicate_share": 1.0,
+   "rank_replicate_share": 0.9703,
    "climate_ratio": 13.4321
   },
   "prior +4K KP 57.4": {
-   "p_system": 0.00759168,
-   "p_bep": 0.0075171,
+   "p_system": 0.0102487,
+   "p_bep": 0.0102093,
    "p_overflow": 0.000911434,
-   "share_bep": 0.891863,
+   "share_bep": 0.918042,
    "system_ci95": [
-    0.00605955,
-    0.00923566
+    0.00837404,
+    0.0122197
    ],
    "fraction_replicates_piping_leads": 1.0,
    "rank": 3,
@@ -661,13 +661,13 @@
    "rank_replicate_share": 1.0
   },
   "berm_inert +4K KP 57.4": {
-   "p_system": 0.00759168,
-   "p_bep": 0.0075171,
+   "p_system": 0.0102487,
+   "p_bep": 0.0102093,
    "p_overflow": 0.000911434,
-   "share_bep": 0.891863,
+   "share_bep": 0.918042,
    "system_ci95": [
-    0.00605955,
-    0.00923566
+    0.00837404,
+    0.0122197
    ],
    "fraction_replicates_piping_leads": 1.0,
    "rank": 3,
@@ -715,13 +715,13 @@
    "rank_replicate_share": 1.0
   },
   "berm_relief_40pct +4K KP 57.4": {
-   "p_system": 0.00759168,
-   "p_bep": 0.0075171,
+   "p_system": 0.0102487,
+   "p_bep": 0.0102093,
    "p_overflow": 0.000911434,
-   "share_bep": 0.891863,
+   "share_bep": 0.918042,
    "system_ci95": [
-    0.00605955,
-    0.00923566
+    0.00837404,
+    0.0122197
    ],
    "fraction_replicates_piping_leads": 1.0,
    "rank": 3,
@@ -769,13 +769,13 @@
    "rank_replicate_share": 1.0
   },
   "berm_relief_60pct +4K KP 57.4": {
-   "p_system": 0.00759168,
-   "p_bep": 0.0075171,
+   "p_system": 0.0102487,
+   "p_bep": 0.0102093,
    "p_overflow": 0.000911434,
-   "share_bep": 0.891863,
+   "share_bep": 0.918042,
    "system_ci95": [
-    0.00605955,
-    0.00923566
+    0.00837404,
+    0.0122197
    ],
    "fraction_replicates_piping_leads": 1.0,
    "rank": 3,
@@ -823,13 +823,13 @@
    "rank_replicate_share": 1.0
   },
   "berm_relief_80pct +4K KP 57.4": {
-   "p_system": 0.00759168,
-   "p_bep": 0.0075171,
+   "p_system": 0.0102487,
+   "p_bep": 0.0102093,
    "p_overflow": 0.000911434,
-   "share_bep": 0.891863,
+   "share_bep": 0.918042,
    "system_ci95": [
-    0.00605955,
-    0.00923566
+    0.00837404,
+    0.0122197
    ],
    "fraction_replicates_piping_leads": 1.0,
    "rank": 3,
@@ -877,13 +877,13 @@
    "rank_replicate_share": 1.0
   },
   "as_if_undrained +4K KP 57.4": {
-   "p_system": 0.00759168,
-   "p_bep": 0.0075171,
+   "p_system": 0.0102487,
+   "p_bep": 0.0102093,
    "p_overflow": 0.000911434,
-   "share_bep": 0.891863,
+   "share_bep": 0.918042,
    "system_ci95": [
-    0.00605955,
-    0.00923566
+    0.00837404,
+    0.0122197
    ],
    "fraction_replicates_piping_leads": 1.0,
    "rank": 3,

@@ -349,11 +349,14 @@ def fig_bep_sections(curves: dict) -> None:
             # Horizontal and centred in the band. At the band's left edge the
             # overflow curve is still rising at two sections and used to run
             # straight through the label; at the centre every curve has
-            # saturated. The plate is insurance, not the fix.
+            # saturated. The plate is insurance, not the fix. The label names
+            # the band by its edge: the thesis reserves "attainable" for the
+            # top of the regular stage grid, which is not where the band starts.
+            # Three lines, so that it is no wider than the label it replaced.
             ax.text(
                 0.5 * (h_max + stage[-1]),
                 0.5,
-                "beyond max\nattainable stage\n(+4 K ensemble)",
+                "above the\nlargest simulated\n+4 K peak",
                 fontsize=fs.pt("small", scale),
                 color=MUTED,
                 ha="center",

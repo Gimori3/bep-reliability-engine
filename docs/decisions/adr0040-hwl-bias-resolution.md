@@ -3,6 +3,15 @@
 **Status:** Pre-registration written 2026-07-30, before any new number was computed.
 Outcome sections are appended below it, unedited above.
 
+> **Re-based at KP 57.4 under ADR-0059, 2026-10-17.** KP 57.4's aquifer-thickness
+> prior mean was corrected from 7 m (the A_g gravel alone) to 12 m (the combined
+> A_g + N_s thickness) and the evidence this note reads was regenerated (`adr0040-hwl-bias-resolution.json`).
+> Every KP 57.4 value in the prose below, and every range, ordering or count that
+> includes KP 57.4, predates the correction and is kept as written; the committed
+> JSON is the record and governs. Values at KP 58.8, 60.0 and 62.0 are unchanged. Summary and headline values:
+> `0059-kp57-aquifer-thickness-correction.md` and the dated addenda of
+> `docs/phase2_report.md`, `docs/phase3_report.md` and `docs/stage6_6_report.md`.
+
 > **Re-based under ADR-0054, 2026-09-25.** The evidence this note reads was regenerated on the re-based
 > matrix d70 (0.70 / 0.53 / 0.26 / 0.70 mm became 0.90 / 0.65 / 0.74 /
 > 0.75 mm at KP 57.4 / 58.8 / 60.0 / 62.0; bulk unchanged). The committed
@@ -640,6 +649,14 @@ statement is that the tilted sampler remains validated for what ADR-0029 built i
 for, and is **not** validated for the static-vs-transient ratio.
 
 ## 2.7 Stage C at KP 57.4: gate G-A2 fired, and it is a real finding
+
+**[2026-10-17, ADR-0059: after KP 57.4's aquifer thickness was corrected from 7 to
+12 m, the N = 1e6 run carries one `c4b_not_c3b` row (40.00 m, 1 of 43 280 C4b
+failures) and one `c4a_not_c3a` row (39.75 m, 1 of 155 380 C4a failures), none at
+N = 1e5. The second class, the same jump on the alpha = -1/2 branch, is admitted
+at KP 57.4 under the same 1 per cent share rule, measured against its own branch;
+`hwl_bias_resolution.DOCUMENTED_FLIP_CLASS`. The counts below are the earlier
+priors' record.]**
 
 The first KP 57.4 brute-force run at N = 1e6 **failed gate G-A2**:
 

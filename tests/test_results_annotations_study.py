@@ -190,8 +190,9 @@ def test_adopted_table_uses_prior_at_drained_sections() -> None:
     for kp in KPS[:3]:
         assert t[f"+4K {kp}"]["first_breach_share_bep"] > 0.9
     six = adopted["sixty_year_check"]
-    assert round(six["expected_failures_60yr"], 2) == 0.50
-    assert round(six["exclusion_over_composed"], 1) == 5.8
+    # 0.50 and 5.8 before ADR-0059 (2026-10-17).
+    assert round(six["expected_failures_60yr"], 2) == 0.52
+    assert round(six["exclusion_over_composed"], 1) == 5.6
 
 
 # --------------------------------------------------------------------------- #
@@ -220,7 +221,8 @@ def test_bounded_prior_quoted_values() -> None:
         round(adopted[f"t0.85 historical {kp}"]["bep_relative_to_adopted"], 2)
         for kp in KPS
     ]
-    assert rel == [0.51, 0.69, 0.60, 0.51]
+    # KP 57.4 0.51 before ADR-0059 (2026-10-17).
+    assert rel == [0.60, 0.69, 0.60, 0.51]
 
 
 def test_overflow_rerun_reproduces_the_model(driver) -> None:

@@ -359,7 +359,7 @@ shape as much as of the sections.
   the climate axis live in Phase 3 (ADR-0023/0038) and were not touched.
 - The 225 s grid is validated for failure indicators (ADR-0030/0039), which
   is all the ladder consumes; l_e magnitudes (not used here) would need
-  112.5 s (ADR-0039).
+  112.5 s (ADR-0039) [2026-10-17, ADR-0059: with KP 57.4's corrected aquifer thickness the regenerated `adr0039-timestep-stress.json` places KP 57.4's first converged rung at 56.25 s; KP 58.8 unchanged; no flag changes].
 
 ## 7. Implications for Sub-question 1
 
@@ -513,7 +513,7 @@ N = 1e5 the expected count is 0.4, which is why every previous run, including th
 study's own N = 1e5 gate, saw exactly zero. **No production result is affected**
 (all run at N = 1e5, where the gate passes and the drift guard is bit-identical),
 and KP 62.0 is untouched (0 flips at all 39 levels). It is the indicator-level
-counterpart of ADR-0039's rider that KP 57.4 needs Δt ≤ 112.5 s for l_e magnitudes.
+counterpart of ADR-0039's rider that KP 57.4 needs Δt ≤ 112.5 s for l_e magnitudes [2026-10-17, ADR-0059: with KP 57.4's corrected aquifer thickness the regenerated `adr0039-timestep-stress.json` places KP 57.4's first converged rung at 56.25 s; KP 58.8 unchanged; no flag changes].
 The recommended 42.7 at 39.50 m contains 1 such row in 521, biasing it **down** by
 0.2 % — conservative, and stated.
 
@@ -609,3 +609,49 @@ head-convention and H_eq ranges had **not** propagated: the thesis quotes the
 per-level values from these same live files and states them correctly as 75 to
 97 percent and 1 to 39 percent, so on those two the thesis was right and this
 report was stale.
+
+## 11. KP 57.4 AQUIFER THICKNESS CORRECTED (2026-10-17; ADR-0059; authoritative where it differs from everything above at KP 57.4)
+
+ADR-0059 corrects KP 57.4's aquifer-thickness prior mean from 7 m (the A_g gravel
+alone) to 12 m (the combined A_g + N_s thickness over the seepage path). Every KP 57.4
+number in sections 1 to 10 was computed on 7 m and is superseded at KP 57.4 by this
+section; KP 62.0 is untouched (its ladder, analysis and figures were not re-run and
+need no re-run). The superseded KP 57.4 artifacts are retained under
+`results/superseded_kp57daq_20261017T135158/`.
+
+**Re-run and gates.** `stage6_6_gap_decomposition.py --sections kp57_4` (matrix and
+bulk) on the regenerated configs: the drift guard is bit-identical to the regenerated
+production sweep at all 23 levels with identical theta, and every Euler-flip count is
+0 at N = 1e5. The committed copies `adr0040-stage6-6-kp57_4-{analysis,duration-ladder}.json`
+were transcribed from the live artifacts with a provenance block; the summary's one
+changed shared leaf (KP 57.4 `c4b_not_c3b` at N = 1e5, 1 -> 0) is updated in place
+with a dated check note.
+
+**The N = 1e6 ladder** (`hwl_bias_resolution.py brute --sections kp57_4`, re-run twice,
+identical): the design HWL (39.21 m) carries 5 failing transient rows (was 2) against
+1,170 gross-static rows (was 302); the nearest grid level (39.25 m) 11 (was 2). R1 still
+fails, so the design-level bias stays a bound: Clopper-Pearson **B >= 94.6** at 39.21 m
+(was 37.2) and **B >= 97.9** at 39.25 m. The resolved anchor above HWL stays 39.50 m:
+**B = 33.5 [31.3, 36.1] on 712 transient rows** (was 51.2 on 163). These are gross-head
+bias factors, correct for that comparison only; since ADR-0055 the RQ1 numbers of
+record are the same-head time-dependence factors of
+`docs/decisions/time-dependence-factor-study.json` (KP 57.4 resolved anchor F_td 3.12
+[2.94, 3.32], dbeta 0.345 [0.328, 0.364] on 2,223 / 712 rows).
+
+**Barrier jumps at N = 1e6.** Two rows in 1e6: one `c4b_not_c3b` at 40.00 m (1 of
+43,280 transient failures) and one `c4a_not_c3a`, on the alpha = -1/2 branch, at 39.75 m
+(1 of 155,380). Neither is at a quoted anchor; the 39.50 m anchor carries none (the
+7 m ladder carried one there). Gate G-A2's documented class at KP 57.4 now names both
+(`scripts/hwl_bias_resolution.py` `DOCUMENTED_FLIP_CLASS`, share measured against the
+class's own transient branch), recorded as an ADR-0059 amendment to ADR-0040 and its
+companion section 2.7.
+
+**Equilibrium end anchor (0.9 H_c), N = 1e6.** C4b minus C4c over C4b at KP 57.4:
+38 % at 39.50 m, 16 % at 40.50 m, 1 % at 43.25 m (was 39 / 19 / 1). With KP 62.0's 33 /
+19 / 6 % the field-indicator range is **1 to 38 %** (was 1 to 39).
+
+**Engine ladder at N = 1e5, KP 57.4.** The head-convention share of the gross-head gap
+falls slightly at every resolved level (0.92 at 39.50 m, 0.69 at 40.00 m, 0.43 at
+40.50 m; was 0.93 / 0.74 / 0.50) and the temporal share rises correspondingly (0.07 /
+0.31 / 0.57; was 0.06 / 0.26 / 0.50). The initiation-gate step stays below 1 % of the
+gap wherever resolved. The qualitative reading of section 4.2 survives at KP 57.4.

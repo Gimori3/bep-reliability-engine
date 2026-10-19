@@ -1,0 +1,63 @@
+{
+  "adr": "0059",
+  "title": "KP 57.4 aquifer thickness D_aq: evidence for the correction from 7 m to 12 m",
+  "date": "2026-10-17",
+  "definition": "D_aq_m = combined A_g + N_s thickness to the K_1p base (provenance section 2; original thesis tab:strat_thickness)",
+  "sources": {
+    "report": "OYO (1999) 平成10年度 十勝川中流部堤防強化対策検討業務 報告書（調査・解析編）: Figs. 4-1-1 to 4-1-4 (PDF pp. 34 to 37, 1:200), text printed pp. 34 to 35 (PDF 39 to 40), longitudinal soil profile (PDF p. 247, H 1:10000, V 1:400)",
+    "sheets": "docs/references/R0xx.xxx/ 様式-3 (transverse panel), 様式-4 (soil-test table, no layer depths), 様式-5 (seepage model and soil constants)",
+    "independent": "data/raw/borehole_and_soil_survey/TRANSCRIPTION_layers.csv (Kunijiban KP1.8R-1, H25TK-B4, H25TK-B5)"
+  },
+  "orientation": "Every figure, 様式-3 panel and 様式-5 model draws the river on the left (high-water-bed width, mean riverbed and HWL marker on the left); the right-hand boring is the landside-toe boring: B-2 (57.4), B-4 (58.8), B-6 (60.0), B-9 (62.0).",
+  "method": "PyMuPDF render at 4 px/pt; EL calibrated on each drawing's own 10 m grid lines (1:200, 56.7 px/m, residual < 0.05 m); layer classes by nearest legend-swatch colour of the same figure, smoothed over 0.25 m; 様式-5 model lines as dark-pixel runs on axes calibrated from their own ticks (22.8 px/m). Precision: +/-0.1 m on a drawn line, +/-0.3 m on a boundary read beside a boring. Scripts and raw output in the thesis campaign artifacts (session5b_kp57/readings/).",
+  "readings_report_figures_m_TP": {
+    "KP57.4": {
+      "riverside_toe_B-1": {"Ag_top": 36.9, "Ag_Ns": 29.47, "Ns_K1p": 26.6, "Ag": 7.4, "Ns": 2.8, "Ag_plus_Ns": 10.3},
+      "crest_H8-B-3": {"Ag_top": 36.9, "Ag_Ns": 29.0, "Ns_K1p": 24.4, "Ag": 7.9, "Ns": 4.6, "Ag_plus_Ns": 12.5},
+      "landside_toe_B-2": {"Ag_top": 37.1, "Ag_Ns": 28.85, "Ns_K1p": 23.75, "Ag": 8.25, "Ns": 5.1, "Ag_plus_Ns": 13.35}
+    },
+    "KP58.8": {
+      "riverside_toe_B-3": {"Ag_top": 38.3, "Ag_Ns": 31.95, "Ns_K1p": 27.8, "Ag_plus_Ns": 10.5},
+      "crest_H8-B-4": {"Ag_top": 37.75, "Ag_Ns": 31.85, "Ns_K1p": 28.8, "Ag_plus_Ns": 8.95},
+      "landside_toe_B-4": {"Ag_top": 37.6, "Ag_Ns": 31.9, "Ns_K1p": 29.15, "Ag_plus_Ns": 8.45}
+    },
+    "KP60.0": {
+      "riverside_toe_B-5": {"Ag_top": 38.65, "Ag_Ns": 34.1, "Ns_K1p": 30.85, "Ag_plus_Ns": 7.8},
+      "crest_H8-B-5": {"Ag_top": 38.75, "Ag_Ns": 34.25, "Ns_K1p": 30.6, "Ag_plus_Ns": 8.15},
+      "landside_toe_B-6": {"Ag_top": 39.0, "Ag_Ns": 34.17, "Ns_K1p": 30.5, "Ag_plus_Ns": 8.5}
+    },
+    "KP62.0": {
+      "riverside_slope_B-7": {"Ag_top": 43.9, "Ag_Ns": 35.9, "Ns_K1p": 32.3, "Ag_plus_Ns": 11.6},
+      "crest_B-8": {"Ag_top": 43.9, "Ag_Ns": 35.95, "Ns_K1p": 32.9, "Ag_plus_Ns": 11.0},
+      "landside_toe_B-9": {"Ag_top": 43.85, "Ag_Ns": 36.3, "Ns_K1p": 35.05, "Ag_plus_Ns": 8.8}
+    }
+  },
+  "adopted_before": {"KP57.4": 7, "KP58.8": 8, "KP60.0": 9, "KP62.0": 10},
+  "deviation_adopted_minus_combined_m": {
+    "KP57.4": {"riverside": -3.3, "crest": -5.5, "landside": -6.35, "three_position_mean": -5.0},
+    "KP58.8": {"riverside": -2.5, "crest": -0.95, "landside": -0.45, "three_position_mean": -1.3},
+    "KP60.0": {"riverside": 1.2, "crest": 0.85, "landside": 0.5, "three_position_mean": 0.85},
+    "KP62.0": {"riverside": -1.6, "crest": -1.0, "landside": 1.2, "three_position_mean": -0.5}
+  },
+  "seepage_model_form5": {
+    "KP57.4": {"layers": "3 cohesive 1.6E-04; 4 Ag sand-gravel 3.0E-01; 5 Ns sand-gravel 3.0E-01 (N=45); 6 volcanic ash 8.0E-05 (N=50) cm/s", "Ag_plus_Ns_m": {"riverside": 10.0, "crest": 11.5, "landside_from_ground_37.96": 14.1}, "K1p_top_landside": 23.85},
+    "KP58.8": {"layers": "5 Ag 2.0E-01; 6 Ns 2.0E-01 (N=50); 7 ash 9.0E-06 cm/s", "Ag_plus_Ns_m": {"riverside": 11.5, "landside": 7.4}},
+    "KP60.0": {"layers": "5 Ag 1.0E-01; 6 gravel 1.0E-01 (N=40) to the model base; no ash layer", "layer5_m": 8.3},
+    "KP62.0": {"layers": "3 Ag 1.0E-01; 4 Ns 3.0E-01 (N=34); 5 ash 1.0E-06 (N=23) cm/s", "Ag_plus_Ns_m": {"riverside": 12.5, "crest": 9.8, "landside": 8.6}}
+  },
+  "longitudinal_profile_along_levee_m": {"KP57.4": 10.4, "KP58.8": 10, "KP60.0": 8, "KP62.0": 11.5, "precision": "+/-0.5 m"},
+  "kunijiban": {
+    "KP1.8R-1": {"position": "Satsunai KP 1.8 right-bank crest, about 0.9 km downstream of KP 57.4", "aquifer_m": 11.7, "aquifer_EL": [32.75, 21.05], "base": "tuff"},
+    "H25TK-B4": {"position": "KP 58.8 floodplain", "aquifer_m": 7.8, "base_EL": 28.25},
+    "H25TK-B5": {"position": "KP 61.0 floodplain", "aquifer_m": 9.95, "base_EL": 30.6},
+    "base_trend_at_KP57.4_EL": 23.9
+  },
+  "decision": {"KP57.4_D_aq_m": 12.0, "rule": "owner-chosen mean over the seepage path (riverside toe 10.3, crest 12.5, landside toe 13.35; mean 12.05; Form 5 model 11.9), integer like the other rows", "cov": 0.1, "other_rows": "unchanged"},
+  "effect_measured_before_decision": "thesis campaign artifact session5b_kp57/a5_daq_effect.json (same seed, D_aq mean only; baseline bit-identical to production)",
+  "config_hashes": {
+    "tokachi_kp57.4_historical_matrix": {"before": "d737929b2cc7", "after": "638a49c93ec3"},
+    "tokachi_kp57.4_historical_bulk": {"before": "a06bf4aaadb5", "after": "16e269975937"},
+    "other_six": "unchanged and equal to their persisted sweeps"
+  },
+  "superseded_results_archive": "results/superseded_kp57daq_20261017T135158/"
+}

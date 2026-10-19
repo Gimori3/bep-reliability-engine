@@ -5,6 +5,15 @@ Status: Part 1 (the question, the common quantity, the sources and the
 pre-registration) is committed on its own, before the collation of Part 2 is
 run. Part 2 records the outcome.
 
+> **Re-based at KP 57.4 under ADR-0059, 2026-10-17.** KP 57.4's aquifer-thickness
+> prior mean was corrected from 7 m (the A_g gravel alone) to 12 m (the combined
+> A_g + N_s thickness) and the evidence this note reads was regenerated (`canonical-shape-sensitivity.json`, `drained-section-conditioning-adopted.json`, `drained-section-conditioning-alternatives.json`, `gravel-grading-resistance-study.json`, `seepage-length-lower-tail-adopted.json`, `time-dependence-factor-study.json`, `time-effect-in-proportion-study.json`, `why-no-piping-2016-study.json`).
+> Every KP 57.4 value in the prose below, and every range, ordering or count that
+> includes KP 57.4, predates the correction and is kept as written; the committed
+> JSON is the record and governs. Values at KP 58.8, 60.0 and 62.0 are unchanged. Summary and headline values:
+> `0059-kp57-aquifer-thickness-correction.md` and the dated addenda of
+> `docs/phase2_report.md`, `docs/phase3_report.md` and `docs/stage6_6_report.md`.
+
 Evidence: `time-effect-in-proportion-study.json`, driver
 `scripts/time_effect_in_proportion.py`, gate
 `tests/test_time_effect_in_proportion.py`, figure
