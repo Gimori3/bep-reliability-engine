@@ -28,7 +28,10 @@ and 62.0 are unchanged, proven row by row against the archive; aggregates,
 ranges and orderings that include KP 57.4 changed with it. The Bayesian
 posterior provenance version stays at 0.1.0. Prepared on 2026-10-18 and rebuilt
 on 2026-10-19 after three figure labels changed; it was never tagged or
-published in between.
+published in between. The first tag, on 2026-10-19, sat on a commit whose
+`pyproject.toml` still said 1.3.0; that tag and its GitHub release were
+withdrawn the same day, before the deposit was uploaded, and re-cut on the
+commit that sets the distribution version to 1.4.0.
 
 ### Changed
 
